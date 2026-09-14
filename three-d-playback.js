@@ -72,7 +72,10 @@ class ThreeDPlaybackViewer {
         };
         this.boundContextLost = event => {
             event.preventDefault();
-            if(!this.active)return;
+            // A suspended builder view retains its scene for fast re-entry. A
+            // context can still be reclaimed while that canvas is hidden; do
+            // not leave the dead renderer available for the reuse path.
+            if (!this.scene || event.currentTarget !== this.renderer?.domElement) return;
             this.exit();
             this.elements.loadStatus.textContent='Graphics were interrupted. Your board is safe. Try 3D View again.';
             this.elements.loadStatus.hidden=false;
