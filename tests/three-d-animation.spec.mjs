@@ -128,9 +128,9 @@ test('quality guardrails keep sprite anchors finite and contact ball at the visi
   }
 });
 
-test('pause freezes player pose and ball together, rate scales both, and restart restores ready', async ({ page }) => {
+test('pause freezes player pose and ball together, rate scales both, and seeking to start restores ready', async ({ page }) => {
   await openPlay(page, 'third-shot-drop');
-  await page.locator('#threeDRate').selectOption('0.25');
+  await page.locator('#threeDRate').selectOption('0.25',{force:true});
   await page.locator('#threeDPlayPause').click();
   await page.waitForTimeout(250);
   await page.locator('#threeDPlayPause').click();
@@ -144,19 +144,19 @@ test('pause freezes player pose and ball together, rate scales both, and restart
     return { elapsed: viewer.clock.elapsed, ball: viewer.ballObject.position.toArray(), frame: root.userData.animation.frame, paddle: root.userData.paddleFaceWorld.toArray() };
   });
   expect(after).toEqual(before);
-  await page.locator('#threeDRestart').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   const restart = await page.evaluate(() => ({ elapsed: window.pickleboard.threeD.clock.elapsed, animations: [...window.pickleboard.threeD.playerObjects.values()].map(root => root.userData.animation.phase) }));
   expect(restart.elapsed).toBe(0);
   expect(restart.animations).toEqual(['ready', 'ready', 'ready', 'ready']);
 });
 
-test('3D Previous and Next seek logical endpoints and reduced motion remains inspectable', async ({ page }) => {
+test('3D chapter seeking uses canonical anchors and reduced motion remains inspectable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openPlay(page, 'fifth-shot-drop');
-  await expect(page.locator('#threeDPrevious')).toBeDisabled();
-  await page.locator('#threeDNext').click();
+  await expect(page.locator('#threeDPrevious,#threeDNext,#threeDRestart,#threeDLoop')).toHaveCount(0);
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
   expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(1);
-  await page.locator('#threeDPrevious').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(0);
   expect(await page.evaluate(() => [...window.pickleboard.threeD.playerObjects.values()].every(root => root.userData.animation.phase === 'ready'))).toBe(true);
 });

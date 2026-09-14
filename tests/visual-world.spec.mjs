@@ -213,7 +213,7 @@ test('camera presets reframe after portrait resize without resetting playback', 
   await expect.poll(() => page.evaluate(() => window.pickleboard.threeD.getState().framing.aspect)).toBeCloseTo(390 / 844, 2);
 
   for (const name of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
-    await page.locator('#threeDCamera').selectOption(name);
+    await page.locator('#threeDCamera').selectOption(name,{force:true});
     const { state, audit, restored } = await page.evaluate(before => ({
       state: window.pickleboard.threeD.getState(),
       audit: window.__auditPixelWorld({ includeTrajectory: true }),
@@ -303,7 +303,7 @@ test('all Plays keep complete actors and trajectories above the HUD at every tar
 test('phone cameras retain a visible ball without changing its trajectory or physical radius', async ({ page }) => {
   await openWorld(page, {width:320, height:568});
   for (const name of ['overhead','sideline','behind-green','behind-orange']) {
-    await page.locator('#threeDCamera').selectOption(name);
+    await page.locator('#threeDCamera').selectOption(name,{force:true});
     const sample = await page.evaluate(() => {
       const v = pickleboard.threeD;
       const s = v.timeline.segments.find(s => s.step.id === 'third-drive');

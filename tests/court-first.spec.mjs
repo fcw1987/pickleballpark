@@ -47,7 +47,7 @@ test('guided layout keeps border controls on their projected park anchors',async
 
 test('active shot cue keeps the banner inside a 1024x768 viewport',async({page})=>{
  await page.setViewportSize({width:1024,height:768});await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);
- await page.evaluate(()=>pickleboard.plays.load('lob-overhead'));await page.locator('#playNext').click();
+ await page.evaluate(()=>{pickleboard.plays.load('lob-overhead');pickleboard.plays.timelineAction('chapter','overhead');});
  await expect(page.locator('#playShotCue')).toBeVisible();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  const banner=await page.locator('.park-banner').boundingBox();expect(banner.y).toBeGreaterThanOrEqual(0);expect(banner.y+banner.height).toBeLessThanOrEqual(768);
 });

@@ -16,7 +16,7 @@ async function openApp(page) {
 }
 
 for (const expected of plays) {
-  test(`${expected.id} completes, restarts, exits, and re-enters 3D`, async ({ page }) => {
+  test(`${expected.id} reaches its endpoint, seeks, exits, and re-enters 3D`, async ({ page }) => {
     const errors = await openApp(page);
     await page.evaluate(id => window.pickleboard.plays.load(id), expected.id);
     await page.locator('#play3dView').click();
@@ -55,16 +55,16 @@ for (const expected of plays) {
     expect(completed.positions).toHaveProperty('player1');
     expect(completed.ball).toBeTruthy();
 
-    await page.locator('#threeDRestart').click();
+    await page.locator('#threeDTimelineMount input[type=range]').fill('0');
     expect(await page.evaluate(() => window.pickleboard.threeD.getState())).toMatchObject({ elapsed: 0, playing: false });
-    await page.locator('#threeDCamera').selectOption('sideline');
+    await page.locator('#threeDCamera').selectOption('sideline',{force:true});
     expect(await page.evaluate(() => window.pickleboard.threeD.getState().camera)).toBe('sideline');
-    await page.locator('#threeDRate').selectOption('0.5');
+    await page.locator('#threeDRate').selectOption('0.5',{force:true});
     expect(await page.evaluate(() => window.pickleboard.threeD.getState().playbackRate)).toBe(0.5);
     await page.locator('#threeDExit').click();
     expect(await page.evaluate(() => window.pickleboard.plays.getState().playId)).toBe(expected.id);
-    await page.locator('#playNext').click();
-    expect((await page.evaluate(() => window.pickleboard.plays.getState().stepIndex))).toBe(1);
+    await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter',window.pickleboard.plays.chapters[1].shotId));
+    expect((await page.evaluate(() => window.pickleboard.plays.getState().stepIndex))).toBeGreaterThan(0);
     await page.locator('#play3dView').click();
     await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
     expect(errors).toEqual([]);

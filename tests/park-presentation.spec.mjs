@@ -29,12 +29,12 @@ test('empty cues stay hidden; pause freezes their timeline-driven reveal',async(
  await page.evaluate(()=>pickleboard.plays.load('serve-and-return'));await expect(page.locator('#playShotCue')).toBeHidden();
  await page.locator('#playPlayPause').click();await page.clock.runFor(80);await page.locator('#playPlayPause').click();
  const cue=await page.locator('#playShotCue').getAttribute('style');await page.clock.runFor(500);expect(await page.locator('#playShotCue').getAttribute('style')).toBe(cue);
- await page.locator('#playRestart').click();await expect(page.locator('#playShotCue')).toBeHidden();
+ await page.locator('#playTimelineMount input[type=range]').fill('0');await expect(page.locator('#playShotCue')).toBeHidden();
 });
 
 test('manual contact boundaries identify the next shot without relabeling the selected step',async({page})=>{
  await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);
- await page.evaluate(()=>pickleboard.plays.load('lob-overhead'));await page.locator('#playNext').click();
+ await page.evaluate(()=>{pickleboard.plays.load('lob-overhead');pickleboard.plays.timelineAction('chapter','overhead');});
  await expect(page.locator('#playbackStepLabel')).toHaveText('Forehand Lob');
  await expect(page.locator('#playShotCue')).toHaveText('Next shot: overhead · Contact');
  await page.locator('#play3dView').click();await page.locator('#threeDCanvas canvas').waitFor();

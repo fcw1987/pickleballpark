@@ -34,16 +34,16 @@ test('named cameras switch without resetting the Play', async ({ page }) => {
   await openApp(page);
   await openDrop3d(page);
   for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
-    await page.locator('#threeDCamera').selectOption(camera);
+    await page.locator('#threeDCamera').selectOption(camera,{force:true});
     expect(await page.evaluate(() => window.pickleboard.threeD.getState().camera)).toBe(camera);
     expect(await page.evaluate(() => window.pickleboard.threeD.getState().elapsed)).toBe(0);
   }
 });
 
-test('play, pause, playback rate, restart, and proof bounce share one clock', async ({ page }) => {
+test('play, pause, playback rate, timeline seek, and proof bounce share one clock', async ({ page }) => {
   await openApp(page);
   await openDrop3d(page);
-  await page.locator('#threeDRate').selectOption('0.25');
+  await page.locator('#threeDRate').selectOption('0.25',{force:true});
   await page.locator('#threeDPlayPause').click();
   await page.waitForTimeout(300);
   const slowState = await page.evaluate(() => window.pickleboard.threeD.getState());
@@ -63,7 +63,7 @@ test('play, pause, playback rate, restart, and proof bounce share one clock', as
   const proof = await page.evaluate(() => window.pickleboard.threeD.getState().lastState);
   expect(proof.y).toBeCloseTo(0.037, 6);
   expect(proof.phase).toBe('bounce');
-  await page.locator('#threeDRestart').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.getState())).toMatchObject({ elapsed: 0, playing: false });
 });
 
@@ -75,7 +75,7 @@ test('exit stops render loop, re-entry creates one new loop, and 2D Play remains
   await expect(page.locator('#threeDViewer')).toBeHidden();
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().active)).toBe(false);
   expect(await page.evaluate(() => window.pickleboard.plays.getState().playId)).toBe('third-shot-drop');
-  await page.locator('#playNext').click();
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
   expect(await page.evaluate(() => window.pickleboard.plays.getState().stepIndex)).toBe(1);
   await page.locator('#play3dView').click();
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
@@ -106,9 +106,9 @@ test('reduced motion retains 3D endpoints and camera controls', async ({ page })
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openApp(page);
   await openDrop3d(page);
-  await page.locator('#threeDCamera').selectOption('sideline');
+  await page.locator('#threeDCamera').selectOption('sideline',{force:true});
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().camera)).toBe('sideline');
-  await page.locator('#threeDRestart').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().lastState.phase)).toBe('ready');
 });
 

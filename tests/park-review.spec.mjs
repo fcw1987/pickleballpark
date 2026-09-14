@@ -113,7 +113,7 @@ test('camera changes and a 3D exit-restart keep one timeline and the original bo
   expect(Math.max(...audit.map(item => item.paddleError))).toBeLessThan(0.01);
 
   await page.locator('#threeDExit').click();
-  await page.locator('#playRestart').click();
+  await page.locator('#playTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
     elapsed: pickleboard.plays.clock.elapsed, playing: pickleboard.plays.clock.playing })))
     .toEqual({ owner: 'guided', elapsed: 0, playing: false });
