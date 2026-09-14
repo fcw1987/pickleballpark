@@ -179,9 +179,11 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 .builder-planner .builder-meta, .builder-planner .builder-transport { display: none; }
 .builder-planner .builder-layout { height: 100%; }
 .builder-planner .builder-inspector { left: 8px; right: auto; top: 8px; }
-#infoModal .modal-content { border-radius: 0; max-height: calc(100dvh - 32px); }
+#infoModal { z-index: 6000; }
+#infoModal .modal-content { display: flex; flex-direction: column; border-radius: 0; max-height: calc(100dvh - 32px); }
 #infoModal .modal-header { background: var(--game-paper); color: var(--game-ink); border-bottom: 2px dashed var(--game-edge); }
-#infoModal .modal-body { color: var(--game-ink); }
+#infoModal .modal-header { flex-shrink: 0; }
+#infoModal .modal-body { min-height: 0; max-height: none; overflow-y: auto; color: var(--game-ink); }
 #infoModal .modal-header h2 { font-family: 'Park Labels',ui-monospace,monospace; }
 .sr-only { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
 @media(max-width:700px) {

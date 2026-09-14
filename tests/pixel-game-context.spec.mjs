@@ -44,6 +44,15 @@ test('main, chapter, and playback menus open over the scene without resizing the
     } else await summary.click();
     expect(await courtGeometry(page), selector).toEqual(initial);
   }
+  await page.locator('.builder-main-menu > summary').click();
+  await page.getByRole('button', { name: 'Help', exact: true }).click();
+  await expect(page.locator('#infoClose')).toBeFocused();
+  expect(await page.locator('#infoClose').evaluate(node => {
+    const box=node.getBoundingClientRect();
+    return node.contains(document.elementFromPoint(box.x+box.width/2,box.y+box.height/2));
+  })).toBe(true);
+  await page.locator('#infoClose').click();
+  await expect(page.locator('.builder-main-menu > summary')).toBeFocused();
 });
 
 test('Coach tools remains expanded and focused after an assistance edit rerenders the document', async ({ page }) => {
