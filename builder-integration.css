@@ -1,12 +1,12 @@
 /* Runtime geometry owned by PlayBuilder. Keep this file limited to viewport
    adaptation so visual tokens stay consolidated in builder-ui.css. */
 body.builder-workspace{--builder-visible-height:100dvh}
-body.builder-workspace #playbackControls,body.builder-workspace .three-d-hud{visibility:hidden;pointer-events:none}
+body.builder-workspace #playbackControls,body.builder-workspace .three-d-hud{display:none;pointer-events:none}
 .builder-ui{height:var(--builder-visible-height,100dvh);box-sizing:border-box;overflow:hidden;top:var(--builder-visible-top,0px)}
 .builder-ui.builder-busy{cursor:progress}.builder-ui button:disabled{opacity:.5;cursor:default}.builder-ui>*{min-width:0}
 .builder-layout{min-height:0}.builder-court-region{min-height:0}.builder-court-region [data-builder-court-region]{pointer-events:none}
 .builder-inspector[data-surface="nonmodal-sheet"]{overscroll-behavior:contain;scrollbar-gutter:stable}.builder-inspector :is(button,select,input){accent-color:var(--game-green,#477a59)}
-.builder-ui.builder-placing .builder-inspector-collapsed{display:none}.builder-ui.builder-placing .builder-message{display:block}
+.builder-ui.builder-placing .builder-inspector-collapsed{display:block}.builder-ui.builder-placing .builder-inspector-collapsed .builder-inspector-header{display:flex!important}.builder-ui.builder-placing .builder-inspector-collapsed .builder-collapse{display:block!important}.builder-ui.builder-placing .builder-message{display:block}
 .builder-planner .builder-layout{grid-template-columns:minmax(0,1fr)}
 .builder-large-text .builder-ui{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}.builder-large-text .builder-ui>*{flex-shrink:0}.builder-large-text .builder-layout{flex:1 0 65dvh;min-height:24rem}.builder-large-text .builder-transport{display:block}.builder-large-text .builder-transport-top{display:flex;flex-wrap:wrap}.builder-large-text .builder-transport-timeline{flex:1 1 16rem}.builder-large-text .builder-button{white-space:normal}
 @media(max-width:700px){
