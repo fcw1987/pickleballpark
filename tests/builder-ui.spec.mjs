@@ -48,6 +48,8 @@ test.describe('court first builder UI harness', () => {
     await expect(page.getByRole('button', { name: 'Use as starting layout' })).toBeVisible();
     await page.getByRole('button', { name: 'Return to builder' }).click();
     await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+    const coach = page.locator('.builder-assistance > summary');
+    if (!await coach.locator('..').evaluate(node => node.open)) await coach.click();
     await page.getByRole('checkbox', { name: 'Auto Shading', exact: true }).check();
     const actions = await page.evaluate(() => window.__builderActions);
     expect(actions.map(action => action.type)).toEqual(['workspace', 'workspace', 'pauseForEditing', 'assistance']);
@@ -65,7 +67,10 @@ test.describe('court first builder UI harness', () => {
     await page.getByRole('button', { name: 'My Plays', exact: true }).click();
     await expect(page.getByRole('dialog')).toContainText('My Plays');
     await page.getByRole('dialog').getByRole('button', { name: 'Saved One' }).click();
+    await openMenu(page);
     await page.getByLabel('Play title').fill('Focused title');
+    await page.getByLabel('Play title').press('Tab');
+    await page.locator('.builder-main-menu').evaluate(node => { node.open = false; });
     await openMenu(page);
     await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
     await page.getByLabel('JSON backup').fill('{"schemaVersion":1,"title":"Imported"}');
@@ -76,8 +81,8 @@ test.describe('court first builder UI harness', () => {
 
   test('keeps zero-shot settings and bounds file imports', async ({ page }) => {
     await mount(page, { title: 'Empty', shots: [], players: {}, assistance: {} });
-    await expect(page.getByRole('checkbox', { name: 'Auto Shading', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Edit play', exact: true }).click();
+    await expect(page.getByRole('checkbox', { name: 'Auto Shading', exact: true })).toBeVisible();
     await expect(page.getByLabel('Starting condition')).toBeVisible();
     await openMenu(page);
     await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
