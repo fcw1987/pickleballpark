@@ -16,9 +16,16 @@ PORT=4194 PICKLEBALLPARK_TEST_URL=http://127.0.0.1:4194 npx playwright test test
 
 Baseline result: 3 failed as expected on `0fef773`. Each failure received the saved `starter-draft` / `Authority A` source after the newer operation had already completed.
 
+The central source-intent correction (`2066995`, cherry-picked locally as `39b9188`) passes all three focused cases independently. Two adjacent authority failures were found afterward:
+
+- A confirmed **Use Planner** action can await 3D restoration. A later Open succeeds against the visible builder, then the older action resumes and applies the prior planner layout, handedness, and annotations to the newly opened document. The focused regression is commit `430dc15`.
+- Two tabs opened on a fresh origin before either saves both begin with the fixed `starter-draft` identity. Neither store has observed that draft as absent, so the second first-save overwrites the first without a conflict. The focused regression is commit `c3f6aeb`; the observed library contains only `Fresh tab second version`.
+
+Both adjacent failures are fixed. `9e6e2b7` gives **Use Planner** its own source-intent checks around confirmation and workspace restoration. `ac88f66` gives each never-saved starter a per-tab UUID, matching **New Play**. The four asynchronous authority regressions pass together after the first two fixes. After the UUID correction, the fresh two-tab regression and focused-field page-close autosave pass together. The integration run reports all 11 persistence cases plus four iPhone reliability cases passing.
+
 ## Passing browser coverage
 
-The same spec includes six independent passing cases:
+Besides the five focused regressions, the same spec includes six independent passing cases:
 
 - A seeded 140-step browser state machine checks every document against a bounded snapshot model after edits, undo, redo, autosave, and reopen.
 - A deterministic mutation matrix verifies exact one-step undo and redo for title, arc and pace, shot family, manual movement target and pinning, handedness, both assistance controls, insert, duplicate, reorder, delete, and a real court drag.
@@ -61,3 +68,5 @@ Default result on `0fef773`:
 ```
 
 The storage module is synchronous: reads, validation, compilation, history commits, and `localStorage.setItem` cannot finish out of invocation order within one JavaScript task. The tested stale-winner defect begins only where a source action awaits UI restoration. File reading is independently asynchronous and already has a working generation guard in `builder-ui.js`.
+
+Before the final runtime pin, the package source gate correctly rejected the locally cherry-picked runtime correction: `npm run build:site` reported `Unapproved runtime change: play-builder.js`. The approved runtime fixture must be refreshed only after the integrated candidate is frozen, then the package gate must pass against those exact bytes.
