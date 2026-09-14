@@ -3,17 +3,17 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 export const REVIEW_EXPIRES = '2026-10-06';
 export const TEST_FILE_HASHES = Object.freeze({
-  'tests/coaching-workflow.spec.mjs': 'ae316fe1b1e8adaef3fbd2a49625bb1fd8fcf7f7215555b5452680a2cc85c029',
+  'tests/coaching-workflow.spec.mjs': '417c47c2f77efd5c8d51ec5caf9cbf23a53e97ba843ec5e3a25220a7bb5b3ddb',
   'tests/pixel-replay.spec.mjs': '11e47959d5a67ec9d22f78c3e8fd014e86142419ed11aef16442b9688c1b0808',
-  'tests/plays.spec.mjs': '022625b7c4e12b45b70b20976ac3034d594f1f35eb4ba4f0dc9b9f1fd77a601d',
-  'tests/three-d.spec.mjs': '2b537f7cdf131da967b56f1e0d3dde79734dc2e48fab552d76df9a3e062d7533',
-  'tests/service-worker.spec.mjs': '5b3aaa5a23b6c8757925cddee6956ad8713ea32dea97ab2d710c03a0bef20389',
+  'tests/plays.spec.mjs': '44e7a8844e674b7a20f415b3d1237268c78973a881ee15b2c99cb85fa85d71d1',
+  'tests/three-d.spec.mjs': '2aec1983a22bce20bfe44d6757119eadf830d431405018eb00ff71cc3ee2e0b4',
+  'tests/service-worker.spec.mjs': 'd4a2bd0e675df54e5e00774c74bc354d3dc3976c6cb674427382e203681c3abf',
 });
 
 export const ALLOWED_FAILURES = Object.freeze([
-  ['tests/coaching-workflow.spec.mjs', 'cached coaching engine resumes an interrupted shot offline', 125, 'page.reload', 'page.reload: WebKit encountered an internal error'],
+  ['tests/coaching-workflow.spec.mjs', 'cached coaching engine resumes an interrupted shot offline', 122, 'page.reload', 'page.reload: WebKit encountered an internal error'],
   ['tests/pixel-replay.spec.mjs', 'fresh cached installation opens all four pixel actors fully offline', 73, 'page.reload', 'page.reload: WebKit encountered an internal error'],
-  ['tests/plays.spec.mjs', 'guided plays start and advance on an offline repeat visit', 182, 'page.reload', 'page.reload: WebKit encountered an internal error'],
+  ['tests/plays.spec.mjs', 'guided plays start and advance on an offline repeat visit', 228, 'page.reload', 'page.reload: WebKit encountered an internal error'],
   ['tests/three-d.spec.mjs', 'offline repeat visit can open the locally cached Three.js viewer', 119, 'page.reload', 'page.reload: WebKit encountered an internal error'],
   ['tests/service-worker.spec.mjs', 'installs the versioned shell and serves a repeat visit offline', 52, 'page.goto', 'page.goto: WebKit encountered an internal error'],
   ['tests/service-worker.spec.mjs', 'offline navigation uses only the owned shell cache and does not cache unknown pages as the shell', 108, 'page.goto', 'page.goto: WebKit encountered an internal error'],
@@ -52,9 +52,9 @@ export function inspectWebKitReport(report, diagnostics, options = {}) {
 
   const specs = (report?.suites ?? []).flatMap(flattenSpecs);
   if ((report?.errors ?? []).length) failures.push('report contains errors outside tests');
-  if (specs.length !== 189) failures.push(`expected 189 tests, found ${specs.length}`);
+  if (specs.length !== 219) failures.push(`expected 219 tests, found ${specs.length}`);
   const stats = report?.stats ?? {};
-  for (const [name, expected] of Object.entries({ expected: 182, unexpected: 7, flaky: 0, skipped: 0 })) if (stats[name] !== expected) failures.push(`unexpected ${name} count: ${stats[name]}`);
+  for (const [name, expected] of Object.entries({ expected: 212, unexpected: 7, flaky: 0, skipped: 0 })) if (stats[name] !== expected) failures.push(`unexpected ${name} count: ${stats[name]}`);
 
   const allowed = new Map(ALLOWED_FAILURES.map((entry) => [key(entry), entry]));
   const observed = new Set();
