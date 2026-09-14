@@ -180,6 +180,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 .builder-planner .builder-layout { height: 100%; }
 .builder-planner .builder-inspector { left: 8px; right: auto; top: 8px; }
 #infoModal { z-index: 6000; }
+.app:has(#infoModal.active) { z-index: 6000; }
 #infoModal .modal-content { display: flex; flex-direction: column; border-radius: 0; max-height: calc(100dvh - 32px); }
 #infoModal .modal-header { background: var(--game-paper); color: var(--game-ink); border-bottom: 2px dashed var(--game-edge); }
 #infoModal .modal-header { flex-shrink: 0; }

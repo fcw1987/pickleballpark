@@ -333,10 +333,10 @@ body.three-d-active .park-control, body.three-d-active .court-container-fullscre
   body.play-mode .playback-copy p { max-width: 28ch; }
   body.play-mode .playback-buttons { gap: .3rem; }
   body.play-mode .transport-primary { display: grid; grid-template-columns: 48px minmax(0, 1fr); }
-  body.play-mode .shot-timeline { grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; }
-  body.play-mode .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; }
-  body.play-mode .shot-timeline-identity { grid-column: 1; grid-row: 1; }
-  body.play-mode .shot-timeline-time { grid-column: 2; grid-row: 1; }
+  body.play-mode:not(.builder-workspace) .shot-timeline { grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; }
+  body.play-mode:not(.builder-workspace) .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; }
+  body.play-mode:not(.builder-workspace) .shot-timeline-identity { grid-column: 1; grid-row: 1; }
+  body.play-mode:not(.builder-workspace) .shot-timeline-time { grid-column: 2; grid-row: 1; }
   body.play-mode .shot-timeline-mount,
   body.play-mode .shot-timeline,
   body.play-mode .shot-timeline-target,

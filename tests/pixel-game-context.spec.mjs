@@ -47,6 +47,7 @@ test('main, chapter, and playback menus open over the scene without resizing the
   await page.locator('.builder-main-menu > summary').click();
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   await expect(page.locator('#infoClose')).toBeFocused();
+  expect(await page.evaluate(() => Boolean(document.elementFromPoint(200,30)?.closest('#infoModal')))).toBe(true);
   expect(await page.locator('#infoClose').evaluate(node => {
     const box=node.getBoundingClientRect();
     return node.contains(document.elementFromPoint(box.x+box.width/2,box.y+box.height/2));
