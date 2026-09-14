@@ -77,5 +77,19 @@
     "helpDuringPlayback": "Visible Play > Menu > Help > Close; court, four athletes, outlined ball and target remain rendered; paused at final Drop chapter",
     "backgroundReturn": "Open disposable second tab then close it; same paused time 3.78252 and rendered court retained",
     "automationLimit": "Native about:blank entry was autocompleted to a public page; that owned test tab was closed. No interaction with that page or other user tabs."
+  },
+  "finalPackagedCheck": {
+    "packageRevision": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "runtimeRevision": "c4e88626846b0bbcd227e077dbe7b384c11543ec",
+    "origin": "http://127.0.0.1:4173/",
+    "visiblePath": "Play > Menu > Help > Close, preserved Fifth Shot Drop Copy, paused at2.924202s, complete court/athletes/ball visible",
+    "loadedRuntimeProof": {
+      "caches": [
+        "pickleboard-static-v21"
+      ],
+      "sourceIntent": 0,
+      "lossHandlerContainsOwnedCanvasGuard": true
+    },
+    "inspector": "Console evaluated successfully; Inspector closed afterward; owned window left at paused court"
   }
 }
