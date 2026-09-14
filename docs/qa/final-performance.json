@@ -1,0 +1,101 @@
+{
+  "conditions": {
+    "context": "fresh isolated context per run; service workers blocked; local static servers",
+    "viewport": [
+      1440,
+      900
+    ],
+    "deviceScaleFactor": 1,
+    "runs": 3,
+    "workload": "3, 8 and 64 shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs and 50 saves per size; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining 64 shots",
+    "limitations": "CPU-side performance.now/action timing and automation callback cadence. Renderer calls measure CPU command submission, not GPU completion. Results do not measure displayed FPS or physical-device performance."
+  },
+  "host": {
+    "platform": "darwin",
+    "release": "27.0.0",
+    "arch": "arm64",
+    "cpu": "Apple M3 Max"
+  },
+  "browser": "Playwright Chromium 149.0.7827.55",
+  "measuredAt": "2026-09-14T04:43:13.336Z",
+  "beforeRuntime": "d66934838a742f126cf9650b2459a5420ea917b8",
+  "candidateRuntime": "e0177cc706e316a8011db348deed133fcaf3ec47",
+  "medians": {
+    "before": {
+      "first3DReadyMs": 127.53129100000024,
+      "warm3DReadyMs": 23.099999994039536,
+      "compile64Ms": 0.7000000029802322,
+      "edit64Ms": 6,
+      "seek64Ms": 0.8999999910593033,
+      "save64Ms": 0.5,
+      "reloadMs": 730.8595000000005,
+      "resourceBytes": 1612236,
+      "pausedRenderCalls": [
+        0,
+        0,
+        0
+      ],
+      "finalResources": [
+        {
+          "memory": {
+            "geometries": 43,
+            "textures": 17
+          },
+          "drawCalls": 57
+        },
+        {
+          "memory": {
+            "geometries": 43,
+            "textures": 17
+          },
+          "drawCalls": 57
+        },
+        {
+          "memory": {
+            "geometries": 43,
+            "textures": 17
+          },
+          "drawCalls": 57
+        }
+      ]
+    },
+    "candidate": {
+      "first3DReadyMs": 124.39116699999795,
+      "warm3DReadyMs": 23.5,
+      "compile64Ms": 0.699999988079071,
+      "edit64Ms": 6,
+      "seek64Ms": 0.800000011920929,
+      "save64Ms": 0.5,
+      "reloadMs": 730.3506249999991,
+      "resourceBytes": 1614592,
+      "pausedRenderCalls": [
+        0,
+        0,
+        0
+      ],
+      "finalResources": [
+        {
+          "memory": {
+            "geometries": 43,
+            "textures": 17
+          },
+          "drawCalls": 57
+        },
+        {
+          "memory": {
+            "geometries": 43,
+            "textures": 17
+          },
+          "drawCalls": 57
+        },
+        {
+          "memory": {
+            "geometries": 43,
+            "textures": 17
+          },
+          "drawCalls": 57
+        }
+      ]
+    }
+  }
+}

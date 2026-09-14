@@ -91,5 +91,17 @@
       "lossHandlerContainsOwnedCanvasGuard": true
     },
     "inspector": "Console evaluated successfully; Inspector closed afterward; owned window left at paused court"
+  },
+  "finalV22Package": {
+    "runtime": "e0177cc706e316a8011db348deed133fcaf3ec47",
+    "packageMetadata": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
+    "origin": "http://127.0.0.1:4173",
+    "cache": "pickleboard-static-v22",
+    "loadedPauseGuard": true,
+    "preservedSavedPlay": "Fifth Shot Drop Copy",
+    "visibleJourney": "Reload paused; Play, Menu, Help, Close; visible full 3D court; Play, Pause; timeline stayed at 0.5799788 while auxiliary tab closed",
+    "helpBlankReproduced": false,
+    "historicalHelpOnlyCauseEstablished": false,
+    "method": "Native Safari through CUA; Inspector version proof, visible AX controls and screenshot inspection; no user storage cleared"
   }
 }

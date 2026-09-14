@@ -203,7 +203,7 @@
           },
           "programs": 10,
           "renderFrames": 2,
-          "renderLoopStarts": 806,
+          "renderLoopStarts": 805,
           "rendererScheduler": null,
           "guidedScheduler": null,
           "holdTimer": null,
@@ -368,7 +368,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": null
     },
     {
@@ -380,7 +380,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
     },
     {
@@ -392,7 +392,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
     },
     {
@@ -404,7 +404,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "4816210"
     },
     {
@@ -416,7 +416,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241"
     },
     {
@@ -428,8 +428,20 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8"
+    },
+    {
+      "browser": "chromium",
+      "mode": "beta-interim-upgrade",
+      "status": "PASS",
+      "runtimeHashes": 99,
+      "cacheEntries": 97,
+      "offlineCustomReload": true,
+      "offlineLessons": 8,
+      "offlineMethod": "owned server stopped",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
+      "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048"
     },
     {
       "browser": "webkit",
@@ -440,7 +452,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": null
     },
     {
@@ -452,7 +464,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
     },
     {
@@ -464,7 +476,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
     },
     {
@@ -476,7 +488,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "4816210"
     },
     {
@@ -488,7 +500,7 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241"
     },
     {
@@ -500,8 +512,20 @@
       "offlineCustomReload": true,
       "offlineLessons": 8,
       "offlineMethod": "owned server stopped",
-      "source": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
       "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8"
+    },
+    {
+      "browser": "webkit",
+      "mode": "beta-interim-upgrade",
+      "status": "PASS",
+      "runtimeHashes": 99,
+      "cacheEntries": 97,
+      "offlineCustomReload": true,
+      "offlineLessons": 8,
+      "offlineMethod": "owned server stopped",
+      "source": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
+      "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048"
     }
   ],
   "webkitNoApp": {
@@ -515,5 +539,73 @@
     "offlineSignature": "page.reload: WebKit encountered an internal error",
     "realOfflineWithoutEmulation": true,
     "result": "confirmed"
+  },
+  "runtime": "e0177cc706e316a8011db348deed133fcaf3ec47",
+  "finalBrowsers": {
+    "chromium": {
+      "stats": {
+        "startTime": "2026-09-14T04:44:45.064Z",
+        "duration": 196341.82499999998,
+        "expected": 284,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "failures": []
+    },
+    "webkit": {
+      "stats": {
+        "startTime": "2026-09-14T04:44:59.240Z",
+        "duration": 232819.044,
+        "expected": 277,
+        "skipped": 0,
+        "unexpected": 7,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "file": "coaching-workflow.spec.mjs",
+          "title": "cached coaching engine resumes an interrupted shot offline",
+          "line": 122,
+          "firstLine": "Error: page.reload: WebKit encountered an internal error"
+        },
+        {
+          "file": "pixel-replay.spec.mjs",
+          "title": "fresh cached installation opens all four pixel actors fully offline",
+          "line": 73,
+          "firstLine": "Error: page.reload: WebKit encountered an internal error"
+        },
+        {
+          "file": "plays.spec.mjs",
+          "title": "guided plays start and advance on an offline repeat visit",
+          "line": 228,
+          "firstLine": "Error: page.reload: WebKit encountered an internal error"
+        },
+        {
+          "file": "service-worker.spec.mjs",
+          "title": "installs the versioned shell and serves a repeat visit offline",
+          "line": 52,
+          "firstLine": "Error: page.goto: WebKit encountered an internal error"
+        },
+        {
+          "file": "service-worker.spec.mjs",
+          "title": "upgrades old Pickleboard caches without deleting unrelated origin caches",
+          "line": 93,
+          "firstLine": "Error: expect(received).toBe(expected) // Object.is equality"
+        },
+        {
+          "file": "service-worker.spec.mjs",
+          "title": "offline navigation uses only the owned shell cache and does not cache unknown pages as the shell",
+          "line": 108,
+          "firstLine": "Error: page.goto: WebKit encountered an internal error"
+        },
+        {
+          "file": "three-d.spec.mjs",
+          "title": "offline repeat visit can open the locally cached Three.js viewer",
+          "line": 126,
+          "firstLine": "Error: page.reload: WebKit encountered an internal error"
+        }
+      ]
+    }
   }
 }
