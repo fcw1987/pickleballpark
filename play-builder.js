@@ -21,6 +21,9 @@ export class PlayBuilder {
         let document;
         try { document = this.store.loadLast(); } catch (error) { this.saveStatus = `Storage recovery needed: ${error.message}. Export your work as a backup.`; }
         this.document = document || createStarterDocument();
+        // Fresh tabs have independent unsaved work. A shared starter id would
+        // let a later first save overwrite another tab before either observed it.
+        if(!document)this.document.id=id();
         if(document)this.saveStatus='Saved on this device';
         this.saveError=null;this.libraryDirty=true;this.library=[];
         this.history = new EditHistory(this.document); this.selectedShotId = this.document.shots[0]?.id || null;
