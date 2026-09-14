@@ -34,6 +34,12 @@ const mark = async (name, details = {}) => {
   events.push({ atMs: Date.now() - started, name, ...details, state });
 };
 const hold = (milliseconds = 650) => page.waitForTimeout(milliseconds);
+const touch = async locator => {
+  await locator.scrollIntoViewIfNeeded();
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Cannot touch a hidden authoring control');
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+};
 const mainMenu = async () => {
   const menu = page.locator('.builder-main-menu');
   if (!(await menu.evaluate(node => node.open))) await menu.locator('summary').click();
@@ -60,7 +66,10 @@ try {
   await page.evaluate(() => localStorage.removeItem('pickleballpark-builder-v1'));
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
-  await page.evaluate(async () => { if (playBuilder.view !== '2d') await playBuilder.switchView('2d'); });
+  if (await page.evaluate(() => playBuilder.view !== '2d')) {
+    await page.getByRole('button', { name: '2D', exact: true }).click();
+    await page.waitForFunction(() => playBuilder.view === '2d' && !playBuilder.busy);
+  }
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
   await mark('fresh synthetic draft opens paused');
   await hold();
@@ -103,12 +112,12 @@ try {
 
   const coachTools = page.getByText('Coach tools', { exact: true });
   if (!(await coachTools.locator('..').evaluate(node => node.open))) await coachTools.click();
-  await page.getByRole('checkbox', { name: 'Coverage Guides', exact: true }).evaluate(node => node.click());
+  await touch(page.getByRole('checkbox', { name: 'Coverage Guides', exact: true }));
   await expect.poll(() => page.evaluate(() => playBuilder.document.assistance)).toMatchObject({ autoShading: false, showGuides: true });
   await mark('coverage guides enabled independently');
   await openEditor();
   if (!(await coachTools.locator('..').evaluate(node => node.open))) await coachTools.click();
-  await page.getByRole('checkbox', { name: 'Auto Shading', exact: true }).evaluate(node => node.click());
+  await touch(page.getByRole('checkbox', { name: 'Auto Shading', exact: true }));
   await expect.poll(() => page.evaluate(() => playBuilder.document.assistance)).toMatchObject({ autoShading: true, showGuides: true });
   await mark('auto shading enabled without changing guides');
   await hold();
