@@ -1,5 +1,6 @@
 import { chromium, expect } from '@playwright/test';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 
 const output = process.argv[2];
@@ -10,8 +11,7 @@ const videoName = 'phone-authoring.webm';
 const screenshotName = 'phone-authoring-final.png';
 const eventsName = 'phone-authoring-events.json';
 await mkdir(output, { recursive: true });
-const rawVideo = join(output, '.raw-video');
-await mkdir(rawVideo, { recursive: true });
+const rawVideo = await mkdtemp(join(tmpdir(), 'pickleboard-phone-authoring-'));
 
 const browser = await chromium.launch();
 const context = await browser.newContext({
@@ -21,7 +21,6 @@ const context = await browser.newContext({
   recordVideo: { dir: rawVideo, size: viewport }
 });
 const page = await context.newPage();
-await page.addInitScript(() => localStorage.removeItem('pickleballpark-builder-v1'));
 const started = Date.now();
 const events = [];
 const mark = async (name, details = {}) => {
@@ -58,6 +57,8 @@ const editChapter = async number => {
 
 try {
   await page.goto(url);
+  await page.evaluate(() => localStorage.removeItem('pickleballpark-builder-v1'));
+  await page.reload();
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.evaluate(async () => { if (playBuilder.view !== '2d') await playBuilder.switchView('2d'); });
   await expect(page.getByRole('button', { name: 'Play rally' })).toBeVisible();
@@ -133,6 +134,9 @@ try {
   expect(await page.evaluate(() => playBuilder.session.playing)).toBe(false);
   expect(await page.evaluate(() => playBuilder.document.title)).toContain('Pixel park walkthrough');
   await mark('saved draft reloaded paused');
+  await page.getByRole('button', { name: '2D', exact: true }).click();
+  await page.waitForFunction(() => playBuilder.view === '2d' && !playBuilder.busy);
+  await mark('continued saved work in 2D');
   await page.getByRole('button', { name: 'Play rally' }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.session.clock.elapsed)).toBeGreaterThan(.2);
   await mark('play started from current position');
@@ -171,4 +175,5 @@ try {
 } finally {
   if (!page.isClosed()) await context.close().catch(() => {});
   await browser.close();
+  await rm(rawVideo, { recursive: true, force: true });
 }
