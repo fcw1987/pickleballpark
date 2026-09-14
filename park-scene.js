@@ -91,12 +91,15 @@ export function updateParkSVGProjection(svg) {
 }
 
 const assetURL = asset => new URL(`./${asset}`, import.meta.url).href;
-const configureTexture = (texture, THREE, repeat = [1, 1]) => {
+const configureTexture = (texture, THREE, repeat = [1, 1], tiled = true) => {
     texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
     texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.LinearMipmapNearestFilter || THREE.LinearFilter;
+    // Blend mip levels on the angled ground rather than switching abruptly.
+    // Upright art retains nearest magnification and padded transparent edges.
+    texture.minFilter = THREE.LinearMipmapLinearFilter || THREE.LinearFilter;
     texture.generateMipmaps = true;
-    if (THREE.RepeatWrapping !== undefined) { texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping; }
+    const wrapping=tiled?THREE.RepeatWrapping:THREE.ClampToEdgeWrapping;
+    if (wrapping !== undefined) { texture.wrapS = wrapping; texture.wrapT = wrapping; }
     texture.repeat?.set(repeat[0], repeat[1]);
     texture.needsUpdate = true;
     return texture;
@@ -120,7 +123,7 @@ export async function createPark3D(THREE, { signal } = {}) {
         try{
             const texture=await loader.loadAsync(blobURL);
             if(signal?.aborted){texture.dispose();throw new DOMException('Park loading cancelled','AbortError');}
-            return [name,configureTexture(texture,THREE)];
+            return [name,configureTexture(texture,THREE,[1,1],['grass','path','quietCourt'].includes(name))];
         }finally{URL.revokeObjectURL(blobURL);}
     });
     let loadedTextures;
@@ -155,6 +158,9 @@ export async function createPark3D(THREE, { signal } = {}) {
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(landmark.size * FEET_TO_METERS, landmark.height * FEET_TO_METERS), material(detailTextures[landmark.type], 1));
         mesh.name = `ParkLandmark-${landmark.id}`;
         mesh.position.set(world.x, landmark.height * FEET_TO_METERS * (58/64-.5), world.z);
+        mesh.userData.foot = new THREE.Vector3(world.x, 0.012, world.z);
+        mesh.userData.anchorOffset = landmark.height * FEET_TO_METERS * (58/64-.5);
+        mesh.userData.offset = new THREE.Vector3();
         mesh.frustumCulled = false;
         mesh.renderOrder = -2;
         group.userData.landmarks.set(landmark.id, mesh); group.add(mesh);
@@ -174,7 +180,14 @@ export async function createPark3D(THREE, { signal } = {}) {
 export function updateParkCamera(group, camera) {
     if (!group || !camera) return group;
     const landmarks = group.userData?.landmarks;
-    if (landmarks) for (const mesh of landmarks.values()) mesh.rotation.y = Math.atan2(camera.position.x - mesh.position.x, camera.position.z - mesh.position.z);
+    if (landmarks) for (const mesh of landmarks.values()) {
+        // Keep original pixel landmarks upright in screen space. Yaw-only
+        // planes collapsed into thin slivers in the normal overhead view.
+        // Reposition around the stored foot so the sprite never floats away.
+        mesh.quaternion.copy(camera.quaternion);
+        mesh.userData.offset.set(0,mesh.userData.anchorOffset,0).applyQuaternion(mesh.quaternion);
+        mesh.position.copy(mesh.userData.foot).add(mesh.userData.offset);
+    }
     group.updateMatrixWorld?.(true);
     return group;
 }

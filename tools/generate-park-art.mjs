@@ -56,33 +56,60 @@ const encodePng = canvas => {
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header), chunk('IDAT', deflateSync(scanlines, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
 };
 
-// Sparse deliberately placed clusters: no per-pixel random noise or false court lines.
+// Original tile language: quiet court grain, tapered grass tufts and staggered
+// clay pavers. All pixels are deterministic, with no bright ball-like details.
 const texture = (base, accents, seed, pattern = 0) => {
   const c = new Canvas(128,128);c.rect(0,0,128,128,base);
+  if(seed===3){
+    const grout=mix(base,C.parkShadow,.23),lip=mix(base,C.orangeLight,.2);
+    for(let row=0;row<8;row++)for(let col=-1;col<5;col++){
+      const x=col*32+(row%2?16:0),y=row*16;
+      c.rect(x,y,32,1,grout);c.rect(x,y,1,16,grout);
+      c.rect(x+2,y+2,28,1,lip);c.rect(x+2,y+3,1,10,lip);
+      c.rect(x+29,y+4,1,10,accents[0]);c.rect(x+4,y+14,26,1,accents[0]);
+      if((row+col)%3===0)c.rect(x+9,y+8,7,1,accents[1]);
+    }
+    return c;
+  }
   const clusters=[[8,12],[37,7],[78,20],[111,9],[22,49],[59,43],[97,55],[7,88],[45,79],[81,99],[112,87],[30,115],[65,120]];
   for(const [i,[x,y]] of clusters.entries()){
     if(pattern===2&&i%3)continue;
     const color=accents[i%accents.length];
     c.rect(x,y,pattern===2?2:4,2,color);c.rect(x+2,y-1,2,1,color);
-    if(seed===2){c.rect(x+1,y-3,1,3,color);c.rect(x+4,y-2,1,2,color);}
+    if(seed===2){
+      c.rect(x+1,y-3,1,3,color);c.rect(x+4,y-2,1,2,color);
+      c.rect(x-1,y-5,1,2,color);c.rect(x+6,y-4,1,2,color);
+      c.rect(x+2,y+2,5,1,mix(base,C.parkShadow,.12));
+    }
   }
   return c;
 };
 
 const tree = () => {
   const c = new Canvas(64, 64);
-  c.ellipse = (cx, cy, rx, ry, color) => { for (let y = cy - ry; y <= cy + ry; y += 1) for (let x = cx - rx; x <= cx + rx; x += 1) if (((x - cx) ** 2) / rx ** 2 + ((y - cy) ** 2) / ry ** 2 <= 1) c.set(x, y, color); };
-  c.ellipse(32, 57, 21, 4, [...C.parkShadow.slice(0, 3), 90]);
-  c.rect(27, 37, 10, 20, C.parkWood); c.rect(30, 36, 5, 21, C.parkShadow);
-  c.ellipse(22, 27, 16, 17, C.grassDeep); c.ellipse(39, 27, 16, 18, C.grassDeep); c.ellipse(31, 17, 17, 15, C.grassLight);
-  c.rect(18, 21, 5, 5, C.surround); c.rect(39, 15, 5, 5, C.surround); c.rect(27, 8, 8, 4, C.grassLight);
+  const shadow=[...C.parkShadow.slice(0,3),74],barkLight=mix(C.parkWood,C.parkSign,.35);
+  c.rect(17,55,32,5,shadow);c.rect(11,56,43,3,shadow);
+  c.polygon([[27,32],[37,32],[37,52],[41,57],[33,57],[30,55],[24,57],[27,51]],C.parkShadow);
+  c.rect(28,34,7,21,C.parkWood);c.rect(28,35,2,18,barkLight);c.rect(33,42,2,10,C.orangeDark);
+  c.rect(25,38,5,3,C.parkWood);c.rect(23,34,3,5,C.parkWood);
+  // Layered stepped canopy, lit from upper left; transparent padding on all sides.
+  c.polygon([[25,3],[39,3],[39,6],[47,6],[47,11],[53,11],[53,19],[57,19],[57,34],[52,34],[52,41],[43,41],[43,45],[20,45],[20,41],[11,41],[11,35],[7,35],[7,20],[11,20],[11,12],[17,12],[17,7],[25,7]],C.parkShadow);
+  c.polygon([[25,5],[38,5],[38,9],[46,9],[46,14],[51,14],[51,21],[54,21],[54,32],[48,32],[48,39],[40,39],[40,42],[21,42],[21,38],[14,38],[14,32],[10,32],[10,22],[14,22],[14,14],[20,14],[20,9],[25,9]],C.grassDeep);
+  c.polygon([[25,6],[37,6],[37,10],[44,10],[44,16],[48,16],[48,24],[41,24],[41,29],[27,29],[27,26],[17,26],[17,20],[14,20],[14,15],[20,15],[20,10],[25,10]],C.surround);
+  c.polygon([[26,7],[35,7],[35,10],[40,10],[40,14],[34,14],[34,17],[23,17],[23,20],[17,20],[17,16],[21,16],[21,11],[26,11]],C.grassLight);
+  const leaf=mix(C.grassLight,C.surround,.35);
+  for(const [x,y,w]of [[21,12,5],[29,8,5],[36,17,5],[16,24,6],[24,29,7],[38,31,5],[44,25,4]]){c.rect(x,y,w,2,leaf);c.rect(x+1,y+2,w-2,1,C.surround);}
+  c.rect(18,34,7,2,C.parkShadow);c.rect(31,37,6,2,C.parkShadow);c.rect(45,30,5,2,C.parkShadow);
   return c;
 };
 const shrub = () => {
   const c = new Canvas(64, 64);
-  c.rect(7, 48, 50, 7, [...C.parkShadow.slice(0, 3), 90]);
-  c.polygon([[8, 49], [12, 32], [21, 24], [32, 30], [41, 22], [53, 30], [57, 49]], C.grassDeep);
-  c.rect(15, 34, 12, 9, C.grassLight); c.rect(34, 29, 11, 9, C.surround); c.rect(24, 42, 16, 7, C.grassLight);
+  c.rect(9,50,47,4,[...C.parkShadow.slice(0,3),74]);
+  c.polygon([[8,49],[8,37],[13,37],[13,29],[20,29],[20,25],[28,25],[28,29],[35,29],[35,25],[43,25],[43,29],[51,29],[51,36],[56,36],[56,49]],C.parkShadow);
+  c.rect(12,37,40,11,C.grassDeep);c.rect(16,31,32,9,C.surround);
+  c.rect(20,28,7,6,C.grassLight);c.rect(36,28,7,5,C.grassLight);
+  c.rect(14,37,10,3,C.grassLight);c.rect(28,38,9,2,C.grassLight);c.rect(43,35,7,2,C.grassLight);
+  c.rect(18,44,11,2,C.parkShadow);c.rect(37,42,9,2,C.parkShadow);
   return c;
 };
 const bench = () => {
@@ -90,6 +117,9 @@ const bench = () => {
   c.rect(6, 52, 52, 5, [...C.parkShadow.slice(0, 3), 90]);
   c.rect(10, 28, 44, 8, C.parkWood); c.rect(10, 39, 44, 7, C.parkWood); c.rect(13, 30, 38, 3, C.orangeDark);
   c.rect(14, 46, 5, 9, C.navyDark); c.rect(45, 46, 5, 9, C.navyDark); c.rect(8, 26, 5, 24, C.navyDark); c.rect(51, 26, 5, 24, C.navyDark);
+  c.rect(13,28,38,1,C.parkSign);c.rect(13,39,38,1,C.parkSign);
+  c.rect(16,33,12,1,C.orangeDark);c.rect(32,42,15,1,C.orangeDark);
+  c.rect(10,26,2,22,C.navyLight);c.rect(52,27,1,21,C.navyLight);
   return c;
 };
 const glyphs = {
