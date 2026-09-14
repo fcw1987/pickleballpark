@@ -1,0 +1,44 @@
+{
+  "browser": "Native macOS Safari 27, controlled through the application UI and Web Inspector",
+  "physicalMobile": false,
+  "isolatedWindow": true,
+  "origins": ["http://localhost:4173/", "http://127.0.0.1:4184/"],
+  "helpBeforeFix": {
+    "visibleChecks": "Paused court, Menu, Help open/close rendered on both origins",
+    "controlledProbeRounds": 24,
+    "samples": 51,
+    "contextLosses": 0,
+    "errors": [],
+    "final": {"frame": 108, "geometry": 43, "textures": 17, "canvases": 1, "pendingRendererFrame": false, "playing": false}
+  },
+  "parkedContextBefore": {
+    "runtime": "d669348 renderer",
+    "mechanism": "Switch to 2D; induce real WEBGL_lose_context on retained renderer; wait for contextlost; reopen 3D",
+    "view": "3d", "active": true, "sameRenderer": true, "originalConnected": true,
+    "contextLost": true, "canvases": 1, "sourcePreserved": true, "ok": false,
+    "visual": "Court and athletes absent; target and application controls still visible"
+  },
+  "parkedContextAfter": {
+    "fix": "572c561",
+    "view": "3d", "active": true, "sameRenderer": false, "originalConnected": false,
+    "contextLost": false, "canvases": 1, "sourcePreserved": true, "ok": true,
+    "diagnosticWarning": "Three.js disposal attempted forceContextLoss on an already lost context; its extension was then unavailable"
+  },
+  "helpAfterRecovery": {
+    "controlledProbeRounds": 48,
+    "samples": 99,
+    "viewSwitchPairs": 16,
+    "seeks": 48,
+    "contextLosses": 0,
+    "errors": [],
+    "final": {"frame": 212, "geometry": 43, "textures": 17, "canvases": 1, "pendingRendererFrame": false, "playing": false, "elapsed": 1.122136874713284},
+    "visual": "Rendered court, athletes, ball and target inspected after recovery and all repeated Help transitions"
+  },
+  "limits": [
+    "The historical Help-only blank observation has not been causally connected to parked context loss. Its spontaneous cause is not claimed resolved by this evidence alone.",
+    "Controlled probes are distinct from visible-interface journeys; they use application methods and the real WebGL loss extension.",
+    "Native screenshots were inspected in the tool transcript; no personal browser windows, clipboard content or account data were stored in repository evidence.",
+    "The first local probe import failed because .mjs was served as application/octet-stream. The probe was renamed .js, and subsequent imports executed. This was a QA helper MIME issue, not a product error.",
+    "Some native UI actions returned before the accessibility state settled. A later observation established console execution; no Safari settings or security permissions were changed."
+  ]
+}

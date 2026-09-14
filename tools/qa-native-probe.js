@@ -1,6 +1,36 @@
 // Optional local-only native Safari probe. Import from Web Inspector on an
 // isolated synthetic QA origin. It is excluded from the packaged runtime.
 // Controlled lifecycle testing, not a claim of a visible-interface journey.
+export async function parkedContextLoss() {
+  const builder = window.playBuilder;
+  await builder.switchView('3d'); builder.pause();
+  const original = builder.board.threeD.renderer;
+  const source = JSON.stringify(builder.document);
+  await builder.switchView('2d');
+  const extension = original.getContext().getExtension('WEBGL_lose_context');
+  if (!extension) throw Error('WEBGL_lose_context is unavailable');
+  await new Promise(resolve => {
+    original.domElement.addEventListener('webglcontextlost', resolve, { once: true });
+    extension.loseContext();
+  });
+  await builder.switchView('3d');
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  const viewer = builder.board.threeD;
+  const result = window.qaNativeContextResult = {
+    view: builder.view, active: viewer.active, sameRenderer: viewer.renderer === original,
+    originalConnected: original.domElement.isConnected,
+    contextLost: viewer.renderer?.getContext().isContextLost(),
+    canvases: document.querySelectorAll('#threeDViewer canvas').length,
+    sourcePreserved: source === JSON.stringify(builder.document)
+  };
+  result.ok = result.active && !result.sameRenderer && !result.originalConnected && !result.contextLost && result.canvases === 1 && result.sourcePreserved;
+  const output = document.createElement('output');
+  output.id = 'qa-native-result'; output.style.cssText = 'position:fixed;left:10px;top:90px;z-index:9999;max-width:90vw;background:white;color:black;padding:8px;font:14px monospace;';
+  output.textContent = JSON.stringify(result);
+  document.getElementById(output.id)?.remove(); document.body.append(output);
+  return result;
+}
+
 export async function run({ rounds = 24 } = {}) {
   const builder = window.playBuilder;
   if (!builder || builder.busy || builder.workspace !== 'builder') throw Error('Open the ready builder first');
