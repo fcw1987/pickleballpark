@@ -31,8 +31,8 @@ const passingSpec = (index) => ({
   tests: [{ projectName: 'webkit', expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', errors: [] }] }],
 });
 const validReport = () => ({
-  suites: [{ specs: [...Array.from({ length: 271 }, (_, i) => passingSpec(i)), ...ALLOWED_FAILURES.map(failingSpec)] }],
-  errors: [], stats: { expected: 271, unexpected: 7, flaky: 0, skipped: 0 },
+  suites: [{ specs: [...Array.from({ length: 277 }, (_, i) => passingSpec(i)), ...ALLOWED_FAILURES.map(failingSpec)] }],
+  errors: [], stats: { expected: 277, unexpected: 7, flaky: 0, skipped: 0 },
 });
 const options = (overrides = {}) => ({
   runtimePlatform: 'linux', ci: true, playwrightVersion: '1.61.0',
@@ -50,13 +50,13 @@ test('accepts exactly the seven confirmed failures with identical retries', () =
 
 test('rejects an unknown error signature', () => {
   const report = validReport();
-  report.suites[0].specs[271].tests[0].results[1].errors[0].message = 'Error: page.reload: a different failure';
+  report.suites[0].specs[277].tests[0].results[1].errors[0].message = 'Error: page.reload: a different failure';
   expectRejected(inspect(report), /wrong error signature/);
 });
 
 test('rejects an unexpected pass of an allowed failure', () => {
   const report = validReport();
-  report.suites[0].specs[271].tests[0] = { projectName: 'webkit', expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', errors: [] }] };
+  report.suites[0].specs[277].tests[0] = { projectName: 'webkit', expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', errors: [] }] };
   report.stats.expected += 1; report.stats.unexpected = 6;
   expectRejected(inspect(report), /missing allowed failure/);
 });
@@ -68,7 +68,7 @@ test('rejects a changed Playwright version or missing diagnostics', () => {
 
 test('rejects timed out and skipped results', () => {
   const timedOut = validReport();
-  timedOut.suites[0].specs[271].tests[0].results[0] = result(ALLOWED_FAILURES[0], 'timedOut');
+  timedOut.suites[0].specs[277].tests[0].results[0] = result(ALLOWED_FAILURES[0], 'timedOut');
   expectRejected(inspect(timedOut), /disallowed result timedOut/);
   const skipped = validReport();
   skipped.suites[0].specs[0].tests[0] = { projectName: 'webkit', expectedStatus: 'passed', status: 'skipped', results: [{ status: 'skipped', errors: [] }] };
@@ -78,13 +78,13 @@ test('rejects timed out and skipped results', () => {
 
 test('rejects an extra assertion error on an allowed failure', () => {
   const report = validReport();
-  report.suites[0].specs[271].tests[0].results[0].errors.push({ message: 'extra', location: { file: ALLOWED_FAILURES[0].file, line: ALLOWED_FAILURES[0].line } });
+  report.suites[0].specs[277].tests[0].results[0].errors.push({ message: 'extra', location: { file: ALLOWED_FAILURES[0].file, line: ALLOWED_FAILURES[0].line } });
   expectRejected(inspect(report), /expected one error/);
 });
 
 test('rejects a wrong failure line', () => {
   const report = validReport();
-  report.suites[0].specs[271].tests[0].results[0].errors[0].location.line += 1;
+  report.suites[0].specs[277].tests[0].results[0].errors[0].location.line += 1;
   expectRejected(inspect(report), /wrong failure location/);
 });
 
