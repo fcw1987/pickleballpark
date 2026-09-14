@@ -14,6 +14,8 @@ import {
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
 import { loadPixelActorAssets, PixelActorResources, createPixelActor, updatePixelActor } from './three-d-pixel-actors.js';
 import { ReadableBall } from './three-d-ball.js';
+import { chapterAtTime } from './shot-chapters.js';
+import { mountShotTimeline } from './shot-timeline.js';
 
 const FALLBACK_PALETTE = Object.freeze({
     ink: '#263449', navy: '#304762', navyLight: '#526d86', navyDark: '#1c2b40',
@@ -33,16 +35,12 @@ class ThreeDPlaybackViewer {
             root: document.getElementById('threeDViewer'),
             canvas: document.getElementById('threeDCanvas'),
             title: document.getElementById('threeDTitle'),
-            loop: document.getElementById('threeDLoop'),
             progress: document.getElementById('threeDProgress'),
             stepLabel: document.getElementById('threeDStepLabel'),
             description: document.getElementById('threeDDescription'),
             shotCue: document.getElementById('threeDShotCue'),
             status: document.getElementById('threeDStatus'),
-            previous: document.getElementById('threeDPrevious'),
             playPause: document.getElementById('threeDPlayPause'),
-            next: document.getElementById('threeDNext'),
-            restart: document.getElementById('threeDRestart'),
             camera: document.getElementById('threeDCamera'),
             rate: document.getElementById('threeDRate'),
             exit: document.getElementById('threeDExit'),
@@ -80,19 +78,18 @@ class ThreeDPlaybackViewer {
             this.elements.loadStatus.hidden=false;
         };
         this.bindControls();
+        const timelineMount = document.getElementById('threeDTimelineMount');
+        this.shotTimeline = timelineMount ? mountShotTimeline({ onAction: (action, value) => this.board.plays.timelineAction(action, value) }) : null;
+        if (timelineMount && this.shotTimeline) timelineMount.replaceChildren(this.shotTimeline.element);
         this.updateEntryAvailability();
     }
 
     bindControls() {
         this.elements.enter.addEventListener('click', () => this.enter());
-        this.elements.previous.addEventListener('click', () => this.previous());
         this.elements.playPause.addEventListener('click', () => this.togglePlay());
-        this.elements.next.addEventListener('click', () => this.next());
-        this.elements.restart.addEventListener('click', () => this.restart());
         this.elements.camera.addEventListener('change', event => this.setCamera(event.target.value));
         this.elements.rate.addEventListener('change', event => this.setPlaybackRate(Number(event.target.value)));
         this.elements.exit.addEventListener('click', () => this.exit());
-        this.elements.loop.addEventListener('click', () => this.board.plays.setLoop(!this.session.loop));
     }
 
     updateEntryAvailability() {
@@ -105,17 +102,31 @@ class ThreeDPlaybackViewer {
         this.loading=false;
         this.elements.enter.removeAttribute('aria-busy');
         this.updateEntryAvailability();
+        const suspension=this.loadSuspension;this.loadSuspension=null;
+        if (suspension && this.session.resumeSuspension(suspension)) this.board.plays.startPlaybackLoop();
+    }
+
+    cancelRenderWork() {
+        if (this.renderLoopId !== null) cancelAnimationFrame(this.renderLoopId);
+        this.renderLoopId = null;
+    }
+
+    renderSessionSample() {
+        if (!this.scene || !this.currentPlay) return;
+        this.applyAtTime(this.clock.elapsed);
+        this.renderer?.render(this.scene, this.camera);
+        this.updateUI();
     }
 
     // A builder view toggle parks this renderer; leaving the workspace still disposes it.
     suspend() {
         if (!this.active) return false;
-        this.session.pause(performance.now(), this.board.plays.timingScale);
+        const suspension=this.session.suspend(performance.now(), this.board.plays.timingScale);
         this.board.plays.cancelScheduledWork();
-        if (this.renderLoopId !== null) cancelAnimationFrame(this.renderLoopId);
-        this.renderLoopId = null; this.active = false; this.session.owner = 'guided';
+        this.cancelRenderWork(); this.active = false; this.session.owner = 'guided';
         this.elements.root.hidden = true; document.body.classList.remove('three-d-active');
         this.board.plays.applyAtTime(this.clock.elapsed);
+        if (this.session.resumeSuspension(suspension)) this.board.plays.startPlaybackLoop();
         return true;
     }
     replaceDefinition(play, timeline) {
@@ -129,11 +140,13 @@ class ThreeDPlaybackViewer {
         if (this.scene && this.currentPlay === play) {
             this.session.owner = 'replay'; this.active = true;
             this.elements.root.hidden = false; document.body.classList.add('three-d-active');
-            this.resize(); this.applyAtTime(this.clock.elapsed); this.updateUI();
+            this.resize(); this.applyAtTime(this.clock.elapsed); this.updateUI(); this.startRenderLoop();
             return true;
         }
         const snapshot=this.board.plays.snapshot;
-        this.board.plays.pause();
+        const playbackSuspension = this.session.suspend(performance.now(), this.board.plays.timingScale);
+        this.loadSuspension=playbackSuspension;
+        this.board.plays.cancelScheduledWork({ preserveTransition: true });
         const generation=++this.loadGeneration;
         const controller=new AbortController();this.loadAbort=controller;
         this.loading=true;
@@ -152,6 +165,8 @@ class ThreeDPlaybackViewer {
             controller.abort();
             this.elements.loadStatus.textContent=`${loadingSubject} could not load. Your board is safe. Try 3D View again.`;
             this.elements.loadStatus.hidden=false;
+            this.loadSuspension=null;
+            if (this.session.resumeSuspension(playbackSuspension)) this.board.plays.startPlaybackLoop();
             return false;
         } finally {
             if(generation===this.loadGeneration){this.loading=false;this.loadAbort=null;
@@ -160,7 +175,6 @@ class ThreeDPlaybackViewer {
         this.currentPlay = play;
         this.timeline = this.board.plays.timeline;
         this.session.owner = 'replay';
-        this.board.plays.pause();
         this.elements.root.hidden = false;
         document.body.classList.add('three-d-active');
         try {
@@ -176,6 +190,8 @@ class ThreeDPlaybackViewer {
             this.active = false;
             this.currentPlay = null;
             this.timeline = null;
+            this.loadSuspension=null;
+            if (this.session.resumeSuspension(playbackSuspension)) this.board.plays.startPlaybackLoop();
             if (this.elements.loadStatus) {
                 this.elements.loadStatus.textContent = `3D view unavailable: ${error?.message || 'WebGL could not start.'}`;
                 this.elements.loadStatus.hidden = false;
@@ -191,6 +207,8 @@ class ThreeDPlaybackViewer {
         }
         window.addEventListener('resize', this.boundResize);
         document.addEventListener('visibilitychange', this.boundVisibilityChange);
+        this.loadSuspension=null;
+        this.session.resumeSuspension(playbackSuspension);
         this.startRenderLoop();
         this.updateUI();
         this.elements.playPause.focus?.();
@@ -513,7 +531,7 @@ class ThreeDPlaybackViewer {
     togglePlay() {
         if (!this.active) return;
         this.board.plays.cancelScheduledWork({preserveTransition:true});
-        if (this.clock.playing) this.session.pause(performance.now(), this.board.plays.timingScale);
+        if (this.session.playing) this.session.pause(performance.now(), this.board.plays.timingScale);
         else this.session.play();
         this.updateUI(); this.startRenderLoop();
     }
@@ -539,8 +557,8 @@ class ThreeDPlaybackViewer {
                 return;
             }
             this.updateUI();
-            if (this.session.holding && this.clock.playing) this.board.plays.scheduleHold();
-            else if (this.clock.playing) this.renderLoopId = requestAnimationFrame(frame);
+            if (this.session.holding && this.session.playing && this.clock.playing) this.board.plays.scheduleHold();
+            else if (this.session.playing && this.clock.playing) this.renderLoopId = requestAnimationFrame(frame);
         };
         this.renderLoopId = requestAnimationFrame(frame);
     }
@@ -572,22 +590,24 @@ class ThreeDPlaybackViewer {
         const index=this.currentStepIndex(),step=this.currentPlay.steps[index];
         const segment=this.timeline.segments.find(item=>this.clock.elapsed<=item.endTime);
         const cueStep=this.timeline.segments.find(s=>s.rallyLeg===this.lastState?.rallyLeg)?.step;
-        updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:this.session.loop,reducedMotion:this.board.plays.reducedMotion.matches});
+        updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:true,reducedMotion:this.board.plays.reducedMotion.matches});
         this.elements.rate.value=String(this.clock.playbackRate);
-        this.elements.playPause.textContent = this.clock.playing ? 'Pause' : this.session.holding ? 'Resume' : this.clock.elapsed >= this.timeline.duration ? 'Replay' : 'Play';
-        this.elements.playPause.setAttribute('aria-pressed', String(this.clock.playing));
-        const stepIndex = this.currentStepIndex();
-        this.elements.previous.disabled = this.clock.playing || stepIndex === 0;
-        this.elements.next.disabled = this.clock.playing || stepIndex >= this.currentPlay.steps.length - 1;
-        if (!this.clock.playing && this.clock.elapsed === 0) this.elements.status.textContent = 'Ready';
+        this.elements.playPause.textContent = this.session.playing ? 'Ⅱ' : '▶';
+        this.elements.playPause.setAttribute('aria-label', this.session.playing ? 'Pause rally' : 'Play rally');
+        this.elements.playPause.setAttribute('aria-pressed', String(this.session.playing));
+        if (!this.session.playing && this.clock.elapsed === 0) this.elements.status.textContent = 'Ready';
+        const chapters = this.board.plays.chapters || [];
+        const chapter = chapterAtTime(chapters, this.clock.elapsed);
+        this.shotTimeline?.update({ chapters, time: this.clock.elapsed, duration: this.session.duration,
+            playing: this.session.playing, busy: Boolean(this.loading), currentShotId: chapter?.shotId || null });
         this.board.onCoachingState?.();
     }
 
     getState() {
         return {
             active: this.active,
-            loop: this.session.loop, holding: this.session.holding, iteration: this.session.iteration,
-            playing: this.clock.playing,
+            loop: true, holding: this.session.holding, iteration: this.session.iteration,
+            playing: this.session.playing,
             elapsed: this.clock.elapsed,
             playbackRate: this.clock.playbackRate,
             camera: this.cameraPreset,
@@ -627,9 +647,10 @@ class ThreeDPlaybackViewer {
         this.sceneEnvelope=null;
     }
 
-    exit() {
+    exit({ preservePlayback = true } = {}) {
         if (!this.active && !this.scene) return false;
-        this.session.pause(performance.now(),this.board.plays.timingScale);
+        const suspension=preservePlayback?this.session.suspend(performance.now(),this.board.plays.timingScale):null;
+        if(!preservePlayback)this.session.pause(performance.now(),this.board.plays.timingScale);
         this.board.plays.cancelScheduledWork();
         this.session.owner='guided';
         this.active = false;
@@ -645,6 +666,7 @@ class ThreeDPlaybackViewer {
         this.board.plays.applyAtTime(this.clock.elapsed);
         this.board.plays.status = this.session.complete ? 'complete' : 'paused';
         this.board.plays.updateUI();
+        if(suspension&&this.session.resumeSuspension(suspension))this.board.plays.startPlaybackLoop();
         this.elements.enter.focus?.();
         return true;
     }

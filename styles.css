@@ -249,14 +249,20 @@ body[data-theme="dark"] .playback-step-label { color: var(--pb-orange-light); }
 .shot-cue { display: inline-block; margin-top: .25rem; padding: .18rem .45rem; color: var(--button-ink); background: var(--button-bg); border: 2px solid var(--pb-shot); border-radius: var(--corner); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; opacity: var(--cue-opacity, 1); transform: translateY(var(--cue-y, 0px)); transition: none; }
 .shot-cue[hidden] { display: none; }
 .transport-primary { display: flex; gap: .4rem; }
+.transport-primary .shot-timeline-mount { flex: 1 1 auto; min-width: 0; }
 .playback-buttons { display: flex; flex-direction: column; gap: .45rem; }
-.transport-primary button { flex: 1; }
+.transport-primary button { flex: 0 0 48px; }
 .transport-play { min-width: 5.2rem; color: var(--button-ink) !important; background: var(--button-hover) !important; border-color: var(--pb-shot) !important; }
 .transport-secondary { display: flex; align-items: end; gap: .4rem; flex-wrap: wrap; }
 .transport-secondary > button, .transport-secondary > .play-rate { flex: 0 1 auto; }
 .transport-secondary button, .transport-secondary select { min-height: 40px; }
 .transport-secondary button { font-size: .76rem; opacity: .92; }
 .transport-secondary button[aria-pressed="true"] { color: var(--button-ink); background: var(--pb-green-dark); border-color: var(--pb-green-light); }
+.playback-options { position: relative; align-self: center; }
+.playback-options summary { min-height: 40px; display: grid; place-items: center; padding: .35rem .6rem; border: 2px solid var(--border-color); background: var(--bg-primary); cursor: pointer; font-size: .76rem; font-weight: 800; list-style: none; }
+.playback-options summary::-webkit-details-marker { display: none; }
+.playback-options[open] { display: flex; align-items: end; gap: .5rem; flex-wrap: wrap; }
+.playback-options[open] summary { color: var(--button-ink); background: var(--button-bg); }
 .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
 /* The optional 3D viewer has the same paper HUD over a deep court surround. */
@@ -316,9 +322,9 @@ body.three-d-active .park-control, body.three-d-active .court-container-fullscre
   .playback-controls { padding: 0.55rem; }
   .playback-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .playback-buttons button { min-height: 40px; padding: 0.25rem 0.15rem; font-size: 0.7rem; }
-  .three-d-hud { flex-direction: row; padding: 0.45rem; }
+  .three-d-hud { flex-direction: column; align-items: stretch; padding: 0.45rem; }
   .three-d-copy { display: grid; }
-  .three-d-controls { display: flex; }
+  .three-d-controls { display: grid; width: 100%; min-width: 0; }
   .three-d-controls button, .three-d-controls select { min-height: 40px; padding: 0.25rem 0.4rem; font-size: 0.73rem; }
 }
 @media (min-width: 700px) and (max-height: 500px) and (orientation: landscape) {
@@ -326,7 +332,15 @@ body.three-d-active .park-control, body.three-d-active .court-container-fullscre
   body.play-mode .playback-controls { top: .5rem; right: .5rem; bottom: .5rem; left: auto; width: min(320px, calc(100vw - 1rem)); max-height: calc(100dvh - 1rem); overflow-y: auto; transform: none; }
   body.play-mode .playback-copy p { max-width: 28ch; }
   body.play-mode .playback-buttons { gap: .3rem; }
-  body.play-mode .transport-primary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body.play-mode .transport-primary { display: grid; grid-template-columns: 48px minmax(0, 1fr); }
+  body.play-mode .shot-timeline { grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; }
+  body.play-mode .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; }
+  body.play-mode .shot-timeline-identity { grid-column: 1; grid-row: 1; }
+  body.play-mode .shot-timeline-time { grid-column: 2; grid-row: 1; }
+  body.play-mode .shot-timeline-mount,
+  body.play-mode .shot-timeline,
+  body.play-mode .shot-timeline-target,
+  body.play-mode .shot-timeline-range { min-width: 0; }
   body.play-mode .transport-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   body.play-mode .transport-secondary .play-rate { grid-column: span 2; }
 }

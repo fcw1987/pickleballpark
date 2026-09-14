@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180.png">
     <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-152x152.png">
-<link rel="stylesheet" href="builder-ui.css"><link rel="stylesheet" href="builder-integration.css"></head>
+<link rel="stylesheet" href="builder-ui.css"><link rel="stylesheet" href="builder-integration.css"><link rel="stylesheet" href="shot-timeline.css"></head>
 <body>
     <div class="app">
         <main class="court-container-fullscreen">
@@ -110,8 +110,8 @@
                 <span id="playShotCue" class="shot-cue" hidden></span>
             </div>
             <div class="playback-buttons">
-                <div class="transport-primary"><button id="playPrevious" type="button" aria-label="Previous step">Previous</button><button id="playPlayPause" class="transport-play" type="button" aria-pressed="false">Play</button><button id="playNext" type="button" aria-label="Next step">Next</button></div>
-                <div class="transport-secondary"><button id="playRestart" type="button">Restart</button><button id="playLoop" type="button" aria-pressed="false">Loop</button><label class="play-rate">Speed<select id="playRate"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25×</option></select></label><button id="play3dView" type="button">3D View</button><button id="playExit" type="button">Exit</button></div>
+                <div class="transport-primary"><button id="playPlayPause" class="transport-play" type="button" aria-label="Play rally" aria-pressed="false">▶</button><div id="playTimelineMount" class="shot-timeline-mount"></div></div>
+                <div class="transport-secondary"><details class="playback-options"><summary>Playback</summary><label class="play-rate">Speed<select id="playRate"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25×</option></select></label></details><button id="play3dView" type="button">3D View</button><button id="playExit" type="button">Exit</button></div>
             </div>
             <p id="threeDLoadStatus" class="three-d-load-status" role="status" aria-live="polite" hidden></p>
         </section>
@@ -130,8 +130,8 @@
                     <span id="threeDShotCue" class="shot-cue" hidden></span>
                 </div>
                 <div class="three-d-controls">
-                    <div class="transport-primary"><button id="threeDPrevious" type="button">Previous</button><button id="threeDPlayPause" class="transport-play" type="button" aria-pressed="false">Play</button><button id="threeDNext" type="button">Next</button></div>
-                    <div class="transport-secondary"><button id="threeDRestart" type="button">Restart</button><button id="threeDLoop" type="button" aria-pressed="false">Loop</button><label>Camera
+                    <div class="transport-primary"><button id="threeDPlayPause" class="transport-play" type="button" aria-label="Play rally" aria-pressed="false">▶</button><div id="threeDTimelineMount" class="shot-timeline-mount"></div></div>
+                    <div class="transport-secondary"><details class="playback-options"><summary>View</summary><label>Camera
                         <select id="threeDCamera">
                             <option value="overhead">Overhead 3D</option>
                             <option value="sideline">Sideline</option>
@@ -145,7 +145,7 @@
                             <option value="0.5">0.5×</option>
                             <option value="0.25">0.25×</option>
                         </select>
-                    </label>
+                    </label></details>
                     <button id="threeDExit" type="button">Exit 3D</button></div>
                 </div>
             </div>
@@ -233,8 +233,8 @@
                     
                     <section class="info-section">
                         <h3>Plays</h3>
-                        <p>Plays demonstrate common patterns rather than mandatory strategy. Choose one from the menu, then use Previous, Play/Pause, Next, Restart, or Exit to study it.</p>
-                        <p>While a Play is open, choose 3D View for a spatial replay. Use Previous/Next to inspect contacts, switch cameras, use Play/Pause or Restart, choose a playback speed, and Exit 3D to return to the same 2D Play.</p>
+                        <p>Plays demonstrate common patterns rather than mandatory strategy. Choose one from the menu, then use Play/Pause and the shot-marked timeline to study it. Playback repeats until paused.</p>
+                        <p>While a Play is open, choose 3D View for a spatial replay. Seek or choose shot chapters to inspect contacts, switch cameras, choose a playback speed, and Exit 3D to return to the same shared playhead.</p>
                     </section>
 
                     <!-- Court Information -->

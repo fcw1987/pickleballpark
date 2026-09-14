@@ -48,7 +48,7 @@ export class BuilderCourtTools {
         if(this.builder.workspace!=='builder'||event.button>0||this.builder.busy)return;
         if((this.drag&&event.pointerId!==this.drag.pointer)||((this.drag||this.placing)&&['touch','pen'].includes(event.pointerType)&&event.isPrimary===false)){this.abort('Target placement cancelled because another touch was detected.');return;}
         // Hidden targets must never capture an ordinary playback gesture.
-        if(this.builder.session.clock.playing&&!this.placing)return;
+        if(this.builder.session.playing&&!this.placing)return;
         const shot=this.builder.selectedShot;if(!shot)return;const source=this.placement?.start||shot.target,target=this.project(source);
         const near=target&&Math.hypot(event.clientX-target.x,event.clientY-target.y)<25;
         if(!this.placing&&!near)return;
@@ -67,7 +67,7 @@ export class BuilderCourtTools {
         const b=this.builder;if(b.workspace!=='builder'){this.clear();return;}this.bind();
                 this.layer.replaceChildren();const shot=b.selectedShot;if(!shot)return;
         const point=this.project(this.drag?.target || this.placement?.start || shot.target);
-        if(point&&!b.session.clock.playing){const group=element('g');group.append(element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#fff6db','stroke-width':5}),element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#6f365f','stroke-width':3}),element('path',{d:`M${point.x-20} ${point.y}h40 M${point.x} ${point.y-20}v40`,stroke:'#6f365f','stroke-width':2}));const label=element('text',{x:point.x+17,y:point.y-17,fill:'#203449',stroke:'#fff6db','stroke-width':3,'paint-order':'stroke','font-size':13,'font-family':'system-ui','font-weight':700});label.textContent=this.placement?.player?`${Number(this.placement.player.at(-1))<=2?'Green':'Orange'} ${['player1','player3'].includes(this.placement.player)?1:2} pin`:'Target';group.append(label);this.layer.append(group);}
+        if(point&&!b.session.playing){const group=element('g');group.append(element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#fff6db','stroke-width':5}),element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#6f365f','stroke-width':3}),element('path',{d:`M${point.x-20} ${point.y}h40 M${point.x} ${point.y-20}v40`,stroke:'#6f365f','stroke-width':2}));const label=element('text',{x:point.x+17,y:point.y-17,fill:'#203449',stroke:'#fff6db','stroke-width':3,'paint-order':'stroke','font-size':13,'font-family':'system-ui','font-weight':700});label.textContent=this.placement?.player?`${Number(this.placement.player.at(-1))<=2?'Green':'Orange'} ${['player1','player3'].includes(this.placement.player)?1:2} pin`:'Target';group.append(label);this.layer.append(group);}
         for(const annotation of b.document.annotations){
             if(annotation.type!=='path'||typeof annotation.d!=='string')continue;
             const pairs=[...annotation.d.matchAll(/[ML]\s*(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s+(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)/gi)].slice(0,2000);
@@ -76,7 +76,7 @@ export class BuilderCourtTools {
         }
         if(!b.document.assistance.showGuides)return;
         const segment=b.compiled.timeline.segments.find(s=>b.session.clock.elapsed<=s.endTime);
-        const activeId=b.session.clock.playing?segment?.step.id:shot.id;
+        const activeId=b.session.playing?segment?.step.id:shot.id;
         const coverage=b.compiled.coverage?.find(c=>c.shotId===activeId);if(!coverage)return;
         const origin=this.project(coverage.threat);if(!origin)return;
         const positions=Object.values(coverage.positions || {});for(const position of positions){const p=this.project(position);if(!p)continue;this.layer.append(element('path',{d:`M${origin.x} ${origin.y}L${p.x} ${p.y}`,stroke:'#526d86','stroke-width':2,'stroke-dasharray':'5 5',opacity:.65}),element('circle',{cx:p.x,cy:p.y,r:17,fill:'none',stroke:'#526d86','stroke-width':2,'stroke-dasharray':'3 3'}));}

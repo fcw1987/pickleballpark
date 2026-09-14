@@ -7,6 +7,7 @@ import { builderViewBox } from './builder-framing.js';
 import { getWaypointPolicy } from './builder-waypoint-policy.js';
 import { applyCoverageAssistance } from './coverage-assistance.js';
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
+import { buildShotChapters, chapterAtTime, mapSemanticPlayhead } from './shot-chapters.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
 
@@ -40,6 +41,7 @@ export class PlayBuilder {
         window.addEventListener('resize',this.viewportChanged);
         this.board.onCoachingState = () => {if(this.view==='3d'&&!this.busy&&this.workspace==='builder'&&!this.board.threeD?.active){this.view='2d';this.message='3D stopped. Your draft and playhead are safe in 2D; retry 3D when ready.';}this.scheduleRender();};
         this.frame = null;
+        this.chapters = Object.freeze([]);
         this.keyboard=event=>{if(event.key==='Escape'&&this.courtTools.placing){this.courtTools.clear();this.message='Target placement cancelled.';this.render();return;}if(this.workspace==='builder'&&(event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!event.target.closest('input,textarea,select,[contenteditable]')){event.preventDefault();this.action(event.shiftKey?'redo':'undo');}};
         globalThis.document.addEventListener('keydown',this.keyboard);
         this.storageChanged=event=>{if(event.key===STORAGE_KEY){this.libraryDirty=true;this.message='Local drafts changed in another tab. Your current work stays here; saving checks for conflicts.';this.scheduleRender();}};
@@ -70,12 +72,13 @@ export class PlayBuilder {
     render() {
         if(this.libraryDirty){try{this.library=this.store.list();}catch{/* Save status retains recovery information. */}this.libraryDirty=false;}const library=this.library;
         const segment=this.compiled?.timeline?.segments.find(s=>this.session.clock.elapsed<=s.endTime)||this.compiled?.timeline?.segments.at(-1);
+        const currentChapter=chapterAtTime(this.chapters,this.session.clock.elapsed);
         const selectedStep=this.compiled?.timeline?.segments.find(s=>s.step.id===this.selectedShotId)?.step;
-        const cue=this.session.clock.playing?{shotId:segment?.step.id,title:segment?.step.label||'Starting layout',description:segment?.step.description||'Choose your first shot.'}:{shotId:this.selectedShotId,title:selectedStep?.label||'Selected shot',description:this.document.templateSource?selectedStep?.description||'':''};
+        const cue=this.session.playing?{shotId:currentChapter?.shotId,title:segment?.step.label||currentChapter?.label||'Starting layout',description:segment?.step.description||'Choose your first shot.'}:{shotId:this.selectedShotId,title:selectedStep?.label||'Selected shot',description:this.document.templateSource?selectedStep?.description||'':''};
         this.ui.render({cue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
-            playing:this.session.clock.playing, time:this.session.clock.elapsed, duration:this.session.duration,
+            playing:this.session.playing, time:this.session.clock.elapsed, duration:this.session.duration, chapters:this.chapters, currentShotId:currentChapter?.shotId || null,
             view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, library,
-            templates:PICKLEBOARD_PLAYS.map(({id,name})=>({id,name})), loop:this.session.loop, rate:this.session.clock.playbackRate,
+            templates:PICKLEBOARD_PLAYS.map(({id,name})=>({id,name})), loop:true, rate:this.session.clock.playbackRate,
             busy:this.busy, targetPlacement:this.courtTools.placing&&!this.courtTools.placement?.player, movementPlacement:Boolean(this.courtTools.placing&&this.courtTools.placement?.player), message:this.message, canUndo:this.history.canUndo, canRedo:this.history.canRedo,
             camera:this.board.threeD?.cameraPreset || 'overhead'});
         this.fitCourt(); this.courtTools.render();
@@ -107,22 +110,26 @@ export class PlayBuilder {
         this.board.plays.pause();
         if(this.board.threeD?.active) this.board.threeD.startRenderLoop();
     }
-    installPlay(first = false, seconds = 0) {
+    installPlay(first = false, seconds = null) {
+        const previousChapters=this.chapters,previousDuration=this.session.duration,previousTime=this.session.clock.elapsed;
         this.compiled = {...compileDocument(this.document)};
         if(this.compiled.play) {
             const assisted=applyCoverageAssistance(this.compiled.play,this.document,this.compiled.timeline);
             this.compiled=this.document.assistance.autoShading?{...recompileAssistedDocument(this.document,this.compiled,assisted.play,assisted.coverage)}:{...this.compiled,coverage:assisted.coverage};
         }
         const play = this.compiled.play || {id:this.document.id,name:this.document.title,description:'Incomplete draft',mode:'doubles',steps:[{id:'start',label:'Starting layout',description:'Add a shot to preview this draft.',durationMs:0,positions:copy(this.document.initialLayout)}]};
+        const chapters=buildShotChapters(this.compiled.timeline,{shotIds:this.document.shots.slice(0,this.compiled.validShotCount).map(shot=>shot.id)});
+        const mappedSeconds=seconds!=null?Math.max(0,Math.min(this.compiled.timeline.duration,seconds)):first?0:mapSemanticPlayhead(previousChapters,chapters,previousTime,previousDuration,this.compiled.timeline.duration);
         const engine=this.board.plays;
         if(first || !engine.activePlay) {
             engine.loadDefinition(play,this.compiled.timeline);
-        } else engine.replaceDefinition(play,seconds,this.compiled.timeline);
+        } else engine.replaceDefinition(play,mappedSeconds,this.compiled.timeline);
+        this.chapters=chapters;engine.chapters=chapters;
         for(const [player,settings] of Object.entries(this.document.players)) {
             const token=this.board.tokens[player]; if(!token)continue;
             token.handedness=settings.handedness; this.board.renderPlayerArtwork(token);
         }
-        engine.session.seek(seconds); engine.applyAtTime(engine.clock.elapsed);
+        engine.session.seek(mappedSeconds); engine.applyAtTime(engine.clock.elapsed);
         if(this.board.threeD?.scene) this.board.threeD.replaceDefinition(play,engine.timeline);
         this.compiled.timeline=engine.timeline;
         this.courtTools?.render();
@@ -138,9 +145,7 @@ export class PlayBuilder {
         this.history.commit(draft); this.document=this.history.current;
         if(!this.document.shots.some(s=>s.id===this.selectedShotId))this.selectedShotId=this.document.shots[0]?.id || null;
         this.message=review?'Updated. Review later shots if flagged.':'';
-        const index=this.document.shots.findIndex(s=>s.id===this.selectedShotId);
-        this.installPlay(false,0);
-        if(index>=0)this.seek(this.compiled.timeline.segments[index]?.startTime || 0);
+        this.installPlay(false);
         this.save(); this.render();
     }
     cancelPendingView() {
@@ -149,38 +154,40 @@ export class PlayBuilder {
     }
     async switchView(view) {
         if(this.workspace!=='builder')return;
-        if(this.busy&&view==='2d'){this.cancelPendingView();this.pause();this.message='3D loading cancelled. Continue editing in 2D.';this.render();return;}
+        if(this.busy&&view==='2d'){this.cancelPendingView();this.message='3D loading cancelled. Continue in 2D.';this.render();return;}
         if(this.busy||view===this.view)return;
         this.courtTools.clear();
-        const generation=++this.generation, wasPlaying=this.session.clock.playing;
-        this.pause(); const seconds=this.session.clock.elapsed;
+        const generation=++this.generation;
         if(view==='2d') {
-            this.board.threeD?.suspend?.(); this.view='2d'; this.board.plays.applyAtTime(seconds);
+            this.board.threeD?.suspend?.(); this.view='2d'; this.board.plays.applyAtTime(this.session.clock.elapsed);
         } else {
-            this.busy=true; this.message='Opening 3D at the paused playhead…'; this.render();
+            this.busy=true; this.message='Opening 3D at the current playhead…'; this.render();
             const opened=await this.board.threeD.enter();
             if(generation!==this.generation||this.workspace!=='builder')return;
             this.busy=false;
             if(!opened){this.view='2d';this.message='3D is unavailable. Your draft is safe and editable in 2D. You can retry the view toggle.';this.render();return;}
             this.view='3d'; this.message='';this.board.threeD.ballObject.userData.minimumCSSDiameter=12;
-            this.board.threeD.applyAtTime(seconds);
+            this.board.threeD.applyAtTime(this.session.clock.elapsed);
         }
-        if(wasPlaying) this.play(); this.courtTools.bind(); this.render();
+        this.courtTools.bind(); this.render();
     }
     play() {
         this.courtTools.clear();this.message='';
         if(this.waypointPolicy.requiresConfirmation){this.message=this.waypointPolicy.message;this.render();return;}
         if(!this.compiled.validShotCount){this.message='Add or correct the first shot before playback.';this.render();return;}
+        if(this.compiled.validShotCount<this.document.shots.length){this.pause();this.message=`Playback is paused because Shot ${this.compiled.validShotCount+1} is not valid yet. Fix that shot before previewing the rally.`;this.render();return;}
         if(this.view==='3d'&&this.board.threeD.active) {
-            if(!this.session.clock.playing)this.board.threeD.togglePlay();
+            if(!this.session.playing)this.board.threeD.togglePlay();
         } else this.board.plays.play();
     }
-    seek(seconds) {
+    seek(seconds, { preserveIntent = false } = {}) {
         this.courtTools.clear();
         if(this.waypointPolicy.requiresConfirmation&&seconds>0){this.pause();this.message=this.waypointPolicy.message;this.render();return;}
-        this.pause(); this.session.seek(seconds);
+        if(!preserveIntent)this.pause();
+        this.session.seek(seconds,{preserveIntent});
         this.board.plays.applyAtTime(this.session.clock.elapsed);
         if(this.board.threeD?.scene) {this.board.threeD.applyAtTime(this.session.clock.elapsed);this.board.threeD.startRenderLoop();}
+        if(preserveIntent)this.board.plays.continuePlayback();
         this.render();
     }
     async setWorkspace(workspace) {
@@ -202,7 +209,7 @@ export class PlayBuilder {
     loadDocument(value) {
         this.cancelPendingView(); this.pause(); validateDocument(value);
         this.document=copy(value); this.history=new EditHistory(this.document); this.selectedShotId=this.document.shots[0]?.id || null;
-        this.installPlay(false); this.save(); this.render();
+        this.installPlay(false,0); this.save(); this.render();
     }
     async action(action,value) {
         try {
@@ -214,9 +221,22 @@ export class PlayBuilder {
             if(action==='view')return await this.switchView(value);
             if(action==='workspace')return await this.setWorkspace(value);
             if(action==='help'){this.courtTools.clear();this.pause();const trigger=this.ui.element.querySelector('.builder-menu summary');trigger?.focus({preventScroll:true});this.board.openInfoModal({returnFocus:trigger});return;}
-            if(action==='playPause'){const playing=typeof value?.playing==='boolean'?value.playing:!this.session.clock.playing;if(playing)this.play();else this.pause();}
+            if(action==='playPause'){const playing=typeof value?.playing==='boolean'?value.playing:!this.session.playing;if(playing)this.play();else this.pause();}
             else if(action==='restart')this.seek(0);
-            else if(action==='seek')this.seek(Number(value));
+            else if(action==='seek'){
+                const time=Number(value);
+                if(this.waypointPolicy.requiresConfirmation&&time>0){this.pause();this.message=this.waypointPolicy.message;}
+                else if(this.compiled.validShotCount<this.document.shots.length&&time>0){this.pause();this.message=`Shot ${this.compiled.validShotCount+1} must be corrected before timeline preview.`;}
+                else this.board.plays.timelineAction('seek',time);
+            }
+            else if(['scrubBegin','scrubSeek','scrubEnd','scrubCancel','chapter'].includes(action)){
+                const chapter=action==='chapter'?this.chapters.find(item=>item.shotId===value):null;
+                const blocked=action!=='scrubCancel'&&(this.waypointPolicy.requiresConfirmation||this.compiled.validShotCount<this.document.shots.length);
+                if(blocked){this.pause();this.message=this.waypointPolicy.requiresConfirmation?this.waypointPolicy.message:`Shot ${this.compiled.validShotCount+1} must be corrected before timeline preview.`;}
+                else if(action==='chapter'&&!chapter){this.pause();this.message='That authored shot has no valid timeline destination yet. Open it in Edit to correct it.';}
+                else this.board.plays.timelineAction(action,value);
+            }
+            else if(action==='pauseForEditing')this.pause();
             else if(action==='rate')this.board.plays.setPlaybackRate(Number(value));
             else if(action==='loop')this.board.plays.setLoop(Boolean(value));
             else if(action==='camera'){this.courtTools.clear();this.board.threeD?.setCamera?.(value);}
