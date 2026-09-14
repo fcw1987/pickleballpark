@@ -34,7 +34,7 @@ const mark = async (name, details = {}) => {
   }));
   events.push({ atMs: Date.now() - started, name, ...details, state });
 };
-const hold = milliseconds => page.waitForTimeout(milliseconds);
+const hold = (milliseconds = 650) => page.waitForTimeout(milliseconds);
 const mainMenu = async () => {
   const menu = page.locator('.builder-main-menu');
   if (!(await menu.evaluate(node => node.open))) await menu.locator('summary').click();
@@ -102,12 +102,12 @@ try {
 
   const coachTools = page.getByText('Coach tools', { exact: true });
   if (!(await coachTools.locator('..').evaluate(node => node.open))) await coachTools.click();
-  await page.getByRole('checkbox', { name: 'Coverage Guides', exact: true }).check({ force: true, noWaitAfter: true });
+  await page.getByRole('checkbox', { name: 'Coverage Guides', exact: true }).evaluate(node => node.click());
   await expect.poll(() => page.evaluate(() => playBuilder.document.assistance)).toMatchObject({ autoShading: false, showGuides: true });
   await mark('coverage guides enabled independently');
   await openEditor();
   if (!(await coachTools.locator('..').evaluate(node => node.open))) await coachTools.click();
-  await page.getByRole('checkbox', { name: 'Auto Shading', exact: true }).check({ force: true, noWaitAfter: true });
+  await page.getByRole('checkbox', { name: 'Auto Shading', exact: true }).evaluate(node => node.click());
   await expect.poll(() => page.evaluate(() => playBuilder.document.assistance)).toMatchObject({ autoShading: true, showGuides: true });
   await mark('auto shading enabled without changing guides');
   await hold();
