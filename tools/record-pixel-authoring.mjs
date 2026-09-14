@@ -39,7 +39,7 @@ const mainMenu = async () => {
   if (!(await menu.evaluate(node => node.open))) await menu.locator('summary').click();
 };
 const openEditor = async () => {
-  const inspector = page.getByRole('region', { name: 'Selected shot settings' });
+  const inspector = page.locator('.builder-inspector');
   if (await inspector.evaluate(node => node.classList.contains('builder-inspector-collapsed'))) {
     await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();
   }
@@ -61,7 +61,7 @@ try {
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.evaluate(async () => { if (playBuilder.view !== '2d') await playBuilder.switchView('2d'); });
-  await expect(page.getByRole('button', { name: 'Play rally' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
   await mark('fresh synthetic draft opens paused');
   await hold();
 
@@ -114,8 +114,11 @@ try {
   await hold();
 
   const beforeUndo = await page.evaluate(() => JSON.stringify(playBuilder.document.assistance));
+  const playbackOptions = page.locator('.builder-context-menu').filter({ has: page.getByText('Playback options', { exact: true }) });
+  if (!(await playbackOptions.evaluate(node => node.open))) await playbackOptions.locator('summary').click();
   await page.getByRole('button', { name: 'Undo authored edit' }).click();
   await mark('undo');
+  if (!(await playbackOptions.evaluate(node => node.open))) await playbackOptions.locator('summary').click();
   await page.getByRole('button', { name: 'Redo authored edit' }).click();
   expect(await page.evaluate(() => JSON.stringify(playBuilder.document.assistance))).toBe(beforeUndo);
   await mark('redo');
@@ -137,7 +140,7 @@ try {
   await page.getByRole('button', { name: '2D', exact: true }).click();
   await page.waitForFunction(() => playBuilder.view === '2d' && !playBuilder.busy);
   await mark('continued saved work in 2D');
-  await page.getByRole('button', { name: 'Play rally' }).click();
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.session.clock.elapsed)).toBeGreaterThan(.2);
   await mark('play started from current position');
   await hold(1000);
@@ -153,7 +156,7 @@ try {
   expect(await page.evaluate(() => playBuilder.session.clock.elapsed)).toBeGreaterThan(beforeView);
   await mark('returned to 2D and continued');
   await hold(700);
-  await page.getByRole('button', { name: 'Pause rally' }).click();
+  await page.getByRole('button', { name: 'Pause', exact: true }).click();
   await mark('paused after continuing saved work');
   await page.screenshot({ path: join(output, screenshotName), animations: 'disabled' });
 
