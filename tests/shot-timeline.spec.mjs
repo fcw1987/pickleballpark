@@ -14,7 +14,9 @@ async function mount(page, extra = {}) {
     window.timelineActions = [];
     window.timeline = mountShotTimeline({ onAction: (type, payload) => window.timelineActions.push({ type, payload }) });
     document.querySelector('#fixture').append(window.timeline.element);
-    window.timeline.update({ chapters: chapterList, time: 0, duration: 10, playing: false, busy: false, ...extraState });
+    const initialState = { chapters: chapterList, time: 0, duration: 10, playing: false, busy: false, ...extraState };
+    window.timelineChapters = initialState.chapters;
+    window.timeline.update(initialState);
   }, { chapters, extraState: extra });
 }
 
@@ -50,6 +52,38 @@ test('standard range keys seek exact endpoints without a transport stepping acti
   await expect(page.locator('button')).toHaveCount(0);
 });
 
+test('fractional compiled endpoints remain exact and arrow keys remain native', async ({ page }) => {
+  const duration = 6.295528;
+  await mount(page, { time: 4, duration, chapters: chapters.slice(0, 2) });
+  const control = page.getByRole('slider', { name: 'Rally timeline' });
+  await expect(control).toHaveAttribute('step', 'any');
+  await control.focus();
+  await control.press('End');
+  expect(await control.inputValue()).toBe(String(duration));
+  expect(await page.evaluate(() => window.timelineActions.at(-1))).toEqual({ type: 'seek', payload: duration });
+  await control.press('Home');
+  await control.press('ArrowRight');
+  expect(Number(await control.inputValue())).toBeGreaterThan(0);
+});
+
+test('stable chapter data does not rebuild markers per animation frame', async ({ page }) => {
+  await mount(page, { time: 1 });
+  const mutations = await page.evaluate(() => new Promise(resolve => {
+    const markerLayer = document.querySelector('.shot-timeline-markers');
+    let childMutations = 0;
+    const observer = new MutationObserver(records => { childMutations += records.filter(record => record.type === 'childList').length; });
+    observer.observe(markerLayer, { childList: true });
+    for (let frame = 0; frame < 50; frame += 1) {
+      window.timeline.update({ chapters: window.timelineChapters, time: frame / 10, duration: 10, playing: true, busy: false });
+    }
+    requestAnimationFrame(() => { observer.disconnect(); resolve(childMutations); });
+  }));
+  expect(mutations).toBe(0);
+
+  await page.evaluate(() => window.timeline.update({ chapters: window.timelineChapters, time: 2.2, duration: 20, playing: false, busy: false }));
+  expect(await page.locator('.shot-timeline-marker').nth(1).evaluate(node => node.style.getPropertyValue('--shot-marker-position'))).toBe('0.11000000000000001');
+});
+
 test('a real track tap seeks through the pointer operation and stays scoped to the control', async ({ page }) => {
   await mount(page, { time: 0 });
   const box = await page.getByRole('slider').boundingBox();
@@ -79,11 +113,11 @@ test('a real track tap seeks through the pointer operation and stays scoped to t
 test('a pointer scrub keeps one operation identity and ignores stale frame updates', async ({ page }) => {
   await mount(page, { time: 2, playing: true });
   await syntheticBegin(page, 72);
-  await page.locator('.shot-timeline-range').evaluate((input, chapterList) => {
+  await page.locator('.shot-timeline-range').evaluate(input => {
     input.value = '8.25';
     input.dispatchEvent(new Event('input', { bubbles: true }));
-    window.timeline.update({ chapters: chapterList, time: 3, duration: 10, playing: true, busy: false });
-  }, chapters);
+    window.timeline.update({ chapters: window.timelineChapters, time: 3, duration: 10, playing: true, busy: false });
+  });
   await expect(page.getByRole('slider')).toHaveValue('8.25');
   await page.locator('.shot-timeline-range').evaluate(input => {
     input.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 72, pointerType: 'touch', isPrimary: true }));
@@ -99,7 +133,7 @@ test('a pointer scrub keeps one operation identity and ignores stale frame updat
 test('an explicit paused update during a scrub remains paused when released', async ({ page }) => {
   await mount(page, { time: 3, playing: true });
   await syntheticBegin(page, 73);
-  await page.evaluate(chapterList => window.timeline.update({ chapters: chapterList, time: 3, duration: 10, playing: false, busy: false }), chapters);
+  await page.evaluate(() => window.timeline.update({ chapters: window.timelineChapters, time: 3, duration: 10, playing: false, busy: false }));
   await expect(page.locator('.shot-timeline')).toHaveAttribute('data-playing', 'false');
   await page.locator('.shot-timeline-range').evaluate(input => {
     input.value = '6';

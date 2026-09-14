@@ -78,7 +78,9 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   input.type = 'range';
   input.min = '0';
   input.max = '0';
-  input.step = '0.01';
+  // The compiled endpoint can be fractional. `any` keeps End and direct seeks
+  // exact instead of snapping them to a display-oriented decimal interval.
+  input.step = 'any';
   input.value = '0';
   input.setAttribute('aria-label', 'Rally timeline');
   input.setAttribute('aria-valuetext', 'Rally, 0.0 seconds of 0.0 seconds');
@@ -95,7 +97,8 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   let operation = null;
   let operationSequence = 0;
   let destroyed = false;
-  let chapterSignature = '';
+  let chapterSource = null;
+  let chapterDuration = NaN;
 
   const emit = (type, payload) => {
     if (destroyed) return;
@@ -125,9 +128,6 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   };
 
   const renderMarkers = () => {
-    const signature = state.chapters.map(chapter => `${chapter.shotId}:${chapter.anchor}:${chapter.number}:${chapter.label}`).join('|');
-    if (signature === chapterSignature) return;
-    chapterSignature = signature;
     markers.replaceChildren(...state.chapters.map(chapter => {
       const marker = document.createElement('i');
       marker.className = 'shot-timeline-marker';
@@ -146,6 +146,9 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     if (!operation) return;
     const cancelled = operation;
     clearOperation();
+    try {
+      if (input.hasPointerCapture(cancelled.pointerId)) input.releasePointerCapture(cancelled.pointerId);
+    } catch {}
     emit('scrubCancel', { id: cancelled.id });
   };
 
@@ -225,11 +228,16 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   const update = nextState => {
     if (destroyed) return;
     const nextDuration = Math.max(0, finite(nextState?.duration));
-    const nextChapters = normalizeChapters(nextState?.chapters, nextDuration);
-    const nextChapterSignature = nextChapters.map(chapter => `${chapter.shotId}:${chapter.anchor}:${chapter.number}:${chapter.label}`).join('|');
-    if (operation && (nextDuration !== state.duration || nextChapterSignature !== chapterSignature)) cancelOperation();
+    const nextChapterSource = Array.isArray(nextState?.chapters) ? nextState.chapters : [];
+    const chaptersChanged = nextChapterSource !== chapterSource || nextDuration !== chapterDuration;
+    if (operation && chaptersChanged) cancelOperation();
+    if (chaptersChanged) {
+      state.chapters = normalizeChapters(nextChapterSource, nextDuration);
+      chapterSource = nextChapterSource;
+      chapterDuration = nextDuration;
+    }
     state = {
-      chapters: nextChapters,
+      chapters: state.chapters,
       time: clamp(finite(nextState?.time), 0, nextDuration),
       duration: nextDuration,
       playing: Boolean(nextState?.playing),
@@ -243,7 +251,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     input.setAttribute('aria-busy', String(state.busy));
     root.dataset.playing = String(state.playing);
     root.dataset.busy = String(state.busy);
-    renderMarkers();
+    if (chaptersChanged) renderMarkers();
     if (!operation) renderValue(state.time, state.currentShotId);
   };
 
