@@ -115,6 +115,57 @@ test('a rejected newer Import keeps the current source and cancels an older pend
   expect(result.olderResult).toMatchObject({ ok: false });
 });
 
+test('a pending Use Planner cannot rewrite a play opened during 3D restoration', async ({ page }) => {
+  await start(page);
+  const ids = await savedPair(page);
+  await page.evaluate(() => {
+    playBuilder.board.updateTokenPosition(playBuilder.board.tokens.player1, 8.75, 19.5);
+    playBuilder.ui.confirmPlanner = async () => true;
+  });
+  await gateBuilderRestore(page);
+
+  const result = await page.evaluate(async ({ a }) => {
+    const plannerAction = playBuilder.action('usePlanner');
+    await window.__qaRestoreGate.enteredGate;
+    const opened = await playBuilder.action('open', a);
+    const afterOpen = structuredClone(playBuilder.document);
+    window.__qaRestoreGate.release();
+    const plannerResult = await plannerAction;
+    return {
+      opened,
+      plannerResult,
+      afterOpen,
+      final: structuredClone(playBuilder.document)
+    };
+  }, ids);
+
+  expect(result.opened).toMatchObject({ ok: true });
+  expect(result.final).toEqual(result.afterOpen);
+  expect(result.plannerResult).toMatchObject({ ok: false });
+});
+
+test('two never-saved starter tabs cannot silently overwrite the same draft identity', async ({ context, page }) => {
+  await start(page);
+  const other = await context.newPage();
+  await other.goto('/index.html?qa-persistence=fresh-second-tab');
+  await other.waitForFunction(() => window.playBuilder && !window.playBuilder.busy);
+
+  const initialIds = await Promise.all([
+    page.evaluate(() => playBuilder.document.id),
+    other.evaluate(() => playBuilder.document.id)
+  ]);
+  await page.evaluate(() => playBuilder.action('title', 'Fresh tab first version'));
+  await other.evaluate(() => playBuilder.action('title', 'Fresh tab second version'));
+  const conflict = await other.evaluate(() => Boolean(playBuilder.saveError?.conflict));
+  if (conflict) await other.evaluate(() => playBuilder.action('saveAs'));
+
+  const library = await page.evaluate(() => playBuilder.store.list());
+  expect(library.map(item => item.title)).toContain('Fresh tab first version');
+  expect(library.some(item => item.title.startsWith('Fresh tab second version'))).toBe(true);
+  expect(new Set(library.map(item => item.id)).size).toBeGreaterThanOrEqual(2);
+  expect(initialIds[0] !== initialIds[1] || conflict).toBe(true);
+});
+
 test('bounded random source edits, undo, and redo agree with a snapshot model', async ({ page }) => {
   await start(page);
 
@@ -365,33 +416,3 @@ test('out-of-order and dialog-closed file reads cannot replace newer import text
   await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
   await expect(page.getByLabel('JSON backup')).toHaveValue('');
 });
-
-test('a pending Use Planner cannot rewrite a play opened during 3D restoration', async ({ page }) => {
-  await start(page);
-  const ids = await savedPair(page);
-  await page.evaluate(() => {
-    playBuilder.board.updateTokenPosition(playBuilder.board.tokens.player1, 8.75, 19.5);
-    playBuilder.ui.confirmPlanner = async () => true;
-  });
-  await gateBuilderRestore(page);
-
-  const result = await page.evaluate(async ({ a }) => {
-    const plannerAction = playBuilder.action('usePlanner');
-    await window.__qaRestoreGate.enteredGate;
-    const opened = await playBuilder.action('open', a);
-    const afterOpen = structuredClone(playBuilder.document);
-    window.__qaRestoreGate.release();
-    const plannerResult = await plannerAction;
-    return {
-      opened,
-      plannerResult,
-      afterOpen,
-      final: structuredClone(playBuilder.document)
-    };
-  }, ids);
-
-  expect(result.opened).toMatchObject({ ok: true });
-  expect(result.final).toEqual(result.afterOpen);
-  expect(result.plannerResult).toMatchObject({ ok: false });
-});
-
