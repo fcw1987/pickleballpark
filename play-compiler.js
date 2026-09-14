@@ -134,7 +134,7 @@ function validateRecipeIntent(document, recipe, index, priorRecipe, contact) {
   const findings = [];
   const team = document.players[recipe.hitter].team;
   if (index === 0 && document.opening === 'serve' && recipe.family !== 'serve') findings.push(finding('rule', 'error', recipe.id, 'A standard full-rally draft must begin with a serve.'));
-  if (index > 0 && recipe.family === 'serve') findings.push(finding('rule', 'error', recipe.id, 'A serve can only begin a standard rally.'));
+  if (recipe.family === 'serve' && (index > 0 || document.opening === 'midrally')) findings.push(finding('rule', 'error', recipe.id, 'A serve can only begin a standard full-rally draft.'));
   if (priorRecipe && document.players[priorRecipe.hitter].team === team) findings.push(finding('rule', 'error', recipe.id, 'Consecutive contacts must alternate between teams.'));
   if (priorRecipe && priorRecipe.receiver !== 'auto' && priorRecipe.receiver !== recipe.hitter) findings.push(finding('rule', 'error', recipe.id, `The preceding shot names ${priorRecipe.receiver} as receiver, but ${recipe.hitter} is authored to strike.`));
   if (recipe.receiver !== 'auto' && document.players[recipe.receiver].team !== oppositeTeam(team)) findings.push(finding('rule', 'error', recipe.id, 'The intended receiver must be on the opposing team.'));

@@ -129,6 +129,31 @@ test('opening sequence protects the two-bounce rule and treats the kitchen line 
   assert.equal(returnFault.play.steps[1].shot.flight.bounces, 1);
 });
 
+test('serve intent is accepted only as the first shot of a full-rally opening', () => {
+  const fullRally = createStarterDocument();
+  assert.equal(compileDocument(fullRally).validShotCount, 3);
+
+  const midrally = createStarterDocument();
+  midrally.opening = 'midrally';
+  midrally.shots = [midrally.shots[0]];
+  const firstServe = compileDocument(midrally);
+  assert.equal(firstServe.validShotCount, 0);
+  assert.match(firstServe.findings[0].message, /only begin a standard full-rally draft/);
+
+  for (const opening of ['serve', 'midrally']) {
+    const late = createStarterDocument();
+    late.opening = opening;
+    if (opening === 'midrally') {
+      late.shots.shift();
+      late.initialLayout.ball = { x: 5, y: 42 };
+    }
+    late.shots[1] = { ...late.shots[1], family: 'serve', serveMethod: 'volley' };
+    const result = compileDocument(late);
+    assert.equal(result.validShotCount, 1, opening);
+    assert.match(result.findings.find(item => item.shotId === late.shots[1].id).message, /only begin a standard full-rally draft/);
+  }
+});
+
 test('drop serves include a distinct preparatory bounce before contact and the legal rally bounce', () => {
   const document = createStarterDocument();
   document.shots[0].serveMethod = 'drop';
