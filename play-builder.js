@@ -313,9 +313,12 @@ export class PlayBuilder {
             }
             else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleballpark-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
             else if(action==='usePlanner') {
+                const plannerIntent=++this.sourceIntent;
                 this.pause();
                 if(!await this.ui.confirmPlanner())return;
+                if(plannerIntent!==this.sourceIntent)return {ok:false,error:'A newer edit or play choice was kept.'};
                 const state=this.workspace==='planner'?this.board.captureBoardState():this.plannerSnapshot;await this.setWorkspace('builder');
+                if(plannerIntent!==this.sourceIntent)return {ok:false,error:'A newer edit or play choice was kept.'};
                 this.edit(doc=>{doc.initialLayout=copy(state.positions);for(const [key,handedness]of Object.entries(state.handedness))doc.players[key].handedness=handedness;doc.annotations=state.drawings.map(d=>({type:'path',d}));});
             }
             this.render();return {ok:true};
