@@ -1,0 +1,303 @@
+{
+  "decoder": "Chromium HTMLVideoElement + requestVideoFrameCallback",
+  "results": [
+    {
+      "recording": "normal",
+      "source": "normal-speed-playback.webm",
+      "metadata": {
+        "duration": 22.16,
+        "width": 402,
+        "height": 874,
+        "seekable": [
+          [
+            0,
+            0
+          ]
+        ],
+        "canPlayWebm": "maybe",
+        "readyState": 4
+      },
+      "samples": [
+        {
+          "label": "launch-paused",
+          "file": "normal-01-launch-paused.png",
+          "requestedTime": 1.05,
+          "currentTime": 1.067305,
+          "mediaTime": 1.08,
+          "presentedFrames": 28,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "play-start",
+          "file": "normal-02-play-start.png",
+          "requestedTime": 2.55,
+          "currentTime": 2.534426,
+          "mediaTime": 2.56,
+          "presentedFrames": 65,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "first-rally",
+          "file": "normal-03-first-rally.png",
+          "requestedTime": 4.2,
+          "currentTime": 4.177446,
+          "mediaTime": 4.2,
+          "presentedFrames": 106,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "repeat-one",
+          "file": "normal-04-repeat-one.png",
+          "requestedTime": 7.2,
+          "currentTime": 7.176895,
+          "mediaTime": 7.2,
+          "presentedFrames": 181,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "repeat-two",
+          "file": "normal-05-repeat-two.png",
+          "requestedTime": 10.15,
+          "currentTime": 10.134381,
+          "mediaTime": 10.16,
+          "presentedFrames": 255,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "wrap-after-two",
+          "file": "normal-06-wrap-after-two.png",
+          "requestedTime": 11.78,
+          "currentTime": 11.782738,
+          "mediaTime": 11.8,
+          "presentedFrames": 296,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "paused-flight",
+          "file": "normal-07-paused-flight.png",
+          "requestedTime": 12.62,
+          "currentTime": 12.615172,
+          "mediaTime": 12.64,
+          "presentedFrames": 317,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "resumed-flight",
+          "file": "normal-08-resumed-flight.png",
+          "requestedTime": 14.35,
+          "currentTime": 14.339378,
+          "mediaTime": 14.36,
+          "presentedFrames": 360,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "scrub",
+          "file": "normal-09-scrub.png",
+          "requestedTime": 15.22,
+          "currentTime": 15.21389,
+          "mediaTime": 15.24,
+          "presentedFrames": 382,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "chapter-two",
+          "file": "normal-10-chapter-two.png",
+          "requestedTime": 16.42,
+          "currentTime": 16.413639,
+          "mediaTime": 16.44,
+          "presentedFrames": 412,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "view-2d",
+          "file": "normal-11-view-2d.png",
+          "requestedTime": 17.35,
+          "currentTime": 17.338159,
+          "mediaTime": 17.36,
+          "presentedFrames": 435,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "view-3d",
+          "file": "normal-12-view-3d.png",
+          "requestedTime": 19.2,
+          "currentTime": 19.177487,
+          "mediaTime": 19.2,
+          "presentedFrames": 481,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "final-pause",
+          "file": "normal-13-final-pause.png",
+          "requestedTime": 21.4,
+          "currentTime": 21.379735,
+          "mediaTime": 21.4,
+          "presentedFrames": 536,
+          "width": 402,
+          "height": 874
+        }
+      ]
+    },
+    {
+      "recording": "authoring",
+      "source": "phone-authoring.webm",
+      "metadata": {
+        "duration": 12.48,
+        "width": 402,
+        "height": 874,
+        "seekable": [
+          [
+            0,
+            0
+          ]
+        ],
+        "canPlayWebm": "maybe",
+        "readyState": 1
+      },
+      "samples": [
+        {
+          "label": "fresh-paused",
+          "file": "authoring-01-fresh-paused.png",
+          "requestedTime": 1.1,
+          "currentTime": 1.103493,
+          "mediaTime": 1.12,
+          "presentedFrames": 29,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "serve-target",
+          "file": "authoring-02-serve-target.png",
+          "requestedTime": 1.85,
+          "currentTime": 1.854577,
+          "mediaTime": 1.88,
+          "presentedFrames": 48,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "return-adjustment",
+          "file": "authoring-03-return-adjustment.png",
+          "requestedTime": 2.6,
+          "currentTime": 2.574989,
+          "mediaTime": 2.6,
+          "presentedFrames": 66,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "third-shot",
+          "file": "authoring-04-third-shot.png",
+          "requestedTime": 3.3,
+          "currentTime": 3.298752,
+          "mediaTime": 3.32,
+          "presentedFrames": 84,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "response-added",
+          "file": "authoring-05-response-added.png",
+          "requestedTime": 4,
+          "currentTime": 3.975054,
+          "mediaTime": 4,
+          "presentedFrames": 101,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "partner-pin",
+          "file": "authoring-06-partner-pin.png",
+          "requestedTime": 4.75,
+          "currentTime": 4.734036,
+          "mediaTime": 4.76,
+          "presentedFrames": 120,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "coach-tools",
+          "file": "authoring-07-coach-tools.png",
+          "requestedTime": 5.45,
+          "currentTime": 5.453969,
+          "mediaTime": 5.48,
+          "presentedFrames": 138,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "undo-redo",
+          "file": "authoring-08-undo-redo.png",
+          "requestedTime": 6.2,
+          "currentTime": 6.179788,
+          "mediaTime": 6.2,
+          "presentedFrames": 156,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "save",
+          "file": "authoring-09-save.png",
+          "requestedTime": 6.92,
+          "currentTime": 6.897253,
+          "mediaTime": 6.92,
+          "presentedFrames": 174,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "play-2d",
+          "file": "authoring-10-play-2d.png",
+          "requestedTime": 8.82,
+          "currentTime": 8.813491,
+          "mediaTime": 8.84,
+          "presentedFrames": 222,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "play-3d",
+          "file": "authoring-11-play-3d.png",
+          "requestedTime": 10.12,
+          "currentTime": 10.09864,
+          "mediaTime": 10.12,
+          "presentedFrames": 254,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "return-2d",
+          "file": "authoring-12-return-2d.png",
+          "requestedTime": 11.02,
+          "currentTime": 11.018918,
+          "mediaTime": 11.04,
+          "presentedFrames": 277,
+          "width": 402,
+          "height": 874
+        },
+        {
+          "label": "final-pause",
+          "file": "authoring-13-final-pause.png",
+          "requestedTime": 12.35,
+          "currentTime": 12.339839,
+          "mediaTime": 12.36,
+          "presentedFrames": 310,
+          "width": 402,
+          "height": 874
+        }
+      ]
+    }
+  ]
+}
