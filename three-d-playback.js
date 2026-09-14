@@ -595,7 +595,8 @@ class ThreeDPlaybackViewer {
         const cueStep=this.timeline.segments.find(s=>s.rallyLeg===this.lastState?.rallyLeg)?.step;
         updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:true,reducedMotion:this.board.plays.reducedMotion.matches});
         this.elements.rate.value=String(this.clock.playbackRate);
-        this.elements.playPause.textContent = this.session.playing ? 'Ⅱ' : '▶';
+        const playPauseText = this.session.playing ? 'Ⅱ' : '▶';
+        if (this.elements.playPause.textContent !== playPauseText) this.elements.playPause.textContent = playPauseText;
         this.elements.playPause.setAttribute('aria-label', this.session.playing ? 'Pause rally' : 'Play rally');
         this.elements.playPause.setAttribute('aria-pressed', String(this.session.playing));
         if (!this.session.playing && this.clock.elapsed === 0) this.elements.status.textContent = 'Ready';

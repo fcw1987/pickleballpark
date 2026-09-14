@@ -158,11 +158,25 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       root.querySelectorAll('[data-action="chapter"]').forEach(chapter => chapter.setAttribute('aria-current', String(Boolean(liveChapterId && chapter.dataset.shotId === liveChapterId))));
       const save = root.querySelector('.builder-save-status'); if (save) save.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft';
       const message = root.querySelector('.builder-message'); if (message) message.textContent = current.message || '';
-      const cueNode = root.querySelector('.builder-cue'); const fastCue = current.cue; if (cueNode && fastCue) { const summary = cueNode.querySelector('.builder-chapter-menu > summary'); if (summary) summary.textContent = fastCue.title || 'Current shot'; }
-      const play = root.querySelector('[data-action="play-pause"]'); if (play) { play.replaceChildren(el('span', 'pixel-play-icon', current.playing ? 'Ⅱ' : '▶'), el('span', 'pixel-play-label', current.playing ? 'Pause' : 'Play')); play.setAttribute('aria-pressed', String(Boolean(current.playing))); play.setAttribute('aria-label', current.playing ? 'Pause' : 'Play'); }
+      const cueNode = root.querySelector('.builder-cue'); const fastCue = current.cue; if (cueNode && fastCue) { const summary = cueNode.querySelector('.builder-chapter-menu > summary'),summaryText=fastCue.title||'Current shot'; if (summary&&summary.textContent!==summaryText) summary.textContent=summaryText; }
+      const play = root.querySelector('[data-action="play-pause"]'); if (play) {
+        const icon=play.querySelector('.pixel-play-icon'),label=play.querySelector('.pixel-play-label');
+        const iconText=current.playing?'Ⅱ':'▶',labelText=current.playing?'Pause':'Play';
+        if(icon&&label){if(icon.textContent!==iconText)icon.textContent=iconText;if(label.textContent!==labelText)label.textContent=labelText;}
+        else play.replaceChildren(el('span','pixel-play-icon',iconText),el('span','pixel-play-label',labelText));
+        play.setAttribute('aria-pressed', String(Boolean(current.playing))); play.setAttribute('aria-label', labelText);
+      }
       root.classList.toggle('builder-busy', Boolean(current.busy));
       root.querySelector('.builder-context-actions [data-action="collapse-inspector"]')?.setAttribute('aria-expanded', String(current.workspace === 'planner' || inspectorManualCollapsed === false));
-      const inspector = root.querySelector('.builder-inspector'); const collapsed = current.workspace==='planner'?false:Boolean(inspectorManualCollapsed ?? true); if (inspector) inspector.classList.toggle('builder-inspector-collapsed', collapsed); const collapseButton = root.querySelector('.builder-inspector [data-action="collapse-inspector"],.builder-inspector [data-action="cancel-target"],.builder-inspector [data-action="cancel-movement"]'); if (collapseButton) { const placement = current.targetPlacement ? 'target' : current.movementPlacement ? 'movement' : ''; if (placement === 'target' || placement === 'movement' || collapsed) collapseButton.textContent = placement === 'target' ? 'Cancel target' : placement === 'movement' ? 'Cancel movement' : 'Edit shot'; else collapseButton.replaceChildren(el('span', 'builder-collapse-label-collapse', 'Collapse'), el('span', 'builder-collapse-label-done', 'Done')); collapseButton.dataset.action=placement==='target'?'cancel-target':placement==='movement'?'cancel-movement':'collapse-inspector'; collapseButton.setAttribute('aria-label', placement === 'target' ? 'Cancel target' : placement === 'movement' ? 'Cancel movement' : collapsed ? 'Edit shot' : (innerWidth<=700?'Done':'Collapse')); collapseButton.setAttribute('aria-expanded', String(!collapsed)); }
+      const inspector = root.querySelector('.builder-inspector'); const collapsed = current.workspace==='planner'?false:Boolean(inspectorManualCollapsed ?? true); if (inspector) inspector.classList.toggle('builder-inspector-collapsed', collapsed); const collapseButton = root.querySelector('.builder-inspector [data-action="collapse-inspector"],.builder-inspector [data-action="cancel-target"],.builder-inspector [data-action="cancel-movement"]'); if (collapseButton) {
+        const placement = current.targetPlacement ? 'target' : current.movementPlacement ? 'movement' : '';
+        if (placement === 'target' || placement === 'movement' || collapsed) {
+          const collapseText=placement==='target'?'Cancel target':placement==='movement'?'Cancel movement':'Edit shot';
+          if(collapseButton.textContent!==collapseText||collapseButton.childElementCount)collapseButton.textContent=collapseText;
+        } else if(!collapseButton.querySelector('.builder-collapse-label-collapse')||!collapseButton.querySelector('.builder-collapse-label-done'))
+          collapseButton.replaceChildren(el('span','builder-collapse-label-collapse','Collapse'),el('span','builder-collapse-label-done','Done'));
+        collapseButton.dataset.action=placement==='target'?'cancel-target':placement==='movement'?'cancel-movement':'collapse-inspector'; collapseButton.setAttribute('aria-label', placement === 'target' ? 'Cancel target' : placement === 'movement' ? 'Cancel movement' : collapsed ? 'Edit shot' : (innerWidth<=700?'Done':'Collapse')); collapseButton.setAttribute('aria-expanded', String(!collapsed));
+      }
       return;
     }
     renderedDocument = doc; renderedSelectedShotId = current.selectedShotId; renderedView = current.view; renderedWorkspace = current.workspace; renderedWaypointKey = waypointKey; renderedSaveErrorKey = saveErrorKey;
