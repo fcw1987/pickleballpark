@@ -15,7 +15,7 @@ export class PlayBuilder {
     constructor(board) {
         this.board = board; this.view = '2d'; this.workspace = 'builder';
         this.board.courtFirstComposition = true;
-        this.busy = false; this.generation = 0; this.message = ''; this.saveStatus = 'Starter draft · not saved yet';
+        this.busy = false; this.generation = 0; this.sourceIntent = 0; this.message = ''; this.saveStatus = 'Starter draft · not saved yet';
         try { this.store = new DraftStore({ validate: validateDocument }); }
         catch { this.store = new DraftStore({validate:validateDocument,storage:{getItem:()=>null,setItem:()=>{throw Error('Browser storage is unavailable');}}}); this.saveStatus='Browser storage unavailable. Export a backup.'; }
         let document;
@@ -151,6 +151,7 @@ export class PlayBuilder {
         catch(error) { this.saveError={conflict:error.code==='DRAFT_CONFLICT',message:error.message};this.saveStatus=this.saveError.conflict?'Not saved · changed in another tab':'Not saved · retry or export';return false; }
     }
     edit(change) {
+        this.sourceIntent++;
         this.courtTools.clear();
         this.pause(); this.cancelPendingView();
         const draft=copy(this.document); change(draft); validateDocument(draft);
@@ -206,6 +207,7 @@ export class PlayBuilder {
     }
     async setWorkspace(workspace) {
         if(workspace===this.workspace)return;
+        if(workspace==='planner')this.sourceIntent++;
         this.cancelPendingView(); this.pause();
         if(workspace==='planner') {
             this.savedPlayhead=this.session.clock.elapsed; this.savedView=this.view;
@@ -221,14 +223,17 @@ export class PlayBuilder {
         this.render();
     }
     loadDocument(value) {
+        this.sourceIntent++;
         this.cancelPendingView(); this.pause(); validateDocument(value);
         this.document=copy(value); this.history=new EditHistory(this.document); this.selectedShotId=this.document.shots[0]?.id || null;
         this.installPlay(false,0); this.save(); this.render();
     }
     async action(action,value) {
+        const replacesSource=['new','open','template','import'].includes(action);
+        const sourceIntent=replacesSource?++this.sourceIntent:null;
         try {
             if(value?.shotId&&['editShot','editMovement'].includes(action)&&value.shotId!==this.selectedShotId)return {ok:false,error:'The selected shot changed; placement was cancelled.'};
-            if(['new','open','template','import'].includes(action)&&this.saveError){this.message='Keep this unsaved work first: Retry save, Save As a copy, or export a backup before opening another play.';this.render();return {ok:false,error:this.message};}
+            if(replacesSource&&this.saveError){this.message='Keep this unsaved work first: Retry save, Save As a copy, or export a backup before opening another play.';this.render();return {ok:false,error:this.message};}
             if(action==='retrySave'){this.save();this.render();return;}
             if(action==='acknowledgeWaypoints'){this.waypointAcknowledgement=this.waypointPolicy.key;this.message='Destination-only preview enabled. Original path points remain saved. Press Play when ready.';this.render();return;}
             if(action==='message'){this.message=String(value);this.render();return;}
@@ -292,13 +297,20 @@ export class PlayBuilder {
             else if(action==='handedness')this.edit(doc=>{doc.players[value.id].handedness=value.value;});
             else if(['opening','ending','intentionalFault'].includes(action))this.edit(doc=>{doc[action]=value;});
             else if(action==='undo'||action==='redo') {
+                this.sourceIntent++;
                 this.pause();this.cancelPendingView();const restored=this.history[action]();if(restored){this.document=restored;if(!restored.shots.some(shot=>shot.id===this.selectedShotId))this.selectedShotId=restored.shots[0]?.id||null;this.installPlay(false);this.save();}
             }
-            else if(action==='new'){if(this.workspace==='planner')await this.setWorkspace('builder');const fresh=createStarterDocument();fresh.id=id();this.loadDocument(fresh);this.message='New starter draft. Choose targets or remove shots to begin from an empty sequence.';}
             else if(action==='saveAs'){const draft=copy(this.document);draft.id=id();draft.title=`${draft.title} — copy`.slice(0,120);this.loadDocument(draft);}
-            else if(action==='open'){if(this.workspace==='planner')await this.setWorkspace('builder');this.loadDocument(this.store.open(value));}
-            else if(action==='template'){if(this.workspace==='planner')await this.setWorkspace('builder');const template=PICKLEBOARD_PLAYS.find(p=>p.id===value);if(template){const draft=documentFromTemplate(template);draft.id=id();this.loadDocument(draft);}}
-            else if(action==='import'){if(this.workspace==='planner')await this.setWorkspace('builder');const imported=this.store.importJSON(value);imported.id=id();this.loadDocument(imported);this.message='Imported as a separate copy. Existing saved plays were kept.';}
+            else if(replacesSource){
+                if(this.workspace==='planner')await this.setWorkspace('builder');
+                // Restoring the 3D view may await assets. A later play choice,
+                // edit, history operation or return to Planner owns the source.
+                if(sourceIntent!==this.sourceIntent)return {ok:false,error:'A newer edit or play choice was kept.'};
+                if(action==='new'){const fresh=createStarterDocument();fresh.id=id();this.loadDocument(fresh);this.message='New starter draft. Choose targets or remove shots to begin from an empty sequence.';}
+                else if(action==='open')this.loadDocument(this.store.open(value));
+                else if(action==='template'){const template=PICKLEBOARD_PLAYS.find(p=>p.id===value);if(template){const draft=documentFromTemplate(template);draft.id=id();this.loadDocument(draft);}}
+                else {const imported=this.store.importJSON(value);imported.id=id();this.loadDocument(imported);this.message='Imported as a separate copy. Existing saved plays were kept.';}
+            }
             else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleballpark-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
             else if(action==='usePlanner') {
                 this.pause();
