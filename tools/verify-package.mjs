@@ -16,7 +16,7 @@ expect(walk(artifact).sort()).toEqual([...manifest.files.map(f => f.path), ...in
 for (const f of manifest.files) expect(sha(readFileSync(`${artifact}/${f.path}`)), f.path).toBe(f.sha256);
 const prior = JSON.parse(readFileSync('tests/fixtures/prior-production.json'));
 const previousCache = prior.cacheName;
-const candidateCache = 'pickleboard-static-v20';
+const candidateCache = 'pickleboard-static-v21';
 const oldFiles = new Map();
 for (const f of prior.files) {
   const b = execFileSync('git', ['show', `${prior.revision}:${f.file}`], { maxBuffer: 20 * 1024 * 1024 });
@@ -48,15 +48,23 @@ for (const f of iphoneFixture.files) {
   const bytes = execFileSync('git', ['show', `${iphoneRevision}:${f.path}`], { maxBuffer: 20 * 1024 * 1024 });
   expect(sha(bytes), `iPhone baseline ${f.path}`).toBe(f.sha256); iphoneFiles.set(f.path, bytes);
 }
+// Preserve the exact local pixel-game candidate that entered stabilization.
+const betaStartingRevision = 'd66934838a742f126cf9650b2459a5420ea917b8';
+const betaStartingFixture = JSON.parse(execFileSync('git', ['show', `${betaStartingRevision}:tests/fixtures/approved-runtime.json`]));
+const betaStartingFiles = new Map();
+for (const f of betaStartingFixture.files) {
+  const bytes = execFileSync('git', ['show', `${betaStartingRevision}:${f.path}`], { maxBuffer: 20 * 1024 * 1024 });
+  expect(sha(bytes), `beta starting candidate ${f.path}`).toBe(f.sha256); betaStartingFiles.set(f.path, bytes);
+}
 const results = [];
 const scopePath = new URL('https://fcw1987.github.io/pickleboard/').pathname;
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.ttf': 'font/ttf' };
 for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
-  for (const mode of ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade']) {
+  for (const mode of ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade']) {
     const upgrading = mode !== 'fresh';
-    const previousFiles = mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
-    const priorCache = mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
-    const previousRevision = mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
+    const previousFiles = mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
+    const priorCache = mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
+    const previousRevision = mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
     let phase = upgrading ? 'old' : 'new', stopped = false;
     const server = createServer((req, res) => {
       const pathname = decodeURIComponent(new URL(req.url, 'http://local').pathname);
@@ -86,7 +94,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade') {
+        if (mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');
