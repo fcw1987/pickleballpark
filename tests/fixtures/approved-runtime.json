@@ -1,5 +1,5 @@
 {
-  "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+  "source": "c4e88626846b0bbcd227e077dbe7b384c11543ec",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -393,8 +393,8 @@
     },
     {
       "path": "play-builder.js",
-      "bytes": 29294,
-      "sha256": "d2fcdb7470dee011b09a1fcb7552e269a4ef3d5b731200566454e260dc42b45d"
+      "bytes": 30570,
+      "sha256": "c070420ff2e4c64d0e6a6e099f5eacbc240acfcc0dd9f450c10cfd5aa4683a31"
     },
     {
       "path": "play-catalog.js",
@@ -403,8 +403,8 @@
     },
     {
       "path": "play-compiler.js",
-      "bytes": 20119,
-      "sha256": "2bbe051570d29c1beae41f21a7cc646b3785f0529e2be15d6f21deac16ade328"
+      "bytes": 20167,
+      "sha256": "0a691e9bd5baf219bd819ebeac02f819ba06a202c3af698057cad41affd3fbb2"
     },
     {
       "path": "play-document.js",
@@ -444,7 +444,7 @@
     {
       "path": "sw.js",
       "bytes": 6748,
-      "sha256": "19dbc1e06b14f4edb3691f56531fedf065f7e599be89d8e5258156b80362badd"
+      "sha256": "76c9a67fe15968dde45c460b7991506e62cb3b3755fc6539c069a3e2cae5681d"
     },
     {
       "path": "three-d-animation.js",
@@ -473,8 +473,8 @@
     },
     {
       "path": "three-d-playback.js",
-      "bytes": 32708,
-      "sha256": "d23a93fd20e0b596dd32587802648f7c1e104e562fd76dcd95b1670cce132299"
+      "bytes": 32992,
+      "sha256": "c4873762954aa4711a6c998588de18c02ec0b386adb08d7bbeec2eabb80e37e9"
     },
     {
       "path": "three-d-presentation.js",
