@@ -1,6 +1,6 @@
 import{test,expect}from'@playwright/test';
 const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);};
-const menu=async page=>{const summary=page.locator('.builder-main-menu summary');await summary.click();return summary;};
+const menu=async page=>{const details=page.locator('.builder-main-menu');const summary=details.locator('summary');if(!(await details.evaluate(node=>node.open)))await summary.click();return summary;};
 const namePlay=async(page,value)=>{await menu(page,'File');await page.getByLabel('Play title').fill(value);await page.getByLabel('Play title').press('Tab');};
 const chooseChapter=async(page,number)=>{const picker=page.getByLabel('Choose shot chapter');if(!(await picker.locator('..').evaluate(node=>node.open)))await picker.click();await page.getByRole('button',{name:`Edit Shot ${number}`,exact:true}).click();};
 const editShot=async page=>{const inspector=page.locator('.builder-inspector');if(await inspector.evaluate(node=>node.classList.contains('builder-inspector-collapsed')))await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();};
