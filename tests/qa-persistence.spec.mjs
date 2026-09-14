@@ -380,7 +380,9 @@ test('the last rapid title input commits synchronously when the page closes', as
   await title.fill('Rapid one');
   await title.fill('Rapid two');
   await title.fill('Rapid final value');
-  await page.close({ runBeforeUnload: true });
+  await page.close();
+  expect(page.isClosed()).toBe(true);
+  expect(context.pages()).not.toContain(page);
 
   const reopened = await context.newPage();
   await reopened.goto('/index.html?qa-persistence=reopen');
