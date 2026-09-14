@@ -75,6 +75,7 @@ across these dimensions, without expanding to their full Cartesian product:
 - lengths 1, 2, 8, 31, and 64;
 - all four green/orange hitter pairings;
 - left, center-left, center, center-right, and right contact regions;
+- all eight legal mid-rally shot families;
 - automatic, forehand, backhand, and physically valid post-bounce short-hop
   contacts;
 - hold, advance, recover, and manual pinned movement;

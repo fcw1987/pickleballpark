@@ -244,7 +244,7 @@ export function runExtendedCorpus() {
   let boundarySamples = 0;
   let guidedCoverageRecords = 0;
   const observed = {
-    lengths: new Set(), hitterPairs: new Set(), regions: new Set(), contactStyles: new Set(),
+    lengths: new Set(), hitterPairs: new Set(), regions: new Set(), families: new Set(), contactStyles: new Set(),
     movementIntents: new Set(), assistanceModes: new Set(), shadeTeams: new Set(), handPatterns: new Set()
   };
   for (const document of valid) {
@@ -262,6 +262,7 @@ export function runExtendedCorpus() {
     observed.lengths.add(document.shots.length);
     observed.hitterPairs.add(`${document.shots[0]?.hitter}/${document.shots[1]?.hitter || 'single'}`);
     observed.regions.add(document.initialLayout[document.shots[0].hitter].x);
+    document.shots.forEach(shot => observed.families.add(shot.family));
     document.shots.forEach(shot => observed.contactStyles.add(shot.contactStyle));
     document.shots.forEach(shot => observed.movementIntents.add(shot.movement.intent));
     observed.assistanceModes.add(`${document.assistance.autoShading}/${document.assistance.showGuides}`);

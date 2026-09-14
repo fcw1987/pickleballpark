@@ -66,6 +66,7 @@ test('extended corpus truthfully covers hundreds of valid documents and classifi
       lengths: [1, 2, 31, 64, 8],
       hitterPairs: ['player1/player3', 'player1/player4', 'player1/single', 'player2/player3', 'player2/player4', 'player2/single'],
       regions: [1, 10, 15, 19, 5],
+      families: ['dink', 'drive', 'drop', 'lob', 'overhead', 'reset', 'return', 'volley'],
       contactStyles: ['auto', 'backhand', 'forehand', 'short-hop'],
       movementIntents: ['advance', 'hold', 'manual', 'recover'],
       assistanceModes: ['false/false', 'false/true', 'true/false', 'true/true'],
