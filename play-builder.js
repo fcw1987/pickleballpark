@@ -42,7 +42,15 @@ export class PlayBuilder {
         this.board.onCoachingState = () => {if(this.view==='3d'&&!this.busy&&this.workspace==='builder'&&!this.board.threeD?.active){this.view='2d';this.message='3D stopped. Your draft and playhead are safe in 2D; retry 3D when ready.';}this.scheduleRender();};
         this.frame = null;
         this.chapters = Object.freeze([]);
-        this.keyboard=event=>{if(event.key==='Escape'&&this.courtTools.placing){this.courtTools.clear();this.message='Target placement cancelled.';this.render();return;}if(this.workspace==='builder'&&(event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!event.target.closest('input,textarea,select,[contenteditable]')){event.preventDefault();this.action(event.shiftKey?'redo':'undo');}};
+        this.keyboard=event=>{
+            // Modal focus owns its keys, including shortcuts which otherwise
+            // bubble to this document listener from the dialog's buttons.
+            if(event.defaultPrevented||globalThis.document.querySelector('dialog[open],#infoModal.active,#menuOverlay.active'))return;
+            if(event.key==='Escape'&&this.courtTools.placing){this.courtTools.clear();this.message='Target placement cancelled.';this.render();return;}
+            if(this.workspace==='builder'&&(event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!event.target.closest('input,textarea,select,[contenteditable]')){
+                event.preventDefault();this.action(event.shiftKey?'redo':'undo');
+            }
+        };
         globalThis.document.addEventListener('keydown',this.keyboard);
         this.storageChanged=event=>{if(event.key===STORAGE_KEY){this.libraryDirty=true;this.message='Local drafts changed in another tab. Your current work stays here; saving checks for conflicts.';this.scheduleRender();}};
         window.addEventListener('storage',this.storageChanged);
