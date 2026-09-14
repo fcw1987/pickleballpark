@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v19`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v20`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -27,6 +27,9 @@ const STATIC_ASSETS = [
   './play-catalog.js',
   './court-geometry.js',
   './coaching-session.js',
+  './shot-chapters.js',
+  './shot-timeline.js',
+  './shot-timeline.css',
   './coaching-ui.js',
   './park-layout.js',
   './park-scene.js',
@@ -38,6 +41,9 @@ const STATIC_ASSETS = [
   './assets/park/bench.png',
   './assets/park/sign.png',
   './assets/park/banner.png',
+  './assets/park/menu-frame-light.png',
+  './assets/park/menu-frame-dark.png',
+  './assets/park/menu-labels.ttf',
 
   './three-d-core.js',
   './three-d-animation.js',

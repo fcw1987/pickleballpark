@@ -153,11 +153,24 @@ const banner = () => {
   return c;
 };
 
+// Original 24px nine-slice dialogue frame. Eight source pixels per edge keep
+// the two-pixel stepped corners crisp while only the middle regions stretch.
+const menuFrame = dark => {
+  const c=new Canvas(24,24),edge=rgba(dark?'#a6bea0':'#243d4b'),paper=rgba(dark?'#1d3542':'#fff6d9'),shade=rgba(dark?'#102733':'#d2bb83'),light=rgba(dark?'#41606a':'#fffdf0');
+  c.rect(4,0,16,24,edge);c.rect(0,4,24,16,edge);c.rect(2,2,20,20,edge);
+  c.rect(4,2,16,20,shade);c.rect(2,4,20,16,shade);
+  c.rect(5,4,14,16,paper);c.rect(4,5,16,14,paper);
+  c.rect(5,4,14,1,light);c.rect(4,5,1,14,light);
+  c.rect(5,2,14,1,light);c.rect(2,5,1,14,light);
+  return c;
+};
+
 const assets = [
   ['quiet-court.png', texture(C.court, [mix(C.court, C.navyLight, 0.16), mix(C.court, C.kitchen, 0.14)], 1, 2)],
   ['grass.png', texture(C.surround, [mix(C.surround, C.grassDeep, 0.28), mix(C.surround, C.grassLight, 0.24)], 2, 1)],
   ['path.png', texture(C.path, [mix(C.path, C.orangeDark, 0.24), mix(C.path, C.orangeLight, 0.16)], 3, 1)],
-  ['tree.png', tree()], ['shrub.png', shrub()], ['bench.png', bench()], ['sign.png', sign()], ['banner.png', banner()]
+  ['tree.png', tree()], ['shrub.png', shrub()], ['bench.png', bench()], ['sign.png', sign()], ['banner.png', banner()],
+  ['menu-frame-light.png',menuFrame(false)],['menu-frame-dark.png',menuFrame(true)]
 ];
 const output = [];
 for (const [name, canvas] of assets) {

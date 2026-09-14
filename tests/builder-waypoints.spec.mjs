@@ -36,6 +36,13 @@ test('bounded imported waypoints require a session acknowledgement and survive e
   await page.evaluate(() => playBuilder.action('playPause'));
   await page.evaluate(()=>playBuilder.session.tick(performance.now()+5000));
   await page.evaluate(()=>playBuilder.seek(1));
+  await page.evaluate(async()=>{
+    await playBuilder.action('seek',1);
+    await playBuilder.action('chapter',playBuilder.document.shots[2].id);
+    await playBuilder.action('scrubBegin',{id:'unacknowledged'});
+    await playBuilder.action('scrubSeek',{id:'unacknowledged',time:1});
+    await playBuilder.action('scrubEnd',{id:'unacknowledged'});
+  });
   expect(await page.evaluate(() => playBuilder.session.clock.elapsed)).toBe(stoppedAt);
   expect(await page.evaluate(() => playBuilder.session.clock.playing)).toBe(false);
 
@@ -57,7 +64,8 @@ test('bounded imported waypoints require a session acknowledgement and survive e
   expect(await page.evaluate(() => playBuilder.waypointPolicy.key)).not.toBe(firstKey);
 
   await page.evaluate(() => playBuilder.action('selectShot', playBuilder.document.shots[0].id));
-  await page.getByRole('button', { name: '3. Drop', exact: true }).click();
+  await page.getByLabel('Choose shot chapter', {exact:true}).click();
+  await page.getByRole('button', { name: 'Edit Shot 3', exact: true }).click();
   expect(await page.evaluate(() => playBuilder.selectedShotId)).toBe(imported.shotId);
   await page.getByRole('button', { name: 'Preview destination only', exact: true }).click();
   expect(await page.evaluate(() => playBuilder.waypointPolicy.requiresConfirmation)).toBe(false);

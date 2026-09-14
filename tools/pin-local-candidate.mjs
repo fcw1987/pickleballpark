@@ -1,0 +1,24 @@
+// Reproducibly pin an explicitly selected local runtime revision for review.
+// This does not approve publication, commit, push, or deploy anything.
+import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const source=process.argv[2];if(!/^[a-f0-9]{40}$/.test(source||''))throw Error('Provide the full committed runtime revision to pin');
+const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+if(git('rev-parse',source)!==source)throw Error('Unknown source revision');
+const walk=(dir)=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):`${dir}/${e.name}`);
+const paths=[...readdirSync('.').filter(p=>/\.(?:js|css|html)$/.test(p)||p==='manifest.json'),...walk('icons'),...walk('vendor'),...walk('assets').filter(p=>!p.startsWith('assets/source/'))].sort();
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const files=paths.map(path=>{const bytes=readFileSync(path),committed=execFileSync('git',['show',`${source}:${path}`],{maxBuffer:20*1024*1024});if(!bytes.equals(committed))throw Error(`Uncommitted or different runtime: ${path}`);return {path,bytes:bytes.length,sha256:sha(bytes)};});
+const old=JSON.parse(readFileSync('tests/fixtures/approved-runtime.json'));
+const previousDigest=sha(JSON.stringify({approvedSource:old.source,files:old.files},null,2)+'\n');
+const digest=sha(JSON.stringify({approvedSource:source,files},null,2)+'\n');
+const size=files.reduce((n,f)=>n+f.bytes,0),oldSize=old.files.reduce((n,f)=>n+f.bytes,0);
+for(const file of ['tools/build-site.mjs','tools/verify-deployment-artifact.mjs','tests/deployment-artifact.unit.mjs']){
+ let text=readFileSync(file,'utf8').replaceAll(previousDigest,digest).replaceAll(old.source,source);
+ if(file.endsWith('verify-deployment-artifact.mjs'))text=text.replace(`manifest.files.length !== ${old.files.length}`,`manifest.files.length !== ${files.length}`).replace(`exactly ${old.files.length} files`,`exactly ${files.length} files`);
+ if(file.endsWith('deployment-artifact.unit.mjs'))text=text.replace(`runtimeFiles: ${old.files.length}, runtimeBytes: ${oldSize}`,`runtimeFiles: ${files.length}, runtimeBytes: ${size}`);
+ writeFileSync(file,text);
+}
+writeFileSync('tests/fixtures/approved-runtime.json',JSON.stringify({source,files},null,2)+'\n');
+console.log(JSON.stringify({source,manifestSha256:digest,runtimeFiles:files.length,runtimeBytes:size,deltaBytes:size-oldSize,added:files.filter(f=>!old.files.some(o=>o.path===f.path)).map(f=>f.path),removed:old.files.filter(f=>!files.some(o=>o.path===f.path)).map(f=>f.path),note:'Local review package only; owner acceptance and publication are separate.'},null,2));

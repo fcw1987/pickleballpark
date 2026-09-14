@@ -16,7 +16,7 @@ expect(walk(artifact).sort()).toEqual([...manifest.files.map(f => f.path), ...in
 for (const f of manifest.files) expect(sha(readFileSync(`${artifact}/${f.path}`)), f.path).toBe(f.sha256);
 const prior = JSON.parse(readFileSync('tests/fixtures/prior-production.json'));
 const previousCache = prior.cacheName;
-const candidateCache = 'pickleboard-static-v19';
+const candidateCache = 'pickleboard-static-v20';
 const oldFiles = new Map();
 for (const f of prior.files) {
   const b = execFileSync('git', ['show', `${prior.revision}:${f.file}`], { maxBuffer: 20 * 1024 * 1024 });
@@ -40,15 +40,23 @@ for (const f of usabilityFixture.files) {
   const bytes = execFileSync('git', ['show', `${usabilityRevision}:${f.path}`], { maxBuffer: 20 * 1024 * 1024 });
   expect(sha(bytes), `court-centered baseline ${f.path}`).toBe(f.sha256); usabilityFiles.set(f.path, bytes);
 }
+// PR #17 is the direct pixel-game baseline and the owner-used preview at start.
+const iphoneRevision = 'd0d5376a4a76e44a3ce381c83f61e3354bcc2241';
+const iphoneFixture = JSON.parse(execFileSync('git', ['show', `${iphoneRevision}:tests/fixtures/approved-runtime.json`]));
+const iphoneFiles = new Map();
+for (const f of iphoneFixture.files) {
+  const bytes = execFileSync('git', ['show', `${iphoneRevision}:${f.path}`], { maxBuffer: 20 * 1024 * 1024 });
+  expect(sha(bytes), `iPhone baseline ${f.path}`).toBe(f.sha256); iphoneFiles.set(f.path, bytes);
+}
 const results = [];
 const scopePath = new URL('https://fcw1987.github.io/pickleboard/').pathname;
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png' };
 for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
-  for (const mode of ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade']) {
+  for (const mode of ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade']) {
     const upgrading = mode !== 'fresh';
-    const previousFiles = mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
-    const priorCache = mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
-    const previousRevision = mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
+    const previousFiles = mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
+    const priorCache = mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
+    const previousRevision = mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
     let phase = upgrading ? 'old' : 'new', stopped = false;
     const server = createServer((req, res) => {
       const pathname = decodeURIComponent(new URL(req.url, 'http://local').pathname);
@@ -78,7 +86,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'builder-upgrade' || mode === 'usability-upgrade') {
+        if (mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');

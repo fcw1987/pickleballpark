@@ -73,8 +73,9 @@ export class PlayBuilder {
         if(this.libraryDirty){try{this.library=this.store.list();}catch{/* Save status retains recovery information. */}this.libraryDirty=false;}const library=this.library;
         const segment=this.compiled?.timeline?.segments.find(s=>this.session.clock.elapsed<=s.endTime)||this.compiled?.timeline?.segments.at(-1);
         const currentChapter=chapterAtTime(this.chapters,this.session.clock.elapsed);
-        const selectedStep=this.compiled?.timeline?.segments.find(s=>s.step.id===this.selectedShotId)?.step;
-        const cue=this.session.playing?{shotId:currentChapter?.shotId,title:segment?.step.label||currentChapter?.label||'Starting layout',description:segment?.step.description||'Choose your first shot.'}:{shotId:this.selectedShotId,title:selectedStep?.label||'Selected shot',description:this.document.templateSource?selectedStep?.description||'':''};
+        // Playback identity follows the sampled chapter even while paused. The
+        // separate selectedShotId keeps an open editor stable across playback.
+        const cue={shotId:currentChapter?.shotId,title:currentChapter?`${currentChapter.number}. ${currentChapter.label}`:'Choose a shot',description:segment?.step.description||'Choose your first shot.'};
         this.ui.render({cue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
             playing:this.session.playing, time:this.session.clock.elapsed, duration:this.session.duration, chapters:this.chapters, currentShotId:currentChapter?.shotId || null,
             view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, library,
@@ -92,7 +93,10 @@ export class PlayBuilder {
         if(!region)return;const rect=region.getBoundingClientRect();
         this.ui.element.style.setProperty('--builder-sheet-max-height',`${Math.max(100,rect.bottom-58-(window.visualViewport?.offsetTop||0))}px`);
         if(innerWidth>700&&innerHeight<=500){const meta=this.ui.element.querySelector('.builder-meta');if(meta)this.ui.element.style.setProperty('--builder-rail-sequence-top',`${meta.getBoundingClientRect().bottom-this.ui.element.getBoundingClientRect().top+4}px`);}
-        const controls=[...region.querySelectorAll('.builder-camera,.builder-view-toggle')].map(node=>Math.max(0,rect.bottom-node.getBoundingClientRect().top+4));const collapsed=this.ui.element.querySelector('.builder-inspector-collapsed');if(innerWidth<=700&&collapsed)controls.push(collapsed.getBoundingClientRect().height+12);const reserve=innerWidth>700&&innerHeight<=500?0:Math.max(48,...controls);const sceneHeight=Math.max(80,rect.height-reserve);const key=[rect.x,rect.y,rect.width,sceneHeight].join(":");
+        // The context and playback strips already reserve their own grid rows.
+        // An optional editor overlays the scene; its height must not also be
+        // subtracted from the court or move the projection under a placement.
+        const sceneHeight=Math.max(80,rect.height);const key=[rect.x,rect.y,rect.width,sceneHeight].join(":");
         if(key!==this.courtRect&&this.courtTools?.drag){this.courtTools.abort('Placement cancelled after the court resized.',false);this.scheduleRender();}
         for(const surface of surfaces)if(surface)Object.assign(surface.style,{position:"fixed",inset:"auto",left:`${rect.x}px`,top:`${rect.y}px`,width:`${rect.width}px`,height:`${sceneHeight}px`,padding:"0"});
         const projection=this.board.projection;
@@ -221,6 +225,7 @@ export class PlayBuilder {
             if(action==='view')return await this.switchView(value);
             if(action==='workspace')return await this.setWorkspace(value);
             if(action==='help'){this.courtTools.clear();this.pause();const trigger=this.ui.element.querySelector('.builder-menu summary');trigger?.focus({preventScroll:true});this.board.openInfoModal({returnFocus:trigger});return;}
+            if(action==='appearance'){this.board.toggleTheme();this.render();return;}
             if(action==='playPause'){const playing=typeof value?.playing==='boolean'?value.playing:!this.session.playing;if(playing)this.play();else this.pause();}
             else if(action==='restart')this.seek(0);
             else if(action==='seek'){
