@@ -378,7 +378,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if(event.target.matches('input[type=number],input[type=text]')){pendingField=true;const status=root.querySelector('.builder-save-status');if(status)status.textContent='Editing · not saved yet';}
   }
   root.addEventListener('pointerdown',event=>{if(event.target.closest('button,summary')&&root.contains(document.activeElement)&&document.activeElement.matches('input:not([type=range]),textarea'))event.preventDefault();});
-  root.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const menu = event.target.closest('.builder-menu[open]'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); event.preventDefault(); } });
+  root.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const menu = event.target.closest('.builder-menu[open],.builder-chapter-menu[open]'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); event.preventDefault(); } });
   root.addEventListener('click', handleClick); root.addEventListener('change', handleChange); root.addEventListener('input', handleInput);
   root.addEventListener('keydown', event => {
     if (!event.target.matches('input[type="number"], input[type="text"]')) return;

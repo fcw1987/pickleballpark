@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 
 const output = process.argv[2];
-if (!output) throw new Error('Usage: node tools/record-pixel-authoring.mjs <output-directory>');
-const url = process.env.PREVIEW_URL || 'http://127.0.0.1:4183/';
+if (!output) throw new Error('Usage: node tools/record-pixel-authoring.mjs <output-directory> [preview-url]');
+const url = process.argv[3] || process.env.PREVIEW_URL || 'http://127.0.0.1:4173/';
 const viewport = { width: 402, height: 874 };
 const videoName = 'phone-authoring.webm';
 const screenshotName = 'phone-authoring-final.png';
