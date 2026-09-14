@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);};
-const title=async(page,value)=>{await page.getByLabel('Play title').fill(value);await page.getByLabel('Play title').press('Tab');};
+const fileMenu=async page=>{const menu=page.locator('.builder-main-menu');if(!(await menu.evaluate(node=>node.open)))await menu.locator('summary').click();return menu;};
+const title=async(page,value)=>{await fileMenu(page);await page.getByLabel('Play title').fill(value);await page.getByLabel('Play title').press('Tab');};
 
 test('two tabs keep both authored versions and recover a conflict as a copy',async({context,page})=>{
  await open(page);await title(page,'Shared original');const identity=await page.evaluate(()=>playBuilder.document.id);
@@ -8,10 +9,10 @@ test('two tabs keep both authored versions and recover a conflict as a copy',asy
  expect(await page.evaluate(()=>playBuilder.store.open(playBuilder.document.id).title)).toBe('First tab version');
  expect(await other.evaluate(()=>playBuilder.saveError?.conflict)).toBe(true);
  expect(await other.evaluate(()=>playBuilder.document.title)).toBe('Second tab version');
- await other.locator('.builder-menu summary').filter({hasText:'File'}).click();await other.getByRole('button',{name:'Save As',exact:true}).click();
+ await fileMenu(other);await other.getByRole('button',{name:'Save As',exact:true}).click();
  expect(await other.evaluate(()=>playBuilder.saveError)).toBe(null);expect(await other.evaluate(()=>playBuilder.document.id)).not.toBe(identity);
  expect(await other.evaluate(()=>playBuilder.store.list().map(d=>d.title))).toEqual(['First tab version','Second tab version — copy']);
- await other.reload();await other.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);expect(await other.getByLabel('Play title').inputValue()).toBe('Second tab version — copy');
+ await other.reload();await other.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);await fileMenu(other);expect(await other.getByLabel('Play title').inputValue()).toBe('Second tab version — copy');
 });
 test('import with a matching identity creates a separate copy and a failed import keeps the source',async({page})=>{
  await open(page);await title(page,'Original');const original=await page.evaluate(()=>structuredClone(playBuilder.document));
@@ -21,8 +22,8 @@ test('import with a matching identity creates a separate copy and a failed impor
  const copy=await page.evaluate(()=>JSON.stringify(playBuilder.document));await page.evaluate(()=>playBuilder.action('import','{"oops":'));
  expect(await page.evaluate(()=>JSON.stringify(playBuilder.document))).toBe(copy);
 });
-test('completed background field edits save and playback does not read the library per frame',async({page})=>{
- await open(page);await page.getByLabel('Play title').fill('Background edit');await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
+test('completed contextual name edits save and playback does not read the library per frame',async({page})=>{
+ await open(page);await fileMenu(page);await page.getByLabel('Play title').fill('Background edit');await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
  expect(await page.evaluate(()=>playBuilder.store.loadLast().title)).toBe('Background edit');
  await page.evaluate(()=>{window.libraryReads=0;const read=playBuilder.store.list.bind(playBuilder.store);playBuilder.store.list=()=>{window.libraryReads++;return read();};playBuilder.play();});
  await expect.poll(()=>page.evaluate(()=>playBuilder.session.clock.elapsed)).toBeGreaterThan(.5);

@@ -30,7 +30,7 @@ test('native emulated touch places one bounded target and remains undoable', asy
   const page = await context.newPage();
   await open(page);
   const before = await page.evaluate(() => structuredClone(playBuilder.document));
-  await page.getByRole('button',{name:'Edit shot',exact:true}).click();
+  await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();
   await page.getByRole('button',{name:'Place target on court',exact:true}).click();
   await page.evaluate(() => {
     playBuilder.courtTools.surface.addEventListener('pointerup', event => { window.actualTouchPoint = playBuilder.courtTools.unproject(event); }, { capture: true, once: true });
