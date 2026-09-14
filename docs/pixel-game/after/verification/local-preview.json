@@ -1,0 +1,22 @@
+[
+  {
+    "browser": "chromium",
+    "playing": false,
+    "view": "3d",
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "helpReturned": true
+  },
+  {
+    "browser": "webkit",
+    "playing": false,
+    "view": "3d",
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "helpReturned": true
+  }
+]

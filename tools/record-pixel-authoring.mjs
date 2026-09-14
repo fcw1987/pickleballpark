@@ -167,6 +167,8 @@ try {
   await hold(700);
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
   await mark('paused after continuing saved work');
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
+  await hold(1000); // Give the video encoder a complete, visible paused ending.
   await page.screenshot({ path: join(output, screenshotName), animations: 'disabled' });
 
   const video = page.video();

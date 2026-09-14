@@ -1,0 +1,101 @@
+{
+  "environment": "Headless Playwright Chromium, fresh isolated storage, local static server; CPU timing includes JavaScript sampling and controls. Fifty repeats use timingScale 0.01, separate from normal-speed recordings.",
+  "results": [
+    {
+      "viewport": [
+        402,
+        874
+      ],
+      "dpr": 2,
+      "readyMs": 971,
+      "editMs": 5.700000002980232,
+      "seekMs": {
+        "n": 80,
+        "median": 0.5999999940395355,
+        "p95": 1.4000000059604645,
+        "max": 2.5
+      },
+      "pausedRenders": 0,
+      "repeated": 50,
+      "savesDuringViewing": 0,
+      "compilesDuringViewing": 0,
+      "sourcePreserved": true,
+      "historyPreserved": true,
+      "initialResources": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "beforeResources": {
+        "geometries": 43,
+        "textures": 19
+      },
+      "afterResources": {
+        "geometries": 43,
+        "textures": 19
+      },
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "buffer": [
+        780,
+        1438
+      ],
+      "pixelRatio": 2,
+      "renderCalls": 53,
+      "long": {
+        "shots": 64,
+        "duration": 94.40602106727792,
+        "compileAndInstallMs": 10.5,
+        "seeks": 128,
+        "seekMedianMs": 1,
+        "seekP95Ms": 1.5
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "dpr": 2,
+      "readyMs": 986,
+      "editMs": 5.300000011920929,
+      "seekMs": {
+        "n": 80,
+        "median": 0.5,
+        "p95": 1.2999999970197678,
+        "max": 2.9000000059604645
+      },
+      "pausedRenders": 0,
+      "repeated": 50,
+      "savesDuringViewing": 0,
+      "compilesDuringViewing": 0,
+      "sourcePreserved": true,
+      "historyPreserved": true,
+      "initialResources": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "beforeResources": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "afterResources": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "buffer": [
+        2856,
+        1516
+      ],
+      "pixelRatio": 2,
+      "renderCalls": 53,
+      "long": {
+        "shots": 64,
+        "duration": 94.40602106727792,
+        "compileAndInstallMs": 10.200000002980232,
+        "seeks": 128,
+        "seekMedianMs": 1,
+        "seekP95Ms": 1.7999999970197678
+      }
+    }
+  ]
+}

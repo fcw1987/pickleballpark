@@ -1,0 +1,280 @@
+[
+  {
+    "theme": "light",
+    "state": "menu",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu"
+  },
+  {
+    "theme": "light",
+    "state": "my-plays",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Close"
+  },
+  {
+    "theme": "light",
+    "state": "learn",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Serve & Return"
+  },
+  {
+    "theme": "light",
+    "state": "playback-options",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Playback options"
+  },
+  {
+    "theme": "light",
+    "state": "help",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Close help and information"
+  },
+  {
+    "theme": "light",
+    "state": "planner-confirmation",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Use layout"
+  },
+  {
+    "theme": "light",
+    "state": "chapters",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Choose shot chapter"
+  },
+  {
+    "theme": "light",
+    "state": "editing",
+    "playing": false,
+    "time": 1.698944464057202,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Shot family"
+  },
+  {
+    "theme": "light",
+    "state": "details",
+    "playing": false,
+    "time": 1.698944464057202,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Details · coordinates, contact, movement"
+  },
+  {
+    "theme": "light",
+    "state": "placement",
+    "playing": false,
+    "time": 1.698944464057202,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Cancel target"
+  },
+  {
+    "theme": "light",
+    "state": "import-error",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "light",
+    "state": "save-failure",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "light",
+    "state": "invalid-sequence",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "light",
+    "state": "empty",
+    "playing": false,
+    "time": 0,
+    "shots": 0,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "light",
+    "state": "loading",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "light",
+    "errors": []
+  },
+  {
+    "theme": "dark",
+    "state": "menu",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu"
+  },
+  {
+    "theme": "dark",
+    "state": "my-plays",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Close"
+  },
+  {
+    "theme": "dark",
+    "state": "learn",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Serve & Return"
+  },
+  {
+    "theme": "dark",
+    "state": "playback-options",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Playback options"
+  },
+  {
+    "theme": "dark",
+    "state": "help",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Close help and information"
+  },
+  {
+    "theme": "dark",
+    "state": "planner-confirmation",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Use layout"
+  },
+  {
+    "theme": "dark",
+    "state": "chapters",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Choose shot chapter"
+  },
+  {
+    "theme": "dark",
+    "state": "editing",
+    "playing": false,
+    "time": 1.698944464057202,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Shot family"
+  },
+  {
+    "theme": "dark",
+    "state": "details",
+    "playing": false,
+    "time": 1.698944464057202,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Details · coordinates, contact, movement"
+  },
+  {
+    "theme": "dark",
+    "state": "placement",
+    "playing": false,
+    "time": 1.698944464057202,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Cancel target"
+  },
+  {
+    "theme": "dark",
+    "state": "import-error",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "dark",
+    "state": "save-failure",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "dark",
+    "state": "invalid-sequence",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "dark",
+    "state": "empty",
+    "playing": false,
+    "time": 0,
+    "shots": 0,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "dark",
+    "state": "loading",
+    "playing": false,
+    "time": 0,
+    "shots": 3,
+    "horizontalOverflow": false,
+    "focused": "Menu\n        \n\n        \n        ?Help\n\n        \n            "
+  },
+  {
+    "theme": "dark",
+    "errors": []
+  }
+]

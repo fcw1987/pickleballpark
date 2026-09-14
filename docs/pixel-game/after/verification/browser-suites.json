@@ -1,0 +1,113 @@
+{
+  "runtimeSource": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+  "summaries": [
+    {
+      "engine": "chromium",
+      "platform": "darwin",
+      "playwright": "1.61.0",
+      "catalog": 219,
+      "stats": {
+        "startTime": "2026-09-14T02:32:33.181Z",
+        "duration": 120626,
+        "expected": 219,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "failures": []
+    },
+    {
+      "engine": "webkit",
+      "platform": "darwin",
+      "playwright": "1.61.0",
+      "catalog": 219,
+      "stats": {
+        "startTime": "2026-09-14T02:25:25.262Z",
+        "duration": 184198.74800000002,
+        "expected": 212,
+        "skipped": 0,
+        "unexpected": 7,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "file": "tests/coaching-workflow.spec.mjs",
+          "title": "cached coaching engine resumes an interrupted shot offline",
+          "line": 122,
+          "status": "unexpected",
+          "signature": "page.reload: WebKit encountered an internal error",
+          "matchesHistoricalSignature": true
+        },
+        {
+          "file": "tests/pixel-replay.spec.mjs",
+          "title": "fresh cached installation opens all four pixel actors fully offline",
+          "line": 73,
+          "status": "unexpected",
+          "signature": "page.reload: WebKit encountered an internal error",
+          "matchesHistoricalSignature": true
+        },
+        {
+          "file": "tests/plays.spec.mjs",
+          "title": "guided plays start and advance on an offline repeat visit",
+          "line": 228,
+          "status": "unexpected",
+          "signature": "page.reload: WebKit encountered an internal error",
+          "matchesHistoricalSignature": true
+        },
+        {
+          "file": "tests/service-worker.spec.mjs",
+          "title": "installs the versioned shell and serves a repeat visit offline",
+          "line": 52,
+          "status": "unexpected",
+          "signature": "page.goto: WebKit encountered an internal error",
+          "matchesHistoricalSignature": true
+        },
+        {
+          "file": "tests/service-worker.spec.mjs",
+          "title": "Legacy cache upgrade preserves unrelated origin caches",
+          "line": 93,
+          "status": "unexpected",
+          "signature": "expect(received).toBe(expected) // Object.is equality",
+          "matchesHistoricalSignature": true,
+          "originalTitleSha256": "1b07c2d75cc2754b4efc69ff51d9f6415dbbf0857301bd47cd7b1fd4000533a4",
+          "titleNote": "Display label normalized; source file, exact assertion line, protected file hash and original title hash identify the unchanged test."
+        },
+        {
+          "file": "tests/service-worker.spec.mjs",
+          "title": "offline navigation uses only the owned shell cache and does not cache unknown pages as the shell",
+          "line": 108,
+          "status": "unexpected",
+          "signature": "page.goto: WebKit encountered an internal error",
+          "matchesHistoricalSignature": true
+        },
+        {
+          "file": "tests/three-d.spec.mjs",
+          "title": "offline repeat visit can open the locally cached Three.js viewer",
+          "line": 126,
+          "status": "unexpected",
+          "signature": "page.reload: WebKit encountered an internal error",
+          "matchesHistoricalSignature": true
+        }
+      ]
+    }
+  ],
+  "finalFocused": {
+    "helpAccessibility": {
+      "chromium": 14,
+      "webkit": 14
+    },
+    "landscapeAndLargeText": {
+      "chromium": 6,
+      "webkit": 6
+    }
+  },
+  "protectedTestHashesMatch": {
+    "tests/coaching-workflow.spec.mjs": true,
+    "tests/pixel-replay.spec.mjs": true,
+    "tests/plays.spec.mjs": true,
+    "tests/three-d.spec.mjs": true,
+    "tests/service-worker.spec.mjs": true
+  },
+  "policyApplied": false,
+  "reason": "The retained exception policy is Linux-CI-only. This Mac run reports the seven observed browser infrastructure failures without waiving them."
+}

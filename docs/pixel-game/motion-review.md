@@ -2,7 +2,7 @@
 
 This review covers the app-only recordings in [`after`](after/) using Chromium's installed `HTMLVideoElement` decoder and `requestVideoFrameCallback`. The recordings were decoded sequentially because their browser seek ranges report `[0, 0]`; setting `currentTime` directly resets them to the opening frame. Each saved sample records the decoder's actual `mediaTime`, dimensions and cumulative presented-frame count in [`decoded-metadata.json`](after/motion-samples/decoded-metadata.json).
 
-Both recordings decode at 402×874 pixels. [`normal-speed-playback.webm`](after/normal-speed-playback.webm) is 22.16 seconds, and [`phone-authoring.webm`](after/phone-authoring.webm) is 12.48 seconds. The normal recording reaches 536 presented frames by media time 21.40 seconds and the authoring recording reaches 310 by 12.36 seconds, which is consistent with the recorder's roughly 25 fps output. This is recording cadence, not a measurement of application rendering performance.
+Both recordings decode at 402×874 pixels. [`normal-speed-playback.webm`](after/normal-speed-playback.webm) is 22.16 seconds, and [`phone-authoring.webm`](after/phone-authoring.webm) is 13.36 seconds. The normal recording reaches 536 presented frames by media time 21.40 seconds and the authoring recording reaches 310 by 12.36 seconds, which is consistent with the recorder's roughly 25 fps output. This is recording cadence, not a measurement of application rendering performance.
 
 ## Normal playback
 
@@ -26,14 +26,14 @@ The [authoring contact sheet](after/motion-samples/authoring-contact-sheet.png) 
 3. The 4.76-second Shot 3 details frame exposes Green 2, Manual movement, X 7.4 and Y 13.2. The 5.48-second frame shows both Auto Shading and Coverage Guides checked.
 4. The 6.20-second frame shows the restored post-Redo state, and 6.92 seconds shows the saved four-shot work returned to Shot 1. The 41 ms Undo/Redo interval is too short for these samples to show the transient undone frame independently.
 5. The 8.84-second frame shows playback in 2D, 10.12 seconds shows the active session in 3D, and 11.04 seconds shows its return to 2D with the playhead advanced. Ball and trail remain visible in both views.
+6. The 12.36-second frame visibly shows **Play** after the final Pause action, with Shot 3 held at about 3.2 seconds. It matches the final screenshot and the event log's `playing: false` state.
 
 The log contains all 17 named operations and records three shots becoming four, exact target and movement values, independent assistance settings, save/reload, and preserved playing intent through both view switches. Some operations occur closer together than the sampled cadence—Coverage Guides/Auto Shading, Undo/Redo, and reload/2D continuation—so their ordering comes from the structured event log rather than separate visible frames.
 
-The WebM's last decoded frame still displays **Pause**, even after the log records `playing: false` at 11.647 seconds. The separately captured [`phone-authoring-final.png`](after/phone-authoring-final.png) shows the resulting **Play** control and the same paused 3.2-second pose. The recording was closed before Chromium encoded that final DOM-label repaint, so the WebM alone does not visually prove the last Pause click; the event state and final still supply that evidence.
+The corrected recording keeps the paused ending visible for one second before closing. The WebM sample, structured event state and [`phone-authoring-final.png`](after/phone-authoring-final.png) now agree on the final **Play** control and paused 3.2-second pose.
 
 ## Limits of this evidence
 
 The decoded PNGs are discrete visual samples from browser video. They establish the rendered controls, court, actors, ball, trails and sampled state changes at specific media times. They cannot by themselves prove continuous smoothness, the duration of every hold, input causality, or the absence of a defect between samples. Exact 1× configuration, iteration counts, selected chapters and authored values come from the recorder's structured state logs and are separately covered by browser tests.
 
 The recordings use Playwright Chromium viewport emulation and contain only the application surface. They do not include browser chrome, a physical phone, native Safari, device compositing, or physical touch latency. The authoring walkthrough uses emulated touch for court placement and assistance toggles; other controls use Playwright's actionability-driven clicks, fills and selections.
-

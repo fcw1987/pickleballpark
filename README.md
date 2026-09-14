@@ -2,6 +2,8 @@
 
 Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same pixel art park.
 
+The unpublished pixel-game candidate uses contextual original game menus and one Play/Pause plus a seekable shot-chapter timeline. See [the local candidate report](docs/PIXEL_GAME_REPORT.md) for screenshots, recordings, exact verification, and remaining native Safari/device acceptance. Publication is not approved by this local checkpoint.
+
 Pickleball Park remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
 
 Formerly Pickleboard. The public snapshot preserves the accepted coaching behavior under the Pickleball Park name. See [rebrand verification](docs/REBRAND_VERIFICATION.md), [release notes](docs/RELEASE_NOTES.md), and [rename handoff](docs/RENAME_HANDOFF.md).
@@ -24,7 +26,7 @@ Phone authoring now includes a shallow shot editor, full movement/contact detail
 - Mouse, touch, and keyboard token interaction; arrow keys move a focused token half a foot, Enter/Space switches player handedness
 - Viewport-fitted portrait, landscape, mobile, and desktop layouts
 - Installable PWA shell with repeat-visit offline support
-- Eight guided Plays with manual or automatic playback and shared Loop controls
+- Eight guided Plays with exact shot chapters and playback that repeats until paused
 - No backend, account, analytics, or remote persistence
 
 Builder source documents are autosaved locally, including incomplete drafts, with named copies and versioned JSON import/export. Browser storage is not a backup guarantee: export important plays. Court Planner arrangements remain session-only; explicitly use a planner layout as a draft starting state to save it. Theme preference retains its compatible storage key. See [document and trajectory contract](docs/PLAY_DOCUMENT.md), [storage](docs/BUILDER_STORAGE.md), and [builder verification](docs/BUILDER_VERIFICATION.md).
@@ -75,7 +77,7 @@ board-projection.js Canonical court ↔ elevated SVG view mapping
 script.js        Board state, interactions, SVG updates, and public API
 play-catalog.js  Shared declarative lessons, contacts and flight metadata
 guided-plays.js  Guided playback and snapshot ownership
-coaching-session.js Shared clock, loop preference and end hold
+coaching-session.js Shared clock, playback intent and logical end hold
 court-geometry.js Canonical court dimensions and marking endpoints
 park-layout.js / park-scene.js Shared pixel park layout and rendering adapters
 visual-theme.js Shared frozen palette and rendering tokens (CSS/SVG/Three.js/art)
@@ -97,11 +99,11 @@ The Plays menu offers **Serve & Return, Third Shot Drop, Third Shot Drive, Fifth
 
 `play-catalog.js` owns the eight built-in templates. Custom `play-document.js` recipes compile through `play-compiler.js` into the same production timeline; no separate animation catalog is created. `three-d-core.js` compiles ordered contact, net-crossing, bounce and end events; both views sample the same continuous ball trajectory and player presentation at the same absolute time. `rally-rules.js` checks the represented standing-play invariants. Add lessons through that contract, not a private rendering script. See [the coaching contract](docs/PARK_COACHING_VERIFICATION.md) for scope and limits.
 
-Entering a Play captures mode, exact token positions, handedness, drawings, tracers and drawing state once. Editing is locked until **Exit**, which restores that snapshot. **Previous/Next** seek step endpoints and pause. **Restart** returns to the opening state and pauses. **Play/Pause** resumes the same clock, including an interrupted shot. Entering/exiting **3D View** hands off the same paused time; camera changes do not change tactical state.
+Entering an ordinary guided Play captures mode, exact token positions, handedness, drawings, tracers and drawing state once. **Exit** restores that snapshot. The custom builder retains its separate editable document. Both experiences use one **Play/Pause** and a seekable timeline with exact shot chapters. Opening an authoring operation pauses. Switching ready 2D/3D views preserves the shared playhead and active intent; camera changes do not change tactical state.
 
-**Loop** is visible in both guided views and shared for the current session (off on a new page). It finishes the last event/recovery, holds for one playback second, then resets to the opening state. Pause freezes the hold too. Turning Loop off during the hold leaves a completed, stopped view. Speed, handedness and camera persist; the editable snapshot is never recaptured. Exit, replacement and loading cancellation invalidate pending restarts. Reduced motion keeps cues static and manual navigation usable.
+Fresh launch, draft restoration, import and lesson selection stay paused. Choosing **Play** resumes the current sample and repeats the rally continuously, including a one-logical-second final hold. **Pause** freezes flight or the remaining hold immediately. Explicit endpoint seeking shows the final pose, and Play from that endpoint begins a new repetition. Legacy Loop-false preferences no longer govern viewing. There are no Previous, Next, Restart or Loop controls. Speed, handedness, camera and authored history persist; loading or scrub completion cannot override a later Pause.
 
-Transport, lesson context and viewing options are grouped separately. Short phone landscape uses a side instruction panel; other layouts reserve a bottom coaching panel. Shot cues use timeline-derived phases, with persistent instructions and no independent animation timer.
+The builder rests on the court, with a compact main menu and contextual editor. Speed, camera and Undo/Redo live in Playback options. The chapter picker keeps every shot reachable without a permanent sequence toolbar. Ordinary guided lessons retain their compact instruction context. Shot cues and chapter marks derive from the compiled timeline, with no independent animation timer.
 
 ## Pixel actors and shared park
 

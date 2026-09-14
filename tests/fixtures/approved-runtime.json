@@ -1,5 +1,5 @@
 {
-  "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+  "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -8,18 +8,33 @@
     },
     {
       "path": "assets/park/bench.png",
-      "bytes": 200,
-      "sha256": "f33274d9d7842bf021ec8b33daa0747bfe01dae0d68aa763ff080d9230d5df7e"
+      "bytes": 255,
+      "sha256": "2fdc53a57b2aa4addaebfde280ab88defdbd3a4082ec615ed28c6f4961a4df7d"
     },
     {
       "path": "assets/park/grass.png",
-      "bytes": 481,
-      "sha256": "43504f0422c443c2c925086ffd74548813f62d0decf215a25d841b268a0cfc26"
+      "bytes": 618,
+      "sha256": "e1bd01b005f82b8d4ed21c48aabb590b556451e71c162c6b9321b119b8f6380d"
+    },
+    {
+      "path": "assets/park/menu-frame-dark.png",
+      "bytes": 149,
+      "sha256": "b5a5e51f8681a691ee34a2b258cf360eaab710d294c2f41e0940b40c3ab41dc9"
+    },
+    {
+      "path": "assets/park/menu-frame-light.png",
+      "bytes": 149,
+      "sha256": "12e71f3b3b44a1c72e3a3f52602c1979ffdd930bd093dcbedb8eccc40e32feb2"
+    },
+    {
+      "path": "assets/park/menu-labels.ttf",
+      "bytes": 15520,
+      "sha256": "badbe699869422d9f14f8d646715935d8da67f146d83cd6d00c61b8fa06b6c9f"
     },
     {
       "path": "assets/park/path.png",
-      "bytes": 418,
-      "sha256": "9aea7517ebba2513dd7bf1e8169738b584717cc1913f02cf25b3b79ef9dac851"
+      "bytes": 613,
+      "sha256": "a5fd8e1e4668c30988dd987a9b5377add6c75a8526b4999e3905f929c545cf42"
     },
     {
       "path": "assets/park/quiet-court.png",
@@ -28,8 +43,8 @@
     },
     {
       "path": "assets/park/shrub.png",
-      "bytes": 255,
-      "sha256": "396b1da0d9fdbb63ccb094eb06b655c0d85e999b6995a2f2c7473c093115d5ce"
+      "bytes": 247,
+      "sha256": "a7cd4a087e4134d48a7d63b214a02161897185a5907c511e2c74da38c59e5e35"
     },
     {
       "path": "assets/park/sign.png",
@@ -38,8 +53,8 @@
     },
     {
       "path": "assets/park/tree.png",
-      "bytes": 416,
-      "sha256": "ffd4de7504798bc912de89b0400cb8a457958f14c5f754f7e9ee5a37401c1acb"
+      "bytes": 466,
+      "sha256": "ae3fb8be4ff28983caa42d685182c071f82609857a746189cb2a3a8f15be4203"
     },
     {
       "path": "assets/players/green-left-handed.png",
@@ -233,8 +248,8 @@
     },
     {
       "path": "builder-court-tools.js",
-      "bytes": 9984,
-      "sha256": "b9c3095e6918caf5485aa38468e3dafe16550de0108e6cb5c6161b581e668838"
+      "bytes": 9966,
+      "sha256": "cbfcf2d1f608e89a94e66918bf5fc81ff30c6e7adbe956636b4f5b1aa57d839d"
     },
     {
       "path": "builder-framing.js",
@@ -243,8 +258,8 @@
     },
     {
       "path": "builder-integration.css",
-      "bytes": 21049,
-      "sha256": "dfa07a0296dbfdfb43f4a446600432bfc10b7157d81eba164ef635320d9c92c0"
+      "bytes": 1591,
+      "sha256": "328ee290f443bf09e1a0e1925448c61fb4a5c43eeedd234fed4eefd940869ba3"
     },
     {
       "path": "builder-storage.js",
@@ -253,13 +268,13 @@
     },
     {
       "path": "builder-ui.css",
-      "bytes": 19929,
-      "sha256": "501c45edfbb50dd7cb91bf5c2e97b12a5c02de2f663e1778aea9cafa904e5562"
+      "bytes": 14086,
+      "sha256": "61867e9783cd390a88bb379a49c8be984668685f839597d06d5de3b947b943d9"
     },
     {
       "path": "builder-ui.js",
-      "bytes": 42456,
-      "sha256": "a265220108fb665de78551c67040e210227b97b3b330b999f87e951defcee9de"
+      "bytes": 50910,
+      "sha256": "1b136023fe6e4a8ffba6f6116d172602a58c2523a5cc8ad1a6411b10c57a6c4a"
     },
     {
       "path": "builder-waypoint-policy.js",
@@ -268,8 +283,8 @@
     },
     {
       "path": "coaching-session.js",
-      "bytes": 3182,
-      "sha256": "686aad197c76814c64d9857aa235b93711de4c53bb2a03bcf08569eb1b150af7"
+      "bytes": 5777,
+      "sha256": "7f8afd72689345ba2488a2511d714cad54299dbffd047c834bb038b8d03069f2"
     },
     {
       "path": "coaching-ui.js",
@@ -293,8 +308,8 @@
     },
     {
       "path": "guided-plays.js",
-      "bytes": 17686,
-      "sha256": "341f98e63c9cb1d1852de7f756b45e702b1a5bfb6b74cd7bbc0254575acb26d0"
+      "bytes": 20090,
+      "sha256": "7ba9181556ec7ab26d9a4a5bbf55ca15a35069b25258c55e3ace8071c3f2e0e5"
     },
     {
       "path": "icons/apple-icon-180.png",
@@ -353,8 +368,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 19809,
-      "sha256": "79eaaf79916907af664d48e2ca01860db3b9043f44fea0fffb435c09b41ee858"
+      "bytes": 19932,
+      "sha256": "80cc423d5392fd1fa1ec6b1ede0b8c333b292f40ec714b8398fc6c0d4ecf40b9"
     },
     {
       "path": "manifest.json",
@@ -363,13 +378,13 @@
     },
     {
       "path": "park-layout.js",
-      "bytes": 2488,
-      "sha256": "9007dfd5b3bc98ff23d0e0444f982999eff0148b314002a18c12531ae48ee460"
+      "bytes": 2482,
+      "sha256": "f5db83619fdebe2a110dea0eb0c62764bcd49a67f9ae14333a91d7eaf429dbc4"
     },
     {
       "path": "park-scene.js",
-      "bytes": 10989,
-      "sha256": "87b8a7cf230683cfadb802a6790cf447acac5f83bdaab37890edacde36d897d8"
+      "bytes": 11809,
+      "sha256": "67c9b5cc297b2b6b1c48b84680371da2783e59c47778c8404ca1eeb830f162e2"
     },
     {
       "path": "pixel-actor-assets.js",
@@ -378,8 +393,8 @@
     },
     {
       "path": "play-builder.js",
-      "bytes": 26964,
-      "sha256": "86b7911c08b8c7765fde4425dd2803377c3de8949373008413a36527a72921e9"
+      "bytes": 29294,
+      "sha256": "d2fcdb7470dee011b09a1fcb7552e269a4ef3d5b731200566454e260dc42b45d"
     },
     {
       "path": "play-catalog.js",
@@ -407,14 +422,29 @@
       "sha256": "daaf75c96a1cd8a3b81c711183c55218003aaa92e0aea9ab8acd03965965557e"
     },
     {
+      "path": "shot-chapters.js",
+      "bytes": 3928,
+      "sha256": "fc98333bdb7aaae7b04b20148b67315f0b62e9371d1b637726b2f3e3e9bafb46"
+    },
+    {
+      "path": "shot-timeline.css",
+      "bytes": 3842,
+      "sha256": "3d12b65fb496d627bb26be621f3b794220236352d3ff2c8748653bd835a5438a"
+    },
+    {
+      "path": "shot-timeline.js",
+      "bytes": 10650,
+      "sha256": "dfb59225ff5a6d51e6fd0b95ba4e916bc42de6c6f4da553b37ec8499e425d75c"
+    },
+    {
       "path": "styles.css",
-      "bytes": 23644,
-      "sha256": "9c30fcf37e090812b23c89885964120e94099a664623e2f3e567e5b3360ad19d"
+      "bytes": 24912,
+      "sha256": "63395adc09e08d7faca3a6990a51ef66a020a9bbeaf6f102358ee6bc62bd827e"
     },
     {
       "path": "sw.js",
-      "bytes": 6561,
-      "sha256": "42f5382490e338888c9b037812d7c85e21be89d6aa3a51ff64a8d123b6a4b10b"
+      "bytes": 6748,
+      "sha256": "19dbc1e06b14f4edb3691f56531fedf065f7e599be89d8e5258156b80362badd"
     },
     {
       "path": "three-d-animation.js",
@@ -433,8 +463,8 @@
     },
     {
       "path": "three-d-loader.js",
-      "bytes": 3249,
-      "sha256": "0e12384e5c30a6b6a84aa329c9b89580f24a99c7408cb7a65681d04ff07eb5d4"
+      "bytes": 3775,
+      "sha256": "555830ece2e4b075dcd82a0a416fc7f5ecdb86001d91f7ea582eca9a30d6255e"
     },
     {
       "path": "three-d-pixel-actors.js",
@@ -443,8 +473,8 @@
     },
     {
       "path": "three-d-playback.js",
-      "bytes": 31235,
-      "sha256": "36a07020109b30e77efbe52ff9fc50dc90fddad33fffea238e02ed9269a8c255"
+      "bytes": 32708,
+      "sha256": "d23a93fd20e0b596dd32587802648f7c1e104e562fd76dcd95b1670cce132299"
     },
     {
       "path": "three-d-presentation.js",

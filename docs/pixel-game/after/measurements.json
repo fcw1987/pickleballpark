@@ -1,0 +1,772 @@
+[
+  {
+    "viewport": [
+      402,
+      874
+    ],
+    "dpr": 3,
+    "theme": "light",
+    "readyMs": 870,
+    "courtPixels": 110925.18072307328,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 110925.18072307328,
+    "corners": [
+      {
+        "x": 131.79058710939006,
+        "y": 237.09113178533934
+      },
+      {
+        "x": 334.2056948051974,
+        "y": 257.5714562167865
+      },
+      {
+        "x": 299.81800507617015,
+        "y": 717.0893147216825
+      },
+      {
+        "x": 18.878341625523444,
+        "y": 677.1089682656443
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 390,
+      "height": 718.8125
+    },
+    "buffer": [
+      780,
+      1438
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      402,
+      874
+    ],
+    "dpr": 3,
+    "theme": "dark",
+    "readyMs": 870,
+    "courtPixels": 110925.18072307328,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 110925.18072307328,
+    "corners": [
+      {
+        "x": 131.79058710939006,
+        "y": 237.09113178533934
+      },
+      {
+        "x": 334.2056948051974,
+        "y": 257.5714562167865
+      },
+      {
+        "x": 299.81800507617015,
+        "y": 717.0893147216825
+      },
+      {
+        "x": 18.878341625523444,
+        "y": 677.1089682656443
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 390,
+      "height": 718.8125
+    },
+    "buffer": [
+      780,
+      1438
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 3,
+    "theme": "light",
+    "readyMs": 797,
+    "courtPixels": 103692.15894719961,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 103692.15894719961,
+    "corners": [
+      {
+        "x": 128.20291551870585,
+        "y": 228.72674580104493
+      },
+      {
+        "x": 323.57956838412184,
+        "y": 248.4715436542394
+      },
+      {
+        "x": 290.66703129967874,
+        "y": 692.8491110254628
+      },
+      {
+        "x": 18.730751486918276,
+        "y": 654.0821219867702
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 378,
+      "height": 688.8125
+    },
+    "buffer": [
+      756,
+      1378
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 3,
+    "theme": "dark",
+    "readyMs": 797,
+    "courtPixels": 103692.15894719961,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 103692.15894719961,
+    "corners": [
+      {
+        "x": 128.20291551870585,
+        "y": 228.72674580104493
+      },
+      {
+        "x": 323.57956838412184,
+        "y": 248.4715436542394
+      },
+      {
+        "x": 290.66703129967874,
+        "y": 692.8491110254628
+      },
+      {
+        "x": 18.730751486918276,
+        "y": 654.0821219867702
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 378,
+      "height": 688.8125
+    },
+    "buffer": [
+      756,
+      1378
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 3,
+    "theme": "light",
+    "readyMs": 809,
+    "courtPixels": 127879.1398622584,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 127879.1398622584,
+    "corners": [
+      {
+        "x": 140.59547058431133,
+        "y": 251.801385746311
+      },
+      {
+        "x": 358.1910570024607,
+        "y": 273.83674957618473
+      },
+      {
+        "x": 321.00049687322314,
+        "y": 767.1507005261335
+      },
+      {
+        "x": 19.60497860067653,
+        "y": 724.312980188641
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 418,
+      "height": 776.8125
+    },
+    "buffer": [
+      836,
+      1554
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 3,
+    "theme": "dark",
+    "readyMs": 809,
+    "courtPixels": 127879.1398622584,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 127879.1398622584,
+    "corners": [
+      {
+        "x": 140.59547058431133,
+        "y": 251.801385746311
+      },
+      {
+        "x": 358.1910570024607,
+        "y": 273.83674957618473
+      },
+      {
+        "x": 321.00049687322314,
+        "y": 767.1507005261335
+      },
+      {
+        "x": 19.60497860067653,
+        "y": 724.312980188641
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 418,
+      "height": 776.8125
+    },
+    "buffer": [
+      836,
+      1554
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 2,
+    "theme": "light",
+    "readyMs": 789,
+    "courtPixels": 47995.56728005885,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 47995.56728005885,
+    "corners": [
+      {
+        "x": 115.72939681607848,
+        "y": 153.16663886859675
+      },
+      {
+        "x": 245.3794182308983,
+        "y": 166.04036820284196
+      },
+      {
+        "x": 226.35870546433904,
+        "y": 469.27687499999973
+      },
+      {
+        "x": 38.20617552147885,
+        "y": 441.7498728523971
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 308,
+      "height": 413.6875
+    },
+    "buffer": [
+      616,
+      828
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 2,
+    "theme": "dark",
+    "readyMs": 789,
+    "courtPixels": 47995.56728005885,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 47995.56728005885,
+    "corners": [
+      {
+        "x": 115.72939681607848,
+        "y": 153.16663886859675
+      },
+      {
+        "x": 245.3794182308983,
+        "y": 166.04036820284196
+      },
+      {
+        "x": 226.35870546433904,
+        "y": 469.27687499999973
+      },
+      {
+        "x": 38.20617552147885,
+        "y": 441.7498728523971
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 308,
+      "height": 413.6875
+    },
+    "buffer": [
+      616,
+      828
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      874,
+      402
+    ],
+    "dpr": 2,
+    "theme": "light",
+    "readyMs": 814,
+    "courtPixels": 41965.256513741384,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 41965.256513741384,
+    "corners": [
+      {
+        "x": 549.1675865476698,
+        "y": 124.99197210260589
+      },
+      {
+        "x": 626.9495813232685,
+        "y": 223.0352385194432
+      },
+      {
+        "x": 257.26975310317965,
+        "y": 323.8399999999999
+      },
+      {
+        "x": 265.3205387454457,
+        "y": 181.852024041265
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 60,
+      "width": 862,
+      "height": 272
+    },
+    "buffer": [
+      1724,
+      544
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      874,
+      402
+    ],
+    "dpr": 2,
+    "theme": "dark",
+    "readyMs": 814,
+    "courtPixels": 41965.256513741384,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 41965.256513741384,
+    "corners": [
+      {
+        "x": 549.1675865476698,
+        "y": 124.99197210260589
+      },
+      {
+        "x": 626.9495813232685,
+        "y": 223.0352385194432
+      },
+      {
+        "x": 257.26975310317965,
+        "y": 323.8399999999999
+      },
+      {
+        "x": 265.3205387454457,
+        "y": 181.852024041265
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 60,
+      "width": 862,
+      "height": 272
+    },
+    "buffer": [
+      1724,
+      544
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 2,
+    "theme": "light",
+    "readyMs": 845,
+    "courtPixels": 218004.550978759,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 218004.550978759,
+    "corners": [
+      {
+        "x": 289.6843671299063,
+        "y": 249.5790312303425
+      },
+      {
+        "x": 565.8952823180007,
+        "y": 277.026390100998
+      },
+      {
+        "x": 525.3728942501136,
+        "y": 923.5399999999995
+      },
+      {
+        "x": 124.52620002402016,
+        "y": 864.8512170559039
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 756,
+      "height": 882
+    },
+    "buffer": [
+      1512,
+      1764
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 2,
+    "theme": "dark",
+    "readyMs": 845,
+    "courtPixels": 218004.550978759,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 218004.550978759,
+    "corners": [
+      {
+        "x": 289.6843671299063,
+        "y": 249.5790312303425
+      },
+      {
+        "x": 565.8952823180007,
+        "y": 277.026390100998
+      },
+      {
+        "x": 525.3728942501136,
+        "y": 923.5399999999995
+      },
+      {
+        "x": 124.52620002402016,
+        "y": 864.8512170559039
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 756,
+      "height": 882
+    },
+    "buffer": [
+      1512,
+      1764
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "theme": "light",
+    "readyMs": 803,
+    "courtPixels": 314149.2506317286,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 314149.2506317286,
+    "corners": [
+      {
+        "x": 1028.2290644765922,
+        "y": 251.87466403817146
+      },
+      {
+        "x": 1239.81767459856,
+        "y": 520.984868624045
+      },
+      {
+        "x": 230.22396035319815,
+        "y": 795.371907286101
+      },
+      {
+        "x": 249.3657729641931,
+        "y": 408.21538545844084
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 1428,
+      "height": 758
+    },
+    "buffer": [
+      1428,
+      758
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "theme": "dark",
+    "readyMs": 803,
+    "courtPixels": 314149.2506317286,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 314149.2506317286,
+    "corners": [
+      {
+        "x": 1028.2290644765922,
+        "y": 251.87466403817146
+      },
+      {
+        "x": 1239.81767459856,
+        "y": 520.984868624045
+      },
+      {
+        "x": 230.22396035319815,
+        "y": 795.371907286101
+      },
+      {
+        "x": 249.3657729641931,
+        "y": 408.21538545844084
+      }
+    ],
+    "canvas": {
+      "x": 6,
+      "y": 68,
+      "width": 1428,
+      "height": 758
+    },
+    "buffer": [
+      1428,
+      758
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "Edit shot",
+      "Add shot",
+      "3D",
+      "2D",
+      "Play"
+    ],
+    "errors": []
+  }
+]
