@@ -110,6 +110,23 @@ test('a real track tap seeks through the pointer operation and stays scoped to t
   expect(result.outer).toEqual([]);
 });
 
+test('native emulated phone touch seeks without an overlapping chapter hit target', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 402, height: 874 }, deviceScaleFactor: 3, hasTouch: true });
+  const page = await context.newPage();
+  await mount(page, { time: 0 });
+  const control = page.getByRole('slider', { name: 'Rally timeline' });
+  const box = await control.boundingBox();
+  await page.touchscreen.tap(Math.round(box.x + box.width * .61), Math.round(box.y + box.height / 2));
+  const result = await page.evaluate(() => ({ actions: window.timelineActions, value: Number(document.querySelector('.shot-timeline-range').value) }));
+  expect(result.actions[0].type).toBe('scrubBegin');
+  expect(result.actions.at(-1).type).toBe('scrubEnd');
+  expect(result.actions.some(action => action.type === 'scrubSeek')).toBe(true);
+  expect(result.value).toBeGreaterThan(5.5);
+  expect(result.value).toBeLessThan(6.7);
+  await expect(page.locator('.shot-timeline-marker')).toHaveCount(4);
+  await context.close();
+});
+
 test('a pointer scrub keeps one operation identity and ignores stale frame updates', async ({ page }) => {
   await mount(page, { time: 2, playing: true });
   await syntheticBegin(page, 72);
