@@ -278,7 +278,10 @@ class GuidedPlayEngine {
     applyPositions(positions) { this.board.applyPlayPositions(positions); }
     applyAtTime(seconds) {
         if (!this.activePlay || !this.timeline) return;
-        const segment = seconds > 0 ? this.timeline.segments.find(item => seconds <= item.endTime) || this.timeline.segments.at(-1) : null;
+        // At a shared boundary the destination shot owns the sample. Keep the
+        // same epsilon convention as samplePlayState/samplePlayBall so actors,
+        // ball, cue, path, and chapter identity cannot disagree.
+        const segment = seconds > 0 ? this.timeline.segments.find(item => seconds < item.endTime - 1e-9) || this.timeline.segments.at(-1) : null;
         const local = segment ? Math.max(0, Math.min(segment.duration, seconds - segment.startTime)) : 0;
         const positions = {}, samples = {};
         for (const id of ['player1', 'player2', 'player3', 'player4']) {

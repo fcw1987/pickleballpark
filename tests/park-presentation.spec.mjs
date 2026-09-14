@@ -32,11 +32,11 @@ test('empty cues stay hidden; pause freezes their timeline-driven reveal',async(
  await page.locator('#playTimelineMount input[type=range]').fill('0');await expect(page.locator('#playShotCue')).toBeHidden();
 });
 
-test('manual contact boundaries identify the next shot without relabeling the selected step',async({page})=>{
+test('chapter boundaries label and cue the destination shot consistently',async({page})=>{
  await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);
  await page.evaluate(()=>{pickleboard.plays.load('lob-overhead');pickleboard.plays.timelineAction('chapter','overhead');});
- await expect(page.locator('#playbackStepLabel')).toHaveText('Forehand Lob');
- await expect(page.locator('#playShotCue')).toHaveText('Next shot: overhead · Contact');
+ await expect(page.locator('#playbackStepLabel')).toHaveText('Overhead Reply');
+ await expect(page.locator('#playShotCue')).toHaveText('overhead · Contact');
  await page.locator('#play3dView').click();await page.locator('#threeDCanvas canvas').waitFor();
- await expect(page.locator('#threeDShotCue')).toHaveText('Next shot: overhead · Contact');
+ await expect(page.locator('#threeDShotCue')).toHaveText('overhead · Contact');
 });

@@ -424,7 +424,7 @@ class ThreeDPlaybackViewer {
 
     currentStepIndex() {
         if (!this.timeline || this.clock.elapsed <= 0) return 0;
-        const index = this.timeline.segments.findIndex(segment => this.clock.elapsed <= segment.endTime);
+        const index = this.timeline.segments.findIndex(segment => this.clock.elapsed < segment.endTime - 1e-9);
         return index < 0 ? this.currentPlay.steps.length - 1 : this.timeline.segments[index].index;
     }
 
@@ -564,7 +564,7 @@ class ThreeDPlaybackViewer {
     }
 
     applyAtTime(seconds) {
-        const segment=seconds>0?(this.timeline.segments.find(item=>seconds<=item.endTime)||this.timeline.segments.at(-1)):null;
+        const segment=seconds>0?(this.timeline.segments.find(item=>seconds<item.endTime-1e-9)||this.timeline.segments.at(-1)):null;
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
         this.applyPixelActors(segment,local);
         const ball=this.sampleBall(seconds);
@@ -588,7 +588,7 @@ class ThreeDPlaybackViewer {
     updateUI() {
         if (!this.currentPlay) return;
         const index=this.currentStepIndex(),step=this.currentPlay.steps[index];
-        const segment=this.timeline.segments.find(item=>this.clock.elapsed<=item.endTime);
+        const segment=this.timeline.segments.find(item=>this.clock.elapsed<item.endTime-1e-9)||this.timeline.segments.at(-1);
         const cueStep=this.timeline.segments.find(s=>s.rallyLeg===this.lastState?.rallyLeg)?.step;
         updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:true,reducedMotion:this.board.plays.reducedMotion.matches});
         this.elements.rate.value=String(this.clock.playbackRate);

@@ -155,7 +155,7 @@ test('3D chapter seeking uses canonical anchors and reduced motion remains inspe
   await openPlay(page, 'fifth-shot-drop');
   await expect(page.locator('#threeDPrevious,#threeDNext,#threeDRestart,#threeDLoop')).toHaveCount(0);
   await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
-  expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(1);
+  expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(2);
   await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(0);
   expect(await page.evaluate(() => [...window.pickleboard.threeD.playerObjects.values()].every(root => root.userData.animation.phase === 'ready'))).toBe(true);
