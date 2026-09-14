@@ -50,7 +50,7 @@ for (const f of iphoneFixture.files) {
 }
 const results = [];
 const scopePath = new URL('https://fcw1987.github.io/pickleboard/').pathname;
-const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png' };
+const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.ttf': 'font/ttf' };
 for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
   for (const mode of ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade']) {
     const upgrading = mode !== 'fresh';
@@ -131,6 +131,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
         expect(f.sha256, f.path).toBe(manifest.files.find(e => e.path === f.path).sha256);
         if (f.path.endsWith('.js')) expect(f.type).toContain('javascript');
         if (f.path.endsWith('.png')) expect(f.type).toBe('image/png');
+        if (f.path.endsWith('.ttf')) expect(f.type).toBe('font/ttf');
       }
       for (const f of checks.cached) expect(f.sha256, `cached ${f.path}`).toBe(manifest.files.find(e => e.path === f.path)?.sha256);
       const declaredCachePaths = [...readFileSync(`${artifact}/sw.js`, 'utf8').split('const STATIC_ASSETS = [')[1].split('];')[0].matchAll(/'\.\/([^']*)'/g)].map(m => m[1] || 'index.html');
@@ -138,6 +139,8 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
       const missing = await context.request.get(`${base}missing-asset.png`); expect(missing.status()).toBe(404);
       // Exercise the shipped default builder with one saved custom edit and both renderers.
       await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+      expect(await page.evaluate(async()=>{const faces=await document.fonts.load('20px "Park Labels"');return faces.length===1&&faces[0].status==='loaded';})).toBe(true);
+      expect(await page.evaluate(()=>playBuilder.session.playing)).toBe(false);
       const builderProof = await page.evaluate(async () => {
         const b = playBuilder;
         await b.action('title', 'Package offline custom rally');
@@ -160,6 +163,8 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
       // Real offline: close only this test's server. Do not use setOffline emulation.
       server.closeAllConnections(); await new Promise(r => server.close(r)); stopped = true;
       await page.reload(); await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+      expect(await page.evaluate(async()=>{const faces=await document.fonts.load('20px "Park Labels"');return faces.length===1&&faces[0].status==='loaded';})).toBe(true);
+      expect(await page.evaluate(()=>playBuilder.session.playing)).toBe(false);
       expect(await page.evaluate(() => ({ title: playBuilder.document.title, target: playBuilder.document.shots[0].target.x }))).toEqual({ title: 'Package offline custom rally', target: 6.5 });
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
       for (const id of ids) {
@@ -169,14 +174,16 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
           const planner = b.board.captureBoardState();
           await b.action('template', id);
           await b.switchView('3d');
-          const proof = { id: b.document.templateSource?.templateId, active: b.board.threeD.active, shots: b.document.shots.length };
+          const proof = { id: b.document.templateSource?.templateId, active: b.board.threeD.active, shots: b.document.shots.length, valid:b.compiled.validShotCount, chapters:b.chapters.length, paused:!b.session.playing };
+          b.play();proof.canPlay=b.session.playing;b.pause();
           await b.switchView('2d');
           await b.setWorkspace('planner');
           proof.plannerRestored = JSON.stringify(b.board.captureBoardState()) === JSON.stringify(planner);
           return proof;
         }, id);
-        expect(lesson).toMatchObject({ id, active: true, plannerRestored: true });
+        expect(lesson).toMatchObject({ id, active: true, plannerRestored: true, paused:true, canPlay:true });
         expect(lesson.shots).toBeGreaterThan(0);
+        expect(lesson.valid).toBe(lesson.shots);expect(lesson.chapters).toBe(lesson.shots);
       }
       await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0); expect(errors).toEqual([]);
       results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: ids.length, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null });

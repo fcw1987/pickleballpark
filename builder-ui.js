@@ -97,6 +97,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   let advancedOpen = false;
   let shotDetailsOpen = false;
   let handednessOpen = false;
+  let assistanceOpen = false;
   let importFileGeneration = 0;
   let pendingField = false;
   let exportedBackup = '';
@@ -127,11 +128,14 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   }
 
   const fire = (type, payload) => onAction(type, payload);
-  const handleTimelineAction = (action, payload) => {
-    if (action === 'seek') return fire('seek', Number(payload));
-    if (action === 'chapter') return fire('chapter', payload);
-    if (action === 'scrubBegin' || action === 'scrubSeek' || action === 'scrubEnd' || action === 'scrubCancel') return fire(action, payload);
-    return fire(action, payload);
+  const syncViewingShot = async () => {
+    if (!current.playing && inspectorManualCollapsed !== false && current.currentShotId && current.currentShotId !== current.selectedShotId)
+      await fire('selectShot',{id:current.currentShotId,preserveTime:true});
+  };
+  const handleTimelineAction = async (action, payload) => {
+    const result=await fire(action, action==='seek'?Number(payload):payload);
+    if(['seek','chapter','scrubEnd','scrubCancel'].includes(action))await syncViewingShot();
+    return result;
   };
   timelineControl = mountShotTimeline({ onAction: handleTimelineAction });
   const title = el('h1', 'builder-title', 'Build a Play');
@@ -157,20 +161,28 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const cueNode = root.querySelector('.builder-cue'); const fastCue = current.cue; if (cueNode && fastCue) { const summary = cueNode.querySelector('.builder-chapter-menu > summary'); if (summary) summary.textContent = fastCue.title || 'Current shot'; }
       const play = root.querySelector('[data-action="play-pause"]'); if (play) { play.replaceChildren(el('span', 'pixel-play-icon', current.playing ? 'Ⅱ' : '▶'), el('span', 'pixel-play-label', current.playing ? 'Pause' : 'Play')); play.setAttribute('aria-pressed', String(Boolean(current.playing))); play.setAttribute('aria-label', current.playing ? 'Pause' : 'Play'); }
       root.classList.toggle('builder-busy', Boolean(current.busy));
+      root.querySelector('.builder-context-actions [data-action="collapse-inspector"]')?.setAttribute('aria-expanded', String(current.workspace === 'planner' || inspectorManualCollapsed === false));
       const inspector = root.querySelector('.builder-inspector'); const collapsed = current.workspace==='planner'?false:Boolean(inspectorManualCollapsed ?? true); if (inspector) inspector.classList.toggle('builder-inspector-collapsed', collapsed); const collapseButton = root.querySelector('.builder-inspector [data-action="collapse-inspector"],.builder-inspector [data-action="cancel-target"],.builder-inspector [data-action="cancel-movement"]'); if (collapseButton) { const placement = current.targetPlacement ? 'target' : current.movementPlacement ? 'movement' : ''; if (placement === 'target' || placement === 'movement' || collapsed) collapseButton.textContent = placement === 'target' ? 'Cancel target' : placement === 'movement' ? 'Cancel movement' : 'Edit shot'; else collapseButton.replaceChildren(el('span', 'builder-collapse-label-collapse', 'Collapse'), el('span', 'builder-collapse-label-done', 'Done')); collapseButton.dataset.action=placement==='target'?'cancel-target':placement==='movement'?'cancel-movement':'collapse-inspector'; collapseButton.setAttribute('aria-label', placement === 'target' ? 'Cancel target' : placement === 'movement' ? 'Cancel movement' : collapsed ? 'Edit shot' : (innerWidth<=700?'Done':'Collapse')); collapseButton.setAttribute('aria-expanded', String(!collapsed)); }
-      root.appendChild(templateDialog); root.appendChild(importDialog);
       return;
     }
     renderedDocument = doc; renderedSelectedShotId = current.selectedShotId; renderedView = current.view; renderedWorkspace = current.workspace; renderedWaypointKey = waypointKey; renderedSaveErrorKey = saveErrorKey;
     const previousAdvanced = root.querySelector('.builder-advanced'); if (previousAdvanced) advancedOpen = previousAdvanced.open;
     const oldDetails=root.querySelector('.builder-shot-details');if(oldDetails)shotDetailsOpen=oldDetails.open;
     const oldHanded=root.querySelector('.builder-handedness');if(oldHanded)handednessOpen=oldHanded.open;
+    const oldAssistance=root.querySelector('.builder-assistance');if(oldAssistance)assistanceOpen=oldAssistance.open;
+    const mainMenuOpen=Boolean(root.querySelector('.builder-main-menu')?.open);
+    const optionsMenuOpen=Boolean(root.querySelector('.builder-context-menu')?.open);
+    const chaptersOpen=Boolean(root.querySelector('.builder-chapter-menu')?.open);
     const focused=document.activeElement;const focusIdentity=root.contains(focused)?{action:focused.dataset.action,shotId:focused.dataset.shotId,label:focused.getAttribute('aria-label')}:null;
     const oldInspectorScroll=root.querySelector('.builder-inspector')?.scrollTop || 0;
-    root.replaceChildren();
+    // Keep modal dialogs connected through save/field/viewport updates.
+    for(const child of [...root.children])if(child.tagName!=='DIALOG')child.remove();
     root.classList.toggle('builder-planner', current.workspace === 'planner');
 
-    const mainMenu = el('details', 'builder-menu builder-main-menu'); mainMenu.append(el('summary', '', '☰ Menu'));
+    const mainMenu = el('details', 'builder-menu builder-main-menu'); mainMenu.open=mainMenuOpen;
+    const menuSummary=el('summary');menuSummary.setAttribute('aria-label','Menu');
+    const menuIcon=el('span','','☰');menuIcon.setAttribute('aria-hidden','true');
+    menuSummary.append(menuIcon,el('span','builder-menu-word','Menu'));mainMenu.append(menuSummary);
     const menuPanel = el('div', 'builder-menu-panel');
     const menuHeading = el('div', 'builder-menu-heading'); menuHeading.append(el('span', 'builder-park-mark', '◆'), el('strong', '', 'Pickleball Park'));
     const rename = button('Rename play', 'rename', 'builder-menu-item builder-button');
@@ -191,7 +203,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     }
     const cue = current.cue || (selected ? { title: shotLabel(selected, shots.indexOf(selected)), description: '' } : null);
     const cueNode = el('div', 'builder-cue');
-    const chapterMenu = el('details', 'builder-chapter-menu');
+    const chapterMenu = el('details', 'builder-chapter-menu'); chapterMenu.open=chaptersOpen;
     const chapterSummary = el('summary', 'builder-chip', cue?.title || 'Choose a shot'); chapterSummary.setAttribute('aria-label', 'Choose shot chapter'); chapterMenu.append(chapterSummary);
     const chapterList = el('div', 'builder-chapter-list'); chapterList.setAttribute('aria-label', 'Shot chapters');
     const chapterEntries = shots.map((shot, index) => { const chapter = (current.chapters || []).find(item => item.shotId === shot.id); return { ...(chapter || {}), shotId: shot.id, number: chapter?.number || index + 1, label: chapter?.label || FAMILIES.find(([id]) => id === shot.family)?.[1] || 'Shot', authoredOnly: !chapter }; });
@@ -199,7 +211,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     if (!chapterEntries.length) chapterList.appendChild(el('span', 'builder-empty', 'Add a shot to create chapters.'));
     chapterMenu.append(chapterList); cueNode.append(chapterMenu); meta.appendChild(cueNode);
     const context = el('div', 'builder-context-actions');
-    const editButton = button(selected ? 'Edit shot' : 'Edit play', 'collapse-inspector', 'builder-button builder-button-quiet'); editButton.setAttribute('aria-expanded', String(Boolean(!inspectorManualCollapsed)));
+    const editButton = button('Edit', 'collapse-inspector', 'builder-button builder-button-quiet'); editButton.setAttribute('aria-label',selected?'Edit shot':'Edit play');editButton.setAttribute('aria-expanded', String(inspectorManualCollapsed === false));
     const addButton = button('+ Add', 'add-shot', 'builder-button builder-button-primary'); addButton.setAttribute('aria-label', 'Add shot'); addButton.disabled = shots.length >= 64; addButton.title = addButton.disabled ? 'This play has reached the 64-shot limit' : 'Append a shot';
     context.append(editButton, addButton);
     const viewToggle = el('div', 'builder-view-toggle'); viewToggle.setAttribute('role', 'group'); viewToggle.setAttribute('aria-label', 'Court view');
@@ -210,7 +222,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const detail = [current.waypointPolicy.message || 'Some movement waypoints are preview-only.', affected ? `Affected: ${affected}` : ''].filter(Boolean).join(' ');
       const notice = el('div', 'builder-waypoint-notice'); notice.append(el('strong', '', 'Movement path preview'), el('span', '', detail), button('Preview destination only', 'acknowledge-waypoints', 'builder-button builder-button-accent')); meta.appendChild(notice);
     }
-    if(current.findings?.length){const firstFinding = typeof current.findings[0] === 'string' ? {} : current.findings[0]; const affectedId = firstFinding.shotId || firstFinding.stepId; const affectedIndex = shots.findIndex(shot => shot.id === affectedId); const review=button(`${affectedIndex >= 0 ? `Shot ${affectedIndex + 1} needs attention` : `${current.findings.length} items need attention`}`,'review-findings','builder-button builder-button-accent'); if (affectedId) review.dataset.shotId = affectedId; review.setAttribute('aria-label', affectedIndex >= 0 ? `Shot ${affectedIndex + 1} needs attention` : 'Review findings'); meta.append(review);}
+    if(current.findings?.length){const firstFinding = typeof current.findings[0] === 'string' ? {} : current.findings[0]; const affectedId = firstFinding.shotId || firstFinding.stepId; const affectedIndex = shots.findIndex(shot => shot.id === affectedId); const review=button(`${affectedIndex >= 0 ? `Shot ${affectedIndex + 1} needs attention` : `${current.findings.length} items need attention`}`,'review-findings','builder-button builder-button-accent builder-issue-chip'); if (affectedId) review.dataset.shotId = affectedId; review.setAttribute('aria-label', affectedIndex >= 0 ? `Shot ${affectedIndex + 1} needs attention` : 'Review findings'); meta.append(review);}
     root.appendChild(meta);
 
     // The chapter map replaces the old permanently visible shot strip. Details
@@ -261,7 +273,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const fault = el('label', 'builder-switch'); const faultInput = el('input'); faultInput.type = 'checkbox'; faultInput.checked = Boolean(doc.intentionalFault); faultInput.dataset.action = 'intentionalFault'; fault.append(faultInput, el('span', '', 'Intentional coaching mistake'), el('small', '', 'Keep the rule warning visible at the terminal fault.')); advanced.append(fault);
       const scope = select('Shade team', 'shade-team', [['both', 'Both teams'], ['green', 'Green'], ['orange', 'Orange']]); scope.querySelector('select').value = doc.assistance?.team || 'both'; advanced.append(scope); details.appendChild(advanced);
       const handed = el('details', 'builder-handedness'); handed.open = handednessOpen; handed.append(el('summary', '', 'Player handedness')); PLAYERS.forEach(([id, name]) => { const value = doc.players?.[id]?.handedness || 'right'; const field = select(name, 'handedness', [['right', 'Right-handed'], ['left', 'Left-handed']]); const control = field.querySelector('select'); control.value = value; control.dataset.playerId = id; handed.append(field); }); details.appendChild(handed);
-      const assistance = el('details', 'builder-assistance'); assistance.append(el('summary', '', 'Coach tools')); [['autoShading', 'Auto Shading', 'Shading changes eligible movement'], ['showGuides', 'Coverage Guides', 'Explain suggested positions only']].forEach(([field, label, description]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; input.setAttribute('aria-label', label); row.append(input, el('span', '', label), el('small', '', description)); assistance.append(row); }); inspector.appendChild(assistance);
+      const assistance = el('details', 'builder-assistance'); assistance.open=assistanceOpen; assistance.append(el('summary', '', 'Coach tools')); [['autoShading', 'Auto Shading', 'Shading changes eligible movement'], ['showGuides', 'Coverage Guides', 'Explain suggested positions only']].forEach(([field, label, description]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; input.setAttribute('aria-label', label); row.append(input, el('span', '', label), el('small', '', description)); assistance.append(row); }); inspector.appendChild(assistance);
       if (current.findings?.length) { const find = el('div', 'builder-findings'); find.append(el('strong', '', 'Review')); current.findings.forEach(f => { const item = typeof f === 'string' ? { message: f } : f; const row = el('div', 'builder-finding-row'); row.append(el('p', '', findingText(item, shots))); const affectedId = item.shotId || item.stepId; if (affectedId) { const index = shots.findIndex(shot => shot.id === affectedId); const go = button(`Go to ${index >= 0 ? `Shot ${index + 1}` : 'shot'}`, 'finding-shot', 'builder-button builder-button-quiet'); go.dataset.shotId = affectedId; go.setAttribute('aria-label', `Edit affected ${index >= 0 ? `Shot ${index + 1}` : 'shot'}`); row.appendChild(go); } find.appendChild(row); }); inspector.appendChild(find); }
     } else {
       const header=el('div','builder-inspector-header');header.append(el('span','','Play settings'),button(inspectorAutoCollapsed?'Edit play':'Collapse','collapse-inspector','builder-button builder-collapse'));inspector.append(header,el('p','builder-empty','Add a shot to start authoring.'));
@@ -279,8 +291,10 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const optionsMenu = el('details', 'builder-menu builder-context-menu'); optionsMenu.append(el('summary', '', 'Playback options'));
     const rate = select('Playback speed', 'rate', [['0.25', '0.25×'], ['0.5', '0.5×'], ['1', '1×']]); rate.querySelector('select').value = String(current.rate || 1);
     const cameraChoices = select('Camera', 'camera', [['overhead', 'Overhead'], ['sideline', 'Sideline'], ['behind-green', 'Behind Green'], ['behind-orange', 'Behind Orange']]); cameraChoices.querySelector('select').value = current.camera || 'overhead';
-    optionsMenu.append(rate, cameraChoices, undo, redo); transportTop.append(optionsMenu); transport.append(transportTop); root.appendChild(transport);
-    root.append(templateDialog, importDialog);
+    const optionsSummary=optionsMenu.querySelector('summary');optionsSummary.replaceChildren(el('span','','⋮'),el('span','sr-only','Playback options'));optionsSummary.setAttribute('aria-label','Playback options');optionsMenu.open=optionsMenuOpen;
+    const optionsPanel=el('div','builder-menu-panel');optionsPanel.append(rate,cameraChoices,undo,redo);optionsMenu.append(optionsPanel);
+    transportTop.append(optionsMenu); transport.append(transportTop); root.appendChild(transport);
+    for(const dialog of [templateDialog,importDialog])if(dialog.parentElement!==root)root.appendChild(dialog);
     timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
     if(focusIdentity && document.activeElement===document.body){
@@ -293,10 +307,12 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const target = event.target.closest('[data-action]'); if (!target || !root.contains(target)) return;
     const action = target.dataset.action;
     const menu = target.closest('.builder-menu'); if (menu && action !== 'rename') {menu.open = false;menu.querySelector('summary').focus();}
+    const picker=target.closest('.builder-chapter-menu');
+    if(picker&&['chapter','edit-chapter'].includes(action)){picker.open=false;picker.querySelector('summary')?.focus();}
     const input=document.activeElement;if(input&&root.contains(input)&&input.matches('input:not([type=range]),textarea'))input.blur();
     if (action === 'select-shot') { inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; rerenderAction('selectShot', target.dataset.shotId); }
-    else if (action === 'chapter') rerenderAction('chapter', target.dataset.shotId);
-    else if (action === 'edit-chapter') { fire('pauseForEditing'); inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; rerenderAction('selectShot', target.dataset.shotId); requestAnimationFrame(() => root.querySelector('[data-action="edit-family"]')?.focus({ preventScroll: true })); }
+    else if (action === 'chapter') {await rerenderAction('chapter', target.dataset.shotId);await syncViewingShot();}
+    else if (action === 'edit-chapter') { inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; await fire('pauseForEditing');await rerenderAction('selectShot', target.dataset.shotId);root.querySelector('[data-action="edit-family"]')?.focus({ preventScroll: true }); }
     else if (action === 'view') rerenderAction('view', target.dataset.view);
     else if (action === 'workspace-planner') rerenderAction('workspace', 'planner');
     else if (action === 'workspace-builder') rerenderAction('workspace', 'builder');
@@ -316,8 +332,14 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'delete-shot') rerenderAction('deleteShot', current.selectedShotId);
     else if (action === 'move-earlier') rerenderAction('moveShot', { id: current.selectedShotId, delta: -1 });
     else if (action === 'move-later') rerenderAction('moveShot', { id: current.selectedShotId, delta: 1 });
-    else if (action === 'collapse-inspector') { const inspector = root.querySelector('.builder-inspector'); const opening = inspector?.classList.contains('builder-inspector-collapsed'); if (opening) { fire('pauseForEditing'); const liveShotId = current.currentShotId || current.selectedShotId; if (liveShotId && liveShotId !== current.selectedShotId) { current.selectedShotId = liveShotId; fire('selectShot', liveShotId); } } inspectorManualCollapsed = !opening; userInspectorExpanded = !inspectorManualCollapsed; render({}); }
-    else if (action === 'play-pause') { inspectorManualCollapsed = true; userInspectorExpanded = null; rerenderAction('playPause',{playing:target.getAttribute('aria-pressed')!=='true'}); }
+    else if (action === 'collapse-inspector') {
+      const opening=root.querySelector('.builder-inspector')?.classList.contains('builder-inspector-collapsed');
+      inspectorManualCollapsed=!opening;userInspectorExpanded=opening;
+      if(opening){await fire('pauseForEditing');const liveShotId=current.currentShotId||current.selectedShotId;if(liveShotId&&liveShotId!==current.selectedShotId)await fire('selectShot',{id:liveShotId,preserveTime:true});}
+      render({});
+      root.querySelector(opening?'[data-action="edit-family"]':'.builder-context-actions [data-action="collapse-inspector"]')?.focus({preventScroll:true});
+    }
+    else if (action === 'play-pause') { inspectorManualCollapsed = true; userInspectorExpanded = null; await rerenderAction('playPause',{playing:target.getAttribute('aria-pressed')!=='true'});await syncViewingShot(); }
     else if (action === 'restart' || action === 'previous' || action === 'next' || action === 'undo' || action === 'redo' || action === 'save-as' || action === 'use-planner') rerenderAction(({ 'save-as': 'saveAs', 'use-planner': 'usePlanner' }[action] || action));
     else if (action === 'rename') { const field = root.querySelector('[data-action="title"]'); field?.focus(); field?.select(); }
     else if (action === 'open') openTemplateDialog('library');
@@ -325,7 +347,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'import-json') { const area = importDialog.querySelector('textarea'); const result = await rerenderAction('import', area?.value || ''); if (!result || result.ok !== false) { importFileGeneration += 1; closeDialog(importDialog); } else { const status = importDialog.querySelector('.builder-import-status') || el('p', 'builder-import-status'); status.textContent = result.error || 'Import could not be completed. Check the JSON and try again.'; importDialog.insertBefore(status, importDialog.querySelector('.builder-dialog-actions')); } }
     else if (action === 'export') rerenderAction('export');
     else if (action === 'appearance') rerenderAction('appearance');
-    else if (action === 'help') rerenderAction('help');
+    else if (action === 'help') {timelineControl?.cancel();rerenderAction('help');}
     else if (action === 'acknowledge-waypoints') rerenderAction('acknowledgeWaypoints');
     else if (action === 'retry-save') rerenderAction('retrySave');
   }

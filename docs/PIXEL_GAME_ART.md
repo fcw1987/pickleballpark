@@ -8,6 +8,8 @@ This candidate refines five existing assets: stepped multi-layer tree canopies, 
 
 Both views consume `PARK_LAYOUT` and the same textures. The 3D landmarks now face the camera around their stored ground anchors. Previously yaw-only planes collapsed vertically in the overhead view, making a tree look like a flat oval. Camera-facing presentation restores readable silhouettes at the ordinary pixel scale. Landmarks keep transparent padding and clamp their texture edges. Ground materials use nearest magnification and interpolated mip levels at minification, reducing abrupt transitions between levels on angled pavers. Actor atlas sampling is unchanged. There is no postprocessing target or fullscreen resolution reduction.
 
+`tools/generate-menu-font.mjs` creates the original **Park Labels** display font from square-grid letter patterns and rectangle outlines. Its 45 glyphs cover Latin labels, digits and basic punctuation; lowercase characters share the display capitals. It is 15,520 bytes, generated without a font dependency, and contains no redistributed system or commercial font data. Short game labels use it; names, precise values, paragraphs and unsupported characters retain readable system fallbacks. The generator check reproduces its exact bytes alongside the PNG artwork.
+
 ## Selective reference decisions
 
 | Official source and relevant section | Decision in this web app | Evidence/acceptance |

@@ -1,18 +1,27 @@
-/* Runtime geometry owned by PlayBuilder. Keep this file limited to viewport
-   adaptation so visual tokens stay consolidated in builder-ui.css. */
-body.builder-workspace{--builder-visible-height:100dvh}
-body.builder-workspace #playbackControls,body.builder-workspace .three-d-hud{display:none;pointer-events:none}
-.builder-ui{height:var(--builder-visible-height,100dvh);box-sizing:border-box;overflow:hidden;top:var(--builder-visible-top,0px)}
-.builder-ui.builder-busy{cursor:progress}.builder-ui button:disabled{opacity:.5;cursor:default}.builder-ui>*{min-width:0}
-.builder-layout{min-height:0}.builder-court-region{min-height:0}.builder-court-region [data-builder-court-region]{pointer-events:none}
-.builder-inspector[data-surface="nonmodal-sheet"]{overscroll-behavior:contain;scrollbar-gutter:stable}.builder-inspector :is(button,select,input){accent-color:var(--game-green,#477a59)}
-.builder-ui.builder-placing .builder-inspector-collapsed{display:block}.builder-ui.builder-placing .builder-inspector-collapsed .builder-inspector-header{display:flex!important}.builder-ui.builder-placing .builder-inspector-collapsed .builder-collapse{display:block!important}.builder-ui.builder-placing .builder-message{display:block}
-.builder-planner .builder-layout{grid-template-columns:minmax(0,1fr)}
-.builder-large-text .builder-ui{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}.builder-large-text .builder-ui>*{flex-shrink:0}.builder-large-text .builder-layout{flex:1 0 65dvh;min-height:24rem}.builder-large-text .builder-transport{display:block}.builder-large-text .builder-transport-top{display:flex;flex-wrap:wrap}.builder-large-text .builder-transport-timeline{flex:1 1 16rem}.builder-large-text .builder-button{white-space:normal}
-@media(max-width:700px){
-  .builder-ui{overflow:hidden}.builder-layout{display:block;position:relative}.builder-court-region{height:100%;min-height:0}
-  .builder-inspector:not(.builder-inspector-collapsed){overflow-y:auto;overscroll-behavior:contain}.builder-inspector:not(.builder-inspector-collapsed) .builder-inspector-header{min-height:44px}.builder-inspector:not(.builder-inspector-collapsed) :is(select,input[type=number],input[type=text]){min-height:44px;font-size:1rem}.builder-inspector:not(.builder-inspector-collapsed) :is(button,.builder-chip){min-height:44px}.builder-shot-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.builder-shot-actions .builder-button{min-height:44px}
-  .builder-transport{padding:max(.35rem,env(safe-area-inset-bottom)) .35rem .35rem}.builder-transport-top{min-height:4.4rem}.builder-transport-timeline{min-width:0}
+/* The visible viewport and court projection are owned by PlayBuilder. */
+body.builder-workspace { --builder-visible-height: 100dvh; }
+body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { display: none; }
+.builder-ui { height: var(--builder-visible-height,100dvh); top: var(--builder-visible-top,0px); box-sizing: border-box; overflow: hidden; }
+.builder-ui.builder-busy { cursor: progress; }
+.builder-large-text .builder-ui { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+.builder-large-text .builder-ui > * { flex-shrink: 0; }
+.builder-large-text .builder-meta { flex-wrap: wrap; }
+.builder-large-text .builder-cue { flex: 1 1 8rem; }
+.builder-large-text .builder-context-actions { flex-wrap: wrap; margin-left: 0; }
+.builder-large-text .builder-layout { flex: 1 0 65dvh; min-height: 24rem; }
+.builder-large-text .builder-transport-top { display: flex; flex-wrap: wrap; }
+.builder-large-text .builder-transport-timeline { flex: 1 1 12rem; }
+.builder-large-text .builder-context-menu { margin-left: auto; }
+.builder-large-text .builder-button { white-space: normal; }
+.builder-large-text .builder-chapter-list, .builder-large-text .builder-menu-panel { max-width: calc(100vw - 32px); }
+.builder-large-text .builder-inspector:not(.builder-inspector-collapsed) {
+  position: fixed;
+  left: auto;
+  right: 8px;
+  top: calc(var(--builder-visible-top,0px) + 8px);
+  bottom: auto;
+  width: min(24rem,calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  max-height: calc(var(--builder-visible-height,100dvh) - 16px);
+  z-index: 45;
 }
-@media(max-height:500px) and (orientation:landscape){.builder-ui{overflow:hidden}.builder-layout{min-height:0}.builder-court-region{height:100%}.builder-inspector:not(.builder-inspector-collapsed){max-height:calc(100% - 1rem)}.builder-transport{min-height:3.8rem}.builder-transport-top{min-height:3rem}}
-@media(min-width:701px) and (max-height:500px) and (orientation:landscape){.builder-ui{grid-template-columns:minmax(0,1fr) 16rem;grid-template-rows:minmax(0,1fr) auto}.builder-topbar,.builder-meta{grid-column:2}.builder-layout{grid-column:1;grid-row:1}.builder-transport{grid-column:1/-1;grid-row:2}}

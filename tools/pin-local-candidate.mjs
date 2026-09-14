@@ -14,11 +14,23 @@ const old=JSON.parse(readFileSync('tests/fixtures/approved-runtime.json'));
 const previousDigest=sha(JSON.stringify({approvedSource:old.source,files:old.files},null,2)+'\n');
 const digest=sha(JSON.stringify({approvedSource:source,files},null,2)+'\n');
 const size=files.reduce((n,f)=>n+f.bytes,0),oldSize=old.files.reduce((n,f)=>n+f.bytes,0);
+const updates=[];
 for(const file of ['tools/build-site.mjs','tools/verify-deployment-artifact.mjs','tests/deployment-artifact.unit.mjs']){
- let text=readFileSync(file,'utf8').replaceAll(previousDigest,digest).replaceAll(old.source,source);
- if(file.endsWith('verify-deployment-artifact.mjs'))text=text.replace(`manifest.files.length !== ${old.files.length}`,`manifest.files.length !== ${files.length}`).replace(`exactly ${old.files.length} files`,`exactly ${files.length} files`);
- if(file.endsWith('deployment-artifact.unit.mjs'))text=text.replace(`runtimeFiles: ${old.files.length}, runtimeBytes: ${oldSize}`,`runtimeFiles: ${files.length}, runtimeBytes: ${size}`);
- writeFileSync(file,text);
+ const original=readFileSync(file,'utf8');
+ if(!original.includes(previousDigest))throw Error(`Previous manifest pin is absent from ${file}; inspect its contract before updating`);
+ let text=original.replaceAll(previousDigest,digest);
+ if(file.endsWith('verify-deployment-artifact.mjs')){
+  for(const expected of [old.source,`manifest.files.length !== ${old.files.length}`,`exactly ${old.files.length} files`])if(!text.includes(expected))throw Error(`Previous artifact contract is absent from ${file}: ${expected}`);
+  text=text.replaceAll(old.source,source).replace(`manifest.files.length !== ${old.files.length}`,`manifest.files.length !== ${files.length}`).replace(`exactly ${old.files.length} files`,`exactly ${files.length} files`);
+ }
+ if(file.endsWith('deployment-artifact.unit.mjs')){
+  const expected=`runtimeFiles: ${old.files.length}, runtimeBytes: ${oldSize}`;
+  if(!text.includes(expected))throw Error(`Previous byte/count assertion is absent from ${file}`);
+  text=text.replace(expected,`runtimeFiles: ${files.length}, runtimeBytes: ${size}`);
+ }
+ updates.push([file,text]);
 }
+// Validate every old pin before modifying any of the contract files.
+for(const [file,text] of updates)writeFileSync(file,text);
 writeFileSync('tests/fixtures/approved-runtime.json',JSON.stringify({source,files},null,2)+'\n');
 console.log(JSON.stringify({source,manifestSha256:digest,runtimeFiles:files.length,runtimeBytes:size,deltaBytes:size-oldSize,added:files.filter(f=>!old.files.some(o=>o.path===f.path)).map(f=>f.path),removed:old.files.filter(f=>!files.some(o=>o.path===f.path)).map(f=>f.path),note:'Local review package only; owner acceptance and publication are separate.'},null,2));

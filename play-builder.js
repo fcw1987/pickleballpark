@@ -142,13 +142,15 @@ export class PlayBuilder {
         try { this.store.save(this.document); this.saveStatus='Saved on this device';this.saveError=null;this.libraryDirty=true;return true; }
         catch(error) { this.saveError={conflict:error.code==='DRAFT_CONFLICT',message:error.message};this.saveStatus=this.saveError.conflict?'Not saved · changed in another tab':'Not saved · retry or export';return false; }
     }
-    edit(change, {review = true} = {}) {
+    edit(change) {
         this.courtTools.clear();
         this.pause(); this.cancelPendingView();
         const draft=copy(this.document); change(draft); validateDocument(draft);
         this.history.commit(draft); this.document=this.history.current;
         if(!this.document.shots.some(s=>s.id===this.selectedShotId))this.selectedShotId=this.document.shots[0]?.id || null;
-        this.message=review?'Updated. Review later shots if flagged.':'';
+        // Findings have their own affected-shot route; routine edits should not
+        // leave a permanent paragraph in the compact viewing strip.
+        this.message='';
         this.installPlay(false);
         this.save(); this.render();
     }
@@ -250,7 +252,12 @@ export class PlayBuilder {
                 this.selectedShotId=shots[Math.max(0,Math.min(shots.length-1,index+(action==='next'?1:-1)))]?.id || null;
                 this.seek(this.compiled.timeline.segments[shots.findIndex(s=>s.id===this.selectedShotId)]?.startTime || 0);
             }
-            else if(action==='selectShot'){this.selectedShotId=value;this.seek(this.compiled.timeline.segments[this.document.shots.findIndex(s=>s.id===value)]?.startTime || 0);}
+            else if(action==='selectShot'){
+                const shotId=typeof value==='string'?value:value?.id;
+                if(!this.document.shots.some(shot=>shot.id===shotId))return {ok:false,error:'Choose an authored shot.'};
+                this.selectedShotId=shotId;
+                if(!value?.preserveTime)this.seek(this.chapters.find(chapter=>chapter.shotId===shotId)?.anchor || 0);
+            }
             else if(action==='cancelTarget'||action==='cancelMovement'){this.courtTools.clear();this.message='Target placement cancelled.';}
             else if(action==='placeTarget'){this.pause();if(this.courtTools.beginPlacement)this.courtTools.beginPlacement();else this.courtTools.placing=true;this.message=`Tap to place Shot ${this.document.shots.indexOf(this.selectedShot)+1}'s target. Cancel keeps the current target.`;}
             else if(action==='placeMovement'){
@@ -286,7 +293,8 @@ export class PlayBuilder {
             else if(action==='import'){if(this.workspace==='planner')await this.setWorkspace('builder');const imported=this.store.importJSON(value);imported.id=id();this.loadDocument(imported);this.message='Imported as a separate copy. Existing saved plays were kept.';}
             else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleballpark-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
             else if(action==='usePlanner') {
-                if(!confirm('Replace this draft’s starting layout with the current planner arrangement? Your shots will be preserved and revalidated.'))return;
+                this.pause();
+                if(!await this.ui.confirmPlanner())return;
                 const state=this.workspace==='planner'?this.board.captureBoardState():this.plannerSnapshot;await this.setWorkspace('builder');
                 this.edit(doc=>{doc.initialLayout=copy(state.positions);for(const [key,handedness]of Object.entries(state.handedness))doc.players[key].handedness=handedness;doc.annotations=state.drawings.map(d=>({type:'path',d}));});
             }

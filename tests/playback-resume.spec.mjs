@@ -42,7 +42,7 @@ test('repeated pause resumes the same rally leg without skipping contact or chan
     expect(resumed.positions.ball.y).toBeGreaterThan(paused.positions.ball.y);
   }
   await command(page, 'pause');
-  await command(page, 'next');
+  await page.evaluate(()=>pickleboard.plays.timelineAction('seek',pickleboard.plays.timeline.duration));
   const endpoint=await state(page);
   expect(endpoint.playing).toBe(false);
   expect(endpoint.stepIndex).toBe(2);
@@ -51,8 +51,8 @@ test('repeated pause resumes the same rally leg without skipping contact or chan
   expect(endpoint.positions.ball.y).toBeCloseTo(6,9);
 });
 
-test('final shot resumes to its actual final event before completion', async ({ page }) => {
-  await command(page,'next');
+test('final shot resumes to its actual final event, holds, and then repeats', async ({ page }) => {
+  await page.evaluate(()=>pickleboard.plays.timelineAction('chapter',pickleboard.plays.chapters[1].shotId));
   await command(page,'play');
   await page.clock.runFor(320);
   await command(page,'pause');
@@ -66,18 +66,24 @@ test('final shot resumes to its actual final event before completion', async ({ 
   expect((await state(page)).status).toBe('playing');
   await page.clock.runFor(80);
   const ended=await state(page);
-  expect(ended.status).toBe('complete'); expect(ended.playing).toBe(false);
+  expect(ended.status).toBe('playing'); expect(ended.playing).toBe(true);
+  expect(await page.evaluate(()=>pickleboard.plays.session.holding)).toBe(true);
   expect(ended.positions.ball.x).toBeCloseTo(15,9);expect(ended.positions.ball.y).toBeCloseTo(6,9);
+  await command(page,'pause');const held=await state(page);
+  await page.clock.runFor(2000);expect(await state(page)).toEqual(held);
+  await command(page,'play');await page.clock.runFor(1100);
+  expect(await page.evaluate(()=>pickleboard.plays.session.iteration)).toBe(1);
+  expect((await state(page)).elapsed).toBeLessThan(.3);
 });
 
-test('manual navigation, restart and exit cancel retained action and timers', async ({ page }) => {
+test('paused chapter and endpoint seeking plus exit cancel retained action and timers', async ({ page }) => {
   await command(page,'play');await page.clock.runFor(320);await command(page,'pause');
-  await command(page,'next');const manual=await state(page);
+  await page.evaluate(()=>pickleboard.plays.timelineAction('chapter',pickleboard.plays.chapters[1].shotId));const manual=await state(page);
   expect(manual.playing).toBe(false);
   await page.clock.runFor(2000);expect(await state(page)).toEqual(manual);
-  await command(page,'restart');await command(page,'play');await page.clock.runFor(160);await command(page,'pause');
-  await command(page,'previous');expect((await state(page)).stepIndex).toBe(0);
-  await command(page,'play');await page.clock.runFor(160);await command(page,'restart');
+  await page.evaluate(()=>pickleboard.plays.timelineAction('seek',0));await command(page,'play');await page.clock.runFor(160);await command(page,'pause');
+  await page.evaluate(()=>pickleboard.plays.timelineAction('seek',0));expect((await state(page)).elapsed).toBe(0);
+  await command(page,'play');await page.clock.runFor(160);await command(page,'pause');await page.evaluate(()=>pickleboard.plays.timelineAction('seek',0));
   const restarted=await state(page);await page.clock.runFor(2000);expect(await state(page)).toEqual(restarted);
   await command(page,'play');await page.clock.runFor(160);await command(page,'exit');
   const exited=await state(page);await page.clock.runFor(2000);expect(await state(page)).toEqual(exited);
