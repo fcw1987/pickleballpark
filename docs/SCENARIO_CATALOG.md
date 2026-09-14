@@ -32,7 +32,7 @@ Every row declares the source intent, derived contact and bounce contract, respo
 | `center-target` | Center target | G / 1 | player1 | stop | Intended target x=10 remains immutable |
 | `bounced-response` | Ground response after a kitchen bounce | G,G / 1,1 | player1, player3 | stop | Incoming leg lands at y=28 intent; next contact is generated 0.75 feet beyond it |
 | `long-mixed` | 30-shot mixed supported-family exchange | Per executable fixture / per next contact | player1/player3 alternate | stop after shot 30 | Bounded event stream, stable IDs, deterministic seek |
-| `infeasible-pin` | Contact conflicts with an active pin | G,G / 1,1 playable prefix | player1, player3 | stop at valid prefix | Feasibility finding identifies shot 3; the two-shot prefix remains playable |
+| `infeasible-pin` | Contact conflicts with an active pin | G,G / 1,1 compiled prefix | player1, player3 | preview blocked until corrected | Feasibility finding identifies shot 3; compiler retains two valid shots, while the builder keeps the whole draft paused and editable |
 | `intentional-rule-warning` | Deliberate terminal serve fault | S / 1 | player1 | declared fault after shot 1 | Rule warning remains visible; no continuation is invented |
 | `declared-winner` | Explicit winner outcome | G / 1 | player1 | declared winner after shot 1 | Winner label and outcome point to the final recipe ID |
 
@@ -73,3 +73,9 @@ Future model work, kept outside this beta contract:
 ## Stabilization defect covered
 
 `BETA-002` exposed a contract hole: a serve recipe at shot 1 was accepted when `opening` was `midrally`. A mid-rally declaration means the opening serve and return bounces have already happened, so a new serve cannot occur in that sequence. The compiler now accepts serve only as shot 1 of `opening: "serve"`; it rejects serve at every mid-rally position and at later full-rally positions while preserving the valid prefix.
+
+## Browser and extended corpus verification
+
+`tests/qa-scenario-browser.spec.mjs` loads all 25 fixtures into the real browser renderer. Valid contacts check paddle/ball agreement, handedness, unchanged tactical facing across all four cameras, 2D/3D world agreement, history-independent seeking and source preservation. Invalid fixtures must keep playback blocked and preserve authored data. This is controlled fixture testing, distinct from the three visible-interface challenges.
+
+The independent extended generator in `tools/qa-generated-extended.mjs` covers 446 valid documents, 24 intentionally invalid documents, 9,435 shots and 77,873 boundary samples. See [the independent review](qa/sol-review.md) for seeds, pair coverage, factor limits and the 64-shot visible workflow. The two generator totals describe separate schedules; they are not a claim of that many unique tactical scenarios.
