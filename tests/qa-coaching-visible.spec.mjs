@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('coaching visible journey smoke', async ({ page }) => {
-  await page.goto(process.env.PARK_URL ?? 'http://127.0.0.1:4195');
+  await page.goto('/');
   await expect(page.getByText('Starter Serve, Return & Third.', { exact: false }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add shot' })).toBeVisible();
 });
@@ -9,7 +9,7 @@ test('coaching visible journey smoke', async ({ page }) => {
 test('mobile playback options and measured Menu tap are visible', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const page = await context.newPage();
-  await page.goto(process.env.PARK_URL ?? 'http://127.0.0.1:4195');
+  await page.goto('/');
 
   await page.locator('summary[aria-label="Playback options"]').click();
   const camera = page.locator('select[aria-label="Camera"]');
