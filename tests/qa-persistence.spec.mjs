@@ -114,3 +114,33 @@ test('a rejected newer Import keeps the current source and cancels an older pend
   expect(result.final).toEqual(result.beforeImport);
   expect(result.olderResult).toMatchObject({ ok: false });
 });
+
+test('a pending Use Planner cannot rewrite a play opened during 3D restoration', async ({ page }) => {
+  await start(page);
+  const ids = await savedPair(page);
+  await page.evaluate(() => {
+    playBuilder.board.updateTokenPosition(playBuilder.board.tokens.player1, 8.75, 19.5);
+    playBuilder.ui.confirmPlanner = async () => true;
+  });
+  await gateBuilderRestore(page);
+
+  const result = await page.evaluate(async ({ a }) => {
+    const plannerAction = playBuilder.action('usePlanner');
+    await window.__qaRestoreGate.enteredGate;
+    const opened = await playBuilder.action('open', a);
+    const afterOpen = structuredClone(playBuilder.document);
+    window.__qaRestoreGate.release();
+    const plannerResult = await plannerAction;
+    return {
+      opened,
+      plannerResult,
+      afterOpen,
+      final: structuredClone(playBuilder.document)
+    };
+  }, ids);
+
+  expect(result.opened).toMatchObject({ ok: true });
+  expect(result.final).toEqual(result.afterOpen);
+  expect(result.plannerResult).toMatchObject({ ok: false });
+});
+
