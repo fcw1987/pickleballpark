@@ -5,8 +5,8 @@ export const REVIEW_EXPIRES = '2026-10-06';
 export const TEST_FILE_HASHES = Object.freeze({
   'tests/coaching-workflow.spec.mjs': '417c47c2f77efd5c8d51ec5caf9cbf23a53e97ba843ec5e3a25220a7bb5b3ddb',
   'tests/pixel-replay.spec.mjs': '11e47959d5a67ec9d22f78c3e8fd014e86142419ed11aef16442b9688c1b0808',
-  'tests/plays.spec.mjs': '44e7a8844e674b7a20f415b3d1237268c78973a881ee15b2c99cb85fa85d71d1',
-  'tests/three-d.spec.mjs': '2aec1983a22bce20bfe44d6757119eadf830d431405018eb00ff71cc3ee2e0b4',
+  'tests/plays.spec.mjs': 'a081abea40b87dc7d6f345eb31bf0e09da10655ccc84bdef0120f01acd3826cf',
+  'tests/three-d.spec.mjs': '596165ad01f342efb923d888dd32bf0332914ef9bc7e79adab105f820317df2f',
   'tests/service-worker.spec.mjs': 'd4a2bd0e675df54e5e00774c74bc354d3dc3976c6cb674427382e203681c3abf',
 });
 
@@ -14,7 +14,7 @@ export const ALLOWED_FAILURES = Object.freeze([
   ['tests/coaching-workflow.spec.mjs', 'cached coaching engine resumes an interrupted shot offline', 122, 'page.reload', 'page.reload: WebKit encountered an internal error'],
   ['tests/pixel-replay.spec.mjs', 'fresh cached installation opens all four pixel actors fully offline', 73, 'page.reload', 'page.reload: WebKit encountered an internal error'],
   ['tests/plays.spec.mjs', 'guided plays start and advance on an offline repeat visit', 228, 'page.reload', 'page.reload: WebKit encountered an internal error'],
-  ['tests/three-d.spec.mjs', 'offline repeat visit can open the locally cached Three.js viewer', 119, 'page.reload', 'page.reload: WebKit encountered an internal error'],
+  ['tests/three-d.spec.mjs', 'offline repeat visit can open the locally cached Three.js viewer', 126, 'page.reload', 'page.reload: WebKit encountered an internal error'],
   ['tests/service-worker.spec.mjs', 'installs the versioned shell and serves a repeat visit offline', 52, 'page.goto', 'page.goto: WebKit encountered an internal error'],
   ['tests/service-worker.spec.mjs', 'offline navigation uses only the owned shell cache and does not cache unknown pages as the shell', 108, 'page.goto', 'page.goto: WebKit encountered an internal error'],
   ['tests/service-worker.spec.mjs', 'upgrades old Pickleboard caches without deleting unrelated origin caches', 93, 'toBe', 'expect(received).toBe(expected) // Object.is equality'],

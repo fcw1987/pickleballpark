@@ -76,7 +76,14 @@ test('exit stops render loop, re-entry creates one new loop, and 2D Play remains
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().active)).toBe(false);
   expect(await page.evaluate(() => window.pickleboard.plays.getState().playId)).toBe('third-shot-drop');
   await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
-  expect(await page.evaluate(() => window.pickleboard.plays.getState().stepIndex)).toBe(1);
+  const returnState = await page.evaluate(() => {
+    const engine = window.pickleboard.plays;
+    const chapter = engine.chapters.find(item => item.shotId === 'return');
+    return { ...engine.getState(), anchor: chapter.anchor, stepId: engine.lastState.segment.step.id,
+      currentShotId: document.querySelector('#playTimelineMount .shot-timeline-marker.is-current')?.dataset.shotId };
+  });
+  expect(returnState).toMatchObject({ stepIndex: 2, stepId: 'return', currentShotId: 'return' });
+  expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
   await page.locator('#play3dView').click();
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().renderLoopCount)).toBe(firstLoopCount + 1);

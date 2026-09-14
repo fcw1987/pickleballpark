@@ -229,6 +229,14 @@ test('guided plays start and advance on an offline repeat visit', async ({ page,
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
   await loadPlay(page, 'third-shot-drop');
   await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
-  expect(await engineState(page)).toMatchObject({ playId: 'third-shot-drop', stepIndex: 1 });
+  const returnState = await page.evaluate(() => {
+    const engine = window.pickleboard.plays;
+    const chapter = engine.chapters.find(item => item.shotId === 'return');
+    return { ...engine.getState(), anchor: chapter.anchor,
+      stepId: engine.lastState.segment.step.id,
+      currentShotId: document.querySelector('#playTimelineMount .shot-timeline-marker.is-current')?.dataset.shotId };
+  });
+  expect(returnState).toMatchObject({ playId: 'third-shot-drop', stepIndex: 2, stepId: 'return', currentShotId: 'return' });
+  expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
   await context.setOffline(false);
 });

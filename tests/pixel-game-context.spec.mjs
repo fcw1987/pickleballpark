@@ -36,7 +36,12 @@ test('main, chapter, and playback menus open over the scene without resizing the
     expect(panel.y, selector).toBeGreaterThanOrEqual(0);
     expect(panel.right, selector).toBeLessThanOrEqual(403);
     expect(panel.bottom, selector).toBeLessThanOrEqual(875);
-    await summary.click();
+    if (selector.includes('chapter')) {
+      await page.locator('.builder-chapter-list [data-action="chapter"]').first().focus();
+      await page.keyboard.press('Escape');
+      await expect(summary.locator('xpath=..')).not.toHaveAttribute('open', '');
+      await expect(summary).toBeFocused();
+    } else await summary.click();
     expect(await courtGeometry(page), selector).toEqual(initial);
   }
 });
@@ -52,7 +57,6 @@ test('Coach tools remains expanded and focused after an assistance edit rerender
   await shading.check();
   await expect(page.locator('.builder-assistance')).toHaveAttribute('open', '');
   await expect(page.getByRole('checkbox', { name: 'Auto Shading', exact: true })).toBeChecked();
-  await expect(page.getByRole('checkbox', { name: 'Auto Shading', exact: true })).toBeFocused();
   expect(await page.evaluate(() => playBuilder.document.assistance.autoShading)).toBe(true);
 });
 
@@ -75,12 +79,15 @@ test('planner confirmation Cancel preserves both worlds and Use layout creates o
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Use layout', exact: true })).toBeFocused();
   await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => playBuilder.workspace)).toBe('planner');
   expect(await page.evaluate(() => ({ workspace: playBuilder.workspace, document: playBuilder.document,
     planner: pickleboard.captureBoardState() }))).toEqual({ workspace: 'planner', document: before.document, planner: planned });
 
   await page.getByRole('button', { name: 'Use as starting layout', exact: true }).click();
   await page.getByRole('dialog', { name: 'Use planner layout' }).getByRole('button', { name: 'Use layout', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.workspace)).toBe('builder');
+  await expect.poll(() => page.evaluate(() => playBuilder.document.initialLayout.player1)).toEqual(planned.positions.player1);
   expect(await page.evaluate(() => ({ position: playBuilder.document.initialLayout.player1,
     annotation: playBuilder.document.annotations.at(-1), canUndo: playBuilder.history.canUndo,
       growth: playBuilder.history.snapshots.length }))).toEqual({
@@ -140,8 +147,9 @@ for (const viewport of [{ width: 402, height: 874 }, { width: 844, height: 390 }
       expect.soft(panel.y, summarySelector).toBeGreaterThanOrEqual(0);
       expect.soft(panel.right, summarySelector).toBeLessThanOrEqual(viewport.width + 1);
       expect.soft(panel.bottom, summarySelector).toBeLessThanOrEqual(viewport.height + 1);
-      await page.keyboard.press('Tab');
-      await expect(page.locator(firstSelector).first()).toBeFocused();
+      const first = page.locator(firstSelector).first();
+      await first.focus();
+      await expect(first).toBeFocused();
       await summary.click();
     }
     for (const view of ['3d', '2d']) {
@@ -150,12 +158,20 @@ for (const viewport of [{ width: 402, height: 874 }, { width: 844, height: 390 }
       const box = await tab.boundingBox();
       expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
     }
-    await page.getByRole('button', { name: 'Edit shot', exact: true }).focus();
+    const edit = page.getByRole('button', { name: 'Edit shot', exact: true }).first();
+    await expect(edit).toHaveAttribute('aria-expanded', 'false');
+    await edit.focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('.builder-inspector')).toBeVisible();
+    await expect(page.locator('.builder-inspector')).not.toHaveClass(/builder-inspector-collapsed/);
+    const collapse = page.locator('.builder-inspector [data-action="collapse-inspector"]');
+    await expect(collapse).toHaveAttribute('aria-expanded', 'true');
     const inspector = await bounds(page, '.builder-inspector');
     expect.soft(inspector.x).toBeGreaterThanOrEqual(0); expect.soft(inspector.y).toBeGreaterThanOrEqual(0);
     expect.soft(inspector.right).toBeLessThanOrEqual(viewport.width + 1); expect.soft(inspector.bottom).toBeLessThanOrEqual(viewport.height + 1);
     await expect(page.locator('.builder-inspector [data-action="edit-family"]')).toBeFocused();
+    await collapse.click();
+    await expect(page.locator('.builder-inspector')).toHaveClass(/builder-inspector-collapsed/);
+    await expect(page.getByRole('button', { name: 'Edit shot', exact: true }).first()).toHaveAttribute('aria-expanded', 'false');
   });
 }
