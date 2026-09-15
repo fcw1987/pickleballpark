@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openPlayFileMenu } from './helpers/builder-navigation.mjs';
 
 test('coaching visible journey smoke', async ({ page }) => {
   await page.goto('/');
@@ -22,6 +23,7 @@ test('mobile playback options and measured Menu tap are visible', async ({ brows
   const menu = page.locator('summary[aria-label="Menu"]');
   const box = await menu.boundingBox();
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  await openPlayFileMenu(page);
   await expect(page.getByRole('button', { name: 'Save As' })).toBeVisible();
   await context.close();
 });

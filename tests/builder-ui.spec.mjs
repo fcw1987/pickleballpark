@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openPlayFileMenu } from './helpers/builder-navigation.mjs';
 
 const fixture = { title: 'Starter rally', shots: [
   { id: 'shot-serve', family: 'serve', hitter: 'player3', receiver: 'auto', contactStyle: 'auto', target: { x: 13, y: 8 }, arc: 'high', pace: 'soft', movement: { intent: 'recover', pinned: false }, serveMethod: 'drop' },
@@ -34,7 +35,7 @@ test.describe('court first builder UI harness', () => {
     await expect(page.getByRole('button', { name: 'Court Planner', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
     await page.getByRole('button', { name: 'Place target on court' }).click();
-    await page.getByRole('button', { name: '2D', exact: true }).click();
+    await page.getByRole('button', { name: 'Switch to 2D court view', exact: true }).click();
     const actions = await page.evaluate(() => window.__builderActions);
     expect(actions.map(action => action.type)).toEqual(['pauseForEditing', 'addShot', 'pauseForEditing', 'pauseForEditing', 'placeTarget', 'view']);
     expect(actions[4].payload).toEqual({ shotId: 'shot-serve' });
@@ -48,6 +49,8 @@ test.describe('court first builder UI harness', () => {
     await expect(page.getByRole('button', { name: 'Use as starting layout' })).toBeVisible();
     await page.getByRole('button', { name: 'Return to builder' }).click();
     await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+    await page.getByText('Edit by intent', { exact: true }).click();
+    await page.getByRole('tab', { name: 'Coach Tools', exact: true }).click();
     const coach = page.locator('.builder-assistance > summary');
     if (!await coach.locator('..').evaluate(node => node.open)) await coach.click();
     await page.getByRole('checkbox', { name: 'Auto Shading', exact: true }).check();
@@ -63,11 +66,11 @@ test.describe('court first builder UI harness', () => {
     await page.getByRole('button', { name: 'Learn', exact: true }).click();
     await expect(page.getByRole('dialog')).toContainText('Learn / Templates');
     await page.getByRole('dialog').getByRole('button', { name: 'Lesson One' }).click();
-    await openMenu(page);
+    await openPlayFileMenu(page);
     await page.getByRole('button', { name: 'My Plays', exact: true }).click();
     await expect(page.getByRole('dialog')).toContainText('My Plays');
     await page.getByRole('dialog').getByRole('button', { name: 'Saved One' }).click();
-    await openMenu(page);
+    await openPlayFileMenu(page);
     await page.getByLabel('Play title').fill('Focused title');
     await page.getByLabel('Play title').press('Tab');
     await page.locator('.builder-main-menu').evaluate(node => { node.open = false; });

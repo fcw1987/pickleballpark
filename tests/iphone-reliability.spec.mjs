@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
-const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);};
-const fileMenu=async page=>{const menu=page.locator('.builder-main-menu');if(!(await menu.evaluate(node=>node.open)))await menu.locator('summary').click();return menu;};
+const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder);await page.evaluate(async()=>{if(playBuilder.busy)await playBuilder.switchView('2d');});await page.waitForFunction(()=>!playBuilder.busy);};
+const fileMenu=async page=>{const menu=page.locator('.builder-main-menu');if(!(await menu.evaluate(node=>node.open)))await menu.locator(':scope > summary').click();const files=page.locator('.builder-document-menu');if(!(await files.evaluate(node=>node.open)))await page.getByLabel('Play file',{exact:true}).click();return files;};
 const title=async(page,value)=>{await fileMenu(page);await page.getByLabel('Play title').fill(value);await page.getByLabel('Play title').press('Tab');};
 
 test('two tabs keep both authored versions and recover a conflict as a copy',async({context,page})=>{

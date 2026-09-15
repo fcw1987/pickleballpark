@@ -21,9 +21,11 @@ test.describe('portrait selected-shot authoring sheet', () => {
     const inspector = ui.locator('.builder-inspector');
     await expect(inspector).toHaveAttribute('data-surface', 'nonmodal-sheet');
     await expect(ui.locator('.builder-collapse-label-done')).toBeVisible();
-    await expect(ui.getByText('Details · coordinates, contact, movement', { exact: true })).toBeVisible();
-    await ui.getByText('Details · coordinates, contact, movement', { exact: true }).click();
+    await expect(ui.getByText('Edit by intent', { exact: true })).toBeVisible();
+    await ui.getByText('Edit by intent', { exact: true }).click();
+    await ui.getByRole('tab', { name: 'Flight', exact: true }).click();
     await expect(ui.getByLabel('Arc', { exact: true })).toBeVisible();
+    await ui.getByRole('tab', { name: 'Movement', exact: true }).click();
     await expect(ui.getByLabel('Moving player', { exact: true })).toBeVisible();
     await expect(ui.getByRole('button', { name: 'Place movement on court', exact: true })).toBeVisible();
   });
@@ -33,7 +35,8 @@ test.describe('portrait selected-shot authoring sheet', () => {
     await mount(page);
     const ui = page.locator('.builder-ui').last();
     await ui.getByRole('button', { name: 'Edit shot', exact: true }).click();
-    await ui.getByText('Details · coordinates, contact, movement', { exact: true }).click();
+    await ui.getByText('Edit by intent', { exact: true }).click();
+    await ui.getByRole('tab', { name: 'Movement', exact: true }).click();
     const inspector = ui.locator('.builder-inspector');
     await inspector.evaluate(node => { node.scrollTop = node.scrollHeight; });
     await ui.getByLabel('Manual X', { exact: true }).fill('7.5');

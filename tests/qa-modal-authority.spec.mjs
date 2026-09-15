@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openBuilderMainMenu, openPlayFileMenu } from './helpers/builder-navigation.mjs';
 
 async function open(page) {
   await page.goto('/?qa-modal-authority=1');
@@ -14,7 +15,8 @@ for (const panel of ['Help', 'My Plays', 'Learn', 'Import / Export']) {
   test(`${panel} prevents background authored Undo and Redo`, async ({ page }) => {
     await open(page);
     const snapshot = await page.evaluate(() => ({ document: playBuilder.document, index: playBuilder.history.index }));
-    await page.locator('.builder-main-menu > summary').click();
+    if (panel === 'My Plays') await openPlayFileMenu(page);
+    else await openBuilderMainMenu(page);
     await page.getByRole('button', { name: panel, exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();

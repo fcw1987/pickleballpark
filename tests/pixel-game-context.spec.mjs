@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { openIntentTab, settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
 
 const APP = '/index.html?pixel-game-context=1';
 
 async function openBuilder(page, viewport = { width: 402, height: 874 }) {
   await page.setViewportSize(viewport);
   await page.goto(APP);
-  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  await settleBuilderStartup(page);
 }
 
 const bounds = (page, selector) => page.locator(selector).evaluate(node => {
@@ -59,6 +60,7 @@ test('main, chapter, and playback menus open over the scene without resizing the
 test('Coach tools remains expanded and focused after an assistance edit rerenders the document', async ({ page }) => {
   await openBuilder(page);
   await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+  await openIntentTab(page, 'Coach Tools');
   const tools = page.locator('.builder-assistance');
   await tools.locator('summary').click();
   await expect(tools).toHaveAttribute('open', '');
@@ -105,7 +107,6 @@ test('planner confirmation Cancel preserves both worlds and Use layout creates o
       growth: before.history + 1
     });
 
-  await page.locator('.builder-context-menu > summary').click();
   await page.getByRole('button', { name: 'Undo authored edit', exact: true }).click();
   expect(await page.evaluate(() => ({ layout: playBuilder.document.initialLayout,
     annotations: playBuilder.document.annotations }))).toEqual({
@@ -144,7 +145,7 @@ for (const viewport of [{ width: 402, height: 874 }, { width: 844, height: 390 }
     await page.addStyleTag({ content: 'html { font-size: 200%; }' });
     await page.evaluate(() => { playBuilder.render(); playBuilder.viewportChanged(); });
     const checks = [
-      ['.builder-main-menu > summary', '.builder-main-menu > .builder-menu-panel', '[data-action="title"]'],
+      ['.builder-main-menu > summary', '.builder-main-menu > .builder-menu-panel', '[data-action="templates"]'],
       ['.builder-chapter-menu > summary', '.builder-chapter-list', '[data-action="chapter"]'],
       ['.builder-context-menu > summary', '.builder-context-menu > .builder-menu-panel', '[data-action="rate"]']
     ];
@@ -162,11 +163,12 @@ for (const viewport of [{ width: 402, height: 874 }, { width: 844, height: 390 }
       await expect(first).toBeFocused();
       await summary.click();
     }
-    for (const view of ['3d', '2d']) {
-      const tab = page.getByRole('button', { name: view.toUpperCase(), exact: true });
+    for (const view of ['2d', '3d']) {
+      const tab = page.getByRole('button', { name: `Switch to ${view.toUpperCase()} court view`, exact: true });
       await tab.focus(); await expect(tab).toBeFocused();
       const box = await tab.boundingBox();
       expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
+      await switchCourtView(page, view);
     }
     const edit = page.getByRole('button', { name: 'Edit shot', exact: true }).first();
     await expect(edit).toHaveAttribute('aria-expanded', 'false');

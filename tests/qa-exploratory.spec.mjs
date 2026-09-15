@@ -1,12 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { openBuilderMainMenu, openIntentTab, openPlayFileMenu, switchCourtView } from './helpers/builder-navigation.mjs';
 
 const title = 'Starter Serve, Return & Third';
 
 async function openMenu(page) {
-  const menu = page.locator('summary[aria-label="Menu"]');
-  const isOpen = await menu.evaluate(node => node.closest('details')?.open === true);
-  if (!isOpen) await menu.click();
-  await expect(page.getByRole('textbox', { name: 'Play title' })).toBeVisible();
+  await openBuilderMainMenu(page);
 }
 
 async function authoredSnapshot(page) {
@@ -31,7 +29,7 @@ test('visible serve, return, third workflow supports advanced movement and Save 
   await page.getByRole('button', { name: /^Play$/ }).first().click();
   await expect(page.getByRole('button', { name: /^Pause$/ }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Edit shot' }).click();
-  await page.getByText('Details · coordinates, contact, movement', { exact: true }).click();
+  await openIntentTab(page, 'Movement');
 
   await page.getByRole('combobox', { name: 'Movement intent' }).selectOption({ label: 'Manual' });
   await page.getByRole('spinbutton', { name: 'Manual X' }).fill('13');
@@ -43,14 +41,14 @@ test('visible serve, return, third workflow supports advanced movement and Save 
   const savedBeforeReload = await authoredSnapshot(page);
   expect(savedBeforeReload.shots[0].movement).toMatchObject({ intent: 'manual', pinned: true, target: { x: 13, y: 2 } });
 
-  await openMenu(page);
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Save As' }).click();
   await page.reload();
   await expect(page.getByRole('region', { name: 'Build a Play' })).toBeVisible();
   const savedAfterReload = await authoredSnapshot(page);
   expect(authoredContent(savedAfterReload)).toEqual(authoredContent(savedBeforeReload));
   expect(savedAfterReload.shots[0].movement).toMatchObject({ intent: 'manual', pinned: true, target: { x: 13, y: 2 } });
-  await openMenu(page);
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'My Plays' }).click();
   await expect(page.getByRole('dialog', { name: 'My Plays' })).toContainText('— copy');
 });
@@ -92,7 +90,7 @@ test.describe('touch and responsive surfaces', () => {
       const page = await context.newPage();
       await page.goto('/');
       await expect(page.getByRole('region', { name: 'Build a Play' })).toBeVisible();
-      await page.getByRole('button', { name: '2D' }).click();
+      await switchCourtView(page, '2d');
       const beforeDocument = await authoredSnapshot(page);
 
       // Two taps on the disabled replay token are an ignored gesture, not an authoring edit.
@@ -116,8 +114,7 @@ test.describe('touch and responsive surfaces', () => {
         await page.mouse.up();
       }
       await expect.poll(() => player2.getAttribute('aria-label')).toBe(player2Before);
-      await page.getByRole('button', { name: '2D' }).click();
-      await page.getByRole('button', { name: '3D' }).click();
+      await switchCourtView(page, '3d');
       await expect(page.getByRole('region', { name: '3D Play playback' })).toBeVisible();
       await expect.poll(() => authoredSnapshot(page)).toEqual(beforeDocument);
       await context.close();
@@ -128,17 +125,17 @@ test.describe('touch and responsive surfaces', () => {
 test('selected edit panel scrolls, rapid view/detail toggles settle, and resize keeps data', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Edit shot' }).click();
-  await page.getByText('Details · coordinates, contact, movement', { exact: true }).click();
+  await openIntentTab(page, 'Movement');
   const before = await authoredSnapshot(page);
   const panel = page.getByRole('region', { name: 'Selected shot settings' });
   await panel.evaluate(node => node.scrollTop = node.scrollHeight);
   await expect(page.getByRole('combobox', { name: 'Movement intent' })).toBeVisible();
 
   for (let i = 0; i < 4; i += 1) {
-    await page.getByRole('button', { name: '2D' }).click();
-    await page.getByRole('button', { name: '3D' }).click();
-    await page.getByText('Details · coordinates, contact, movement', { exact: true }).click();
-    await page.getByText('Details · coordinates, contact, movement', { exact: true }).click();
+    await switchCourtView(page, '2d');
+    await switchCourtView(page, '3d');
+    await page.getByText('Edit by intent', { exact: true }).click();
+    await page.getByText('Edit by intent', { exact: true }).click();
   }
   await page.setViewportSize({ width: 430, height: 932 });
   await page.setViewportSize({ width: 844, height: 390 });
@@ -148,7 +145,7 @@ test('selected edit panel scrolls, rapid view/detail toggles settle, and resize 
 
 test('desktop keyboard shortcuts skip text fields, trap Help focus, and skip hidden controls', async ({ page }) => {
   await page.goto('/');
-  await openMenu(page);
+  await openPlayFileMenu(page);
   const titleInput = page.getByRole('textbox', { name: 'Play title' });
   await titleInput.fill('Keyboard probe');
   await titleInput.press('Control+z');
@@ -183,7 +180,7 @@ test('reduced motion and enlarged text simulation preserve the visible controls'
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(32, 47, 60)');
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
   await expect(page.getByRole('region', { name: 'Build a Play' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '2D' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Switch to 2D court view', exact: true })).toBeVisible();
   await page.getByRole('button', { name: /^Play$/ }).first().click();
   await expect(page.getByRole('button', { name: /^Pause$/ }).first()).toBeVisible();
   await context.close();

@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { openPlayFileMenu, settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
 
 const APP = '/index.html?pixel-game-review=1';
 
 async function openBuilder(page) {
   await page.goto(APP);
-  await page.waitForFunction(() => window.playBuilder && !window.playBuilder.busy);
+  await settleBuilderStartup(page);
 }
 
 const rect = (page, selector) => page.locator(selector).evaluate(node => {
@@ -106,9 +107,8 @@ test('normal-motion playback, Pause, chapter seek, and ready view switching shar
   expect(chapterTime).toBeGreaterThan(paused);
   expect(await page.evaluate(() => playBuilder.session.playing)).toBe(false);
   const beforeView = await page.evaluate(() => playBuilder.session.clock.elapsed);
-  const nextView = await page.locator('[data-action="view"][aria-pressed="false"]').getAttribute('data-view');
-  await page.locator(`[data-action="view"][data-view="${nextView}"]`).click();
-  await expect.poll(() => page.evaluate(view => playBuilder.view === view, nextView)).toBe(true);
+  const nextView = await page.evaluate(() => playBuilder.view === '3d' ? '2d' : '3d');
+  await switchCourtView(page, nextView);
   expect(await page.evaluate(() => playBuilder.session.clock.elapsed)).toBeCloseTo(beforeView, 8);
 });
 
@@ -117,6 +117,7 @@ test('keyboard authoring retains typed data and returns focus to a useful editin
   await openBuilder(page);
   await page.locator('.builder-main-menu > summary').focus();
   await page.keyboard.press('Enter');
+  await page.getByLabel('Play file', { exact: true }).click();
   const rename = page.getByRole('button', { name: 'Rename play', exact: true });
   await rename.focus();
   await page.keyboard.press('Enter');
@@ -140,8 +141,8 @@ test('keyboard authoring retains typed data and returns focus to a useful editin
   await expect(page.locator('.builder-inspector').getByLabel('Shot family', { exact: true })).toBeFocused();
 
   await page.reload();
-  await page.waitForFunction(() => window.playBuilder && !window.playBuilder.busy);
-  await page.locator('.builder-main-menu > summary').click();
+  await settleBuilderStartup(page);
+  await openPlayFileMenu(page);
   await expect(page.getByLabel('Play title', { exact: true })).toHaveValue('Keyboard persistence sentinel');
 });
 
@@ -167,7 +168,7 @@ test('validation, save failure, and delayed 3D completion leave an honest paused
       setItem: () => { throw new DOMException('Storage quota reached', 'QuotaExceededError'); }
     };
   });
-  await page.locator('.builder-main-menu > summary').click();
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Rename play', exact: true }).click();
   await page.getByLabel('Play title', { exact: true }).fill('Unsaved review sentinel');
   await page.getByLabel('Play title', { exact: true }).press('Tab');

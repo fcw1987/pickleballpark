@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openIntentTab, openPlayFileMenu, switchCourtView } from './helpers/builder-navigation.mjs';
 
 import {
   EXTENDED_DOCUMENT_COUNT,
@@ -97,28 +98,29 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
   }
 
   await chooseChapter(page, 1, { edit: true });
-  const details = page.locator('details.builder-shot-details');
-  await details.locator(':scope > summary').click();
+  await openIntentTab(page, 'Players');
   const firstContact = await chooseDifferent(page.getByLabel('Contact style', { exact: true }), ['auto', 'forehand', 'backhand']);
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots[0].contactStyle)).toBe(firstContact);
 
   await chooseChapter(page, 33, { edit: true });
+  await openIntentTab(page, 'Flight');
   const middleArc = await chooseDifferent(page.getByLabel('Arc', { exact: true }), ['low', 'medium', 'high']);
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots[32].arc)).toBe(middleArc);
 
   await chooseChapter(page, 64, { edit: true });
+  await openIntentTab(page, 'Flight');
   const lastPace = await chooseDifferent(page.getByLabel('Pace', { exact: true }), ['soft', 'medium', 'firm']);
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots[63].pace)).toBe(lastPace);
   const editedLast = await page.evaluate(() => structuredClone(playBuilder.document.shots[63]));
 
+  await page.getByText('More shot actions', { exact: true }).click();
   await page.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(63);
-  await page.getByLabel('Playback options').click();
   await page.getByLabel('Undo authored edit').click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(64);
   expect(await page.evaluate(() => playBuilder.document.shots[63])).toEqual(editedLast);
 
-  await page.getByLabel('Menu', { exact: true }).click();
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Save As', exact: true }).click();
   const savedAs = await page.evaluate(() => ({ id: playBuilder.document.id, title: playBuilder.document.title }));
   expect(savedAs.id).not.toBe(importedId);
@@ -143,10 +145,8 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
     await expect.poll(() => page.evaluate(() => playBuilder.session.clock.playbackRate)).toBe(Number(rate));
     await page.getByLabel('Playback options').click();
     for (let repeat = 0; repeat < 4; repeat += 1) {
-      await page.locator('[data-action="view"][data-view="2d"]').click();
-      await expect.poll(() => page.evaluate(() => playBuilder.view)).toBe('2d');
-      await page.locator('[data-action="view"][data-view="3d"]').click();
-      await expect.poll(() => page.evaluate(() => !playBuilder.busy && playBuilder.view)).toBe('3d');
+      await switchCourtView(page, '2d');
+      await switchCourtView(page, '3d');
     }
   }
   expect(await page.evaluate(() => ({
@@ -241,8 +241,7 @@ test('parked WebGL loss during active 2D playback preserves source, rate, intent
   await page.getByLabel('Playback options').click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.session.clock.elapsed)).toBeGreaterThan(0.05);
-  await page.locator('[data-action="view"][data-view="2d"]').click();
-  await expect.poll(() => page.evaluate(() => playBuilder.view)).toBe('2d');
+  await switchCourtView(page, '2d');
 
   const before = await page.evaluate(() => ({
     source: JSON.stringify(playBuilder.document),
@@ -276,8 +275,7 @@ test('parked WebGL loss during active 2D playback preserves source, rate, intent
   });
   expect(afterLoss.elapsed).toBeGreaterThan(before.elapsed);
 
-  await page.locator('[data-action="view"][data-view="3d"]').click();
-  await expect.poll(() => page.evaluate(() => !playBuilder.busy && playBuilder.view)).toBe('3d');
+  await switchCourtView(page, '3d');
   const recovered = await page.evaluate(() => ({
     source: JSON.stringify(playBuilder.document),
     elapsed: playBuilder.session.clock.elapsed,

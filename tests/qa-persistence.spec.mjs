@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openPlayFileMenu } from './helpers/builder-navigation.mjs';
 
 const start = async page => {
   await page.goto('/index.html?qa-persistence=1');
@@ -375,7 +376,7 @@ test('malformed, oversized, and unknown-version imports retain the last valid so
 
 test('the last rapid title input commits synchronously when the page closes', async ({ context, page }) => {
   await start(page);
-  await page.locator('.builder-main-menu > summary').click();
+  await openPlayFileMenu(page);
   const title = page.getByLabel('Play title');
   await title.fill('Rapid one');
   await title.fill('Rapid two');
