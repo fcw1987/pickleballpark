@@ -1,5 +1,5 @@
 {
-  "source": "7be0c58343bdeacebd00332e82cf31541a850f1f",
+  "source": "9024bfc40e9c498092497db2e3a04f2ff3844f68",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -258,8 +258,8 @@
     },
     {
       "path": "builder-integration.css",
-      "bytes": 1591,
-      "sha256": "328ee290f443bf09e1a0e1925448c61fb4a5c43eeedd234fed4eefd940869ba3"
+      "bytes": 1792,
+      "sha256": "a22cb6b47a50b833df92355b7609dff11f7419babe25119107e405f906160b39"
     },
     {
       "path": "builder-storage.js",
@@ -273,8 +273,8 @@
     },
     {
       "path": "builder-ui.js",
-      "bytes": 65314,
-      "sha256": "2dbaf176c2d3dfcf64db16a93f790ee0a0e83622bef42897f48bad0009287d40"
+      "bytes": 66288,
+      "sha256": "d28daba9ec0525f4aa7985770950728f38ecb8304b1b2bf0c2449802fc7d69d8"
     },
     {
       "path": "builder-waypoint-policy.js",
