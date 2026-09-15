@@ -8,14 +8,19 @@ if (!output) throw Error('Provide an output JSON path.');
 const targets = (process.env.QA_PERF_TARGETS || 'before=http://127.0.0.1:4173/,candidate=http://127.0.0.1:4198/')
   .split(',').map(entry => { const [label, url] = entry.split('='); return { label, url }; });
 const runCount = Number(process.env.QA_PERF_RUNS || 3);
+const viewport = (process.env.QA_PERF_VIEWPORT || '1440x900').split('x').map(Number);
+const deviceScaleFactor = Number(process.env.QA_PERF_DPR || 1);
+if (viewport.length !== 2 || viewport.some(value => !Number.isInteger(value) || value < 100 || value > 4000) ||
+    !Number.isFinite(deviceScaleFactor) || deviceScaleFactor < 1 || deviceScaleFactor > 4 ||
+    !Number.isInteger(runCount) || runCount < 1 || runCount > 10) throw Error('Invalid bounded performance conditions.');
 const browser = await chromium.launch();
 const records = [];
 
 for (const target of targets) {
   for (let run = 1; run <= runCount; run++) {
     const context = await browser.newContext({
-      viewport: { width: 1440, height: 900 },
-      deviceScaleFactor: 1,
+      viewport: { width: viewport[0], height: viewport[1] },
+      deviceScaleFactor,
       serviceWorkers: 'block'
     });
     const page = await context.newPage();
@@ -223,8 +228,8 @@ const evidence = {
   host: { platform: os.platform(), release: os.release(), arch: os.arch(), cpu: os.cpus()[0]?.model },
   conditions: {
     context: 'fresh isolated context per run; service workers blocked; local static servers',
-    viewport: [1440, 900],
-    deviceScaleFactor: 1,
+    viewport,
+    deviceScaleFactor,
     runs: runCount,
     workload: '3, 8 and 64 shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs, 30 details open-close/layout pairs and 50 saves per size; 120 settled renderer samples per rally; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining 64 shots',
     limitations: 'CPU-side performance.now/action timing and automation callback cadence. Renderer calls measure CPU command submission, not GPU completion. Results do not measure displayed FPS or physical-device performance.'
