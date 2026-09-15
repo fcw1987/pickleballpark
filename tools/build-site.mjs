@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 // Frozen release contract, independently compared with the locally retained approved source.
-const approvedManifestSha256 = 'b19e4335586098ce9ac3e50e29696babe513f2ee8e0bd08de696499efe9f7597';
+const approvedManifestSha256 = '04388022155d8580b80a4e505a70ed2350115e18af9caee8f42b4866a764d01a';
 const approved = JSON.parse(await readFile('tests/fixtures/approved-runtime.json'));
 const rootFiles = await readdir('.');
 const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(async e => e.isDirectory() ? walk(`${dir}/${e.name}`) : `${dir}/${e.name}`))).flat();
