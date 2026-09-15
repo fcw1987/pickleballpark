@@ -26,7 +26,7 @@ export async function openIntentTab(page, name) {
   }
   const tab = page.getByRole('tab', { name, exact: true });
   if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
-  return page.getByRole('tabpanel', { name: `${name} settings`, exact: true });
+  return page.getByRole('tabpanel', { name, exact: true });
 }
 
 export async function openCoachTools(page) {

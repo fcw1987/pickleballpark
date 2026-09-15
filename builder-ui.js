@@ -354,7 +354,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const quickTarget = el('div', 'builder-quick-actions'); quickTarget.append(el('span', 'builder-quick-label', 'Target'), button('Place target on court', 'place-target', 'builder-button builder-button-accent')); inspector.appendChild(quickTarget);
       const details = el('details', 'builder-shot-details'); details.open=shotDetailsOpen;details.append(el('summary', '', 'Edit by intent'));
       const detailTabs = el('div', 'builder-detail-tabs'); detailTabs.setAttribute('role', 'tablist'); detailTabs.setAttribute('aria-label', 'Shot detail sections');
-      const detailTab = (label, group) => { const tab = button(label, 'detail-group', 'builder-detail-tab'); tab.dataset.group = group; tab.setAttribute('role', 'tab'); tab.setAttribute('aria-label', label); tab.setAttribute('aria-selected', String(detailGroup === group)); tab.setAttribute('tabindex', detailGroup === group ? '0' : '-1'); return tab; };
+      const detailTab = (label, group) => { const tab = button(label, 'detail-group', 'builder-detail-tab'); tab.dataset.group = group; tab.id = `builder-detail-tab-${group}`; tab.setAttribute('aria-controls', `builder-detail-panel-${group}`); tab.setAttribute('role', 'tab'); tab.setAttribute('aria-label', label); tab.setAttribute('aria-selected', String(detailGroup === group)); tab.setAttribute('tabindex', detailGroup === group ? '0' : '-1'); return tab; };
       ['target', 'flight', 'players', 'movement', 'coach', 'precision'].forEach(group => detailTabs.appendChild(detailTab(titleCase(group === 'coach' ? 'Coach tools' : group), group)));
       details.append(detailTabs);
       const targetGroup = el('section', 'builder-control-group builder-group-target'); targetGroup.dataset.detailGroup = 'target'; targetGroup.setAttribute('role', 'tabpanel'); targetGroup.setAttribute('aria-label', 'Target settings'); targetGroup.classList.toggle('is-active', detailGroup === 'target'); targetGroup.append(el('h3', '', 'Target'));
@@ -389,6 +389,11 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const handed = el('details', 'builder-handedness'); handed.open = handednessOpen; handed.append(el('summary', '', 'Player handedness')); PLAYERS.forEach(([id, name]) => { const value = doc.players?.[id]?.handedness || 'right'; const field = select(name, 'handedness', [['right', 'Right-handed'], ['left', 'Left-handed']]); const control = field.querySelector('select'); control.value = value; control.dataset.playerId = id; handed.append(field); });
       const assistance = el('details', 'builder-assistance'); assistance.open=assistanceOpen || detailGroup === 'coach'; assistance.append(el('summary', '', 'Shading & Guides')); [['autoShading', 'Auto Shading', 'Shading changes eligible movement'], ['showGuides', 'Coverage Guides', 'Explain suggested positions only']].forEach(([field, label, description]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; input.setAttribute('aria-label', label); row.append(input, el('span', '', label), el('small', '', description)); assistance.append(row); });
       const coachGroup = el('section', 'builder-control-group builder-group-coach'); coachGroup.dataset.detailGroup = 'coach'; coachGroup.setAttribute('role', 'tabpanel'); coachGroup.setAttribute('aria-label', 'Coach tools settings'); coachGroup.classList.toggle('is-active', detailGroup === 'coach'); coachGroup.append(el('h3', '', 'Coach tools'), advanced, handed, assistance); details.appendChild(coachGroup);
+      for (const panel of details.querySelectorAll('[role="tabpanel"]')) {
+        panel.id = `builder-detail-panel-${panel.dataset.detailGroup}`;
+        panel.setAttribute('aria-labelledby', `builder-detail-tab-${panel.dataset.detailGroup}`);
+        panel.removeAttribute('aria-label');
+      }
       if (current.findings?.length) {
         const find = el('section', 'builder-findings');
         const firstFinding = typeof current.findings[0] === 'string' ? {} : current.findings[0];
@@ -548,6 +553,14 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   }
   root.addEventListener('pointerdown',event=>{if(event.target.closest('button,summary')&&root.contains(document.activeElement)&&document.activeElement.matches('input:not([type=range]),textarea'))event.preventDefault();});
   root.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const menu = event.target.closest('.builder-menu[open],.builder-chapter-menu[open]'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); event.preventDefault(); } });
+  root.addEventListener('keydown', event => {
+    const tab = event.target.closest('[role="tab"][data-action="detail-group"]');
+    if (!tab || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    const tabs = [...tab.parentElement.querySelectorAll('[role="tab"]')];
+    const index = tabs.indexOf(tab);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    event.preventDefault(); event.stopPropagation(); tabs[next].click();
+  });
   root.addEventListener('click', handleSurfaceClick); root.addEventListener('click', handleClick); root.addEventListener('change', handleChange); root.addEventListener('input', handleInput);
   root.addEventListener('keydown', event => {
     if (!event.target.matches('input[type="number"], input[type="text"]')) return;

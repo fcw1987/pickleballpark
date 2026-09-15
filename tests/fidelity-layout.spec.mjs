@@ -52,6 +52,15 @@ test('enlarged shot choices remain readable and intent tabs retain useful names'
   await page.setViewportSize({ width: 320, height: 568 }); await page.goto('/');
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; playBuilder.render(); });
+  for (const selector of ['.builder-main-menu > summary', '.builder-context-actions [data-action="collapse-inspector"]', '.builder-context-actions [data-action="add-shot"]', '.builder-view-button']) {
+    const control = page.locator(selector).first();
+    const fits = await control.evaluate(node => {
+      const range = document.createRange(); range.selectNodeContents(node);
+      const text = range.getBoundingClientRect(), box = node.getBoundingClientRect();
+      return text.left >= box.left + 2 && text.right <= box.right - 2;
+    });
+    expect(fits, `${selector} enlarged live label stays inside its button`).toBe(true);
+  }
   await page.getByRole('button', { name: 'Edit shot', exact: true }).first().click();
   for (const name of ['Shot family', 'Hitter']) {
     const field = page.getByLabel(name, { exact: true });
@@ -66,7 +75,7 @@ test('enlarged shot choices remain readable and intent tabs retain useful names'
   await page.getByText('Edit by intent', { exact: true }).click();
   await page.getByRole('tab', { name: 'Movement', exact: true }).click();
   await expect(page.getByRole('tab', { name: 'Movement', exact: true })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel', { name: 'Movement settings', exact: true })).toBeVisible();
+  await expect(page.getByRole('tabpanel', { name: 'Movement', exact: true })).toBeVisible();
 });
 
 test('landscape chapter list stays inside the viewport with enlarged text', async ({ page }) => {
@@ -116,4 +125,22 @@ test('wide court reclaims the editor column when details close', async ({ page }
   await page.locator('.builder-inspector [data-action="collapse-inspector"]').click();
   await expect.poll(async () => (await court.boundingBox()).width).toBeCloseTo(original.width, 0);
   expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(documentBefore);
+});
+
+test('intent tabs support keyboard selection without changing the rally', async ({ page }) => {
+  await page.goto('/'); await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  await page.getByRole('button', { name: 'Edit shot', exact: true }).first().click();
+  await page.getByText('Edit by intent', { exact: true }).click();
+  const before = await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }));
+  await page.getByRole('tab', { name: 'Target', exact: true }).focus();
+  for (const [key, name] of [['ArrowRight', 'Flight'], ['End', 'Precision'], ['ArrowRight', 'Target'], ['ArrowLeft', 'Precision'], ['Home', 'Target']]) {
+    await page.keyboard.press(key);
+    const tab = page.getByRole('tab', { name, exact: true });
+    await expect(tab).toBeFocused(); await expect(tab).toHaveAttribute('aria-selected', 'true');
+    const id = await tab.getAttribute('aria-controls'); expect(id).toBeTruthy();
+    const panel = page.locator(`#${id}`); await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute('aria-labelledby', await tab.getAttribute('id'));
+    await expect(page.locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
+  }
+  expect(await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }))).toEqual(before);
 });
