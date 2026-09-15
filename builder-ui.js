@@ -392,6 +392,16 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     }
   }
   function rerenderAction(type, payload) { return fire(type, payload); }
+  function cancelActivePlacement() {
+    if (current.targetPlacement) fire('cancelTarget');
+    if (current.movementPlacement) fire('cancelMovement');
+  }
+  function handleSurfaceClick(event) {
+    const summary = event.target.closest('summary');
+    if (!summary || !root.contains(summary)) return;
+    const details = summary.closest('details');
+    if (details && !details.open && details.matches('.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-details,.builder-advanced,.builder-handedness,.builder-assistance')) cancelActivePlacement();
+  }
   async function handleClick(event) {
     const target = event.target.closest('[data-action]'); if (!target || !root.contains(target)) return;
     const action = target.dataset.action;
@@ -468,7 +478,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   }
   root.addEventListener('pointerdown',event=>{if(event.target.closest('button,summary')&&root.contains(document.activeElement)&&document.activeElement.matches('input:not([type=range]),textarea'))event.preventDefault();});
   root.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const menu = event.target.closest('.builder-menu[open],.builder-chapter-menu[open]'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); event.preventDefault(); } });
-  root.addEventListener('click', handleClick); root.addEventListener('change', handleChange); root.addEventListener('input', handleInput);
+  root.addEventListener('click', handleSurfaceClick); root.addEventListener('click', handleClick); root.addEventListener('change', handleChange); root.addEventListener('input', handleInput);
   root.addEventListener('keydown', event => {
     if (!event.target.matches('input[type="number"], input[type="text"]')) return;
     if (event.key === 'Escape') { pendingField=false; renderedDocument = null; render({}); event.preventDefault(); return; }
