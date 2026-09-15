@@ -2,6 +2,7 @@
 import {chromium} from '@playwright/test';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
+import {copyScenarioDocument} from '../tests/fixtures/qa-scenarios.mjs';
 const out=process.argv[2],url=process.argv[3]||'http://127.0.0.1:4173/';
 if(!out)throw Error('Provide evidence output directory');
 await mkdir(out,{recursive:true});
@@ -12,6 +13,8 @@ page.on('pageerror',error=>errors.push(error.message));
 const started=Date.now();
 const mark=async action=>events.push({wallSeconds:(Date.now()-started)/1000,action,...await page.evaluate(()=>({time:playBuilder.session.clock.elapsed,iteration:playBuilder.session.iteration,playing:playBuilder.session.playing,view:playBuilder.view}))});
 await page.goto(url);await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.courtTools.THREE);
+const scenario=process.env.QA_RECORD_SCENARIO || null;
+if(scenario){const source=copyScenarioDocument(scenario);if(source.shots.length<2)throw Error('Recording transport route requires at least two chapters');await page.evaluate(source=>playBuilder.loadDocument(source),source);}
 await mark('Fresh launch paused');await page.waitForTimeout(1200);
 await page.locator('[data-action="play-pause"]').click();await mark('Play at 1×');
 await page.waitForFunction(()=>playBuilder.session.iteration>=2,{},{timeout:90000});
@@ -29,5 +32,5 @@ await page.locator('[data-action="view"][data-view="2d"]').click();await mark('S
 await page.locator('[data-action="view"][data-view="3d"]').click();await mark('Return to 3D with shared active session');await page.waitForTimeout(1800);
 await page.locator('[data-action="play-pause"]').click();await mark('Final explicit Pause');await page.waitForTimeout(1000);
 const video=page.video();await context.close();await video.saveAs(join(out,'normal-speed-playback.webm'));await video.delete();await browser.close();
-await writeFile(join(out,'normal-speed-playback.json'),JSON.stringify({viewport:[402,874],dpr:3,environment:'Playwright Chromium viewport emulation; normal 1× clock; pointer scrub, not physical iPhone touch',events,errors},null,2)+'\n');
+await writeFile(join(out,'normal-speed-playback.json'),JSON.stringify({viewport:[402,874],dpr:3,scenario,environment:'Playwright Chromium viewport emulation; normal 1× clock; pointer scrub, not physical iPhone touch. Named scenarios load controlled catalog fixtures; starter uses normal startup.',events,errors},null,2)+'\n');
 if(errors.length)throw Error(errors.join('\n'));console.log(JSON.stringify({recording:'normal-speed-playback.webm',events:events.length,errors}));
