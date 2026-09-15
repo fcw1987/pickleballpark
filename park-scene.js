@@ -47,12 +47,27 @@ export function populateParkSVG(svg, groundPlane) {
     };
     patternFor('grass', PARK_LAYOUT.assets.grass); patternFor('quiet-court', PARK_LAYOUT.assets.quietCourt); patternFor('path', PARK_LAYOUT.assets.path);
     groundAssets.appendChild(defs);
+    // Continue the park material beneath the playable apron. The apron still
+    // receives its authored tile overlay below, but this keeps the projected
+    // outer edge from meeting a flat CSS-colored void at a hard diagonal.
+    const outsideArea = groundPlane.querySelector?.('.outside-area');
+    if (outsideArea) {
+        // The presentation viewBox includes a little breathing room around
+        // the authored apron. Extend the same material into that margin so
+        // resize and portrait projection never expose a hard empty triangle.
+        outsideArea.setAttribute('x', '-24');
+        outsideArea.setAttribute('y', '-24');
+        outsideArea.setAttribute('width', '68');
+        outsideArea.setAttribute('height', '100');
+        outsideArea.style.fill = `url(#${patterns.get('grass')})`;
+        outsideArea.style.opacity = '1';
+    }
     const fillRect = (name, rect, opacity) => {
         const element = svgElement(document, 'rect', { x: rect.x, y: rect.y, width: rect.width, height: rect.height, opacity, fill: `url(#${patterns.get(name)})` });
         element.setAttribute('shape-rendering', 'crispEdges'); groundAssets.appendChild(element);
     };
-    groundAssets.appendChild(svgElement(document,'path',{d:'M -8 -8 H 28 V 52 H -8 Z M 0 0 V 44 H 20 V 0 Z','fill-rule':'evenodd',fill:`url(#${patterns.get('grass')})`}));
-    fillRect('quiet-court', { x: 0, y: 0, width: 20, height: 44 }, 0.12);
+    groundAssets.appendChild(svgElement(document,'path',{d:'M -8 -8 H 28 V 52 H -8 Z M 0 0 V 44 H 20 V 0 Z','fill-rule':'evenodd',fill:`url(#${patterns.get('grass')})`,opacity:0.96}));
+    fillRect('quiet-court', { x: 0, y: 0, width: 20, height: 44 }, 0.18);
     for (const path of PARK_LAYOUT.paths) fillRect('path', path, 1);
     const courtMarkings = [...(groundPlane.children || [])].find(child => child.id === 'courtMarkings');
     if (courtMarkings) groundPlane.insertBefore(groundAssets, courtMarkings); else groundPlane.appendChild(groundAssets);
@@ -148,8 +163,12 @@ export async function createPark3D(THREE, { signal } = {}) {
     };
     const apron = PARK_LAYOUT.apronFeet;
     const apronRect = { x: apron.x[0], y: apron.y[0], width: apron.x[1] - apron.x[0], height: apron.y[1] - apron.y[0] };
+    // Carry the park material beyond the authored apron. The extra layer is
+    // deliberately quiet and sits below the court slab; it removes the hard
+    // diagonal between the playable surround and the renderer clear color.
+    addGround('ParkWorld', { x: -100, y: -100, width: 220, height: 260 }, textures.get('grass'), 1, -0.12);
     addGround('ParkGrass', apronRect, textures.get('grass'), 1, -0.06);
-    addGround('ParkCourtTexture', { x: 0, y: 0, width: 20, height: 44 }, textures.get('quietCourt'), 0.12, 0.006);
+    addGround('ParkCourtTexture', { x: 0, y: 0, width: 20, height: 44 }, textures.get('quietCourt'), 0.24, 0.006);
     for (const path of PARK_LAYOUT.paths) addGround(path.id, path, textures.get('path'), 1, -0.045);
 
     const detailTextures = { tree: textures.get('tree'), shrub: textures.get('shrub'), bench: textures.get('bench'), sign: textures.get('sign'), banner: textures.get('banner') };
