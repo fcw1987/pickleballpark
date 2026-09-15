@@ -72,15 +72,27 @@ for (const f of stabilizedFixture.files) {
   const bytes = execFileSync('git', ['show', `${stabilizedRevision}:${f.path}`], { maxBuffer: 20 * 1024 * 1024 });
   expect(sha(bytes), `stabilized checkpoint ${f.path}`).toBe(f.sha256); stabilizedFiles.set(f.path, bytes);
 }
+// A local preview may already have installed the interim fidelity cache. It
+// must upgrade without clearing the owner's storage or leaving stale assets.
+const fidelityRevision = '1d2e4cd67330d2efc444fd99868c22442222465c';
+const fidelityFixture = JSON.parse(execFileSync('git', ['show', `${fidelityRevision}:tests/fixtures/approved-runtime.json`]));
+const fidelityFiles = new Map();
+for (const f of fidelityFixture.files) {
+  const bytes = execFileSync('git', ['show', `${fidelityRevision}:${f.path}`], { maxBuffer: 20 * 1024 * 1024 });
+  expect(sha(bytes), `interim fidelity candidate ${f.path}`).toBe(f.sha256); fidelityFiles.set(f.path, bytes);
+}
 const results = [];
+const allModes = ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade'];
+const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allModes;
+if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
 const scopePath = new URL('https://fcw1987.github.io/pickleboard/').pathname;
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.ttf': 'font/ttf' };
 for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
-  for (const mode of ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade']) {
+  for (const mode of modes) {
     const upgrading = mode !== 'fresh';
-    const previousFiles = mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
-    const priorCache = mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
-    const previousRevision = mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
+    const previousFiles = mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
+    const priorCache = mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
+    const previousRevision = mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
     let phase = upgrading ? 'old' : 'new', stopped = false;
     const server = createServer((req, res) => {
       const pathname = decodeURIComponent(new URL(req.url, 'http://local').pathname);
@@ -110,7 +122,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade') {
+        if (mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');
@@ -122,7 +134,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
         phase = 'new';
         await page.evaluate(async () => (await navigator.serviceWorker.ready).update());
         await expect.poll(() => page.evaluate(() => caches.keys()), { timeout: 20000 }).toContain(candidateCache);
-        await expect.poll(() => page.evaluate(() => caches.keys()), { timeout: 20000 }).not.toContain(priorCache);
+        if (priorCache !== candidateCache) await expect.poll(() => page.evaluate(() => caches.keys()), { timeout: 20000 }).not.toContain(priorCache);
         expect(await page.evaluate(() => pickleboard.captureBoardState())).toEqual(before);
         await page.reload(); await page.waitForFunction(() => window.pickleboard?.plays);
         if (priorDraft) {
