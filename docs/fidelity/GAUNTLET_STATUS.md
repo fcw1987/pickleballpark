@@ -37,5 +37,12 @@ Only reproduced defects enter the confirmed ledger. Each records severity, repro
 | GNT-R03–07 | Confirmed input defects / medium, except R06 low | Viewport placement, Planner second-touch token/path ownership, nonprimary mouse ownership, and hidden/workspace gesture completion. Full reproductions and roots in `docs/qa/gauntlet-robustness.md`. | Fixed `4c8da18`; eight new focused cases pass both engines in worker checkout; integrated Chromium surrounding run passes |
 | G-V01 | Visual defect / medium | Fresh Wave 1 844×390 screenshot shows overlapping shot/status/header content. | UI corrective pass underway |
 | G-V02 | Usability defect / high | First UI pass hides the expanded chapter selector at ≤430px, while dense timelines require that route. Root found in code and actual narrow captures. | UI corrective pass restores reachable chapter selection |
+| G-AUTH01 | Confirmed wrong-edit defect / high | Play from Serve into Return, open/close Help, then drag the still-visible Serve target while the card/timeline say Return. Fresh Sol proves the old Serve mutates. Root first observed the mismatch in native Safari. | UI owner applies the existing viewing-selection synchronization after Help; fresh Sol verifies both collapsed viewing and deliberately open editor cases |
 
 Root review also requests truthfully named target areas (a left-side target alone does not establish a crosscourt trajectory), focused editing sections, compact document operations, readable narrow shot context and a reserved wide editing column. These are explicit mission acceptance corrections. The fresh review's first-run tutorial suggestion is retained as a possible future enhancement; this mission does not add an onboarding system.
+
+## Intermediate verification
+
+At `83f39db`, generated verification passes all 66 paths and static references pass all 96 paths. The full unit command reports 167/168: the intentional exact-artifact comparison still points at the preserved v22 runtime and rejects the changed artwork. Candidate pinning is deferred until runtime integration is complete; this failure is recorded, not waived. The new authority document also used a historical class name that the brand gate rejects; the documentation now names the actual board-instance properties without changing the gate.
+
+Native Safari early inspection: one paused and three playing Help open/close cycles restored the visible 3D court and returned paused. Final native lifecycle acceptance still remains. The original historical blank mechanism is not asserted to be known.

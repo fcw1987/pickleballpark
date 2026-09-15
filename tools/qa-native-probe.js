@@ -66,22 +66,37 @@ export async function run({ rounds = 24 } = {}) {
     return value;
   };
   try {
-    await builder.switchView('3d'); builder.pause(); await settle(); sample('initial');
+    await builder.switchView('3d'); builder.pause();
+    // Three uploads the occlusion cue on first visible use. Warm the tested
+    // camera/time combinations before demanding exact retained-resource counts.
+    const originalTime = builder.session.clock.elapsed, originalCamera = viewer.cameraPreset;
+    for (const camera of ['overhead', 'sideline']) {
+      viewer.setCamera(camera);
+      for (let index = 0; index <= 24; index++) { builder.seek(index / 24 * builder.session.duration); await frames(); }
+    }
+    viewer.setCamera(originalCamera); builder.seek(originalTime); await settle(); sample('initial');
     for (let i = 0; i < rounds; i++) {
       if (i % 2) builder.play();
       await frames(4);
       await builder.action('help'); await settle(); sample(`help-${i}`);
       builder.board.closeInfoModal(); await settle(); sample(`closed-${i}`);
       if (builder.session.playing) throw Error('Help pause lost authority');
+      const menu = builder.ui.element.querySelector('.builder-main-menu > summary');
+      menu.click(); await settle(); menu.click(); await settle();
+      const edit = () => builder.ui.element.querySelector('.builder-context-actions [data-action="collapse-inspector"]');
+      edit().click(); await settle(); sample(`details-${i}`);
+      edit().click(); await settle();
       if (i % 3 === 2) { await builder.switchView('2d'); await frames(); await builder.switchView('3d'); await settle(); }
+      viewer.setCamera(i % 2 ? 'overhead' : 'sideline'); await settle();
       builder.seek((i % 11) / 10 * builder.session.duration); await frames();
       if (JSON.stringify(builder.document) !== initial || builder.history.snapshots.length !== initialHistory) throw Error(`Source/history changed at round ${i}`);
     }
     builder.pause(); await settle(); const idle = sample('idle'); await frames(12);
     const final = sample('final');
     if (idle.frame !== final.frame || final.scheduler) throw Error('Paused renderer did not settle');
+    if (final.canvases !== 1 || final.geometry !== samples[0].geometry || final.textures !== samples[0].textures) throw Error('Native transition resources drifted');
     return window.qaNativeResult = { ok: true, rounds, samples, contextLosses, errors,
-      agent: navigator.userAgent, note: 'Real native browser; controlled actions. Inspect visible court separately.' };
+      agent: navigator.userAgent, note: 'Real native browser; controlled actions. Two cameras × 25 timeline positions warmed before resource comparison. Inspect visible court separately.' };
   } catch (error) {
     window.qaNativeResult = { ok: false, error: String(error), rounds, samples, contextLosses, errors };
     throw error;
