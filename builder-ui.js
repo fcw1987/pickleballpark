@@ -282,7 +282,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     meta.appendChild(cueNode);
     const context = el('div', 'builder-context-actions');
     const editButton = button('Edit', 'collapse-inspector', 'builder-button builder-button-quiet'); editButton.setAttribute('aria-label',selected?'Edit shot':'Edit play');editButton.setAttribute('aria-expanded', String(inspectorManualCollapsed === false));
-    const addButton = button('+ Add', 'add-shot', 'builder-button builder-button-primary'); addButton.setAttribute('aria-label', 'Add shot'); addButton.disabled = shots.length >= 64; addButton.title = addButton.disabled ? 'This play has reached the 64-shot limit' : 'Append a shot';
+    const addButton = button('Add', 'add-shot', 'builder-button builder-button-primary'); addButton.setAttribute('aria-label', 'Add shot'); addButton.disabled = shots.length >= 64; addButton.title = addButton.disabled ? 'This play has reached the 64-shot limit' : 'Append a shot';
     context.append(editButton, addButton);
     const viewToggle = el('div', 'builder-view-toggle'); viewToggle.setAttribute('role', 'group'); viewToggle.setAttribute('aria-label', 'Court view');
     const nextView = current.view === '3d' ? '2d' : '3d';

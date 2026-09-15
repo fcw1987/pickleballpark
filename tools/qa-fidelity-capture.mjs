@@ -1,6 +1,7 @@
 // Matched visual captures. UI actions open surfaces; read-only probes measure composition.
 import { chromium, expect } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { copyScenarioDocument } from '../tests/fixtures/qa-scenarios.mjs';
 const base=process.env.PREVIEW_URL||'http://127.0.0.1:4184/';
 const output=process.env.EVIDENCE_DIR||'/private/tmp/park-fidelity-captures';
 await mkdir(output,{recursive:true});
@@ -26,9 +27,18 @@ try{
   if(label==='phone')await page.screenshot({path:`${output}/phone-rest-3d-dpr3.png`,scale:'device',animations:'disabled'});
   await page.locator('[data-action="view"][data-view="2d"]:visible').click();await page.waitForFunction(()=>!playBuilder.busy&&playBuilder.view==='2d');await snap('rest-2d');
   await page.locator('[data-action="view"][data-view="3d"]:visible').click();await page.waitForFunction(()=>!playBuilder.busy&&playBuilder.view==='3d');
-  await page.locator('.builder-main-menu > summary').click();await snap('menu');await page.locator('.builder-main-menu > summary').click();
+  await page.locator('.builder-main-menu > summary').click();await snap('menu');
+  const fileMenu=page.getByLabel('Play file',{exact:true});if(await fileMenu.count()){await fileMenu.click();await snap('document-menu');}
+  await page.locator('.builder-main-menu > summary').click();
+  await page.getByLabel('Choose shot chapter',{exact:true}).click();await snap('chapters');await page.getByLabel('Choose shot chapter',{exact:true}).click();
   await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();await snap('shot-card');
   const details=page.locator('.builder-shot-details > summary');await expect(details).toBeVisible();await details.click();await snap('details');
+  for(const [name,group] of [['Movement','movement'],['Precision','precision']]){
+   const tab=page.getByRole('tab',{name,exact:true});if(await tab.count()){await tab.click();await page.locator(`[data-detail-group="${group}"]`).scrollIntoViewIfNeeded();await snap(group);}
+  }
+  // This last image is a controlled catalog fixture, separate from visible-only journeys.
+  await page.evaluate(document=>playBuilder.loadDocument(document),copyScenarioDocument('infeasible-pin'));
+  await page.locator('[data-action="review-findings"]').click();await snap('validation');
   records.push({label,metric,errors});await context.close();
  }
 }finally{await browser.close();}

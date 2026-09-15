@@ -346,22 +346,35 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 
 @media (max-width: 700px) {
   .builder-meta { gap: 3px; }
+  .builder-main-menu > summary { min-width: 54px; width: 54px; padding-inline: 5px; }
+  .builder-menu-icon { display: none; }
+  .builder-menu-word { display: inline; }
   .builder-shot-card { display: flex; gap: 5px; padding: 4px 5px; border-left-width: 3px; }
-  .builder-shot-card-kicker { flex: 1; min-width: 0; }
+  .builder-shot-card-kicker { display: none; }
   .builder-shot-card-description { display: none; }
   .builder-shot-card-flight { display: none; }
   .builder-shot-card-kicker { gap: 4px; }
   .builder-shot-card-family { font-size: .78rem; }
   .builder-shot-card-number { font-size: .62rem; }
-  .builder-shot-card .builder-chapter-menu > summary { max-width: 6rem; min-width: 44px; padding-inline: 4px; font-size: .65rem; }
+  .builder-shot-card .builder-chapter-menu { width: 100%; }
+  .builder-shot-card .builder-chapter-menu > summary { width: 100%; max-width: none; min-width: 44px; padding-inline: 4px; font-size: .78rem; }
   .builder-shot-card .builder-chapter-list { position: fixed; left: 6px; right: 6px; top: 5rem; width: auto; max-height: min(70dvh, 34rem); }
   .builder-save-pill { width: 9px; min-width: 9px; height: 9px; min-height: 9px; margin-inline: 1px; padding: 0; border: 0; border-radius: 50%; font-size: 0; }
   .builder-save-pill::before { width: 9px; height: 9px; margin: 0; }
+  /* History stays directly available without taking width from the seek rail. */
+  .builder-transport-top { grid-template-columns: auto minmax(0,1fr) auto; gap: 3px 8px; }
+  .builder-history-controls { justify-content: center; }
+  .builder-history-controls .builder-button { min-width: 44px; min-height: 44px; }
+  .builder-context-menu { grid-column: 3; grid-row: 1; }
+  .builder-transport-timeline { grid-column: 1 / -1; grid-row: 2; }
+  .builder-transport .shot-timeline { grid-template-columns: minmax(0,1fr) auto; gap: 0 8px; }
+  .builder-transport .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; }
+  .builder-transport .shot-timeline-identity { grid-column: 1; grid-row: 1; }
+  .builder-transport .shot-timeline-time { grid-column: 2; grid-row: 1; max-width: none; overflow: visible; font-size: .7rem; }
 }
 @media (max-width: 430px) {
   .builder-shot-card { min-width: 3.5rem; }
-  .builder-context-actions .builder-button[data-action="add-shot"] { width: 42px; min-width: 42px; padding-inline: 4px; font-size: 0; }
-  .builder-context-actions .builder-button[data-action="add-shot"]::after { content: '+'; font: 800 1.2rem/1 ui-monospace, Menlo, monospace; }
+  .builder-context-actions .builder-button[data-action="add-shot"] { width: 44px; min-width: 44px; padding-inline: 4px; font-size: .72rem; }
   .builder-context-actions .builder-button[data-action="collapse-inspector"] { width: 51px; min-width: 51px; padding-inline: 4px; font-size: .72rem; }
 }
 @media (max-width: 360px) {
@@ -372,10 +385,10 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
   .builder-shot-card-kicker { justify-content: center; }
 }
 @media (min-width: 980px) {
-  .builder-layout { padding-right: min(26rem, 32vw); }
+  .builder-layout:has(.builder-inspector:not(.builder-inspector-collapsed)) { padding-right: min(26rem, 32vw); }
   .builder-inspector { right: 8px; width: min(25rem, calc(32vw - 16px)); }
 }
 @media (min-width: 980px) and (max-width: 1180px) {
-  .builder-layout { padding-right: min(23rem, 34vw); }
+  .builder-layout:has(.builder-inspector:not(.builder-inspector-collapsed)) { padding-right: min(23rem, 34vw); }
   .builder-inspector { width: min(22rem, calc(34vw - 16px)); }
 }
