@@ -85,3 +85,16 @@ test('[model probe] Help preserves an explicitly open editor while playback chap
     history: playBuilder.history.index
   }))).toEqual({ selected: ids[0], current: ids[1], history: 0 });
 });
+
+test('the always-visible save state reports a pending title edit honestly', async ({ page }) => {
+  await openBuilder(page);
+  await page.getByLabel('Menu', { exact: true }).click();
+  await page.getByLabel('Play file', { exact: true }).click();
+  await page.getByLabel('Play title', { exact: true }).fill('Saved status baseline');
+  await page.getByLabel('Play title', { exact: true }).press('Tab');
+  await expect(page.locator('[data-ui="save-pill"]')).toHaveText('Saved on this device');
+
+  await page.getByLabel('Play title', { exact: true }).fill('Pending status edit');
+  await expect(page.locator('.builder-save-status')).toHaveText('Editing · not saved yet');
+  await expect(page.locator('[data-ui="save-pill"]')).toHaveText('Editing');
+});
