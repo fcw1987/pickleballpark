@@ -530,7 +530,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   }
   function handleInput(event) {
     if (event.target.dataset.action === 'seek') fire('seek', Number(event.target.value));
-    else if(event.target.matches('input[type=number],input[type=text]')){pendingField=true;const status=root.querySelector('.builder-save-status');if(status)status.textContent='Editing · not saved yet';}
+    else if(event.target.matches('input[type=number],input[type=text]')){pendingField=true;const status=root.querySelector('.builder-save-status');if(status)status.textContent='Editing · not saved yet';const savePill=root.querySelector('[data-ui="save-pill"]');if(savePill){savePill.textContent='Editing';savePill.setAttribute('aria-label','Save state: Editing');}}
   }
   root.addEventListener('pointerdown',event=>{if(event.target.closest('button,summary')&&root.contains(document.activeElement)&&document.activeElement.matches('input:not([type=range]),textarea'))event.preventDefault();});
   root.addEventListener('keydown', event => { if (event.key !== 'Escape') return; const menu = event.target.closest('.builder-menu[open],.builder-chapter-menu[open]'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); event.preventDefault(); } });
