@@ -8,6 +8,14 @@ export class BuilderCourtTools {
         this.layer.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:4500';
         document.body.append(this.layer);
         this.handlers={pointerdown:e=>this.down(e),pointermove:e=>this.move(e),pointerup:e=>this.up(e),pointercancel:e=>this.cancel(e),lostpointercapture:e=>this.lostCapture(e)};
+        this.secondPointer=event=>{
+            const differentDragPointer=this.drag&&event.pointerId!==this.drag.pointer;
+            const nonPrimaryContact=(this.drag||this.placing)&&['touch','pen'].includes(event.pointerType)&&event.isPrimary===false;
+            if(!differentDragPointer&&!nonPrimaryContact)return;
+            this.abort('Target placement cancelled because another touch was detected.');
+            event.stopPropagation();
+        };
+        document.addEventListener('pointerdown',this.secondPointer,true);
         this.resize=()=>{if(this.drag||this.placing)this.abort('Target placement cancelled after the court resized.');else this.render();};window.addEventListener('resize',this.resize);
     }
     async bind(){
@@ -82,5 +90,5 @@ export class BuilderCourtTools {
         const positions=Object.values(coverage.positions || {});for(const position of positions){const p=this.project(position);if(!p)continue;this.layer.append(element('path',{d:`M${origin.x} ${origin.y}L${p.x} ${p.y}`,stroke:'#526d86','stroke-width':2,'stroke-dasharray':'5 5',opacity:.65}),element('circle',{cx:p.x,cy:p.y,r:17,fill:'none',stroke:'#526d86','stroke-width':2,'stroke-dasharray':'3 3'}));}
         const label=element('text',{x:Math.max(16,b.ui.element.querySelector('.builder-court-region').getBoundingClientRect().x+16),y:b.ui.element.querySelector('.builder-court-region').getBoundingClientRect().y+25,fill:'#203449',stroke:'#fff6db','stroke-width':3,'paint-order':'stroke','font-size':13,'font-family':'system-ui'});label.textContent='Suggested Coverage · instructional approximation';this.layer.append(label);
     }
-    destroy(){this.clear();if(this.surface)for(const[type,handler]of Object.entries(this.handlers))this.surface.removeEventListener(type,handler);window.removeEventListener('resize',this.resize);this.layer.remove();}
+    destroy(){this.clear();if(this.surface)for(const[type,handler]of Object.entries(this.handlers))this.surface.removeEventListener(type,handler);document.removeEventListener('pointerdown',this.secondPointer,true);window.removeEventListener('resize',this.resize);this.layer.remove();}
 }

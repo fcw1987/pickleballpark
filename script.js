@@ -85,7 +85,8 @@ class Pickleboard {
             elementStartY: 0,
             touchStartClientX: 0,
             touchStartClientY: 0,
-            touchMoved: false
+            touchMoved: false,
+            touchIdentifier: null
         };
         this.touchTapState = {
             lastTokenId: null,
@@ -111,6 +112,7 @@ class Pickleboard {
         this.drawingMode = false;
         this.isDrawing = false;
         this.currentPath = null;
+        this.drawingTouchIdentifier = null;
         this.drawingPaths = [];
         this.drawingState = {
             startX: 0,
@@ -507,6 +509,27 @@ class Pickleboard {
     startDrag(event, token) {
         // Don't start dragging in drawing or guided play mode.
         if (this.drawingMode || this.playInteractionLocked) return;
+
+        if (!event.touches && event.button !== undefined && event.button !== 0) {
+            if (this.dragState.isDragging) this.endDrag();
+            event.preventDefault();
+            return;
+        }
+        if (this.dragState.isDragging) {
+            this.cancelPlayerTouch();
+            this.endDrag();
+            event.preventDefault();
+            return;
+        }
+
+        // One touch owns a Planner drag. A second contact cancels the current
+        // operation instead of silently transferring authority to another token.
+        if (event.touches?.length > 1) {
+            this.cancelPlayerTouch();
+            this.endDrag();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         
@@ -523,8 +546,11 @@ class Pickleboard {
         this.dragState.elementStartY = token.y;
         this.dragState.touchMoved = false;
         if (event.touches) {
+            this.dragState.touchIdentifier = event.changedTouches?.[0]?.identifier ?? event.touches[0]?.identifier ?? null;
             this.dragState.touchStartClientX = coords.x;
             this.dragState.touchStartClientY = coords.y;
+        } else {
+            this.dragState.touchIdentifier = null;
         }
         
         // Add visual feedback
@@ -536,6 +562,13 @@ class Pickleboard {
     
     drag(event) {
         if (!this.dragState.isDragging || !this.dragState.dragElement) return;
+
+        if (event.touches?.length > 1) {
+            this.cancelPlayerTouch();
+            this.endDrag();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         
@@ -581,6 +614,7 @@ class Pickleboard {
         // Reset drag state
         this.dragState.isDragging = false;
         this.dragState.dragElement = null;
+        this.dragState.touchIdentifier = null;
         
         // Restore text selection
         document.body.style.userSelect = '';
@@ -621,7 +655,12 @@ class Pickleboard {
     
     getEventCoords(event) {
         if (event.touches && event.touches[0]) {
-            return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+            const touchIdentifier = this.dragState.touchIdentifier ?? this.drawingTouchIdentifier;
+            const ownedTouch = touchIdentifier == null
+                ? event.touches[0]
+                : [...event.touches].find(touch => touch.identifier === touchIdentifier);
+            const touch = ownedTouch || event.changedTouches?.[0] || event.touches[0];
+            return { x: touch.clientX, y: touch.clientY };
         } else {
             return { x: event.clientX, y: event.clientY };
         }
@@ -1127,9 +1166,16 @@ class Pickleboard {
     
     startDrawing(event) {
         if (!this.drawingMode || this.playInteractionLocked) return;
+
+        if (this.isDrawing || event.touches?.length > 1) {
+            if (this.isDrawing) this.endDrawing();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         this.isDrawing = true;
+        this.drawingTouchIdentifier = event.changedTouches?.[0]?.identifier ?? event.touches?.[0]?.identifier ?? null;
         
         const coords = this.getEventCoords(event);
         const svgCoords = this.screenToSVG(coords.x, coords.y);
@@ -1148,6 +1194,12 @@ class Pickleboard {
     
     draw(event) {
         if (!this.isDrawing || !this.drawingMode || !this.currentPath) return;
+
+        if (event.touches?.length > 1) {
+            this.endDrawing();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         
@@ -1161,6 +1213,12 @@ class Pickleboard {
     
     endDrawing(event) {
         if (!this.isDrawing) return;
+
+        if (event?.touches && this.drawingTouchIdentifier != null) {
+            const ownerEnded=[...(event.changedTouches || [])].some(touch=>touch.identifier===this.drawingTouchIdentifier);
+            const ownerRemains=[...event.touches].some(touch=>touch.identifier===this.drawingTouchIdentifier);
+            if (!ownerEnded && ownerRemains) return;
+        }
         
         this.isDrawing = false;
         
@@ -1173,6 +1231,7 @@ class Pickleboard {
         }
         
         this.currentPath = null;
+        this.drawingTouchIdentifier = null;
         this.drawingState.pathData = [];
         if(this.projectionResizePending){this.projectionResizePending=false;this.scheduleProjectionUpdate?.();}
     }
@@ -1363,7 +1422,11 @@ window.addEventListener('popstate', () => {
 // Handle page visibility changes (pause/resume)
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        // Page is hidden - could pause animations if any
+        // A hidden page cannot keep an input gesture owner. Finish the last
+        // coherent Planner position/stroke before browser events are suspended.
+        window.pickleboard?.endDrag();
+        if (window.pickleboard?.isDrawing) window.pickleboard.endDrawing();
+        window.pickleboard?.clearPendingTouchTap();
         console.log('Page hidden');
     } else {
         // Page is visible - could resume animations if any

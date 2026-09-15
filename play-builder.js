@@ -34,7 +34,7 @@ export class PlayBuilder {
             const viewport=window.visualViewport;
             // Pinch zoom remains browser-owned. Avoid resizing the scene under it.
             if(viewport&&Math.abs(viewport.scale-1)>.01)return;
-            if(this.courtTools.drag){this.courtTools.abort('Placement cancelled after the visible area changed.',false);this.scheduleRender();}
+            if(this.courtTools.drag||this.courtTools.placing){this.courtTools.abort('Placement cancelled after the visible area changed.',false);this.scheduleRender();}
             this.ui.element.style.setProperty('--builder-visible-height',`${viewport?.height || innerHeight}px`);
             this.ui.element.style.setProperty('--builder-visible-top',`${viewport?.offsetTop || 0}px`);
             this.fitCourt();this.courtTools.render();
@@ -218,6 +218,7 @@ export class PlayBuilder {
             this.courtTools.clear();
         } else {
             if(this.board.plays.activePlay)this.board.plays.exit();
+            this.board.endDrag?.();if(this.board.isDrawing)this.board.endDrawing?.();
             this.plannerSnapshot=this.board.captureBoardState();
             this.workspace='builder';this.board.courtFirstComposition=true; this.view='2d'; globalThis.document.body.classList.add('builder-workspace');
             this.installPlay(true,this.savedPlayhead); this.render();
@@ -242,17 +243,19 @@ export class PlayBuilder {
             if(action==='message'){this.message=String(value);this.render();return;}
             if(action==='view')return await this.switchView(value);
             if(action==='workspace')return await this.setWorkspace(value);
-            if(action==='help'){this.courtTools.clear();this.pause();const trigger=this.ui.element.querySelector('.builder-menu summary');trigger?.focus({preventScroll:true});this.board.openInfoModal({returnFocus:trigger});return;}
+            if(action==='help'){this.courtTools.clear();this.board.endDrag?.();if(this.board.isDrawing)this.board.endDrawing?.();this.pause();const trigger=this.ui.element.querySelector('.builder-menu summary');trigger?.focus({preventScroll:true});this.board.openInfoModal({returnFocus:trigger});return;}
             if(action==='appearance'){this.board.toggleTheme();this.render();return;}
             if(action==='playPause'){const playing=typeof value?.playing==='boolean'?value.playing:!this.session.playing;if(playing)this.play();else this.pause();}
             else if(action==='restart')this.seek(0);
             else if(action==='seek'){
+                if(this.courtTools.placing||this.courtTools.drag){this.courtTools.clear();this.message='Placement cancelled before timeline navigation.';}
                 const time=Number(value);
                 if(this.waypointPolicy.requiresConfirmation&&time>0){this.pause();this.message=this.waypointPolicy.message;}
                 else if(this.compiled.validShotCount<this.document.shots.length&&time>0){this.pause();this.message=`Shot ${this.compiled.validShotCount+1} must be corrected before timeline preview.`;}
                 else this.board.plays.timelineAction('seek',time);
             }
             else if(['scrubBegin','scrubSeek','scrubEnd','scrubCancel','chapter'].includes(action)){
+                if(this.courtTools.placing||this.courtTools.drag){this.courtTools.clear();this.message='Placement cancelled before timeline navigation.';}
                 const chapter=action==='chapter'?this.chapters.find(item=>item.shotId===value):null;
                 const blocked=action!=='scrubCancel'&&(this.waypointPolicy.requiresConfirmation||this.compiled.validShotCount<this.document.shots.length);
                 if(blocked){this.pause();this.message=this.waypointPolicy.requiresConfirmation?this.waypointPolicy.message:`Shot ${this.compiled.validShotCount+1} must be corrected before timeline preview.`;}
