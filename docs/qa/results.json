@@ -589,9 +589,10 @@
         },
         {
           "file": "service-worker.spec.mjs",
-          "title": "upgrades old Pickleboard caches without deleting unrelated origin caches",
+          "title": "upgrades legacy application caches without deleting unrelated origin caches",
           "line": 93,
-          "firstLine": "Error: expect(received).toBe(expected) // Object.is equality"
+          "firstLine": "Error: expect(received).toBe(expected) // Object.is equality",
+          "titleNote": "Display label normalized; exact historical test title is at tests/service-worker.spec.mjs:66 in revision13758356d65f154b19ca631e6ecb9bdb8afd875b. Assertion location and failure are unchanged."
         },
         {
           "file": "service-worker.spec.mjs",
