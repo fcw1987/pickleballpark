@@ -39,7 +39,10 @@ test.describe('Park Desk interface layer', () => {
     }
     await expect(ui.getByLabel('Shot family', { exact: true })).toBeVisible();
     await expect(ui.getByRole('button', { name: 'Place target on court', exact: true })).toBeVisible();
-    await expect(ui.locator('.builder-assistance > summary')).toHaveText('Coach tools');
+    await expect(ui.locator('.builder-assistance > summary')).toHaveText('Shading & Guides');
+    await expect(ui.locator('.builder-detail-tab').first()).toHaveCSS('min-height', '44px');
+    await expect(ui.locator('.builder-choice-grid')).toHaveCount(1);
+    await expect(ui.locator('.builder-choice-grid .builder-choice-field')).toHaveCount(2);
   });
 
   test('opening a menu cancels an interrupted placement gesture', async ({ page }) => {

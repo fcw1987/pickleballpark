@@ -394,3 +394,37 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
   .builder-layout:has(.builder-inspector:not(.builder-inspector-collapsed)) { padding-right: min(23rem, 34vw); }
   .builder-inspector { width: min(22rem, calc(34vw - 16px)); }
 }
+
+/* Focused shot authoring surface. Native selects remain the semantic and
+   keyboard/touch control; this frame supplies the Park game treatment. */
+.builder-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.builder-choice-field { position: relative; min-width: 0; margin: 0; padding: 7px 8px 8px 30px; border: 2px solid var(--game-edge); background: color-mix(in srgb, var(--game-paper-deep) 54%, var(--game-paper)); box-shadow: inset 2px 2px 0 color-mix(in srgb, var(--game-paper) 55%, transparent); }
+.builder-choice-field::before { content: attr(data-glyph); position: absolute; left: 9px; top: 29px; color: var(--game-accent); font: 700 .95rem/1 'Park Labels', ui-monospace, monospace; pointer-events: none; z-index: 1; }
+.builder-choice-hitter::before { content: '●'; color: var(--game-green); font-family: ui-monospace, monospace; }
+.builder-choice-hitter[data-team="orange"]::before { color: var(--game-accent); }
+.builder-choice-field .builder-field-label { display: block; margin-bottom: 4px; color: var(--game-green); font: 700 .64rem/1 'Park Labels', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
+.builder-choice-field select { min-height: 40px; padding: 5px 28px 5px 7px; border: 1px solid color-mix(in srgb, var(--game-edge) 62%, transparent); appearance: none; background-color: color-mix(in srgb, var(--game-paper) 65%, var(--game-paper-deep)); font-weight: 700; }
+.builder-choice-field::after { content: '▼'; position: absolute; right: 10px; bottom: 17px; color: var(--game-edge); font: 700 .66rem/1 ui-monospace, monospace; pointer-events: none; }
+.builder-choice-field:focus-within { border-color: var(--game-accent); box-shadow: inset 2px 2px 0 color-mix(in srgb, var(--game-highlight) 70%, transparent), 0 0 0 2px color-mix(in srgb, var(--game-accent) 28%, transparent); }
+.builder-group-shot > h3 { margin-bottom: 5px; font-size: .65rem; letter-spacing: .14em; }
+.builder-detail-tab { position: relative; min-height: 44px; border-width: 2px; font-family: 'Park Labels', ui-monospace, monospace; letter-spacing: .03em; text-transform: uppercase; }
+.builder-detail-tab::before { display: inline-block; margin-right: 4px; color: var(--game-accent); font-family: ui-monospace, monospace; }
+.builder-detail-tab[data-group="target"]::before { content: '⌖'; }
+.builder-detail-tab[data-group="flight"]::before { content: '⌁'; }
+.builder-detail-tab[data-group="players"]::before { content: '●'; }
+.builder-detail-tab[data-group="movement"]::before { content: '→'; }
+.builder-detail-tab[data-group="coach"]::before { content: '✦'; }
+.builder-detail-tab[data-group="precision"]::before { content: '＋'; }
+.builder-detail-tab[aria-selected="true"] { border-bottom-width: 4px; }
+.builder-group-coach > h3 { margin-bottom: 5px; }
+.builder-group-coach .builder-assistance { margin-top: 8px; padding: 5px 8px 7px; border: 1px solid color-mix(in srgb, var(--game-green) 55%, var(--game-edge)); background: color-mix(in srgb, var(--game-green) 8%, var(--game-paper)); }
+.builder-group-coach .builder-assistance > summary { color: var(--game-green); font: 800 .78rem/1.2 'Park Labels', ui-monospace, monospace; }
+.builder-group-coach .builder-assistance[open] > summary { padding-bottom: 6px; border-bottom: 1px dashed color-mix(in srgb, var(--game-green) 45%, transparent); }
+
+@media (max-width: 430px) {
+  .builder-choice-grid { gap: 6px; }
+  .builder-choice-field { padding-left: 25px; }
+  .builder-choice-field select { padding-inline: 5px 24px; font-size: .9rem; }
+  .builder-choice-field::before { left: 6px; }
+  .builder-choice-field::after { right: 7px; }
+}
