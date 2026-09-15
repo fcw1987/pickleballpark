@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
 
 // BETA009: this spec intentionally targets only the visible builder transport.
 // Run against a running candidate with PORT/PICKLEBALLPARK_TEST_URL set.
@@ -10,11 +11,11 @@ const viewports = [
 ];
 
 const visiblePlay = page => page.locator('.builder-play-button:visible');
-const visibleView = (page, label) => page.locator('.builder-view-button:visible').filter({ hasText: label });
 
 async function openBuilder(page, viewport) {
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.goto('/index.html?workspace=builder');
+  await settleBuilderStartup(page);
   await expect(page.locator('.builder-ui')).toBeVisible();
   await expect(visiblePlay(page)).toHaveAttribute('aria-label', 'Play');
 }
@@ -85,11 +86,12 @@ test.describe('BETA009 visible pause input', () => {
 
   test('2D and 3D builder views expose one working visible Pause control', async ({ page }) => {
     await openBuilder(page, viewports[0]);
-    for (const label of ['2D', '3D']) {
-      await visibleView(page, label).click();
-      await expect(visibleView(page, label)).toHaveClass(/is-selected/);
+    for (const view of ['2d', '3d']) {
+      await switchCourtView(page, view);
+      const counterpart = view === '2d' ? '3D' : '2D';
+      await expect(page.getByRole('button', { name: `Switch to ${counterpart} court view`, exact: true })).toBeVisible();
       const result = await playAndHoldPause(page, 3, 'mouse');
-      expect(result.label, `${label} visible transport`).toBe('Play');
+      expect(result.label, `${view.toUpperCase()} visible transport`).toBe('Play');
       await expect(visiblePlay(page)).toHaveAttribute('aria-pressed', 'false');
     }
   });
