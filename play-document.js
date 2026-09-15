@@ -1,7 +1,10 @@
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 export const SCHEMA_VERSION = 1;
-export const MAX_SHOTS = 64;
+// One shared bound for authored, imported, generated, and compiled rallies.
+// Keep this in the document contract so callers never need to duplicate the
+// limit (the previous public limit was 64).
+export const MAX_SHOTS = 99;
 
 const PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 const FAMILIES = Object.freeze(['serve', 'return', 'drive', 'drop', 'dink', 'volley', 'reset', 'lob', 'overhead']);
@@ -102,7 +105,7 @@ export function validateDocument(value) {
     if (value.players[id].team !== requiredTeam) fail(`players.${id}.team`, `must remain ${requiredTeam} in schema version 1 so player identity agrees with the approved artwork and renderers.`);
   }
   if (!Array.isArray(value.shots)) fail('shots', 'must be an array.');
-  if (value.shots.length > MAX_SHOTS) fail('shots', `must contain at most ${MAX_SHOTS} recipes.`);
+  if (value.shots.length > MAX_SHOTS) fail('shots', `must contain at most ${MAX_SHOTS} recipes (legacy documents may contain at most 64).`);
   const ids = new Set();
   value.shots.forEach((shot, index) => {
     const path = `shots[${index}]`;
@@ -129,7 +132,7 @@ export function validateDocument(value) {
     if (shot.family === 'serve') choice(shot.serveMethod, ['volley', 'drop'], `${path}.serveMethod`);
     else if (shot.serveMethod !== undefined) fail(`${path}.serveMethod`, 'is only valid for a serve.');
   });
-  if (!Array.isArray(value.annotations) || value.annotations.length > 64) fail('annotations', 'must be an array of at most 64 items.');
+  if (!Array.isArray(value.annotations) || value.annotations.length > MAX_SHOTS) fail('annotations', `must be an array of at most ${MAX_SHOTS} items (legacy documents may contain at most 64).`);
   // Annotations remain inert JSON data. Bound their serialized size for safe import.
   let annotationBytes;
   try { annotationBytes = JSON.stringify(value.annotations).length; } catch { fail('annotations', 'must be JSON serializable.'); }
