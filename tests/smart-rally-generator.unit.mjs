@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
-import { documentFromTemplate, MAX_SHOTS, validateDocument } from '../play-document.js';
+import { createStarterDocument, documentFromTemplate, MAX_SHOTS, validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
-import { proposeFamilyChange, documentSourceIdentity, authorizeProposal } from '../rally-proposals.js';
+import { evaluateCandidate, proposeFamilyChange, documentSourceIdentity, authorizeProposal } from '../rally-proposals.js';
 import { proposeRandomRally, proposeSmartAdd } from '../smart-rally-generator.js';
 
 const clone = value => structuredClone(value);
@@ -24,6 +24,32 @@ test('smart Add appends five validated hits from an empty document and preserves
   assert.equal(source.shots.length, 5);
   assert.equal(source.shots[0].family, 'serve');
   assert.deepEqual(initial.shots, []);
+});
+
+test('Smart Add records bounded seed metadata, keeps all source fields, and avoids an occupied deterministic id', async () => {
+  const generated = await proposeRandomRally({ length: 4, seed: 1 });
+  assert.equal(generated.ok, true, generated.reason);
+  generated.document.shots[3].id = 'smart-shot-5';
+  const before = clone(generated.document);
+  const proposal = await proposeSmartAdd(generated.document, { seed: 0xdeadbeef });
+  assert.equal(proposal.ok, true, proposal.reason);
+  assert.deepEqual(generated.document, before);
+  assert.deepEqual(proposal.document.shots.slice(0, before.shots.length), before.shots);
+  assert.equal(proposal.document.shots.at(-1).id, 'smart-shot-5-2');
+  assert.deepEqual(proposal.document.shots.at(-1).generation, { seed: 0xdeadbeef, generatorVersion: 'smart-rally-v1' });
+  validateDocument(proposal.document);
+});
+
+test('candidate evaluation includes the same coverage and Auto Shading boundary as play installation', () => {
+  const document = createStarterDocument();
+  document.assistance = { autoShading: true, showGuides: true, team: 'both' };
+  document.shots[0].movement = { intent: 'manual', pinned: true, target: { x: 15, y: 5.25 } };
+  document.shots[1].movement.pinned = true;
+  const result = evaluateCandidate(document);
+  assert.equal(result.ok, true, result.reason);
+  assert.equal(result.validShotCount, document.shots.length);
+  assert.ok(result.compiled.coverage.length > 0);
+  assert.deepEqual(document.shots[0].target, { x: 5, y: 38 });
 });
 
 test('Fifth Shot Drop continuation chooses a compiler-reachable opposing hitter', async () => {
@@ -95,4 +121,47 @@ test('family changes maintain the schema-conditional serve method', async () => 
   assert.equal(serve.ok, false, 'an invalid late Serve remains visible as a rejected proposal');
   assert.equal(serve.document.shots[2].family, 'serve');
   assert.equal(serve.document.shots[2].serveMethod, 'volley');
+});
+
+test('family changes preserve an authored drop serve method when the family is unchanged', async () => {
+  const source = createStarterDocument();
+  source.shots[0].serveMethod = 'drop';
+  const proposal = await proposeFamilyChange(source, { index: 0, family: 'serve' });
+  assert.equal(proposal.ok, true, proposal.reason);
+  assert.equal(proposal.document.shots[0].serveMethod, 'drop');
+});
+
+test('Smart Add refuses terminal documents and malformed finite attempt overrides', async () => {
+  const terminal = createStarterDocument();
+  terminal.ending = 'winner';
+  const stopped = await proposeSmartAdd(terminal, { seed: 3 });
+  assert.equal(stopped.ok, false);
+  assert.match(stopped.reason, /terminal outcome/);
+  for (const options of [{ maxAttempts: Infinity }, { maxAttempts: 1.5 }, { maxAttempts: 0 }]) {
+    const result = await proposeSmartAdd(createStarterDocument(), options);
+    assert.equal(result.ok, false);
+    assert.match(result.reason, /finite integer/);
+  }
+  for (const options of [{ maxAttempts: Infinity }, { maxBacktracks: Infinity }, { maxBacktracks: -1 }]) {
+    const result = await proposeRandomRally({ length: 1, seed: 4, ...options });
+    assert.equal(result.ok, false);
+    assert.match(result.reason, /finite integer/);
+  }
+});
+
+test('Random Rally yields between successful hits so cancellation remains observable', async () => {
+  const controller = new AbortController();
+  const progress = [];
+  const result = await proposeRandomRally({
+    length: 99,
+    seed: 0x1234,
+    signal: controller.signal,
+    onProgress: update => {
+      progress.push(update.shot);
+      if (update.shot === 4) controller.abort();
+    }
+  });
+  assert.equal(result.ok, false);
+  assert.match(result.reason, /cancelled/i);
+  assert.ok(progress.includes(4));
 });

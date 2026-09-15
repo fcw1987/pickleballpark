@@ -14,6 +14,10 @@ const PACES = Object.freeze(['soft', 'medium', 'firm']);
 const MOVEMENT_INTENTS = Object.freeze(['hold', 'advance', 'recover', 'manual']);
 const TEAMS = Object.freeze(['green', 'orange']);
 const HANDS = Object.freeze(['right', 'left']);
+const SHOT_AUTHORING_FIELDS = Object.freeze([
+  'family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace',
+  'movement', 'playerMovement', 'serveMethod'
+]);
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const fail = (path, message) => { throw new TypeError(`${path} ${message}`); };
@@ -57,6 +61,31 @@ function validateMovement(value, path) {
     if (!Array.isArray(value.waypoints) || value.waypoints.length > 8) fail(`${path}.waypoints`, 'must contain at most 8 points.');
     value.waypoints.forEach((item, waypointIndex) => point(item, `${path}.waypoints[${waypointIndex}]`, { offCourt: true }));
   }
+}
+
+function validateShotMetadata(value, path) {
+  if (value === undefined) return;
+  object(value, path);
+  const allowed = new Set(['ownership', 'fields']);
+  for (const key of Object.keys(value)) if (!allowed.has(key)) fail(`${path}.${key}`, 'is not a supported authoring metadata field.');
+  choice(value.ownership, ['automatic', 'authored'], `${path}.ownership`);
+  if (!Array.isArray(value.fields) || value.fields.length > SHOT_AUTHORING_FIELDS.length) fail(`${path}.fields`, `must contain at most ${SHOT_AUTHORING_FIELDS.length} top-level field names.`);
+  const seen = new Set();
+  value.fields.forEach((field, index) => {
+    string(field, `${path}.fields[${index}]`, 32);
+    if (!SHOT_AUTHORING_FIELDS.includes(field)) fail(`${path}.fields[${index}]`, `must name one of the supported shot fields: ${SHOT_AUTHORING_FIELDS.join(', ')}.`);
+    if (seen.has(field)) fail(`${path}.fields[${index}]`, 'must not contain duplicate field names.');
+    seen.add(field);
+  });
+}
+
+function validateShotGeneration(value, path) {
+  if (value === undefined) return;
+  object(value, path);
+  const keys = Object.keys(value);
+  if (keys.some(key => !['seed', 'generatorVersion'].includes(key))) fail(path, 'contains unsupported generation metadata.');
+  if (!Number.isInteger(value.seed) || value.seed < 0 || value.seed > 0xffffffff) fail(`${path}.seed`, 'must be an unsigned 32-bit integer.');
+  string(value.generatorVersion, `${path}.generatorVersion`, 64);
 }
 
 function validateTemplateSource(value) {
@@ -105,7 +134,7 @@ export function validateDocument(value) {
     if (value.players[id].team !== requiredTeam) fail(`players.${id}.team`, `must remain ${requiredTeam} in schema version 1 so player identity agrees with the approved artwork and renderers.`);
   }
   if (!Array.isArray(value.shots)) fail('shots', 'must be an array.');
-  if (value.shots.length > MAX_SHOTS) fail('shots', `must contain at most ${MAX_SHOTS} recipes (legacy documents may contain at most 64).`);
+  if (value.shots.length > MAX_SHOTS) fail('shots', `must contain at most ${MAX_SHOTS} recipes.`);
   const ids = new Set();
   value.shots.forEach((shot, index) => {
     const path = `shots[${index}]`;
@@ -121,6 +150,8 @@ export function validateDocument(value) {
     choice(shot.arc, ARCS, `${path}.arc`);
     choice(shot.pace, PACES, `${path}.pace`);
     validateMovement(shot.movement, `${path}.movement`);
+    validateShotMetadata(shot.authoring, `${path}.authoring`);
+    validateShotGeneration(shot.generation, `${path}.generation`);
     if (shot.playerMovement !== undefined) {
       object(shot.playerMovement, `${path}.playerMovement`);
       for (const [player, movement] of Object.entries(shot.playerMovement)) {
@@ -132,7 +163,7 @@ export function validateDocument(value) {
     if (shot.family === 'serve') choice(shot.serveMethod, ['volley', 'drop'], `${path}.serveMethod`);
     else if (shot.serveMethod !== undefined) fail(`${path}.serveMethod`, 'is only valid for a serve.');
   });
-  if (!Array.isArray(value.annotations) || value.annotations.length > MAX_SHOTS) fail('annotations', `must be an array of at most ${MAX_SHOTS} items (legacy documents may contain at most 64).`);
+  if (!Array.isArray(value.annotations) || value.annotations.length > MAX_SHOTS) fail('annotations', `must be an array of at most ${MAX_SHOTS} items.`);
   // Annotations remain inert JSON data. Bound their serialized size for safe import.
   let annotationBytes;
   try { annotationBytes = JSON.stringify(value.annotations).length; } catch { fail('annotations', 'must be JSON serializable.'); }

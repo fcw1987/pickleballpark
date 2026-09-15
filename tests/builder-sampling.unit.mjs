@@ -68,7 +68,7 @@ test('seeded feasible serve, return, and third-shot parameters compile determini
   }
 });
 
-test('the documented maximum of 64 stable recipes compiles without a fixed-slot path', () => {
+test('the documented maximum of 99 stable recipes compiles without a fixed-slot path', () => {
   const document = createStarterDocument();
   document.id = 'maximum-supported-rally';
   document.opening = 'midrally';

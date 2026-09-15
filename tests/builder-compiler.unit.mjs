@@ -20,7 +20,7 @@ test('validation rejects malformed, unbounded, duplicate, and non-finite authori
   const base = createStarterDocument();
   assert.throws(() => validateDocument({ ...base, schemaVersion: 99 }), /schemaVersion must be 1/);
   assert.throws(() => validateDocument({ ...base, title: '<b>'.repeat(100) }), /at most 120/);
-  assert.throws(() => validateDocument({ ...base, shots: Array.from({ length: MAX_SHOTS + 1 }, () => base.shots[0]) }), /at most 64/);
+  assert.throws(() => validateDocument({ ...base, shots: Array.from({ length: MAX_SHOTS + 1 }, () => base.shots[0]) }), new RegExp(`at most ${MAX_SHOTS}`));
   const duplicate = clone(base); duplicate.shots[1].id = duplicate.shots[0].id;
   assert.throws(() => validateDocument(duplicate), /must be unique/);
   const nan = clone(base); nan.shots[1].target.x = NaN;
@@ -29,6 +29,13 @@ test('validation rejects malformed, unbounded, duplicate, and non-finite authori
   assert.throws(() => validateDocument(manual), /target is required/);
   const reassigned = clone(base); reassigned.players.player1.team = 'orange';
   assert.throws(() => validateDocument(reassigned), /must remain green/);
+  const metadata = clone(base);
+  metadata.shots[0].authoring = { ownership: 'automatic', fields: ['shots[0].target'] };
+  assert.throws(() => validateDocument(metadata), /supported shot fields/);
+  metadata.shots[0].authoring = { ownership: 'automatic', fields: ['target'], extra: true };
+  assert.throws(() => validateDocument(metadata), /not a supported authoring metadata/);
+  metadata.shots[0].authoring = { ownership: 'automatic', fields: ['target', 'target'] };
+  assert.throws(() => validateDocument(metadata), /duplicate field names/);
 });
 
 test('custom recipes compile through production steps and timeline with stable recipe event ids', () => {

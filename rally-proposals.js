@@ -1,9 +1,10 @@
 // Shared proposal, identity, ownership, and candidate-evaluation primitives.
 // Generation deliberately stays separate from applying a proposal to a live
 // builder. The builder owns revision checks, history, and the single Undo step.
-import { compileDocument } from './play-compiler.js';
+import { compileDocument, recompileAssistedDocument } from './play-compiler.js';
 import { validateDocument } from './play-document.js';
 import { validateRallyRules } from './rally-rules.js';
+import { applyCoverageAssistance } from './coverage-assistance.js';
 
 export const PROPOSAL_VERSION = 1;
 export const SMART_GENERATOR_VERSION = 'smart-rally-v1';
@@ -45,8 +46,6 @@ export const sourceIdentity = documentSourceIdentity;
  * equality with a preset/default never grants a generator permission to edit.
  */
 export function fieldOwnership(document, path) {
-  const entries = document?.authoring?.ownership;
-  if (entries && typeof entries === 'object' && entries[path]) return entries[path];
   const shotMatch = /^shots\[(\d+)\]\.(.+)$/.exec(path || '');
   const shot = shotMatch && document?.shots?.[Number(shotMatch[1])];
   const metadata = shot?.authoring;
@@ -91,10 +90,21 @@ export function makeProposal({ operation, sourceDocument, document = null, seed 
   });
 }
 
+/** Compile the same effective Play used by the builder, including coverage. */
+export function compileEffectiveCandidate(document) {
+  validateDocument(document);
+  const baseCompiled = compileDocument(document);
+  const assisted = baseCompiled.play
+    ? applyCoverageAssistance(baseCompiled.play, document, baseCompiled.timeline)
+    : { play: null, coverage: [] };
+  return baseCompiled.play && document.assistance?.autoShading
+    ? recompileAssistedDocument(document, baseCompiled, assisted.play, assisted.coverage)
+    : baseCompiled.play ? { ...baseCompiled, coverage: assisted.coverage } : baseCompiled;
+}
+
 export function evaluateCandidate(document, { allowOpeningPrefix = false } = {}) {
   try {
-    validateDocument(document);
-    const compiled = compileDocument(document);
+    const compiled = compileEffectiveCandidate(document);
     const rules = compiled.play ? validateRallyRules(compiled.play, compiled.timeline) : { valid: false, violations: [] };
     const errors = compiled.findings.filter(item => item.severity === 'error');
     const shortOpening = allowOpeningPrefix && document.opening === 'serve' && document.shots.length <= 1 &&
@@ -158,8 +168,9 @@ export async function proposeFamilyChange(sourceDocument, { shotId, index, famil
     // serveMethod is schema-conditional rather than a user-facing protected
     // flight choice: every Serve gets a valid default and every other family
     // removes the stale field, including legacy authored shots.
-    if (family === 'serve') changed.serveMethod = 'volley';
-    else delete changed.serveMethod;
+    if (family === 'serve') {
+      if (shot.family !== 'serve') changed.serveMethod = 'volley';
+    } else delete changed.serveMethod;
     const evaluated = evaluateCandidate(candidate);
     const changes = proposalChanges(source, candidate);
     if (!evaluated.ok) {

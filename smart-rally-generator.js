@@ -18,9 +18,10 @@ const FAMILIES = Object.freeze(['drive', 'drop', 'dink', 'volley', 'reset', 'lob
 const ARCS = Object.freeze(['low', 'medium', 'high']);
 const PACES = Object.freeze(['soft', 'medium', 'firm']);
 const OPENING_FAMILIES = Object.freeze(['drive', 'drop', 'dink', 'reset', 'lob']);
-const MAX_ATTEMPTS_PER_SHOT = 24;
+const MAX_ATTEMPTS_PER_SHOT = 48;
 const MAX_BACKTRACKS = 12;
 const DEFAULT_SEED = 0x51a7c0de;
+const GENERATION_YIELD_INTERVAL = 4;
 
 export const GENERATOR_LIMITS = Object.freeze({ maxAttemptsPerShot: MAX_ATTEMPTS_PER_SHOT, maxBacktracks: MAX_BACKTRACKS, maxShots: MAX_SHOTS });
 
@@ -55,6 +56,12 @@ function normalizedSeed(seed) {
 function normalizedLength(length) {
   if (!Number.isInteger(length) || length < 1 || length > MAX_SHOTS) throw new RangeError(`A rally must contain an integer number of hits from 1 to ${MAX_SHOTS}.`);
   return length;
+}
+
+function normalizedAttempts(value, fallback, maximum, label, { allowZero = false } = {}) {
+  if (value === undefined) return fallback;
+  if (!Number.isInteger(value) || value < (allowZero ? 0 : 1) || value > maximum) throw new RangeError(`${label} must be a finite integer from ${allowZero ? 0 : 1} to ${maximum}.`);
+  return value;
 }
 
 function baseDocument(seed, length) {
@@ -99,11 +106,22 @@ function hittersFor(document, index, previous, next) {
   return shuffled(required.filter(id => PLAYER_IDS.includes(id)), next);
 }
 
-function shotCandidate(document, index, family, hitter, next, { smartAdd = false } = {}) {
+function nextShotId(document, index) {
+  const used = new Set(document.shots.map(shot => shot.id));
+  const base = `smart-shot-${index + 1}`;
+  if (!used.has(base)) return base;
+  for (let suffix = 2; suffix <= MAX_SHOTS + 1; suffix += 1) {
+    const candidate = `${base}-${suffix}`;
+    if (!used.has(candidate)) return candidate;
+  }
+  return `${base}-${document.shots.length + 1}`;
+}
+
+function shotCandidate(document, index, family, hitter, next, { smartAdd = false, generationSeed } = {}) {
   const team = document.players[hitter].team;
   const contactStyle = family === 'reset' && index > 2 && next() < .2 ? 'short-hop' : 'auto';
   const shot = {
-    id: `smart-shot-${index + 1}`,
+    id: nextShotId(document, index),
     family,
     hitter,
     receiver: 'auto',
@@ -115,6 +133,7 @@ function shotCandidate(document, index, family, hitter, next, { smartAdd = false
     authoring: automaticOwnership(['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'])
   };
   if (family === 'serve') shot.serveMethod = next() < .78 ? 'volley' : 'drop';
+  if (smartAdd && generationSeed !== undefined) shot.generation = { seed: generationSeed >>> 0, generatorVersion: SMART_GENERATOR_VERSION };
   return shot;
 }
 
@@ -133,7 +152,7 @@ function completeEvaluation(document, { allowOpeningPrefix = true } = {}) {
   return rules.valid || shortOpening ? { ...evaluation, ok: true, rules } : { ...evaluation, ok: false, rules, reason: rules.violations[0]?.message || 'The candidate violated rally rules.' };
 }
 
-async function appendNext(document, index, random, { signal, maxAttempts = MAX_ATTEMPTS_PER_SHOT, allowVolley = true } = {}) {
+async function appendNext(document, index, random, { signal, maxAttempts = MAX_ATTEMPTS_PER_SHOT, allowVolley = true, generationSeed } = {}) {
   const previous = document.shots.at(-1);
   const families = familyChoices(index, document.opening, previous, random, { allowVolley });
   const attempted = new Set();
@@ -143,7 +162,7 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
     const family = families[attempt % families.length];
     const hitters = hittersFor(document, index, previous, random);
     for (const hitter of hitters) {
-      const candidateShot = shotCandidate(document, index, family, hitter, random, { smartAdd: !allowVolley });
+      const candidateShot = shotCandidate(document, index, family, hitter, random, { smartAdd: generationSeed !== undefined, generationSeed });
       const key = `${family}/${hitter}/${JSON.stringify(candidateShot.target)}/${candidateShot.arc}/${candidateShot.pace}`;
       if (attempted.has(key)) continue;
       attempted.add(key);
@@ -175,6 +194,7 @@ async function buildRally(length, seed, { signal, onProgress, base = null, maxAt
     if (next.document) {
       stack.push({ document: next.document, attempts: 0 });
       onProgress?.({ shot: next.document.shots.length, requestedHits: length, backtracks });
+      if (next.document.shots.length % GENERATION_YIELD_INTERVAL === 0) await waitTurn();
       continue;
     }
     if (stack.length === 1 || backtracks >= maxBacktracks) break;
@@ -192,15 +212,20 @@ function failure({ operation, sourceDocument = null, seed = null, reason }) {
 /** Propose one compatible continuation while preserving every prior field. */
 export async function proposeSmartAdd(sourceDocument, options = {}) {
   const source = copy(sourceDocument);
-  const seed = normalizedSeed(options.seed);
+  let seed = null;
   try {
+    seed = normalizedSeed(options.seed);
     validateDocument(source);
+    if (source.ending !== 'stop' || source.intentionalFault) {
+      return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: 'A rally with an explicit terminal outcome or intentional fault cannot accept another shot. Reopen it before appending.' });
+    }
+    const maxAttempts = normalizedAttempts(options.maxAttempts, MAX_ATTEMPTS_PER_SHOT, MAX_ATTEMPTS_PER_SHOT, 'maxAttempts');
     const current = completeEvaluation(source);
     if (!current.ok || current.validShotCount !== source.shots.length) {
       return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: current.reason || 'Correct the existing rally with Coach before adding a continuation.' });
     }
     if (source.shots.length >= MAX_SHOTS) return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: `The shared rally limit of ${MAX_SHOTS} hits has been reached.` });
-    const result = await appendNext(source, source.shots.length, seededRandom(seed), { ...options, allowVolley: false });
+    const result = await appendNext(source, source.shots.length, seededRandom(seed), { ...options, maxAttempts, allowVolley: true, generationSeed: seed });
     if (!result.document) return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: result.result.reason });
     // Verify that the source prefix is byte-equivalent in canonical JSON.
     const prefix = result.document.shots.slice(0, source.shots.length);
@@ -223,7 +248,9 @@ export async function proposeRandomRally({ length, seed = DEFAULT_SEED, sourceDo
     return makeProposal({ operation: 'random-rally', sourceDocument, seed: Number.isFinite(Number(seed)) ? Number(seed) >>> 0 : null, reason: error.message });
   }
   try {
-    const document = await buildRally(normalized, normalizedSeedValue, { signal, onProgress, maxAttempts, maxBacktracks });
+    const boundedAttempts = normalizedAttempts(maxAttempts, MAX_ATTEMPTS_PER_SHOT, MAX_ATTEMPTS_PER_SHOT, 'maxAttempts');
+    const boundedBacktracks = normalizedAttempts(maxBacktracks, MAX_BACKTRACKS, MAX_BACKTRACKS, 'maxBacktracks', { allowZero: true });
+    const document = await buildRally(normalized, normalizedSeedValue, { signal, onProgress, maxAttempts: boundedAttempts, maxBacktracks: boundedBacktracks });
     if (!document) return makeProposal({ operation: 'random-rally', sourceDocument, seed: normalizedSeedValue, reason: `Could not produce exactly ${normalized} valid hits within bounded search (${MAX_ATTEMPTS_PER_SHOT} attempts per shot, ${MAX_BACKTRACKS} backtracks).` });
     const evaluation = completeEvaluation(document, { allowOpeningPrefix: normalized === 1 });
     if (!evaluation.ok || evaluation.validShotCount !== normalized) return makeProposal({ operation: 'random-rally', sourceDocument, seed: normalizedSeedValue, reason: evaluation.reason || 'The generated rally did not pass complete validation.' });
