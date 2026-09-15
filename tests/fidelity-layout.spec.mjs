@@ -1,6 +1,26 @@
 import { test, expect } from '@playwright/test';
 import { copyScenarioDocument } from './fixtures/qa-scenarios.mjs';
 
+test('short-screen menu actions scroll clear of playback and remain operable', async ({ page }) => {
+  for (const [width, height, enlarged] of [[320, 568, false], [390, 844, false], [844, 390, false], [320, 568, true]]) {
+    await page.setViewportSize({ width, height }); await page.goto('/');
+    await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+    if (enlarged) await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; playBuilder.render(); });
+    const before = await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length, theme: document.body.dataset.theme }));
+    await page.locator('.builder-main-menu > summary').click();
+    const panel = await page.locator('.builder-main-menu > .builder-menu-panel').boundingBox();
+    const footer = await page.locator('.builder-transport').boundingBox();
+    expect(panel.y + panel.height).toBeLessThanOrEqual(Math.min(height - 4, footer.y - 4));
+    const appearance = page.getByRole('button', { name: 'Appearance', exact: true });
+    await appearance.scrollIntoViewIfNeeded();
+    const box = await appearance.boundingBox();
+    expect(box.y + box.height).toBeLessThanOrEqual(Math.min(height, footer.y));
+    await appearance.click();
+    expect(await page.evaluate(() => document.body.dataset.theme)).not.toBe(before.theme);
+    expect(await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }))).toEqual({ doc: before.doc, history: before.history });
+  }
+});
+
 test('compact history leaves a full-width, touch-sized seek surface', async ({ page }) => {
   for (const [width, height] of [[320, 568], [390, 844], [430, 932]]) {
     await page.setViewportSize({ width, height });

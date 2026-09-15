@@ -102,6 +102,15 @@ export class PlayBuilder {
         const surfaces=[document.querySelector(".court-container-fullscreen"),document.getElementById("threeDViewer")];
         if(this.workspace!=="builder"){for(const surface of surfaces)surface?.style.removeProperty("css-text");for(const surface of surfaces)if(surface)surface.style.cssText="";return;}
         if(!region)return;const rect=region.getBoundingClientRect();
+        // The menu scrolls within the space above playback, including short
+        // screens and enlarged text. Its overflow never covers the transport.
+        const menu=this.ui.element.querySelector('.builder-main-menu');
+        const transport=this.ui.element.querySelector('.builder-transport');
+        if(menu&&transport){
+            const visibleBottom=window.visualViewport?visualViewport.height+visualViewport.offsetTop:innerHeight;
+            const menuBottom=Math.min(visibleBottom,transport.getBoundingClientRect().top);
+            this.ui.element.style.setProperty('--builder-menu-max-height',`${Math.max(80,menuBottom-menu.getBoundingClientRect().bottom-14)}px`);
+        }
         this.ui.element.style.setProperty('--builder-sheet-max-height',`${Math.max(100,rect.bottom-58-(window.visualViewport?.offsetTop||0))}px`);
         if(innerWidth>700&&innerHeight<=500){const meta=this.ui.element.querySelector('.builder-meta');if(meta)this.ui.element.style.setProperty('--builder-rail-sequence-top',`${meta.getBoundingClientRect().bottom-this.ui.element.getBoundingClientRect().top+4}px`);}
         // The context and playback strips already reserve their own grid rows.
