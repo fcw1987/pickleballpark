@@ -215,3 +215,133 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 @media(prefers-reduced-motion:reduce) {
   .builder-ui *, .builder-ui *::before, .builder-ui *::after { transition:none!important; animation:none!important; }
 }
+
+/* Park Desk interface layer: the controls stay live HTML, while the surfaces
+   use one compact game vocabulary. Decorative labels use the bundled display
+   face; instructions and values stay in a readable system face. */
+.builder-meta {
+  align-items: stretch;
+  padding: 5px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-paper) 94%, white), var(--game-paper));
+  box-shadow: 3px 3px 0 var(--game-ink), inset 0 -3px 0 color-mix(in srgb, var(--game-edge) 15%, transparent);
+}
+.builder-main-menu > summary,
+.builder-context-actions .builder-button,
+.builder-view-button {
+  background: color-mix(in srgb, var(--game-paper-deep) 76%, var(--game-paper));
+  box-shadow: inset 2px 2px 0 color-mix(in srgb, var(--game-paper) 75%, transparent), 2px 2px 0 var(--game-ink);
+}
+.builder-main-menu > summary { min-width: 5.3rem; }
+.builder-save-pill {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin: 0 2px;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in srgb, var(--game-edge) 55%, transparent);
+  color: var(--game-muted);
+  background: color-mix(in srgb, var(--game-paper-deep) 52%, transparent);
+  font: 700 .62rem/1 ui-monospace, Menlo, monospace;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.builder-save-pill::before { content: ''; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--game-green); box-shadow: 0 0 0 2px color-mix(in srgb, var(--game-green) 22%, transparent); }
+.builder-save-pill[aria-label*="Editing"]::before { background: var(--game-accent); }
+.builder-shot-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 4px 8px 4px 10px;
+  border-left: 4px solid var(--game-accent);
+  background: color-mix(in srgb, var(--game-highlight) 40%, var(--game-paper));
+  flex: 1 1 7rem;
+  overflow: hidden;
+}
+.builder-shot-card-kicker { display: flex; align-items: baseline; gap: 5px; min-width: 0; color: var(--game-muted); white-space: nowrap; }
+.builder-shot-card-number { color: var(--game-edge); font: 700 .66rem/1 'Park Labels', ui-monospace, monospace; letter-spacing: .06em; }
+.builder-shot-card-family { color: var(--game-ink); font: 800 .9rem/1.1 ui-monospace, Menlo, monospace; }
+.builder-shot-card-description { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--game-ink); font: 700 .82rem/1.15 ui-sans-serif, system-ui, sans-serif; }
+.builder-shot-card-flight { color: var(--game-muted); font: 700 .68rem/1.15 ui-monospace, Menlo, monospace; white-space: nowrap; }
+.builder-cue { display: flex; align-items: center; min-width: 0; gap: 4px; }
+.builder-cue .builder-chapter-menu { flex: 0 0 auto; min-width: 0; }
+.builder-cue .builder-chapter-menu > summary { max-width: 7rem; min-height: 40px; padding: 10px 5px; color: var(--game-muted); font-size: .72rem; }
+.builder-cue .builder-chapter-menu > summary::before { color: var(--game-accent); }
+.builder-context-actions { flex: 0 0 auto; }
+
+.builder-menu-panel {
+  padding: 10px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-paper) 97%, white), var(--game-paper));
+}
+.builder-menu-heading { padding-bottom: 8px; }
+.builder-menu-kicker { margin: 2px 2px 7px; color: var(--game-muted); font: 700 .62rem/1 ui-monospace, Menlo, monospace; letter-spacing: .11em; }
+.builder-menu-group { margin: 8px 0 0; padding-top: 6px; border-top: 1px solid color-mix(in srgb, var(--game-edge) 48%, transparent); }
+.builder-menu-group h3 { margin: 0 3px 3px; color: var(--game-green); font: 700 .68rem/1 'Park Labels', ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+.builder-menu-item { min-height: 42px; margin-top: 3px; border: 1px solid transparent; background: transparent; box-shadow: none; }
+.builder-menu-item:hover, .builder-menu-item:focus-visible { border-color: var(--game-edge); background: color-mix(in srgb, var(--game-highlight) 64%, transparent); box-shadow: none; }
+.builder-menu-item::before { width: 10px; color: var(--game-accent); }
+.builder-menu-item.builder-button-primary { border-color: var(--game-edge); background: var(--game-green); box-shadow: inset 2px 2px 0 color-mix(in srgb, var(--game-paper) 34%, transparent), 2px 2px 0 var(--game-ink); }
+.builder-menu-field { margin: 7px 0 2px; }
+.builder-menu-field input { min-height: 40px; background: color-mix(in srgb, var(--game-paper-deep) 54%, var(--game-paper)); }
+.builder-save-status { margin-top: 8px; }
+
+.builder-control-group { margin-top: 10px; padding: 8px 0 2px; border-top: 2px solid color-mix(in srgb, var(--game-edge) 55%, transparent); }
+.builder-control-group h3 { margin: 0 0 6px; color: var(--game-green); font: 700 .72rem/1 'Park Labels', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
+.builder-control-group .builder-field { margin: 7px 0; }
+.builder-shot-details { margin-top: 14px; padding-top: 0; border-top: 2px dashed var(--game-edge); }
+.builder-shot-details > summary { color: var(--game-ink); font: 800 .92rem/1.2 ui-monospace, Menlo, monospace; }
+.builder-group-target { border-top: 0; padding-top: 2px; }
+.builder-group-target .builder-target-row { margin-top: 3px; }
+.builder-group-flight .builder-field:first-of-type { margin-top: 4px; }
+.builder-group-precision { padding-bottom: 5px; }
+.builder-group-movement .builder-button-accent { width: 100%; }
+.builder-presets { margin-top: 7px; }
+.builder-presets .builder-chip { min-height: 38px; padding: 5px 9px; font-size: .72rem; }
+.builder-assistance, .builder-handedness, .builder-advanced { padding-top: 3px; }
+.builder-assistance > summary, .builder-handedness > summary, .builder-advanced > summary { color: var(--game-ink); font: 800 .86rem/1.2 ui-monospace, Menlo, monospace; }
+
+.builder-findings { position: relative; margin-top: 16px; padding: 10px; border: 2px solid var(--game-danger); border-left-width: 6px; background: color-mix(in srgb, var(--game-danger) 9%, var(--game-paper)); }
+.builder-findings-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: var(--game-danger); }
+.builder-findings-kicker { font: 700 .66rem/1 'Park Labels', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
+.builder-findings-heading strong { font: 800 .85rem/1.2 ui-monospace, Menlo, monospace; }
+.builder-findings-copy { margin: 7px 0 9px; color: var(--game-muted); font-size: .83rem; }
+.builder-finding-row { margin: 8px 0 0; padding: 8px; border: 1px solid color-mix(in srgb, var(--game-danger) 42%, var(--game-edge)); background: color-mix(in srgb, var(--game-paper) 84%, transparent); }
+.builder-finding-row[data-kind="tactical"] { border-color: color-mix(in srgb, var(--game-green) 55%, var(--game-edge)); }
+.builder-finding-kind { display: block; margin-bottom: 4px; color: var(--game-danger); font: 700 .66rem/1 ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .07em; }
+.builder-finding-row[data-kind="tactical"] .builder-finding-kind { color: var(--game-green); }
+.builder-finding-row p { margin: 0 0 6px; }
+.builder-finding-row .builder-button-quiet { min-height: 36px; padding-inline: 7px; border-color: var(--game-edge); background: transparent; box-shadow: none; font-size: .74rem; }
+
+.builder-dialog { background: linear-gradient(180deg, color-mix(in srgb, var(--game-paper) 97%, white), var(--game-paper)); }
+.builder-dialog h2 { color: var(--game-green); letter-spacing: .03em; }
+.builder-dialog-actions { border-top: 1px dashed var(--game-edge); padding-top: 10px; }
+.builder-dialog-list .builder-button { border: 1px solid transparent; background: transparent; box-shadow: none; }
+.builder-dialog-list .builder-button:hover, .builder-dialog-list .builder-button:focus-visible { border-color: var(--game-edge); background: var(--game-highlight); }
+
+@media (max-width: 700px) {
+  .builder-meta { gap: 3px; }
+  .builder-shot-card { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 4px 5px; border-left-width: 3px; }
+  .builder-shot-card-description { display: none; }
+  .builder-shot-card-flight { display: none; }
+  .builder-shot-card-kicker { gap: 4px; }
+  .builder-shot-card-family { font-size: .78rem; }
+  .builder-shot-card-number { font-size: .62rem; }
+  .builder-cue .builder-chapter-menu > summary { max-width: 3.4rem; padding-inline: 2px; font-size: .65rem; }
+  .builder-save-pill { width: 9px; min-width: 9px; height: 9px; min-height: 9px; margin-inline: 1px; padding: 0; border: 0; border-radius: 50%; font-size: 0; }
+  .builder-save-pill::before { width: 9px; height: 9px; margin: 0; }
+}
+@media (max-width: 430px) {
+  .builder-cue .builder-chapter-menu { display: none; }
+  .builder-shot-card { min-width: 3.5rem; }
+  .builder-context-actions .builder-button[data-action="add-shot"] { width: 42px; min-width: 42px; padding-inline: 4px; font-size: 0; }
+  .builder-context-actions .builder-button[data-action="add-shot"]::after { content: '+'; font: 800 1.2rem/1 ui-monospace, Menlo, monospace; }
+  .builder-context-actions .builder-button[data-action="collapse-inspector"] { width: 51px; min-width: 51px; padding-inline: 4px; font-size: .72rem; }
+}
+@media (max-width: 360px) {
+  .builder-main-menu > summary { width: 52px; min-width: 52px; padding-inline: 5px; }
+  .builder-save-pill { display: none; }
+  .builder-shot-card-family { display: none; }
+  .builder-shot-card-kicker { justify-content: center; }
+}
