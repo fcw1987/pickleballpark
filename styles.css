@@ -81,6 +81,13 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focu
   padding: max(0.7rem, env(safe-area-inset-top)) max(0.7rem, env(safe-area-inset-right)) max(0.7rem, env(safe-area-inset-bottom)) max(0.7rem, env(safe-area-inset-left));
   background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--bg-primary) 78%, var(--pb-green-light)), var(--bg-primary) 75%);
 }
+/* Continue the authored park through the 2D letterbox space. Keep the full
+   court and off-court recovery envelope instead of stretching or cropping it. */
+body.builder-workspace .court-container-fullscreen {
+  background: #739b70 url('assets/park/grass.png') repeat;
+  background-size: 128px 128px;
+  image-rendering: pixelated;
+}
 .park-stage { --stage-ratio: 41.2 / 59; position:relative; width:min(1050px,100%,calc((100dvh - 1.4rem) * var(--stage-ratio))); max-height:100%; aspect-ratio:var(--stage-ratio); }
 .park-stage[data-projection="wide"] { --stage-ratio:44 / 43.8; }
 .court-svg {
