@@ -85,7 +85,7 @@ class GuidedPlayEngine {
         const snapshot=this.snapshot;
         this.pixelActors.load().then(loaded=>{if(loaded&&this.activePlay===play&&this.snapshot===snapshot)this.applyAtTime(this.clock.elapsed);}).catch(()=>{
             // Static approved actors remain usable if optional action sheets fail.
-            if(this.activePlay===play)this.elements.announcement.textContent='Animated athletes could not load. The lesson and controls remain available.';
+            if(this.activePlay===play&&this.snapshot===snapshot)this.elements.announcement.textContent='Animated athletes could not load. The lesson and controls remain available.';
         });
         return true;
     }

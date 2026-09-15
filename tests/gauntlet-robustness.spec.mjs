@@ -207,3 +207,31 @@ test('returning from Planner finalizes an interrupted drawing before taking its 
 
   expect(result).toEqual({ workspace: 'builder', drawing: false, current: false, snapshotDrawings: 1 });
 });
+
+test('an older failed 2D actor load cannot announce failure over a newer load of the same play', async ({ page }) => {
+  await openBuilder(page);
+  const result = await page.evaluate(async () => {
+    const engine = playBuilder.board.plays;
+    const play = engine.activePlay;
+    const timeline = engine.timeline;
+    const pending = [];
+    engine.pixelActors.load = () => new Promise((resolve, reject) => pending.push({ resolve, reject }));
+    engine.loadDefinition(play, timeline);
+    const older = pending[0];
+    engine.loadDefinition(play, timeline);
+    const newer = pending[1];
+    newer.resolve(true);
+    await Promise.resolve();
+    engine.elements.announcement.textContent = 'Newer load retained';
+    older.reject(new Error('older asset failure'));
+    await Promise.resolve();
+    await Promise.resolve();
+    return {
+      announcement: engine.elements.announcement.textContent,
+      activePlay: engine.activePlay?.id,
+      expectedPlay: play.id
+    };
+  });
+
+  expect(result).toEqual({ announcement: 'Newer load retained', activePlay: result.expectedPlay, expectedPlay: result.expectedPlay });
+});
