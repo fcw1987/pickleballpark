@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "product": "Pickleball Park",
+  "status": "development",
+  "developmentStatus": "unverified local source",
+  "sourceRevision": null,
+  "sourceBranch": "work/smart-rally-diagnostics",
+  "sourceState": "dirty",
+  "packageRevision": null,
+  "evidenceRevision": null,
+  "runtimeSha256": null,
+  "runtimeDigest": null,
+  "runtimeFileset": {
+    "algorithm": "sha256",
+    "include": "static application runtime files",
+    "exclusions": [
+      "version.json",
+      "build-identity.js",
+      "build-info.json",
+      "runtime-manifest.json"
+    ]
+  },
+  "cacheVersion": null,
+  "buildTime": null
+}

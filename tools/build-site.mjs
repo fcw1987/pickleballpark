@@ -9,7 +9,7 @@ const approvedManifestSha256 = '678199f3d3136f12bce20451507524111b81b0b5f4659655
 const approved = JSON.parse(await readFile('tests/fixtures/approved-runtime.json'));
 const rootFiles = await readdir('.');
 const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(async e => e.isDirectory() ? walk(`${dir}/${e.name}`) : `${dir}/${e.name}`))).flat();
-const actualPaths = [...rootFiles.filter(p => /\.(?:js|css|html)$/.test(p) || p === 'manifest.json'), ...await walk('icons'), ...await walk('vendor'), ...(await walk('assets')).filter(p => !p.startsWith('assets/source/'))].sort();
+const actualPaths = [...rootFiles.filter(p => /\.(?:js|css|html)$/.test(p) || ['manifest.json', 'version.json'].includes(p)), ...await walk('icons'), ...await walk('vendor'), ...(await walk('assets')).filter(p => !p.startsWith('assets/source/'))].sort();
 if (JSON.stringify(actualPaths) !== JSON.stringify(approved.files.map(f => f.path).sort())) throw Error('Runtime path set differs from approved source; explicit review required');
 const files = [];
 for (const file of approved.files) {
