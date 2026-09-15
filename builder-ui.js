@@ -50,6 +50,20 @@ const numberField = (label, action, value, min, max) => {
 
 function shotLabel(shot, index) { return `${FAMILY_GLYPHS[shot?.family] || '◆'} ${index + 1}. ${FAMILIES.find(([id]) => id === shot?.family)?.[1] || 'Shot'}`; }
 
+function updateChapterSummary(summary, label) {
+  let full = summary.querySelector('.builder-chapter-full');
+  let compact = summary.querySelector('.builder-chapter-compact');
+  if (!full || !compact) {
+    full = el('span', 'builder-chapter-full'); compact = el('span', 'builder-chapter-compact');
+    summary.replaceChildren(full, compact);
+  }
+  const number = /^\D*(\d+)\./.exec(label)?.[1];
+  const shortLabel = number ? `Shot ${number}` : 'Shots';
+  if (full.textContent !== label) full.textContent = label;
+  if (compact.textContent !== shortLabel) compact.textContent = shortLabel;
+  summary.setAttribute('aria-description', `Current chapter: ${label}`);
+}
+
 function recipeSummary(shot) {
   if (!shot) return '';
   const family = FAMILIES.find(([id]) => id === shot.family)?.[1] || 'Shot';
@@ -195,7 +209,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const save = root.querySelector('.builder-save-status'); if (save) save.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft';
       const savePill = root.querySelector('[data-ui="save-pill"]'); if (savePill) { const saveText = pendingField ? 'Editing' : (current.saveStatus || 'Saved'); savePill.textContent = saveText; savePill.setAttribute('aria-label', `Save state: ${saveText}`); }
       const message = root.querySelector('.builder-message'); if (message) message.textContent = current.message || '';
-      const cueNode = root.querySelector('.builder-cue'); const fastCue = current.cue; if (cueNode && fastCue) { const summary = cueNode.querySelector('.builder-chapter-menu > summary'),summaryText=fastCue.title||'Current shot'; if (summary&&summary.textContent!==summaryText) summary.textContent=summaryText; }
+      const cueNode = root.querySelector('.builder-cue'); const fastCue = current.cue; if (cueNode && fastCue) { const summary = cueNode.querySelector('.builder-chapter-menu > summary'); if (summary) updateChapterSummary(summary, fastCue.title || 'Current shot'); }
       const liveShot = shots.find(shot => shot.id === (current.currentShotId || current.selectedShotId));
       const card = root.querySelector('[data-shot-card]');
       if (card && liveShot) {
@@ -286,7 +300,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       card.append(cardKicker, cardDescription, cardFlight);
     }
     const chapterMenu = el('details', 'builder-chapter-menu'); chapterMenu.open=chaptersOpen;
-    const chapterSummary = el('summary', 'builder-chip', cue?.title || 'Choose a shot'); chapterSummary.setAttribute('aria-label', 'Choose shot chapter'); chapterMenu.append(chapterSummary);
+    const chapterSummary = el('summary', 'builder-chip'); updateChapterSummary(chapterSummary, cue?.title || 'Choose a shot'); chapterSummary.setAttribute('aria-label', 'Choose shot chapter'); chapterMenu.append(chapterSummary);
     const chapterList = el('div', 'builder-chapter-list'); chapterList.setAttribute('aria-label', 'Shot chapters');
     const chapterEntries = shots.map((shot, index) => { const chapter = (current.chapters || []).find(item => item.shotId === shot.id); return { ...(chapter || {}), shotId: shot.id, number: chapter?.number || index + 1, label: chapter?.label || FAMILIES.find(([id]) => id === shot.family)?.[1] || 'Shot', authoredOnly: !chapter }; });
     chapterEntries.forEach((chapter, index) => { const id = chapter.shotId || chapter.id || shots[index]?.id || ''; const shot = shots.find(item => item.id === id); const glyph = FAMILY_GLYPHS[shot?.family] || '◆'; const row = el('div', 'builder-chapter-row'); const b = button(`${glyph} Shot ${chapter.number || index + 1} · ${chapter.label || 'Shot'}${chapter.authoredOnly ? ' · needs review' : ''}`, 'chapter', 'builder-menu-item builder-button'); b.dataset.shotId = id; b.disabled = Boolean(chapter.authoredOnly); b.title = chapter.authoredOnly ? 'This authored shot is not in the valid playback prefix yet. Edit it to review.' : 'Seek to shot chapter'; b.setAttribute('aria-current', String((current.currentShotId || current.selectedChapterId || current.selectedShotId) === id)); row.appendChild(b); if (id) { const edit = button('Edit', 'edit-chapter', 'builder-button builder-button-quiet'); edit.dataset.shotId = id; edit.setAttribute('aria-label', `Edit Shot ${chapter.number || index + 1}`); row.appendChild(edit); } chapterList.appendChild(row); });
@@ -340,7 +354,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const quickTarget = el('div', 'builder-quick-actions'); quickTarget.append(el('span', 'builder-quick-label', 'Target'), button('Place target on court', 'place-target', 'builder-button builder-button-accent')); inspector.appendChild(quickTarget);
       const details = el('details', 'builder-shot-details'); details.open=shotDetailsOpen;details.append(el('summary', '', 'Edit by intent'));
       const detailTabs = el('div', 'builder-detail-tabs'); detailTabs.setAttribute('role', 'tablist'); detailTabs.setAttribute('aria-label', 'Shot detail sections');
-      const detailTab = (label, group) => { const tab = button(label, 'detail-group', 'builder-detail-tab'); tab.dataset.group = group; tab.setAttribute('role', 'tab'); tab.setAttribute('aria-selected', String(detailGroup === group)); tab.setAttribute('tabindex', detailGroup === group ? '0' : '-1'); return tab; };
+      const detailTab = (label, group) => { const tab = button(label, 'detail-group', 'builder-detail-tab'); tab.dataset.group = group; tab.setAttribute('role', 'tab'); tab.setAttribute('aria-label', label); tab.setAttribute('aria-selected', String(detailGroup === group)); tab.setAttribute('tabindex', detailGroup === group ? '0' : '-1'); return tab; };
       ['target', 'flight', 'players', 'movement', 'coach', 'precision'].forEach(group => detailTabs.appendChild(detailTab(titleCase(group === 'coach' ? 'Coach tools' : group), group)));
       details.append(detailTabs);
       const targetGroup = el('section', 'builder-control-group builder-group-target'); targetGroup.dataset.detailGroup = 'target'; targetGroup.setAttribute('role', 'tabpanel'); targetGroup.setAttribute('aria-label', 'Target settings'); targetGroup.classList.toggle('is-active', detailGroup === 'target'); targetGroup.append(el('h3', '', 'Target'));

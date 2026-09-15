@@ -7,6 +7,13 @@ test('compact history leaves a full-width, touch-sized seek surface', async ({ p
     await page.goto('/');
     await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
     const range = page.getByRole('slider', { name: 'Rally timeline' });
+    const chapter = page.getByLabel('Choose shot chapter', { exact: true });
+    if (width === 320) {
+      const text = chapter.locator('.builder-chapter-compact');
+      await expect(text).toHaveText('Shot 1');
+      const textBox = await text.boundingBox(), chapterBox = await chapter.boundingBox();
+      expect(textBox.x + textBox.width).toBeLessThanOrEqual(chapterBox.x + chapterBox.width - 4);
+    }
     const box = await range.boundingBox();
     expect(box.width).toBeGreaterThan(width * .85);
     expect(box.height).toBeGreaterThanOrEqual(44);
@@ -19,6 +26,27 @@ test('compact history leaves a full-width, touch-sized seek surface', async ({ p
     await range.focus(); await range.press('End');
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
   }
+});
+
+test('enlarged shot choices remain readable and intent tabs retain useful names', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 }); await page.goto('/');
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; playBuilder.render(); });
+  await page.getByRole('button', { name: 'Edit shot', exact: true }).first().click();
+  for (const name of ['Shot family', 'Hitter']) {
+    const field = page.getByLabel(name, { exact: true });
+    const size = await field.evaluate(node => {
+      const style = getComputedStyle(node), ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = style.font;
+      return { text: ctx.measureText(node.selectedOptions[0].textContent).width, available: node.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight), height: node.clientHeight };
+    });
+    expect(size.text).toBeLessThanOrEqual(size.available);
+    expect(size.height).toBeGreaterThanOrEqual(42);
+  }
+  await page.getByText('Edit by intent', { exact: true }).click();
+  await page.getByRole('tab', { name: 'Movement', exact: true }).click();
+  await expect(page.getByRole('tab', { name: 'Movement', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel', { name: 'Movement settings', exact: true })).toBeVisible();
 });
 
 test('landscape chapter list stays inside the viewport with enlarged text', async ({ page }) => {
