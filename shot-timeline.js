@@ -96,6 +96,8 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   let state = { chapters: [], time: 0, duration: 0, playing: false, busy: false, currentShotId: null };
   let operation = null;
   let operationSequence = 0;
+  let lastNativeValue = 0;
+  let lastCompletedOperation = null;
   let destroyed = false;
   let chapterSource = null;
   let chapterDuration = NaN;
@@ -145,6 +147,12 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   const cancelOperation = () => {
     if (!operation) return;
     const cancelled = operation;
+    lastCompletedOperation = {
+      id: cancelled.id,
+      nativeInput: cancelled.nativeInput,
+      cancelled: true,
+      pauseWins: cancelled.pauseWins
+    };
     clearOperation();
     try {
       if (input.hasPointerCapture(cancelled.pointerId)) input.releasePointerCapture(cancelled.pointerId);
@@ -160,11 +168,14 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
       return;
     }
     if (event.pointerType === 'touch' && event.isPrimary === false) return;
+    lastCompletedOperation = null;
     operation = {
       id: `shot-timeline-${++operationSequence}`,
       pointerId: event.pointerId,
       rect: input.getBoundingClientRect(),
-      time: finite(input.value)
+      time: finite(input.value),
+      nativeInput: false,
+      pauseWins: false
     };
     root.dataset.scrubbing = 'true';
     try { input.setPointerCapture(event.pointerId); } catch {}
@@ -173,18 +184,47 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   };
 
   const seekFromInput = () => {
+    if (operation?.pauseWins) return;
     const nextTime = renderValue(input.value);
+    lastNativeValue = nextTime;
     if (operation) {
       operation.time = nextTime;
+      operation.nativeInput = true;
       emit('scrubSeek', { id: operation.id, time: nextTime });
     } else {
+      lastCompletedOperation = null;
       emit('seek', nextTime);
     }
+  };
+
+  // Some native implementations report a final `change` without a preceding
+  // `input`; others report both. Route the former once and ignore the latter.
+  // A change arriving after cancel or an explicit Pause belongs to the old
+  // gesture and must not restart or rewind playback.
+  const changeFromInput = () => {
+    const nextTime = renderValue(input.value);
+    if (operation) {
+      if (operation.pauseWins) return;
+      if (Math.abs(nextTime - operation.time) > Number.EPSILON) seekFromInput();
+      return;
+    }
+    if (Math.abs(nextTime - lastNativeValue) <= Number.EPSILON) return;
+    const completed = lastCompletedOperation;
+    lastCompletedOperation = null;
+    if (completed && (completed.cancelled || completed.nativeInput || completed.pauseWins)) return;
+    lastNativeValue = nextTime;
+    emit('seek', nextTime);
   };
 
   const end = event => {
     if (!operation || event.pointerId !== operation.pointerId) return;
     const completed = operation;
+    lastCompletedOperation = {
+      id: completed.id,
+      nativeInput: completed.nativeInput,
+      cancelled: false,
+      pauseWins: completed.pauseWins
+    };
     clearOperation();
     try {
       if (input.hasPointerCapture(event.pointerId)) input.releasePointerCapture(event.pointerId);
@@ -205,23 +245,30 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
 
   const secondPointer = event => {
     if (!operation || event.pointerId === operation.pointerId) return;
-    if (event.pointerType === 'touch') cancelOperation();
+    cancelOperation();
+    // If the second pointer landed on the range itself, do not let the target
+    // listener immediately claim a fresh operation after cancellation.
+    event.stopPropagation();
   };
 
   input.addEventListener('pointerdown', begin);
   input.addEventListener('pointermove', containMove);
   input.addEventListener('input', seekFromInput);
+  input.addEventListener('change', changeFromInput);
   input.addEventListener('pointerup', end);
   input.addEventListener('pointercancel', interrupted);
   input.addEventListener('lostpointercapture', interrupted);
+  input.addEventListener('blur', interrupted);
   input.addEventListener('click', event => event.stopPropagation());
   input.addEventListener('keydown', event => event.stopPropagation());
   document.addEventListener('pointerdown', secondPointer, true);
 
   const cancelForLayoutChange = () => cancelOperation();
+  const cancelForWindowBlur = () => cancelOperation();
   const cancelForVisibility = () => { if (document.hidden) cancelOperation(); };
   window.addEventListener('resize', cancelForLayoutChange);
   window.addEventListener('orientationchange', cancelForLayoutChange);
+  window.addEventListener('blur', cancelForWindowBlur);
   window.visualViewport?.addEventListener('resize', cancelForLayoutChange);
   document.addEventListener('visibilitychange', cancelForVisibility);
 
@@ -229,6 +276,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     if (destroyed) return;
     const nextDuration = Math.max(0, finite(nextState?.duration));
     const nextChapterSource = Array.isArray(nextState?.chapters) ? nextState.chapters : [];
+    if (operation && state.playing && !Boolean(nextState?.playing)) operation.pauseWins = true;
     const chaptersChanged = nextChapterSource !== chapterSource || nextDuration !== chapterDuration;
     if (operation && chaptersChanged) cancelOperation();
     if (chaptersChanged) {
@@ -252,7 +300,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     root.dataset.playing = String(state.playing);
     root.dataset.busy = String(state.busy);
     if (chaptersChanged) renderMarkers();
-    if (!operation) renderValue(state.time, state.currentShotId);
+    if (!operation) lastNativeValue = renderValue(state.time, state.currentShotId);
   };
 
   const destroy = () => {
@@ -262,6 +310,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     document.removeEventListener('pointerdown', secondPointer, true);
     window.removeEventListener('resize', cancelForLayoutChange);
     window.removeEventListener('orientationchange', cancelForLayoutChange);
+    window.removeEventListener('blur', cancelForWindowBlur);
     window.visualViewport?.removeEventListener('resize', cancelForLayoutChange);
     document.removeEventListener('visibilitychange', cancelForVisibility);
     root.remove();

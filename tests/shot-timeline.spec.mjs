@@ -162,7 +162,7 @@ test('an explicit paused update during a scrub remains paused when released', as
   expect(await page.locator('.shot-timeline').getAttribute('data-playing')).toBe('false');
 });
 
-for (const reason of ['pointercancel', 'lostpointercapture', 'resize', 'second-touch', 'modal']) {
+for (const reason of ['pointercancel', 'lostpointercapture', 'resize', 'blur', 'second-touch', 'second-mouse', 'modal']) {
   test(`${reason} cancels the active scrub once and leaves the last coherent sample`, async ({ page }) => {
     await mount(page, { time: 2, playing: true });
     await syntheticBegin(page, 80);
@@ -172,7 +172,9 @@ for (const reason of ['pointercancel', 'lostpointercapture', 'resize', 'second-t
       if (interruption === 'pointercancel') input.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true, pointerId: 80, pointerType: 'touch' }));
       else if (interruption === 'lostpointercapture') input.dispatchEvent(new PointerEvent('lostpointercapture', { bubbles: true, pointerId: 80, pointerType: 'touch' }));
       else if (interruption === 'resize') window.dispatchEvent(new Event('resize'));
+      else if (interruption === 'blur') window.dispatchEvent(new Event('blur'));
       else if (interruption === 'second-touch') document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 81, pointerType: 'touch', isPrimary: false }));
+      else if (interruption === 'second-mouse') document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 81, pointerType: 'mouse', button: 0, isPrimary: true }));
       else window.timeline.cancel();
       input.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 80, pointerType: 'touch' }));
     }, reason);
@@ -183,6 +185,36 @@ for (const reason of ['pointercancel', 'lostpointercapture', 'resize', 'second-t
     await expect(page.locator('.shot-timeline')).toHaveAttribute('data-scrubbing', 'false');
   });
 }
+
+test('a late native change cannot seek again after Pause wins a scrub', async ({ page }) => {
+  await mount(page, { time: 2, playing: true });
+  await syntheticBegin(page, 90);
+  await page.locator('.shot-timeline-range').evaluate(input => {
+    input.value = '6.5';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    // This authoritative update is the explicit Pause that supersedes the
+    // gesture. A browser may still deliver change after pointerup.
+    window.timeline.update({ chapters: window.timelineChapters, time: 6.5, duration: 10, playing: false, busy: false });
+    input.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 90, pointerType: 'touch', isPrimary: true }));
+    input.value = '1';
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  const actions = await page.evaluate(() => window.timelineActions);
+  expect(actions.map(action => action.type)).toEqual(['scrubBegin', 'scrubSeek', 'scrubEnd']);
+  await expect(page.locator('.shot-timeline')).toHaveAttribute('data-playing', 'false');
+});
+
+test('rapid keyboard seeks remain native and emit one semantic seek per input', async ({ page }) => {
+  await mount(page, { time: 2, playing: true });
+  const control = page.getByRole('slider', { name: 'Rally timeline' });
+  await control.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('End');
+  const actions = await page.evaluate(() => window.timelineActions);
+  expect(actions.map(action => action.type)).toEqual(['seek', 'seek', 'seek']);
+  expect(actions.at(-1).payload).toBe(10);
+});
 
 test('busy and empty states disable seeking and destroy releases the surface', async ({ page }) => {
   await mount(page, { duration: 0, chapters: [], busy: false });

@@ -147,9 +147,22 @@ test('desktop keyboard shortcuts skip text fields, trap Help focus, and skip hid
   await page.goto('/');
   await openPlayFileMenu(page);
   const titleInput = page.getByRole('textbox', { name: 'Play title' });
+  const beforeDocument = await page.evaluate(() => ({
+    title: playBuilder.document.title,
+    playing: playBuilder.session.playing,
+    time: playBuilder.session.clock.elapsed
+  }));
   await titleInput.fill('Keyboard probe');
-  await titleInput.press('Control+z');
-  await expect(titleInput).toHaveValue('Keyboard probe');
+  // The shortcut must remain native while a title field owns the key. Verify
+  // the browser can undo the field edit, and that no builder playback or
+  // authored document command was generated alongside that native edit.
+  await titleInput.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z');
+  await expect(titleInput).toHaveValue(beforeDocument.title);
+  await expect.poll(() => page.evaluate(() => ({
+    title: playBuilder.document.title,
+    playing: playBuilder.session.playing,
+    time: playBuilder.session.clock.elapsed
+  }))).toEqual(beforeDocument);
 
   const tabbed = [];
   await page.keyboard.press('Escape');

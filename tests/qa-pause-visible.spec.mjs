@@ -79,8 +79,13 @@ test.describe('BETA009 visible pause input', () => {
       await visiblePlay(page).focus();
       await expect(visiblePlay(page)).toBeFocused();
       await visiblePlay(page).click();
-      await page.waitForTimeout(80);
-      expect(Number(await page.locator('.builder-transport input[type="range"]:visible').inputValue())).toBeGreaterThan(pausedAt);
+      // WebKit can take a couple of render turns to publish the resumed
+      // sample. Poll the authoritative range for a bounded interval instead
+      // of treating one 80ms snapshot as proof that playback did not resume.
+      await expect.poll(
+        async () => Number(await page.locator('.builder-transport input[type="range"]:visible').inputValue()),
+        { timeout: 1000, intervals: [40, 80, 160] }
+      ).toBeGreaterThan(pausedAt);
     });
   }
 
