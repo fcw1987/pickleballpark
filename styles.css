@@ -353,7 +353,9 @@ body.three-d-active .park-control, body.three-d-active .court-container-fullscre
 }
 @media (hover: none) { .ball-token:hover { r: inherit; stroke-width: inherit; } }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  /* A positive duration with the default property "all" accidentally creates
+     height transitions on the renderer host. Geometry must settle immediately. */
+  *, *::before, *::after { transition: none !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   .play-shot-path { transition: none; }
   .shot-cue { animation: none !important; transition: none; opacity: 1; transform: none; }
 }
