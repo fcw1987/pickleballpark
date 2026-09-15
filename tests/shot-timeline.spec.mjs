@@ -162,6 +162,23 @@ test('an explicit paused update during a scrub remains paused when released', as
   expect(await page.locator('.shot-timeline').getAttribute('data-playing')).toBe('false');
 });
 
+test('late native events after Pause and outside release cannot move the playhead', async ({ page }) => {
+  await mount(page, {time:3,playing:true});
+  await syntheticBegin(page, 901);
+  await page.evaluate(() => {
+    window.timeline.update({chapters:window.timelineChapters,time:3,duration:10,playing:false,busy:false});
+    document.body.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:901,pointerType:'touch'}));
+    const input=document.querySelector('.shot-timeline-range');
+    for(const type of ['input','change','input']){input.value='8';input.dispatchEvent(new Event(type,{bubbles:true}));}
+  });
+  expect(await page.evaluate(()=>window.timelineActions.map(item=>item.type))).toEqual(['scrubBegin','scrubEnd']);
+  await expect(page.getByRole('slider')).toHaveValue('3');
+  await expect(page.locator('.shot-timeline')).toHaveAttribute('data-scrubbing','false');
+  await page.getByRole('slider').focus();
+  await page.getByRole('slider').press('End');
+  expect(await page.evaluate(()=>window.timelineActions.at(-1))).toEqual({type:'seek',payload:10});
+});
+
 for (const reason of ['pointercancel', 'lostpointercapture', 'resize', 'blur', 'second-touch', 'second-mouse', 'modal']) {
   test(`${reason} cancels the active scrub once and leaves the last coherent sample`, async ({ page }) => {
     await mount(page, { time: 2, playing: true });

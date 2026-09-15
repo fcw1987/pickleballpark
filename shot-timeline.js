@@ -184,7 +184,10 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   };
 
   const seekFromInput = () => {
-    if (operation?.pauseWins) return;
+    if (operation?.pauseWins || (!operation && (lastCompletedOperation?.pauseWins || lastCompletedOperation?.cancelled))) {
+      renderValue(state.time, state.currentShotId);
+      return;
+    }
     const nextTime = renderValue(input.value);
     lastNativeValue = nextTime;
     if (operation) {
@@ -202,6 +205,9 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   // A change arriving after cancel or an explicit Pause belongs to the old
   // gesture and must not restart or rewind playback.
   const changeFromInput = () => {
+    if(operation?.pauseWins||(!operation&&(lastCompletedOperation?.cancelled||lastCompletedOperation?.pauseWins))){
+      renderValue(state.time,state.currentShotId);return;
+    }
     const nextTime = renderValue(input.value);
     if (operation) {
       if (operation.pauseWins) return;
@@ -230,7 +236,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
       if (input.hasPointerCapture(event.pointerId)) input.releasePointerCapture(event.pointerId);
     } catch {}
     emit('scrubEnd', { id: completed.id });
-    event.stopPropagation();
+    if(input.contains(event.target))event.stopPropagation();
   };
 
   const containMove = event => {
@@ -248,7 +254,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     cancelOperation();
     // If the second pointer landed on the range itself, do not let the target
     // listener immediately claim a fresh operation after cancellation.
-    event.stopPropagation();
+    if(input.contains(event.target))event.stopPropagation();
   };
 
   input.addEventListener('pointerdown', begin);
@@ -260,7 +266,9 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
   input.addEventListener('lostpointercapture', interrupted);
   input.addEventListener('blur', interrupted);
   input.addEventListener('click', event => event.stopPropagation());
-  input.addEventListener('keydown', event => event.stopPropagation());
+  input.addEventListener('keydown', event => { lastCompletedOperation=null; event.stopPropagation(); });
+  input.addEventListener('focus', () => { if(!operation)lastCompletedOperation=null; });
+  document.addEventListener('pointerup', end, true);
   document.addEventListener('pointerdown', secondPointer, true);
 
   const cancelForLayoutChange = () => cancelOperation();
@@ -308,6 +316,7 @@ export function mountShotTimeline({ onAction = () => {} } = {}) {
     cancelOperation();
     destroyed = true;
     document.removeEventListener('pointerdown', secondPointer, true);
+    document.removeEventListener('pointerup', end, true);
     window.removeEventListener('resize', cancelForLayoutChange);
     window.removeEventListener('orientationchange', cancelForLayoutChange);
     window.removeEventListener('blur', cancelForWindowBlur);
