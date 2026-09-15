@@ -87,11 +87,13 @@ const texture = (base, accents, seed, pattern = 0) => {
   // Grass uses low contrast stepped ribbons and a handful of clustered tufts.
   // The layout is intentionally asymmetric so repetition is hard to perceive.
   const shade = accents[0], light = accents[1], deep = mix(base, C.grassDeep, .3);
-  const ribbons = [[0, 14, 42], [55, 4, 30], [95, 24, 33], [15, 43, 36], [72, 52, 46], [104, 69, 24], [1, 88, 28], [45, 78, 42], [83, 105, 31], [20, 118, 49]];
-  for (const [x, y, width] of ribbons) {
-    c.rect(x, y, width, 1, mix(base, deep, .2));
-    c.rect(x + 4, y + 1, Math.max(5, width - 12), 1, mix(base, shade, .27));
-    if (pattern === 1) c.rect(x + width - 8, y - 2, 2, 2, mix(base, light, .42));
+  const patches = [[5, 8, 24, 6], [43, 3, 34, 8], [91, 18, 28, 7], [16, 42, 30, 7], [65, 48, 36, 8], [103, 70, 20, 6], [2, 88, 26, 8], [47, 78, 34, 7], [82, 104, 30, 7], [20, 116, 42, 7]];
+  for (const [x, y, width, height] of patches) {
+    const patchTone = mix(base, deep, .13);
+    c.rect(x, y + 2, width, height - 3, patchTone);
+    c.rect(x + 4, y, width - 10, 2, mix(base, shade, .18));
+    c.rect(x + 2, y + height - 1, width - 8, 1, mix(base, deep, .16));
+    if (pattern === 1) c.rect(x + width - 8, y - 2, 2, 2, mix(base, light, .36));
   }
   const clusters = [[8, 29], [37, 7], [78, 20], [111, 9], [26, 61], [59, 43], [97, 55], [7, 88], [45, 93], [81, 99], [113, 86], [31, 115], [66, 120]];
   for (const [i, [x, y]] of clusters.entries()) {
@@ -107,30 +109,30 @@ const texture = (base, accents, seed, pattern = 0) => {
 const tree = () => {
   const c = new Canvas(64, 64);
   const shadow=[...C.parkShadow.slice(0,3),74],barkLight=mix(C.parkWood,C.parkSign,.35);
-  c.rect(17,55,32,5,shadow);c.rect(11,56,43,3,shadow);
-  c.rect(20,53,24,2,C.parkShadow); c.rect(24,50,16,5,C.parkWood);
-  c.polygon([[27,31],[37,31],[37,51],[41,57],[33,57],[30,54],[24,57],[27,50]],C.parkShadow);
-  c.rect(28,34,7,20,C.parkWood);c.rect(28,35,2,18,barkLight);c.rect(33,42,2,11,C.orangeDark);
-  c.rect(25,38,5,3,C.parkWood);c.rect(23,34,3,5,C.parkWood); c.rect(35,50,6,2,barkLight);
-  // Layered stepped canopy, lit from upper left; transparent padding on all sides.
-  c.polygon([[25,3],[39,3],[39,6],[47,6],[47,11],[53,11],[53,19],[57,19],[57,34],[52,34],[52,41],[43,41],[43,45],[20,45],[20,41],[11,41],[11,35],[7,35],[7,20],[11,20],[11,12],[17,12],[17,7],[25,7]],C.parkShadow);
-  c.polygon([[25,5],[38,5],[38,9],[46,9],[46,14],[51,14],[51,21],[54,21],[54,32],[48,32],[48,39],[40,39],[40,42],[21,42],[21,38],[14,38],[14,32],[10,32],[10,22],[14,22],[14,14],[20,14],[20,9],[25,9]],C.grassDeep);
-  c.polygon([[25,6],[37,6],[37,10],[44,10],[44,16],[48,16],[48,24],[41,24],[41,29],[27,29],[27,26],[17,26],[17,20],[14,20],[14,15],[20,15],[20,10],[25,10]],C.grassMid);
-  c.polygon([[26,7],[35,7],[35,10],[40,10],[40,14],[34,14],[34,17],[23,17],[23,20],[17,20],[17,16],[21,16],[21,11],[26,11]],C.grassLight);
-  c.rect(29,6,6,2,C.grassSun); c.rect(20,12,6,2,C.grassSun); c.rect(38,14,5,2,C.grassLight);
+  c.rect(14,56,38,4,shadow);c.rect(8,58,49,2,shadow);
+  c.polygon([[26,29],[37,29],[37,49],[42,57],[35,57],[31,53],[24,57],[27,49]],C.parkShadow);
+  c.rect(28,32,7,22,C.parkWood); c.rect(29,33,2,19,barkLight); c.rect(33,40,2,13,C.orangeDark);
+  c.rect(25,37,5,3,C.parkWood); c.rect(23,33,4,5,C.parkWood); c.rect(35,50,7,2,barkLight);
+  // Uneven stepped canopy with three overlapping lobes. The outer navy edge
+  // gives the tree a readable silhouette beside the approved athletes.
+  c.polygon([[22,2],[36,2],[36,5],[45,5],[45,9],[52,9],[52,15],[57,15],[57,25],[60,25],[60,36],[55,36],[55,42],[47,42],[47,46],[38,46],[38,49],[21,49],[21,46],[12,46],[12,42],[6,42],[6,34],[4,34],[4,23],[8,23],[8,14],[14,14],[14,7],[22,7]],C.parkShadow);
+  c.polygon([[22,5],[35,5],[35,8],[43,8],[43,12],[50,12],[50,18],[54,18],[54,27],[57,27],[57,34],[51,34],[51,40],[43,40],[43,44],[22,44],[22,42],[14,42],[14,38],[9,38],[9,31],[7,31],[7,24],[11,24],[11,16],[17,16],[17,10],[22,10]],C.grassDeep);
+  c.polygon([[22,7],[33,7],[33,10],[40,10],[40,14],[46,14],[46,20],[51,20],[51,28],[45,28],[45,33],[34,33],[34,36],[21,36],[21,33],[13,33],[13,28],[10,28],[10,21],[15,21],[15,14],[22,14]],C.grassMid);
+  c.polygon([[23,8],[32,8],[32,11],[38,11],[38,15],[43,15],[43,20],[35,20],[35,23],[24,23],[24,26],[16,26],[16,21],[13,21],[13,17],[18,17],[18,12],[23,12]],C.grassLight);
+  c.rect(26,7,7,2,C.grassSun); c.rect(18,13,7,2,C.grassSun); c.rect(39,16,6,2,C.grassLight); c.rect(47,23,5,2,C.grassLight);
   const leaf=mix(C.grassLight,C.grassMid,.35);
-  for(const [x,y,w]of [[21,12,5],[29,8,5],[36,17,5],[16,24,6],[24,29,7],[38,31,5],[44,25,4]]){c.rect(x,y,w,2,leaf);c.rect(x+1,y+2,w-2,1,C.grassMid);}
-  c.rect(18,34,7,2,C.parkShadow);c.rect(31,37,6,2,C.parkShadow);c.rect(45,30,5,2,C.parkShadow); c.rect(12,29,4,2,C.grassLight);
+  for(const [x,y,w] of [[20,11,6],[29,9,6],[36,16,6],[13,25,6],[22,30,8],[35,31,6],[45,27,5],[49,35,4]]) { c.rect(x,y,w,2,leaf); c.rect(x+1,y+2,w-2,1,C.grassMid); }
+  c.rect(13,36,8,2,C.parkShadow); c.rect(27,39,7,2,C.parkShadow); c.rect(43,35,7,2,C.parkShadow); c.rect(9,31,4,2,C.grassLight);
   return c;
 };
 const shrub = () => {
   const c = new Canvas(64, 64);
-  c.rect(9,50,47,4,[...C.parkShadow.slice(0,3),74]);
-  c.polygon([[8,49],[8,37],[13,37],[13,29],[20,29],[20,25],[28,25],[28,29],[35,29],[35,25],[43,25],[43,29],[51,29],[51,36],[56,36],[56,49]],C.parkShadow);
-  c.rect(12,37,40,11,C.grassDeep);c.rect(16,31,32,9,C.grassMid);
-  c.rect(20,28,7,6,C.grassLight);c.rect(36,28,7,5,C.grassLight); c.rect(27,31,8,3,C.grassSun);
-  c.rect(14,37,10,3,C.grassLight);c.rect(28,38,9,2,C.grassLight);c.rect(43,35,7,2,C.grassLight);
-  c.rect(18,44,11,2,C.parkShadow);c.rect(37,42,9,2,C.parkShadow); c.rect(10,47,14,2,C.grassMid); c.rect(42,47,11,2,C.grassMid);
+  c.rect(7,50,51,5,[...C.parkShadow.slice(0,3),74]);
+  c.polygon([[7,50],[7,39],[11,39],[11,32],[17,32],[17,27],[25,27],[25,30],[32,30],[32,25],[40,25],[40,29],[48,29],[48,34],[54,34],[54,40],[58,40],[58,50]],C.parkShadow);
+  c.polygon([[11,48],[11,39],[15,39],[15,33],[21,33],[21,29],[27,29],[27,34],[35,34],[35,29],[42,29],[42,33],[49,33],[49,38],[54,38],[54,48]],C.grassDeep);
+  c.rect(16,36,34,11,C.grassMid); c.rect(20,31,8,7,C.grassLight); c.rect(37,30,8,6,C.grassLight); c.rect(28,34,9,4,C.grassSun);
+  c.rect(13,39,10,3,C.grassLight); c.rect(27,40,10,2,C.grassLight); c.rect(43,37,8,2,C.grassLight);
+  c.rect(17,45,12,2,C.parkShadow); c.rect(37,43,11,2,C.parkShadow); c.rect(11,48,15,2,C.grassMid); c.rect(42,48,13,2,C.grassMid);
   return c;
 };
 const bench = () => {
