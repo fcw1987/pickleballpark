@@ -470,7 +470,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'import-json') { const area = importDialog.querySelector('textarea'); const result = await rerenderAction('import', area?.value || ''); if (!result || result.ok !== false) { importFileGeneration += 1; closeDialog(importDialog); } else { const status = importDialog.querySelector('.builder-import-status') || el('p', 'builder-import-status'); status.textContent = result.error || 'Import could not be completed. Check the JSON and try again.'; importDialog.insertBefore(status, importDialog.querySelector('.builder-dialog-actions')); } }
     else if (action === 'export') rerenderAction('export');
     else if (action === 'appearance') rerenderAction('appearance');
-    else if (action === 'help') {timelineControl?.cancel();rerenderAction('help');}
+    else if (action === 'help') {timelineControl?.cancel();await rerenderAction('help');await syncViewingShot();}
     else if (action === 'acknowledge-waypoints') rerenderAction('acknowledgeWaypoints');
     else if (action === 'retry-save') rerenderAction('retrySave');
   }
