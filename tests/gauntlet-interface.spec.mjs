@@ -71,6 +71,8 @@ test.describe('Park Desk interface layer', () => {
       await page.setViewportSize(viewport);
       await mount(page);
       const ui = page.locator('.builder-ui').last();
+      await expect(page.locator('#menuToggle')).toBeHidden();
+      await expect(page.locator('#infoToggle')).toBeHidden();
       await expect(ui.locator('.builder-shot-card .builder-chapter-menu > summary')).toBeVisible();
       await expect(ui.locator('.builder-context-actions [data-action="view"]')).toHaveCount(1);
       const boxes = await ui.evaluate(root => [...root.querySelectorAll('.builder-meta > *')].filter(node => node.getBoundingClientRect().width > 0).map(node => { const r = node.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }; }));
@@ -80,5 +82,17 @@ test.describe('Park Desk interface layer', () => {
         expect(overlapX && overlapY, `${viewport.width}x${viewport.height} header overlap`).toBe(false);
       }
     }
+  });
+
+  test('dense chapter navigation stays scrollable on a phone', async ({ page }) => {
+    const shots = Array.from({ length: 64 }, (_, index) => ({ id: `shot-${index + 1}`, family: 'drive', hitter: 'player1', target: { x: 10, y: 20 }, arc: 'medium', pace: 'medium', movement: { intent: 'recover' } }));
+    const chapters = shots.map((shot, index) => ({ shotId: shot.id, number: index + 1, label: `Shot ${index + 1}`, time: index * 0.3 }));
+    await page.setViewportSize({ width: 390, height: 844 });
+    await mount(page, { chapters, duration: 19.2 }, { ...fixture, shots });
+    const ui = page.locator('.builder-ui').last();
+    await ui.locator('.builder-shot-card .builder-chapter-menu > summary').click();
+    const list = ui.locator('.builder-shot-card .builder-chapter-list');
+    await expect(list.locator('[data-action="chapter"]')).toHaveCount(64);
+    await expect.poll(() => list.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
   });
 });
