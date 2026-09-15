@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openPlayFileMenu } from './helpers/builder-navigation.mjs';
+import { openCoachTools, openPlayFileMenu } from './helpers/builder-navigation.mjs';
 
 const fixture = { title: 'Starter rally', shots: [
   { id: 'shot-serve', family: 'serve', hitter: 'player3', receiver: 'auto', contactStyle: 'auto', target: { x: 13, y: 8 }, arc: 'high', pace: 'soft', movement: { intent: 'recover', pinned: false }, serveMethod: 'drop' },
@@ -49,10 +49,7 @@ test.describe('court first builder UI harness', () => {
     await expect(page.getByRole('button', { name: 'Use as starting layout' })).toBeVisible();
     await page.getByRole('button', { name: 'Return to builder' }).click();
     await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
-    await page.getByText('Edit by intent', { exact: true }).click();
-    await page.getByRole('tab', { name: 'Coach Tools', exact: true }).click();
-    const coach = page.locator('.builder-assistance > summary');
-    if (!await coach.locator('..').evaluate(node => node.open)) await coach.click();
+    await openCoachTools(page);
     await page.getByRole('checkbox', { name: 'Auto Shading', exact: true }).check();
     const actions = await page.evaluate(() => window.__builderActions);
     expect(actions.map(action => action.type)).toEqual(['workspace', 'workspace', 'pauseForEditing', 'assistance']);

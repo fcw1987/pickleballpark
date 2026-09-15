@@ -29,6 +29,15 @@ export async function openIntentTab(page, name) {
   return page.getByRole('tabpanel', { name: `${name} settings`, exact: true });
 }
 
+export async function openCoachTools(page) {
+  await openIntentTab(page, 'Coach Tools');
+  const tools = page.locator('.builder-assistance');
+  if (!(await tools.evaluate(node => node.open))) {
+    await tools.locator(':scope > summary').click();
+  }
+  return tools;
+}
+
 export async function switchCourtView(page, view) {
   const label = `Switch to ${view.toUpperCase()} court view`;
   const button = page.getByRole('button', { name: label, exact: true });

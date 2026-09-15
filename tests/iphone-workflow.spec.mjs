@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 import {mkdir} from 'node:fs/promises';
-import {openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
+import {openCoachTools,openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
 test.use({launchOptions:process.env.IPHONE_RECORD?{slowMo:120}:{}});
 const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.courtTools.THREE);};
 const edit=async page=>{const inspector=page.locator('.builder-inspector:not(.builder-inspector-collapsed)');if(!await inspector.isVisible())await page.getByRole('button',{name:'Edit shot',exact:true}).click();};
-const details=async(page,group='Precision')=>{await edit(page);await openIntentTab(page,group);};
+const details=async(page,group='Precision')=>{await edit(page);return openIntentTab(page,group);};
 const finish=async page=>{await page.locator('.builder-inspector [data-action=collapse-inspector]').click();};
 const field=async(page,name,value)=>{const control=page.getByLabel(name,{exact:true});if(name==='Play title'&&!await control.isVisible())await openPlayFileMenu(page);await control.fill(String(value));await control.press('Enter');if(name==='Play title')await page.locator('.builder-main-menu').evaluate(node=>{node.open=false;});};
 const menu=async page=>page.locator('.builder-main-menu > summary').click();
@@ -16,7 +16,7 @@ test('complete portrait custom rally and detailed movement survive views, reload
  const page=await context.newPage();await open(page);await field(page,'Play title','Phone custom rally');
  await edit(page);await page.getByRole('button',{name:'Place target on court',exact:true}).click();
  const target=await page.evaluate(()=>playBuilder.courtTools.project({x:6,y:37}));await page.touchscreen.tap(target.x,target.y);const exactTarget=await page.evaluate(()=>structuredClone(playBuilder.selectedShot.target));
- await chapter(page,2,'Return');await details(page,'Flight');await page.getByLabel('Flight',{exact:true}).selectOption('high/soft');
+ await chapter(page,2,'Return');const flight=await details(page,'Flight');await flight.getByLabel('Flight',{exact:true}).selectOption('high/soft');
  await chapter(page,3,'Drop');await edit(page);await page.getByLabel('Shot family',{exact:true}).selectOption('drive');
  await page.getByRole('button',{name:'Add shot',exact:true}).click();await page.getByLabel('Shot family',{exact:true}).selectOption('drop');
  expect(await page.evaluate(()=>playBuilder.compiled.validShotCount)).toBe(4);
@@ -30,7 +30,7 @@ test('complete portrait custom rally and detailed movement survive views, reload
  await page.getByRole('button',{name:'Place movement on court',exact:true}).click();await expect(page.getByRole('button',{name:'Cancel movement',exact:true})).toBeVisible();
  const pin=await page.evaluate(()=>playBuilder.courtTools.project({x:7,y:4}));await page.touchscreen.tap(pin.x,pin.y);
  const exactPin=await page.evaluate(()=>structuredClone(playBuilder.selectedShot.playerMovement.player2));
- await edit(page);await openIntentTab(page,'Coach Tools');const coach=page.locator('.builder-assistance > summary');if(!await coach.locator('..').evaluate(node=>node.open))await coach.click();await page.getByRole('checkbox',{name:'Auto Shading',exact:true}).check();await page.getByRole('checkbox',{name:'Coverage Guides',exact:true}).check();
+ await edit(page);await openCoachTools(page);await page.getByRole('checkbox',{name:'Auto Shading',exact:true}).check();await page.getByRole('checkbox',{name:'Coverage Guides',exact:true}).check();
  await page.getByRole('button',{name:'Undo authored edit',exact:true}).click();await page.getByRole('button',{name:'Redo authored edit',exact:true}).click();
  const saved=await page.evaluate(()=>structuredClone(playBuilder.document));expect(saved.shots[0].target).toEqual(exactTarget);expect(saved.shots[0].playerMovement.player2).toEqual(exactPin);expect(saved.shots.length).toBe(4);
  if(record){await page.screenshot({path:`${record}/custom-phone.png`});await import('node:fs/promises').then(fs=>fs.writeFile(`${record}/custom-play.json`,JSON.stringify(saved,null,2)+'\n'));}

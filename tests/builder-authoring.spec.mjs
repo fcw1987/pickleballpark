@@ -1,4 +1,5 @@
 import{test,expect}from'@playwright/test';
+import{openCoachTools}from'./helpers/builder-navigation.mjs';
 const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);};
 const menu=async page=>{const details=page.locator('.builder-main-menu');const summary=details.locator(':scope > summary');if(!(await details.evaluate(node=>node.open)))await summary.click();return summary;};
 const fileMenu=async page=>{await menu(page);const details=page.locator('.builder-document-menu');if(!(await details.evaluate(node=>node.open)))await page.getByLabel('Play file',{exact:true}).click();};
@@ -6,7 +7,6 @@ const namePlay=async(page,value)=>{await fileMenu(page);await page.getByLabel('P
 const chooseChapter=async(page,number)=>{const picker=page.getByLabel('Choose shot chapter');if(!(await picker.locator('..').evaluate(node=>node.open)))await picker.click();await page.getByRole('button',{name:`Edit Shot ${number}`,exact:true}).click();};
 const editShot=async page=>{const inspector=page.locator('.builder-inspector');if(await inspector.evaluate(node=>node.classList.contains('builder-inspector-collapsed')))await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();};
 const details=async(page,group='Precision')=>{const summary=page.getByText('Edit by intent',{exact:true});if(!(await summary.locator('..').evaluate(node=>node.open)))await summary.click();const tab=page.getByRole('tab',{name:group,exact:true});if(await tab.getAttribute('aria-selected')!=='true')await tab.click();};
-const coachTools=async page=>{await details(page,'Coach Tools');const summary=page.locator('.builder-assistance > summary');if(!(await summary.locator('..').evaluate(node=>node.open)))await summary.click();};
 test('authors a longer rally through contextual controls, saves copies, and reopens named work',async({page})=>{
  await open(page);await namePlay(page,'Wide serve rally');await editShot(page);await details(page);
  await page.getByLabel('Target width',{exact:true}).fill('7');await page.getByLabel('Target width',{exact:true}).press('Tab');
@@ -18,8 +18,8 @@ test('authors a longer rally through contextual controls, saves copies, and reop
  await fileMenu(page);await page.getByRole('button',{name:'New Play',exact:true}).click();expect(await page.evaluate(()=>playBuilder.document.id)).not.toBe(id);expect(await page.evaluate(id=>playBuilder.store.open(id).shots.length,id)).toBe(6);
 });
 test('assistance is undoable and guides do not enable generated movement',async({page})=>{
- await open(page);await editShot(page);await coachTools(page);const before=await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps));await page.getByRole('checkbox',{name:'Coverage Guides',exact:true}).evaluate(node=>node.click());await expect.poll(()=>page.evaluate(()=>playBuilder.document.assistance.showGuides)).toBe(true);expect(await page.evaluate(()=>playBuilder.document.assistance.autoShading)).toBe(false);expect(await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps))).toBe(before);
- await coachTools(page);await page.getByRole('checkbox',{name:'Auto Shading',exact:true}).evaluate(node=>node.click());await expect.poll(()=>page.evaluate(()=>playBuilder.document.assistance.autoShading)).toBe(true);expect(await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps))).not.toBe(before);await page.getByRole('button',{name:'Undo authored edit'}).click();expect(await page.evaluate(()=>playBuilder.document.assistance)).toMatchObject({autoShading:false,showGuides:true});
+ await open(page);await editShot(page);await openCoachTools(page);const before=await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps));await page.getByRole('checkbox',{name:'Coverage Guides',exact:true}).evaluate(node=>node.click());await expect.poll(()=>page.evaluate(()=>playBuilder.document.assistance.showGuides)).toBe(true);expect(await page.evaluate(()=>playBuilder.document.assistance.autoShading)).toBe(false);expect(await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps))).toBe(before);
+ await openCoachTools(page);await page.getByRole('checkbox',{name:'Auto Shading',exact:true}).evaluate(node=>node.click());await expect.poll(()=>page.evaluate(()=>playBuilder.document.assistance.autoShading)).toBe(true);expect(await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps))).not.toBe(before);await page.getByRole('button',{name:'Undo authored edit'}).click();expect(await page.evaluate(()=>playBuilder.document.assistance)).toMatchObject({autoShading:false,showGuides:true});
 });
 for(const[width,height]of[[1440,900],[768,1024],[1024,768],[390,844],[844,390],[320,568]])test(`default builder court and essential controls fit ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width,height});await open(page);

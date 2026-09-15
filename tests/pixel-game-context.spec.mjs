@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openIntentTab, settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
+import { openCoachTools, settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
 
 const APP = '/index.html?pixel-game-context=1';
 
@@ -60,9 +60,7 @@ test('main, chapter, and playback menus open over the scene without resizing the
 test('Coach tools remains expanded and focused after an assistance edit rerenders the document', async ({ page }) => {
   await openBuilder(page);
   await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
-  await openIntentTab(page, 'Coach Tools');
-  const tools = page.locator('.builder-assistance');
-  await tools.locator('summary').click();
+  const tools = await openCoachTools(page);
   await expect(tools).toHaveAttribute('open', '');
   const shading = page.getByRole('checkbox', { name: 'Auto Shading', exact: true });
   await shading.focus();
