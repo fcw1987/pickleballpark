@@ -1,5 +1,5 @@
 {
-  "source": "e0177cc706e316a8011db348deed133fcaf3ec47",
+  "source": "2dc5ce63912b25a620990f8566bfed499c1f597a",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -8,13 +8,13 @@
     },
     {
       "path": "assets/park/bench.png",
-      "bytes": 255,
-      "sha256": "2fdc53a57b2aa4addaebfde280ab88defdbd3a4082ec615ed28c6f4961a4df7d"
+      "bytes": 266,
+      "sha256": "95f494158346c46dc57cbfed344e0e6c83e23578df5d5f9058367bddb2def5a6"
     },
     {
       "path": "assets/park/grass.png",
-      "bytes": 618,
-      "sha256": "e1bd01b005f82b8d4ed21c48aabb590b556451e71c162c6b9321b119b8f6380d"
+      "bytes": 739,
+      "sha256": "a4c56d7463fe47fc86fe802ce26dab4c5f54ce93627853af84ca5aef5aefe168"
     },
     {
       "path": "assets/park/menu-frame-dark.png",
@@ -33,18 +33,18 @@
     },
     {
       "path": "assets/park/path.png",
-      "bytes": 613,
-      "sha256": "a5fd8e1e4668c30988dd987a9b5377add6c75a8526b4999e3905f929c545cf42"
+      "bytes": 607,
+      "sha256": "5cb16df7ae092167f4a8a3dbfe620ef486069a9eb4ddc7dd5c9192d8ec306fc9"
     },
     {
       "path": "assets/park/quiet-court.png",
-      "bytes": 346,
-      "sha256": "ef7a3e45335222449dafba0ba5b63c8ccc3733e1035e38338d5e342b5fb57dd9"
+      "bytes": 381,
+      "sha256": "78dddd22016eb3dacfab9308bb1653d1852fa9d89c0aabd2450311ddd54ca98a"
     },
     {
       "path": "assets/park/shrub.png",
-      "bytes": 247,
-      "sha256": "a7cd4a087e4134d48a7d63b214a02161897185a5907c511e2c74da38c59e5e35"
+      "bytes": 288,
+      "sha256": "4f97c750f789a6f0bb8f51809e45721550991dd857a9e231f5ea85837c75c3e8"
     },
     {
       "path": "assets/park/sign.png",
@@ -53,8 +53,8 @@
     },
     {
       "path": "assets/park/tree.png",
-      "bytes": 466,
-      "sha256": "ae3fb8be4ff28983caa42d685182c071f82609857a746189cb2a3a8f15be4203"
+      "bytes": 527,
+      "sha256": "75cd0f96eaea9701d12efad209e9c8e2893f622b4b94040c39943541d4633813"
     },
     {
       "path": "assets/players/green-left-handed.png",
@@ -248,8 +248,8 @@
     },
     {
       "path": "builder-court-tools.js",
-      "bytes": 9966,
-      "sha256": "cbfcf2d1f608e89a94e66918bf5fc81ff30c6e7adbe956636b4f5b1aa57d839d"
+      "bytes": 10567,
+      "sha256": "c09be7090bc83290bdb06d9e8ff64fa08ef1c1224f6ecf983ffa06d9193734c0"
     },
     {
       "path": "builder-framing.js",
@@ -268,13 +268,13 @@
     },
     {
       "path": "builder-ui.css",
-      "bytes": 14086,
-      "sha256": "61867e9783cd390a88bb379a49c8be984668685f839597d06d5de3b947b943d9"
+      "bytes": 32220,
+      "sha256": "0bd609136059d0efde8050af38f6aeefeca304b3c7efb7f43d4b981bf057e694"
     },
     {
       "path": "builder-ui.js",
-      "bytes": 51554,
-      "sha256": "02500485f0a31e672036328ea80b345142b9d2a7ce8b40de68bf70f6482977e1"
+      "bytes": 65314,
+      "sha256": "2dbaf176c2d3dfcf64db16a93f790ee0a0e83622bef42897f48bad0009287d40"
     },
     {
       "path": "builder-waypoint-policy.js",
@@ -308,8 +308,8 @@
     },
     {
       "path": "guided-plays.js",
-      "bytes": 20090,
-      "sha256": "7ba9181556ec7ab26d9a4a5bbf55ca15a35069b25258c55e3ace8071c3f2e0e5"
+      "bytes": 20116,
+      "sha256": "3c0026759323efa725ef4307f1ab6bcd476a3122ec4a39f0d2bc145f4d102210"
     },
     {
       "path": "icons/apple-icon-180.png",
@@ -368,8 +368,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 19932,
-      "sha256": "80cc423d5392fd1fa1ec6b1ede0b8c333b292f40ec714b8398fc6c0d4ecf40b9"
+      "bytes": 20074,
+      "sha256": "4e89dbbc422a5d6290b9af198f2af42ed28e848866b09eb5bcd83b38e2f0ec2f"
     },
     {
       "path": "manifest.json",
@@ -378,13 +378,13 @@
     },
     {
       "path": "park-layout.js",
-      "bytes": 2482,
-      "sha256": "f5db83619fdebe2a110dea0eb0c62764bcd49a67f9ae14333a91d7eaf429dbc4"
+      "bytes": 2638,
+      "sha256": "51d775fed8ba28b7ed32a9ca4df09d06b96bfeb045dfd07185d7454f0ab789d1"
     },
     {
       "path": "park-scene.js",
-      "bytes": 11809,
-      "sha256": "67c9b5cc297b2b6b1c48b84680371da2783e59c47778c8404ca1eeb830f162e2"
+      "bytes": 13020,
+      "sha256": "df8286f8da874218f67e2c0cf08bc29bddebca9305dacc9ad166ffe223f492de"
     },
     {
       "path": "pixel-actor-assets.js",
@@ -393,8 +393,8 @@
     },
     {
       "path": "play-builder.js",
-      "bytes": 30570,
-      "sha256": "c070420ff2e4c64d0e6a6e099f5eacbc240acfcc0dd9f450c10cfd5aa4683a31"
+      "bytes": 31078,
+      "sha256": "d2db3860449ec1981e5bccbd71730960c3f55886230deb354a95cc8266826a7a"
     },
     {
       "path": "play-catalog.js",
@@ -418,8 +418,8 @@
     },
     {
       "path": "script.js",
-      "bytes": 59603,
-      "sha256": "daaf75c96a1cd8a3b81c711183c55218003aaa92e0aea9ab8acd03965965557e"
+      "bytes": 62269,
+      "sha256": "66e125a4f909ebec3dd1ac8488c58056eafe036276a7e8e3d69135726aa08ee6"
     },
     {
       "path": "shot-chapters.js",
@@ -428,8 +428,8 @@
     },
     {
       "path": "shot-timeline.css",
-      "bytes": 3842,
-      "sha256": "3d12b65fb496d627bb26be621f3b794220236352d3ff2c8748653bd835a5438a"
+      "bytes": 4019,
+      "sha256": "78f85426f0df2dbdfe778c7fce6af92f9007be96380270e9960e98ca89589a08"
     },
     {
       "path": "shot-timeline.js",
@@ -438,13 +438,13 @@
     },
     {
       "path": "styles.css",
-      "bytes": 24912,
-      "sha256": "63395adc09e08d7faca3a6990a51ef66a020a9bbeaf6f102358ee6bc62bd827e"
+      "bytes": 25396,
+      "sha256": "166f13fed978dd3d1f902590d9bf1f26cb54dd50144723661525a6b9219c6869"
     },
     {
       "path": "sw.js",
       "bytes": 6748,
-      "sha256": "ad8084335f9c5ed7a44fdba4fba8f8dbe17ef68846d65c074b854be2cdeff11a"
+      "sha256": "f294680455ebd2f7650ba313483308c3bbe767a16f0aa2ba1d4c8be6742f0012"
     },
     {
       "path": "three-d-animation.js",
@@ -493,8 +493,8 @@
     },
     {
       "path": "visual-theme.js",
-      "bytes": 1308,
-      "sha256": "abdaeb7a601974b8e115371ec38f436bea1daf129e3650440c8c5bfdb0448dfc"
+      "bytes": 1470,
+      "sha256": "4c33b37ca6e3f0b7ec62c370683ba09e7862ba9343eafdf99562d50e4506489d"
     }
   ]
 }
