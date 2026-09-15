@@ -12,7 +12,7 @@ try{
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base);await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&pickleboard.threeD.renderer);
   await page.evaluate(()=>document.fonts.ready);
-  const snap=async state=>{await page.screenshot({path:`${output}/${label}-${state}.png`,scale:'css'});};
+  const snap=async state=>{await page.screenshot({path:`${output}/${label}-${state}.png`,scale:'css',animations:'disabled'});};
   await snap('rest-3d');
   const metric=await page.evaluate(async()=>{
    const rect=n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
@@ -23,14 +23,14 @@ try{
    const controls=[...document.querySelectorAll('.builder-ui button,.builder-ui summary,.builder-ui input')].filter(n=>n.getClientRects().length&&getComputedStyle(n).visibility!=='hidden').map(n=>({name:n.getAttribute('aria-label')||n.textContent,rect:rect(n),font:getComputedStyle(n).fontFamily,fontSize:getComputedStyle(n).fontSize}));
    return {viewport:[innerWidth,innerHeight],devicePixelRatio,canvas,buffer:[v.renderer.domElement.width,v.renderer.domElement.height],ui,worldHostFraction:canvas.width*canvas.height/(innerWidth*innerHeight),permanentUiFraction:ui.reduce((a,r)=>a+r.width*r.height,0)/(innerWidth*innerHeight),projectedCourtFraction:area/(innerWidth*innerHeight),courtCorners:points,allCourtCornersInViewport:points.every(p=>p.x>=0&&p.y>=0&&p.x<=innerWidth&&p.y<=innerHeight),controls};
   });
-  if(label==='phone')await page.screenshot({path:`${output}/phone-rest-3d-dpr3.png`,scale:'device'});
-  await page.locator('[data-action="view"][data-view="2d"]:visible').click();await snap('rest-2d');
-  await page.locator('[data-action="view"][data-view="3d"]:visible').click();
+  if(label==='phone')await page.screenshot({path:`${output}/phone-rest-3d-dpr3.png`,scale:'device',animations:'disabled'});
+  await page.locator('[data-action="view"][data-view="2d"]:visible').click();await page.waitForFunction(()=>!playBuilder.busy&&playBuilder.view==='2d');await snap('rest-2d');
+  await page.locator('[data-action="view"][data-view="3d"]:visible').click();await page.waitForFunction(()=>!playBuilder.busy&&playBuilder.view==='3d');
   await page.locator('.builder-main-menu > summary').click();await snap('menu');await page.locator('.builder-main-menu > summary').click();
   await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();await snap('shot-card');
   const details=page.locator('.builder-shot-details > summary');await expect(details).toBeVisible();await details.click();await snap('details');
   records.push({label,metric,errors});await context.close();
  }
 }finally{await browser.close();}
-await writeFile(`${output}/measurements.json`,JSON.stringify({base,method:'Fresh isolated contexts; CSS-pixel captures plus phone DPR3 original. Court fraction is projected regulation surface, not a usability score; host/UI fractions are separate rectangles.',records},null,2));
+await writeFile(`${output}/measurements.json`,JSON.stringify({base,method:'Fresh isolated contexts; completed view changes and CSS transitions disabled for still captures; CSS-pixel captures plus phone DPR3 original. Court fraction is projected regulation surface, not a usability score; host/UI fractions are separate rectangles.',records},null,2));
 console.log(JSON.stringify(records.map(({label,metric,errors})=>({label,worldHostFraction:metric.worldHostFraction,permanentUiFraction:metric.permanentUiFraction,projectedCourtFraction:metric.projectedCourtFraction,allCourtCornersInViewport:metric.allCourtCornersInViewport,errors})),null,2));

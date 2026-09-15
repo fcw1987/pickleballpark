@@ -21,6 +21,8 @@ for (const target of targets) {
     const page = await context.newPage();
     const navigationStarted = performance.now();
     await page.goto(target.url);
+    await page.waitForFunction(() => window.playBuilder?.document && playBuilder.ui?.element);
+    const builderReadyMs = performance.now() - navigationStarted;
     await page.waitForFunction(() => window.playBuilder && !playBuilder.busy && playBuilder.board.threeD?.renderer);
     const first3DReadyMs = performance.now() - navigationStarted;
     const initial = await page.evaluate(() => {
@@ -37,6 +39,7 @@ for (const target of targets) {
         renderer: debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER),
         rendererMemory: { ...renderer.info.memory },
         drawCalls: renderer.info.render.calls,
+        triangles: renderer.info.render.triangles,
         drawingBuffer: [renderer.domElement.width, renderer.domElement.height],
         pixelRatio: renderer.getPixelRatio()
       };
@@ -116,6 +119,33 @@ for (const target of targets) {
           if (!builder.save()) throw Error('Performance save failed.');
           saves.push(performance.now() - started);
         }
+        // Include completed browser layout in the editor measurement. This is
+        // still CPU work, not paint/GPU completion or a visible frame rate.
+        const detailLoops = [];
+        for (let index = 0; index < 30; index++) {
+          const started = performance.now();
+          builder.ui.element.querySelector('.builder-context-actions [data-action="collapse-inspector"]').click();
+          builder.ui.element.querySelector('.builder-inspector')?.getBoundingClientRect();
+          builder.ui.element.querySelector('.builder-context-actions [data-action="collapse-inspector"]').click();
+          builder.ui.element.querySelector('.builder-court-region').getBoundingClientRect();
+          detailLoops.push(performance.now() - started);
+        }
+        const submission = [];
+        const nativeRender = renderer.render;
+        renderer.render = function(...args) {
+          const started = performance.now();
+          try { return nativeRender.apply(this, args); }
+          finally { submission.push(performance.now() - started); }
+        };
+        try {
+          // Sample a complete authored rally with settled real renderer work.
+          // Seeking makes times reproducible without changing the shared clock.
+          for (let index = 0; index < 120; index++) {
+            builder.seek(builder.session.duration * index / 119);
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          }
+        } finally { renderer.render = nativeRender; }
+        if (submission.length < 120) throw Error(`Only ${submission.length} of 120 settled renderer samples submitted.`);
         byShots.push({
           shots: shotCount,
           duration: builder.session.duration,
@@ -124,7 +154,12 @@ for (const target of targets) {
           targetEditMs: stats(targetEdits),
           seekMs: stats(seeks),
           menuOpenCloseMs: stats(menuLoops),
-          saveMs: stats(saves)
+          saveMs: stats(saves),
+          detailsOpenCloseLayoutMs: stats(detailLoops),
+          rendererCpuSubmissionMs: stats(submission),
+          renderedSamples: submission.length,
+          drawCalls: renderer.info.render.calls,
+          triangles: renderer.info.render.triangles
         });
       }
 
@@ -160,7 +195,12 @@ for (const target of targets) {
         byShots,
         viewLoops: { enter2DMs: stats(enter2D), enterWarm3DMs: stats(enterWarm3D) },
         pausedRAF: { callbacks, elapsedMs: sixtyPausedRAFCallbacksMs, applicationRenderCalls: renderCalls },
-        finalResources: { memory: { ...renderer.info.memory }, drawCalls: renderer.info.render.calls }
+        finalResources: {
+          memory: { ...renderer.info.memory }, drawCalls: renderer.info.render.calls,
+          triangles: renderer.info.render.triangles,
+          canvases: document.querySelectorAll('#threeDCanvas canvas').length,
+          pendingRender: builder.board.threeD.renderLoopId !== null
+        }
       };
     });
 
@@ -171,7 +211,7 @@ for (const target of targets) {
       await page.waitForFunction(() => window.playBuilder && !playBuilder.busy && playBuilder.document.shots.length === 64);
       reloadMs.push(performance.now() - started);
     }
-    records.push({ target: target.label, url: target.url, run, first3DReadyMs, initial, tasks, reloadMs });
+    records.push({ target: target.label, url: target.url, run, builderReadyMs, first3DReadyMs, initial, tasks, reloadMs });
     console.log(JSON.stringify({ target: target.label, run, first3DReadyMs, reloadMs }));
     await context.close();
   }
@@ -186,7 +226,7 @@ const evidence = {
     viewport: [1440, 900],
     deviceScaleFactor: 1,
     runs: runCount,
-    workload: '3, 8 and 64 shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs and 50 saves per size; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining 64 shots',
+    workload: '3, 8 and 64 shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs, 30 details open-close/layout pairs and 50 saves per size; 120 settled renderer samples per rally; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining 64 shots',
     limitations: 'CPU-side performance.now/action timing and automation callback cadence. Renderer calls measure CPU command submission, not GPU completion. Results do not measure displayed FPS or physical-device performance.'
   },
   records

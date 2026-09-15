@@ -1,11 +1,11 @@
 # Known limitations
 
-See [QA_STATUS.md](QA_STATUS.md) and [the stabilization report](BETA_STABILIZATION_REPORT.md) for evidence and acceptance.
+See [the current combined gauntlet](fidelity/GAUNTLET_STATUS.md) for active acceptance work. [QA_STATUS.md](QA_STATUS.md) and [the stabilization report](BETA_STABILIZATION_REPORT.md) record the preceding checkpoint.
 
-## Unresolved acceptance
+## Historical Safari risk
 
-- **BETA-001:** the historical native Safari blank 3D court after Help has not recurred, including on the final v22 package. Its original cause remains unproved. The separately reproduced parked-context-loss blank is fixed and passes native Safari recovery. Beta sign-off remains held pending the owner's disposition of the historical report; this is not a claim that it was fixed.
-- All seven confirmed product defects discovered in this campaign are corrected. No confirmed high or medium defect is deferred.
+- **BETA-001:** the historical native Safari blank 3D court after Help has not recurred, including on the final v22 package. Its original cause remains unproved. The separately reproduced parked-context-loss blank is fixed and passes native Safari recovery. The robustness and visual fidelity assignment supersedes the earlier historical-cause hold: its gate requires no reproducible current native Safari blank, while preserving this risk honestly. The new combined candidate still requires native retesting; this is not a claim that the historical cause was fixed.
+- All seven confirmed product defects in the preceding beta campaign were corrected at checkpoint `1375835`. New gauntlet findings and corrective review remain active in the current ledger.
 
 ## Test environment
 
@@ -17,5 +17,5 @@ See [QA_STATUS.md](QA_STATUS.md) and [the stabilization report](BETA_STABILIZATI
 
 - Retained intermediate movement waypoints require explicit destination-only acknowledgement; those paths are preserved but not animated.
 - Dedicated speedup/block semantics beyond existing family mappings, Erne/ATP, spin control, scoring, poach/stacking strategy simulation, measured biomechanics and inferred outcomes are outside current scope. See the future capability list in [SCENARIO_CATALOG.md](SCENARIO_CATALOG.md).
-- Camera is inside Playback options; Save As immediately creates a named copy. These are discoverability observations, not reasons to redesign during stabilization.
+- At the checkpoint, camera is inside Playback options and Save As immediately creates a named copy. The current interface mission reviews their discoverability while preserving both capabilities.
 - A transient drawing-buffer/CSS-size lag during resize was observed without blank rendering. It remains an unconfirmed low-severity observation; no speculative runtime patch was made.
