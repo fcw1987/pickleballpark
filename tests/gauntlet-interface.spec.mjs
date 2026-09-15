@@ -7,14 +7,14 @@ const fixture = {
   assistance: { autoShading: false, showGuides: false }
 };
 
-async function mount(page, state = {}) {
+async function mount(page, state = {}, value = fixture) {
   await page.goto('/index.html?builder-ui-harness=1');
   await page.evaluate(async ({ value, extra }) => {
     const { mountBuilderUI } = await import('/builder-ui.js');
     window.__interfaceActions = [];
     window.__interfaceBuilder = mountBuilderUI({ onAction: (type, payload) => window.__interfaceActions.push({ type, payload }) });
     window.__interfaceBuilder.render({ document: value, selectedShotId: value.shots[0].id, ...extra });
-  }, { value: fixture, extra: state });
+  }, { value, extra: state });
 }
 
 test.describe('Park Desk interface layer', () => {
@@ -23,7 +23,7 @@ test.describe('Park Desk interface layer', () => {
     const ui = page.locator('.builder-ui').last();
     await expect(ui.locator('[data-shot-card-number]')).toHaveText('SHOT 1');
     await expect(ui.locator('[data-shot-card-family]')).toHaveText('Drive');
-    await expect(ui.locator('[data-shot-card-description]')).toHaveText('Middle crosscourt left');
+    await expect(ui.locator('[data-shot-card-description]')).toHaveText('Middle left lane');
     await expect(ui.locator('[data-shot-card-flight]')).toHaveText('Custom pace · Custom arc');
   });
 
@@ -31,8 +31,12 @@ test.describe('Park Desk interface layer', () => {
     await mount(page);
     const ui = page.locator('.builder-ui').last();
     await ui.getByRole('button', { name: 'Edit shot', exact: true }).last().click();
-    await ui.getByText('Details · coordinates, contact, movement', { exact: true }).click();
-    for (const label of ['Shot', 'Target', 'Flight', 'Players', 'Movement', 'Precision']) await expect(ui.locator('.builder-control-group h3', { hasText: label })).toBeVisible();
+    await ui.getByText('Edit by intent', { exact: true }).click();
+    for (const group of ['target', 'flight', 'players', 'movement', 'coach', 'precision']) {
+      await ui.locator(`[data-action="detail-group"][data-group="${group}"]`).click();
+      await expect(ui.locator(`[data-detail-group="${group}"]`)).toBeVisible();
+      await expect(ui.locator(`[data-detail-group]:not([data-detail-group="${group}"])`).filter({ visible: true })).toHaveCount(0);
+    }
     await expect(ui.getByLabel('Shot family', { exact: true })).toBeVisible();
     await expect(ui.getByRole('button', { name: 'Place target on court', exact: true })).toBeVisible();
     await expect(ui.locator('.builder-assistance > summary')).toHaveText('Coach tools');
@@ -43,5 +47,38 @@ test.describe('Park Desk interface layer', () => {
     const ui = page.locator('.builder-ui').last();
     await ui.locator('.builder-main-menu > summary').click();
     await expect.poll(() => page.evaluate(() => window.__interfaceActions.map(item => item.type))).toContain('cancelTarget');
+  });
+
+  test('Help reconciles a collapsed editor to the live shot and preserves an open editor selection', async ({ page }) => {
+    const value = { ...fixture, shots: [...fixture.shots, { id: 'return-shot', family: 'return', hitter: 'player3', target: { x: 16, y: 12 }, arc: 'high', pace: 'firm', movement: { intent: 'recover' } }] };
+    await mount(page, { currentShotId: 'return-shot' }, value);
+    const ui = page.locator('.builder-ui').last();
+    await ui.locator('.builder-main-menu').evaluate(node => { node.open = true; });
+    await ui.locator('[data-action="help"]').click();
+    await expect.poll(() => page.evaluate(() => window.__interfaceActions.map(item => item.type))).toContain('selectShot');
+    await expect.poll(() => page.evaluate(() => window.__interfaceActions.at(-1).payload)).toEqual({ id: 'return-shot', preserveTime: true });
+
+    await mount(page, { currentShotId: 'return-shot' }, value);
+    const openUi = page.locator('.builder-ui').last();
+    await openUi.getByRole('button', { name: 'Edit shot', exact: true }).last().click();
+    await openUi.locator('.builder-main-menu').evaluate(node => { node.open = true; });
+    await openUi.locator('[data-action="help"]').click();
+    await expect.poll(() => page.evaluate(() => window.__interfaceActions.at(-1).type)).toBe('help');
+  });
+
+  test('phone keeps the shot chapter selector and avoids header intersections', async ({ page }) => {
+    for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 320, height: 568 }]) {
+      await page.setViewportSize(viewport);
+      await mount(page);
+      const ui = page.locator('.builder-ui').last();
+      await expect(ui.locator('.builder-shot-card .builder-chapter-menu > summary')).toBeVisible();
+      await expect(ui.locator('.builder-context-actions [data-action="view"]')).toHaveCount(1);
+      const boxes = await ui.evaluate(root => [...root.querySelectorAll('.builder-meta > *')].filter(node => node.getBoundingClientRect().width > 0).map(node => { const r = node.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }; }));
+      for (let i = 0; i < boxes.length; i += 1) for (let j = i + 1; j < boxes.length; j += 1) {
+        const overlapX = boxes[i].left < boxes[j].right - 1 && boxes[j].left < boxes[i].right - 1;
+        const overlapY = boxes[i].top < boxes[j].bottom - 1 && boxes[j].top < boxes[i].bottom - 1;
+        expect(overlapX && overlapY, `${viewport.width}x${viewport.height} header overlap`).toBe(false);
+      }
+    }
   });
 });
