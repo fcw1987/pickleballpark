@@ -24,6 +24,7 @@ async function state(page, label) {
       canvases: document.querySelectorAll('#threeDCanvas canvas').length,
       css: [rect.width, rect.height],
       buffer: [node.width, node.height],
+      expectedBuffer: [viewer.elements.canvas.clientWidth, viewer.elements.canvas.clientHeight].map(value => Math.floor(value * viewer.renderer.getPixelRatio())),
       frame: viewer.renderer.info.render.frame,
       pending: viewer.renderLoopId !== null,
       bodyOverflow: document.body.style.overflow,
@@ -35,6 +36,7 @@ async function state(page, label) {
   assert.equal(runtime.canvases, 1, `${label}: canvas count`);
   assert.ok(runtime.css.every(value => value > 1), `${label}: collapsed CSS canvas`);
   assert.ok(runtime.buffer.every(value => value > 1), `${label}: collapsed drawing buffer`);
+  assert.deepEqual(runtime.buffer, runtime.expectedBuffer, `${label}: drawing buffer does not match settled court size`);
   assert.ok(png.length > 10_000, `${label}: implausibly simple/blank canvas capture (${png.length} bytes)`);
   return { label, ...runtime, pngBytes: png.length, hash: createHash('sha256').update(png).digest('hex').slice(0, 12) };
 }
