@@ -20,8 +20,7 @@ export const PARK_LAYOUT = Object.freeze({
         freezeLandmark({ id: 'park-banner', type: 'banner', x: 10, y: -8, size: 7, height: 1.75, anchorFoot: [10, -8] }),
         freezeLandmark({ id: 'shrub-left', type: 'shrub', x: -6.2, y: 25, size: 4.7, height: 4.2, anchorFoot: [-6.2, 25] }),
         freezeLandmark({ id: 'shrub-right', type: 'shrub', x: 26.2, y: 19, size: 4.7, height: 4.2, anchorFoot: [26.2, 19] }),
-        freezeLandmark({ id: 'bench-left', type: 'bench', x: -6.5, y: 34, size: 5.6, height: 4.5, anchorFoot: [-6.5, 34] }),
-        freezeLandmark({ id: 'park-sign', type: 'sign', x: 26.5, y: 8, size: 3.8, height: 3.8, anchorFoot: [26.5, 8] })
+        freezeLandmark({ id: 'bench-left', type: 'bench', x: -6.5, y: 34, size: 5.6, height: 4.5, anchorFoot: [-6.5, 34] })
     ]),
     assets: Object.freeze({
         quietCourt: 'assets/park/quiet-court.png',
@@ -30,7 +29,6 @@ export const PARK_LAYOUT = Object.freeze({
         tree: 'assets/park/tree.png',
         shrub: 'assets/park/shrub.png',
         bench: 'assets/park/bench.png',
-        sign: 'assets/park/sign.png',
         banner: 'assets/park/banner.png'
     })
 });

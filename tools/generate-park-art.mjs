@@ -157,15 +157,6 @@ const text = (c, value, x, y, color, scale = 1) => {
     x += 4 * scale;
   }
 };
-const sign = () => {
-  const c = new Canvas(64, 64);
-  c.rect(26, 23, 12, 34, C.parkWood); c.rect(29, 21, 6, 36, C.parkShadow);
-  c.rect(8, 8, 48, 23, C.navyDark); c.rect(12, 12, 40, 15, C.parkSign);
-  // The border sign is a readable help affordance; product identity lives in banner().
-  text(c, 'HELP', 16, 15, C.navyDark, 2);
-  c.rect(19, 57, 26, 3, [...C.parkShadow.slice(0, 3), 90]);
-  return c;
-};
 const banner = () => {
   const c = new Canvas(128, 32);
   c.rect(1, 1, 126, 30, C.navyDark);
@@ -193,7 +184,7 @@ const assets = [
   ['quiet-court.png', texture(C.court, [C.courtShade, C.courtLight], 1, 2)],
   ['grass.png', texture(C.surround, [C.grassDeep, C.grassLight], 2, 1)],
   ['path.png', texture(C.path, [C.pathShade, C.pathLight], 3, 1)],
-  ['tree.png', tree()], ['shrub.png', shrub()], ['bench.png', bench()], ['sign.png', sign()], ['banner.png', banner()],
+  ['tree.png', tree()], ['shrub.png', shrub()], ['bench.png', bench()], ['banner.png', banner()],
   ['menu-frame-light.png',menuFrame(false)],['menu-frame-dark.png',menuFrame(true)]
 ];
 const output = [];

@@ -39,7 +39,6 @@ const STATIC_ASSETS = [
   './assets/park/tree.png',
   './assets/park/shrub.png',
   './assets/park/bench.png',
-  './assets/park/sign.png',
   './assets/park/banner.png',
   './assets/park/menu-frame-light.png',
   './assets/park/menu-frame-dark.png',

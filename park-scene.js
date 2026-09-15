@@ -74,7 +74,7 @@ export function populateParkSVG(svg, groundPlane) {
 
     const layer = svgElement(document, 'g', { 'data-park-scene': 'true', 'aria-hidden': 'true', 'pointer-events': 'none' });
     const details = svgElement(document, 'g', { 'data-park-details': 'true', 'pointer-events': 'none' });
-    const assetFor = { tree: PARK_LAYOUT.assets.tree, shrub: PARK_LAYOUT.assets.shrub, bench: PARK_LAYOUT.assets.bench, sign: PARK_LAYOUT.assets.sign, banner: PARK_LAYOUT.assets.banner };
+    const assetFor = { tree: PARK_LAYOUT.assets.tree, shrub: PARK_LAYOUT.assets.shrub, bench: PARK_LAYOUT.assets.bench, banner: PARK_LAYOUT.assets.banner };
     const ordered = [...PARK_LAYOUT.landmarks].sort((a, b) => a.y - b.y || a.x - b.x);
     for (const landmark of ordered) {
         const view = projection(landmark);
@@ -171,7 +171,7 @@ export async function createPark3D(THREE, { signal } = {}) {
     addGround('ParkCourtTexture', { x: 0, y: 0, width: 20, height: 44 }, textures.get('quietCourt'), 0.24, 0.006);
     for (const path of PARK_LAYOUT.paths) addGround(path.id, path, textures.get('path'), 1, -0.045);
 
-    const detailTextures = { tree: textures.get('tree'), shrub: textures.get('shrub'), bench: textures.get('bench'), sign: textures.get('sign'), banner: textures.get('banner') };
+    const detailTextures = { tree: textures.get('tree'), shrub: textures.get('shrub'), bench: textures.get('bench'), banner: textures.get('banner') };
     for (const landmark of PARK_LAYOUT.landmarks) {
         const world = boardToWorld({ x: landmark.x, y: landmark.y });
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(landmark.size * FEET_TO_METERS, landmark.height * FEET_TO_METERS), material(detailTextures[landmark.type], 1));

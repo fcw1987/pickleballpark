@@ -213,7 +213,7 @@ class Pickleboard {
             const halfWidth=banner.offsetWidth/2,height=banner.offsetHeight;
             banner.style.left=`${Math.max(halfWidth+4-rect.left,Math.min(innerWidth-rect.left-halfWidth-4,screen.x-rect.left))}px`;
             banner.style.top=`${Math.max(height+8-rect.top,Math.min(innerHeight-rect.top-4,screen.y-rect.top))}px`;}
-        for(const id of ['park-sign','park-banner']) this.court.querySelector(`[data-landmark-id="${id}"]`)?.setAttribute('visibility','hidden');
+        this.court.querySelector('[data-landmark-id="park-banner"]')?.setAttribute('visibility','hidden');
     }
 
     setupResponsiveProjection() {
