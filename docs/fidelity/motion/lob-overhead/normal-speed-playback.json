@@ -1,0 +1,100 @@
+{
+  "viewport": [
+    402,
+    874
+  ],
+  "dpr": 3,
+  "scenario": "lob-overhead",
+  "environment": "Playwright Chromium viewport emulation; normal 1× clock; pointer scrub, not physical iPhone touch. Named scenarios load controlled catalog fixtures; starter uses normal startup.",
+  "events": [
+    {
+      "wallSeconds": 1.006,
+      "action": "Fresh launch paused",
+      "time": 0,
+      "iteration": 0,
+      "playing": false,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 2.559,
+      "action": "Play at 1×",
+      "time": 0.23679999999403936,
+      "iteration": 0,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 7.288,
+      "action": "Two complete normal-speed repetitions, including final holds",
+      "time": 0.013299999994039134,
+      "iteration": 2,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 8.787,
+      "action": "Pause in flight",
+      "time": 1.3126999999940387,
+      "iteration": 2,
+      "playing": false,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 9.808,
+      "action": "Resume from paused sample",
+      "time": 1.3126999999940387,
+      "iteration": 2,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 12.17,
+      "action": "Scrub freezes poses while Pause remains available",
+      "time": 1.01710583333333,
+      "iteration": 2,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 12.175,
+      "action": "Release resumes at chosen position",
+      "time": 1.01710583333333,
+      "iteration": 2,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 12.97,
+      "action": "Select exact second shot chapter while playing",
+      "time": 0.9284000000000001,
+      "iteration": 2,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 13.634,
+      "action": "Switch to 2D with shared active session",
+      "time": 1.4784000000000002,
+      "iteration": 2,
+      "playing": true,
+      "view": "2d"
+    },
+    {
+      "wallSeconds": 15.743,
+      "action": "Return to 3D with shared active session",
+      "time": 1.218267999988078,
+      "iteration": 3,
+      "playing": true,
+      "view": "3d"
+    },
+    {
+      "wallSeconds": 18.622,
+      "action": "Final explicit Pause",
+      "time": 1.439667999988077,
+      "iteration": 4,
+      "playing": false,
+      "view": "3d"
+    }
+  ],
+  "errors": []
+}

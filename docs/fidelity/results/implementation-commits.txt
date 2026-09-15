@@ -1,0 +1,39 @@
+a2a3018 Keep historical QA labels compatible with the brand gate
+102c778 Preserve visual baseline and define the combined gauntlet gates
+98d443c world: deepen authored park materials and scenery
+2411d92 interface: add Park Desk hierarchy and shot surfaces
+4fc3195 robustness: cancel placement when panels open
+4c8da18 Harden interrupted gesture ownership
+1762074 Guard stale actor load failures
+967b272 Record first visual challenge and expand matched performance evidence
+83f39db world: strengthen park scale and natural silhouettes
+0a03c7d Tighten evidence scope and extend native transition probe
+6ccd8de Preserve crisp artwork on 3x displays
+c4eb1aa Regress Help shot authority handoff
+19bde3c interface: add focused shot routes and compact phone chrome
+acd4765 robustness: reconcile live shot before Help
+1ae2ba3 test: cover dense chapters and builder hotspots
+fd95686 Publish paused chapter before Help handoff
+55cd519 Restore useful phone seeking and collapsible court space
+eadd6bc Follow visible builder navigation in browser QA
+c9fa42a Keep enlarged chapters reachable and link validation to authored pins
+a970faf Wait for real builder startup readiness
+2f9b00a Continue the park across wide 2D court gutters
+fa9adb3 Expose pending save state in persistent status
+a492d28 Follow single court switch in pause QA
+3a73d25 Stop reduced-motion transitions from leaving stale canvas dimensions
+d5cf0e7 interface: refine authored shot choices
+2bc1924 fix: keep save indicators synchronized while editing
+7c5f7fa Keep chapter context and enlarged editing text legible
+981ef59 Verify exact drawing buffer dimensions during recovery
+53f8192 Open Coach Tools idempotently in browser QA
+2dc5ce6 Version the local candidate cache and test stabilized-engine upgrades
+c4ad3f3 Pin the local robustness and fidelity review runtime
+9ba16ce Pin expanded browser catalog without widening WebKit exceptions
+7be0c58 Keep short-screen menu actions clear of playback
+1d2e4cd Pin the final menu correction and 310-case browser catalog
+9024bfc Keep enlarged controls readable and complete intent tab keyboard access
+933eee3 Pin accessible local candidate and exact 311-case catalog
+dd113ca Document original art provenance and record named rally scenarios
+ba5c5bb Verify upgrades from the already installed local fidelity preview
+836fadb Measure matched desktop and high-density phone workloads

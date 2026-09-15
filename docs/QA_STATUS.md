@@ -1,5 +1,8 @@
 # Beta stabilization status
 
+Current local follow-up: [robustness and visual fidelity report](fidelity/REPORT.md). The figures below describe the earlier stabilization checkpoint.
+
+
 Starting checkpoint: `d66934838a742f126cf9650b2459a5420ea917b8`, verified clean on `integration/pixel-game-shot-timeline`. The local review candidate is on `integration/beta-stabilization`. No push, remote preview replacement, merge, deployment, or hosting changes are authorized.
 
 ## Test program

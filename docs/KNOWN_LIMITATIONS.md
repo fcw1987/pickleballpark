@@ -1,11 +1,11 @@
 # Known limitations
 
-See [the current combined gauntlet](fidelity/GAUNTLET_STATUS.md) for active acceptance work. [QA_STATUS.md](QA_STATUS.md) and [the stabilization report](BETA_STABILIZATION_REPORT.md) record the preceding checkpoint.
+See [the combined candidate report](fidelity/REPORT.md) and [findings ledger](fidelity/GAUNTLET_STATUS.md) for this mission’s results. [QA_STATUS.md](QA_STATUS.md) and [the stabilization report](BETA_STABILIZATION_REPORT.md) record the preceding checkpoint.
 
 ## Historical Safari risk
 
-- **BETA-001:** the historical native Safari blank 3D court after Help has not recurred, including on the final v22 package. Its original cause remains unproved. The separately reproduced parked-context-loss blank is fixed and passes native Safari recovery. The robustness and visual fidelity assignment supersedes the earlier historical-cause hold: its gate requires no reproducible current native Safari blank, while preserving this risk honestly. The new combined candidate still requires native retesting; this is not a claim that the historical cause was fixed.
-- All seven confirmed product defects in the preceding beta campaign were corrected at checkpoint `1375835`. New gauntlet findings and corrective review remain active in the current ledger.
+- **BETA-001:** the historical native Safari blank 3D court after Help has not recurred, including on the final v22 package. Its original cause remains unproved. The separately reproduced parked-context-loss blank is fixed and passes native Safari recovery. The robustness and visual fidelity assignment supersedes the earlier historical-cause hold: its gate requires no reproducible current native Safari blank, while preserving this risk honestly. The final combined candidate still requires native retesting: desktop-control access repeatedly failed before Safari app selection with a native pipe startup error. Early mission cycles passed, but are not final-runtime acceptance. This is not a claim that the historical cause was fixed.
+- All seven confirmed product defects in the preceding beta campaign were corrected at checkpoint `1375835`. The combined mission also corrected its 18 tracked finding groups; the final native access limitation remains explicit.
 
 ## Test environment
 
@@ -18,4 +18,5 @@ See [the current combined gauntlet](fidelity/GAUNTLET_STATUS.md) for active acce
 - Retained intermediate movement waypoints require explicit destination-only acknowledgement; those paths are preserved but not animated.
 - Dedicated speedup/block semantics beyond existing family mappings, Erne/ATP, spin control, scoring, poach/stacking strategy simulation, measured biomechanics and inferred outcomes are outside current scope. See the future capability list in [SCENARIO_CATALOG.md](SCENARIO_CATALOG.md).
 - At the checkpoint, camera is inside Playback options and Save As immediately creates a named copy. The current interface mission reviews their discoverability while preserving both capabilities.
-- A transient drawing-buffer/CSS-size lag during resize was observed without blank rendering. It remains an unconfirmed low-severity observation; no speculative runtime patch was made.
+- The combined mission reproduced a persistent reduced-motion drawing-buffer mismatch and corrected the CSS transition mechanism with exact-buffer regressions. This does not establish the historical Safari blank cause.
+- At 320px, advanced panels occupy most of the viewport and require scrolling. Target labels can crowd nearby athletes; Help is long, and wide grass is deliberately quiet. These bounded visual limitations remain for later refinement.

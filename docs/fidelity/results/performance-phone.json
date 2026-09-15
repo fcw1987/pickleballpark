@@ -1,0 +1,1307 @@
+{
+  "measuredAt": "2026-09-15T05:06:41.972Z",
+  "browser": "Playwright Chromium 149.0.7827.55",
+  "host": {
+    "platform": "darwin",
+    "release": "27.0.0",
+    "arch": "arm64",
+    "cpu": "Apple M3 Max"
+  },
+  "conditions": {
+    "context": "fresh isolated context per run; service workers blocked; local static servers",
+    "viewport": [
+      390,
+      844
+    ],
+    "deviceScaleFactor": 3,
+    "runs": 3,
+    "workload": "3, 8 and 64 shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs, 30 details open-close/layout pairs and 50 saves per size; 120 settled renderer samples per rally; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining 64 shots",
+    "limitations": "CPU-side performance.now/action timing and automation callback cadence. Renderer calls measure CPU command submission, not GPU completion. Results do not measure displayed FPS or physical-device performance."
+  },
+  "records": [
+    {
+      "target": "before",
+      "url": "http://127.0.0.1:4190/",
+      "run": 1,
+      "builderReadyMs": 86.41979199999997,
+      "first3DReadyMs": 135.28449999999998,
+      "initial": {
+        "appReadyAtMs": 876.5999999940395,
+        "navigation": 70.7999999821186,
+        "resourceCount": 91,
+        "encodedBytes": 1614592,
+        "decodedBytes": 1614592,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "rendererMemory": {
+          "geometries": 43,
+          "textures": 17
+        },
+        "drawCalls": 53,
+        "triangles": 8822,
+        "drawingBuffer": [
+          756,
+          1378
+        ],
+        "pixelRatio": 2
+      },
+      "tasks": {
+        "byShots": [
+          {
+            "shots": 3,
+            "duration": 3.715794582293717,
+            "compileMs": {
+              "count": 160,
+              "median": 0,
+              "p95": 0.20000001788139343,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 3.600000023841858,
+            "targetEditMs": {
+              "count": 20,
+              "median": 1.9000000059604645,
+              "p95": 3.899999976158142,
+              "max": 3.899999976158142
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.7999999821186066,
+              "max": 1.399999976158142
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.4000000059604645
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.19999998807907104,
+              "max": 0.20000001788139343
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 2.199999988079071,
+              "max": 2.300000011920929
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.3999999761581421,
+              "p95": 0.699999988079071,
+              "max": 0.800000011920929
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          },
+          {
+            "shots": 8,
+            "duration": 11.761477066244838,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.29999998211860657
+            },
+            "compileInstallSaveMs": 3.699999988079071,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.5999999940395355,
+              "p95": 3.100000023841858,
+              "max": 3.100000023841858
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.699999988079071,
+              "max": 0.8999999761581421
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.30000001192092896
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 1.2000000178813934,
+              "max": 1.2999999821186066
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5999999940395355
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          },
+          {
+            "shots": 64,
+            "duration": 94.40602106727792,
+            "compileMs": {
+              "count": 80,
+              "median": 0.699999988079071,
+              "p95": 0.800000011920929,
+              "max": 1
+            },
+            "compileInstallSaveMs": 8,
+            "targetEditMs": {
+              "count": 20,
+              "median": 6.0999999940395355,
+              "p95": 8,
+              "max": 8
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.800000011920929,
+              "p95": 1.0999999940395355,
+              "max": 5.5
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0.09999999403953552,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.5,
+              "p95": 0.9000000059604645,
+              "max": 1
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5999999940395355,
+              "p95": 0.7000000178813934,
+              "max": 2.0999999940395355
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.6000000238418579
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          }
+        ],
+        "viewLoops": {
+          "enter2DMs": {
+            "count": 10,
+            "median": 2.9000000059604645,
+            "p95": 3.0999999940395355,
+            "max": 3.0999999940395355
+          },
+          "enterWarm3DMs": {
+            "count": 10,
+            "median": 25.69999998807907,
+            "p95": 27.299999982118607,
+            "max": 27.299999982118607
+          }
+        },
+        "pausedRAF": {
+          "callbacks": 60,
+          "elapsedMs": 492.09999999403954,
+          "applicationRenderCalls": 0
+        },
+        "finalResources": {
+          "memory": {
+            "geometries": 43,
+            "textures": 18
+          },
+          "drawCalls": 57,
+          "triangles": 8830,
+          "canvases": 1,
+          "pendingRender": false
+        }
+      },
+      "reloadMs": [
+        99.78958299999977,
+        744.5917499999996,
+        743.8007500000003
+      ]
+    },
+    {
+      "target": "before",
+      "url": "http://127.0.0.1:4190/",
+      "run": 2,
+      "builderReadyMs": 83.09512499999983,
+      "first3DReadyMs": 128.4437080000007,
+      "initial": {
+        "appReadyAtMs": 792.8999999761581,
+        "navigation": 67.19999998807907,
+        "resourceCount": 91,
+        "encodedBytes": 1614592,
+        "decodedBytes": 1614592,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "rendererMemory": {
+          "geometries": 43,
+          "textures": 17
+        },
+        "drawCalls": 53,
+        "triangles": 8822,
+        "drawingBuffer": [
+          756,
+          1378
+        ],
+        "pixelRatio": 2
+      },
+      "tasks": {
+        "byShots": [
+          {
+            "shots": 3,
+            "duration": 3.715794582293717,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.10000002384185791,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 3.5,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2,
+              "p95": 3.0999999940395355,
+              "max": 3.0999999940395355
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.800000011920929,
+              "max": 1.5
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.19999998807907104
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.19999998807907104,
+              "max": 0.20000001788139343
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 1.5,
+              "max": 2.2999999821186066
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.699999988079071,
+              "max": 2.5
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          },
+          {
+            "shots": 8,
+            "duration": 11.761477066244838,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.4000000059604645
+            },
+            "compileInstallSaveMs": 3.899999976158142,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.699999988079071,
+              "p95": 3.5,
+              "max": 3.5
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.7000000178813934,
+              "max": 1.199999988079071
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.29999998211860657
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.4000000059604645,
+              "p95": 1.399999976158142,
+              "max": 1.600000023841858
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5999999940395355
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          },
+          {
+            "shots": 64,
+            "duration": 94.40602106727792,
+            "compileMs": {
+              "count": 80,
+              "median": 0.699999988079071,
+              "p95": 0.800000011920929,
+              "max": 0.9000000059604645
+            },
+            "compileInstallSaveMs": 7.4000000059604645,
+            "targetEditMs": {
+              "count": 20,
+              "median": 6.199999988079071,
+              "p95": 7.700000017881393,
+              "max": 7.700000017881393
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.800000011920929,
+              "p95": 1.100000023841858,
+              "max": 4.199999988079071
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.5,
+              "p95": 0.9000000059604645,
+              "max": 1.0999999940395355
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5999999940395355,
+              "p95": 0.699999988079071,
+              "max": 1.699999988079071
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5999999940395355
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          }
+        ],
+        "viewLoops": {
+          "enter2DMs": {
+            "count": 10,
+            "median": 2.5,
+            "p95": 2.699999988079071,
+            "max": 2.699999988079071
+          },
+          "enterWarm3DMs": {
+            "count": 10,
+            "median": 22.30000001192093,
+            "p95": 22.69999998807907,
+            "max": 22.69999998807907
+          }
+        },
+        "pausedRAF": {
+          "callbacks": 60,
+          "elapsedMs": 500.30000001192093,
+          "applicationRenderCalls": 0
+        },
+        "finalResources": {
+          "memory": {
+            "geometries": 43,
+            "textures": 18
+          },
+          "drawCalls": 57,
+          "triangles": 8830,
+          "canvases": 1,
+          "pendingRender": false
+        }
+      },
+      "reloadMs": [
+        100.67983300000196,
+        746.0883749999994,
+        746.0568749999984
+      ]
+    },
+    {
+      "target": "before",
+      "url": "http://127.0.0.1:4190/",
+      "run": 3,
+      "builderReadyMs": 80.39695799999754,
+      "first3DReadyMs": 127.89400000000023,
+      "initial": {
+        "appReadyAtMs": 797.5,
+        "navigation": 66,
+        "resourceCount": 91,
+        "encodedBytes": 1614592,
+        "decodedBytes": 1614592,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "rendererMemory": {
+          "geometries": 43,
+          "textures": 17
+        },
+        "drawCalls": 53,
+        "triangles": 8822,
+        "drawingBuffer": [
+          756,
+          1378
+        ],
+        "pixelRatio": 2
+      },
+      "tasks": {
+        "byShots": [
+          {
+            "shots": 3,
+            "duration": 3.715794582293717,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.19999998807907104,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 3.7000000178813934,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2,
+              "p95": 3.2999999821186066,
+              "max": 3.2999999821186066
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.7000000178813934,
+              "max": 1.399999976158142
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0.09999999403953552,
+              "max": 0.30000001192092896
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.20000001788139343
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 2.5999999940395355,
+              "max": 2.699999988079071
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.699999988079071,
+              "max": 0.9000000059604645
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          },
+          {
+            "shots": 8,
+            "duration": 11.761477066244838,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 3.7999999821186066,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.300000011920929,
+              "p95": 3.100000023841858,
+              "max": 3.100000023841858
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.6000000238418579,
+              "max": 0.7999999821186066
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.09999999403953552
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.30000001192092896
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 1.0999999940395355,
+              "max": 1.800000011920929
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          },
+          {
+            "shots": 64,
+            "duration": 94.40602106727792,
+            "compileMs": {
+              "count": 80,
+              "median": 0.6000000238418579,
+              "p95": 0.800000011920929,
+              "max": 0.9000000059604645
+            },
+            "compileInstallSaveMs": 7.199999988079071,
+            "targetEditMs": {
+              "count": 20,
+              "median": 6.299999982118607,
+              "p95": 8,
+              "max": 8
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.800000011920929,
+              "p95": 1.4000000059604645,
+              "max": 4
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.09999999403953552
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.5,
+              "p95": 0.9000000059604645,
+              "max": 0.9000000059604645
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.7999999821186066,
+              "max": 1.9000000059604645
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.6000000238418579
+            },
+            "renderedSamples": 120,
+            "drawCalls": 57,
+            "triangles": 8830
+          }
+        ],
+        "viewLoops": {
+          "enter2DMs": {
+            "count": 10,
+            "median": 2.4000000059604645,
+            "p95": 2.699999988079071,
+            "max": 2.699999988079071
+          },
+          "enterWarm3DMs": {
+            "count": 10,
+            "median": 21.30000001192093,
+            "p95": 21.900000005960464,
+            "max": 21.900000005960464
+          }
+        },
+        "pausedRAF": {
+          "callbacks": 60,
+          "elapsedMs": 494.59999999403954,
+          "applicationRenderCalls": 0
+        },
+        "finalResources": {
+          "memory": {
+            "geometries": 43,
+            "textures": 18
+          },
+          "drawCalls": 57,
+          "triangles": 8830,
+          "canvases": 1,
+          "pendingRender": false
+        }
+      },
+      "reloadMs": [
+        105.13179200000013,
+        753.8644580000037,
+        746.4824579999986
+      ]
+    },
+    {
+      "target": "candidate",
+      "url": "http://127.0.0.1:4184/",
+      "run": 1,
+      "builderReadyMs": 85.499917000001,
+      "first3DReadyMs": 157.43137500000012,
+      "initial": {
+        "appReadyAtMs": 842.2000000178814,
+        "navigation": 70.40000000596046,
+        "resourceCount": 92,
+        "encodedBytes": 1655680,
+        "decodedBytes": 1655680,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "rendererMemory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "drawCalls": 54,
+        "triangles": 8824,
+        "drawingBuffer": [
+          1134,
+          1902
+        ],
+        "pixelRatio": 3
+      },
+      "tasks": {
+        "byShots": [
+          {
+            "shots": 3,
+            "duration": 3.715794582293717,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.19999998807907104,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 4.299999982118607,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.100000023841858,
+              "p95": 3.7000000178813934,
+              "max": 3.7000000178813934
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.699999988079071,
+              "max": 1.5999999940395355
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0.09999999403953552,
+              "max": 0.19999998807907104
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.20000001788139343
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.800000011920929,
+              "max": 7
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.699999988079071,
+              "max": 0.7999999821186066
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          },
+          {
+            "shots": 8,
+            "duration": 11.761477066244838,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.29999998211860657
+            },
+            "compileInstallSaveMs": 3.9000000059604645,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.4000000059604645,
+              "p95": 3,
+              "max": 3
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.800000011920929,
+              "max": 3.800000011920929
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.19999998807907104,
+              "p95": 0.30000001192092896,
+              "max": 0.5
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.6000000238418579,
+              "max": 1.4000000059604645
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          },
+          {
+            "shots": 64,
+            "duration": 94.40602106727792,
+            "compileMs": {
+              "count": 80,
+              "median": 0.699999988079071,
+              "p95": 0.9000000059604645,
+              "max": 1.0999999940395355
+            },
+            "compileInstallSaveMs": 7.199999988079071,
+            "targetEditMs": {
+              "count": 20,
+              "median": 6.300000011920929,
+              "p95": 11.299999982118607,
+              "max": 11.299999982118607
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.800000011920929,
+              "p95": 1,
+              "max": 1.199999988079071
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.5,
+              "p95": 0.5999999940395355,
+              "max": 0.9000000059604645
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5999999940395355,
+              "p95": 0.7000000178813934,
+              "max": 2
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 1.4000000059604645
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          }
+        ],
+        "viewLoops": {
+          "enter2DMs": {
+            "count": 10,
+            "median": 2.800000011920929,
+            "p95": 3.5,
+            "max": 3.5
+          },
+          "enterWarm3DMs": {
+            "count": 10,
+            "median": 41.5,
+            "p95": 47.29999998211861,
+            "max": 47.29999998211861
+          }
+        },
+        "pausedRAF": {
+          "callbacks": 60,
+          "elapsedMs": 498.7999999821186,
+          "applicationRenderCalls": 0
+        },
+        "finalResources": {
+          "memory": {
+            "geometries": 44,
+            "textures": 18
+          },
+          "drawCalls": 58,
+          "triangles": 8832,
+          "canvases": 1,
+          "pendingRender": false
+        }
+      },
+      "reloadMs": [
+        143.46575000000303,
+        800.9412089999969,
+        790.0668749999968
+      ]
+    },
+    {
+      "target": "candidate",
+      "url": "http://127.0.0.1:4184/",
+      "run": 2,
+      "builderReadyMs": 85.26941700000316,
+      "first3DReadyMs": 149.67166700000234,
+      "initial": {
+        "appReadyAtMs": 841.1999999880791,
+        "navigation": 71,
+        "resourceCount": 92,
+        "encodedBytes": 1655680,
+        "decodedBytes": 1655680,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "rendererMemory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "drawCalls": 54,
+        "triangles": 8824,
+        "drawingBuffer": [
+          1134,
+          1902
+        ],
+        "pixelRatio": 3
+      },
+      "tasks": {
+        "byShots": [
+          {
+            "shots": 3,
+            "duration": 3.715794582293717,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.19999998807907104,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 4,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.0999999940395355,
+              "p95": 3.699999988079071,
+              "max": 3.699999988079071
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.7000000178813934,
+              "max": 1.4000000059604645
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0.09999999403953552,
+              "max": 0.29999998211860657
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.29999998211860657
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.9000000059604645,
+              "max": 7.199999988079071
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.699999988079071,
+              "max": 1.100000023841858
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          },
+          {
+            "shots": 8,
+            "duration": 11.761477066244838,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 3.800000011920929,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.4000000059604645,
+              "p95": 3.0999999940395355,
+              "max": 3.0999999940395355
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.9000000059604645,
+              "max": 3.9000000059604645
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.19999998807907104,
+              "p95": 0.30000001192092896,
+              "max": 0.5
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.5999999940395355,
+              "max": 1.5999999940395355
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.699999988079071
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          },
+          {
+            "shots": 64,
+            "duration": 94.40602106727792,
+            "compileMs": {
+              "count": 80,
+              "median": 0.699999988079071,
+              "p95": 0.9000000059604645,
+              "max": 1.0999999940395355
+            },
+            "compileInstallSaveMs": 7.0999999940395355,
+            "targetEditMs": {
+              "count": 20,
+              "median": 6.200000017881393,
+              "p95": 12.600000023841858,
+              "max": 12.600000023841858
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.800000011920929,
+              "p95": 1.0999999940395355,
+              "max": 1.2000000178813934
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.5,
+              "p95": 0.6000000238418579,
+              "max": 1
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5999999940395355,
+              "p95": 0.7000000178813934,
+              "max": 2
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5999999940395355
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          }
+        ],
+        "viewLoops": {
+          "enter2DMs": {
+            "count": 10,
+            "median": 2.7000000178813934,
+            "p95": 3.5,
+            "max": 3.5
+          },
+          "enterWarm3DMs": {
+            "count": 10,
+            "median": 42,
+            "p95": 48.30000001192093,
+            "max": 48.30000001192093
+          }
+        },
+        "pausedRAF": {
+          "callbacks": 60,
+          "elapsedMs": 497.90000000596046,
+          "applicationRenderCalls": 0
+        },
+        "finalResources": {
+          "memory": {
+            "geometries": 44,
+            "textures": 18
+          },
+          "drawCalls": 58,
+          "triangles": 8832,
+          "canvases": 1,
+          "pendingRender": false
+        }
+      },
+      "reloadMs": [
+        141.45333400000527,
+        788.3224159999954,
+        793.4978750000009
+      ]
+    },
+    {
+      "target": "candidate",
+      "url": "http://127.0.0.1:4184/",
+      "run": 3,
+      "builderReadyMs": 84.21908399999666,
+      "first3DReadyMs": 150.7264589999977,
+      "initial": {
+        "appReadyAtMs": 838.8000000119209,
+        "navigation": 71,
+        "resourceCount": 92,
+        "encodedBytes": 1655680,
+        "decodedBytes": 1655680,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "rendererMemory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "drawCalls": 54,
+        "triangles": 8824,
+        "drawingBuffer": [
+          1134,
+          1902
+        ],
+        "pixelRatio": 3
+      },
+      "tasks": {
+        "byShots": [
+          {
+            "shots": 3,
+            "duration": 3.715794582293717,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.10000002384185791,
+              "max": 0.29999998211860657
+            },
+            "compileInstallSaveMs": 4.0999999940395355,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.2000000178813934,
+              "p95": 3.5,
+              "max": 3.5
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 0.7000000178813934,
+              "max": 1.5
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0.09999999403953552,
+              "max": 0.30000001192092896
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.09999999403953552,
+              "p95": 0.19999998807907104,
+              "max": 0.4000000059604645
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.800000011920929,
+              "max": 6.9000000059604645
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.699999988079071,
+              "max": 0.800000011920929
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          },
+          {
+            "shots": 8,
+            "duration": 11.761477066244838,
+            "compileMs": {
+              "count": 160,
+              "median": 0.09999999403953552,
+              "p95": 0.20000001788139343,
+              "max": 0.30000001192092896
+            },
+            "compileInstallSaveMs": 4.9000000059604645,
+            "targetEditMs": {
+              "count": 20,
+              "median": 2.5,
+              "p95": 3.199999988079071,
+              "max": 3.199999988079071
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.5,
+              "p95": 1,
+              "max": 3.699999988079071
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.19999998807907104,
+              "p95": 0.29999998211860657,
+              "max": 0.30000001192092896
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5,
+              "p95": 0.5,
+              "max": 1.5999999940395355
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.699999988079071
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          },
+          {
+            "shots": 64,
+            "duration": 94.40602106727792,
+            "compileMs": {
+              "count": 80,
+              "median": 0.699999988079071,
+              "p95": 1,
+              "max": 1.2000000178813934
+            },
+            "compileInstallSaveMs": 7.5,
+            "targetEditMs": {
+              "count": 20,
+              "median": 6.300000011920929,
+              "p95": 10.5,
+              "max": 10.5
+            },
+            "seekMs": {
+              "count": 100,
+              "median": 0.8999999761581421,
+              "p95": 1.0999999940395355,
+              "max": 2.199999988079071
+            },
+            "menuOpenCloseMs": {
+              "count": 100,
+              "median": 0,
+              "p95": 0.09999999403953552,
+              "max": 0.10000002384185791
+            },
+            "saveMs": {
+              "count": 50,
+              "median": 0.5,
+              "p95": 0.6000000238418579,
+              "max": 1
+            },
+            "detailsOpenCloseLayoutMs": {
+              "count": 30,
+              "median": 0.5999999940395355,
+              "p95": 0.800000011920929,
+              "max": 1.9000000059604645
+            },
+            "rendererCpuSubmissionMs": {
+              "count": 120,
+              "median": 0.4000000059604645,
+              "p95": 0.5,
+              "max": 0.5999999940395355
+            },
+            "renderedSamples": 120,
+            "drawCalls": 58,
+            "triangles": 8832
+          }
+        ],
+        "viewLoops": {
+          "enter2DMs": {
+            "count": 10,
+            "median": 2.5999999940395355,
+            "p95": 2.9000000059604645,
+            "max": 2.9000000059604645
+          },
+          "enterWarm3DMs": {
+            "count": 10,
+            "median": 40.30000001192093,
+            "p95": 41.69999998807907,
+            "max": 41.69999998807907
+          }
+        },
+        "pausedRAF": {
+          "callbacks": 60,
+          "elapsedMs": 493.69999998807907,
+          "applicationRenderCalls": 0
+        },
+        "finalResources": {
+          "memory": {
+            "geometries": 44,
+            "textures": 18
+          },
+          "drawCalls": 58,
+          "triangles": 8832,
+          "canvases": 1,
+          "pendingRender": false
+        }
+      },
+      "reloadMs": [
+        133.78870900000038,
+        787.5748750000057,
+        789.8219579999859
+      ]
+    }
+  ]
+}
