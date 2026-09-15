@@ -14,7 +14,7 @@ globalThis.PICKLEBOARD_VISUAL = Object.freeze({
     night: '#202f3c', nightPanel: '#2c4050', nightText: '#efe9d4'
   }),
   sprite: Object.freeze({ width: 64, height: 64, anchorX: 32, anchorY: 54, worldWidth: 16 / 3, worldHeight: 16 / 3 }),
-  render: Object.freeze({ pixelScale: 1, maxPixelRatio: 2 })
+  render: Object.freeze({ pixelScale: 1, maxPixelRatio: 3 })
 });
 if (typeof document !== 'undefined') {
   for (const [name, value] of Object.entries(globalThis.PICKLEBOARD_VISUAL.palette)) {
