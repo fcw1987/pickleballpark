@@ -1,9 +1,5 @@
 export async function settleBuilderStartup(page) {
-  await page.waitForFunction(() => Boolean(window.playBuilder));
-  await page.evaluate(async () => {
-    if (playBuilder.busy) await playBuilder.switchView('2d');
-  });
-  await page.waitForFunction(() => !playBuilder.busy);
+  await page.waitForFunction(() => Boolean(window.playBuilder && !playBuilder.busy));
 }
 
 export async function openBuilderMainMenu(page) {

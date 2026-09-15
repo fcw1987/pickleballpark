@@ -1,5 +1,5 @@
 import{test,expect}from'@playwright/test';
-const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder);await page.evaluate(async()=>{if(playBuilder.busy)await playBuilder.switchView('2d');});await page.waitForFunction(()=>!playBuilder.busy);};
+const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);};
 const menu=async page=>{const details=page.locator('.builder-main-menu');const summary=details.locator(':scope > summary');if(!(await details.evaluate(node=>node.open)))await summary.click();return summary;};
 const fileMenu=async page=>{await menu(page);const details=page.locator('.builder-document-menu');if(!(await details.evaluate(node=>node.open)))await page.getByLabel('Play file',{exact:true}).click();};
 const namePlay=async(page,value)=>{await fileMenu(page);await page.getByLabel('Play title').fill(value);await page.getByLabel('Play title').press('Tab');};
