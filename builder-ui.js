@@ -99,6 +99,21 @@ function findingText(item, shots) {
   return `${index>=0?`Shot ${index+1} · `:''}${kind}: ${message}${correction}`;
 }
 
+// Navigation only: follow the last authored movement command for the named
+// player before the blocked contact. The compiler remains the lock authority.
+function findingPinSource(item, shots) {
+  const player = /\bplayer[1-4]\b/.exec(item.message || '')?.[0];
+  const affected = shots.findIndex(shot => shot.id === (item.shotId || item.stepId));
+  if (!player || affected < 1 || !item.message?.includes('is pinned at')) return null;
+  let source = null;
+  for (let index = 0; index < affected; index++) {
+    const shot = shots[index];
+    const command = shot.playerMovement?.[player] || (shot.hitter === player ? shot.movement : null);
+    if (command) source = command.pinned ? { shotId: shot.id, number: index + 1, player } : null;
+  }
+  return source;
+}
+
 export function mountBuilderUI({ onAction = () => {} } = {}) {
   const root = el('section', 'builder-ui');
   root.setAttribute('aria-label', 'Build a Play');
@@ -228,7 +243,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
 
     const mainMenu = el('details', 'builder-menu builder-main-menu'); mainMenu.open=mainMenuOpen;
     const menuSummary=el('summary');menuSummary.setAttribute('aria-label','Menu');
-    const menuIcon=el('span','','☰');menuIcon.setAttribute('aria-hidden','true');
+    const menuIcon=el('span','builder-menu-icon','☰');menuIcon.setAttribute('aria-hidden','true');
     menuSummary.append(menuIcon,el('span','builder-menu-word','Menu'));mainMenu.append(menuSummary);
     const menuPanel = el('div', 'builder-menu-panel');
     const menuHeading = el('div', 'builder-menu-heading'); menuHeading.append(el('span', 'builder-park-mark', '◆'), el('strong', '', 'Pickleball Park'));
@@ -286,7 +301,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     context.append(editButton, addButton);
     const viewToggle = el('div', 'builder-view-toggle'); viewToggle.setAttribute('role', 'group'); viewToggle.setAttribute('aria-label', 'Court view');
     const nextView = current.view === '3d' ? '2d' : '3d';
-    const viewButton = button(nextView.toUpperCase(), 'view', 'builder-view-button is-selected'); viewButton.dataset.view = nextView; viewButton.setAttribute('aria-label', `Switch to ${nextView.toUpperCase()} court view`); viewButton.title = `Switch to ${nextView.toUpperCase()} court view`; viewButton.setAttribute('aria-pressed', 'false'); viewToggle.appendChild(viewButton);
+    const viewButton = button(nextView.toUpperCase(), 'view', 'builder-view-button'); viewButton.dataset.view = nextView; viewButton.setAttribute('aria-label', `Switch to ${nextView.toUpperCase()} court view`); viewButton.title = `Switch to ${nextView.toUpperCase()} court view`; viewToggle.appendChild(viewButton);
     context.append(viewToggle); meta.appendChild(context);
     if (current.waypointPolicy?.requiresConfirmation) {
       const affected = (current.waypointPolicy.affected || []).map(item => `${item.number ? `Shot ${item.number}` : item.shotId || 'Shot'}${item.player ? ` · ${PLAYERS.find(([id])=>id===item.player)?.[1] || item.player}` : ''}`).join(', ');
@@ -372,10 +387,17 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
           const item = typeof f === 'string' ? { message: f } : f;
           const row = el('div', 'builder-finding-row');
           row.dataset.kind = item.kind || 'review';
-          const label = { rule: 'Rule issue', feasibility: 'Reachability', tactical: 'Coaching note', unsupported: 'Preview limit' }[item.kind] || 'Review';
+          const label = { rule: 'Rule issue', feasibility: 'Movement or flight limit', tactical: 'Coaching note', unsupported: 'Preview limit' }[item.kind] || 'Review';
           row.append(el('span', 'builder-finding-kind', label), el('p', '', findingText(item, shots)));
           const affectedId = item.shotId || item.stepId;
           if (affectedId) { const index = shots.findIndex(shot => shot.id === affectedId); const go = button(`Review ${index >= 0 ? `Shot ${index + 1}` : 'shot'}`, 'finding-shot', 'builder-button builder-button-quiet'); go.dataset.shotId = affectedId; go.setAttribute('aria-label', `Edit affected ${index >= 0 ? `Shot ${index + 1}` : 'shot'}`); row.appendChild(go); }
+          const pinSource = findingPinSource(item, shots);
+          if (pinSource) {
+            const playerLabel = PLAYERS.find(([id]) => id === pinSource.player)?.[1];
+            const editPin = button(`Edit ${playerLabel} pin · Shot ${pinSource.number}`, 'finding-pin', 'builder-button builder-button-quiet');
+            editPin.dataset.shotId = pinSource.shotId; editPin.dataset.player = pinSource.player;
+            row.appendChild(editPin);
+          }
           find.appendChild(row);
         });
         inspector.appendChild(find);
@@ -446,6 +468,16 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'dialog-close') { closeDialog(templateDialog); closeDialog(importDialog); }
     else if (action === 'review-findings') { fire('pauseForEditing'); if (target.dataset.shotId) rerenderAction('selectShot', target.dataset.shotId); inspectorManualCollapsed=false;render({});root.querySelector('.builder-findings')?.scrollIntoView({block:'nearest'}); }
     else if (action === 'finding-shot') { fire('pauseForEditing'); inspectorManualCollapsed=false; userInspectorExpanded=true; current.movementPlayer=null; rerenderAction('selectShot', target.dataset.shotId); }
+    else if (action === 'finding-pin') {
+      await fire('pauseForEditing');
+      inspectorManualCollapsed = false; userInspectorExpanded = true;
+      detailGroup = 'movement'; shotDetailsOpen = true; current.movementPlayer = target.dataset.player;
+      await rerenderAction('selectShot', target.dataset.shotId);
+      const details = root.querySelector('.builder-shot-details'); if (details) details.open = true;
+      renderedDocument = null; render({});
+      root.querySelector('.builder-group-movement')?.scrollIntoView({ block: 'nearest' });
+      root.querySelector('[data-action="edit-movement.pinned"]')?.focus({ preventScroll: true });
+    }
     else if (action === 'cancel-target') rerenderAction('cancelTarget');
     else if (action === 'cancel-movement') rerenderAction('cancelMovement');
     else if (action === 'place-target') { fire('pauseForEditing'); inspectorManualCollapsed = true; userInspectorExpanded = null; rerenderAction('placeTarget', { shotId: current.selectedShotId });root.querySelector('[data-action=cancel-target]')?.focus({preventScroll:true}); }

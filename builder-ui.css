@@ -238,6 +238,8 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
   box-shadow: inset 2px 2px 0 color-mix(in srgb, var(--game-paper) 75%, transparent), 2px 2px 0 var(--game-ink);
 }
 .builder-main-menu > summary { min-width: 5.3rem; }
+.builder-context-actions .builder-button-primary { color: var(--game-filled-ink); background: var(--game-green); }
+.builder-context-actions .builder-button-primary:hover { color: var(--game-ink); background: var(--game-highlight); }
 .builder-save-pill {
   align-self: center;
   display: inline-flex;
@@ -272,10 +274,10 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 .builder-shot-card-description { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--game-ink); font: 700 .82rem/1.15 ui-sans-serif, system-ui, sans-serif; }
 .builder-shot-card-flight { color: var(--game-muted); font: 700 .68rem/1.15 ui-monospace, Menlo, monospace; white-space: nowrap; }
 .builder-cue { display: flex; align-items: center; min-width: 0; gap: 4px; }
-.builder-shot-card .builder-chapter-menu { position: relative; flex: 0 0 auto; min-width: 0; }
+.builder-shot-card .builder-chapter-menu { position: static; flex: 0 0 auto; min-width: 0; }
 .builder-shot-card .builder-chapter-menu > summary { max-width: 9rem; min-height: 38px; padding: 8px 6px; color: var(--game-muted); font-size: .7rem; }
 .builder-shot-card .builder-chapter-menu > summary::before { color: var(--game-accent); }
-.builder-shot-card .builder-chapter-list { left: auto; right: 0; top: calc(100% + 7px); }
+.builder-shot-card .builder-chapter-list { left: 4px; right: auto; top: calc(100% + 7px); }
 .builder-context-actions { flex: 0 0 auto; }
 
 .builder-menu-panel {
@@ -375,7 +377,7 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 @media (max-width: 430px) {
   .builder-shot-card { min-width: 3.5rem; }
   .builder-context-actions .builder-button[data-action="add-shot"] { width: 44px; min-width: 44px; padding-inline: 4px; font-size: .72rem; }
-  .builder-context-actions .builder-button[data-action="collapse-inspector"] { width: 51px; min-width: 51px; padding-inline: 4px; font-size: .72rem; }
+  .builder-context-actions .builder-button[data-action="collapse-inspector"] { width: 44px; min-width: 44px; padding-inline: 4px; font-size: .72rem; }
 }
 @media (max-width: 360px) {
   .builder-main-menu > summary { width: 52px; min-width: 52px; padding-inline: 5px; }

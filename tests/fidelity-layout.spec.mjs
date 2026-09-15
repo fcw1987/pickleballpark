@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { copyScenarioDocument } from './fixtures/qa-scenarios.mjs';
 
 test('compact history leaves a full-width, touch-sized seek surface', async ({ page }) => {
   for (const [width, height] of [[320, 568], [390, 844], [430, 932]]) {
@@ -18,6 +19,38 @@ test('compact history leaves a full-width, touch-sized seek surface', async ({ p
     await range.focus(); await range.press('End');
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
   }
+});
+
+test('landscape chapter list stays inside the viewport with enlarged text', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto('/');
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  await page.addStyleTag({ content: 'html { font-size: 200%; }' });
+  await page.getByLabel('Choose shot chapter', { exact: true }).click();
+  const box = await page.locator('.builder-chapter-list').boundingBox();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(844);
+  expect(box.y + box.height).toBeLessThanOrEqual(390);
+  await page.getByRole('button', { name: 'Edit Shot 2', exact: true }).click();
+  await expect(page.getByLabel('Shot family', { exact: true })).toHaveValue('return');
+});
+
+test('blocked contact offers the earlier pin without changing authored intent', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  await page.evaluate(document => playBuilder.loadDocument(document), copyScenarioDocument('infeasible-pin'));
+  const original = await page.evaluate(() => ({ document: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }));
+  await page.getByRole('button', { name: 'Shot 3 needs attention', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit Green 1 pin · Shot 1', exact: true }).click();
+  await expect(page.getByLabel('Moving player', { exact: true })).toHaveValue('player1');
+  await expect(page.getByLabel('Pin movement target', { exact: true })).toBeChecked();
+  await expect.poll(() => page.evaluate(() => playBuilder.selectedShotId)).toBe('pin-1');
+  expect(await page.evaluate(() => ({ document: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }))).toEqual(original);
+  await page.getByLabel('Pin movement target', { exact: true }).uncheck();
+  await expect.poll(() => page.evaluate(() => playBuilder.document.shots[0].movement.pinned)).toBe(false);
+  await page.getByRole('button', { name: 'Undo authored edit', exact: true }).click();
+  expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(original.document);
 });
 
 test('wide court reclaims the editor column when details close', async ({ page }) => {
