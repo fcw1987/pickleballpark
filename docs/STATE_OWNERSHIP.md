@@ -27,3 +27,18 @@ The apparent duplicates that must remain are renderer mirrors of the compiled ti
 The gauntlet found unsafe duplication in gesture presentation rather than the engine contracts. Timeline navigation could leave Builder placement state authoritative after the visible shot changed. Planner touch handlers could replace an existing token or drawing owner, and a replaced drawing path could remain visible without entering `drawingPaths` or a captured Planner snapshot. The bounded corrections make interruption release the old owner and preserve one coherent authored/captured state.
 
 Two limitations remain explicit. LocalStorage provides atomic value writes but no multi-key or cross-tab transaction spanning read/compare/write; per-document conflict detection prevents ordinary stale overwrite but cannot claim database transaction isolation. Service-worker lifecycle status is browser-owned and logged rather than presented as an application update workflow.
+
+## Smart Rally continuation
+
+Smart Add, Random Rally and Coach add **proposal work**, not a second document or clock. The synchronous compiler still installs one effective rally, including enabled assistance. Proposal construction evaluates detached copies and cooperatively yields between bounded attempts.
+
+| Concern | Owner | Acceptance rule |
+| --- | --- | --- |
+| Pending proposal | `PlayBuilder.proposalGeneration`, `proposalController`, `sourceIntent` and canonical `documentSourceIdentity` | An edit, new source choice or cancellation invalidates the old operation. The generation and source identity must both match immediately before applying. |
+| Rapid Add queue | `PlayBuilder.addQueue` and `pendingAddCount` | Each queued request reads the latest completed revision, preserves the prefix and makes at most one history commit. An old queue cannot resume after its generation is cancelled. |
+| Coach options | `PlayBuilder.coachCandidates`, keyed by evaluated candidate identity and source revision | Displayed descriptions are projections. Apply retrieves the original evaluated candidate, verifies source ownership and full downstream validity, then creates one Undo step. Protected changes require explicit option selection. |
+| Random Rally replacement | Builder source transaction | Preserve the old draft first; create a new identity only after exact-length validation succeeds and the request is still current. Cancel and failures keep the current source. |
+| Running build | Startup snapshot of embedded build metadata | A separate no-store Server build query is diagnostic data. Neither response nor failure replaces the Running build, document, history or session. |
+| Family picker | UI presentation state, never a recipe copy | A completed selection closes the picker explicitly. An old native disclosure `open` value cannot reopen it during rerender. |
+
+An independent delayed-renderer test confirmed the existing return-to-Planner source-intent guard: an older saved-play Open cannot overwrite the newer workspace choice. No new controller ownership mechanism was needed.
