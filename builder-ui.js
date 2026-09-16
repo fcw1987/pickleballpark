@@ -172,6 +172,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   let pendingField = false;
   let exportedBackup = '';
   let timelineControl = null;
+  let placementWasActive = false;
   const templateDialog = el('dialog', 'builder-dialog');
   const importDialog = el('dialog', 'builder-dialog');
   const randomDialog = el('dialog', 'builder-dialog builder-random-dialog');
@@ -237,6 +238,13 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   function render(state = {}) {
     if (destroyed) return;
     current = { ...current, ...state, document: state.document || current.document };
+    const placementActive = Boolean(current.targetPlacement || current.movementPlacement);
+    const placementJustFinished = placementWasActive && !placementActive;
+    placementWasActive = placementActive;
+    if (placementJustFinished) {
+      inspectorManualCollapsed = false;
+      userInspectorExpanded = true;
+    }
     root.classList.toggle('builder-placing',Boolean(current.targetPlacement||current.movementPlacement));
     const doc = current.document || { title: 'Build a Play', shots: [], players: {}, assistance: {} };
     const labels = getPlayerLabels(doc);
@@ -315,7 +323,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const documentMenu = el('details', 'builder-document-menu'); documentMenu.open = documentMenuOpen;
     const documentSummary = el('summary', 'builder-menu-submenu-summary', 'Manage plays'); documentSummary.setAttribute('aria-label', 'Manage plays'); documentMenu.append(documentSummary);
     const playGroup = el('div', 'builder-menu-group'); playGroup.append(el('h3', '', 'Your plays'), titleField, rename, button('My Plays', 'open', 'builder-menu-item builder-button'), button('Save As', 'save-as', 'builder-menu-item builder-button'));
-    playGroup.append(button('Import / Export', 'import-export', 'builder-menu-item builder-button'), button('Copy diagnostics', 'buildDiagnostics', 'builder-menu-item builder-button builder-appearance-toggle'));
+    playGroup.append(button('Import / Export', 'import-export', 'builder-menu-item builder-button'), button('Build diagnostics', 'buildDiagnostics', 'builder-menu-item builder-button builder-appearance-toggle'));
     documentMenu.append(playGroup);
     const learnGroup = el('div', 'builder-menu-group'); learnGroup.append(el('h3', '', 'Practice'), button('Learn', 'templates', 'builder-menu-item builder-button'), button('Random Rally', 'random', 'builder-menu-item builder-button'), button(current.workspace === 'planner' ? 'Return to builder' : 'Court Planner', current.workspace === 'planner' ? 'workspace-builder' : 'workspace-planner', 'builder-menu-item builder-button'));
     const toolsGroup = el('div', 'builder-menu-group');
@@ -524,7 +532,9 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     }
     timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
-    if(focusIdentity && document.activeElement===document.body){
+    if(placementJustFinished){
+      root.querySelector('.builder-inspector [data-action="collapse-inspector"]')?.focus({preventScroll:true});
+    } else if(focusIdentity && document.activeElement===document.body){
       const next=[...root.querySelectorAll('[data-action],[aria-label]')].find(n=>focusIdentity.shotId?n.dataset.shotId===focusIdentity.shotId:focusIdentity.action?n.dataset.action===focusIdentity.action:n.getAttribute('aria-label')===focusIdentity.label);
       if(next?.getClientRects().length)next.focus({preventScroll:true});
     }
@@ -597,7 +607,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       inspectorManualCollapsed=!opening;userInspectorExpanded=opening;
       if(opening){await fire('pauseForEditing');const liveShotId=current.currentShotId||current.selectedShotId;if(liveShotId&&liveShotId!==current.selectedShotId)await fire('selectShot',{id:liveShotId,preserveTime:true});}
       render({});
-      root.querySelector(opening?'[data-action="edit-family"]':'.builder-context-actions [data-action="collapse-inspector"]')?.focus({preventScroll:true});
+      root.querySelector(opening?'.builder-inspector [data-action="collapse-inspector"]':'.builder-context-actions [data-action="collapse-inspector"]')?.focus({preventScroll:true});
     }
     else if (action === 'play-pause') { inspectorManualCollapsed = true; userInspectorExpanded = null; await rerenderAction('playPause',{playing:target.getAttribute('aria-pressed')!=='true'});await syncViewingShot(); }
     else if (action === 'restart' || action === 'previous' || action === 'next' || action === 'undo' || action === 'redo' || action === 'save-as' || action === 'use-planner') rerenderAction(({ 'save-as': 'saveAs', 'use-planner': 'usePlanner' }[action] || action));
@@ -605,7 +615,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'open') openTemplateDialog('library');
     else if (action === 'import-export') openImportDialog();
     else if (action === 'random') openRandomDialog();
-    else if (action === 'random-rally') { const count = Number(randomDialog.querySelector('[data-action="random-count"]')?.value); const seed = randomDialog.querySelector('[data-action="random-seed"]')?.value.trim() || undefined; if (!Number.isInteger(count) || count < 1 || count > UI_MAX_SHOTS) { const field = randomDialog.querySelector('[data-action="random-count"]'); if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); } return; } const result = await rerenderAction('randomRally', { count, ...(seed ? { seed } : {}) }); if (!result || result.ok !== false) closeDialog(randomDialog); }
+    else if (action === 'random-rally') { const count = Number(randomDialog.querySelector('[data-action="random-count"]')?.value); const seed = randomDialog.querySelector('[data-action="random-seed"]')?.value.trim() || undefined; if (!Number.isInteger(count) || count < 1 || count > UI_MAX_SHOTS) { const field = randomDialog.querySelector('[data-action="random-count"]'); if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); } return; } const result = await rerenderAction('randomRally', { count, ...(seed ? { seed } : {}) }); if (!result || result.ok !== false) closeDialog(randomDialog); else { const status = randomDialog.querySelector('.builder-proposal-status'); if (status) { status.textContent = result.error || 'Rally generation could not complete. Your current play was kept.'; status.setAttribute('role', 'alert'); status.setAttribute('aria-live', 'assertive'); } } }
     else if (action === 'cancel-proposal') { closeDialog(randomDialog); rerenderAction('cancelProposal'); }
     else if (action === 'import-json') { const area = importDialog.querySelector('textarea'); const result = await rerenderAction('import', area?.value || ''); if (!result || result.ok !== false) { importFileGeneration += 1; closeDialog(importDialog); } else { const status = importDialog.querySelector('.builder-import-status') || el('p', 'builder-import-status'); status.textContent = result.error || 'Import could not be completed. Check the JSON and try again.'; importDialog.insertBefore(status, importDialog.querySelector('.builder-dialog-actions')); } }
     else if (action === 'export') rerenderAction('export');
