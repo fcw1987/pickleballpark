@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { authorizeProposal, documentSourceIdentity, evaluateFullCandidate } from '../rally-proposals.js';
+import { authorizeProposal, documentSourceIdentity, evaluateFullCandidate, proposalChanges } from '../rally-proposals.js';
 import { proposeCoachFix, proposeCoachOptions } from '../rally-coach.js';
 import {
   automaticRepairScenario,
   laterBreakScenario,
+  noFeasibleScenario,
   protectedPinScenario,
   validScenario
 } from './fixtures/smart-coach-scenarios.mjs';
@@ -13,7 +14,7 @@ import {
 const clone = value => structuredClone(value);
 
 test('Coach repairs an automatic derived movement through the complete downstream rally', async () => {
-  const source = automaticRepairScenario();
+  const source = await automaticRepairScenario();
   const before = clone(source);
   const proposal = await proposeCoachFix(source);
 
@@ -23,9 +24,9 @@ test('Coach repairs an automatic derived movement through the complete downstrea
   assert.equal(proposal.operation, 'coach-fix');
   assert.equal(proposal.document.shots.length, source.shots.length);
   assert.equal(evaluateFullCandidate(proposal.document).ok, true);
-  assert.equal(proposal.document.shots[0].playerMovement.player2.intent, 'hold');
+  assert.equal(proposal.document.shots[2].movement.intent, 'advance');
   assert.deepEqual(source, before, 'Coach evaluates a copy and leaves source intent untouched');
-  assert.deepEqual(proposal.changes.map(change => change.path), ['shots[0].playerMovement']);
+  assert.deepEqual(proposal.changes.map(change => change.path), ['shots[2].movement']);
   assert.equal(proposal.changes[0].ownership, 'automatic');
 });
 
@@ -51,6 +52,19 @@ test('Coach never silently releases a protected pin and offers only evaluated co
   assert.deepEqual(source, before, 'Showing options does not mutate the protected draft');
 });
 
+test('Broad generated metadata cannot authorize an explicit manual destination', async () => {
+  const source = validScenario();
+  source.shots[0].authoring = {
+    ownership: 'automatic',
+    fields: ['movement', 'target', 'arc', 'pace', 'hitter', 'receiver', 'family', 'playerMovement']
+  };
+  source.shots[0].playerMovement = { player2: { intent: 'manual', pinned: false, target: { x: 0, y: 44 } } };
+  const fix = await proposeCoachFix(source);
+  assert.equal(fix.ok, false);
+  const options = await proposeCoachOptions(source);
+  assert.ok(options.some(option => option.requiresConsent && option.changes.some(change => change.path === 'shots[0].playerMovement')));
+});
+
 test('Coach evaluates the entire downstream candidate and rejects a repair that leaves a later pin broken', async () => {
   const source = laterBreakScenario();
   const proposal = await proposeCoachFix(source);
@@ -73,7 +87,7 @@ test('Coach distinguishes a valid or tactical draft from a repairable issue', as
 });
 
 test('Coach cancellation is bounded and never returns a partial candidate', async () => {
-  const source = automaticRepairScenario();
+  const source = await automaticRepairScenario();
   const signal = AbortSignal.abort();
   const fix = await proposeCoachFix(source, { signal });
   assert.equal(fix.ok, false);
@@ -85,7 +99,7 @@ test('Coach cancellation is bounded and never returns a partial candidate', asyn
 });
 
 test('Coach proposal source identity makes a later application stale', async () => {
-  const source = automaticRepairScenario();
+  const source = await automaticRepairScenario();
   const proposal = await proposeCoachFix(source);
   assert.equal(proposal.ok, true);
   const newer = clone(source);
@@ -96,11 +110,31 @@ test('Coach proposal source identity makes a later application stale', async () 
 });
 
 test('Coach proposal survives JSON round trip with concrete changes and full validity', async () => {
-  const source = automaticRepairScenario();
+  const source = await automaticRepairScenario();
   const proposal = await proposeCoachFix(source);
   const roundTrip = JSON.parse(JSON.stringify(proposal));
   assert.equal(roundTrip.sourceIdentity, proposal.sourceIdentity);
   assert.deepEqual(roundTrip.changes, proposal.changes);
   assert.equal(evaluateFullCandidate(roundTrip.document).ok, true);
   assert.equal(roundTrip.requiresConsent, false);
+});
+
+test('Coach reports a genuine no-feasible-search case with protected locks intact', async () => {
+  const source = noFeasibleScenario();
+  const before = clone(source);
+  const [fix, options] = await Promise.all([proposeCoachFix(source), proposeCoachOptions(source)]);
+  assert.equal(fix.ok, false);
+  assert.match(fix.reason, /could not find an automatic repair|Protected/);
+  assert.deepEqual([...options], []);
+  assert.match(options.reason, /No evaluated Coach option resolves|cannot reach|pinned/);
+  assert.deepEqual(source, before);
+});
+
+test('Coach marks a combined automatic and initial-layout candidate as consented', async () => {
+  const source = await automaticRepairScenario();
+  const candidate = clone(source);
+  candidate.initialLayout.player1 = { ...candidate.initialLayout.player1, x: candidate.initialLayout.player1.x + 1 };
+  const changes = proposalChanges(source, candidate);
+  assert.ok(changes.some(change => change.path === 'initialLayout.player1.x'));
+  assert.equal(changes.find(change => change.path === 'initialLayout.player1.x').ownership, 'authored');
 });

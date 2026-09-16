@@ -66,14 +66,34 @@ export function proposalChanges(before, after) {
     const left = beforeShots[index], right = afterShots[index];
     for (const key of new Set([...Object.keys(left), ...Object.keys(right)])) {
       if (JSON.stringify(left[key]) !== JSON.stringify(right[key])) {
-        changes.push({ path: `shots[${index}].${key}`, before: clone(left[key]), after: clone(right[key]), ownership: fieldOwnership(before, `shots[${index}].${key}`) });
+        changes.push({ path: `shots[${index}].${key}`, shotId: left.id || right.id || null, before: clone(left[key]), after: clone(right[key]), ownership: fieldOwnership(before, `shots[${index}].${key}`) });
       }
     }
   }
   if (afterShots.length > beforeShots.length) {
     for (let index = beforeShots.length; index < afterShots.length; index += 1) {
-      changes.push({ path: `shots[${index}]`, before: undefined, after: clone(afterShots[index]), ownership: 'automatic' });
+      changes.push({ path: `shots[${index}]`, shotId: afterShots[index]?.id || null, before: undefined, after: clone(afterShots[index]), ownership: 'automatic' });
     }
+  }
+
+  // Coach proposals can include an evaluated initial-layout alternative. The
+  // old diff only inspected shots, which could hide that protected change and
+  // incorrectly classify a combined candidate as automatic. Diff root objects
+  // recursively so every concrete before/after value is reviewable.
+  const walk = (left, right, path) => {
+    if (JSON.stringify(left) === JSON.stringify(right)) return;
+    const leftObject = left && typeof left === 'object' && !Array.isArray(left);
+    const rightObject = right && typeof right === 'object' && !Array.isArray(right);
+    if (leftObject && rightObject) {
+      for (const key of new Set([...Object.keys(left), ...Object.keys(right)])) {
+        walk(left[key], right[key], `${path}.${key}`);
+      }
+      return;
+    }
+    changes.push({ path, before: clone(left), after: clone(right), ownership: fieldOwnership(before, path) });
+  };
+  for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
+    if (key !== 'shots') walk(before[key], after[key], key);
   }
   return changes;
 }

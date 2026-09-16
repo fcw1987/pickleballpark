@@ -74,8 +74,16 @@ function focusIndex(source, evaluation) {
   return Math.min(source.shots?.length || 1, Math.max(0, evaluation.validShotCount || 0));
 }
 
-function hasWaypoints(shot) {
-  return Array.isArray(shot?.movement?.waypoints) && shot.movement.waypoints.length > 0;
+function hasWaypoints(movement) {
+  return Array.isArray(movement?.waypoints) && movement.waypoints.length > 0;
+}
+
+function shotHasWaypoints(shot) {
+  return hasWaypoints(shot?.movement) || Object.values(shot?.playerMovement || {}).some(hasWaypoints);
+}
+
+function hasAuthoredMovementChoice(movement) {
+  return Boolean(movement?.pinned || movement?.intent === 'manual' || movement?.target || hasWaypoints(movement));
 }
 
 function isAutomatic(source, index, field) {
@@ -113,7 +121,9 @@ function automaticDescriptors(source, focus) {
   for (let index = 0; index < source.shots.length; index += 1) {
     const shot = source.shots[index];
     const distance = indexDistance(index, focus);
-    if (isAutomatic(source, index, 'movement') && !shot.movement.pinned && !hasWaypoints(shot)) {
+    // Automatic provenance never grants permission to erase a manual target,
+    // pin, or waypoint. Those are authored movement choices.
+    if (isAutomatic(source, index, 'movement') && !hasAuthoredMovementChoice(shot.movement)) {
       const intents = ['hold', 'recover', 'advance'].filter(intent => intent !== shot.movement.intent);
       for (const intent of intents) descriptors.push({
         path: `shots[${index}].movement`, index, field: 'movement', distance,
@@ -122,7 +132,7 @@ function automaticDescriptors(source, focus) {
       });
     }
     if (isAutomatic(source, index, 'playerMovement') && shot.playerMovement &&
-        !Object.values(shot.playerMovement).some(movement => movement?.pinned || hasWaypoints({ movement }))) {
+        !Object.values(shot.playerMovement).some(hasAuthoredMovementChoice)) {
       const held = Object.fromEntries(Object.entries(shot.playerMovement).map(([player, movement]) => [
         player, movementValue(movement, 'hold')
       ]));
@@ -132,15 +142,9 @@ function automaticDescriptors(source, focus) {
         apply(candidate) { candidate.shots[index].playerMovement = clone(held); }
       });
     }
-    for (const [field, values] of [['arc', ARCS], ['pace', PACES]]) {
-      if (!isAutomatic(source, index, field)) continue;
-      for (const value of enumNeighbors(shot[field], values)) descriptors.push({
-        path: `shots[${index}].${field}`, index, field, distance,
-        label: `adjusted automatic ${field} on Shot ${index + 1}`,
-        delta: 1,
-        apply(candidate) { candidate.shots[index][field] = value; }
-      });
-    }
+    // Flight settings are always explicit Coach consent points. A generated
+    // source may carry automatic provenance for them, but that must not permit
+    // a silent arc or pace rewrite.
     if (shot.receiver === 'auto' && isAutomatic(source, index, 'receiver')) {
       const nextHitter = source.shots[index + 1]?.hitter;
       const eligible = teamPlayers(source, opposite(source.players[shot.hitter]?.team));
@@ -169,12 +173,11 @@ function protectedDescriptors(source, focus) {
   const descriptors = [];
   for (let index = 0; index < source.shots.length; index += 1) {
     const shot = source.shots[index], distance = indexDistance(index, focus);
-    if (hasWaypoints(shot)) continue;
     const movement = shot.movement;
-    if (movement?.pinned || movement?.intent === 'manual') {
+    if (movement?.pinned || movement?.intent === 'manual' || movement?.target || hasWaypoints(movement)) {
       descriptors.push({
         path: `shots[${index}].movement`, index, field: 'movement', distance, protected: true,
-        label: `released the protected movement pin on Shot ${index + 1}`,
+        label: `released the protected movement choice on Shot ${index + 1}`,
         consentReason: 'This proposal changes an authored movement or pin.',
         apply(candidate) { candidate.shots[index].movement = movementValue(movement, 'recover', { release: true }); }
       });
@@ -185,15 +188,36 @@ function protectedDescriptors(source, focus) {
         apply(candidate) { candidate.shots[index].movement = { ...clone(movement), target }; }
       });
     }
+    for (const [player, playerMovement] of Object.entries(shot.playerMovement || {})) {
+      if (!hasAuthoredMovementChoice(playerMovement)) continue;
+      const path = `shots[${index}].playerMovement`;
+      descriptors.push({
+        path, index, field: 'playerMovement', distance, protected: true,
+        label: `released the protected movement choice for ${player} on Shot ${index + 1}`,
+        consentReason: 'This proposal changes an authored partner movement or destination.',
+        apply(candidate) {
+          const next = { ...clone(playerMovement), intent: 'hold', pinned: false };
+          delete next.target;
+          candidate.shots[index].playerMovement = { ...candidate.shots[index].playerMovement, [player]: next };
+        }
+      });
+      if (playerMovement.target && !hasWaypoints(playerMovement)) for (const target of pointVariants(playerMovement.target).slice(0, 4)) descriptors.push({
+        path, index, field: 'playerMovement', distance, protected: true,
+        label: `moved the protected partner destination for ${player} on Shot ${index + 1}`,
+        consentReason: 'This proposal changes an authored partner movement destination.',
+        apply(candidate) {
+          candidate.shots[index].playerMovement = { ...candidate.shots[index].playerMovement, [player]: { ...clone(playerMovement), target } };
+        }
+      });
+    }
     if (shot.target) for (const target of pointVariants(shot.target).slice(0, 4)) descriptors.push({
       path: `shots[${index}].target`, index, field: 'target', distance, protected: true,
       label: `moved the authored ball target on Shot ${index + 1}`,
       consentReason: 'This proposal changes an authored ball target.',
       apply(candidate) { candidate.shots[index].target = target; }
     });
-    for (const value of enumNeighbors(shot.arc, ARCS).concat(enumNeighbors(shot.pace, PACES))) {
-      const field = ARCS.includes(value) ? 'arc' : 'pace';
-      descriptors.push({
+    for (const [field, values] of [['arc', ARCS], ['pace', PACES]]) {
+      for (const value of enumNeighbors(shot[field], values)) descriptors.push({
         path: `shots[${index}].${field}`, index, field, distance, protected: true,
         label: `changed the authored ${field} on Shot ${index + 1}`,
         consentReason: 'This proposal changes an authored flight setting.',
@@ -251,12 +275,13 @@ function automaticChangeAllowed(source, change) {
   const match = /^shots\[(\d+)\]\.([^.]+)$/.exec(change.path || '');
   if (!match) return false;
   const index = Number(match[1]), field = match[2], shot = source.shots?.[index];
-  if (!shot || hasWaypoints(shot)) return false;
-  if (field === 'movement') return isAutomatic(source, index, field) && !shot.movement.pinned;
+  if (!shot || shotHasWaypoints(shot)) return false;
+  if (field === 'movement') return isAutomatic(source, index, field) && !hasAuthoredMovementChoice(shot.movement);
   if (field === 'playerMovement') return isAutomatic(source, index, field) &&
-    !Object.values(shot.playerMovement || {}).some(movement => movement?.pinned || hasWaypoints({ movement }));
+    !Object.values(shot.playerMovement || {}).some(hasAuthoredMovementChoice);
   if (field === 'receiver') return isAutomatic(source, index, field) && shot.receiver === 'auto';
-  if (field === 'arc' || field === 'pace') return isAutomatic(source, index, field);
+  // Arc and pace are authored flight choices even when a generator marks
+  // their provenance automatic.
   return false;
 }
 
@@ -301,7 +326,7 @@ function uniquePush(target, identities, proposal) {
 async function search(source, descriptors, { signal, limit, operation, focus, protectedOnly = false } = {}) {
   const proposals = [], identities = new Set(), seen = new Set();
   let evaluations = 0;
-  const maxEvaluations = protectedOnly ? COACH_LIMITS.maxOptionCandidates * 3 : COACH_LIMITS.maxAutomaticCandidates * 2;
+  const maxEvaluations = protectedOnly ? COACH_LIMITS.maxOptionCandidates : COACH_LIMITS.maxAutomaticCandidates;
   const tryCandidate = async (selected) => {
     if (evaluations >= maxEvaluations) return;
     await yieldIfNeeded(evaluations++, signal);
@@ -315,7 +340,11 @@ async function search(source, descriptors, { signal, limit, operation, focus, pr
     if (!protectedOnly && selected.every(item => item.protected)) return;
     const evaluation = sourceEvaluation(candidate);
     if (!evaluation.ok || evaluation.validShotCount !== candidate.shots.length) return;
-    uniquePush(proposals, identities, concreteProposal(source, candidate, selected, evaluation, { operation, focus }));
+    const proposal = concreteProposal(source, candidate, selected, evaluation, { operation, focus });
+    // Fix for me is strictly automatic. Keep this guard beside candidate
+    // acceptance so a future descriptor cannot smuggle consent into the API.
+    if (!protectedOnly && proposal.requiresConsent) return;
+    uniquePush(proposals, identities, proposal);
   };
   for (const descriptor of descriptors) {
     if (proposals.length >= limit || evaluations >= maxEvaluations) break;

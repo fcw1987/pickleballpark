@@ -1,4 +1,5 @@
 import { createStarterDocument } from '../../play-document.js';
+import { proposeRandomRally } from '../../smart-rally-generator.js';
 
 const clone = value => structuredClone(value);
 
@@ -36,16 +37,17 @@ function threeShot(document, third = {}) {
   return document;
 }
 
-// A deliberately unreachable partner movement is automatically owned and
-// unpinned. Holding that partner at the existing production position fixes the
-// whole document without touching ball intent or any authored identity.
-export function automaticRepairScenario() {
-  return threeShot(midrally('coach-automatic-repair'), {
-    first: {
-      playerMovement: { player2: { intent: 'manual', pinned: false, target: { x: 0, y: 44 } } },
-      authoring: { ownership: 'automatic', fields: ['playerMovement'] }
-    }
-  });
+// Start with a real generated rally, then make the kind of direct target edit
+// a normal authoring session permits. Coach must preserve that explicit target
+// and repair only a derived recovery movement downstream.
+export async function automaticRepairScenario() {
+  const generated = await proposeRandomRally({ length: 6, seed: 1 });
+  if (!generated.ok) throw new Error(generated.reason);
+  const document = clone(generated.document);
+  document.id = 'coach-generated-target-edit';
+  document.title = 'Coach generated target edit';
+  document.shots[1].target = { x: 20, y: 0 };
+  return document;
 }
 
 // The pin is authored. Releasing or moving it can be shown only as a consented
@@ -75,7 +77,18 @@ export function laterBreakScenario() {
 }
 
 export function noFeasibleScenario() {
-  return protectedPinScenario();
+  const document = threeShot(midrally('coach-no-feasible'), {
+    first: {
+      movement: { intent: 'manual', pinned: true, target: { x: 0, y: 0 } },
+      playerMovement: { player2: { intent: 'manual', pinned: true, target: { x: 0, y: 44 } } },
+      authoring: { ownership: 'automatic', fields: ['playerMovement'] }
+    },
+    second: { movement: { intent: 'manual', pinned: true, target: { x: 20, y: 44 } } },
+    third: { movement: { intent: 'manual', pinned: true, target: { x: 0, y: 0 } } }
+  });
+  // Every feasible alternative would require releasing several authored
+  // locks; the bounded one/two-change option search must report no solution.
+  return document;
 }
 
 export function validScenario() {
