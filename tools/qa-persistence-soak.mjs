@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { DraftStore, EditHistory, MAX_JSON_BYTES, STORAGE_KEY } from '../builder-storage.js';
-import { createStarterDocument, validateDocument } from '../play-document.js';
+import { createStarterDocument, validateDocument, MAX_SHOTS } from '../play-document.js';
 
 class MemoryStorage {
   constructor() { this.values = new Map(); }
@@ -55,7 +55,7 @@ function mutate(document, random, step) {
       break;
     }
     case 10:
-      if (next.shots.length < 64) {
+      if (next.shots.length < MAX_SHOTS) {
         const added = copy(next.shots.at(-1));
         added.id = `soak-${step}-${Math.floor(random() * 1e9)}`;
         next.shots.push(added);

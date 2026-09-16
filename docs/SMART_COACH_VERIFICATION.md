@@ -12,9 +12,9 @@ The caller should pass a proposal through the root application guard immediately
 
 ## Regression fixtures
 
-The independent unit suite uses production generated data and the real compiler/evaluator:
+The independent unit suite uses stable authored fixtures and the real compiler/evaluator:
 
-- `automaticRepairScenario` starts with a real six-hit seeded Random Rally, then applies a direct target edit. Coach preserves that explicit target and changes only a downstream derived recovery movement, validating the complete rally.
+- `automaticRepairScenario` stores a six-hit generated document with a direct target edit as a fixed fixture. It is deliberately not regenerated after generator improvements. Coach preserves that explicit target and changes Shot 4's downstream derived recovery movement, validating the complete rally. Current generated outputs have separate positive corpus checks.
 - `protectedPinScenario` gives Shot 1 an authored pin that blocks Shot 3. Fix for me declines it; Show options includes an evaluated pin release that requires consent.
 - `laterBreakScenario` combines an automatic first error with a later authored pin. A candidate that fixes only the first prefix is rejected because the full rally remains invalid.
 - `noFeasibleScenario` uses several protected locks and confirms that the bounded search reports no evaluated repair while preserving the draft.
