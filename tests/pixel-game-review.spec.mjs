@@ -21,7 +21,7 @@ test('the resting pixel game keeps the court and one transport usable in both th
       await openBuilder(page);
       if (await page.locator('body').getAttribute('data-theme') !== theme) {
         await page.locator('.builder-main-menu > summary').click();
-        await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+        await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/, exact: false }).click();
       }
       await expect(page.locator('body')).toHaveAttribute('data-theme', theme);
       await expect(page.locator('[data-action="play-pause"]')).toHaveCount(1);
@@ -55,12 +55,12 @@ test('the resting pixel game keeps the court and one transport usable in both th
   }
 });
 
-test('all 64 authored shots stay reachable without becoming 64 permanent labels', async ({ page }, testInfo) => {
+test('all 99 authored shots stay reachable without becoming 99 permanent labels', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 402, height: 874 });
   await openBuilder(page);
   await page.evaluate(async () => {
     const source = structuredClone(playBuilder.document);
-    while (source.shots.length < 64) {
+    while (source.shots.length < 99) {
       const shot = structuredClone(source.shots.at(-1));
       shot.id = `review-shot-${source.shots.length + 1}`;
       source.shots.push(shot);
@@ -69,20 +69,20 @@ test('all 64 authored shots stay reachable without becoming 64 permanent labels'
   });
   await page.getByLabel('Choose shot chapter', { exact: true }).click();
   const list = page.locator('.builder-chapter-list');
-  await expect(list.locator('.builder-chapter-row')).toHaveCount(64);
-  await expect(list.getByRole('button', { name: /^Edit Shot / })).toHaveCount(64);
+  await expect(list.locator('.builder-chapter-row')).toHaveCount(99);
+  await expect(list.getByRole('button', { name: /^Customize Shot / })).toHaveCount(99);
   await expect(page.getByRole('button', { name: 'Add shot', exact: true })).toBeDisabled();
   expect(await list.evaluate(node => node.scrollHeight)).toBeGreaterThan(await list.evaluate(node => node.clientHeight));
   expect((await rect(page, '.builder-chapter-list')).right).toBeLessThanOrEqual(402);
-  await list.getByRole('button', { name: 'Edit Shot 64', exact: true }).scrollIntoViewIfNeeded();
-  await list.getByRole('button', { name: 'Edit Shot 64', exact: true }).press('Enter');
+  await list.getByRole('button', { name: 'Customize Shot 99', exact: true }).scrollIntoViewIfNeeded();
+  await list.getByRole('button', { name: 'Customize Shot 99', exact: true }).press('Enter');
   const selection = await page.evaluate(() => ({ selected: playBuilder.selectedShotId,
     current: document.querySelector('.shot-timeline-marker.is-current')?.dataset.shotId,
     first: playBuilder.chapters[0].shotId, playing: playBuilder.session.playing }));
-  expect(selection).toMatchObject({ selected: 'review-shot-64', playing: false });
+  expect(selection).toMatchObject({ selected: 'review-shot-99', playing: false });
   expect(selection.current).toBe(selection.first);
   await expect(page.locator('.builder-inspector')).not.toHaveClass(/builder-inspector-collapsed/);
-  await testInfo.attach('dense-64-shot-picker', { body: await page.screenshot(), contentType: 'image/png' });
+  await testInfo.attach('dense-99-shot-picker', { body: await page.screenshot(), contentType: 'image/png' });
 });
 
 test('normal-motion playback, Pause, chapter seek, and ready view switching share one sample', async ({ page }, testInfo) => {
@@ -117,7 +117,7 @@ test('keyboard authoring retains typed data and returns focus to a useful editin
   await openBuilder(page);
   await page.locator('.builder-main-menu > summary').focus();
   await page.keyboard.press('Enter');
-  await page.getByLabel('Play file', { exact: true }).click();
+  await page.getByLabel('Manage plays', { exact: true }).click();
   const rename = page.getByRole('button', { name: 'Rename play', exact: true });
   await rename.focus();
   await page.keyboard.press('Enter');
@@ -134,11 +134,11 @@ test('keyboard authoring retains typed data and returns focus to a useful editin
 
   await page.getByLabel('Choose shot chapter', { exact: true }).focus();
   await page.keyboard.press('Enter');
-  const edit = page.getByRole('button', { name: 'Edit Shot 2', exact: true });
+  const edit = page.getByRole('button', { name: 'Customize Shot 2', exact: true });
   await edit.focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('.builder-inspector')).not.toHaveClass(/builder-inspector-collapsed/);
-  await expect(page.locator('.builder-inspector').getByLabel('Shot family', { exact: true })).toBeFocused();
+  await expect(page.getByRole('button',{name:'Close editor',exact:true})).toBeFocused();
 
   await page.reload();
   await settleBuilderStartup(page);

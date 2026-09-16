@@ -195,7 +195,7 @@ export function extendedInvalidDocuments() {
     validationMutation('too-many-annotations', document => { document.annotations = Array.from({ length: 65 }, () => ({})); }),
     validationMutation('serve-method-on-drive', document => { document.shots[0].serveMethod = 'volley'; }),
     validationMutation('too-many-shots', document => {
-      document.shots = Array.from({ length: 65 }, (_, index) => ({
+      document.shots = Array.from({ length: 100 }, (_, index) => ({
         ...clone(document.shots[index % document.shots.length]), id: `too-many-${index}`
       }));
     })

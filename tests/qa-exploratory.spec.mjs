@@ -71,10 +71,10 @@ test('Menu Help and Appearance are discoverable and Help traps focus', async ({ 
 
   await openMenu(page);
   const before = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  await page.getByRole('button', { name: 'Appearance' }).click();
+  await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/ }).click();
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).not.toBe(before);
   await openMenu(page);
-  await page.getByRole('button', { name: 'Appearance' }).click();
+  await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/ }).click();
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe(before);
 });
 
@@ -134,8 +134,8 @@ test('selected edit panel scrolls, rapid view/detail toggles settle, and resize 
   for (let i = 0; i < 4; i += 1) {
     await switchCourtView(page, '2d');
     await switchCourtView(page, '3d');
-    await page.getByText('Edit by intent', { exact: true }).click();
-    await page.getByText('Edit by intent', { exact: true }).click();
+    await page.getByText('Customize', { exact: true }).click();
+    await page.getByText('Customize', { exact: true }).click();
   }
   await page.setViewportSize({ width: 430, height: 932 });
   await page.setViewportSize({ width: 844, height: 390 });
@@ -185,10 +185,10 @@ test('reduced motion and enlarged text simulation preserve the visible controls'
   await page.goto('/');
   await page.waitForTimeout(700);
   await openMenu(page);
-  await page.getByRole('button', { name: 'Appearance' }).click();
+  await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/ }).click();
   await page.waitForTimeout(350);
   await openMenu(page);
-  await page.getByRole('button', { name: 'Appearance' }).click();
+  await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/ }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('pickleboard-theme'))).toBe('dark');
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(32, 47, 60)');
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });

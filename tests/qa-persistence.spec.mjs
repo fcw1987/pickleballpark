@@ -393,7 +393,7 @@ test('the last rapid title input commits synchronously when the page closes', as
 
 test('out-of-order and dialog-closed file reads cannot replace newer import text', async ({ page }) => {
   await start(page);
-  await page.locator('.builder-main-menu > summary').click();
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
   await page.evaluate(() => {
     window.__qaFileReads = [];
@@ -415,7 +415,7 @@ test('out-of-order and dialog-closed file reads cannot replace newer import text
   await expect.poll(() => page.evaluate(() => window.__qaFileReads.length)).toBe(3);
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.evaluate(() => window.__qaFileReads[2].resolve('{"choice":"closed"}'));
-  await page.locator('.builder-main-menu > summary').click();
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
   await expect(page.getByLabel('JSON backup')).toHaveValue('');
 });

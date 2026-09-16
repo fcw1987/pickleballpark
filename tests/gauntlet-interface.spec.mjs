@@ -31,13 +31,13 @@ test.describe('Park Desk interface layer', () => {
     await mount(page);
     const ui = page.locator('.builder-ui').last();
     await ui.getByRole('button', { name: 'Edit shot', exact: true }).last().click();
-    await ui.getByText('Edit by intent', { exact: true }).click();
+    await ui.getByText('Customize', { exact: true }).click();
     for (const group of ['target', 'flight', 'players', 'movement', 'coach', 'precision']) {
       await ui.locator(`[data-action="detail-group"][data-group="${group}"]`).click();
       await expect(ui.locator(`[data-detail-group="${group}"]`)).toBeVisible();
       await expect(ui.locator(`[data-detail-group]:not([data-detail-group="${group}"])`).filter({ visible: true })).toHaveCount(0);
     }
-    await expect(ui.getByLabel('Shot family', { exact: true })).toBeVisible();
+    await expect(ui.getByLabel(/^Shot family:/)).toBeVisible();
     await expect(ui.getByRole('button', { name: 'Place target on court', exact: true })).toBeVisible();
     await expect(ui.locator('.builder-assistance > summary')).toHaveText('Shading & Guides');
     await expect(ui.locator('.builder-detail-tab').first()).toHaveCSS('min-height', '44px');

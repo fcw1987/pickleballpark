@@ -11,7 +11,7 @@ test('short-screen menu actions scroll clear of playback and remain operable', a
     const panel = await page.locator('.builder-main-menu > .builder-menu-panel').boundingBox();
     const footer = await page.locator('.builder-transport').boundingBox();
     expect(panel.y + panel.height).toBeLessThanOrEqual(Math.min(height - 4, footer.y - 4));
-    const appearance = page.getByRole('button', { name: 'Appearance', exact: true });
+    const appearance = page.getByRole('button', { name: /Switch to (?:light|dark) appearance/, exact: false });
     await appearance.scrollIntoViewIfNeeded();
     const box = await appearance.boundingBox();
     expect(box.y + box.height).toBeLessThanOrEqual(Math.min(height, footer.y));
@@ -62,7 +62,7 @@ test('enlarged shot choices remain readable and intent tabs retain useful names'
     expect(fits, `${selector} enlarged live label stays inside its button`).toBe(true);
   }
   await page.getByRole('button', { name: 'Edit shot', exact: true }).first().click();
-  for (const name of ['Shot family', 'Hitter']) {
+  for (const name of ['Hitter']) {
     const field = page.getByLabel(name, { exact: true });
     const size = await field.evaluate(node => {
       const style = getComputedStyle(node), ctx = document.createElement('canvas').getContext('2d');
@@ -72,7 +72,10 @@ test('enlarged shot choices remain readable and intent tabs retain useful names'
     expect(size.text).toBeLessThanOrEqual(size.available);
     expect(size.height).toBeGreaterThanOrEqual(42);
   }
-  await page.getByText('Edit by intent', { exact: true }).click();
+  const family = page.getByLabel(/^Shot family:/);
+  await expect(family).toBeVisible();
+  expect(await family.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+  await page.getByText('Customize', { exact: true }).click();
   await page.getByRole('tab', { name: 'Movement', exact: true }).click();
   await expect(page.getByRole('tab', { name: 'Movement', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tabpanel', { name: 'Movement', exact: true })).toBeVisible();
@@ -88,8 +91,8 @@ test('landscape chapter list stays inside the viewport with enlarged text', asyn
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(844);
   expect(box.y + box.height).toBeLessThanOrEqual(390);
-  await page.getByRole('button', { name: 'Edit Shot 2', exact: true }).click();
-  await expect(page.getByLabel('Shot family', { exact: true })).toHaveValue('return');
+  await page.getByRole('button', { name: 'Customize Shot 2', exact: true }).click();
+  await expect(page.getByLabel('Shot family: Return', { exact: true })).toBeVisible();
 });
 
 test('blocked contact offers the earlier pin without changing authored intent', async ({ page }) => {
@@ -99,7 +102,7 @@ test('blocked contact offers the earlier pin without changing authored intent', 
   await page.evaluate(document => playBuilder.loadDocument(document), copyScenarioDocument('infeasible-pin'));
   const original = await page.evaluate(() => ({ document: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }));
   await page.getByRole('button', { name: 'Shot 3 needs attention', exact: true }).click();
-  await page.getByRole('button', { name: 'Edit Green 1 pin · Shot 1', exact: true }).click();
+  await page.getByRole('button', { name: /^Edit Green (?:Left|Right|A|B) pin · Shot 1$/ }).click();
   await expect(page.getByLabel('Moving player', { exact: true })).toHaveValue('player1');
   await expect(page.getByLabel('Pin movement target', { exact: true })).toBeChecked();
   await expect.poll(() => page.evaluate(() => playBuilder.selectedShotId)).toBe('pin-1');
@@ -130,7 +133,7 @@ test('wide court reclaims the editor column when details close', async ({ page }
 test('intent tabs support keyboard selection without changing the rally', async ({ page }) => {
   await page.goto('/'); await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.getByRole('button', { name: 'Edit shot', exact: true }).first().click();
-  await page.getByText('Edit by intent', { exact: true }).click();
+  await page.getByText('Customize', { exact: true }).click();
   const before = await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }));
   await page.getByRole('tab', { name: 'Target', exact: true }).focus();
   for (const [key, name] of [['ArrowRight', 'Flight'], ['End', 'Precision'], ['ArrowRight', 'Target'], ['ArrowLeft', 'Precision'], ['Home', 'Target']]) {

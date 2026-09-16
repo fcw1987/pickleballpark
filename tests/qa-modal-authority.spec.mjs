@@ -15,7 +15,7 @@ for (const panel of ['Help', 'My Plays', 'Learn', 'Import / Export']) {
   test(`${panel} prevents background authored Undo and Redo`, async ({ page }) => {
     await open(page);
     const snapshot = await page.evaluate(() => ({ document: playBuilder.document, index: playBuilder.history.index }));
-    if (panel === 'My Plays') await openPlayFileMenu(page);
+    if (panel === 'My Plays' || panel === 'Import / Export') await openPlayFileMenu(page);
     else await openBuilderMainMenu(page);
     await page.getByRole('button', { name: panel, exact: true }).click();
     const dialog = page.getByRole('dialog');

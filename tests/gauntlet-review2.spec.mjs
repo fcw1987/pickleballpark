@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 async function openBuilder(page) {
   await page.addInitScript(() => localStorage.removeItem('pickleballpark-builder-v1'));
   await page.goto('/?gauntlet-review2=1');
-  await page.waitForFunction(() => window.playBuilder);
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.evaluate(async () => {
     if (playBuilder.view !== '2d') await playBuilder.switchView('2d');
   });
@@ -86,15 +86,16 @@ test('[model probe] Help preserves an explicitly open editor while playback chap
   }))).toEqual({ selected: ids[0], current: ids[1], history: 0 });
 });
 
-test('the always-visible save state reports a pending title edit honestly', async ({ page }) => {
+test('contextual save state reports a pending title edit and stays quiet after saving', async ({ page }) => {
   await openBuilder(page);
   await page.getByLabel('Menu', { exact: true }).click();
-  await page.getByLabel('Play file', { exact: true }).click();
+  await page.getByLabel('Manage plays', { exact: true }).click();
   await page.getByLabel('Play title', { exact: true }).fill('Saved status baseline');
   await page.getByLabel('Play title', { exact: true }).press('Tab');
-  await expect(page.locator('[data-ui="save-pill"]')).toHaveText('Saved on this device');
+  await expect(page.locator('[data-ui="save-pill"]')).toHaveCount(0);
+  await expect(page.locator('.builder-save-status')).toHaveText('Saved on this device');
 
   await page.getByLabel('Play title', { exact: true }).fill('Pending status edit');
   await expect(page.locator('.builder-save-status')).toHaveText('Editing · not saved yet');
-  await expect(page.locator('[data-ui="save-pill"]')).toHaveText('Editing');
+
 });

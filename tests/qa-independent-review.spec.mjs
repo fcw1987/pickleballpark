@@ -24,7 +24,7 @@ async function openCleanBuilder(page) {
 }
 
 async function importThroughDialog(page, document) {
-  await page.getByLabel('Menu', { exact: true }).click();
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Import or export play' });
   await expect(dialog).toBeVisible();
@@ -40,7 +40,7 @@ async function importThroughDialog(page, document) {
 
 async function chooseChapter(page, number, { edit = false } = {}) {
   await page.getByLabel('Choose shot chapter').click();
-  if (edit) await page.getByLabel(`Edit Shot ${number}`, { exact: true }).click();
+  if (edit) await page.getByLabel(`Customize Shot ${number}`, { exact: true }).click();
   else await page.locator(`[data-action="chapter"][data-shot-id$="shot-${number}"]`).click();
 }
 
@@ -87,7 +87,7 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
 
   const importedId = await page.evaluate(() => playBuilder.document.id);
   expect(importedId).not.toBe(source.id);
-  await expect(page.getByLabel('Add shot')).toBeDisabled();
+  await expect(page.getByLabel('Add shot')).toBeEnabled();
 
   for (const number of [1, 33, 64]) {
     await chooseChapter(page, number);
@@ -113,7 +113,7 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots[63].pace)).toBe(lastPace);
   const editedLast = await page.evaluate(() => structuredClone(playBuilder.document.shots[63]));
 
-  await page.getByText('More shot actions', { exact: true }).click();
+  await page.getByText('Shot actions', { exact: true }).click();
   await page.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(63);
   await page.getByLabel('Undo authored edit').click();
@@ -126,7 +126,7 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
   expect(savedAs.id).not.toBe(importedId);
   expect(savedAs.title).toContain('— copy');
 
-  await page.getByLabel('Menu', { exact: true }).click();
+  await openPlayFileMenu(page);
   await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Import or export play' });
   await dialog.getByRole('button', { name: 'Export current play', exact: true }).click();
@@ -158,7 +158,7 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   expect(await page.evaluate(() => playBuilder.document)).toEqual(reimported);
-  await expect(page.getByLabel('Add shot')).toBeDisabled();
+  await expect(page.getByLabel('Add shot')).toBeEnabled();
 });
 
 test('hundreds of long-rally boundary seeks keep chapters, 2D, 3D, and resources equivalent', async ({ page }) => {

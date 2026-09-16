@@ -1,3 +1,4 @@
+import {chooseShotFamily} from './helpers/builder-navigation.mjs';
 import {test,expect} from '@playwright/test';
 import {mkdir} from 'node:fs/promises';
 import {openCoachTools,openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
@@ -17,8 +18,8 @@ test('complete portrait custom rally and detailed movement survive views, reload
  await edit(page);await page.getByRole('button',{name:'Place target on court',exact:true}).click();
  const target=await page.evaluate(()=>playBuilder.courtTools.project({x:6,y:37}));await page.touchscreen.tap(target.x,target.y);const exactTarget=await page.evaluate(()=>structuredClone(playBuilder.selectedShot.target));
  await chapter(page,2,'Return');const flight=await details(page,'Flight');await flight.getByLabel('Flight',{exact:true}).selectOption('high/soft');
- await chapter(page,3,'Drop');await edit(page);await page.getByLabel('Shot family',{exact:true}).selectOption('drive');
- await page.getByRole('button',{name:'Add shot',exact:true}).click();await page.getByLabel('Shot family',{exact:true}).selectOption('drop');
+ await chapter(page,3,'Drop');await edit(page);await chooseShotFamily(page,'Drive');
+ await page.getByRole('button',{name:'Add shot',exact:true}).click();await edit(page);await chooseShotFamily(page,'Drop');
  expect(await page.evaluate(()=>playBuilder.compiled.validShotCount)).toBe(4);
  await finish(page);await page.getByRole('button',{name:'Play',exact:true}).click();await expect.poll(()=>page.evaluate(()=>playBuilder.session.clock.elapsed)).toBeGreaterThan(.7);await page.getByRole('button',{name:'Pause',exact:true}).click();
  expect(await page.evaluate(()=>playBuilder.session.clock.playing)).toBe(false);
@@ -45,7 +46,7 @@ test('invalid numeric edits and import remain recoverable inside the phone contr
  await page.setViewportSize({width:390,height:844});await open(page);await details(page);const target=await page.evaluate(()=>structuredClone(playBuilder.selectedShot.target));
  await field(page,'Target width','');expect(await page.evaluate(()=>playBuilder.selectedShot.target)).toEqual(target);await expect(page.getByLabel('Target width',{exact:true})).toHaveAttribute('aria-invalid','true');await page.getByLabel('Target width',{exact:true}).press('Escape');await expect(page.getByLabel('Target width',{exact:true})).toHaveValue(String(target.x));
  await field(page,'Target width',6.125);expect(await page.evaluate(()=>playBuilder.selectedShot.target.x)).toBe(6.125);
- await page.evaluate(()=>playBuilder.action('editShot',{field:'target.x',value:5.999999791}));await details(page);await expect(page.getByLabel('Target width',{exact:true})).toHaveValue('6');await finish(page);expect(await page.evaluate(()=>playBuilder.selectedShot.target.x)).toBe(5.999999791);await menu(page);await page.getByRole('button',{name:'Import / Export',exact:true}).click();await page.getByLabel('JSON backup').fill('{broken');await page.getByRole('button',{name:'Import JSON',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();await expect(page.getByLabel('JSON backup')).toHaveValue('{broken');await expect(page.locator('.builder-import-status')).toContainText('malformed');
+ await page.evaluate(()=>playBuilder.action('editShot',{field:'target.x',value:5.999999791}));await details(page);await expect(page.getByLabel('Target width',{exact:true})).toHaveValue('6');await finish(page);expect(await page.evaluate(()=>playBuilder.selectedShot.target.x)).toBe(5.999999791);await openPlayFileMenu(page);await page.getByRole('button',{name:'Import / Export',exact:true}).click();await page.getByLabel('JSON backup').fill('{broken');await page.getByRole('button',{name:'Import JSON',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();await expect(page.getByLabel('JSON backup')).toHaveValue('{broken');await expect(page.locator('.builder-import-status')).toContainText('malformed');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export current play',exact:true}).click();await download;await expect(page.getByLabel('JSON backup')).toHaveValue(/schemaVersion/);await page.getByRole('button',{name:'Close',exact:true}).click();
 });
 

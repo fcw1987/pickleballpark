@@ -86,7 +86,7 @@ test('chapter seeking preserves playback while Edit selects the shot and pauses'
 
   const picker = page.getByLabel('Choose shot chapter');
   if (!(await picker.locator('..').evaluate(node => node.open))) await picker.click();
-  await page.getByRole('button', { name: 'Edit Shot 2', exact: true }).click();
+  await page.getByRole('button', { name: 'Customize Shot 2', exact: true }).click();
   expect(await page.evaluate(() => ({ intent: playBuilder.session.playing, selected: playBuilder.selectedShotId, history: `${playBuilder.history.index}/${playBuilder.history.snapshots.length}` })))
     .toEqual({ intent: false, selected: state.chapter.shotId, history: state.history });
 });

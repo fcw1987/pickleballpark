@@ -65,7 +65,7 @@ test('bounded imported waypoints require a session acknowledgement and survive e
 
   await page.evaluate(() => playBuilder.action('selectShot', playBuilder.document.shots[0].id));
   await page.getByLabel('Choose shot chapter', {exact:true}).click();
-  await page.getByRole('button', { name: 'Edit Shot 3', exact: true }).click();
+  await page.getByRole('button', { name: 'Customize Shot 3', exact: true }).click();
   expect(await page.evaluate(() => playBuilder.selectedShotId)).toBe(imported.shotId);
   await page.getByRole('button', { name: 'Preview destination only', exact: true }).click();
   expect(await page.evaluate(() => playBuilder.waypointPolicy.requiresConfirmation)).toBe(false);

@@ -131,7 +131,7 @@ test('paused chapter navigation syncs the closed target while an open editor kee
   await page.locator(`[data-action="chapter"][data-shot-id="${state.ids[2]}"]`).click();
   const open = await page.evaluate(() => ({ selected: playBuilder.selectedShotId,
     current: document.querySelector('.builder-transport .shot-timeline-marker.is-current')?.dataset.shotId,
-    family: document.querySelector('[data-action="edit-family"]')?.value,
+    family: document.querySelector('.builder-family-option[aria-selected="true"]')?.dataset.family,
     expectedFamily: playBuilder.document.shots.find(shot => shot.id === playBuilder.selectedShotId)?.family }));
   expect(open).toEqual({ selected: state.ids[1], current: state.ids[2], family: open.expectedFamily, expectedFamily: open.expectedFamily });
   await expect(page.locator('.builder-inspector')).not.toHaveClass(/builder-inspector-collapsed/);
@@ -179,7 +179,7 @@ for (const viewport of [{ width: 402, height: 874 }, { width: 844, height: 390 }
     const inspector = await bounds(page, '.builder-inspector');
     expect.soft(inspector.x).toBeGreaterThanOrEqual(0); expect.soft(inspector.y).toBeGreaterThanOrEqual(0);
     expect.soft(inspector.right).toBeLessThanOrEqual(viewport.width + 1); expect.soft(inspector.bottom).toBeLessThanOrEqual(viewport.height + 1);
-    await expect(page.locator('.builder-inspector [data-action="edit-family"]')).toBeFocused();
+    await expect(page.getByRole('button',{name:'Close editor',exact:true})).toBeFocused();
     await collapse.click();
     await expect(page.locator('.builder-inspector')).toHaveClass(/builder-inspector-collapsed/);
     await expect(page.getByRole('button', { name: 'Edit shot', exact: true }).first()).toHaveAttribute('aria-expanded', 'false');

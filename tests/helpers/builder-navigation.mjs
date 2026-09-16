@@ -44,3 +44,10 @@ export async function switchCourtView(page, view) {
   await button.click();
   await page.waitForFunction(expected => !playBuilder.busy && playBuilder.view === expected, view);
 }
+
+export async function chooseShotFamily(page, family) {
+  const picker = page.locator('.builder-family-picker');
+  if (!(await picker.evaluate(node => node.open))) await picker.locator(':scope > summary').click();
+  await picker.getByRole('option', {name:new RegExp(`^${family}:`, 'i')}).click();
+  await page.waitForFunction(() => !window.playBuilder?.proposalBusy);
+}
