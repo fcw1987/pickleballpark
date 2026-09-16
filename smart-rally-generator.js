@@ -287,7 +287,7 @@ export async function proposeRandomRally({ length, seed = DEFAULT_SEED, sourceDo
     const boundedAttempts = normalizedAttempts(maxAttempts, MAX_ATTEMPTS_PER_SHOT, MAX_ATTEMPTS_PER_SHOT, 'maxAttempts');
     const boundedBacktracks = normalizedAttempts(maxBacktracks, MAX_BACKTRACKS, MAX_BACKTRACKS, 'maxBacktracks', { allowZero: true });
     const document = await buildRally(normalized, normalizedSeedValue, { signal, onProgress, maxAttempts: boundedAttempts, maxBacktracks: boundedBacktracks });
-    if (!document) return makeProposal({ operation: 'random-rally', sourceDocument, seed: normalizedSeedValue, reason: `Could not produce exactly ${normalized} valid hits within bounded search (${MAX_ATTEMPTS_PER_SHOT} attempts per shot, ${MAX_BACKTRACKS} backtracks).` });
+    if (!document) return makeProposal({ operation: 'random-rally', sourceDocument, seed: normalizedSeedValue, reason: `Could not produce exactly ${normalized} valid hits within bounded search (${boundedAttempts} attempts per shot, ${boundedBacktracks} backtracks).` });
     const evaluation = completeEvaluation(document, { allowOpeningPrefix: normalized === 1 });
     if (!evaluation.ok || evaluation.validShotCount !== normalized) return makeProposal({ operation: 'random-rally', sourceDocument, seed: normalizedSeedValue, reason: evaluation.reason || 'The generated rally did not pass complete validation.' });
     return makeProposal({ operation: 'random-rally', sourceDocument: sourceDocument || document, document, seed: normalizedSeedValue, generatorVersion: SMART_GENERATOR_VERSION, changes: [{ path: 'document', before: undefined, after: 'new exact-length rally', ownership: 'automatic' }], reason: `Generated exactly ${normalized} validated hits.` });
