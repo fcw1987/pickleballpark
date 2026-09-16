@@ -11,6 +11,10 @@ const git = (root, ...args) => execFileSync('git', args, { cwd: root, encoding: 
 const makeRepo = () => {
   const root = mkdtempSync(path.join(tmpdir(), 'pickleballpark-stamp-test-'));
   mkdirSync(path.join(root, 'icons'));
+  mkdirSync(path.join(root, 'tests'));
+  mkdirSync(path.join(root, 'docs'));
+  writeFileSync(path.join(root, 'tests', 'fixture.html'), '<p>Test-only fixture</p>');
+  writeFileSync(path.join(root, 'docs', 'viewer.js'), 'export const documentation = true;');
   writeFileSync(path.join(root, 'app.js'), 'export const app = 1;\n');
   writeFileSync(path.join(root, 'build-identity.js'), 'export const identity = 1;\n');
   writeFileSync(path.join(root, 'build-metadata.js'), 'export const BUILD_IDENTITY_METADATA = {};\n');

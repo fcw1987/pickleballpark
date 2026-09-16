@@ -48,7 +48,7 @@ export function runtimeFileset(root = '.') {
 const sourceRuntimePaths = (root, revision) => git(root, 'ls-tree', '-r', '--name-only', revision)
   .split('\n')
   .filter(Boolean)
-  .filter(file => /\.(?:js|css|html)$/.test(file) || ['manifest.json', 'version.json'].includes(file)
+  .filter(file => (!file.includes('/') && /\.(?:js|css|html)$/.test(file)) || ['manifest.json', 'version.json'].includes(file)
     || file.startsWith('icons/') || file.startsWith('vendor/') || (file.startsWith('assets/') && !file.startsWith('assets/source/')))
   .filter(file => !EXCLUSIONS.includes(file));
 
