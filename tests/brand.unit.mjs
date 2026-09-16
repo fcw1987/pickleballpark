@@ -7,7 +7,7 @@ const baseline = new Map([
   ['manifest.json', JSON.stringify({ name: 'Pickleball Park', short_name: 'Pickleball Park', start_url: './index.html', icons: [{ src: 'icons/icon.png' }] })],
   ['package.json', JSON.stringify({ name: 'pickleballpark', description: 'Pickleball Park app' })],
   ['package-lock.json', JSON.stringify({ name: 'pickleballpark', packages: { '': { name: 'pickleballpark' } } })],
-  ['sw.js', "const CACHE_PREFIX = 'pickleboard-';\nconst STATIC_CACHE = `${CACHE_PREFIX}static-v23`;\nconsole.warn('Pickleball Park static cache');"],
+  ['sw.js', "const CACHE_PREFIX = 'pickleboard-';\nconst STATIC_CACHE = `${CACHE_PREFIX}static-v24`;\nconsole.warn('Pickleball Park static cache');"],
   ['README.md', '# Pickleball Park\n'],
   ['tools/generate-park-art.mjs', "const glyphs={P:['1'],I:['1'],C:['1'],K:['1'],L:['1'],E:['1'],B:['1'],A:['1'],R:['1']}; text(c, 'PICKLEBALL', 1, 1, C.x); text(c, 'PARK', 1, 2, C.x);"],
   ['icons/icon.png', null]

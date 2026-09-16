@@ -1,11 +1,16 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v23`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v24`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
   './',
   './index.html',
   './script.js',
+  './build-metadata.js',
+  './build-identity.js',
+  './build-diagnostics.js',
+  './build-diagnostics-ui.js',
+  './version.json',
   './play-builder.js',
   './keyboard-shortcuts.js',
   './rally-proposals.js',
@@ -15,6 +20,7 @@ const STATIC_ASSETS = [
   './play-compiler.js',
   './builder-storage.js',
   './builder-ui.js',
+  './player-labels.js',
   './builder-ui.css',
   './builder-integration.css',
   './builder-court-tools.js',
@@ -187,6 +193,9 @@ self.addEventListener('fetch', event => {
 
   const requestUrl = new URL(request.url);
   if (requestUrl.origin !== self.location.origin) return;
+  // A Server build comparison must reach the server, including when offline.
+  // Never relabel a cached endpoint as the current server response.
+  if (requestUrl.pathname === new URL('./version.json', self.location).pathname && requestUrl.searchParams.has('diagnostic')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(handleNavigation(request));

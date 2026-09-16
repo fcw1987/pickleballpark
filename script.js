@@ -2,6 +2,8 @@ import { populateParkSVG, updateParkSVGProjection } from './park-scene.js';
 import { PARK_LAYOUT } from './park-layout.js';
 import './guided-plays.js';
 import { COURT_LINES } from './court-geometry.js';
+import { mountBuildDiagnostics } from './build-diagnostics-ui.js';
+import { playerLabel } from './player-labels.js';
 // Pickleball Park - Interactive Pickleball Coaching and Strategy
 
 // Register Service Worker for PWA support
@@ -453,7 +455,8 @@ class Pickleboard {
         const position = `${Number(token.x.toFixed(1))}, ${Number(token.y.toFixed(1))} feet`;
         if (token.type === 'player') {
             const teamColor = this.getPlayerTeamColor(token);
-            const playerName = token.id.replace('player', 'Player ');
+            const authored = window.playBuilder?.workspace === 'builder' ? window.playBuilder.document : null;
+            const playerName = authored ? playerLabel(token.id, authored) : token.id.replace('player', 'Player ');
             token.touchElement.setAttribute(
                 'aria-label',
                 `${playerName}, ${teamColor} team, ${token.handedness}-handed, at ${position}. Arrow keys move; Enter or Space switches handedness.`
@@ -1382,13 +1385,13 @@ class Pickleboard {
         if (wasActive && restoreFocus) this.menuToggle.focus({ preventScroll: true });
     }
     
-    openInfoModal({ returnFocus = this.infoToggle } = {}) {
+    openInfoModal({ returnFocus = this.infoToggle, initialFocus = this.infoClose } = {}) {
         this.infoReturnFocus = returnFocus;
         if (this.menuOverlay.classList.contains('active')) this.closeMenu({ restoreFocus: false });
         this.infoModal.classList.add('active');
         this.infoToggle.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        this.focusDialogWhenVisible(this.infoModal, this.infoClose);
+        this.focusDialogWhenVisible(this.infoModal, initialFocus);
     }
     
     closeInfoModal({ restoreFocus = true } = {}) {
@@ -1407,6 +1410,7 @@ class Pickleboard {
 document.addEventListener('DOMContentLoaded', () => {
     // Create global instance
     window.pickleboard = new Pickleboard();
+    window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
     window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
     
     console.log('Pickleball Park initialized successfully');

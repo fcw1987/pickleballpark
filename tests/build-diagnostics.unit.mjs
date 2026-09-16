@@ -24,7 +24,7 @@ test('captures a loaded identity and keeps a later server response separate', as
   const calls = [];
   const diagnostics = createBuildDiagnostics({
     loadedIdentity: running,
-    locationHref: 'https://example.test/pickleboard/index.html',
+    locationHref: 'https://fcw1987.github.io/pickleboard/index.html',
     fetchImpl: async (url, options) => {
       calls.push({ url: String(url), options });
       return { ok: true, json: async () => ({ ...running, sourceRevision: 'a'.repeat(40), status: 'verified' }) };
@@ -94,4 +94,18 @@ test('an older server response cannot overwrite a newer query', async () => {
   resolvers[0].resolve({ ok: true, json: async () => ({ ...running, sourceRevision: 'a'.repeat(40) }) });
   await first;
   assert.equal(diagnostics.snapshot().server.identity.sourceRevision, 'b'.repeat(40));
+});
+
+test('an older JSON parse rejection cannot erase a newer valid response', async () => {
+  let rejectJSON, calls = 0;
+  const diagnostics = createBuildDiagnostics({ loadedIdentity: running, fetchImpl: async () => ++calls === 1
+    ? {ok:true,json:()=>new Promise((resolve,reject)=>{rejectJSON=reject;})}
+    : {ok:true,json:async()=>({...running,sourceRevision:'b'.repeat(40)})}
+  });
+  const first = diagnostics.queryServerBuild();
+  await Promise.resolve();
+  await diagnostics.queryServerBuild();
+  rejectJSON(Error('old invalid JSON'));
+  await first;
+  assert.equal(diagnostics.snapshot().server.identity.sourceRevision,'b'.repeat(40));
 });

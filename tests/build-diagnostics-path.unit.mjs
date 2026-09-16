@@ -8,7 +8,7 @@ test('version endpoint resolves from a project subpath like a packaged static si
   const source = JSON.parse(readFileSync(new URL('../version.json', import.meta.url)));
   let requested;
   const diagnostics = createBuildDiagnostics({
-    locationHref: 'https://example.test/pickleboard/index.html',
+    locationHref: 'https://fcw1987.github.io/pickleboard/index.html',
     versionPath: './version.json',
     fetchImpl: async url => {
       requested = String(url);
@@ -16,7 +16,8 @@ test('version endpoint resolves from a project subpath like a packaged static si
     },
   });
   const result = await diagnostics.queryServerBuild();
-  assert.match(requested, /\/pickleboard\/version\.json\?diagnostic=/);
+  assert.equal(new URL(requested).pathname, new URL('version.json', 'https://fcw1987.github.io/pickleboard/').pathname);
+  assert.ok(new URL(requested).searchParams.has('diagnostic'));
   assert.equal(result.serverFetch.status, 'complete');
   assert.equal(result.server.identity.product, 'Pickleball Park');
 });

@@ -382,3 +382,8 @@ body.play-mode .playback-controls { top: auto; right: auto; bottom: max(.7rem, e
   body.play-mode .court-container-fullscreen { padding-right: calc(var(--coaching-hud-width, 320px) + 1rem); padding-bottom: .4rem; }
   body.play-mode .playback-controls { top: .5rem; right: .5rem; bottom: .5rem; left: auto; width: min(320px, calc(100vw - 1rem)); max-height: calc(100dvh - 1rem); overflow-y: auto; transform: none; }
 }
+
+.build-diagnostics pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .85em; user-select: text; }
+.build-diagnostic-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.build-diagnostic-actions button { min-height: 44px; padding: .5rem .75rem; font: inherit; }
+.build-diagnostics summary { min-height: 44px; cursor: pointer; padding-block: .6rem; }

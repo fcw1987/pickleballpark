@@ -124,6 +124,7 @@ export function createBuildDiagnostics({
       try {
         payload = await response.json();
       } catch {
+        if (generation !== requestGeneration) return snapshot();
         server = { status: 'invalid', reason: 'version-endpoint-invalid', offline: false };
         serverFetch = { status: 'invalid', cache: 'no-store', path: versionPath };
         return snapshot();
@@ -141,7 +142,7 @@ export function createBuildDiagnostics({
     return snapshot();
   };
 
-  const report = () => formatBuildDiagnostics({ running, server, environment: server?.offline ? 'offline' : 'online' });
+  const report = () => formatBuildDiagnostics({ running, server, environment: server?.offline ? 'offline' : server ? 'online' : 'not checked' });
   const copy = async () => {
     const text = report();
     if (!clipboard || typeof clipboard.writeText !== 'function') return { ok: false, reason: 'clipboard-unavailable', text };

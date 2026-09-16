@@ -432,7 +432,8 @@ export class PlayBuilder {
             if(action==='message'){this.message=String(value);this.render();return;}
             if(action==='view')return await this.switchView(value);
             if(action==='workspace')return await this.setWorkspace(value);
-            if(action==='help'){this.courtTools.clear();this.board.endDrag?.();if(this.board.isDrawing)this.board.endDrawing?.();this.pause();this.render();const trigger=this.ui.element.querySelector('.builder-menu summary');trigger?.focus({preventScroll:true});this.board.openInfoModal({returnFocus:trigger});return;}
+            if(action==='buildDiagnostics'){await this.action('help',{diagnostics:true});return;}
+            if(action==='help'){this.courtTools.clear();this.board.endDrag?.();if(this.board.isDrawing)this.board.endDrawing?.();this.pause();this.render();const trigger=this.ui.element.querySelector('.builder-menu summary');trigger?.focus({preventScroll:true});this.board.openInfoModal({returnFocus:trigger,...(value?.diagnostics?{initialFocus:globalThis.document.querySelector('#buildDiagnostics h3')}:{})});if(value?.diagnostics)this.board.buildDiagnostics.open();return;}
             if(action==='appearance'){this.board.toggleTheme();this.render();return;}
             if(action==='playPause'){const playing=typeof value?.playing==='boolean'?value.playing:!this.session.playing;if(playing)this.play();else this.pause();}
             else if(action==='restart')this.seek(0);
