@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   './keyboard-shortcuts.js',
   './rally-proposals.js',
   './smart-rally-generator.js',
+  './rally-coach.js',
   './play-document.js',
   './play-compiler.js',
   './builder-storage.js',

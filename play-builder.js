@@ -1,18 +1,20 @@
 import { createStarterDocument, validateDocument, documentFromTemplate, MAX_SHOTS } from './play-document.js';
-import { compileDocument, recompileAssistedDocument } from './play-compiler.js';
 import { DraftStore, EditHistory, STORAGE_KEY } from './builder-storage.js';
 import { mountBuilderUI } from './builder-ui.js';
 import { BuilderCourtTools } from './builder-court-tools.js';
 import { builderViewBox } from './builder-framing.js';
 import { getWaypointPolicy } from './builder-waypoint-policy.js';
-import { applyCoverageAssistance } from './coverage-assistance.js';
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 import { buildShotChapters, chapterAtTime, mapSemanticPlayhead } from './shot-chapters.js';
 import { handleDesktopSpace } from './keyboard-shortcuts.js';
 import { proposeSmartAdd, proposeRandomRally } from './smart-rally-generator.js';
-import { authorizeProposal, documentSourceIdentity, proposeFamilyChange } from './rally-proposals.js';
+import { authorizeProposal, compileEffectiveCandidate, documentSourceIdentity, evaluateFullCandidate, proposeFamilyChange } from './rally-proposals.js';
+import { proposeCoachFix, proposeCoachOptions } from './rally-coach.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
+function claimShotFields(shot, fields) {
+    if(Array.isArray(shot?.authoring?.fields))shot.authoring.fields=shot.authoring.fields.filter(field=>!fields.includes(field));
+}
 
 // An explicit edit claims the changed field. A value matching a generated
 // default does not make it automatic again, including after export/import.
@@ -156,11 +158,7 @@ export class PlayBuilder {
     }
     installPlay(first = false, seconds = null) {
         const previousChapters=this.chapters,previousDuration=this.session.duration,previousTime=this.session.clock.elapsed;
-        this.compiled = {...compileDocument(this.document)};
-        if(this.compiled.play) {
-            const assisted=applyCoverageAssistance(this.compiled.play,this.document,this.compiled.timeline);
-            this.compiled=this.document.assistance.autoShading?{...recompileAssistedDocument(this.document,this.compiled,assisted.play,assisted.coverage)}:{...this.compiled,coverage:assisted.coverage};
-        }
+        this.compiled = {...compileEffectiveCandidate(this.document)};
         const play = this.compiled.play || {id:this.document.id,name:this.document.title,description:'Incomplete draft',mode:'doubles',steps:[{id:'start',label:'Starting layout',description:'Add a shot to preview this draft.',durationMs:0,positions:copy(this.document.initialLayout)}]};
         const chapters=buildShotChapters(this.compiled.timeline,{shotIds:this.document.shots.slice(0,this.compiled.validShotCount).map(shot=>shot.id)});
         const mappedSeconds=seconds!=null?Math.max(0,Math.min(this.compiled.timeline.duration,seconds)):first?0:mapSemanticPlayhead(previousChapters,chapters,previousTime,previousDuration,this.compiled.timeline.duration);
@@ -300,6 +298,51 @@ export class PlayBuilder {
         this.message=this.compiled.validShotCount===this.document.shots.length?'Shot inserted. Undo is available.':'Shot inserted; later authored intent was kept. Review the highlighted downstream conflict, or Undo.';
         this.render();return {ok:true};
     }
+    async requestCoach(optionsOnly=false) {
+        this.cancelPendingProposals();this.pause();this.courtTools.clear();
+        const generation=this.proposalGeneration,revision=this.sourceIntent;
+        const controller=this.proposalController=new AbortController();
+        this.proposalBusy=true;this.proposalProgress={label:'Coach is checking the complete rally'};this.render();
+        try {
+            const result=optionsOnly?await proposeCoachOptions(this.document,{signal:controller.signal}):await proposeCoachFix(this.document,{signal:controller.signal});
+            if(controller.signal.aborted||!this.proposalIsCurrent(generation,revision,result))return {ok:false,error:'The play changed; ask Coach to review the new version.'};
+            if(optionsOnly){
+                const candidates=result.slice(0,6);
+                for(const proposal of candidates)this.coachCandidates.set(proposal.candidateIdentity,{proposal,revision});
+                const valueText=value=>value===undefined?'none':typeof value==='object'?JSON.stringify(value):String(value);
+                this.coachOptions=candidates.map((proposal,index)=>({
+                    id:proposal.candidateIdentity,
+                    label:`Apply option ${index+1}${proposal.requiresConsent?' · changes authored settings':''}`,
+                    description:proposal.changes.map(change=>`${change.path.replace(/shots\[(\d+)\]/,(_,n)=>`Shot ${Number(n)+1}`)}: ${valueText(change.before)} → ${valueText(change.after)}`).join('; '),
+                    changes:proposal.changes,requiresConsent:proposal.requiresConsent
+                }));
+                this.message=candidates.length?'Coach found validated options. Review the listed changes before applying one.':result.reason||'Coach found no safe repair within this model. Your play was kept.';
+                return {ok:true,options:candidates.length};
+            }
+            if(!result.ok||result.requiresConsent){this.message=result.reason||'A protected setting needs your approval. Choose Show options.';return {ok:false,error:this.message};}
+            const authorized=authorizeProposal(result,this.document,{operation:'coach-fix'});
+            if(!authorized.ok||!evaluateFullCandidate(authorized.document).ok)throw Error(authorized.reason||'Coach could not validate the complete repaired rally. Your play was kept.');
+            this.applyProposalDocument(authorized.document,generation);
+            this.message=`Fixed ${result.affectedShots?.length?`Shot ${result.affectedShots.join(', ')}`:'the rally'} using automatic settings. Authored targets and manual pins were kept. Undo is available.`;
+            return {ok:true};
+        } catch(error){if(generation===this.proposalGeneration)this.message=error.message;return {ok:false,error:error.message};}
+        finally {if(generation===this.proposalGeneration){this.proposalBusy=false;this.proposalProgress=null;this.proposalController=null;}this.render();}
+    }
+    applyCoachOption(optionId) {
+        const entry=this.coachCandidates.get(optionId);
+        if(!entry||entry.revision!==this.sourceIntent)throw Error('That Coach proposal is stale. Ask Coach to check this play again.');
+        const authorized=authorizeProposal(entry.proposal,this.document,{operation:'coach-option'});
+        if(!authorized.ok||!evaluateFullCandidate(authorized.document).ok)throw Error(authorized.reason||'The repair no longer passes complete validation.');
+        const changes=entry.proposal.changes,consented=entry.proposal.requiresConsent;
+        if(consented)for(const change of changes){
+            const match=/^shots\[(\d+)\]\.([^.]+)/.exec(change.path);
+            const shot=match&&authorized.document.shots[Number(match[1])];
+            if(shot?.authoring?.fields)shot.authoring.fields=shot.authoring.fields.filter(field=>field!==match[2]);
+        }
+        this.applyProposalDocument(authorized.document,this.proposalGeneration);
+        this.message=`Applied the reviewed Coach changes: ${changes.map(change=>change.path.replace(/shots\[(\d+)\]/,(_,n)=>`Shot ${Number(n)+1}`)).join(', ')}. Undo is available.`;
+        this.render();return {ok:true};
+    }
     cancelPendingView() {
         this.generation++;
         if(this.busy) { this.board.threeD?.cancelLoading?.(); this.busy=false; this.view='2d'; }
@@ -380,6 +423,10 @@ export class PlayBuilder {
             if(action==='randomRally')return await this.randomRally(value);
             if(action==='insertShot')return await this.insertShot(value);
             if(action==='cancelProposal'){this.cancelPendingProposals();this.message='Cancelled. Your current play was kept.';this.render();return {ok:true};}
+            if(action==='coachFix')return await this.requestCoach(false);
+            if(action==='coachOptions')return await this.requestCoach(true);
+            if(action==='coachApply')return this.applyCoachOption(value?.id||value);
+            if(action==='coachKeep'){this.cancelPendingProposals();this.message='Kept as authored. The existing validation issue remains visible.';this.render();return {ok:true};}
             if(action==='editShot'&&value.field==='family')return await this.changeFamily(value.value);
             if(action==='acknowledgeWaypoints'){this.waypointAcknowledgement=this.waypointPolicy.key;this.message='Destination-only preview enabled. Original path points remain saved. Press Play when ready.';this.render();return;}
             if(action==='message'){this.message=String(value);this.render();return;}
@@ -428,15 +475,16 @@ export class PlayBuilder {
             }
             else if(action==='editMovement')this.edit(doc=>{
                 const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot||!doc.players[value.player])throw Error('Choose a player.');
+                claimShotFields(shot,[value.player===shot.hitter?'movement':'playerMovement']);
                 const movement=value.player===shot.hitter?shot.movement:((shot.playerMovement??={})[value.player]??={intent:'hold',pinned:false});
                 if(!['target','target.x','target.y','intent','pinned'].includes(value.field))throw Error('Unknown movement field.');
                 if(value.field.startsWith('target')){movement.target??=copy(doc.initialLayout[value.player]);if(value.field==='target')movement.target=copy(value.value);else movement.target[value.field.split('.')[1]]=value.value;movement.intent='manual';movement.pinned=true;}
                 else movement[value.field]=value.value;
                 if(movement.intent==='manual'&&!movement.target)movement.target=copy(doc.initialLayout[value.player]);
             });
-            else if(action==='flight')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);shot.arc=value.arc;shot.pace=value.pace;});
+            else if(action==='flight')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);claimShotFields(shot,['arc','pace']);shot.arc=value.arc;shot.pace=value.pace;});
             else if(action==='title')this.edit(doc=>{doc.title=String(value).slice(0,120);},{review:false});
-            else if(action==='editShot')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot)return;const parts=value.field.split('.');let cursor=shot;for(const part of parts.slice(0,-1)){if(['__proto__','constructor','prototype'].includes(part))throw Error('Invalid field');cursor=cursor[part]??={};}const key=parts.at(-1);if(value.field==='hitter'&&shot.hitter!==value.value){shot.playerMovement??={};shot.playerMovement[shot.hitter]=copy(shot.movement);shot.movement=shot.playerMovement[value.value]||{intent:'hold',pinned:false};delete shot.playerMovement[value.value];}if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid field');cursor[key]=value.value;if(value.field==='family'){if(shot.family==='serve')shot.serveMethod='volley';else delete shot.serveMethod;}if(value.field==='movement.intent'&&value.value==='manual'&&!shot.movement.target)shot.movement.target=copy(doc.initialLayout[shot.hitter]);});
+            else if(action==='editShot')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot)return;claimShotFields(shot,[value.field.split('.')[0]]);const parts=value.field.split('.');let cursor=shot;for(const part of parts.slice(0,-1)){if(['__proto__','constructor','prototype'].includes(part))throw Error('Invalid field');cursor=cursor[part]??={};}const key=parts.at(-1);if(value.field==='hitter'&&shot.hitter!==value.value){shot.playerMovement??={};shot.playerMovement[shot.hitter]=copy(shot.movement);shot.movement=shot.playerMovement[value.value]||{intent:'hold',pinned:false};delete shot.playerMovement[value.value];}if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid field');cursor[key]=value.value;if(value.field==='family'){if(shot.family==='serve')shot.serveMethod='volley';else delete shot.serveMethod;}if(value.field==='movement.intent'&&value.value==='manual'&&!shot.movement.target)shot.movement.target=copy(doc.initialLayout[shot.hitter]);});
             else if(action==='deleteShot')this.edit(doc=>{doc.shots=doc.shots.filter(s=>s.id!==(value||this.selectedShotId));});
             else if(action==='duplicateShot')this.edit(doc=>{if(doc.shots.length>=MAX_SHOTS)throw Error('Shot limit reached.');const i=doc.shots.findIndex(s=>s.id===(value||this.selectedShotId));if(i>=0){const shot=copy(doc.shots[i]);shot.id=id();delete shot.authoring;doc.shots.splice(i+1,0,shot);this.selectedShotId=shot.id;}});
             else if(action==='moveShot')this.edit(doc=>{const from=doc.shots.findIndex(s=>s.id===value.id),to=from+value.delta;if(from<0||to<0||to>=doc.shots.length)return;doc.shots.splice(to,0,doc.shots.splice(from,1)[0]);});
