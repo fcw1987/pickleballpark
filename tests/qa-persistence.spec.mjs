@@ -195,26 +195,35 @@ test('bounded random source edits, undo, and redo agree with a snapshot model', 
     const mutate = async step => {
       const shot = builder.selectedShot || builder.document.shots[0];
       const operations = [
-        () => builder.action('title', `History ${step}`),
-        () => builder.action('editShot', { field: 'target.x', value: Math.round(random() * 200) / 10 }),
-        () => builder.action('editShot', { field: 'target.y', value: Math.round(random() * 440) / 10 }),
-        () => builder.action('flight', { arc: choose(['low', 'medium', 'high']), pace: choose(['soft', 'medium', 'firm']) }),
-        () => builder.action('editShot', { field: 'contactStyle', value: choose(['auto', 'forehand', 'backhand', 'short-hop']) }),
-        () => builder.action('editMovement', { player: shot.hitter, field: 'intent', value: choose(['hold', 'advance', 'recover', 'manual']) }),
-        () => builder.action('handedness', { id: choose(['player1', 'player2', 'player3', 'player4']), value: choose(['left', 'right']) }),
-        () => builder.action('assistance', { field: choose(['autoShading', 'showGuides']), value: random() > 0.5 }),
-        () => builder.action('assistance', { field: 'team', value: choose(['both', 'green', 'orange']) }),
-        () => builder.action('opening', choose(['serve', 'midrally'])),
-        () => builder.action('ending', choose(['stop', 'winner', 'fault'])),
-        () => builder.action('intentionalFault', random() > 0.5),
-        () => builder.document.shots.length < 12 ? builder.action('addShot') : builder.action('moveShot', { id: shot.id, delta: -1 }),
-        () => builder.document.shots.length < 12 ? builder.action('duplicateShot') : builder.action('deleteShot'),
-        () => builder.document.shots.length > 1 ? builder.action('moveShot', { id: shot.id, delta: choose([-1, 1]) }) : builder.action('addShot'),
-        () => builder.document.shots.length > 2 ? builder.action('deleteShot') : builder.action('addShot')
+        Object.assign(() => builder.action('title', `History ${step}`), { kind: 'mutation' }),
+        Object.assign(() => builder.action('editShot', { field: 'target.x', value: Math.round(random() * 200) / 10 }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('editShot', { field: 'target.y', value: Math.round(random() * 440) / 10 }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('flight', { arc: choose(['low', 'medium', 'high']), pace: choose(['soft', 'medium', 'firm']) }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('editShot', { field: 'contactStyle', value: choose(['auto', 'forehand', 'backhand', 'short-hop']) }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('editMovement', { player: shot.hitter, field: 'intent', value: choose(['hold', 'advance', 'recover', 'manual']) }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('handedness', { id: choose(['player1', 'player2', 'player3', 'player4']), value: choose(['left', 'right']) }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('assistance', { field: choose(['autoShading', 'showGuides']), value: random() > 0.5 }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('assistance', { field: 'team', value: choose(['both', 'green', 'orange']) }), { kind: 'mutation' }),
+        Object.assign(() => builder.action('opening', choose(['serve', 'midrally'])), { kind: 'mutation' }),
+        Object.assign(() => builder.action('ending', choose(['stop', 'winner', 'fault'])), { kind: 'mutation' }),
+        Object.assign(() => builder.action('intentionalFault', random() > 0.5), { kind: 'mutation' }),
+        Object.assign(() => builder.document.shots.length < 12 ? builder.action('addShot') : builder.action('moveShot', { id: shot.id, delta: -1 }), { kind: builder.document.shots.length < 12 ? 'add' : 'mutation' }),
+        Object.assign(() => builder.document.shots.length < 12 ? builder.action('duplicateShot') : builder.action('deleteShot'), { kind: 'mutation' }),
+        Object.assign(() => builder.document.shots.length > 1 ? builder.action('moveShot', { id: shot.id, delta: choose([-1, 1]) }) : builder.action('addShot'), { kind: builder.document.shots.length > 1 ? 'mutation' : 'add' }),
+        Object.assign(() => builder.document.shots.length > 2 ? builder.action('deleteShot') : builder.action('addShot'), { kind: builder.document.shots.length > 2 ? 'mutation' : 'add' })
       ];
-      const response = await choose(operations)();
-      if (response?.ok === false) throw new Error(`mutation ${step} failed: ${response.error}`);
+      const operation = choose(operations);
+      const before = JSON.stringify(builder.document);
+      const history = builder.history.index;
+      const response = await operation();
+      if (response?.ok === false) {
+        const expectedPrefixRejection = operation.kind === 'add' && /Your current rally is unchanged\. Review the issue with Coach\.$/.test(response.error || '');
+        if (!expectedPrefixRejection) throw new Error(`mutation ${step} failed: ${response.error}`);
+        if (JSON.stringify(builder.document) !== before || builder.history.index !== history) throw new Error(`rejected Smart Add changed source or history at step ${step}`);
+        return false;
+      }
       commitModel();
+      return true;
     };
 
     for (let step = 0; step < 140; step += 1) {
@@ -276,14 +285,11 @@ test('every authored mutation family is one exact undo and redo transition', asy
     ['deleteShot']
   ];
 
+  const baseline = await page.evaluate(() => structuredClone(playBuilder.document));
+
   for (const [action, supplied] of cases) {
-    const transition = await page.evaluate(async ({ action, supplied }) => {
-      // Family edits on the opening shot are intentionally protected by the
-      // serve rule. Exercise this mutation on the second authored shot so the
-      // transition remains a valid semantic edit and can be undone exactly.
-      if (action === 'editShot' && supplied?.field === 'family') {
-        await playBuilder.action('selectShot', playBuilder.document.shots[1].id);
-      }
+    const transition = await page.evaluate(async ({ action, supplied, baseline }) => {
+      playBuilder.loadDocument(baseline);
       const value = action === 'moveShot'
         ? { delta: supplied.delta, id: playBuilder.document.shots[supplied.idIndex].id }
         : supplied;
@@ -295,8 +301,9 @@ test('every authored mutation family is one exact undo and redo transition', asy
       await playBuilder.action('redo');
       const redone = JSON.stringify(playBuilder.document);
       return { before, after, undone, redone, response };
-    }, { action, supplied });
+    }, { action, supplied, baseline });
     expect(transition.response).toMatchObject({ ok: true });
+    if (action === 'editShot' && supplied?.field === 'family') expect(transition.response).toMatchObject({ playable: false });
     expect(transition.after, `${action} must change source`).not.toBe(transition.before);
     expect(transition.undone, `${action} undo`).toBe(transition.before);
     expect(transition.redone, `${action} redo`).toBe(transition.after);
