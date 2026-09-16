@@ -4,7 +4,7 @@ Branch: `work/smart-rally-adversarial` at `ebe89d7`.
 
 The new unit suite is `tests/smart-adversarial.unit.mjs`. It exercises the shared effective compiler/rule boundary, Auto Shading inputs, exact 99 hit boundaries, malformed request limits, deterministic seeds, authored-prefix preservation, waypoint retention, family changes, stale proposal authorization, and repeated proposal behavior.
 
-The suite also records one generator failure as a regression. `proposeRandomRally({ length: 3, seed: 5 })` returns a document that passes `evaluateFullCandidate`, has three valid compiled hits, and carries `ending: "stop"` with `intentionalFault: false`. `proposeSmartAdd(source, { seed: 6 })` then returns `ok: false` with `No compatible continuation was found after 48 bounded attempts.` The source family sequence is `serve / return / drop`. This is a valid playable prefix that Smart Add cannot extend, so it does not meet the authoring expectation that a normal draft can keep adding compatible shots without manual repair.
+The review found a generator dead end: `proposeRandomRally({ length: 3, seed: 5 })` returned a document that passed `evaluateFullCandidate`, had three valid compiled hits, and carried `ending: "stop"` with `intentionalFault: false`, while `proposeSmartAdd(source, { seed: 6 })` could not append Shot 4. The source family sequence was `serve / return / drop`. Random generation now performs one bounded forward reachability check (up to the shared 99 hit limit), and Smart Add checks the resulting state for one further continuation before accepting a candidate. This preserves the requested hit count, authored prefix, cancellation, and deterministic metadata while avoiding a valid dead-end state.
 
 Baseline command:
 
@@ -12,5 +12,4 @@ Baseline command:
 node --test tests/smart-adversarial.unit.mjs
 ```
 
-On this branch, the boundary and preservation checks pass; the dead-end regression is expected to fail until generation accounts for future reachability or offers a compatible continuation policy for this state. No production source was changed by this review.
-
+On this branch, the smart-rally, Coach, and adversarial suites pass, including the original Fifth Shot Drop continuation and 100-seed short-rally corpus with five Adds per seed.

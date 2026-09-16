@@ -135,3 +135,16 @@ test('valid generated source can become a nonextendable dead end after bounded S
   assert.equal(proposal.document.shots.length, 4);
   assert.equal(evaluateFullCandidate(proposal.document).ok, true);
 });
+
+test('short generated rallies remain extendable through five varied Adds across 100 seeds', async () => {
+  for (let seed = 0; seed < 100; seed += 1) {
+    let source = (await proposeRandomRally({ length: 3, seed })).document;
+    for (let add = 0; add < 5; add += 1) {
+      const proposal = await proposeSmartAdd(source, { seed: seed * 10 + add });
+      assert.equal(proposal.ok, true, `seed ${seed}, Add ${add + 1}: ${proposal.reason}`);
+      assert.equal(proposal.document.shots.length, 4 + add);
+      assert.equal(evaluateFullCandidate(proposal.document).ok, true);
+      source = proposal.document;
+    }
+  }
+});

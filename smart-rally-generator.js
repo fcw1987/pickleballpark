@@ -169,7 +169,22 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
       const candidate = copy(document);
       candidate.shots.push(candidateShot);
       const result = completeEvaluation(candidate);
-      if (result.ok && result.validShotCount === candidate.shots.length) return { document: candidate, result };
+      if (result.ok && result.validShotCount === candidate.shots.length) {
+        // Smart Add is itself the next user-visible step. Keep a candidate
+        // only when the resulting state has at least one bounded continuation
+        // available, otherwise a valid Add can immediately strand the next
+        // Add. The lookahead uses an independent deterministic stream and is
+        // not exposed as a mutation or progress event.
+        const needsLookahead = generationSeed !== undefined && candidate.shots.length < MAX_SHOTS;
+        if (needsLookahead) {
+          const lookaheadSeed = (generationSeed + Math.imul(index + 1, 0x45d9f3b)) >>> 0;
+          const continuation = await appendNext(candidate, index + 1, seededRandom(lookaheadSeed), {
+            signal, maxAttempts, allowVolley
+          });
+          if (!continuation.document) continue;
+        }
+        return { document: candidate, result };
+      }
     }
   }
   return { document: null, result: { ok: false, reason: `No compatible continuation was found after ${maxAttempts} bounded attempts.` } };
@@ -181,6 +196,12 @@ async function buildRally(length, seed, { signal, onProgress, base = null, maxAt
   delete initial.templateSource;
   initial.generation = { mode: 'random', generatorVersion: SMART_GENERATOR_VERSION, seed: seed >>> 0, requestedHits: length };
   validateDocument(initial);
+  // A valid prefix can still strand both eligible receivers at its final
+  // landing point. Build one bounded lookahead hit whenever the shared limit
+  // permits it, then trim that hit from the returned document. This keeps
+  // Random Rally outputs naturally extendable by Smart Add without changing
+  // the requested length or exposing progress beyond the requested count.
+  const generationLength = Math.min(length + 1, MAX_SHOTS);
   const random = seededRandom(seed);
   const stack = [{ document: initial, attempts: 0 }];
   let backtracks = 0;
@@ -188,12 +209,18 @@ async function buildRally(length, seed, { signal, onProgress, base = null, maxAt
     checkCancelled(signal);
     const state = stack.at(-1);
     const index = state.document.shots.length;
-    if (index >= length) return state.document;
+    if (index >= generationLength) {
+      const result = state.document;
+      if (generationLength > length) result.shots = result.shots.slice(0, length);
+      return result;
+    }
     const next = await appendNext(state.document, index, random, { signal, maxAttempts });
     state.attempts += 1;
     if (next.document) {
       stack.push({ document: next.document, attempts: 0 });
-      onProgress?.({ shot: next.document.shots.length, requestedHits: length, backtracks });
+      if (next.document.shots.length <= length) {
+        onProgress?.({ shot: next.document.shots.length, requestedHits: length, backtracks });
+      }
       if (next.document.shots.length % GENERATION_YIELD_INTERVAL === 0) await waitTurn();
       continue;
     }
