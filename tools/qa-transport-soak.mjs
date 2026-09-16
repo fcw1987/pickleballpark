@@ -4,11 +4,14 @@
 import { chromium, webkit, expect } from '@playwright/test';
 import { QA_SCENARIOS } from '../tests/fixtures/qa-scenarios.mjs';
 import { generatedRally } from './qa-generated.mjs';
+import { proposeRandomRally } from '../smart-rally-generator.js';
 
 const base = process.env.PREVIEW_URL || 'http://127.0.0.1:4184';
 const requested = (process.env.QA_BROWSER || 'chromium,webkit').split(',');
 const engines = { chromium, webkit };
 const results = [];
+const smart = await proposeRandomRally({length:99,seed:12648430});
+if (!smart.ok) throw Error(smart.reason);
 for (const name of requested) {
   const browser = await engines[name].launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -21,7 +24,8 @@ for (const name of requested) {
     await page.clock.pauseAt(new Date('2026-09-13T00:00:01Z'));
     for (const [label, source, repetitions] of [
       ['opening', QA_SCENARIOS.find(s => s.id === 'third-drop-fifth-drop').document, 150],
-      ['maximum', generatedRally({ seed: 0x5eed2026, length: 64 }), 10]
+      ['legacy-64', generatedRally({ seed: 0x5eed2026, length: 64 }), 10],
+      ['smart-99', smart.document, 20]
     ]) {
       for (const view of ['2d', '3d']) {
         const setup = await page.evaluate(async ({ source, view }) => {

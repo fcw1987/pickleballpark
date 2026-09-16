@@ -14,25 +14,27 @@ Status: implementation in progress. This ledger controls the local continuation;
 
 ## Requirements ledger
 
-| ID | Baseline observation / reproduction | Implementation owner | Regression and browser evidence | Status |
-| --- | --- | --- | --- | --- |
-| R01 | Main menu includes the unwanted subtitle; retain the approved title art. | Luna interface | Pending title/divider and viewport captures. | In progress |
-| R02 | Independent native details elements permit unrelated panels to coexist. | Luna interface | Pending ordered menu/chapter/options tests, child selector and focus tests. | In progress |
-| R03 | Routine successful save status occupies the court header and menu. | Luna interface / integration | Pending quiet success, visible failure/conflict and management journeys. | In progress |
-| R04 | Family is a native select; advanced disclosure says Edit by intent; deletion is inside More shot actions. | Luna interface / integration | Pending semantic picker, Customize, structural actions, mobile access. | In progress |
-| R05 | Add selects player3/player1 by team and always Drive after the first shot, without whole-rally validation. Owner reports Fifth Shot Drop continuation failure. | Luna generation / integration | Pending failing-before fixture, validated continuations and rapid Add queue. | In progress |
-| R06 | Random Rally is absent. | Luna generation / integration | Pending exact hit count, seed corpus, variety, cancellation, stale result, UI and offline tests. | In progress |
-| R07 | Shared schema maximum is 64; UI duplicates a literal 64. | Luna generation / interface | Pending 63/64/65/98/99/100 boundaries and invalid request/import tests. | In progress |
-| R08 | Coach explains findings and routes editing; no evaluated transactional repair. | Next Luna wave / integration | Pending automatic repair, consent, downstream rejection, stale result and one-step Undo. | Planned |
-| R09 | Normal presentation uses numbered team labels. | Luna input / next wave | Pending stable starting-role labels, ambiguous layouts, crossings/cameras/views. | In progress |
-| R10 | Environmental Help sign exists; real Help access must remain. | Next Luna wave | Pending both scene paths, asset reproduction, all workspace Help routes. | Planned |
-| R11 | Appearance is a full menu row. | Luna interface | Pending compact accessible toggle in both themes with state preservation. | In progress |
-| R12 | Curved arrows are Undo and Redo; global Space playback is absent. | Luna input / integration | Pending focus/key ownership and single activation tests. | In progress |
-| R13 | Owner reports native Safari sticky seek; historical automation is not a reproduction. | Luna input | Pending event trace, release/cancel/blur/second pointer and browser comparison. | In progress |
-| R14 | Owner reports Chrome More closes during Camera or speed selection. | Luna interface | Pending demonstrated mechanism and native/automated comparison. | In progress |
-| R15 | Owner reports iPhone Edit activates Family immediately. | Luna interface | Pending activation/focus trace, explicit second-tap and remaining selector checks. | In progress |
-| R16 | Editor labels differ by breakpoint; short landscape needs inspection. | Luna interface | Pending Close semantics, scroll, rotation, enlarged text and input preservation. | In progress |
-| R17 | Source branch has no packaged build-info endpoint; v23 alone does not identify runtime. | Next Luna wave / integration | Pending loaded versus server identity, source/package subpath and offline diagnostics. | Planned |
+The implementation is assembled locally. Final combined browser, package, offline, and visual acceptance is still in progress; individual passes below are not a completion declaration.
+
+| ID | Implemented behavior / reproduced finding | Evidence and remaining gate |
+| --- | --- | --- |
+| R01 | Preserved wordmark, diamond and frame; removed subtitle; consistent groups. | Independent UI review and final viewport captures. |
+| R02 | Captured non-bubbling details toggles enforce unrelated-panel ownership; nested controls retain parent. | Luna Chromium/WebKit tests; native Safari menu/chapter observation; broader regression pending. |
+| R03 | Successful saving is quiet at rest, management is secondary; errors/conflicts retained. | Persistence and live status journeys; failed save remains an explicit exception. |
+| R04 | Nine semantic shot choices, labelled Shot actions, Customize, full precision/movement tools. | Keyboard picker tests; fresh phone authoring and dismissal corrections underway. |
+| R05 | Queued Add evaluates complete effective rally and preserves prefix; one Undo per success. | Five rapid Add transactions, Fifth Shot Drop + five, 100 seeds × five Adds. Independent seed-5 dead end reproduced and fixed with bounded lookahead. |
+| R06 | Seeded offline generation returns exact requested contacts in a new saved draft; cancellable and guarded against newer intent. | Boundary corpus, newer-edit cancellation, 99-hit reload; final modal feedback and package checks pending. |
+| R07 | Shared 99-hit maximum; no truncation; 100 and malformed requests rejected. | Schema/import, generator, 99 chapters, legacy 64 and final long workflows. |
+| R08 | Evaluated automatic repair and consented options; protected intent and full downstream validation; atomic Undo. | Stable repair/pin/later-error/no-solution fixtures, metadata-bypass and stale guards; controller tests. |
+| R09 | Immutable IDs gain team-relative starting labels; ambiguous layouts use A/B. | Label units and court accessibility; cameras/crossings and explanatory copy in final review. |
+| R10 | Shared decorative Help landmark and unused raster removed; product banner retained. | 65 generated assets reproduced, static references checked; Help in Builder/Planner tested, Learn in final journey. |
+| R11 | Compact sun/moon control preserves theme preference. | Both-theme and state-preservation regressions. |
+| R12 | Space uses the same Play/Pause command, preserves native control ownership and Undo/Redo. | Keyboard units/browser checks; no transport stepping controls. |
+| R13 | One scrub operation owns native/custom events; release, cancellation, blur and explicit Pause terminate authority. | 19 timeline cases; native Safari 27 click checks. Native CUA drag delivery was insufficient; no physical-device claim. |
+| R14 | Click dismissal excludes native selects; Camera/speed remain inside their task. | Baseline Chromium select click closed parent; corrected parent stays open. Cross-browser focused checks and native comparison. |
+| R15 | Removed hidden duplicate Family select; editor entry must focus a nonediting Close control. | Fresh activation review correcting remaining stale focus route; final touch/keyboard checks pending. |
+| R16 | Close consistently dismisses details; advanced controls remain available. | Compact/landscape/enlarged-text tests and fresh visual correction pass pending. |
+| R17 | Embedded loaded identity and separate no-store server comparison; source endpoint and package metadata; no self-hash. | Identity/delayed-query tests, Help diagnostics and Planner access pass; actual project-subpath/offline/package gate pending. |
 
 ## Shared implementation contracts
 
@@ -42,4 +44,14 @@ Existing documents conservatively retain authored ownership. New automatic choic
 
 ## Verification record
 
-To be populated with actual command outcomes, reproducible seeds, browser versions, isolated visible journeys, and independent findings as integration proceeds. Native Safari, automated WebKit, touch emulation, and physical device testing will be reported separately.
+- The first full Chromium integration sweep stopped at 15 failures: 34 passed and 283 were unrun. Most failures referenced superseded controls; the Help focus test also assumed it contained only one button. These are being migrated without dropping their behavioral checks. One enlarged-text overflow is under corrective UI review.
+- The focused combined WebKit run passed 31/31: timeline, smart authoring controller, Coach, diagnostics and corrected menu ownership. This preceded the later serve-default correction and does not substitute for the final suite.
+- A 99-hit reload discrepancy was traced to a test inspection calling `store.open` on the older draft, thereby changing the last-opened identity. Corrected read-only inspection and reload passed; no persistence loss was found in that case.
+- Explicit flight selection equal to its default previously retained automatic ownership; the controller now records the explicit choice. Undo restores its previous provenance.
+- Coach fixtures are stable authored documents rather than regenerating changing assumptions after algorithm corrections. Current generator outputs receive separate positive corpus coverage.
+- The strengthened source proof initially counted test/docs HTML and JS as runtime. Matching the actual package discovery corrected that mismatch; temporary-repository tests include those nonruntime files.
+- Native Safari, automated WebKit, touch emulation, and physical testing are distinct. No physical iPhone/iPad acceptance is claimed.
+
+## Execution contributions
+
+The harness exposes four active slots including Astra. Real `gpt-5.6-luna` workers, explicitly selected in invocation metadata, implemented input handling, picker/menu UI, generation, Coach, identity tooling, and independent corrections. Subsequent Luna waves own package upgrades, visible phone/native journeys, and full legacy browser regression. Astra integrates and reviews the assembled controller, stale-work guards, domain checks, and final artifact. All work remains on local public-lineage branches; none of these commits has been pushed.
