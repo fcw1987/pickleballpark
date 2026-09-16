@@ -121,13 +121,13 @@ const packageProtectedCoachFixture = protectedPinScenario();
 async function verifyPackageIdentity(page, context, base, sourceRevision) {
   const endpoint = `${base}version.json?diagnostic=package-${Date.now()}`;
   const response = await context.request.get(endpoint);
-  expect(response.status(), 'version endpoint under /pickleboard/').toBe(200);
+  expect(response.status(), 'version endpoint under the project subpath').toBe(200);
   const serverIdentity = await response.json();
   const moduleResponse = await page.evaluate(async () => {
     const response = await fetch(`./build-identity.js?diagnostic=package-${Date.now()}`);
     return { ok: response.ok, status: response.status, contentType: response.headers.get('content-type') };
   });
-  expect(moduleResponse, 'build identity module must be loadable at /pickleboard/').toMatchObject({ ok: true, status: 200 });
+  expect(moduleResponse, 'build identity module must be loadable at the project subpath').toMatchObject({ ok: true, status: 200 });
   const loaded = await page.evaluate(async () => {
     try {
       const identity = await import(`./build-identity.js?diagnostic=package-${Date.now()}`);
@@ -137,7 +137,7 @@ async function verifyPackageIdentity(page, context, base, sourceRevision) {
       throw Error(`${error.message}; metadata=${metadata.slice(0, 240)}`);
     }
   });
-  expect(page.url()).toContain('/pickleboard/');
+  expect(new URL(page.url()).pathname).toBe(scopePath);
   expect(loaded.sourceRevision).toBe(sourceRevision);
   expect(serverIdentity.sourceRevision).toBe(sourceRevision);
   expect(loaded).toEqual(serverIdentity);
