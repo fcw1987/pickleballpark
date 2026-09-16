@@ -1,4 +1,5 @@
 import { boardToWorld, worldToBoard } from './three-d-core.js';
+import { playerLabel } from './player-labels.js';
 const NS='http://www.w3.org/2000/svg';
 const element=(tag,attrs={})=>{const node=document.createElementNS(NS,tag);for(const[key,value]of Object.entries(attrs))node.setAttribute(key,value);return node;};
 export class BuilderCourtTools {
@@ -75,7 +76,7 @@ export class BuilderCourtTools {
         const b=this.builder;if(b.workspace!=='builder'){this.clear();return;}this.bind();
                 this.layer.replaceChildren();const shot=b.selectedShot;if(!shot)return;
         const point=this.project(this.drag?.target || this.placement?.start || shot.target);
-        if(point&&!b.session.playing){const group=element('g');group.append(element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#fff6db','stroke-width':5}),element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#6f365f','stroke-width':3}),element('path',{d:`M${point.x-20} ${point.y}h40 M${point.x} ${point.y-20}v40`,stroke:'#6f365f','stroke-width':2}));const label=element('text',{x:point.x+17,y:point.y-17,fill:'#203449',stroke:'#fff6db','stroke-width':3,'paint-order':'stroke','font-size':13,'font-family':'system-ui','font-weight':700});label.textContent=this.placement?.player?`${Number(this.placement.player.at(-1))<=2?'Green':'Orange'} ${['player1','player3'].includes(this.placement.player)?1:2} pin`:'Target';group.append(label);this.layer.append(group);}
+        if(point&&!b.session.playing){const group=element('g');group.append(element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#fff6db','stroke-width':5}),element('circle',{cx:point.x,cy:point.y,r:13,fill:'none',stroke:'#6f365f','stroke-width':3}),element('path',{d:`M${point.x-20} ${point.y}h40 M${point.x} ${point.y-20}v40`,stroke:'#6f365f','stroke-width':2}));const label=element('text',{x:point.x+17,y:point.y-17,fill:'#203449',stroke:'#fff6db','stroke-width':3,'paint-order':'stroke','font-size':13,'font-family':'system-ui','font-weight':700});label.textContent=this.placement?.player?`${playerLabel(this.placement.player,b.document)} pin`:'Target';group.append(label);this.layer.append(group);}
         for(const annotation of b.document.annotations){
             if(annotation.type!=='path'||typeof annotation.d!=='string')continue;
             const pairs=[...annotation.d.matchAll(/[ML]\s*(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s+(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)/gi)].slice(0,2000);

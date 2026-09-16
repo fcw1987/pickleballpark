@@ -85,6 +85,7 @@ test.describe('court first builder UI harness', () => {
     await expect(page.getByRole('checkbox', { name: 'Auto Shading', exact: true })).toBeVisible();
     await expect(page.getByLabel('Starting condition')).toBeVisible();
     await openMenu(page);
+    await page.getByLabel('Manage plays', { exact: true }).click();
     await page.getByRole('button', { name: 'Import / Export', exact: true }).click();
     await page.getByLabel('Choose JSON file').setInputFiles({ name: 'oversize.json', mimeType: 'application/json', buffer: Buffer.alloc(512 * 1024 + 1) });
     await expect.poll(() => page.evaluate(() => window.__builderActions.at(-1))).toEqual({ type: 'message', payload: 'Import is limited to 512 KiB.' });

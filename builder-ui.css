@@ -286,6 +286,7 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 .builder-shot-card .builder-chapter-menu > summary::before { color: var(--game-accent); }
 .builder-shot-card .builder-chapter-list { left: 4px; right: auto; top: calc(100% + 7px); }
 .builder-context-actions { flex: 0 0 auto; }
+.builder-context-actions .builder-button { white-space: nowrap; }
 
 .builder-menu-panel {
   padding: 10px;
@@ -299,6 +300,8 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 .builder-menu-item:hover, .builder-menu-item:focus-visible { border-color: var(--game-edge); background: color-mix(in srgb, var(--game-highlight) 64%, transparent); box-shadow: none; }
 .builder-menu-item::before { width: 10px; color: var(--game-accent); }
 .builder-menu-item.builder-button-primary { border-color: var(--game-edge); background: var(--game-green); box-shadow: inset 2px 2px 0 color-mix(in srgb, var(--game-paper) 34%, transparent), 2px 2px 0 var(--game-ink); }
+.builder-new-play { margin-block: 7px 3px; }
+.builder-appearance-toggle { width: auto; min-width: 0; }
 .builder-menu-field { margin: 7px 0 2px; }
 .builder-menu-field input { min-height: 40px; background: color-mix(in srgb, var(--game-paper-deep) 54%, var(--game-paper)); }
 .builder-document-menu { margin-top: 4px; padding: 3px 0 5px; border-top: 1px solid color-mix(in srgb, var(--game-edge) 48%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--game-edge) 48%, transparent); }
@@ -405,7 +408,7 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 @media (max-width: 430px) {
   .builder-shot-card { min-width: 3.5rem; }
   .builder-context-actions .builder-button[data-action="add-shot"] { width: 44px; min-width: 44px; padding-inline: 4px; font-size: .72rem; }
-  .builder-context-actions .builder-button[data-action="collapse-inspector"] { width: 44px; min-width: 44px; padding-inline: 4px; font-size: .72rem; }
+  .builder-context-actions .builder-button[data-action="collapse-inspector"] { width: 44px; min-width: 44px; padding-inline: 2px; font-size: .62rem; letter-spacing: -.05em; }
 }
 @media (max-width: 360px) {
   .builder-main-menu > summary { width: 52px; min-width: 52px; padding-inline: 5px; }

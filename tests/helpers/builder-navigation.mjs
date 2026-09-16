@@ -14,7 +14,7 @@ export async function openPlayFileMenu(page) {
   await openBuilderMainMenu(page);
   const files = page.locator('.builder-document-menu');
   if (!(await files.evaluate(node => node.open))) {
-    await page.getByLabel('Play file', { exact: true }).click();
+    await page.getByLabel('Manage plays', { exact: true }).click();
   }
   return files;
 }
@@ -22,7 +22,7 @@ export async function openPlayFileMenu(page) {
 export async function openIntentTab(page, name) {
   const details = page.locator('.builder-shot-details');
   if (!(await details.evaluate(node => node.open))) {
-    await page.getByText('Edit by intent', { exact: true }).click();
+    await details.locator(':scope > summary').click();
   }
   const tab = page.getByRole('tab', { name, exact: true });
   if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
