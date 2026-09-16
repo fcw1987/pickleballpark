@@ -31,7 +31,7 @@ test.describe('Park Desk interface layer', () => {
     await mount(page);
     const ui = page.locator('.builder-ui').last();
     await ui.getByRole('button', { name: 'Edit shot', exact: true }).last().click();
-    await ui.getByText('Customize', { exact: true }).click();
+    await ui.locator('.builder-shot-details > summary').click();
     for (const group of ['target', 'flight', 'players', 'movement', 'coach', 'precision']) {
       await ui.locator(`[data-action="detail-group"][data-group="${group}"]`).click();
       await expect(ui.locator(`[data-detail-group="${group}"]`)).toBeVisible();

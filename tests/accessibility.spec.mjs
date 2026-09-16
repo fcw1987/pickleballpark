@@ -30,10 +30,18 @@ test('menu and help expose modal state, contain focus, and restore their trigger
   await expect(page.locator('#infoModal')).toHaveAttribute('role', 'dialog');
   await expect(page.locator('#infoModal')).toHaveAttribute('aria-modal', 'true');
   await expect(page.locator('#infoClose')).toBeFocused();
-  await page.keyboard.press('Tab');
-  await expect(page.locator('#infoClose')).toBeFocused();
-  await page.keyboard.press('Shift+Tab');
-  await expect(page.locator('#infoClose')).toBeFocused();
+  const infoFocusables = page.locator('#infoModal button:visible, #infoModal summary:visible, #infoModal [tabindex="0"]:visible');
+  const infoFocusableCount = await infoFocusables.count();
+  expect(infoFocusableCount).toBeGreaterThanOrEqual(4);
+  const infoFocusLabels = [];
+  for (let index = 0; index < infoFocusableCount * 2; index += 1) {
+    await page.keyboard.press('Tab');
+    const focus = await page.evaluate(() => ({ inside: Boolean(document.activeElement?.closest('#infoModal')), label: document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent?.trim(), tag: document.activeElement?.tagName }));
+    infoFocusLabels.push(focus.label);
+    expect(focus.inside).toBe(true);
+  }
+  expect(infoFocusLabels).toContain('Check server build');
+  expect(infoFocusLabels).toContain('Copy diagnostics');
   await page.keyboard.press('Escape');
   await expect(page.locator('#infoModal')).toBeHidden();
   await expect(page.locator('#infoToggle')).toHaveAttribute('aria-expanded', 'false');

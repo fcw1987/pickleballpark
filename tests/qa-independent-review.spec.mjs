@@ -113,8 +113,8 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots[63].pace)).toBe(lastPace);
   const editedLast = await page.evaluate(() => structuredClone(playBuilder.document.shots[63]));
 
-  await page.getByText('Shot actions', { exact: true }).click();
-  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.locator('.builder-shot-actions-menu > summary').click();
+  await page.getByRole('button', { name: 'Delete shot', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(63);
   await page.getByLabel('Undo authored edit').click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(64);

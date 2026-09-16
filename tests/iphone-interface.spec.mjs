@@ -21,8 +21,9 @@ test.describe('portrait selected-shot authoring sheet', () => {
     const inspector = ui.locator('.builder-inspector');
     await expect(inspector).toHaveAttribute('data-surface', 'nonmodal-sheet');
     await expect(ui.getByRole('button',{name:'Close editor',exact:true})).toBeVisible();
-    await expect(ui.getByText('Customize', { exact: true })).toBeVisible();
-    await ui.getByText('Customize', { exact: true }).click();
+    const customize = ui.locator('.builder-shot-details > summary');
+    await expect(customize).toBeVisible();
+    await customize.click();
     await ui.getByRole('tab', { name: 'Flight', exact: true }).click();
     await expect(ui.getByLabel('Arc', { exact: true })).toBeVisible();
     await ui.getByRole('tab', { name: 'Movement', exact: true }).click();
@@ -35,7 +36,7 @@ test.describe('portrait selected-shot authoring sheet', () => {
     await mount(page);
     const ui = page.locator('.builder-ui').last();
     await ui.getByRole('button', { name: 'Edit shot', exact: true }).click();
-    await ui.getByText('Customize', { exact: true }).click();
+    await ui.locator('.builder-shot-details > summary').click();
     await ui.getByRole('tab', { name: 'Movement', exact: true }).click();
     const inspector = ui.locator('.builder-inspector');
     await inspector.evaluate(node => { node.scrollTop = node.scrollHeight; });

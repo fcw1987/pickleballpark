@@ -61,12 +61,17 @@ test('Menu Help and Appearance are discoverable and Help traps focus', async ({ 
   await expect(help).toBeVisible();
   await expect(help).toContainText('Choose a shot chapter');
 
+  const focusables = help.locator('button:visible, summary:visible, [tabindex="0"]:visible');
+  const focusableCount = await focusables.count();
+  expect(focusableCount).toBeGreaterThanOrEqual(4);
   const focused = [];
-  for (let i = 0; i < 5; i += 1) {
+  for (let i = 0; i < focusableCount * 2; i += 1) {
     await page.keyboard.press('Tab');
-    focused.push(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')));
+    expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true);
+    focused.push(await page.evaluate(() => document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent?.trim()));
   }
-  expect(new Set(focused)).toEqual(new Set(['Close help and information']));
+  expect(focused).toContain('Check server build');
+  expect(focused).toContain('Copy diagnostics');
   await closeHelp(page);
 
   await openMenu(page);
@@ -94,7 +99,7 @@ test.describe('touch and responsive surfaces', () => {
       const beforeDocument = await authoredSnapshot(page);
 
       // Two taps on the disabled replay token are an ignored gesture, not an authoring edit.
-      const player = page.locator('[aria-label^="Player 1,"]').first();
+      const player = page.locator('[aria-label^="player1,"]').first();
       const before = await player.getAttribute('aria-label');
       const playerBox = await player.boundingBox();
       expect(playerBox).not.toBeNull();
@@ -104,7 +109,7 @@ test.describe('touch and responsive surfaces', () => {
       await expect.poll(() => player.getAttribute('aria-label')).toBe(before);
 
       // Start a drag, lift outside the court, then confirm the ignored gesture leaves the document intact.
-      const player2 = page.locator('[aria-label^="Player 2,"]').first();
+      const player2 = page.locator('[aria-label^="player2,"]').first();
       const player2Before = await player2.getAttribute('aria-label');
       const box = await player2.boundingBox();
       if (box) {
@@ -134,8 +139,8 @@ test('selected edit panel scrolls, rapid view/detail toggles settle, and resize 
   for (let i = 0; i < 4; i += 1) {
     await switchCourtView(page, '2d');
     await switchCourtView(page, '3d');
-    await page.getByText('Customize', { exact: true }).click();
-    await page.getByText('Customize', { exact: true }).click();
+    await page.locator('.builder-shot-details > summary').click();
+    await page.locator('.builder-shot-details > summary').click();
   }
   await page.setViewportSize({ width: 430, height: 932 });
   await page.setViewportSize({ width: 844, height: 390 });

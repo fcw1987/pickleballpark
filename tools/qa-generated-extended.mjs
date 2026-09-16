@@ -192,7 +192,7 @@ export function extendedInvalidDocuments() {
     }),
     validationMutation('wrong-team', document => { document.players.player1.team = 'orange'; }),
     validationMutation('bad-assistance-team', document => { document.assistance.team = 'spectators'; }),
-    validationMutation('too-many-annotations', document => { document.annotations = Array.from({ length: 65 }, () => ({})); }),
+    validationMutation('too-many-annotations', document => { document.annotations = Array.from({ length: 100 }, () => ({})); }),
     validationMutation('serve-method-on-drive', document => { document.shots[0].serveMethod = 'volley'; }),
     validationMutation('too-many-shots', document => {
       document.shots = Array.from({ length: 100 }, (_, index) => ({

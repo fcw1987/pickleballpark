@@ -7,7 +7,7 @@ const fileMenu=async page=>{await menu(page);const details=page.locator('.builde
 const namePlay=async(page,value)=>{await fileMenu(page);await page.getByLabel('Play title').fill(value);await page.getByLabel('Play title').press('Tab');};
 const chooseChapter=async(page,number)=>{const picker=page.getByLabel('Choose shot chapter');if(!(await picker.locator('..').evaluate(node=>node.open)))await picker.click();await page.getByRole('button',{name:`Customize Shot ${number}`,exact:true}).click();};
 const editShot=async page=>{const inspector=page.locator('.builder-inspector');if(await inspector.evaluate(node=>node.classList.contains('builder-inspector-collapsed')))await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();};
-const details=async(page,group='Precision')=>{const summary=page.getByText('Customize',{exact:true});if(!(await summary.locator('..').evaluate(node=>node.open)))await summary.click();const tab=page.getByRole('tab',{name:group,exact:true});if(await tab.getAttribute('aria-selected')!=='true')await tab.click();};
+const details=async(page,group='Precision')=>{const summary=page.locator('.builder-shot-details > summary');if(!(await summary.locator('..').evaluate(node=>node.open)))await summary.click();const tab=page.getByRole('tab',{name:group,exact:true});if(await tab.getAttribute('aria-selected')!=='true')await tab.click();};
 test('authors a longer rally through contextual controls, saves copies, and reopens named work',async({page})=>{
  await open(page);await namePlay(page,'Wide serve rally');await editShot(page);await details(page);
  await page.getByLabel('Target width',{exact:true}).fill('7');await page.getByLabel('Target width',{exact:true}).press('Tab');

@@ -9,7 +9,7 @@ const details=async(page,group='Precision')=>{await edit(page);return openIntent
 const finish=async page=>{await page.locator('.builder-inspector [data-action=collapse-inspector]').click();};
 const field=async(page,name,value)=>{const control=page.getByLabel(name,{exact:true});if(name==='Play title'&&!await control.isVisible())await openPlayFileMenu(page);await control.fill(String(value));await control.press('Enter');if(name==='Play title')await page.locator('.builder-main-menu').evaluate(node=>{node.open=false;});};
 const menu=async page=>page.locator('.builder-main-menu > summary').click();
-const chapter=async(page,number,label)=>{const picker=page.locator('.builder-chapter-menu');if(!await picker.locator('.builder-chapter-list').isVisible())await picker.locator('summary').click();await picker.getByRole('button',{name:new RegExp(`Shot ${number} · ${label}`)}).click();};
+const chapter=async(page,number,label)=>{const picker=page.locator('.builder-chapter-menu');if(!await picker.locator('.builder-chapter-list').isVisible())await picker.locator(':scope > summary').click();await picker.getByRole('button',{name:new RegExp(`Shot ${number} · ${label}`)}).click();};
 
 test('complete portrait custom rally and detailed movement survive views, reload, lessons and planner',async({browser})=>{
  const record=process.env.IPHONE_RECORD; if(record)await mkdir(record,{recursive:true});

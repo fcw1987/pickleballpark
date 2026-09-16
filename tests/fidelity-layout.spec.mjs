@@ -75,7 +75,7 @@ test('enlarged shot choices remain readable and intent tabs retain useful names'
   const family = page.getByLabel(/^Shot family:/);
   await expect(family).toBeVisible();
   expect(await family.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
-  await page.getByText('Customize', { exact: true }).click();
+  await page.locator('.builder-shot-details > summary').click();
   await page.getByRole('tab', { name: 'Movement', exact: true }).click();
   await expect(page.getByRole('tab', { name: 'Movement', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tabpanel', { name: 'Movement', exact: true })).toBeVisible();
@@ -133,7 +133,7 @@ test('wide court reclaims the editor column when details close', async ({ page }
 test('intent tabs support keyboard selection without changing the rally', async ({ page }) => {
   await page.goto('/'); await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.getByRole('button', { name: 'Edit shot', exact: true }).first().click();
-  await page.getByText('Customize', { exact: true }).click();
+  await page.locator('.builder-shot-details > summary').click();
   const before = await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }));
   await page.getByRole('tab', { name: 'Target', exact: true }).focus();
   for (const [key, name] of [['ArrowRight', 'Flight'], ['End', 'Precision'], ['ArrowRight', 'Target'], ['ArrowLeft', 'Precision'], ['Home', 'Target']]) {
