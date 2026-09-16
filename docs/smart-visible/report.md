@@ -2,7 +2,7 @@
 
 This bounded review was run from `47a2d82` on branch `work/smart-rally-visible-review` with the isolated preview at `http://127.0.0.1:4197/`. No Pages settings, remote branch, or deployment state was changed. The preview used the repository source tree directly; packaged delivery was not exercised in this worker.
 
-The fresh scripted acceptance covers Chromium at 390×844, 320×568, 430×932, and 1440×900. It captures the basic court, Add, Customize, family picker, Random Rally, Coach review, and menu states in `evidence/`. The test is `tests/smart-visible-review.spec.mjs` and passed 5/5 after the focused UI corrections.
+The fresh scripted acceptance covers Chromium at 390×844, 320×568, 430×932, 1440×900, and 844×390 landscape. It captures the basic court, Add, Customize, family picker, Random Rally, Coach review, 200% text, and menu states in `evidence/`. The test is `tests/smart-visible-review.spec.mjs` and passed 7/7 after the focused UI corrections. `tests/smart-visible-random.spec.mjs` passed the visible 99-hit generation and Escape cancellation journeys (2/2).
 
 The native browser pass used the visible controls in a fresh Safari Private Browsing window and a fresh Brave tab, both against port 4197. The CUA surface did not expose exact application versions; the report therefore records the browser products and renderer context rather than inventing version numbers. Existing Safari and Brave tabs were left open.
 
@@ -12,10 +12,14 @@ The native browser pass used the visible controls in a fresh Safari Private Brow
 * Court placement collapsed the editor when the gesture completed. In the visible journey, a target tap could leave the user looking at the current valid timeline chapter instead of the edited shot. The UI now detects placement completion, restores the editor, and focuses Close. The 390px test asserts this directly.
 * The primary menu action was labeled “Copy diagnostics” even though it opens Help and diagnostics first. It is now “Build diagnostics”; the actual diagnostics surface retains its “Copy diagnostics” action.
 * Random generation failures previously left the dialog open with the failure only in the obscured page message. The result error now appears in the dialog's live alert status while Cancel and Escape remain available during pending work.
+* The expanded family picker now claims the inspector width and lays its nine choices out in two compact columns. Hitter remains a normal full-width field below it, and selecting a family closes the native details disclosure through controlled state rather than allowing stale DOM `open` state to reopen it.
+* At 200% text, the 390px document now reports no horizontal overflow. The compact header keeps the current chapter visible and yields the permanent player label; short 844×390 landscape keeps the editor from intercepting the menu and bounds the playback/menu panels to the viewport.
 
-The fresh visible journey also exposed a wording issue for the integration owner: changing the opening Serve to Return correctly preserved the authored choice and surfaced Coach, but the transient message says “The selected family was kept” even though the family changed. The message should be changed to explain that the requested family was applied and the resulting rally needs review. This report leaves that model-owned copy disposition to integration.
+The fresh visible journey exposed a wording issue during integration: changing the opening Serve to Return correctly preserved the authored choice and surfaced Coach, but the transient message had said “The selected family was kept” even though the family changed. Root integration corrected this to explain that the requested family was applied and the resulting rally needs review.
 
-At 390px, the family picker is readable and scrollable; the Hitter column is visually sparse while the picker is open. At 320px, the menu fits without horizontal overflow. The court still contains the decorative `PICKLEBALL PARK` world sign in this source snapshot; removal belongs to the scene/assets owner.
+At 390px, the family picker is readable and scrollable in two columns, with Hitter below it. At 320px, the menu fits without horizontal overflow. The court still contains the decorative `PICKLEBALL PARK` world sign in this source snapshot; that banner is preserved by the mission and is separate from the removed Help sign.
+
+`tests/smart-visible-video.spec.mjs` passed with normal-speed video capture at 390×844. The clip `evidence/phone-390-workflow.webm` shows Add, a seven-hit Random Rally, then a prearranged visible Import JSON fixture followed by a family-change Coach repair review; the fixture is explicitly staged so the repair state is deterministic.
 
 ## Native browser evidence
 
@@ -29,6 +33,9 @@ The initial non-private Safari tab retained a previously saved invalid eight-sho
 
 * `phone-390-start.png`, `phone-390-add.png`, `phone-390-customize-after-placement.png`
 * `phone-390-picker.png`, `phone-390-random.png`, `phone-390-coach.png`
+* `phone-390-large-text-authoring.png`, `landscape-844-large-text-menus.png`
+* `phone-390-random-99-progress.png`, `phone-390-random-99-complete.png`, `phone-390-random-cancel-progress.png`
 * `phone-320-menu.png`, `phone-430-menu.png`, `desktop-1440-menu.png`
+* `phone-390-workflow.webm` (normal-speed visible workflow clip)
 
 These are bounded local evidence captures from the test at normal motion. No private drafts, unrelated tabs, or personal paths are included in the images.

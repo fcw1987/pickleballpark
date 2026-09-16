@@ -37,6 +37,11 @@ test.describe('smart rally visible acceptance', () => {
     const familyPicker = page.locator('.builder-family-picker');
     if (!(await familyPicker.evaluate(element => element.open))) await page.locator('.builder-family-summary').click();
     await expect(page.getByRole('listbox', { name: 'Shot families' })).toBeVisible();
+    const pickerBox = await page.locator('.builder-choice-family').boundingBox();
+    const hitterBox = await page.locator('.builder-choice-hitter').boundingBox();
+    expect(pickerBox?.width).toBeGreaterThan(300);
+    expect(hitterBox?.width).toBeGreaterThan(300);
+    expect(await page.locator('.builder-family-options').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(2);
     await page.screenshot({ path: `${evidenceDir}/phone-390-picker.png`, fullPage: true });
 
     await page.locator('.builder-main-menu > summary').click();
@@ -50,8 +55,34 @@ test.describe('smart rally visible acceptance', () => {
     // actionable Coach review in the same editor surface.
     if (!(await familyPicker.evaluate(element => element.open))) await page.locator('.builder-family-summary').click();
     await page.locator('.builder-family-option').filter({ hasText: 'Return' }).click();
+    await expect(familyPicker).not.toHaveAttribute('open', '');
     await expect(page.getByRole('button', { name: 'Fix for me', exact: true })).toBeVisible();
     await page.screenshot({ path: `${evidenceDir}/phone-390-coach.png`, fullPage: true });
+  });
+
+  test('200% text at 390px keeps advanced authoring inside the viewport', async ({ page }) => {
+    await freshBuilder(page, { width: 390, height: 844 });
+    await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; window.dispatchEvent(new Event('resize')); });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+    await expect(page.getByLabel('Hitter', { exact: true })).toBeVisible();
+    await page.screenshot({ path: `${evidenceDir}/phone-390-large-text-authoring.png`, fullPage: true });
+  });
+
+  test('200% landscape keeps editor, menu, and playback options touchable', async ({ page }) => {
+    await freshBuilder(page, { width: 844, height: 390 });
+    await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; window.dispatchEvent(new Event('resize')); });
+    await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+    await page.locator('.builder-main-menu > summary').click();
+    await expect(page.getByLabel('Menu', { exact: true })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(844);
+    await page.locator('.builder-context-menu > summary').click({ force: true });
+    const playbackPanel = page.locator('.builder-context-menu > .builder-menu-panel');
+    await expect(playbackPanel).toBeVisible();
+    const panelBox = await playbackPanel.boundingBox();
+    expect(panelBox?.x).toBeGreaterThanOrEqual(0);
+    expect((panelBox?.x || 0) + (panelBox?.width || 0)).toBeLessThanOrEqual(844);
+    await page.screenshot({ path: `${evidenceDir}/landscape-844-large-text-menus.png`, fullPage: true });
   });
 
   for (const viewport of [

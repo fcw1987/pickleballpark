@@ -168,6 +168,10 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   let detailGroup = 'target';
   let handednessOpen = false;
   let assistanceOpen = false;
+  // A family choice is a controlled state transition. The native details
+  // element is still allowed to open for browsing, but its stale DOM `open`
+  // value must not win when the choice itself triggers a rerender.
+  let preserveFamilyPickerState = false;
   let importFileGeneration = 0;
   let pendingField = false;
   let exportedBackup = '';
@@ -298,7 +302,8 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     renderedDocument = doc; renderedSelectedShotId = current.selectedShotId; renderedView = current.view; renderedWorkspace = current.workspace; renderedWaypointKey = waypointKey; renderedSaveErrorKey = saveErrorKey; renderedProposalKey = proposalKey; renderedCoachOptionsKey = coachOptionsKey;
     const previousAdvanced = root.querySelector('.builder-advanced'); if (previousAdvanced) advancedOpen = previousAdvanced.open;
     const oldDetails=root.querySelector('.builder-shot-details');if(oldDetails)shotDetailsOpen=oldDetails.open;
-    const oldFamilyPicker=root.querySelector('.builder-family-picker');if(oldFamilyPicker)familyPickerOpen=oldFamilyPicker.open;
+    const oldFamilyPicker=root.querySelector('.builder-family-picker');if(oldFamilyPicker && !preserveFamilyPickerState)familyPickerOpen=oldFamilyPicker.open;
+    preserveFamilyPickerState = false;
     const oldHanded=root.querySelector('.builder-handedness');if(oldHanded)handednessOpen=oldHanded.open;
     const oldAssistance=root.querySelector('.builder-assistance');if(oldAssistance)assistanceOpen=oldAssistance.open;
     const mainMenuOpen=Boolean(root.querySelector('.builder-main-menu')?.open);
@@ -571,7 +576,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'workspace-planner') rerenderAction('workspace', 'planner');
     else if (action === 'workspace-builder') rerenderAction('workspace', 'builder');
     else if (action === 'add-shot') { fire('pauseForEditing'); inspectorManualCollapsed=true; userInspectorExpanded=null; rerenderAction('addShot'); }
-    else if (action === 'choose-family') { familyPickerOpen = false; rerenderAction('editShot', { field: 'family', value: target.dataset.family }); }
+    else if (action === 'choose-family') { familyPickerOpen = false; preserveFamilyPickerState = true; rerenderAction('editShot', { field: 'family', value: target.dataset.family }); }
     else if (action === 'new') rerenderAction('new');
     else if (action === 'templates') openTemplateDialog('learn');
     else if (action === 'template-open') { closeDialog(templateDialog); rerenderAction(target.dataset.kind === 'open' ? 'open' : 'template', target.dataset.id); }

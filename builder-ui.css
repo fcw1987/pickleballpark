@@ -463,3 +463,33 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
   .builder-choice-field::before { left: 6px; }
   .builder-choice-field::after { right: 7px; }
 }
+
+/* The family menu is an authoring surface, so opening it earns the full
+   inspector width. A two-column list keeps all nine choices scannable on a
+   phone while the Hitter select stays a normal, compact field below it. */
+.builder-choice-grid:has(.builder-family-picker[open]) { grid-template-columns: minmax(0,1fr); }
+.builder-choice-grid:has(.builder-family-picker[open]) .builder-choice-family,
+.builder-choice-grid:has(.builder-family-picker[open]) .builder-choice-hitter { grid-column: 1; min-width: 0; }
+.builder-choice-grid:has(.builder-family-picker[open]) .builder-family-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.builder-choice-grid:has(.builder-family-picker[open]) .builder-family-option { min-width: 0; min-height: 52px; }
+.builder-choice-grid:has(.builder-family-picker[open]) .builder-family-option-copy { min-width: 0; }
+.builder-choice-grid:has(.builder-family-picker[open]) .builder-family-option-copy small { overflow-wrap: anywhere; }
+
+/* At 200% browser text zoom the large-text class is active. Keep the phone
+   header's controls bounded and let the chapter chip carry the current
+   chapter; the permanent player label is secondary at this width. */
+@media (max-width: 700px) {
+  .builder-large-text .builder-main-menu > summary { width: 54px; min-width: 54px; flex: 0 0 54px; padding-inline: 5px; }
+  .builder-shot-card-player, .builder-large-text .builder-shot-card-player { display: none; }
+  .builder-large-text .builder-shot-card .builder-chapter-menu { min-width: 0; width: 100%; }
+  .builder-large-text .builder-shot-card .builder-chapter-menu > summary { max-width: 100%; min-width: 44px; }
+  .builder-large-text .builder-choice-grid:has(.builder-family-picker[open]) { grid-template-columns: minmax(0,1fr); }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .builder-large-text .builder-main-menu > summary { width: 54px; min-width: 54px; flex: 0 0 54px; padding-inline: 5px; }
+  .builder-large-text .builder-shot-card-player { display: none; }
+  .builder-large-text .builder-chapter-list,
+  .builder-large-text .builder-menu-panel { max-height: calc(100dvh - 120px); }
+  .builder-large-text .builder-context-menu > .builder-menu-panel { right: 0; max-width: calc(100vw - 16px); }
+}
