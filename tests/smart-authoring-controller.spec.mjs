@@ -83,7 +83,7 @@ test('Coach automatic repair is one reversible transaction',async({page})=>{
     const after=structuredClone(playBuilder.document),valid=playBuilder.compiled.validShotCount;
     await playBuilder.action('undo');const undone=structuredClone(playBuilder.document);
     await playBuilder.action('redo');return {before,fixed,after,valid,undone,redone:playBuilder.document};
-  },automaticRepairScenario());
+  },await automaticRepairScenario());
   expect(result.fixed.ok).toBe(true);expect(result.valid).toBe(result.after.shots.length);
   expect(result.undone).toEqual(result.before);expect(result.redone).toEqual(result.after);
 });

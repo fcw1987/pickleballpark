@@ -23,7 +23,7 @@ function teamLabels(document, team) {
   const ordered = distinctSides
     ? [...points].sort((a, b) => (leftIsLowX ? a.point.x - b.point.x : b.point.x - a.point.x) || a.id.localeCompare(b.id))
     : [...points].sort((a, b) => a.id.localeCompare(b.id));
-  return { [ordered[0].id]: `${title(team)} Left`, [ordered[1].id]: `${title(team)} Right` };
+  return { [ordered[0].id]: `${title(team)} ${distinctSides ? 'Left' : 'A'}`, [ordered[1].id]: `${title(team)} ${distinctSides ? 'Right' : 'B'}` };
 }
 
 export function getPlayerLabels(document) {
