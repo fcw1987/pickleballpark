@@ -2,7 +2,7 @@
 
 Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same pixel art park.
 
-The unpublished pixel-game candidate uses contextual original game menus and one Play/Pause plus a seekable shot-chapter timeline. See [the local candidate report](docs/PIXEL_GAME_REPORT.md) for screenshots, recordings, exact verification, and remaining native Safari/device acceptance. Publication is not approved by this local checkpoint.
+The local Smart Rally candidate adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the current requirements and verification ledger](docs/SMART_RALLY_STATUS.md). This local continuation does not change the public fidelity candidate.
 
 Pickleball Park remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
 
@@ -12,7 +12,8 @@ Phone authoring now includes a shallow shot editor, full movement/contact detail
 
 ## Features
 
-- Custom rallies up to 64 shots, validated targets, valid-prefix preview, movement pins, Undo/Redo, and a shared playhead
+- Custom rallies up to 99 shots, validated targets, valid-prefix preview, movement pins, Undo/Redo, and a shared playhead
+- Validated Smart Add continuations, seeded offline Random Rally, and reversible Coach repairs with explicit permission for protected intent
 - Independent Auto Shading and Suggested Coverage guides; a bounded instructional approximation, not optimal strategy
 - Named local drafts, Save As, and bounded versioned JSON backups
 

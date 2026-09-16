@@ -63,11 +63,11 @@ Coverage remains a separate derived heuristic. `recompileAssistedDocument(docume
 }
 ```
 
-Court coordinates are feet in the established 20 by 44 board coordinate system. Initial athletes and the ball may use the supported 8-foot apron. Shot landing targets remain on court. Recipe IDs are unique, persist across reorder operations, and appear in derived event IDs independently of displayed shot numbers. The source limit is 64 shots and movement paths are limited to 8 waypoints per recipe.
+Court coordinates are feet in the established 20 by 44 board coordinate system. Initial athletes and the ball may use the supported 8-foot apron. Shot landing targets remain on court. Recipe IDs are unique, persist across reorder operations, and appear in derived event IDs independently of displayed shot numbers. The source limit is 99 shots and movement paths are limited to 8 waypoints per recipe.
 
 Schema version 1 fixes `player1` and `player2` to Green and `player3` and `player4` to Orange. This keeps persisted identity aligned with the approved character artwork and both current renderers. Handedness remains independently editable. Team reassignment requires a later schema and renderer contract rather than silently displaying the wrong athlete.
 
-`validateDocument` rejects unknown schema/model versions, missing structures, invalid enums, duplicate IDs, non-finite or out-of-range coordinates, oversized titles, more than 64 recipes or annotations, and annotations larger than 32,768 serialized characters. Annotations are inert JSON data. Import code must also impose a byte limit before parsing; storage/import owns that transport-level check.
+`validateDocument` rejects unknown schema/model versions, missing structures, invalid enums, duplicate IDs, non-finite or out-of-range coordinates, oversized titles, more than 99 recipes or annotations, and annotations larger than 32,768 serialized characters. Annotations are inert JSON data. Import code must also impose a byte limit before parsing; storage/import owns that transport-level check.
 
 ## Targets, contacts, and movement
 

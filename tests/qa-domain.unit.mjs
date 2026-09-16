@@ -250,12 +250,12 @@ test('standalone corpus runner reports fixed seeds, counts, boundary samples, an
   assert.deepEqual(report, {
     seeds: QA_SEEDS,
     lengths: QA_LENGTHS,
-    validDocuments: 87,
-    generatedDocuments: 15,
+    validDocuments: 96,
+    generatedDocuments: 24,
     pairwiseDocuments: 72,
-    validShots: 390,
+    validShots: 1176,
     invalidDocuments: 9,
-    sampledBoundaryPoints: 4386,
+    sampledBoundaryPoints: 13032,
     shrink: {
       strategy: 'shortest-failing-prefix', originalLength: 8, shrunkLength: 2,
       removedShotIds: ['generated-3', 'generated-4', 'generated-5', 'generated-6', 'generated-7', 'generated-8']

@@ -3,12 +3,12 @@
 import { pathToFileURL } from 'node:url';
 
 import { compileDocument } from '../play-compiler.js';
-import { createStarterDocument, validateDocument } from '../play-document.js';
+import { createStarterDocument, validateDocument, MAX_SHOTS } from '../play-document.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { FEET_TO_METERS, samplePlayBall, samplePlayState } from '../three-d-core.js';
 
 export const QA_SEEDS = Object.freeze([0x00c0ffee, 0x01352531, 0x5eed2026]);
-export const QA_LENGTHS = Object.freeze([1, 3, 8, 30, 64]);
+export const QA_LENGTHS = Object.freeze([1, 3, 8, 30, 64, 65, 98, MAX_SHOTS]);
 
 const clone = value => structuredClone(value);
 const FAMILIES = Object.freeze(['return', 'drive', 'drop', 'dink', 'volley', 'reset', 'lob', 'overhead']);
@@ -23,7 +23,7 @@ export function seededRandom(seed) {
 const choose = (items, next) => items[Math.floor(next() * items.length)];
 
 export function generatedRally({ seed, length }) {
-  if (!Number.isInteger(length) || length < 1 || length > 64) throw new RangeError('Generated rally length must be 1–64.');
+  if (!Number.isInteger(length) || length < 1 || length > MAX_SHOTS) throw new RangeError(`Generated rally length must be 1–${MAX_SHOTS}.`);
   const next = seededRandom(seed);
   const x = choose([4, 7, 10, 13, 16], next);
   const document = createStarterDocument();
