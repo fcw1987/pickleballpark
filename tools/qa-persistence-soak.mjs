@@ -123,12 +123,12 @@ for (let seed = 1; seed <= seedCount; seed += 1) {
 }
 
 const nearLimit = createStarterDocument();
-while (nearLimit.shots.length < 64) {
+while (nearLimit.shots.length < MAX_SHOTS) {
   const shot = copy(nearLimit.shots.at(-1));
   shot.id = `limit-${nearLimit.shots.length + 1}`;
   nearLimit.shots.push(shot);
 }
-nearLimit.shots[63].movement = {
+nearLimit.shots.at(-1).movement = {
   intent: 'manual', pinned: true, target: { x: 8.25, y: 12.75 },
   waypoints: [{ x: 15.5, y: 5.25 }, { x: 11.125, y: 9.875 }]
 };
@@ -175,7 +175,7 @@ process.stdout.write(`${JSON.stringify({
   totalRedos,
   persistenceChecks,
   nearLimitShots: nearLimit.shots.length,
-  retainedWaypointCount: nearLimit.shots[63].movement.waypoints.length,
+  retainedWaypointCount: nearLimit.shots.at(-1).movement.waypoints.length,
   quotaAtomic: true,
   staleRevisionConflict: true
 }, null, 2)}\n`);

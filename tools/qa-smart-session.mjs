@@ -22,9 +22,14 @@ for(const [name,engine]of Object.entries({chromium,webkit})){
     const timed=async(label,fn)=>{const start=performance.now(),result=await fn();check(result?.ok!==false,`${label}: ${result?.error}`);samples.push({label,ms:performance.now()-start});return result;};
     for(let round=0;round<rounds;round++){
       await b.action('new');
+      await timed('one Add',()=>b.action('addShot',{seed:round*11}));
+      await b.action('undo');check(b.document.shots.length===0,'single Add Undo');
       await timed('five rapid Adds',()=>Promise.all(Array.from({length:5},(_,i)=>b.action('addShot',{seed:round*11+i}))).then(values=>({ok:values.every(v=>v.ok)})));
       check(b.document.shots.length===5&&b.compiled.validShotCount===5,'rapid Add count/validity');
       const five=JSON.stringify(b.document);
+      await b.action('selectShot',b.document.shots[2].id);
+      await timed('family change',()=>b.action('editShot',{field:'family',value:b.document.shots[2].family==='drop'?'drive':'drop'}));
+      await b.action('undo');check(JSON.stringify(b.document)===five,'family change Undo changed intent');
       await b.action('deleteShot',b.document.shots[2].id);await b.action('undo');check(JSON.stringify(b.document)===five,'delete/Undo changed intent');
       await b.action('redo');await b.action('undo');check(JSON.stringify(b.document)===five,'Redo/Undo changed intent');
       for(let seek=0;seek<20;seek++)b.seek(b.session.duration*seek/19);

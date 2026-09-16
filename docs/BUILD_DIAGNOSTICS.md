@@ -27,9 +27,12 @@ After the intended source commit is frozen, stamp metadata locally:
 
 ```bash
 npm run stamp:build -- --source-revision <source-sha> \
-  --cache-version <cache-label> --status packaged
+  --cache-version <cache-label> --status local
+# Commit only the generated metadata, producing metadata revision M.
+npm run pin:local-candidate -- <full-metadata-revision-M>
+# Commit the updated package fixture and checks, producing package revision P.
 npm run build:site
-npm run verify:deployment-artifact -- dist <package-sha>
+npm run verify:deployment-artifact -- dist <full-package-revision-P>
 ```
 
 `stamp:build` writes `version.json` and the generated `build-metadata.js`
@@ -37,14 +40,14 @@ snapshot. It verifies that the current runtime bytes and paths match the
 explicit source revision; docs and generated metadata changes do not make that
 runtime comparison dirty. A changed runtime is reported as development and
 cannot be stamped as packaged or verified. The existing
-`pin:local-candidate <full-source-sha>` workflow then expands the
+`pin:local-candidate <full-metadata-revision-M>` workflow then expands the
 reviewed runtime fixture, updates its exact digest/count contract, and must be
 run only after the runtime is frozen. It does not publish, push, or alter Pages
 settings.
 
-The local publishing phases are: freeze runtime source revision S; stamp
-metadata for S; commit the generated metadata as metadata revision M; pin the
-exact package candidate P and build the artifact; then run artifact
+The local packaging phases are: freeze runtime source revision S; stamp
+metadata for S; commit the generated metadata as metadata revision M; pin M's
+exact runtime files; commit that fixture and its checks as P; build P's artifact; then run artifact
 verification. `verified` is reserved for metadata carrying matching source and
 package proof. The Running build is the startup snapshot; a queried endpoint is
 reported separately as Server build and cannot replace it.
