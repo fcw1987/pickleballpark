@@ -1,5 +1,4 @@
 import { createStarterDocument } from '../../play-document.js';
-import { proposeRandomRally } from '../../smart-rally-generator.js';
 
 const clone = value => structuredClone(value);
 
@@ -41,13 +40,35 @@ function threeShot(document, third = {}) {
 // a normal authoring session permits. Coach must preserve that explicit target
 // and repair only a derived recovery movement downstream.
 export async function automaticRepairScenario() {
-  const generated = await proposeRandomRally({ length: 6, seed: 1 });
-  if (!generated.ok) throw new Error(generated.reason);
-  const document = clone(generated.document);
-  document.id = 'coach-generated-target-edit';
-  document.title = 'Coach generated target edit';
-  document.shots[1].target = { x: 20, y: 0 };
-  return document;
+  // Stable fixture captured from smart-rally-v1 seed 0. Keep this explicit so
+  // future generator improvements cannot silently change the Coach regression
+  // into a valid tactical draft (the prior generated seed-1 fixture did that).
+  return clone({
+    schemaVersion: 1,
+    modelVersion: 1,
+    id: 'coach-generated-target-edit',
+    title: 'Coach generated target edit',
+    initialLayout: {
+      player1: { x: 15, y: -1 }, player2: { x: 5, y: -1 },
+      player3: { x: 5, y: 42 }, player4: { x: 15, y: 30 }, ball: { x: 16.2, y: 0 }
+    },
+    players: {
+      player1: { team: 'green', handedness: 'right' }, player2: { team: 'green', handedness: 'right' },
+      player3: { team: 'orange', handedness: 'right' }, player4: { team: 'orange', handedness: 'left' }
+    },
+    shots: [
+      { id: 'smart-shot-1', family: 'serve', hitter: 'player2', receiver: 'auto', contactStyle: 'auto', target: { x: 8, y: 39 }, arc: 'medium', pace: 'medium', movement: { intent: 'hold', pinned: false }, authoring: { ownership: 'automatic', fields: ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'] }, serveMethod: 'volley' },
+      { id: 'smart-shot-2', family: 'return', hitter: 'player3', receiver: 'auto', contactStyle: 'auto', target: { x: 10, y: 8 }, arc: 'high', pace: 'firm', movement: { intent: 'hold', pinned: false }, authoring: { ownership: 'automatic', fields: ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'] } },
+      { id: 'smart-shot-3', family: 'dink', hitter: 'player1', receiver: 'auto', contactStyle: 'auto', target: { x: 0, y: 44 }, arc: 'low', pace: 'soft', movement: { intent: 'hold', pinned: false }, authoring: { ownership: 'automatic', fields: ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'] } },
+      { id: 'smart-shot-4', family: 'drive', hitter: 'player4', receiver: 'auto', contactStyle: 'auto', target: { x: 15.5, y: 10 }, arc: 'low', pace: 'soft', movement: { intent: 'hold', pinned: false }, authoring: { ownership: 'automatic', fields: ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'] } },
+      { id: 'smart-shot-5', family: 'volley', hitter: 'player1', receiver: 'auto', contactStyle: 'auto', target: { x: 4.5, y: 31 }, arc: 'medium', pace: 'soft', movement: { intent: 'hold', pinned: false }, authoring: { ownership: 'automatic', fields: ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'] } },
+      { id: 'smart-shot-6', family: 'reset', hitter: 'player4', receiver: 'auto', contactStyle: 'auto', target: { x: 10, y: 13 }, arc: 'high', pace: 'soft', movement: { intent: 'hold', pinned: false }, authoring: { ownership: 'automatic', fields: ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'] } }
+    ],
+    annotations: [],
+    assistance: { autoShading: false, showGuides: false, team: 'both' },
+    opening: 'serve', ending: 'stop', intentionalFault: false,
+    generation: { mode: 'random', generatorVersion: 'smart-rally-v1', seed: 0, requestedHits: 6 }
+  });
 }
 
 // The pin is authored. Releasing or moving it can be shown only as a consented

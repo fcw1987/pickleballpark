@@ -16,6 +16,9 @@ const clone = value => structuredClone(value);
 test('Coach repairs an automatic derived movement through the complete downstream rally', async () => {
   const source = await automaticRepairScenario();
   const before = clone(source);
+  const sourceEvaluation = evaluateFullCandidate(source);
+  assert.equal(sourceEvaluation.ok, false);
+  assert.match(sourceEvaluation.reason, /cannot reach/);
   const proposal = await proposeCoachFix(source);
 
   assert.equal(proposal.ok, true);
@@ -24,9 +27,9 @@ test('Coach repairs an automatic derived movement through the complete downstrea
   assert.equal(proposal.operation, 'coach-fix');
   assert.equal(proposal.document.shots.length, source.shots.length);
   assert.equal(evaluateFullCandidate(proposal.document).ok, true);
-  assert.equal(proposal.document.shots[2].movement.intent, 'advance');
+  assert.equal(proposal.document.shots[3].movement.intent, 'advance');
   assert.deepEqual(source, before, 'Coach evaluates a copy and leaves source intent untouched');
-  assert.deepEqual(proposal.changes.map(change => change.path), ['shots[2].movement']);
+  assert.deepEqual(proposal.changes.map(change => change.path), ['shots[3].movement']);
   assert.equal(proposal.changes[0].ownership, 'automatic');
 });
 
