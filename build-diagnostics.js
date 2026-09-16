@@ -5,7 +5,7 @@ import {
   snapshotBuildIdentity,
 } from './build-identity.js';
 
-const SAFE_STATUS = /^(development|local|packaged|verified|unavailable|error)$/;
+const SAFE_STATUS = /^(development|local|packaged|verified|unavailable|not-found|http-error|invalid|error)$/;
 
 const publicIdentity = identity => {
   const normalized = normalizeBuildIdentity(identity);
@@ -17,8 +17,11 @@ const publicIdentity = identity => {
     sourceRevision: normalized.sourceRevision,
     sourceBranch: normalized.sourceBranch,
     sourceState: normalized.sourceState,
+    sourceRevisionVerified: normalized.sourceRevisionVerified,
+    runtimeMatchesSource: normalized.runtimeMatchesSource,
     packageRevision: normalized.packageRevision,
     evidenceRevision: normalized.evidenceRevision,
+    packageVerified: normalized.packageVerified,
     runtimeSha256: normalized.runtimeSha256,
     runtimeDigest: normalized.runtimeDigest,
     runtimeFileset: normalized.runtimeFileset,
@@ -44,7 +47,7 @@ export function formatBuildDiagnostics({ running = BUILD_IDENTITY, server = null
     `Source state: ${loaded.sourceState}`,
     `Package revision: ${loaded.packageRevision || 'unavailable'}`,
     `Evidence revision: ${loaded.evidenceRevision || 'unavailable'}`,
-    `Runtime SHA-256: ${loaded.runtimeSha256 || loaded.runtimeDigest || 'unavailable'}`,
+    `Runtime fileset digest: ${loaded.runtimeSha256 || loaded.runtimeDigest || 'unavailable'}`,
     `Runtime fileset: ${loaded.runtimeFileset.include}; excludes ${loaded.runtimeFileset.exclusions.join(', ')}`,
     `Cache version: ${loaded.cacheVersion || 'unavailable'}`,
     `Build time: ${loaded.buildTime || 'development source'}`,
@@ -83,6 +86,8 @@ export function createBuildDiagnostics({
   const running = snapshotBuildIdentity(loadedIdentity);
   let server = null;
   let serverFetch = { status: 'not-requested', cache: 'no-store', path: versionPath };
+  let requestGeneration = 0;
+  let activeController = null;
 
   const snapshot = () => ({
     running: snapshotBuildIdentity(running),
@@ -93,28 +98,50 @@ export function createBuildDiagnostics({
   const queryServerBuild = async () => {
     if (typeof fetchImpl !== 'function') {
       serverFetch = { status: 'unavailable', cache: 'no-store', path: versionPath };
-      server = { status: 'unavailable', reason: 'fetch-unavailable' };
+      server = { status: 'unavailable', reason: 'fetch-unavailable', offline: true };
       return snapshot();
     }
+    const generation = ++requestGeneration;
+    if (activeController) activeController.abort();
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    activeController = controller;
     const url = requestURL(versionPath, locationHref);
     serverFetch = { status: 'pending', cache: 'no-store', path: versionPath };
     try {
       const response = await fetchImpl(url, {
         cache: 'no-store',
         headers: { accept: 'application/json', 'cache-control': 'no-cache' },
+        ...(controller ? { signal: controller.signal } : {}),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
+      if (generation !== requestGeneration) return snapshot();
+      if (!response.ok) {
+        const notFound = response.status === 404;
+        server = { status: notFound ? 'not-found' : 'http-error', reason: `HTTP ${response.status}`, offline: false };
+        serverFetch = { status: notFound ? 'not-found' : 'http-error', cache: 'no-store', path: versionPath };
+        return snapshot();
+      }
+      let payload;
+      try {
+        payload = await response.json();
+      } catch {
+        server = { status: 'invalid', reason: 'version-endpoint-invalid', offline: false };
+        serverFetch = { status: 'invalid', cache: 'no-store', path: versionPath };
+        return snapshot();
+      }
+      if (generation !== requestGeneration) return snapshot();
       server = { status: safeServerStatus(payload?.status), identity: normalizeBuildIdentity(payload) };
       serverFetch = { status: 'complete', cache: 'no-store', path: versionPath };
-    } catch {
-      server = { status: 'unavailable', reason: 'version-endpoint-unavailable' };
+    } catch (error) {
+      if (generation !== requestGeneration) return snapshot();
+      server = { status: 'unavailable', reason: 'version-endpoint-unavailable', offline: true };
       serverFetch = { status: 'unavailable', cache: 'no-store', path: versionPath };
+    } finally {
+      if (generation === requestGeneration) activeController = null;
     }
     return snapshot();
   };
 
-  const report = () => formatBuildDiagnostics({ running, server, environment: server?.status === 'unavailable' ? 'offline' : 'online' });
+  const report = () => formatBuildDiagnostics({ running, server, environment: server?.offline ? 'offline' : 'online' });
   const copy = async () => {
     const text = report();
     if (!clipboard || typeof clipboard.writeText !== 'function') return { ok: false, reason: 'clipboard-unavailable', text };

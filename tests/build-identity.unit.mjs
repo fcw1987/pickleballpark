@@ -6,7 +6,7 @@ test('development identity is explicit and has digest exclusions', () => {
   assert.equal(BUILD_IDENTITY.product, 'Pickleball Park');
   assert.equal(BUILD_IDENTITY.status, 'development');
   assert.equal(BUILD_IDENTITY.sourceRevision, null);
-  assert.deepEqual(BUILD_IDENTITY.runtimeFileset.exclusions, ['version.json', 'build-identity.js', 'build-info.json', 'runtime-manifest.json']);
+  assert.deepEqual(BUILD_IDENTITY.runtimeFileset.exclusions, ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json']);
   assert.equal(isBuildIdentityVerified(BUILD_IDENTITY), false);
 });
 
@@ -33,4 +33,16 @@ test('snapshots are detached and cannot be changed by caller mutation', () => {
   const value = snapshotBuildIdentity({ sourceBranch: 'branch', runtimeFileset: { exclusions: ['x'] } });
   assert.throws(() => { value.runtimeFileset.exclusions.push('draft.json'); }, TypeError);
   assert.equal(value.sourceBranch, 'branch');
+});
+
+test('untrusted packaged and verified claims are demoted without matching proof', () => {
+  assert.equal(normalizeBuildIdentity({ status: 'packaged', sourceState: 'clean', sourceRevision: '1'.repeat(40) }).status, 'development');
+  assert.equal(normalizeBuildIdentity({ status: 'verified', sourceState: 'clean', sourceRevision: '1'.repeat(40), runtimeSha256: '2'.repeat(64) }).status, 'development');
+});
+
+test('metadata labels are bounded and cannot carry paths', () => {
+  const identity = normalizeBuildIdentity({ sourceBranch: '/Users/fdub/private', cacheVersion: 'x'.repeat(161), developmentStatus: '../../drafts' });
+  assert.equal(identity.sourceBranch, null);
+  assert.equal(identity.cacheVersion, null);
+  assert.equal(identity.developmentStatus, 'unverified local source');
 });

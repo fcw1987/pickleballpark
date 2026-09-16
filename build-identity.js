@@ -3,35 +3,18 @@
  * an embedded snapshot: a later request for version.json must never change the
  * build that the running page reports.
  *
- * tools/stamp-build.mjs replaces the object between the metadata markers after
- * a source revision has been frozen.  The development object below is truthful
- * for an unstamped checkout and contains no machine paths, drafts, or secrets.
+ * tools/stamp-build.mjs replaces the generated build-metadata.js snapshot after
+ * a source revision has been frozen.  The development object is truthful for
+ * an unstamped checkout and contains no machine paths, drafts, or secrets.
  */
-
-const BUILD_IDENTITY_METADATA_START = {
-  schemaVersion: 1,
-  product: 'Pickleball Park',
-  status: 'development',
-  developmentStatus: 'unverified local source',
-  sourceRevision: null,
-  sourceBranch: 'work/smart-rally-diagnostics',
-  sourceState: 'dirty',
-  packageRevision: null,
-  evidenceRevision: null,
-  runtimeSha256: null,
-  runtimeDigest: null,
-  runtimeFileset: {
-    algorithm: 'sha256',
-    include: 'static application runtime files',
-    exclusions: ['version.json', 'build-identity.js', 'build-info.json', 'runtime-manifest.json'],
-  },
-  cacheVersion: null,
-  buildTime: null,
-};
+import { BUILD_IDENTITY_METADATA } from './build-metadata.js';
 
 const SHA1 = /^[0-9a-f]{40}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
 const statuses = new Set(['development', 'local', 'packaged', 'verified']);
+const MAX_STRING_LENGTH = 160;
+const SAFE_LABEL = /^[A-Za-z0-9][A-Za-z0-9._/@:+ -]*$/;
+const SAFE_PATH = /^[A-Za-z0-9][A-Za-z0-9._/@:+ -]*$/;
 
 const copy = value => {
   if (Array.isArray(value)) return value.map(copy);
@@ -46,7 +29,14 @@ const freeze = value => {
 };
 
 const optionalSha = (value, pattern) => typeof value === 'string' && pattern.test(value) ? value : null;
-const optionalString = value => typeof value === 'string' && value.length > 0 ? value : null;
+const optionalString = (value, pattern = SAFE_LABEL) => (
+  typeof value === 'string' && value.length > 0 && value.length <= MAX_STRING_LENGTH && pattern.test(value)
+    && !value.startsWith('/') && !value.includes('\\') && !value.split('/').includes('..')
+    ? value
+    : null
+);
+
+const optionalBoolean = value => typeof value === 'boolean' ? value : false;
 
 /**
  * Normalize metadata received from a checked-in or fetched version endpoint.
@@ -57,11 +47,21 @@ export function normalizeBuildIdentity(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
   const fileset = source.runtimeFileset && typeof source.runtimeFileset === 'object' ? source.runtimeFileset : {};
   const exclusions = Array.isArray(fileset.exclusions)
-    ? fileset.exclusions.filter(item => typeof item === 'string' && item.length > 0 && !item.startsWith('/') && !item.includes('\\') && !item.split('/').includes('..'))
-    : ['version.json', 'build-identity.js', 'build-info.json', 'runtime-manifest.json'];
+    ? fileset.exclusions.filter(item => typeof item === 'string' && item.length > 0 && item.length <= 120 && SAFE_PATH.test(item) && !item.startsWith('/') && !item.includes('\\') && !item.split('/').includes('..')).slice(0, 16)
+    : ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json'];
   const sourceState = ['clean', 'dirty', 'unknown'].includes(source.sourceState) ? source.sourceState : 'unknown';
   const requestedStatus = statuses.has(source.status) ? source.status : 'development';
-  const status = sourceState === 'dirty' && requestedStatus === 'verified' ? 'development' : requestedStatus;
+  const sourceRevisionVerified = optionalBoolean(source.sourceRevisionVerified);
+  const runtimeMatchesSource = optionalBoolean(source.runtimeMatchesSource);
+  const packageVerified = optionalBoolean(source.packageVerified);
+  const sourceProof = sourceRevisionVerified
+    && runtimeMatchesSource
+    && sourceState === 'clean'
+    && optionalSha(source.sourceRevision, SHA1)
+    && optionalSha(source.runtimeSha256, SHA256);
+  const status = requestedStatus === 'verified' && !(sourceProof && packageVerified)
+    ? 'development'
+    : (requestedStatus === 'packaged' && !sourceProof ? 'development' : requestedStatus);
   const normalized = {
     schemaVersion: Number.isInteger(source.schemaVersion) ? source.schemaVersion : 1,
     product: source.product === 'Pickleball Park' ? source.product : 'Pickleball Park',
@@ -70,8 +70,11 @@ export function normalizeBuildIdentity(value = {}) {
     sourceRevision: optionalSha(source.sourceRevision, SHA1),
     sourceBranch: optionalString(source.sourceBranch),
     sourceState,
+    sourceRevisionVerified,
+    runtimeMatchesSource,
     packageRevision: optionalSha(source.packageRevision, SHA1),
     evidenceRevision: optionalSha(source.evidenceRevision, SHA1),
+    packageVerified,
     runtimeSha256: optionalSha(source.runtimeSha256, SHA256),
     runtimeDigest: optionalSha(source.runtimeDigest, SHA256),
     runtimeFileset: {
@@ -85,9 +88,8 @@ export function normalizeBuildIdentity(value = {}) {
   return freeze(normalized);
 }
 
-// BUILD_IDENTITY_METADATA_START is a stable replacement anchor for the stamp
-// script.  Do not derive the running identity from a later network response.
-export const BUILD_IDENTITY = normalizeBuildIdentity(BUILD_IDENTITY_METADATA_START);
+// Do not derive the running identity from a later network response.
+export const BUILD_IDENTITY = normalizeBuildIdentity(BUILD_IDENTITY_METADATA);
 
 /** Return a detached immutable snapshot for a page's startup state. */
 export function snapshotBuildIdentity(identity = BUILD_IDENTITY) {
@@ -99,7 +101,12 @@ export const captureLoadedBuildIdentity = snapshotBuildIdentity;
 
 export function isBuildIdentityVerified(identity = BUILD_IDENTITY) {
   const current = normalizeBuildIdentity(identity);
-  return current.status === 'verified' && current.sourceState === 'clean' && Boolean(current.sourceRevision && current.runtimeSha256);
+  return current.status === 'verified'
+    && current.sourceState === 'clean'
+    && current.sourceRevisionVerified
+    && current.runtimeMatchesSource
+    && current.packageVerified
+    && Boolean(current.sourceRevision && current.runtimeSha256);
 }
 
 export function buildIdentityLabel(identity = BUILD_IDENTITY) {

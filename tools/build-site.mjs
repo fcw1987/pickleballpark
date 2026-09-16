@@ -7,6 +7,9 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 // Frozen release contract, independently compared with the locally retained approved source.
 const approvedManifestSha256 = '678199f3d3136f12bce20451507524111b81b0b5f4659655c5a372959abe7f0b';
 const approved = JSON.parse(await readFile('tests/fixtures/approved-runtime.json'));
+const version = JSON.parse(await readFile('version.json'));
+if (version.product !== 'Pickleball Park' || !Number.isInteger(version.schemaVersion)) throw Error('Invalid version.json metadata');
+if (!version.sourceRevision || !/^[0-9a-f]{40}$/.test(version.sourceRevision)) throw Error('version.json must identify a full source revision');
 const rootFiles = await readdir('.');
 const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(async e => e.isDirectory() ? walk(`${dir}/${e.name}`) : `${dir}/${e.name}`))).flat();
 const actualPaths = [...rootFiles.filter(p => /\.(?:js|css|html)$/.test(p) || ['manifest.json', 'version.json'].includes(p)), ...await walk('icons'), ...await walk('vendor'), ...(await walk('assets')).filter(p => !p.startsWith('assets/source/'))].sort();
@@ -28,5 +31,5 @@ const manifest = JSON.stringify({ approvedSource: approved.source, files }, null
 if (hash(manifest) !== approvedManifestSha256) throw Error('Approved manifest changed; a new reviewed baseline is required');
 await writeFile('dist/runtime-manifest.json', manifest);
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-await writeFile('dist/build-info.json', JSON.stringify({ product: 'Pickleball Park', revision, approvedSource: approved.source, runtimeManifestSha256: hash(manifest), runtimeFiles: files.length, runtimeBytes: files.reduce((n, f) => n + f.bytes, 0), publicationMetadata: ['build-info.json', 'runtime-manifest.json'] }, null, 2) + '\n');
+await writeFile('dist/build-info.json', JSON.stringify({ product: 'Pickleball Park', revision, approvedSource: approved.source, sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null, runtimeManifestSha256: hash(manifest), runtimeFiles: files.length, runtimeBytes: files.reduce((n, f) => n + f.bytes, 0), publicationMetadata: ['build-info.json', 'runtime-manifest.json'] }, null, 2) + '\n');
 console.log(`Packaged ${files.length} unchanged approved runtime files (${files.reduce((n, f) => n + f.bytes, 0)} bytes), plus 2 publication metadata files; revision ${revision}`);

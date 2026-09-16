@@ -10,9 +10,12 @@ const running = snapshotBuildIdentity({
   sourceRevision: '1'.repeat(40),
   sourceBranch: 'integration/test-source',
   sourceState: 'clean',
+  sourceRevisionVerified: true,
+  runtimeMatchesSource: true,
   packageRevision: '2'.repeat(40),
   evidenceRevision: '3'.repeat(40),
   runtimeSha256: '4'.repeat(64),
+  packageVerified: true,
   cacheVersion: 'pickleboard-static-test',
   buildTime: '2026-09-15T12:00:00.000Z',
 });
@@ -67,3 +70,28 @@ test('formatter distinguishes running and server labels', () => {
   assert.match(report, /Runtime fileset: static application runtime files/);
 });
 
+test('a missing endpoint is online but unavailable, rather than offline', async () => {
+  const diagnostics = createBuildDiagnostics({ loadedIdentity: running, fetchImpl: async () => ({ ok: false, status: 404 }) });
+  const result = await diagnostics.queryServerBuild();
+  assert.equal(result.server.status, 'not-found');
+  assert.equal(result.serverFetch.status, 'not-found');
+  assert.match(diagnostics.report(), /Environment: online/);
+});
+
+test('an older server response cannot overwrite a newer query', async () => {
+  const resolvers = [];
+  const diagnostics = createBuildDiagnostics({
+    loadedIdentity: running,
+    fetchImpl: async url => new Promise((resolve, reject) => {
+      const revision = String(url).includes('diagnostic=') ? resolvers.length + 1 : 0;
+      resolvers.push({ revision, resolve, reject });
+    }),
+  });
+  const first = diagnostics.queryServerBuild();
+  const second = diagnostics.queryServerBuild();
+  resolvers[1].resolve({ ok: true, json: async () => ({ ...running, sourceRevision: 'b'.repeat(40) }) });
+  await second;
+  resolvers[0].resolve({ ok: true, json: async () => ({ ...running, sourceRevision: 'a'.repeat(40) }) });
+  await first;
+  assert.equal(diagnostics.snapshot().server.identity.sourceRevision, 'b'.repeat(40));
+});

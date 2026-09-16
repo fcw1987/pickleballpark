@@ -9,15 +9,17 @@ The runtime imports `build-identity.js` during startup and captures that object
 as the Running build. `build-diagnostics.js` can make one explicit request to
 `./version.json` with `cache: "no-store"` and a cache-busting query. The result
 is labelled Server build and remains separate from the loaded snapshot. If the
-request fails, the report keeps the Running build and labels the server status
-unavailable; offline use therefore remains truthful.
+request fails, the report keeps the Running build. Network failure is labelled
+offline; a reachable server that returns 404 is labelled not-found and remains
+online, so a missing endpoint is not misreported as disconnected use.
 
 Identity fields distinguish the source revision, package revision, and review
 evidence revision. `runtimeSha256` is the digest of a canonical list of static
-runtime file paths and bytes. The fileset explicitly excludes generated
-`version.json`, `build-identity.js`, `build-info.json`, and
-`runtime-manifest.json` so metadata cannot hash itself recursively. The package
-manifest still records the exact bytes of the generated files.
+runtime file paths and bytes; it does not claim to hash the browser's loaded
+memory. The fileset explicitly excludes generated `version.json`,
+`build-metadata.js`, `build-info.json`, and `runtime-manifest.json` so metadata
+cannot hash itself recursively. Runtime logic in `build-identity.js` remains
+covered. The package manifest still records the exact bytes of generated files.
 
 ## Local source and package flow
 
@@ -30,15 +32,24 @@ npm run build:site
 npm run verify:deployment-artifact -- dist <package-sha>
 ```
 
-`stamp:build` writes `version.json` and embeds the same snapshot in
-`build-identity.js`. It reports a dirty tree as development/unverified. The
-existing `pin:local-candidate <full-source-sha>` workflow then expands the
+`stamp:build` writes `version.json` and the generated `build-metadata.js`
+snapshot. It verifies that the current runtime bytes and paths match the
+explicit source revision; docs and generated metadata changes do not make that
+runtime comparison dirty. A changed runtime is reported as development and
+cannot be stamped as packaged or verified. The existing
+`pin:local-candidate <full-source-sha>` workflow then expands the
 reviewed runtime fixture, updates its exact digest/count contract, and must be
 run only after the runtime is frozen. It does not publish, push, or alter Pages
 settings.
+
+The local publishing phases are: freeze runtime source revision S; stamp
+metadata for S; commit the generated metadata as metadata revision M; pin the
+exact package candidate P and build the artifact; then run artifact
+verification. `verified` is reserved for metadata carrying matching source and
+package proof. The Running build is the startup snapshot; a queried endpoint is
+reported separately as Server build and cannot replace it.
 
 The package build copies `version.json` under the same subpath as the rest of
 the static application. A source-branch server and a `dist/` server can
 therefore be checked at `/version.json` (or the equivalent project subpath)
 without depending on a legacy build-info endpoint.
-

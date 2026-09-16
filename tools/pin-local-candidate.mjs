@@ -8,6 +8,7 @@ const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
 if(git('rev-parse',source)!==source)throw Error('Unknown source revision');
 const walk=(dir)=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):`${dir}/${e.name}`);
 const paths=[...readdirSync('.').filter(p=>/\.(?:js|css|html)$/.test(p)||['manifest.json','version.json'].includes(p)),...walk('icons'),...walk('vendor'),...walk('assets').filter(p=>!p.startsWith('assets/source/'))].sort();
+for(const required of ['version.json','build-identity.js','build-metadata.js'])if(!paths.includes(required))throw Error(`Runtime metadata is missing from package path set: ${required}`);
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const files=paths.map(path=>{const bytes=readFileSync(path),committed=execFileSync('git',['show',`${source}:${path}`],{maxBuffer:20*1024*1024});if(!bytes.equals(committed))throw Error(`Uncommitted or different runtime: ${path}`);return {path,bytes:bytes.length,sha256:sha(bytes)};});
 const old=JSON.parse(readFileSync('tests/fixtures/approved-runtime.json'));

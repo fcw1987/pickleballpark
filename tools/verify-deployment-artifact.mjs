@@ -39,6 +39,7 @@ export function validateDeploymentArtifact(root, expectedRevision) {
   if (!Array.isArray(manifest.files) || manifest.files.length !== 99) throw new Error('Runtime manifest must contain exactly 99 files');
 
   const runtimePaths = manifest.files.map((file) => file.path);
+  if (!runtimePaths.includes('version.json')) throw new Error('Artifact is missing version.json');
   if (runtimePaths.some((file) => !safePath(file))) throw new Error('Runtime manifest contains an unsafe path');
   if (new Set(runtimePaths).size !== runtimePaths.length) throw new Error('Runtime manifest contains duplicate paths');
   const expectedPaths = [...runtimePaths, ...METADATA_FILES].sort();
@@ -53,6 +54,15 @@ export function validateDeploymentArtifact(root, expectedRevision) {
   }
   if (info.runtimeFiles !== manifest.files.length) throw new Error('Runtime file count mismatch');
   if (info.runtimeBytes !== runtimeBytes) throw new Error('Runtime byte count mismatch');
+  const version = JSON.parse(readFileSync(path.join(root, 'version.json')));
+  if (version.product !== 'Pickleball Park' || version.sourceRevision !== info.sourceRevision) throw new Error('Version metadata source mismatch');
+  if (!/^[0-9a-f]{40}$/.test(version.sourceRevision ?? '')) throw new Error('Version metadata source revision is invalid');
+  if (info.runtimeDigest !== (version.runtimeSha256 || null)) throw new Error('Build metadata runtime digest mismatch');
+  const exclusions = ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json'];
+  if (JSON.stringify(version.runtimeFileset?.exclusions) !== JSON.stringify(exclusions)) throw new Error('Version metadata exclusion set mismatch');
+  const runtimeFiles = manifest.files.filter((file) => !exclusions.includes(file.path));
+  const expectedRuntimeDigest = sha256(Buffer.from(`${JSON.stringify({ algorithm: 'sha256', files: runtimeFiles })}\n`));
+  if (version.runtimeSha256 !== expectedRuntimeDigest) throw new Error('Version metadata runtime digest mismatch');
   return { revision: expectedRevision, runtimeFiles: manifest.files.length, runtimeBytes, manifestSha256: APPROVED_MANIFEST_SHA256 };
 }
 
