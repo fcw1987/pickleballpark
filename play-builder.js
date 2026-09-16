@@ -347,7 +347,8 @@ export class PlayBuilder {
             if(shot?.authoring?.fields)shot.authoring.fields=shot.authoring.fields.filter(field=>field!==match[2]);
         }
         this.applyProposalDocument(authorized.document,this.proposalGeneration);
-        this.message=`Applied the reviewed Coach changes: ${changes.map(change=>change.path.replace(/shots\[(\d+)\]/,(_,n)=>`Shot ${Number(n)+1}`)).join(', ')}. Undo is available.`;
+        const labels=changes.map(change=>change.path.replace(/shots\[(\d+)\]/,(_,n)=>`Shot ${Number(n)+1}`).replace(/player[1-4]/g,id=>playerLabel(id,this.document)).replace(/initialLayout/g,'Starting positions').replace(/playerMovement/g,'partner movement').replace(/\./g,' · '));
+        this.message=`Applied the reviewed Coach changes: ${labels.join(', ')}. Undo is available.`;
         this.render();return {ok:true};
     }
     cancelPendingView() {
