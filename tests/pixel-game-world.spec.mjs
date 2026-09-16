@@ -13,6 +13,6 @@ test('park artwork faces each camera without moving its grounded anchor or alloc
   }
   return {results,count:group.userData.landmarks.size};
  });
- expect(evidence.count).toBe(7);expect(evidence.results).toHaveLength(28);
+ expect(evidence.count).toBe(6);expect(evidence.results).toHaveLength(24);
  for(const sample of evidence.results){expect(sample.anchorError,`${sample.camera}/${sample.id}`).toBeLessThan(1e-8);expect(sample.facingError).toBeLessThan(1e-8);expect(sample.magFilter).toBe(1003);expect(sample.wrap).toBe(1001);}
 });

@@ -264,11 +264,13 @@ test('every authored mutation family is one exact undo and redo transition', asy
     ['title', 'Mutation title'],
     ['flight', { arc: 'low', pace: 'firm' }],
     ['editShot', { field: 'family', value: 'lob' }],
+    // Smart Add must see the untouched starter continuation before this
+    // matrix deliberately pins a movement target below.
+    ['addShot'],
     ['editMovement', { player: 'player1', field: 'target', value: { x: 8.5, y: 12.25 } }],
     ['handedness', { id: 'player1', value: 'left' }],
     ['assistance', { field: 'showGuides', value: true }],
     ['assistance', { field: 'autoShading', value: true }],
-    ['addShot'],
     ['duplicateShot'],
     ['moveShot', { delta: -1, idIndex: 1 }],
     ['deleteShot']
@@ -276,6 +278,12 @@ test('every authored mutation family is one exact undo and redo transition', asy
 
   for (const [action, supplied] of cases) {
     const transition = await page.evaluate(async ({ action, supplied }) => {
+      // Family edits on the opening shot are intentionally protected by the
+      // serve rule. Exercise this mutation on the second authored shot so the
+      // transition remains a valid semantic edit and can be undone exactly.
+      if (action === 'editShot' && supplied?.field === 'family') {
+        await playBuilder.action('selectShot', playBuilder.document.shots[1].id);
+      }
       const value = action === 'moveShot'
         ? { delta: supplied.delta, id: playBuilder.document.shots[supplied.idIndex].id }
         : supplied;
