@@ -86,12 +86,13 @@ function familyChoices(index, opening, previous, next, { allowVolley = true } = 
   return shuffled(choices, next);
 }
 
-function targetFor(team, family, next) {
+function targetFor(team, family, next, openingPoint) {
   const x = choose([4.5, 7, 10, 13, 15.5], next);
   if (family === 'serve') {
-    // The starter server is on the near side. This diagonal service box is
-    // also used by the compiler's serviceBoxForServer check.
-    return { x: choose([3.5, 5, 6.5, 8], next), y: choose([33, 35, 37, 39, 41], next) };
+    const x = choose([3.5, 5, 6.5, 8], next);
+    // Preserve an authored starting side. The serve lands diagonally across
+    // from the ball's opening contact, including a left-box custom setup.
+    return { x: openingPoint?.x < 10 ? 20 - x : x, y: choose([33, 35, 37, 39, 41], next) };
   }
   const y = team === 'green'
     ? choose(family === 'lob' ? [31, 35, 39, 41] : [26, 28, 31, 34, 37, 40], next)
@@ -102,6 +103,14 @@ function targetFor(team, family, next) {
 function hittersFor(document, index, previous, next) {
   const priorTeam = previous ? document.players[previous.hitter].team : null;
   const team = priorTeam ? opposite(priorTeam) : document.players.player1.team;
+  if (index === 0 && document.opening === 'serve') {
+    const ball = document.initialLayout.ball;
+    const nearest = [...TEAM_PLAYERS[team]].sort((a,b) => {
+      const distance = id => Math.hypot(document.initialLayout[id].x-ball.x, document.initialLayout[id].y-ball.y);
+      return distance(a)-distance(b) || a.localeCompare(b);
+    });
+    return nearest.slice(0,1);
+  }
   const required = previous?.receiver && previous.receiver !== 'auto' ? [previous.receiver] : TEAM_PLAYERS[team];
   return shuffled(required.filter(id => PLAYER_IDS.includes(id)), next);
 }
@@ -126,7 +135,7 @@ function shotCandidate(document, index, family, hitter, next, { smartAdd = false
     hitter,
     receiver: 'auto',
     contactStyle,
-    target: targetFor(team, family, next),
+    target: targetFor(team, family, next, document.initialLayout.ball),
     arc: family === 'lob' ? 'high' : choose(ARCS, next),
     pace: family === 'dink' || family === 'drop' || family === 'reset' ? choose(['soft', 'soft', 'medium'], next) : choose(PACES, next),
     movement: { intent: smartAdd ? 'advance' : 'hold', pinned: false },

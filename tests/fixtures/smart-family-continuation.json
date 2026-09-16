@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 1,
+  "id": "random-rally-0-5",
+  "title": "Random Rally · 5 hits · seed 0",
+  "initialLayout": {
+    "player1": {
+      "x": 15,
+      "y": -1
+    },
+    "player2": {
+      "x": 5,
+      "y": -1
+    },
+    "player3": {
+      "x": 5,
+      "y": 42
+    },
+    "player4": {
+      "x": 15,
+      "y": 30
+    },
+    "ball": {
+      "x": 16.2,
+      "y": 0
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "smart-shot-1",
+      "family": "serve",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 8,
+        "y": 39
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "serveMethod": "volley"
+    },
+    {
+      "id": "smart-shot-2",
+      "family": "return",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 8
+      },
+      "arc": "high",
+      "pace": "firm",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      }
+    },
+    {
+      "id": "smart-shot-3",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 31
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      }
+    },
+    {
+      "id": "smart-shot-4",
+      "family": "drive",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 10
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      }
+    },
+    {
+      "id": "smart-shot-5",
+      "family": "volley",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 31
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "serve",
+  "ending": "stop",
+  "intentionalFault": false,
+  "generation": {
+    "mode": "random",
+    "generatorVersion": "smart-rally-v1",
+    "seed": 0,
+    "requestedHits": 5
+  }
+}

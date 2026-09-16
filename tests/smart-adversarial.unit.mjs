@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const fixture=name=>JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`,import.meta.url)));
 
 import { createStarterDocument, MAX_SHOTS, validateDocument } from '../play-document.js';
 import {
@@ -55,9 +57,7 @@ test('malformed lengths and nonfinite bounded search options never return a cand
 });
 
 test('Smart Add preserves an authored prefix, including explicit target and flight fields', async () => {
-  const generated = await proposeRandomRally({ length: 7, seed: 1 });
-  assert.equal(generated.ok, true, generated.reason);
-  const source = clone(generated.document);
+  const source = fixture('smart-preserved-prefix');
   source.shots[2].target = { x: 7, y: 31 };
   source.shots[2].arc = 'high';
   source.shots[2].pace = 'soft';
@@ -84,7 +84,7 @@ test('same Smart Add source and seed produce the same candidate without source m
 });
 
 test('family changes preserve a directly authored target before a continuation', async () => {
-  const source = (await proposeRandomRally({ length: 5, seed: 0 })).document;
+  const source = fixture('smart-family-continuation');
   source.shots[2].target = { x: 7, y: 31 };
   const beforeTarget = clone(source.shots[2].target);
   const family = await proposeFamilyChange(source, { index: 2, family: 'drive' });
@@ -119,11 +119,11 @@ test('proposal authorization rejects a stale source after an unrelated edit', as
   assert.deepEqual(source.shots, proposal.document.shots.slice(0, source.shots.length));
 });
 
-test('valid generated source can become a nonextendable dead end after bounded Smart Add', async () => {
+test('a generated source avoids the reproduced nonextendable dead end', async () => {
   // This is the smallest deterministic reproduction found in the adversarial
   // seed sweep. It is valid under the complete compiler/rule boundary and has
-  // no terminal/fault marker, but its next contact opportunity is unreachable
-  // for every candidate family/hitter/target tried by the generator.
+  // no terminal/fault marker. The corrected generator must leave a reachable
+  // next contact, rather than recreating the historical dead end.
   const source = (await proposeRandomRally({ length: 3, seed: 5 })).document;
   assert.equal(source.ending, 'stop');
   assert.equal(source.intentionalFault, false);
