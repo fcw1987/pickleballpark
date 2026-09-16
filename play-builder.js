@@ -10,6 +10,7 @@ import { handleDesktopSpace } from './keyboard-shortcuts.js';
 import { proposeSmartAdd, proposeRandomRally } from './smart-rally-generator.js';
 import { authorizeProposal, compileEffectiveCandidate, documentSourceIdentity, evaluateFullCandidate, proposeFamilyChange } from './rally-proposals.js';
 import { proposeCoachFix, proposeCoachOptions } from './rally-coach.js';
+import { playerLabel } from './player-labels.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
 function claimShotFields(shot, fields) {
@@ -278,7 +279,7 @@ export class PlayBuilder {
         const changed=proposal.document.shots.find(shot=>shot.id===shotId);
         if(changed?.authoring?.fields)changed.authoring.fields=changed.authoring.fields.filter(field=>field!=='family');
         this.applyProposalDocument(proposal.document,generation);
-        if(!proposal.ok)this.message=`The selected family was kept. ${proposal.reason} Coach can evaluate repair options.`;
+        if(!proposal.ok)this.message=`Applied ${family}. The rally now needs review: ${proposal.reason} Coach can evaluate repair options.`;
         this.render();return {ok:true,playable:proposal.ok};
     }
     async insertShot({position,shotId=this.selectedShotId}={}) {
@@ -309,11 +310,17 @@ export class PlayBuilder {
             if(optionsOnly){
                 const candidates=result.slice(0,6);
                 for(const proposal of candidates)this.coachCandidates.set(proposal.candidateIdentity,{proposal,revision});
-                const valueText=value=>value===undefined?'none':typeof value==='object'?JSON.stringify(value):String(value);
+                const valueText=value=>{
+                    if(value===undefined||value===null)return 'none';
+                    if(typeof value==='string'&&this.document.players[value])return playerLabel(value,this.document);
+                    if(typeof value==='object')return Object.entries(value).map(([key,item])=>`${this.document.players[key]?playerLabel(key,this.document):key}: ${valueText(item)}`).join(', ');
+                    return String(value);
+                };
+                const changeLabel=path=>path.replace(/shots\[(\d+)\]/,(_,n)=>`Shot ${Number(n)+1}`).replace(/player[1-4]/g,id=>playerLabel(id,this.document)).replace(/initialLayout/g,'Starting positions').replace(/playerMovement/g,'partner movement').replace(/\./g,' · ');
                 this.coachOptions=candidates.map((proposal,index)=>({
                     id:proposal.candidateIdentity,
                     label:`Apply option ${index+1}${proposal.requiresConsent?' · changes authored settings':''}`,
-                    description:proposal.changes.map(change=>`${change.path.replace(/shots\[(\d+)\]/,(_,n)=>`Shot ${Number(n)+1}`)}: ${valueText(change.before)} → ${valueText(change.after)}`).join('; '),
+                    description:proposal.changes.map(change=>`${changeLabel(change.path)}: ${valueText(change.before)} → ${valueText(change.after)}`).join('; '),
                     changes:proposal.changes,requiresConsent:proposal.requiresConsent
                 }));
                 this.message=candidates.length?'Coach found validated options. Review the listed changes before applying one.':result.reason||'Coach found no safe repair within this model. Your play was kept.';

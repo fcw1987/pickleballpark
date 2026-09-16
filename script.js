@@ -1310,7 +1310,7 @@ class Pickleboard {
 
     getDialogFocusables(dialog) {
         return [...dialog.querySelectorAll(
-            'button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+            'button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, a[href], [tabindex]:not([tabindex="-1"])'
         )].filter(element => !element.hidden && getComputedStyle(element).visibility !== 'hidden' && element.getClientRects().length > 0);
     }
 
