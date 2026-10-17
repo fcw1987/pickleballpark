@@ -5,25 +5,30 @@
  * digest; only this generated file is excluded from that digest.
  */
 export const BUILD_IDENTITY_METADATA = {
-  schemaVersion: 1,
-  product: 'Pickleball Park',
-  status: 'development',
-  developmentStatus: 'unverified local source',
-  sourceRevision: null,
-  sourceBranch: null,
-  sourceState: 'unknown',
-  sourceRevisionVerified: false,
-  runtimeMatchesSource: false,
-  packageRevision: null,
-  evidenceRevision: null,
-  packageVerified: false,
-  runtimeSha256: null,
-  runtimeDigest: null,
-  runtimeFileset: {
-    algorithm: 'sha256',
-    include: 'static application runtime files',
-    exclusions: ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json'],
+  "schemaVersion": 1,
+  "product": "Pickleball Park",
+  "status": "local",
+  "developmentStatus": "stamped local build",
+  "sourceRevision": "372a904b156fdf7d7c3cd47cb0b1ec2cc9c597a3",
+  "sourceBranch": "feature/dimensional-art-mobile",
+  "sourceState": "clean",
+  "sourceRevisionVerified": true,
+  "runtimeMatchesSource": true,
+  "packageRevision": null,
+  "evidenceRevision": null,
+  "packageVerified": false,
+  "runtimeSha256": "87f3f09ada26fcb5cf7db188da47a934a79ef3910015961c4810d5e11a53722d",
+  "runtimeDigest": "87f3f09ada26fcb5cf7db188da47a934a79ef3910015961c4810d5e11a53722d",
+  "runtimeFileset": {
+    "algorithm": "sha256",
+    "include": "static application runtime files",
+    "exclusions": [
+      "version.json",
+      "build-metadata.js",
+      "build-info.json",
+      "runtime-manifest.json"
+    ]
   },
-  cacheVersion: null,
-  buildTime: null,
+  "cacheVersion": "pickleboard-static-v25",
+  "buildTime": "2026-10-17T23:07:59.244Z"
 };
