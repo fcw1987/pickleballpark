@@ -179,6 +179,17 @@ export function sampleActorPresentation({
     const contactTarget = segment.trajectory ? (isStriker ? Object.freeze({ ...segment.trajectory.start }) :
         isIncomingStriker ? Object.freeze({ ...segment.trajectory.end }) : null) : null;
     const activeSemantics = isStriker ? segment.shotSemantics : isIncomingStriker ? segment.nextShotSemantics : null;
+    const profile = activeSemantics?.profile || null;
+    const strokeTime = profile ? Math.max(0, Math.min(profile.duration,
+        profile.duration * profile.contactRatio + (isStriker ? localTime - segment.contactTime : localTime - segment.duration))) : null;
+    const strokePose = profile && !['ready', 'shuffle'].includes(state.action) ?
+        sampleStrokePose(activeSemantics.artAction, profile, strokeTime) : null;
+    const origin = boardToWorld(from);
+    const travelDistance = Math.hypot(worldPosition.x - origin.x, worldPosition.z - origin.z);
+    const before = sampleActorWorldPosition(segment, playerId, Math.max(0, localTime - .015), handedness);
+    const after = sampleActorWorldPosition(segment, playerId, Math.min(segment.duration, localTime + .015), handedness);
+    const sampleInterval = Math.min(segment.duration, localTime + .015) - Math.max(0, localTime - .015);
+    const travelSpeed = sampleInterval > 0 ? Math.hypot(after.x - before.x, after.z - before.z) / sampleInterval : 0;
     return Object.freeze({
         playerId, worldPosition, bodyFacing: Object.freeze(bodyFacing), viewDirection: direction,
         action: state.action, phase: state.phase, frameIndex: state.frameIndex,
@@ -186,6 +197,8 @@ export function sampleActorPresentation({
         artFamily, artAction: state.action,
         shotType: activeSemantics?.shotType || null, strokeSide: activeSemantics?.strokeSide || null,
         strokeIntensity: activeSemantics?.profile.intensity || 0,
+        strokePose, strokeTime, profile, timeSeconds: seconds ?? segment.startTime + localTime,
+        travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,
         atlasKey: `${artFamily}/${handedness}/${direction}/${state.action}/${state.phase}`,
         paddle: Object.freeze({ anchorId: `${handedness}-paddle-face`, worldContactTarget: contactTarget })
     });
