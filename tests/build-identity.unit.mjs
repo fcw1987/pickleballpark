@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { BUILD_IDENTITY, normalizeBuildIdentity, snapshotBuildIdentity, isBuildIdentityVerified } from '../build-identity.js';
 
 test('development identity is explicit and has digest exclusions', () => {
-  assert.equal(BUILD_IDENTITY.product, 'Pickleball Park');
-  assert.equal(BUILD_IDENTITY.status, 'development');
-  assert.equal(BUILD_IDENTITY.sourceRevision, null);
-  assert.deepEqual(BUILD_IDENTITY.runtimeFileset.exclusions, ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json']);
-  assert.equal(isBuildIdentityVerified(BUILD_IDENTITY), false);
+  const development = normalizeBuildIdentity();
+  assert.equal(development.product, 'Pickleball Park');
+  assert.equal(development.status, 'development');
+  assert.equal(development.sourceRevision, null);
+  assert.deepEqual(development.runtimeFileset.exclusions, ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json']);
+  assert.equal(isBuildIdentityVerified(development), false);
 });
 
 test('identity normalization drops unsafe or malformed metadata', () => {
@@ -45,4 +47,9 @@ test('metadata labels are bounded and cannot carry paths', () => {
   assert.equal(identity.sourceBranch, null);
   assert.equal(identity.cacheVersion, null);
   assert.equal(identity.developmentStatus, 'unverified local source');
+});
+
+test('embedded identity exactly matches the stamped version snapshot', () => {
+  const version = JSON.parse(readFileSync(new URL('../version.json', import.meta.url)));
+  assert.deepEqual(BUILD_IDENTITY, normalizeBuildIdentity(version));
 });

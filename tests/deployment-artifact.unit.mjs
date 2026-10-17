@@ -8,6 +8,7 @@ import { validateDeploymentArtifact } from '../tools/verify-deployment-artifact.
 
 const REVISION = '0'.repeat(40);
 const fixture = JSON.parse(readFileSync('tests/fixtures/approved-runtime.json'));
+const version = JSON.parse(readFileSync('version.json'));
 const manifestBytes = Buffer.from(`${JSON.stringify({ approvedSource: fixture.source, files: fixture.files }, null, 2)}\n`);
 const stage = () => {
   const root = mkdtempSync(path.join(tmpdir(), 'pickleballpark-deploy-test-'));
@@ -19,6 +20,7 @@ const stage = () => {
   writeFileSync(path.join(root, 'runtime-manifest.json'), manifestBytes);
   writeFileSync(path.join(root, 'build-info.json'), `${JSON.stringify({
     product: 'Pickleball Park', revision: REVISION, approvedSource: fixture.source,
+    sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null,
     runtimeManifestSha256: '4793db6a6feae1a94fe0166e2c80b41760b4b76865ecb718181ce99d326ab813',
     runtimeFiles: fixture.files.length,
     runtimeBytes: fixture.files.reduce((sum, file) => sum + file.bytes, 0),
@@ -70,4 +72,12 @@ test('rejects the obsolete hidden-file metadata contract', () => withStage((root
   info.publicationMetadata.push('.nojekyll');
   writeFileSync(file, JSON.stringify(info));
   assert.throws(() => validateDeploymentArtifact(root, REVISION), /Publication metadata set mismatch/);
+}));
+
+test('rejects package metadata naming a different source from its runtime', () => withStage(root => {
+  const file = path.join(root, 'build-info.json');
+  const info = JSON.parse(readFileSync(file));
+  info.sourceRevision = '1'.repeat(40);
+  writeFileSync(file, JSON.stringify(info));
+  assert.throws(() => validateDeploymentArtifact(root, REVISION), /Version metadata source mismatch/);
 }));
