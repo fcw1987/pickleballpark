@@ -1,0 +1,80 @@
+{
+  "screen": [
+    844,
+    390
+  ],
+  "canvas": [
+    [
+      844,
+      390
+    ]
+  ],
+  "viewer": {
+    "x": 0,
+    "y": 0,
+    "width": 844,
+    "height": 390,
+    "top": 0,
+    "right": 844,
+    "bottom": 390,
+    "left": 0
+  },
+  "controls": [
+    {
+      "id": "threeDPlayPause",
+      "rect": {
+        "x": 498.328125,
+        "y": 260.25,
+        "width": 83.1875,
+        "height": 61.1875,
+        "top": 260.25,
+        "right": 581.515625,
+        "bottom": 321.4375,
+        "left": 498.328125
+      },
+      "disabled": false
+    },
+    {
+      "id": "threeDCamera",
+      "rect": {
+        "x": 498.328125,
+        "y": 386.6875,
+        "width": 158.953125,
+        "height": 40,
+        "top": 386.6875,
+        "right": 657.28125,
+        "bottom": 426.6875,
+        "left": 498.328125
+      },
+      "disabled": false
+    },
+    {
+      "id": "threeDRate",
+      "rect": {
+        "x": 498.328125,
+        "y": 444.75,
+        "width": 158.953125,
+        "height": 40,
+        "top": 444.75,
+        "right": 657.28125,
+        "bottom": 484.75,
+        "left": 498.328125
+      },
+      "disabled": false
+    },
+    {
+      "id": "threeDExit",
+      "rect": {
+        "x": 663.671875,
+        "y": 328.625,
+        "width": 158.953125,
+        "height": 40,
+        "top": 328.625,
+        "right": 822.625,
+        "bottom": 368.625,
+        "left": 663.671875
+      },
+      "disabled": false
+    }
+  ]
+}

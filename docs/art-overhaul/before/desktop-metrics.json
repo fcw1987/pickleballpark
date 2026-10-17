@@ -1,0 +1,85 @@
+{
+  "bootMs": 58.890832999999986,
+  "navigation": {
+    "domContentLoaded": 39,
+    "loadEvent": 43.89999997615814,
+    "transferBytes": 21452
+  },
+  "rendererMetrics": {
+    "state": {
+      "active": true,
+      "loop": true,
+      "holding": false,
+      "iteration": 0,
+      "playing": false,
+      "elapsed": 0,
+      "playbackRate": 1,
+      "camera": "sideline",
+      "playId": "third-shot-drop",
+      "playerCount": 4,
+      "hasBall": true,
+      "renderLoopCount": 2,
+      "pixelScale": 1,
+      "framing": {
+        "aspect": 1.6,
+        "usableAspect": 2.1546806321892826,
+        "reservedPixels": 231.6875,
+        "distanceScale": 1.140460253855579,
+        "position": [
+          12.54506279241137,
+          7.884899599290148,
+          0
+        ],
+        "target": [
+          0,
+          0.7,
+          0
+        ]
+      },
+      "lastState": {
+        "x": 1.8897599999999999,
+        "y": 0.85344,
+        "z": -6.7056000000000004,
+        "board": {
+          "x": 16.2,
+          "y": 0
+        },
+        "phase": "ready",
+        "launched": false,
+        "rallyLeg": 1,
+        "time": 0,
+        "elapsed": 0,
+        "stepIndex": 0
+      }
+    },
+    "viewport": {
+      "w": 1440,
+      "h": 900
+    },
+    "canvas": {
+      "w": 1440,
+      "h": 900
+    },
+    "renderer": {
+      "calls": 53,
+      "triangles": 8822,
+      "geometries": 43,
+      "textures": 16,
+      "programs": 10
+    },
+    "webgl": {
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "vendor": "WebKit",
+      "renderer": "WebKit WebGL"
+    },
+    "diag": null
+  },
+  "frameMetrics": {
+    "rafSamples": 206,
+    "medianIntervalMs": 25.099999999999454,
+    "p95IntervalMs": 41.600000000000364,
+    "over25ms": 105,
+    "renderFrames": 146
+  },
+  "errors": []
+}

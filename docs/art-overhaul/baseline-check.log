@@ -1,0 +1,1249 @@
+
+> pickleballpark@1.0.0 check
+> node --check script.js && node --check sw.js && node --check guided-plays.js && node --check three-d-playback.js && node --test tests/*.unit.mjs && node tests/helpers/validate-static-assets.mjs && node tools/check-brand.mjs
+
+TAP version 13
+# Subtest: accepts canonical metadata and exact compatibility identities
+ok 1 - accepts canonical metadata and exact compatibility identities
+  ---
+  duration_ms: 3.669583
+  ...
+# Subtest: rejects former branding in active UI, README, and current docs
+ok 2 - rejects former branding in active UI, README, and current docs
+  ---
+  duration_ms: 0.848291
+  ...
+# Subtest: rejects stale package metadata and incorrectly cased asset references
+ok 3 - rejects stale package metadata and incorrectly cased asset references
+  ---
+  duration_ms: 0.110333
+  ...
+# Subtest: rejects an incomplete generated sign while allowing exact archive and contract exceptions
+ok 4 - rejects an incomplete generated sign while allowing exact archive and contract exceptions
+  ---
+  duration_ms: 0.114334
+  ...
+# Subtest: allows only the actual accepted before title in comparison metadata
+ok 5 - allows only the actual accepted before title in comparison metadata
+  ---
+  duration_ms: 0.125958
+  ...
+# Subtest: catches case-insensitive spaced brand variants without treating lowercase Paeth variables as a wordmark
+ok 6 - catches case-insensitive spaced brand variants without treating lowercase Paeth variables as a wordmark
+  ---
+  duration_ms: 0.1675
+  ...
+# Subtest: version endpoint resolves from a project subpath like a packaged static site
+ok 7 - version endpoint resolves from a project subpath like a packaged static site
+  ---
+  duration_ms: 9.192375
+  ...
+# Subtest: captures a loaded identity and keeps a later server response separate
+ok 8 - captures a loaded identity and keeps a later server response separate
+  ---
+  duration_ms: 7.306333
+  ...
+# Subtest: offline diagnostics retain the loaded identity and report unavailable server state
+ok 9 - offline diagnostics retain the loaded identity and report unavailable server state
+  ---
+  duration_ms: 0.401708
+  ...
+# Subtest: copy diagnostics has a compact metadata only report
+ok 10 - copy diagnostics has a compact metadata only report
+  ---
+  duration_ms: 0.171459
+  ...
+# Subtest: formatter distinguishes running and server labels
+ok 11 - formatter distinguishes running and server labels
+  ---
+  duration_ms: 0.086917
+  ...
+# Subtest: a missing endpoint is online but unavailable, rather than offline
+ok 12 - a missing endpoint is online but unavailable, rather than offline
+  ---
+  duration_ms: 0.134334
+  ...
+# Subtest: an older server response cannot overwrite a newer query
+ok 13 - an older server response cannot overwrite a newer query
+  ---
+  duration_ms: 0.309375
+  ...
+# Subtest: an older JSON parse rejection cannot erase a newer valid response
+ok 14 - an older JSON parse rejection cannot erase a newer valid response
+  ---
+  duration_ms: 1.151042
+  ...
+# Subtest: development identity is explicit and has digest exclusions
+ok 15 - development identity is explicit and has digest exclusions
+  ---
+  duration_ms: 0.87
+  ...
+# Subtest: identity normalization drops unsafe or malformed metadata
+ok 16 - identity normalization drops unsafe or malformed metadata
+  ---
+  duration_ms: 0.142708
+  ...
+# Subtest: a dirty source cannot be presented as a verified release
+ok 17 - a dirty source cannot be presented as a verified release
+  ---
+  duration_ms: 0.63175
+  ...
+# Subtest: snapshots are detached and cannot be changed by caller mutation
+ok 18 - snapshots are detached and cannot be changed by caller mutation
+  ---
+  duration_ms: 0.270333
+  ...
+# Subtest: untrusted packaged and verified claims are demoted without matching proof
+ok 19 - untrusted packaged and verified claims are demoted without matching proof
+  ---
+  duration_ms: 0.072875
+  ...
+# Subtest: metadata labels are bounded and cannot carry paths
+ok 20 - metadata labels are bounded and cannot carry paths
+  ---
+  duration_ms: 0.130083
+  ...
+# Subtest: starter is a valid versioned three-shot source document
+ok 21 - starter is a valid versioned three-shot source document
+  ---
+  duration_ms: 1.460084
+  ...
+# Subtest: validation rejects malformed, unbounded, duplicate, and non-finite authoring input
+ok 22 - validation rejects malformed, unbounded, duplicate, and non-finite authoring input
+  ---
+  duration_ms: 2.2875
+  ...
+# Subtest: custom recipes compile through production steps and timeline with stable recipe event ids
+ok 23 - custom recipes compile through production steps and timeline with stable recipe event ids
+  ---
+  duration_ms: 4.744458
+  ...
+# Subtest: serve placement and a drive/drop choice produce genuinely different deterministic timelines
+ok 24 - serve placement and a drive/drop choice produce genuinely different deterministic timelines
+  ---
+  duration_ms: 1.647209
+  ...
+# Subtest: all supported shot families compile as intent rather than a lesson selector
+ok 25 - all supported shot families compile as intent rather than a lesson selector
+  ---
+  duration_ms: 0.825333
+  ...
+# Subtest: rule violations and feasibility failures are distinct and preserve a playable prefix
+ok 26 - rule violations and feasibility failures are distinct and preserve a playable prefix
+  ---
+  duration_ms: 0.230834
+  ...
+# Subtest: intentional fault remains visible and terminates without an invented continuation
+ok 27 - intentional fault remains visible and terminates without an invented continuation
+  ---
+  duration_ms: 0.180334
+  ...
+# Subtest: opening sequence protects the two-bounce rule and treats the kitchen line as a serve fault
+ok 28 - opening sequence protects the two-bounce rule and treats the kitchen line as a serve fault
+  ---
+  duration_ms: 0.242417
+  ...
+# Subtest: serve intent is accepted only as the first shot of a full-rally opening
+ok 29 - serve intent is accepted only as the first shot of a full-rally opening
+  ---
+  duration_ms: 0.540041
+  ...
+# Subtest: drop serves include a distinct preparatory bounce before contact and the legal rally bounce
+ok 30 - drop serves include a distinct preparatory bounce before contact and the legal rally bounce
+  ---
+  duration_ms: 0.772875
+  ...
+# Subtest: a pinned prior movement stops a dependent contact instead of being overwritten
+ok 31 - a pinned prior movement stops a dependent contact instead of being overwritten
+  ---
+  duration_ms: 0.650959
+  ...
+# Subtest: automatic stroke side uses handedness and the actor stance
+ok 32 - automatic stroke side uses handedness and the actor stance
+  ---
+  duration_ms: 0.200041
+  ...
+# Subtest: winner and fault endings are visible terminal semantics
+ok 33 - winner and fault endings are visible terminal semantics
+  ---
+  duration_ms: 0.3175
+  ...
+# Subtest: compiler does not mutate source targets, manual movement, or pins
+ok 34 - compiler does not mutate source targets, manual movement, or pins
+  ---
+  duration_ms: 0.297042
+  ...
+# Subtest: all eight templates preserve approved timing, positions, contacts, and bounce semantics exactly
+ok 35 - all eight templates preserve approved timing, positions, contacts, and bounce semantics exactly
+  ---
+  duration_ms: 8.335708
+  ...
+# Subtest: editing a template recipe leaves the exact-source path and recompiles authored intent
+ok 36 - editing a template recipe leaves the exact-source path and recompiles authored intent
+  ---
+  duration_ms: 0.51825
+  ...
+# Subtest: changes to non-shot template source fields cannot use stale approved steps
+ok 37 - changes to non-shot template source fields cannot use stale approved steps
+  ---
+  duration_ms: 1.661959
+  ...
+# Subtest: guide-only assistance and annotations preserve every approved template timeline
+ok 38 - guide-only assistance and annotations preserve every approved template timeline
+  ---
+  duration_ms: 5.617667
+  ...
+# Subtest: template source cannot smuggle modified runtime steps or forged compatibility signatures
+ok 39 - template source cannot smuggle modified runtime steps or forged compatibility signatures
+  ---
+  duration_ms: 1.055167
+  ...
+# Subtest: one sampled ball remains continuous at every generated event boundary
+ok 40 - one sampled ball remains continuous at every generated event boundary
+  ---
+  duration_ms: 0.430584
+  ...
+# Subtest: coverage recompilation preserves semantics, pins, targets, and stable event ids
+ok 41 - coverage recompilation preserves semantics, pins, targets, and stable event ids
+  ---
+  duration_ms: 1.137833
+  ...
+# Subtest: coverage boundary rejects authored changes and declines unreachable suggestions
+ok 42 - coverage boundary rejects authored changes and declines unreachable suggestions
+  ---
+  duration_ms: 1.627625
+  ...
+# Subtest: real compiler and coverage preserve authored pins and every intended target
+ok 43 - real compiler and coverage preserve authored pins and every intended target
+  ---
+  duration_ms: 4.863375
+  ...
+# Subtest: guide-only coverage leaves compiled play and timeline unchanged
+ok 44 - guide-only coverage leaves compiled play and timeline unchanged
+  ---
+  duration_ms: 2.218084
+  ...
+# Subtest: compile plus coverage is deterministic for identical source and timeline
+ok 45 - compile plus coverage is deterministic for identical source and timeline
+  ---
+  duration_ms: 1.72775
+  ...
+# Subtest: actual schema storage round-trips an incomplete source draft
+ok 46 - actual schema storage round-trips an incomplete source draft
+  ---
+  duration_ms: 0.744083
+  ...
+# Subtest: actual schema rejects malformed imports and preserves the prior draft on write failure
+ok 47 - actual schema rejects malformed imports and preserves the prior draft on write failure
+  ---
+  duration_ms: 0.998416
+  ...
+# Subtest: responsive builder framing contains the regulation court, players, and complete lesson flight
+ok 48 - responsive builder framing contains the regulation court, players, and complete lesson flight
+  ---
+  duration_ms: 44.683292
+  ...
+# Subtest: responsive builder framing contains a compiled custom rally without changing its timeline data
+ok 49 - responsive builder framing contains a compiled custom rally without changing its timeline data
+  ---
+  duration_ms: 42.717125
+  ...
+# Subtest: exported eight-shot example is a genuine valid custom timeline
+ok 50 - exported eight-shot example is a genuine valid custom timeline
+  ---
+  duration_ms: 4.160834
+  ...
+# Subtest: shading example preserves a manual pin without making it a contact dependency
+ok 51 - shading example preserves a manual pin without making it a contact dependency
+  ---
+  duration_ms: 0.841667
+  ...
+# Subtest: seeded feasible serve, return, and third-shot parameters compile deterministically
+ok 52 - seeded feasible serve, return, and third-shot parameters compile deterministically
+  ---
+  duration_ms: 23.206416
+  ...
+# Subtest: the documented maximum of 99 stable recipes compiles without a fixed-slot path
+ok 53 - the documented maximum of 99 stable recipes compiles without a fixed-slot path
+  ---
+  duration_ms: 6.311708
+  ...
+# Subtest: event boundaries are continuous and drop preparation never becomes an incoming bounce
+ok 54 - event boundaries are continuous and drop preparation never becomes an incoming bounce
+  ---
+  duration_ms: 2.382625
+  ...
+# Subtest: world position and contact target are camera-independent and visibly reachable
+ok 55 - world position and contact target are camera-independent and visibly reachable
+  ---
+  duration_ms: 3.858417
+  ...
+# Subtest: edited templates exercise short-hop, volley, lob, and overhead through genuine compilation
+ok 56 - edited templates exercise short-hop, volley, lob, and overhead through genuine compilation
+  ---
+  duration_ms: 2.911833
+  ...
+# Subtest: round trips version-one source drafts, selection, listing, and removal
+ok 57 - round trips version-one source drafts, selection, listing, and removal
+  ---
+  duration_ms: 2.431875
+  ...
+# Subtest: returns detached documents and exports/imports validated JSON
+ok 58 - returns detached documents and exports/imports validated JSON
+  ---
+  duration_ms: 0.238458
+  ...
+# Subtest: rejects malformed, oversized, future-version, non-finite, and prototype-key imports
+ok 59 - rejects malformed, oversized, future-version, non-finite, and prototype-key imports
+  ---
+  duration_ms: 1.024084
+  ...
+# Subtest: preserves corrupt and unsupported stored bytes for recovery
+ok 60 - preserves corrupt and unsupported stored bytes for recovery
+  ---
+  duration_ms: 0.132584
+  ...
+# Subtest: quota failure cannot overwrite the previously committed library
+ok 61 - quota failure cannot overwrite the previously committed library
+  ---
+  duration_ms: 0.167375
+  ...
+# Subtest: detects a same-draft overwrite from another store and identifies the conflict
+ok 62 - detects a same-draft overwrite from another store and identifies the conflict
+  ---
+  duration_ms: 0.199125
+  ...
+# Subtest: does not conflict when another store saves an unrelated draft
+ok 63 - does not conflict when another store saves an unrelated draft
+  ---
+  duration_ms: 0.171875
+  ...
+# Subtest: detects deletion or creation after a draft identity was observed
+ok 64 - detects deletion or creation after a draft identity was observed
+  ---
+  duration_ms: 0.131625
+  ...
+# Subtest: failed writes retain the observation so a quota retry can succeed
+ok 65 - failed writes retain the observation so a quota retry can succeed
+  ---
+  duration_ms: 0.324542
+  ...
+# Subtest: preserves schema-one extension data including intermediate waypoints
+ok 66 - preserves schema-one extension data including intermediate waypoints
+  ---
+  duration_ms: 1.7505
+  ...
+# Subtest: a save without a prior observation retains legacy overwrite behavior
+ok 67 - a save without a prior observation retains legacy overwrite behavior
+  ---
+  duration_ms: 0.1775
+  ...
+# Subtest: reports unavailable default storage as a constructor contract error
+ok 68 - reports unavailable default storage as a constructor contract error
+  ---
+  duration_ms: 0.079541
+  ...
+# Subtest: enforces the library bound without changing saved data
+ok 69 - enforces the library bound without changing saved data
+  ---
+  duration_ms: 5.61875
+  ...
+# Subtest: uses a dedicated key and leaves the legacy theme and service-worker-like entries alone
+ok 70 - uses a dedicated key and leaves the legacy theme and service-worker-like entries alone
+  ---
+  duration_ms: 0.102083
+  ...
+# Subtest: edit history isolates snapshots, truncates redo, and honors its limit
+ok 71 - edit history isolates snapshots, truncates redo, and honors its limit
+  ---
+  duration_ms: 0.159208
+  ...
+# Subtest: incomplete and path-free documents need no acknowledgement
+ok 72 - incomplete and path-free documents need no acknowledgement
+  ---
+  duration_ms: 2.390458
+  ...
+# Subtest: reports every affected shot, player, and intermediate point count
+ok 73 - reports every affected shot, player, and intermediate point count
+  ---
+  duration_ms: 1.177458
+  ...
+# Subtest: matching session acknowledgement clears confirmation without changing disclosure
+ok 74 - matching session acknowledgement clears confirmation without changing disclosure
+  ---
+  duration_ms: 0.31225
+  ...
+# Subtest: does not mutate source data or expose mutable policy records
+ok 75 - does not mutate source data or expose mutable policy records
+  ---
+  duration_ms: 0.52125
+  ...
+# Subtest: key changes for document identity and exact affected path, targets, intent, hitter, or shot identity
+ok 76 - key changes for document identity and exact affected path, targets, intent, hitter, or shot identity
+  ---
+  duration_ms: 1.598375
+  ...
+# Subtest: key ignores unrelated presentation and assistance settings and object key order
+ok 77 - key ignores unrelated presentation and assistance settings and object key order
+  ---
+  duration_ms: 0.148958
+  ...
+# Subtest: play completes final recovery, holds, then always repeats without backwards flight
+ok 78 - play completes final recovery, holds, then always repeats without backwards flight
+  ---
+  duration_ms: 0.702875
+  ...
+# Subtest: 50 repetitions and multi-boundary jumps have bounded state and no drift
+ok 79 - 50 repetitions and multi-boundary jumps have bounded state and no drift
+  ---
+  duration_ms: 0.118917
+  ...
+# Subtest: pause freezes end hold and resume consumes the remainder before repeating
+ok 80 - pause freezes end hold and resume consumes the remainder before repeating
+  ---
+  duration_ms: 0.078416
+  ...
+# Subtest: endpoint seeking shows the final pose and Play starts the next repetition at zero
+ok 81 - endpoint seeking shows the final pose and Play starts the next repetition at zero
+  ---
+  duration_ms: 0.457583
+  ...
+# Subtest: legacy loop preferences cannot disable the repeat policy
+ok 82 - legacy loop preferences cannot disable the repeat policy
+  ---
+  duration_ms: 0.075667
+  ...
+# Subtest: scrub preserves playing intent but Pause wins over a later pointer release
+ok 83 - scrub preserves playing intent but Pause wins over a later pointer release
+  ---
+  duration_ms: 0.091291
+  ...
+# Subtest: completed scrub resumes only the current operation and cancellation stays paused
+ok 84 - completed scrub resumes only the current operation and cancellation stays paused
+  ---
+  duration_ms: 0.063875
+  ...
+# Subtest: tap seek preserves running or paused intent without changing iteration
+ok 85 - tap seek preserves running or paused intent without changing iteration
+  ---
+  duration_ms: 0.106292
+  ...
+# Subtest: suspension resumes only if no newer explicit Pause changed intent
+ok 86 - suspension resumes only if no newer explicit Pause changed intent
+  ---
+  duration_ms: 0.263667
+  ...
+# Subtest: court geometry names every regulation boundary and split centerline in board feet
+ok 87 - court geometry names every regulation boundary and split centerline in board feet
+  ---
+  duration_ms: 0.919458
+  ...
+# Subtest: non-volley-zone includes its lines but not the adjacent service courts
+ok 88 - non-volley-zone includes its lines but not the adjacent service courts
+  ---
+  duration_ms: 0.095875
+  ...
+# Subtest: service boxes are diagonal and remain on the correct side of the kitchen
+ok 89 - service boxes are diagonal and remain on the correct side of the kitchen
+  ---
+  duration_ms: 0.180292
+  ...
+# Subtest: default-off assistance clones the play without changing derived positions
+ok 90 - default-off assistance clones the play without changing derived positions
+  ---
+  duration_ms: 1.283208
+  ...
+# Subtest: coverage guides never enable movement and identify guide-only suggestions
+ok 91 - coverage guides never enable movement and identify guide-only suggestions
+  ---
+  duration_ms: 0.351792
+  ...
+# Subtest: uses a current-leg partner pin without changing the canonical assistance setting
+ok 92 - uses a current-leg partner pin without changing the canonical assistance setting
+  ---
+  duration_ms: 0.445084
+  ...
+# Subtest: current-leg suggestions use contact origin and ignore the future authored target
+ok 93 - current-leg suggestions use contact origin and ignore the future authored target
+  ---
+  duration_ms: 0.232458
+  ...
+# Subtest: auto shading preserves receiver, hitter, manual pins, depth, and all shot facts
+ok 94 - auto shading preserves receiver, hitter, manual pins, depth, and all shot facts
+  ---
+  duration_ms: 0.174625
+  ...
+# Subtest: applies selected-team movement in both team directions without hitter swaps
+ok 95 - applies selected-team movement in both team directions without hitter swaps
+  ---
+  duration_ms: 1.135291
+  ...
+# Subtest: bounds lateral travel by duration and court limits deterministically
+ok 96 - bounds lateral travel by duration and court limits deterministically
+  ---
+  duration_ms: 0.539791
+  ...
+# Subtest: accepts the exact staged runtime fixture from the working tree
+not ok 97 - accepts the exact staged runtime fixture from the working tree
+  ---
+  duration_ms: 7.278583
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:34:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:34:78)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: rejects missing and extra artifact files
+not ok 98 - rejects missing and extra artifact files
+  ---
+  duration_ms: 3.389417
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:41:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:42:3)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: rejects changed runtime bytes
+not ok 99 - rejects changed runtime bytes
+  ---
+  duration_ms: 2.290375
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:46:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:46:45)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: rejects the wrong expected revision
+not ok 100 - rejects the wrong expected revision
+  ---
+  duration_ms: 4.427708
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:51:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:51:51)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: rejects a changed runtime manifest
+not ok 101 - rejects a changed runtime manifest
+  ---
+  duration_ms: 2.195166
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:55:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:55:50)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: rejects symbolic links
+not ok 102 - rejects symbolic links
+  ---
+  duration_ms: 1.865625
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:60:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:60:38)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: rejects the obsolete hidden-file metadata contract
+not ok 103 - rejects the obsolete hidden-file metadata contract
+  ---
+  duration_ms: 1.898875
+  location: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:67:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, lstat 'assets/park/sign.png'"
+  code: 'ENOENT'
+  stack: |-
+    lstatSync (node:fs:1625:25)
+    getStatsSync (node:internal/fs/cp/cp-sync:119:19)
+    checkPathsSync (node:internal/fs/cp/cp-sync:71:33)
+    cpSyncFn (node:internal/fs/cp/cp-sync:57:42)
+    cpSync (node:fs:3024:3)
+    stage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:17:5)
+    withStage (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:30:16)
+    TestContext.<anonymous> (file:///Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard/tests/deployment-artifact.unit.mjs:67:66)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:856:25)
+  ...
+# Subtest: accepts different lossless encodings of identical PNG scanlines
+ok 104 - accepts different lossless encodings of identical PNG scanlines
+  ---
+  duration_ms: 2.207916
+  ...
+# Subtest: rejects changed PNG pixels
+ok 105 - rejects changed PNG pixels
+  ---
+  duration_ms: 1.745
+  ...
+# Subtest: rejects changed PNG geometry
+ok 106 - rejects changed PNG geometry
+  ---
+  duration_ms: 1.265417
+  ...
+# Subtest: rejects changed PNG metadata
+ok 107 - rejects changed PNG metadata
+  ---
+  duration_ms: 0.343
+  ...
+# Subtest: rejects structurally corrupt PNG chunks
+ok 108 - rejects structurally corrupt PNG chunks
+  ---
+  duration_ms: 0.28075
+  ...
+# Subtest: rejects missing or extra generated paths and altered non-PNG metadata
+ok 109 - rejects missing or extra generated paths and altered non-PNG metadata
+  ---
+  duration_ms: 0.303417
+  ...
+# Subtest: partner destination is compiled once and shading preserves it without changing targets
+ok 110 - partner destination is compiled once and shading preserves it without changing targets
+  ---
+  duration_ms: 4.568084
+  ...
+# Subtest: an unreachable partner pin stops valid preview and keeps authored intent
+ok 111 - an unreachable partner pin stops valid preview and keeps authored intent
+  ---
+  duration_ms: 0.401708
+  ...
+# Subtest: partner waypoint acknowledgement follows changes and retains all intermediate data
+ok 112 - partner waypoint acknowledgement follows changes and retains all intermediate data
+  ---
+  duration_ms: 0.416958
+  ...
+# Subtest: old documents stay valid; duplicate hitter commands and malformed partner movement are rejected
+ok 113 - old documents stay valid; duplicate hitter commands and malformed partner movement are rejected
+  ---
+  duration_ms: 0.351541
+  ...
+# Subtest: future pins do not suppress earlier coverage and persist only after their event
+ok 114 - future pins do not suppress earlier coverage and persist only after their event
+  ---
+  duration_ms: 2.255875
+  ...
+# Subtest: accepts one ordinary unmodified Space event from the court
+ok 115 - accepts one ordinary unmodified Space event from the court
+  ---
+  duration_ms: 1.461667
+  ...
+# Subtest: ignores repetition, composition, modifiers, handled events, and other keys
+ok 116 - ignores repetition, composition, modifiers, handled events, and other keys
+  ---
+  duration_ms: 0.118708
+  ...
+# Subtest: leaves native and focused controls responsible for Space
+ok 117 - leaves native and focused controls responsible for Space
+  ---
+  duration_ms: 0.258625
+  ...
+# Subtest: handles an eligible event exactly once and only then prevents scrolling
+ok 118 - handles an eligible event exactly once and only then prevents scrolling
+  ---
+  duration_ms: 0.091125
+  ...
+# Subtest: does not handle an ineligible event even when an action is supplied
+ok 119 - does not handle an ineligible event even when an action is supplied
+  ---
+  duration_ms: 0.991834
+  ...
+# Subtest: player labels use team relative starting roles
+ok 120 - player labels use team relative starting roles
+  ---
+  duration_ms: 0.926625
+  ...
+# Subtest: stacked and missing starting layouts fall back to stable id order
+ok 121 - stacked and missing starting layouts fall back to stable id order
+  ---
+  duration_ms: 6.41875
+  ...
+# Subtest: eight camera-relative compass sectors are stable
+ok 122 - eight camera-relative compass sectors are stable
+  ---
+  duration_ms: 2.016334
+  ...
+# Subtest: camera-forward atlas selection does not rotate an actor merely because the actor translates
+ok 123 - camera-forward atlas selection does not rotate an actor merely because the actor translates
+  ---
+  duration_ms: 0.18425
+  ...
+# Subtest: every Play samples deterministically across cameras and physical hands
+ok 124 - every Play samples deterministically across cameras and physical hands
+  ---
+  duration_ms: 12.062541
+  ...
+# Subtest: stationary actors never walk and lateral movers keep court-facing posture
+ok 125 - stationary actors never walk and lateral movers keep court-facing posture
+  ---
+  duration_ms: 0.386583
+  ...
+# Subtest: contact exposes authoritative target and distinct unmirrored handed assets
+ok 126 - contact exposes authoritative target and distinct unmirrored handed assets
+  ---
+  duration_ms: 0.5605
+  ...
+# Subtest: phase anchors progress through a stroke and settle to ready
+ok 127 - phase anchors progress through a stroke and settle to ready
+  ---
+  duration_ms: 0.168875
+  ...
+# Subtest: striker facing remains continuous through planting and contact
+ok 128 - striker facing remains continuous through planting and contact
+  ---
+  duration_ms: 1.360709
+  ...
+# Subtest: return contact plants within paddle reach before the final destination
+ok 129 - return contact plants within paddle reach before the final destination
+  ---
+  duration_ms: 0.5405
+  ...
+# Subtest: every player remains grounded and continuous across rally-stage boundaries
+ok 130 - every player remains grounded and continuous across rally-stage boundaries
+  ---
+  duration_ms: 0.769417
+  ...
+# Subtest: catalog fixtures carry complete intent, contact, bounce, responsibility, terminal, and visual expectations
+ok 131 - catalog fixtures carry complete intent, contact, bounce, responsibility, terminal, and visual expectations
+  ---
+  duration_ms: 0.75725
+  ...
+# Subtest: catalog scenarios compile deterministically without mutating targets, pins, or handedness
+ok 132 - catalog scenarios compile deterministically without mutating targets, pins, or handedness
+  ---
+  duration_ms: 16.116334
+  ...
+# Subtest: serve depth boundaries remain legal while the kitchen line and midrally serve remain errors
+ok 133 - serve depth boundaries remain legal while the kitchen line and midrally serve remain errors
+  ---
+  duration_ms: 0.363917
+  ...
+# Subtest: interception and bounced-response fixtures preserve authored landing intent and canonical contact behavior
+ok 134 - interception and bounced-response fixtures preserve authored landing intent and canonical contact behavior
+  ---
+  duration_ms: 0.268292
+  ...
+# Subtest: block/reset, speedup, handedness, and formation mappings stay honest to model version 1
+ok 135 - block/reset, speedup, handedness, and formation mappings stay honest to model version 1
+  ---
+  duration_ms: 0.470541
+  ...
+# Subtest: shading and guides toggle independently and manual pins survive assisted recompilation
+ok 136 - shading and guides toggle independently and manual pins survive assisted recompilation
+  ---
+  duration_ms: 1.649375
+  ...
+# Subtest: seeded and Cartesian-pairwise valid generation covers all bounded lengths and authoring choices
+ok 137 - seeded and Cartesian-pairwise valid generation covers all bounded lengths and authoring choices
+  ---
+  duration_ms: 42.389083
+  ...
+# Subtest: invalid generated cases separate validation, rule, and physical feasibility failures and shrink reproducibly
+ok 138 - invalid generated cases separate validation, rule, and physical feasibility failures and shrink reproducibly
+  ---
+  duration_ms: 1.448333
+  ...
+# Subtest: thousands of boundary seeks stay continuous, repeatable, finite, and canonically shared by 2D and 3D
+ok 139 - thousands of boundary seeks stay continuous, repeatable, finite, and canonically shared by 2D and 3D
+  ---
+  duration_ms: 369.950458
+  ...
+# Subtest: generated movement remains inside the compiler reach envelope without drift
+ok 140 - generated movement remains inside the compiler reach envelope without drift
+  ---
+  duration_ms: 8.959167
+  ...
+# Subtest: standalone corpus runner reports fixed seeds, counts, boundary samples, and shrink metadata
+ok 141 - standalone corpus runner reports fixed seeds, counts, boundary samples, and shrink metadata
+  ---
+  duration_ms: 397.0705
+  ...
+# Subtest: quality gate accepts only when every required conclusion is success
+ok 142 - quality gate accepts only when every required conclusion is success
+  ---
+  duration_ms: 0.91225
+  ...
+# Subtest: quality gate rejects an actual skipped conclusion
+ok 143 - quality gate rejects an actual skipped conclusion
+  ---
+  duration_ms: 0.23125
+  ...
+# Subtest: quality gate rejects an actual cancelled conclusion
+ok 144 - quality gate rejects an actual cancelled conclusion
+  ---
+  duration_ms: 0.095292
+  ...
+# Subtest: quality gate rejects an actual failure conclusion
+ok 145 - quality gate rejects an actual failure conclusion
+  ---
+  duration_ms: 0.05075
+  ...
+# Subtest: quality gate rejects a missing required job
+ok 146 - quality gate rejects a missing required job
+  ---
+  duration_ms: 1.530625
+  ...
+# Subtest: quality gate reports every non-success conclusion together
+ok 147 - quality gate reports every non-success conclusion together
+  ---
+  duration_ms: 0.156708
+  ...
+# Subtest: the shared catalog compiles and passes scoped rally rules
+ok 148 - the shared catalog compiles and passes scoped rally rules
+  ---
+  duration_ms: 3.352583
+  ...
+# Subtest: timeline events are immutable, stable, globally ordered rally facts
+ok 149 - timeline events are immutable, stable, globally ordered rally facts
+  ---
+  duration_ms: 0.268208
+  ...
+# Subtest: opening shots bounce once while a drive into a block does not bounce
+ok 150 - opening shots bounce once while a drive into a block does not bounce
+  ---
+  duration_ms: 0.10625
+  ...
+# Subtest: contact kind agrees with the preceding leg bounce and reports play/actor context
+ok 151 - contact kind agrees with the preceding leg bounce and reports play/actor context
+  ---
+  duration_ms: 0.232125
+  ...
+# Subtest: one ball sampler is continuous across every segment and contact boundary
+ok 152 - one ball sampler is continuous across every segment and contact boundary
+  ---
+  duration_ms: 0.748875
+  ...
+# Subtest: short-hop has one nearby bounce and a low contact, and final outcomes hold
+ok 153 - short-hop has one nearby bounce and a low contact, and final outcomes hold
+  ---
+  duration_ms: 0.373375
+  ...
+# Subtest: sampled shared positions use the canonical ball projection
+ok 154 - sampled shared positions use the canonical ball projection
+  ---
+  duration_ms: 0.229625
+  ...
+# Subtest: validator rejects kitchen serves and opening-bounce violations
+ok 155 - validator rejects kitchen serves and opening-bounce violations
+  ---
+  duration_ms: 0.324833
+  ...
+# Subtest: validator trusts compiled bounce facts and rejects an extra event
+ok 156 - validator trusts compiled bounce facts and rejects an extra event
+  ---
+  duration_ms: 0.356041
+  ...
+# Subtest: validator checks volley feet and momentum without banning a bounced kitchen contact
+ok 157 - validator checks volley feet and momentum without banning a bounced kitchen contact
+  ---
+  duration_ms: 0.393333
+  ...
+# Subtest: short-hop incoming rebound is still rising at contact, not a second falling arc
+ok 158 - short-hop incoming rebound is still rising at contact, not a second falling arc
+  ---
+  duration_ms: 0.159375
+  ...
+# Subtest: the backhand reset uses backhand artwork with its compact reset timing
+ok 159 - the backhand reset uses backhand artwork with its compact reset timing
+  ---
+  duration_ms: 0.067083
+  ...
+# Subtest: mid-rally preconditions are visible and every authored backhand selects backhand art
+ok 160 - mid-rally preconditions are visible and every authored backhand selects backhand art
+  ---
+  duration_ms: 0.248292
+  ...
+# Subtest: chapters use real shot segments, stable ids and canonical contact times
+ok 161 - chapters use real shot segments, stable ids and canonical contact times
+  ---
+  duration_ms: 1.939667
+  ...
+# Subtest: all guided lessons preserve authored shot ids and labels across non-shot transitions
+ok 162 - all guided lessons preserve authored shot ids and labels across non-shot transitions
+  ---
+  duration_ms: 1.407958
+  ...
+# Subtest: coincident anchors retain every destination and ties choose authored order
+ok 163 - coincident anchors retain every destination and ties choose authored order
+  ---
+  duration_ms: 0.151041
+  ...
+# Subtest: semantic mapping preserves relative position when durations change
+ok 164 - semantic mapping preserves relative position when durations change
+  ---
+  duration_ms: 0.114833
+  ...
+# Subtest: semantic mapping chooses the nearest surviving authored chapter after deletion
+ok 165 - semantic mapping chooses the nearest surviving authored chapter after deletion
+  ---
+  duration_ms: 0.069416
+  ...
+# Subtest: random boundary corpus is exact, effective-validator clean, and repeat deterministic
+ok 166 - random boundary corpus is exact, effective-validator clean, and repeat deterministic
+  ---
+  duration_ms: 12119.697458
+  ...
+# Subtest: malformed lengths and nonfinite bounded search options never return a candidate
+ok 167 - malformed lengths and nonfinite bounded search options never return a candidate
+  ---
+  duration_ms: 0.941833
+  ...
+# Subtest: Smart Add preserves an authored prefix, including explicit target and flight fields
+ok 168 - Smart Add preserves an authored prefix, including explicit target and flight fields
+  ---
+  duration_ms: 3.036417
+  ...
+# Subtest: same Smart Add source and seed produce the same candidate without source mutation
+ok 169 - same Smart Add source and seed produce the same candidate without source mutation
+  ---
+  duration_ms: 5.534375
+  ...
+# Subtest: family changes preserve a directly authored target before a continuation
+ok 170 - family changes preserve a directly authored target before a continuation
+  ---
+  duration_ms: 1.72975
+  ...
+# Subtest: Smart Add preserves supported waypoint data while validating the effective candidate
+ok 171 - Smart Add preserves supported waypoint data while validating the effective candidate
+  ---
+  duration_ms: 4.314917
+  ...
+# Subtest: proposal authorization rejects a stale source after an unrelated edit
+ok 172 - proposal authorization rejects a stale source after an unrelated edit
+  ---
+  duration_ms: 4.177208
+  ...
+# Subtest: a generated source avoids the reproduced nonextendable dead end
+ok 173 - a generated source avoids the reproduced nonextendable dead end
+  ---
+  duration_ms: 2.506667
+  ...
+# Subtest: short generated rallies remain extendable through five varied Adds across 100 seeds
+ok 174 - short generated rallies remain extendable through five varied Adds across 100 seeds
+  ---
+  duration_ms: 1349.610084
+  ...
+# Subtest: Random Rally failure reports the caller supplied bounded search limits
+ok 175 - Random Rally failure reports the caller supplied bounded search limits
+  ---
+  duration_ms: 15.050667
+  ...
+# Subtest: Coach repairs an automatic derived movement through the complete downstream rally
+ok 176 - Coach repairs an automatic derived movement through the complete downstream rally
+  ---
+  duration_ms: 53.007291
+  ...
+# Subtest: Coach never silently releases a protected pin and offers only evaluated consent options
+ok 177 - Coach never silently releases a protected pin and offers only evaluated consent options
+  ---
+  duration_ms: 31.777041
+  ...
+# Subtest: Broad generated metadata cannot authorize an explicit manual destination
+ok 178 - Broad generated metadata cannot authorize an explicit manual destination
+  ---
+  duration_ms: 28.48175
+  ...
+# Subtest: Coach evaluates the entire downstream candidate and rejects a repair that leaves a later pin broken
+ok 179 - Coach evaluates the entire downstream candidate and rejects a repair that leaves a later pin broken
+  ---
+  duration_ms: 0.384833
+  ...
+# Subtest: Coach distinguishes a valid or tactical draft from a repairable issue
+ok 180 - Coach distinguishes a valid or tactical draft from a repairable issue
+  ---
+  duration_ms: 0.430625
+  ...
+# Subtest: Coach cancellation is bounded and never returns a partial candidate
+ok 181 - Coach cancellation is bounded and never returns a partial candidate
+  ---
+  duration_ms: 0.524833
+  ...
+# Subtest: Coach proposal source identity makes a later application stale
+ok 182 - Coach proposal source identity makes a later application stale
+  ---
+  duration_ms: 29.959208
+  ...
+# Subtest: Coach proposal survives JSON round trip with concrete changes and full validity
+ok 183 - Coach proposal survives JSON round trip with concrete changes and full validity
+  ---
+  duration_ms: 30.777292
+  ...
+# Subtest: Coach reports a genuine no-feasible-search case with protected locks intact
+ok 184 - Coach reports a genuine no-feasible-search case with protected locks intact
+  ---
+  duration_ms: 25.796875
+  ...
+# Subtest: Coach marks a combined automatic and initial-layout candidate as consented
+ok 185 - Coach marks a combined automatic and initial-layout candidate as consented
+  ---
+  duration_ms: 0.427417
+  ...
+# Subtest: new serves use the nearby athlete and the diagonal box without rewriting a starting layout
+ok 186 - new serves use the nearby athlete and the diagonal box without rewriting a starting layout
+  ---
+  duration_ms: 6.313625
+  ...
+# Subtest: generated contacts, bounces, targets and camera-independent actors agree across a bounded corpus
+ok 187 - generated contacts, bounces, targets and camera-independent actors agree across a bounded corpus
+  ---
+  duration_ms: 1061.994125
+  ...
+# Subtest: smart Add appends five validated hits from an empty document and preserves the prefix
+ok 188 - smart Add appends five validated hits from an empty document and preserves the prefix
+  ---
+  duration_ms: 16.783083
+  ...
+# Subtest: Smart Add records bounded seed metadata, keeps all source fields, and avoids an occupied deterministic id
+ok 189 - Smart Add records bounded seed metadata, keeps all source fields, and avoids an occupied deterministic id
+  ---
+  duration_ms: 4.876625
+  ...
+# Subtest: candidate evaluation includes the same coverage and Auto Shading boundary as play installation
+ok 190 - candidate evaluation includes the same coverage and Auto Shading boundary as play installation
+  ---
+  duration_ms: 1.166166
+  ...
+# Subtest: Fifth Shot Drop continuation chooses a compiler-reachable opposing hitter
+ok 191 - Fifth Shot Drop continuation chooses a compiler-reachable opposing hitter
+  ---
+  duration_ms: 14.400958
+  ...
+# Subtest: Random Rally returns exact bounded lengths, deterministic seeds, and varied authored sequences
+ok 192 - Random Rally returns exact bounded lengths, deterministic seeds, and varied authored sequences
+  ---
+  duration_ms: 2021.015333
+  ...
+# Subtest: Random Rally rejects malformed and over-limit requests without a candidate
+ok 193 - Random Rally rejects malformed and over-limit requests without a candidate
+  ---
+  duration_ms: 0.30025
+  ...
+# Subtest: family proposals retain authored fields and adapt only explicit automatic metadata
+ok 194 - family proposals retain authored fields and adapt only explicit automatic metadata
+  ---
+  duration_ms: 1.2395
+  ...
+# Subtest: family changes maintain the schema-conditional serve method
+ok 195 - family changes maintain the schema-conditional serve method
+  ---
+  duration_ms: 1.175792
+  ...
+# Subtest: family changes preserve an authored drop serve method when the family is unchanged
+ok 196 - family changes preserve an authored drop serve method when the family is unchanged
+  ---
+  duration_ms: 0.691083
+  ...
+# Subtest: Smart Add refuses terminal documents and malformed finite attempt overrides
+ok 197 - Smart Add refuses terminal documents and malformed finite attempt overrides
+  ---
+  duration_ms: 0.572458
+  ...
+# Subtest: Random Rally yields between successful hits so cancellation remains observable
+ok 198 - Random Rally yields between successful hits so cancellation remains observable
+  ---
+  duration_ms: 1.282459
+  ...
+# Subtest: createBuildMetadata uses the supplied root for git and branch discovery
+ok 199 - createBuildMetadata uses the supplied root for git and branch discovery
+  ---
+  duration_ms: 114.219541
+  ...
+# Subtest: unknown source revisions and changed runtime bytes cannot be packaged
+ok 200 - unknown source revisions and changed runtime bytes cannot be packaged
+  ---
+  duration_ms: 99.448541
+  ...
+# Subtest: docs and generated metadata changes do not invalidate a frozen runtime
+ok 201 - docs and generated metadata changes do not invalidate a frozen runtime
+  ---
+  duration_ms: 119.1505
+  ...
+# Subtest: runtime digest includes build identity logic but excludes only generated metadata
+ok 202 - runtime digest includes build identity logic but excludes only generated metadata
+  ---
+  duration_ms: 88.730875
+  ...
+# Subtest: required authored pose vocabulary exists
+ok 203 - required authored pose vocabulary exists
+  ---
+  duration_ms: 0.646333
+  ...
+# Subtest: dominant side maps semantic roles without mirroring player root
+ok 204 - dominant side maps semantic roles without mirroring player root
+  ---
+  duration_ms: 0.088458
+  ...
+# Subtest: stroke families are visually distinct and block preparation stays compact
+ok 205 - stroke families are visually distinct and block preparation stays compact
+  ---
+  duration_ms: 0.309125
+  ...
+# Subtest: ready and contact poses stay within conservative balance bounds
+ok 206 - ready and contact poses stay within conservative balance bounds
+  ---
+  duration_ms: 0.160541
+  ...
+# Subtest: stroke samples contain preparation, contact, follow-through, and recovery
+ok 207 - stroke samples contain preparation, contact, follow-through, and recovery
+  ---
+  duration_ms: 0.106625
+  ...
+# Subtest: shot ownership uses explicit metadata and deterministic nearest-player fallback
+ok 208 - shot ownership uses explicit metadata and deterministic nearest-player fallback
+  ---
+  duration_ms: 0.240375
+  ...
+# Subtest: invalid explicit shot ownership, stroke, and contact metadata fail safely
+ok 209 - invalid explicit shot ownership, stroke, and contact metadata fail safely
+  ---
+  duration_ms: 0.209709
+  ...
+# Subtest: compiled shot timeline prepares before authoritative contact and launches trajectory afterward
+ok 210 - compiled shot timeline prepares before authoritative contact and launches trajectory afterward
+  ---
+  duration_ms: 0.474417
+  ...
+# Subtest: board coordinates map centrally to Three.js x/z with y reserved for height
+ok 211 - board coordinates map centrally to Three.js x/z with y reserved for height
+  ---
+  duration_ms: 0.847542
+  ...
+# Subtest: court and camera constants expose regulation dimensions and four presets
+ok 212 - court and camera constants expose regulation dimensions and four presets
+  ---
+  duration_ms: 0.750625
+  ...
+# Subtest: Third Shot Drop trajectory clears the net, lands at target, and bounces
+ok 213 - Third Shot Drop trajectory clears the net, lands at target, and bounces
+  ---
+  duration_ms: 0.362125
+  ...
+# Subtest: invalid trajectory metadata fails safely
+ok 214 - invalid trajectory metadata fails safely
+  ---
+  duration_ms: 0.26125
+  ...
+# Subtest: spin provides distinct illustrative post-bounce travel
+ok 215 - spin provides distinct illustrative post-bounce travel
+  ---
+  duration_ms: 0.155333
+  ...
+# Subtest: central clock pauses and playback rate scales elapsed simulation time
+ok 216 - central clock pauses and playback rate scales elapsed simulation time
+  ---
+  duration_ms: 0.09325
+  ...
+# Subtest: accepts exactly the seven confirmed failures with identical retries
+ok 217 - accepts exactly the seven confirmed failures with identical retries
+  ---
+  duration_ms: 1.661792
+  ...
+# Subtest: rejects an unknown error signature
+ok 218 - rejects an unknown error signature
+  ---
+  duration_ms: 0.958875
+  ...
+# Subtest: rejects an unexpected pass of an allowed failure
+ok 219 - rejects an unexpected pass of an allowed failure
+  ---
+  duration_ms: 0.190791
+  ...
+# Subtest: rejects a changed Playwright version or missing diagnostics
+ok 220 - rejects a changed Playwright version or missing diagnostics
+  ---
+  duration_ms: 0.271625
+  ...
+# Subtest: rejects timed out and skipped results
+ok 221 - rejects timed out and skipped results
+  ---
+  duration_ms: 0.518834
+  ...
+# Subtest: rejects an extra assertion error on an allowed failure
+ok 222 - rejects an extra assertion error on an allowed failure
+  ---
+  duration_ms: 0.162958
+  ...
+# Subtest: rejects a wrong failure line
+ok 223 - rejects a wrong failure line
+  ---
+  duration_ms: 0.195083
+  ...
+# Subtest: rejects changed protected test source
+ok 224 - rejects changed protected test source
+  ---
+  duration_ms: 0.218041
+  ...
+# Subtest: rejects wrong cache assertion details and expired review
+ok 225 - rejects wrong cache assertion details and expired review
+  ---
+  duration_ms: 0.541541
+  ...
+# Subtest: accepts real reporter paths relative to testDir without relaxing error locations
+ok 226 - accepts real reporter paths relative to testDir without relaxing error locations
+  ---
+  duration_ms: 0.466333
+  ...
+1..226
+# tests 226
+# suites 0
+# pass 219
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13677.016333

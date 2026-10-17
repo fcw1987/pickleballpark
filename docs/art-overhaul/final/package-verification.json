@@ -1,0 +1,1972 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": null,
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "078b6076-20d1-40fe-be4f-47df34c8249b",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "4816210",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "beta-starting-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "beta-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "stabilized-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "13758356d65f154b19ca631e6ecb9bdb8afd875b",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "fidelity-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "1d2e4cd67330d2efc444fd99868c22442222465c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "public-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "4ce1eee1-05ec-4eeb-a370-be4f2d9ace1a",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "smart-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "2aa76042-8e42-41be-8e31-9effa5844dc8",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": null,
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "5b4f3a93-6ae9-4d71-9a6a-c7445f6fbac9",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "4816210",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "beta-starting-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "beta-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "stabilized-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "13758356d65f154b19ca631e6ecb9bdb8afd875b",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "fidelity-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "1d2e4cd67330d2efc444fd99868c22442222465c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "public-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "4d8f74bb-9c4b-496f-85ae-395802638899",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "smart-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+    "previousPublicSource": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "33134173-858c-4e60-bb00-19c98e5bad71",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  }
+]

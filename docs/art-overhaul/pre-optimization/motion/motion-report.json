@@ -1,0 +1,106 @@
+{
+  "baseUrl": "http://127.0.0.1:4173/index.html",
+  "viewport": [
+    1280,
+    800
+  ],
+  "sourceRevision": "978f0e568b490f0083aef0504e9a0251995abe38",
+  "runtimeDigest": "87f3f09ada26fcb5cf7db188da47a934a79ef3910015961c4810d5e11a53722d",
+  "plays": [
+    {
+      "id": "serve-and-return",
+      "duration": 2.5046178158344348,
+      "contacts": [
+        {
+          "index": 1,
+          "shot": "serve",
+          "time": 0.45599999999999996
+        },
+        {
+          "index": 2,
+          "shot": "return",
+          "time": 1.7260171603575372
+        }
+      ]
+    },
+    {
+      "id": "third-shot-drop",
+      "duration": 4.457919709744057,
+      "contacts": [
+        {
+          "index": 1,
+          "shot": "serve",
+          "time": 0.45599999999999996
+        },
+        {
+          "index": 2,
+          "shot": "return",
+          "time": 1.7260171603575372
+        },
+        {
+          "index": 3,
+          "shot": "drop",
+          "time": 2.8001506910234375
+        }
+      ]
+    },
+    {
+      "id": "third-shot-drive",
+      "duration": 4.09458169903626,
+      "contacts": [
+        {
+          "index": 1,
+          "shot": "serve",
+          "time": 0.45599999999999996
+        },
+        {
+          "index": 2,
+          "shot": "return",
+          "time": 1.7260171603575372
+        },
+        {
+          "index": 3,
+          "shot": "drive",
+          "time": 2.7978575295844297
+        },
+        {
+          "index": 4,
+          "shot": "block",
+          "time": 3.34785752958443
+        }
+      ]
+    },
+    {
+      "id": "fifth-shot-drop",
+      "duration": 5.7295997213954575,
+      "contacts": [
+        {
+          "index": 1,
+          "shot": "serve",
+          "time": 0.45599999999999996
+        },
+        {
+          "index": 2,
+          "shot": "return",
+          "time": 1.7260171603575372
+        },
+        {
+          "index": 3,
+          "shot": "drive",
+          "time": 2.7978575295844297
+        },
+        {
+          "index": 4,
+          "shot": "block",
+          "time": 3.34785752958443
+        },
+        {
+          "index": 5,
+          "shot": "drop",
+          "time": 4.361367413321974
+        }
+      ]
+    }
+  ],
+  "errors": []
+}
