@@ -1,5 +1,5 @@
 {
-  "source": "9024bfc40e9c498092497db2e3a04f2ff3844f68",
+  "source": "6acada37621c148ab731b9927759007b18c2e294",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -45,11 +45,6 @@
       "path": "assets/park/shrub.png",
       "bytes": 288,
       "sha256": "4f97c750f789a6f0bb8f51809e45721550991dd857a9e231f5ea85837c75c3e8"
-    },
-    {
-      "path": "assets/park/sign.png",
-      "bytes": 248,
-      "sha256": "3b210a502b6a0431e87f76ce7ed1e9c575924dd1ee992ec1120af1d8468ef12b"
     },
     {
       "path": "assets/park/tree.png",
@@ -247,9 +242,29 @@
       "sha256": "ec1ae76b9241c4f570b58d167e26c6b6c67e65a0a327b5f1451905ad7b5cbd0a"
     },
     {
+      "path": "build-diagnostics-ui.js",
+      "bytes": 1796,
+      "sha256": "99270a7764a4e13026a0369dec575e6f4baa5a635c7983e763237b7d60106130"
+    },
+    {
+      "path": "build-diagnostics.js",
+      "bytes": 7301,
+      "sha256": "948cc62a6b0e579e96a9e2feca4c9b455de3d8393d1b85e80520bd9be716afc1"
+    },
+    {
+      "path": "build-identity.js",
+      "bytes": 5714,
+      "sha256": "ea09ce9238b0ace15707c2c94e13ae2ab113224834894094b62f92ccceff27a5"
+    },
+    {
+      "path": "build-metadata.js",
+      "bytes": 1247,
+      "sha256": "c24e27403188723c1519ec4fa936a052e14f3c3f7f46df13a459136bc6f48323"
+    },
+    {
       "path": "builder-court-tools.js",
-      "bytes": 10567,
-      "sha256": "c09be7090bc83290bdb06d9e8ff64fa08ef1c1224f6ecf983ffa06d9193734c0"
+      "bytes": 10545,
+      "sha256": "3e42238824acc81dbfd9d0163195b3a5c321bc3a29783e1a9059957b51caf1ce"
     },
     {
       "path": "builder-framing.js",
@@ -258,8 +273,8 @@
     },
     {
       "path": "builder-integration.css",
-      "bytes": 1792,
-      "sha256": "a22cb6b47a50b833df92355b7609dff11f7419babe25119107e405f906160b39"
+      "bytes": 3071,
+      "sha256": "347311d38a4d8560b410418f11f9b243459d30f0e616b429984b7c2cb8431132"
     },
     {
       "path": "builder-storage.js",
@@ -268,13 +283,13 @@
     },
     {
       "path": "builder-ui.css",
-      "bytes": 32287,
-      "sha256": "cf36f38108b7546789df3b60b7b3b4b43f7e99ec1a63e4d2121bbc4c3c9514e6"
+      "bytes": 51517,
+      "sha256": "42e86d2660bae7e61f851edf73540b16fd02b676b7c553f26e668ae3f5d415dc"
     },
     {
       "path": "builder-ui.js",
-      "bytes": 66288,
-      "sha256": "d28daba9ec0525f4aa7985770950728f38ecb8304b1b2bf0c2449802fc7d69d8"
+      "bytes": 79666,
+      "sha256": "a461ab6dea62891e3bc188bd240a018dea9d0b14a5f0b0f5d36fb5ad111c44c0"
     },
     {
       "path": "builder-waypoint-policy.js",
@@ -368,8 +383,13 @@
     },
     {
       "path": "index.html",
-      "bytes": 20074,
-      "sha256": "4e89dbbc422a5d6290b9af198f2af42ed28e848866b09eb5bcd83b38e2f0ec2f"
+      "bytes": 21480,
+      "sha256": "61892b4793831f1529eb8c43f672111880080150f79176cb3e02171f6de1cfa0"
+    },
+    {
+      "path": "keyboard-shortcuts.js",
+      "bytes": 2861,
+      "sha256": "a65f39ee3a9bd6533c70079680a330fe810cdbd7bc247096a0f852aa14dfc565"
     },
     {
       "path": "manifest.json",
@@ -378,13 +398,13 @@
     },
     {
       "path": "park-layout.js",
-      "bytes": 2638,
-      "sha256": "51d775fed8ba28b7ed32a9ca4df09d06b96bfeb045dfd07185d7454f0ab789d1"
+      "bytes": 2479,
+      "sha256": "d565bcd3bb848fdc5211f5b5277034d319173e2890ed679dee79523614e8ff38"
     },
     {
       "path": "park-scene.js",
-      "bytes": 13020,
-      "sha256": "df8286f8da874218f67e2c0cf08bc29bddebca9305dacc9ad166ffe223f492de"
+      "bytes": 12961,
+      "sha256": "f83736f3de508afdf94f3a7897dd9efbe40bb0d6af1d023012064a142a3e7773"
     },
     {
       "path": "pixel-actor-assets.js",
@@ -393,8 +413,8 @@
     },
     {
       "path": "play-builder.js",
-      "bytes": 31774,
-      "sha256": "80491c2fe7f3d9323da5c147d5fc350e7afa82d96d611709ce4dde2e0047d28e"
+      "bytes": 47302,
+      "sha256": "4a5466be8573a7c32a38e3d0e98d284db43d0a566fb1ddfdb19ec7e1ce9f97bb"
     },
     {
       "path": "play-catalog.js",
@@ -408,8 +428,23 @@
     },
     {
       "path": "play-document.js",
-      "bytes": 15435,
-      "sha256": "2259569e1a6ce2af7894f9f0b8004c7d9bf53f4e14bc6f6603ff95f15131e571"
+      "bytes": 17406,
+      "sha256": "e82930383864d2dccd7a53e36e4c1f54de7026a8f23646cda94f9be8b237d5b4"
+    },
+    {
+      "path": "player-labels.js",
+      "bytes": 1874,
+      "sha256": "b910d2939a179e8bb2b078829324dd4920ff2b33f7975f4d5caa7b3cc4a17640"
+    },
+    {
+      "path": "rally-coach.js",
+      "bytes": 22017,
+      "sha256": "0e84921af19cbd041ff3e37e4e03ed7d0ff7989de61e73aafc8d19d0d49909ac"
+    },
+    {
+      "path": "rally-proposals.js",
+      "bytes": 11656,
+      "sha256": "6e084c15790f0e8327db59fbf3dc6c90f1177caba5fa61098b1263d09b361f8b"
     },
     {
       "path": "rally-rules.js",
@@ -418,8 +453,8 @@
     },
     {
       "path": "script.js",
-      "bytes": 62269,
-      "sha256": "66e125a4f909ebec3dd1ac8488c58056eafe036276a7e8e3d69135726aa08ee6"
+      "bytes": 62651,
+      "sha256": "430dbf04578665ecbf4532b6251904a34d3b059b9765a872dc82f27c5abdc988"
     },
     {
       "path": "shot-chapters.js",
@@ -433,18 +468,23 @@
     },
     {
       "path": "shot-timeline.js",
-      "bytes": 10650,
-      "sha256": "dfb59225ff5a6d51e6fd0b95ba4e916bc42de6c6f4da553b37ec8499e425d75c"
+      "bytes": 13285,
+      "sha256": "9896d04fba7dc60bf132a34f6c23bef5a01b1e36adcde74684fcdde1297a6c1b"
+    },
+    {
+      "path": "smart-rally-generator.js",
+      "bytes": 17561,
+      "sha256": "808ebbe37385e1c4666307f7637ac7994ad0c6dbe66c23e91868fd1f8e2ed65e"
     },
     {
       "path": "styles.css",
-      "bytes": 25396,
-      "sha256": "166f13fed978dd3d1f902590d9bf1f26cb54dd50144723661525a6b9219c6869"
+      "bytes": 32472,
+      "sha256": "e05117d47463bca239a40c40aca03b5e61e3411635ce2030c35a6aef0699786a"
     },
     {
       "path": "sw.js",
-      "bytes": 6748,
-      "sha256": "f294680455ebd2f7650ba313483308c3bbe767a16f0aa2ba1d4c8be6742f0012"
+      "bytes": 7314,
+      "sha256": "e7a56084709366585837b0e12970d6e35b1855d9d11421e9aaabbcb45a76d648"
     },
     {
       "path": "three-d-animation.js",
@@ -452,14 +492,19 @@
       "sha256": "227e7e437a906a5e9afb5e53c97737888ed783eea66c5c9ad0b664135f3a2f8c"
     },
     {
+      "path": "three-d-athletes.js",
+      "bytes": 21960,
+      "sha256": "fd93ddaed315e433bcb213a8f15cab9928be822ea76e8a61ed34224ab7ed0d5d"
+    },
+    {
       "path": "three-d-ball.js",
       "bytes": 4959,
-      "sha256": "06ad393ca68e6b7093b1cceb56323d850f78e6743be80e2ed4de96ae60be33ad"
+      "sha256": "77e3047135c2b4093da60260aa85f462890b2decd7da8ca1c39d443050bee4e3"
     },
     {
       "path": "three-d-core.js",
-      "bytes": 23364,
-      "sha256": "8d3519e0327f35dd7b138b9e178a28209c76274b3339bc6eaa4659329cd8155e"
+      "bytes": 23407,
+      "sha256": "6809e28cb47dbaef3768ddec01250662ef9323307926ab4367f50bfc36a3f0a2"
     },
     {
       "path": "three-d-loader.js",
@@ -473,13 +518,18 @@
     },
     {
       "path": "three-d-playback.js",
-      "bytes": 33096,
-      "sha256": "c96c4fad5278c838aa658bbbd9c1b7b13e3703826be96480ce148136e3df0e2a"
+      "bytes": 28143,
+      "sha256": "122f0ea5fa54dddea54d00809728241e2152f2bcd6b1c3094a8b10a66b949d58"
     },
     {
       "path": "three-d-presentation.js",
-      "bytes": 11429,
-      "sha256": "54257f5281c20bc8ce8c8353943f75ea49d79814c3092103d719e9d710ac2ca8"
+      "bytes": 12621,
+      "sha256": "4a148d6c81582c8bfc07882ea2b74df0f0d9234fe45a59e2a6b2100b79c42094"
+    },
+    {
+      "path": "three-d-world.js",
+      "bytes": 19011,
+      "sha256": "d6f13277bfa6a271672143c86879394aa0204444a3e962578f2c68cc5af8503c"
     },
     {
       "path": "vendor/three.core.min.js",
@@ -490,6 +540,11 @@
       "path": "vendor/three.module.min.js",
       "bytes": 365552,
       "sha256": "86bcee248b64f44bcfc23c331ae74619061957d59cab040171dcb6fb5900beb6"
+    },
+    {
+      "path": "version.json",
+      "bytes": 911,
+      "sha256": "28dc79537725d4e582b349ec07df7239f55de2d4d1dd8937b62dd52979b7f656"
     },
     {
       "path": "visual-theme.js",
