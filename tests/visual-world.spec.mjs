@@ -89,6 +89,8 @@ test('3D world has original lit solid geometry, deterministic acrylic surfaces, 
   await openWorld(page, { width: 1280, height: 800 });
   const world = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, garden = viewer.world;
+    const gardenMeshMaterials = new Set();
+    garden.group.traverse(object => { if (object.isMesh) gardenMeshMaterials.add(object.material); });
     const players = [...viewer.playerObjects.values()].map(root => {
       const meshes = [];
       root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
@@ -104,13 +106,14 @@ test('3D world has original lit solid geometry, deterministic acrylic surfaces, 
       gardenMeshes: garden.resources.geometries.size,
       actorGeometries: viewer.actorResources.geometries.size,
       shadowEnabled: viewer.renderer.shadowMap.enabled,
-      diffuseGarden: [...garden.resources.materials].every(material => material.type === 'MeshLambertMaterial'),
+      diffuseGarden: gardenMeshMaterials.size > 0 && [...gardenMeshMaterials].every(material => material.type === 'MeshLambertMaterial'),
+      netGridMaterial: garden.net.getObjectByName('NetMesh').material.type,
       contactShadows: [...viewer.playerObjects.values()].every(root => root.userData.shadow.visible && root.userData.shadow.material.opacity > 0),
       line: `#${viewer.scene.getObjectByName('GreenBaseline').material.color.getHexString()}`,
       pixelScale: viewer.getState().pixelScale };
   });
   expect(world).toMatchObject({ worldName: 'DimensionalSportsGarden', dimensional: true,
-    textureCount: 3, opaqueTextures: true, shadowEnabled: false, diffuseGarden: true, contactShadows: true, line: '#fff6db', pixelScale: 1 });
+    textureCount: 3, opaqueTextures: true, shadowEnabled: false, diffuseGarden: true, netGridMaterial: 'LineBasicMaterial', contactShadows: true, line: '#fff6db', pixelScale: 1 });
   expect(world.players).toHaveLength(4);
   for (const player of world.players) {
     expect(player).toMatchObject({ volumetric: true, positiveScale: true, lit: true, depthTested: true, owned: true });
