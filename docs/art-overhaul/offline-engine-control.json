@@ -1,0 +1,16 @@
+[
+  {
+    "engine": "chromium",
+    "cached": true,
+    "offlineReload": "passed",
+    "error": null,
+    "title": "Independent offline fixture"
+  },
+  {
+    "engine": "webkit",
+    "cached": true,
+    "offlineReload": "failed",
+    "error": "page.reload: WebKit encountered an internal error",
+    "title": "Independent offline fixture"
+  }
+]
