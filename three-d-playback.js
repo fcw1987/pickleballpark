@@ -1,5 +1,4 @@
-import { createPark3D, disposePark3D, updateParkCamera } from './park-scene.js';
-import { COURT_LINES } from './court-geometry.js';
+import { createDimensionalWorld } from './three-d-world.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import * as THREE from './vendor/three.module.min.js';
 import {
@@ -12,7 +11,7 @@ import {
     fitCameraPreset
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
-import { loadPixelActorAssets, PixelActorResources, createPixelActor, updatePixelActor } from './three-d-pixel-actors.js';
+import { AthleteResources, createAthlete, updateAthlete } from './three-d-athletes.js';
 import { ReadableBall } from './three-d-ball.js';
 import { chapterAtTime } from './shot-chapters.js';
 import { mountShotTimeline } from './shot-timeline.js';
@@ -155,14 +154,13 @@ class ThreeDPlaybackViewer {
         this.loading=true;
         this.updateEntryAvailability();
         this.elements.enter.setAttribute('aria-busy','true');
-        let loadingSubject='Pixel athletes';
+        let loadingSubject='The court';
         try {
-            this.pixelAssets=await loadPixelActorAssets();
-            loadingSubject='The park';
-            if(generation!==this.loadGeneration)return false;
-            const park = await createPark3D(THREE,{signal:controller.signal});
-            if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot){disposePark3D(park);return false;}
-            this.parkObject=park;
+            // Keep asynchronous intent cancellation at the renderer boundary.
+            // The dimensional scene uses locally authored geometry and needs no
+            // raster actor download; the existing 2D artwork remains unchanged.
+            await Promise.resolve();
+            if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
         } catch(error) {
             if(generation!==this.loadGeneration)return false;
             controller.abort();
@@ -220,22 +218,24 @@ class ThreeDPlaybackViewer {
 
     initializeScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(PALETTE.surround).multiplyScalar(0.72);
+        this.scene.background = new THREE.Color('#9eaf8b');
         this.camera = new THREE.PerspectiveCamera(48, 1, 0.05, 100);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-        this.renderer.shadowMap.enabled = false;
-        this.renderer.shadowMap.type = THREE.BasicShadowMap;
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.setPixelRatio(this.renderPixelRatio());
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.elements.canvas.replaceChildren(this.renderer.domElement);
         this.renderer.domElement.addEventListener('webglcontextlost',this.boundContextLost);
 
-        this.scene.add(new THREE.HemisphereLight(PALETTE.line, PALETTE.greenDark, 0.85));
-        this.scene.add(new THREE.AmbientLight(PALETTE.line, 0.45));
-        const key = new THREE.DirectionalLight(PALETTE.line, 1.35);
-        key.position.set(-5, 10, -4);
-        key.castShadow = false;
+        this.scene.add(new THREE.HemisphereLight('#fff5df', '#637d76', 1.2));
+        this.scene.add(new THREE.AmbientLight('#fff9ed', 0.32));
+        const key = new THREE.DirectionalLight('#fff2d9', 1.9);
+        key.position.set(-3.5, 12, -2.5);
+        key.castShadow = true;
         key.shadow.mapSize.set(1024, 1024);
+        key.shadow.normalBias = 0.025;
+        key.shadow.intensity = 0.6;
         key.shadow.camera.left = -8;
         key.shadow.camera.right = 8;
         key.shadow.camera.top = 10;
@@ -247,8 +247,10 @@ class ThreeDPlaybackViewer {
         this.gradientMap.magFilter = THREE.NearestFilter;
         this.gradientMap.generateMipmaps = false;
         this.gradientMap.needsUpdate = true;
-        this.buildCourt();
-        this.scene.add(this.parkObject);
+        this.world = createDimensionalWorld(THREE, { palette: PALETTE, gradientMap: this.gradientMap });
+        this.scene.add(this.world.group);
+        this.courtObject = this.world.court;
+        this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
 
@@ -278,145 +280,32 @@ class ThreeDPlaybackViewer {
         return this.pixelScale;
     }
 
-    buildCourt() {
-        const width = COURT_DIMENSIONS.widthFeet * FEET_TO_METERS;
-        const length = COURT_DIMENSIONS.lengthFeet * FEET_TO_METERS;
-        const courtGroup = new THREE.Group();
-        courtGroup.name = 'Court';
-        courtGroup.userData = { width, length, kitchenDepth: COURT_DIMENSIONS.kitchenDepthFeet * FEET_TO_METERS };
-        this.scene.add(courtGroup);
-
-        const surround = new THREE.Mesh(
-            new THREE.PlaneGeometry(width + 10, length + 10),
-            this.flatMaterial(PALETTE.surround)
-        );
-        surround.name = 'CourtSurround';
-        surround.rotation.x = -Math.PI / 2;
-        surround.position.y = -0.075;
-        surround.receiveShadow = true;
-        courtGroup.add(surround);
-
-        const slab = new THREE.Mesh(
-            new THREE.BoxGeometry(width, 0.11, length),
-            this.flatMaterial(PALETTE.court)
-        );
-        slab.name = 'CourtSlab';
-        slab.position.y = -0.055;
-        slab.receiveShadow = true;
-        courtGroup.add(slab);
-
-        const kitchen = new THREE.Mesh(
-            new THREE.PlaneGeometry(width - 0.04, 14 * FEET_TO_METERS),
-            this.flatMaterial(PALETTE.kitchen)
-        );
-        kitchen.name = 'KitchenSurface';
-        kitchen.rotation.x = -Math.PI / 2;
-        kitchen.position.y = 0.004;
-        kitchen.receiveShadow = true;
-        courtGroup.add(kitchen);
-
-        const lineMaterial = this.flatMaterial(PALETTE.line);
-        const lineWidth = 0.045;
-        const addLine = (name, x, z, w, d) => {
-            const line = new THREE.Mesh(new THREE.BoxGeometry(w, 0.022, d), lineMaterial);
-            line.name = name;
-            line.position.set(x, 0.018, z);
-            courtGroup.add(line);
-        };
-        const names = ['GreenBaseline','OrangeBaseline','LeftSideline','RightSideline','GreenKitchenLine','OrangeKitchenLine','GreenCenterline','OrangeCenterline'];
-        COURT_LINES.forEach((line,index) => {
-            const from=boardToWorld(line.from),to=boardToWorld(line.to),thickness=line.lineWidthFeet*FEET_TO_METERS;
-            addLine(names[index],(from.x+to.x)/2,(from.z+to.z)/2,Math.abs(to.x-from.x)||thickness,Math.abs(to.z-from.z)||thickness);
-            const mesh=courtGroup.children.at(-1); mesh.userData.courtLine=line;
-        });
-
-        const shadowReceiver = new THREE.Mesh(
-            new THREE.PlaneGeometry(width + 10, length + 10),
-            new THREE.ShadowMaterial({ color: PALETTE.ink, opacity: 0.13, depthWrite: false })
-        );
-        shadowReceiver.name = 'CourtShadowReceiver';
-        shadowReceiver.rotation.x = -Math.PI / 2;
-        shadowReceiver.position.y = 0.032;
-        shadowReceiver.receiveShadow = true;
-        courtGroup.add(shadowReceiver);
-
-        const centerHeight = COURT_DIMENSIONS.netCenterHeightFeet * FEET_TO_METERS;
-        const sideHeight = COURT_DIMENSIONS.netSidelineHeightFeet * FEET_TO_METERS;
-        const netWidth = width + 0.55;
-        const netGroup = new THREE.Group();
-        netGroup.name = 'Net';
-        netGroup.userData = { centerHeight, sideHeight, width: netWidth };
-        courtGroup.add(netGroup);
-
-        const netMaterial = new THREE.LineBasicMaterial({ color: PALETTE.ink, transparent: true, opacity: 0.62 });
-        const points = [];
-        const segments = 16;
-        const heightAt = x => centerHeight + (sideHeight - centerHeight) * Math.pow(Math.abs(x) / (netWidth / 2), 1.7);
-        for (let index = 0; index <= segments; index += 1) {
-            const x = -netWidth / 2 + (netWidth * index / segments);
-            points.push(x, 0.03, 0, x, heightAt(x), 0);
-        }
-        for (let row = 1; row < 7; row += 1) {
-            for (let index = 0; index < segments; index += 1) {
-                const x1 = -netWidth / 2 + netWidth * index / segments;
-                const x2 = -netWidth / 2 + netWidth * (index + 1) / segments;
-                const ratio = row / 7;
-                points.push(x1, heightAt(x1) * ratio, 0, x2, heightAt(x2) * ratio, 0);
-            }
-        }
-        const netGeometry = new THREE.BufferGeometry();
-        netGeometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-        const net = new THREE.LineSegments(netGeometry, netMaterial);
-        net.name = 'NetMesh';
-        netGroup.add(net);
-
-        const curve = new THREE.QuadraticBezierCurve3(
-            new THREE.Vector3(-netWidth / 2, sideHeight, 0),
-            new THREE.Vector3(0, centerHeight - 0.025, 0),
-            new THREE.Vector3(netWidth / 2, sideHeight, 0)
-        );
-        const tape = new THREE.Mesh(
-            new THREE.TubeGeometry(curve, 24, 0.028, 6, false),
-            this.toonMaterial(PALETTE.line)
-        );
-        tape.name = 'NetTopTape';
-        netGroup.add(tape);
-        const postMaterial = this.toonMaterial(PALETTE.navyDark);
-        for (const x of [-netWidth / 2, netWidth / 2]) {
-            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, sideHeight + 0.12, 12), postMaterial);
-            post.name = 'NetPost';
-            post.position.set(x, (sideHeight + 0.12) / 2, 0);
-            netGroup.add(post);
-        }
-        this.courtObject = courtGroup;
-        this.netObject = netGroup;
-    }
 
     buildPlayers() {
-        this.actorResources=new PixelActorResources(this.pixelAssets);
+        this.actorResources=new AthleteResources();
         for(let index=1;index<=4;index++) {
             const token=this.board.tokens[`player${index}`];
             const team=token.element.classList.contains('team2-player')?'team2':'team1';
-            const actor=createPixelActor(this.actorResources,team,token.handedness);
+            const actor=createAthlete(this.actorResources,team,token.handedness,index-1);
             actor.userData.id=token.id;this.scene.add(actor);this.playerObjects.set(token.id,actor);
         }
     }
 
-    applyPixelActors(segment,localTime) {
+    applyAthletes(segment,localTime) {
         for(const [id,actor] of this.playerObjects) {
             let sample;
             if(segment) sample=sampleActorPresentation({segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
             else {
                 const position=this.currentPlay.steps[0].positions[id],world=boardToWorld(position);
                 const facing={x:0,z:position.y<22?1:-1};
-                sample={handedness:actor.userData.handedness,worldPosition:world,viewDirection:selectCameraRelativeDirection(facing,world,this.camera.position,this.cameraTarget),action:'ready',phase:'ready',locomotionFrame:null,paddle:null};
+                sample={handedness:actor.userData.handedness,worldPosition:world,bodyFacing:facing,facing,timeSeconds:0,travelPhase:0,viewDirection:selectCameraRelativeDirection(facing,world,this.camera.position,this.cameraTarget),action:'ready',phase:'ready',locomotionFrame:null,paddle:null};
             }
             const isStriker=segment?.shotSemantics?.playerId===id;
             const isIncoming=segment?.nextShotSemantics?.playerId===id;
             const distance=isStriker?Math.abs(localTime-segment.contactTime):isIncoming?Math.abs(segment.duration-localTime):Infinity;
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
-            updatePixelActor(actor,sample,this.camera,weight);
+            updateAthlete(actor,sample,this.camera,weight);
         }
     }
 
@@ -475,7 +364,7 @@ class ThreeDPlaybackViewer {
         const hudHeight = this.elements.root.hidden ? 0 : (this.elements.root.querySelector('.three-d-hud')?.getBoundingClientRect().height || 0);
         const reservedPixels = this.board.courtFirstComposition ? 0 : Math.min(height * 0.8, hudHeight + 24);
         // Include every authored position and shot, so playback never needs camera chasing.
-        // Conservative upright pixel-actor bounds include cap, feet and stroke reach.
+        // Bounds include upright athletes and paddle reach without framing empty scenery.
         const envelope = this.sceneEnvelope || [];
         if (!this.sceneEnvelope) {
         const halfWidth = COURT_DIMENSIONS.widthFeet * FEET_TO_METERS / 2;
@@ -486,7 +375,7 @@ class ThreeDPlaybackViewer {
             for (const [id, position] of Object.entries(step.positions)) {
                 if (id === 'ball') continue;
                 const point = boardToWorld(position);
-                for (const x of [-1, 1]) for (const y of [0, 2.4]) for (const z of [-1, 1]) {
+                for (const x of [-0.7, 0.7]) for (const y of [0, 2.0]) for (const z of [-0.7, 0.7]) {
                     envelope.push([point.x + x, y, point.z + z]);
                 }
             }
@@ -499,7 +388,7 @@ class ThreeDPlaybackViewer {
         }
         this.sceneEnvelope=envelope;
         }
-        const framing = fitCameraPreset(this.cameraPreset, width / height, reservedPixels / height, envelope, {courtFirst:Boolean(this.board.courtFirstComposition)});
+        const framing = fitCameraPreset(this.cameraPreset, width / height, reservedPixels / height, envelope, {courtFirst:Boolean(this.board.courtFirstComposition),compactLandscape:height<=500&&width/height>=1.35});
         this.camera.clearViewOffset();
         this.camera.aspect = width / height;
         this.camera.fov = framing.fov;
@@ -510,7 +399,6 @@ class ThreeDPlaybackViewer {
         this.camera.setViewOffset(width, height, 0, reservedPixels / 2, width, height);
         this.camera.updateProjectionMatrix();
         this.camera.updateMatrixWorld(true);
-        updateParkCamera(this.parkObject,this.camera);
         this.updateBallReadability();
         this.cameraFraming = {
             aspect: width / height,
@@ -569,7 +457,7 @@ class ThreeDPlaybackViewer {
     applyAtTime(seconds) {
         const segment=seconds>0?(this.timeline.segments.find(item=>seconds<item.endTime-1e-9)||this.timeline.segments.at(-1)):null;
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
-        this.applyPixelActors(segment,local);
+        this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
@@ -618,6 +506,7 @@ class ThreeDPlaybackViewer {
             playId: this.currentPlay?.id || null,
             playerCount: this.playerObjects.size,
             hasBall: Boolean(this.ballObject),
+            artStyle: 'dimensional-court-garden',
             renderLoopCount: this.renderLoopCount,
             pixelScale: this.pixelScale,
             framing: this.cameraFraming ? { ...this.cameraFraming } : null,
@@ -627,8 +516,9 @@ class ThreeDPlaybackViewer {
 
     disposeScene() {
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
-        disposePark3D(this.parkObject);this.parkObject=null;
+        if (this.world) { this.scene?.remove(this.world.group); this.world.dispose(); this.world=null; }
         this.readableBall?.dispose();this.readableBall=null;
+        for (const actor of this.playerObjects.values()) this.scene?.remove(actor);
         this.actorResources?.dispose();this.actorResources=null;
         this.scene?.traverse(object => {
             object.geometry?.dispose?.();

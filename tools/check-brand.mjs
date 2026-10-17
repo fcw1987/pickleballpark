@@ -52,6 +52,7 @@ const ARCHIVED_FILES = new Set([
 const isArchived = file => ARCHIVED_FILES.has(file);
 
 const removeApprovedLegacyContracts = (file, source) => {
+  if (['docs/art-overhaul/SOURCE.md', 'docs/art-overhaul/before/README.md'].includes(file)) source = source.replaceAll('/Users/fdub/Geese/pickleboard', '[canonical repository path]');
   if (file === 'docs/rebrand/capture-metadata.json') {
     const data = JSON.parse(source);
     for (const record of data.records || []) {
@@ -129,7 +130,7 @@ export function validateBrandFiles(files) {
   if (!/<title>Pickleball Park - Build a Play<\/title>/.test(index)) errors.push('index.html: canonical title is missing');
   if (!/^# Pickleball Park\b/m.test(readme)) errors.push('README.md: canonical heading is missing');
   if (!/const CACHE_PREFIX = 'pickleboard-';/.test(worker)) errors.push('sw.js: compatibility cache prefix changed');
-  if (!/const STATIC_CACHE = `\$\{CACHE_PREFIX\}static-v24`;/.test(worker)) errors.push('sw.js: v24 cache identity is missing');
+  if (!/const STATIC_CACHE = `\$\{CACHE_PREFIX\}static-v25`;/.test(worker)) errors.push('sw.js: v25 cache identity is missing');
   if (!/Pickleball Park static cache/.test(worker)) errors.push('sw.js: current cache diagnostic name is missing');
   if (!/text\(c,\s*'PICKLEBALL'\s*,/.test(generator) || !/text\(c,\s*'PARK'\s*,/.test(generator)) errors.push('tools/generate-park-art.mjs: sign must emit full PICKLEBALL and PARK lettering');
   for (const letter of new Set('PICKLEBALLPARK')) {

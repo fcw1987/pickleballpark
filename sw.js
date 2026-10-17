@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v24`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v25`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -57,6 +57,8 @@ const STATIC_ASSETS = [
   './three-d-core.js',
   './three-d-animation.js',
   './three-d-playback.js',
+  './three-d-athletes.js',
+  './three-d-world.js',
   './three-d-presentation.js',
   './three-d-pixel-actors.js',
   './three-d-ball.js',

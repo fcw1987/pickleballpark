@@ -10,13 +10,13 @@ export const CAMERA_PRESETS = Object.freeze({
     'behind-orange':{label:'Behind Orange',position:[0,1.95,10.2],target:[0,.8,-1.4],fov:52}
 });
 
-export function fitCameraPreset(name,aspect=16/9,hudFraction=0,envelope=null,{courtFirst=false}={}){
+export function fitCameraPreset(name,aspect=16/9,hudFraction=0,envelope=null,{courtFirst=false,compactLandscape=false}={}){
     let preset=CAMERA_PRESETS[name]; if(name==='overhead'&&aspect<.9)preset={...preset,position:[1.4,12,9.5]};
     if(!preset)throw new RangeError(`Unknown camera preset: ${name}.`);
     // Builder composition follows the available playing surface, not scenery.
     // Keep the same elevated preset identity while fitting the long court axis
     // across wide screens. Other camera presets retain their existing views.
-    if(courtFirst&&name==='overhead')preset={...preset,position:aspect>=1.35?[12,16,3.5]:[1.4,16,10],target:[0,.35,0]};
+    if((courtFirst||compactLandscape)&&name==='overhead')preset={...preset,position:aspect>=1.35?[12,16,3.5]:[1.4,16,10],target:[0,.35,0]};
     const safeAspect=Number.isFinite(aspect)&&aspect>0?aspect:1,reserved=Number.isFinite(hudFraction)?Math.max(0,Math.min(.8,hudFraction)):0;
     const target=[...preset.target],direction=preset.position.map((v,i)=>v-target[i]),originalDistance=Math.hypot(...direction);
     const normal=direction.map(v=>v/originalDistance),horizontalLength=Math.hypot(normal[0],normal[2]);

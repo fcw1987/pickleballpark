@@ -33,7 +33,7 @@ export class ReadableBall {
         this.cue=new THREE.Sprite(new THREE.SpriteMaterial({map:this.cueTexture,transparent:true,opacity:0.7,depthTest:true,depthFunc:THREE.GreaterDepth,depthWrite:false,toneMapped:false}));
         this.cue.name='OccludedBallCue';this.cue.renderOrder=901;this.object.add(this.cue);
         this.object.name='CoachingBall';
-        this.object.userData={physicalRadius:0.037,visualRadius:0.037,minimumCSSDiameter:10};
+        this.object.userData={physicalRadius:0.037,visualRadius:0.037,minimumCSSDiameter:12};
         scene.add(this.object);
         this.viewPosition=new THREE.Vector3();
         this.shadow=new THREE.Mesh(new THREE.CircleGeometry(1,20),new THREE.MeshBasicMaterial({color:palette.ink,transparent:true,opacity:0.2,depthWrite:false}));
@@ -43,7 +43,7 @@ export class ReadableBall {
             const dot=new THREE.Sprite(material);dot.name='BallPastPosition';dot.visible=false;scene.add(dot);return dot;
         });
     }
-    sizeAt(position,camera,height,diameter=10) {
+    sizeAt(position,camera,height,diameter=12) {
         const depth=Math.max(0.01,-this.viewPosition.copy(position).applyMatrix4(camera.matrixWorldInverse).z);
         const worldPerPixel=2*depth*Math.tan(camera.fov*Math.PI/360)/Math.max(1,height);
         // The artwork occupies 12 of the 16 texture columns.
