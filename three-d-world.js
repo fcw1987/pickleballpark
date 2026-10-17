@@ -13,7 +13,7 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
         apron: '#547d7a', terracotta: '#b77e62', clayShade: '#8d604f',
         stone: '#e4d7b9', stoneShade: '#c4b79a', metal: '#293e48',
         wood: '#a97550', woodLight: '#c89765', soil: '#57694d',
-        grass: '#829779', leaf: '#5e8961', leafLight: '#7fa46c', leafShade: '#456e55',
+        grass: '#719b6a', leaf: '#5f946b', leafLight: '#86ae70', leafShade: '#456e55',
         ...palette
     };
     const group = new THREE.Group(); group.name = 'DimensionalSportsGarden';
