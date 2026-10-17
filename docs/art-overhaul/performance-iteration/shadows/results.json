@@ -1,0 +1,141 @@
+{
+  "method": "One headless Chromium process, sequential contexts,1440x900 DPR1,6s active third-shot-drop overhead after1.5s material warm-up; RAF callback cadence and CPU submission durations,not display FPS/GPU completion.",
+  "records": [
+    {
+      "mode": "soft1024",
+      "stats": {
+        "raf": {
+          "count": 243,
+          "median": 33.29999999999927,
+          "p95": 41.80000000000018,
+          "max": 108.40000000000009
+        },
+        "applyCPU": {
+          "count": 128,
+          "median": 1.0999999046325684,
+          "p95": 1.2999999523162842,
+          "max": 3.299999952316284
+        },
+        "renderCPU": {
+          "count": 127,
+          "median": 0.3999999761581421,
+          "p95": 0.5999999046325684,
+          "max": 1.600000023841858
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 8
+        },
+        "calls": 83,
+        "triangles": 22194,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "soft512",
+      "stats": {
+        "raf": {
+          "count": 245,
+          "median": 33.30000000000018,
+          "p95": 41.69999999999982,
+          "max": 100
+        },
+        "applyCPU": {
+          "count": 132,
+          "median": 1,
+          "p95": 1.2999999523162842,
+          "max": 7.5
+        },
+        "renderCPU": {
+          "count": 131,
+          "median": 0.30000007152557373,
+          "p95": 0.5,
+          "max": 2
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 8
+        },
+        "calls": 84,
+        "triangles": 22196,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "basic512",
+      "stats": {
+        "raf": {
+          "count": 265,
+          "median": 33.20000000000027,
+          "p95": 33.400000000000546,
+          "max": 91.59999999999991
+        },
+        "applyCPU": {
+          "count": 152,
+          "median": 1,
+          "p95": 1.2000000476837158,
+          "max": 3.799999952316284
+        },
+        "renderCPU": {
+          "count": 151,
+          "median": 0.3999999761581421,
+          "p95": 0.5,
+          "max": 1.2999999523162842
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 8
+        },
+        "calls": 84,
+        "triangles": 22196,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "none",
+      "stats": {
+        "raf": {
+          "count": 279,
+          "median": 25,
+          "p95": 33.400000000000546,
+          "max": 100
+        },
+        "applyCPU": {
+          "count": 163,
+          "median": 1,
+          "p95": 1.2999999523162842,
+          "max": 5.5
+        },
+        "renderCPU": {
+          "count": 162,
+          "median": 0.2999999523162842,
+          "p95": 0.5,
+          "max": 1.0999999046325684
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "calls": 47,
+        "triangles": 11160,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    }
+  ]
+}

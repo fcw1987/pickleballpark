@@ -221,8 +221,8 @@ class ThreeDPlaybackViewer {
         this.scene.background = new THREE.Color('#9eaf8b');
         this.camera = new THREE.PerspectiveCamera(48, 1, 0.05, 100);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // Ground contact ellipses anchor athletes without a second scene pass.
+        this.renderer.shadowMap.enabled = false;
         this.renderer.setPixelRatio(this.renderPixelRatio());
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.elements.canvas.replaceChildren(this.renderer.domElement);
@@ -232,15 +232,6 @@ class ThreeDPlaybackViewer {
         this.scene.add(new THREE.AmbientLight('#fff9ed', 0.32));
         const key = new THREE.DirectionalLight('#fff2d9', 1.9);
         key.position.set(-3.5, 12, -2.5);
-        key.castShadow = true;
-        key.shadow.mapSize.set(1024, 1024);
-        key.shadow.normalBias = 0.025;
-        key.shadow.intensity = 0.6;
-        key.shadow.camera.left = -8;
-        key.shadow.camera.right = 8;
-        key.shadow.camera.top = 10;
-        key.shadow.camera.bottom = -10;
-        key.shadow.bias = -0.00035;
         this.scene.add(key);
         this.gradientMap = new THREE.DataTexture(new Uint8Array([72, 164, 255]), 3, 1, THREE.RedFormat);
         this.gradientMap.minFilter = THREE.NearestFilter;

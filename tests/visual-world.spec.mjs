@@ -104,11 +104,13 @@ test('3D world has original lit solid geometry, deterministic acrylic surfaces, 
       gardenMeshes: garden.resources.geometries.size,
       actorGeometries: viewer.actorResources.geometries.size,
       shadowEnabled: viewer.renderer.shadowMap.enabled,
+      diffuseGarden: [...garden.resources.materials].every(material => material.type === 'MeshLambertMaterial'),
+      contactShadows: [...viewer.playerObjects.values()].every(root => root.userData.shadow.visible && root.userData.shadow.material.opacity > 0),
       line: `#${viewer.scene.getObjectByName('GreenBaseline').material.color.getHexString()}`,
       pixelScale: viewer.getState().pixelScale };
   });
   expect(world).toMatchObject({ worldName: 'DimensionalSportsGarden', dimensional: true,
-    textureCount: 3, opaqueTextures: true, shadowEnabled: true, line: '#fff6db', pixelScale: 1 });
+    textureCount: 3, opaqueTextures: true, shadowEnabled: false, diffuseGarden: true, contactShadows: true, line: '#fff6db', pixelScale: 1 });
   expect(world.players).toHaveLength(4);
   for (const player of world.players) {
     expect(player).toMatchObject({ volumetric: true, positiveScale: true, lit: true, depthTested: true, owned: true });

@@ -26,7 +26,8 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
     const kitchenDepth = COURT_DIMENSIONS.kitchenDepthFeet * FEET_TO_METERS;
     court.userData = { width, length, kitchenDepth, dimensional: true };
     const material = (color, extra = {}) => {
-        const value = new THREE.MeshStandardMaterial({ color, roughness: 1, metalness: 0, flatShading: true, ...extra });
+        // These matte garden surfaces need diffuse faceted lighting only.
+        const value = new THREE.MeshLambertMaterial({ color, flatShading: true, ...extra });
         materials.add(value); return value;
     };
     const m = {
