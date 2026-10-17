@@ -229,7 +229,9 @@ export function updateAthlete(root,sample,camera,contactWeight=0) {
     const bodyDrop=blendChannel(pose,'Hips','position','y')-.048-stance-(action==='block'?.018:.045)*strokeActivity;
     const weightShift=side*blendChannel(pose,'Hips','rotation','y')*.25;
     upper.position.set(weightShift+Math.sin(gait)*travel*.018,bodyDrop+travel*Math.abs(Math.sin(gait))*.028,0);
-    upper.rotation.set(blendChannel(pose,'Torso','rotation','x')*.8,blendChannel(pose,'Torso','rotation','y')*(-side)*1.25,blendChannel(pose,'Torso','rotation','z')*(-side));
+    // In this rig +X pitch tips the chest toward local +Z (the net). The
+    // renderer-independent pose library uses the opposite pitch convention.
+    upper.rotation.set(.06-blendChannel(pose,'Torso','rotation','x')*.65,blendChannel(pose,'Torso','rotation','y')*(-side)*1.25,blendChannel(pose,'Torso','rotation','z')*(-side));
     upper.updateMatrixWorld(true);visual.updateMatrixWorld(true);
     for(const [name,s] of [['left',1],['right',-1]]) {
         const leg=legs[name],swing=Math.sin(gait+(s===1?0:Math.PI))*travel;
