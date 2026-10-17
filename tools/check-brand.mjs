@@ -52,7 +52,7 @@ const ARCHIVED_FILES = new Set([
 const isArchived = file => ARCHIVED_FILES.has(file);
 
 const removeApprovedLegacyContracts = (file, source) => {
-  if (['docs/art-overhaul/SOURCE.md', 'docs/art-overhaul/before/README.md'].includes(file)) source = source.replaceAll('/Users/fdub/Geese/pickleboard', '[canonical repository path]');
+  if (['docs/art-overhaul/SOURCE.md', 'docs/art-overhaul/before/README.md', 'tools/art-overhaul-matched-performance.mjs'].includes(file)) source = source.replaceAll('/Users/fdub/Geese/pickleboard', '[canonical repository path]');
   if (file === 'docs/rebrand/capture-metadata.json') {
     const data = JSON.parse(source);
     for (const record of data.records || []) {
