@@ -21,7 +21,7 @@ const stage = () => {
   writeFileSync(path.join(root, 'build-info.json'), `${JSON.stringify({
     product: 'Pickleball Park', revision: REVISION, approvedSource: fixture.source,
     sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null,
-    runtimeManifestSha256: '4793db6a6feae1a94fe0166e2c80b41760b4b76865ecb718181ce99d326ab813',
+    runtimeManifestSha256: '2d236d5ceb9c4801447b8afe40a531623d03eecd32f4876d62cbcaaa1b7ed865',
     runtimeFiles: fixture.files.length,
     runtimeBytes: fixture.files.reduce((sum, file) => sum + file.bytes, 0),
     publicationMetadata: ['build-info.json', 'runtime-manifest.json'],
@@ -35,8 +35,8 @@ const withStage = (run) => {
 
 test('accepts the exact staged runtime fixture from the working tree', () => withStage((root) => {
   assert.deepEqual(validateDeploymentArtifact(root, REVISION), {
-    revision: REVISION, runtimeFiles: 110, runtimeBytes: 1871702,
-    manifestSha256: '4793db6a6feae1a94fe0166e2c80b41760b4b76865ecb718181ce99d326ab813',
+    revision: REVISION, runtimeFiles: 110, runtimeBytes: 1871430,
+    manifestSha256: '2d236d5ceb9c4801447b8afe40a531623d03eecd32f4876d62cbcaaa1b7ed865',
   });
 }));
 
