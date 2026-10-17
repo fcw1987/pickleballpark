@@ -25,7 +25,9 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
   width: min(24rem,calc(100vw - 16px));
   max-width: calc(100vw - 16px);
   max-height: calc(var(--builder-visible-height,100dvh) - 16px);
-  z-index: 45;
+  /* At enlarged text sizes this fixed editor covers part of the header.
+     Keep its focused Close control above the chrome that it overlaps. */
+  z-index: 70;
 }
 
 /* Keep a short landscape viewport useful while the non-modal editor is open. */

@@ -563,7 +563,13 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     if(picker&&['chapter','edit-chapter'].includes(action)){picker.open=false;picker.querySelector('summary')?.focus();}
     const input=document.activeElement;if(input&&root.contains(input)&&input.matches('input:not([type=range]),textarea'))input.blur();
     if (action === 'select-shot') { inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; rerenderAction('selectShot', target.dataset.shotId); }
-    else if (action === 'chapter') {await rerenderAction('chapter', target.dataset.shotId);await syncViewingShot();}
+    else if (action === 'chapter') {
+      const shotId = target.dataset.shotId;
+      await rerenderAction('chapter', shotId);
+      // Choosing a named shot is explicit authoring intent, including while
+      // the editor is open. Automatic playback/seek updates keep its selection.
+      await rerenderAction('selectShot', { id: shotId, preserveTime: true });
+    }
     else if (action === 'edit-chapter') { inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; await fire('pauseForEditing');await rerenderAction('selectShot', target.dataset.shotId);root.querySelector('.builder-inspector [data-action="collapse-inspector"]')?.focus({ preventScroll: true }); }
     else if (action === 'view') rerenderAction('view', target.dataset.view);
     else if (action === 'detail-group') {

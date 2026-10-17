@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openCoachTools, settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
+import { chooseShotFamily, openCoachTools, settleBuilderStartup, switchCourtView } from './helpers/builder-navigation.mjs';
 
 const APP = '/index.html?pixel-game-context=1';
 
@@ -112,7 +112,7 @@ test('planner confirmation Cancel preserves both worlds and Use layout creates o
     });
 });
 
-test('paused chapter navigation syncs the closed target while an open editor keeps its selection', async ({ page }) => {
+test('explicit chapter navigation updates the open editor while playback and seeks keep its selection', async ({ page }) => {
   await openBuilder(page);
   const state = await page.evaluate(() => ({ ids: playBuilder.document.shots.map(shot => shot.id),
     targets: playBuilder.document.shots.map(shot => structuredClone(shot.target)) }));
@@ -133,7 +133,20 @@ test('paused chapter navigation syncs the closed target while an open editor kee
     current: document.querySelector('.builder-transport .shot-timeline-marker.is-current')?.dataset.shotId,
     family: document.querySelector('.builder-family-option[aria-selected="true"]')?.dataset.family,
     expectedFamily: playBuilder.document.shots.find(shot => shot.id === playBuilder.selectedShotId)?.family }));
-  expect(open).toEqual({ selected: state.ids[1], current: state.ids[2], family: open.expectedFamily, expectedFamily: open.expectedFamily });
+  expect(open).toEqual({ selected: state.ids[2], current: state.ids[2], family: open.expectedFamily, expectedFamily: open.expectedFamily });
+  await expect(page.locator('.builder-inspector-header')).toContainText('Shot 3 details');
+  await chooseShotFamily(page, 'Drive');
+  expect(await page.evaluate(() => playBuilder.document.shots.map(shot => shot.family))).toEqual(['serve', 'return', 'drive']);
+
+  await page.evaluate(async () => {
+    await playBuilder.action('seek', 0);
+    playBuilder.play();
+    playBuilder.render();
+  });
+  await expect.poll(() => page.evaluate(() => playBuilder.session.clock.elapsed)).toBeGreaterThan(.3);
+  await page.evaluate(() => { playBuilder.pause(); playBuilder.render(); });
+  expect(await page.evaluate(() => playBuilder.selectedShotId)).toBe(state.ids[2]);
+  await expect(page.locator('.builder-inspector-header')).toContainText('Shot 3 details');
   await expect(page.locator('.builder-inspector')).not.toHaveClass(/builder-inspector-collapsed/);
 });
 
