@@ -493,3 +493,187 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
   .builder-large-text .builder-menu-panel { max-height: calc(100dvh - 120px); }
   .builder-large-text .builder-context-menu > .builder-menu-panel { right: 0; max-width: calc(100vw - 16px); }
 }
+
+/* Handheld Park UI: ivory field notes, jade actions, and a single ink keyline.
+   Keep the pixel display face for headings; use normal text for live controls. */
+.builder-ui, #infoModal {
+  --game-ink: var(--pb-ink, #263449);
+  --game-paper: var(--pb-panel, #fffbea);
+  --game-paper-deep: #eee9d8;
+  --game-green: #356b5b;
+  --game-accent: #c87742;
+  --game-muted: #57686d;
+  --game-edge: #465a68;
+  --game-highlight: #e4efdf;
+  --game-filled-ink: #fffbea;
+}
+body[data-theme="dark"] :is(.builder-ui, #infoModal) {
+  --game-ink: #efe9d4;
+  --game-paper: #243846;
+  --game-paper-deep: #304955;
+  --game-green: #89bc9e;
+  --game-accent: #edaa72;
+  --game-muted: #bdcdc7;
+  --game-edge: #8ba6a6;
+  --game-highlight: #3c594f;
+  --game-filled-ink: #20343e;
+}
+.builder-ui { gap: 8px; padding: max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); }
+.builder-meta, .builder-transport {
+  border: 1px solid var(--game-edge);
+  border-radius: 3px;
+  background: var(--game-paper);
+  box-shadow: 0 3px 0 color-mix(in srgb,var(--game-ink) 36%,transparent);
+}
+.builder-meta { align-items: center; gap: 8px; padding: 7px; border-top: 3px solid var(--game-green); }
+.builder-button, .builder-view-button, .builder-menu > summary, .builder-chip {
+  border: 1px solid color-mix(in srgb,var(--game-edge) 68%,var(--game-paper));
+  border-radius: 2px;
+  background: var(--game-paper-deep);
+  box-shadow: 0 2px 0 color-mix(in srgb,var(--game-ink) 25%,transparent);
+  font: 700 .875rem/1.2 ui-sans-serif,system-ui,sans-serif;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.builder-button:active, .builder-view-button:active, .builder-menu[open] > summary { transform: translateY(1px); box-shadow: none; }
+.builder-button-primary, .builder-view-button.is-selected,
+.builder-context-actions .builder-button-primary { color: var(--game-filled-ink); background: var(--game-green); border-color: var(--game-green); }
+.builder-button-accent { color: var(--game-ink); background: color-mix(in srgb,var(--game-accent) 23%,var(--game-paper)); border-color: var(--game-accent); }
+.builder-button-quiet { background: transparent; box-shadow: none; }
+.builder-button:disabled, .builder-view-button:disabled { opacity: .4; }
+.builder-main-menu > summary, .builder-context-actions .builder-button, .builder-view-button { box-shadow: none; }
+.builder-main-menu > summary { background: transparent; border-color: transparent; gap: 7px; }
+.builder-menu-icon { color: var(--game-green); }
+.builder-context-actions { gap: 6px; }
+.builder-context-actions .builder-button { min-height: 44px; padding-inline: 14px; }
+.builder-context-actions [data-action="collapse-inspector"] { background: transparent; border-color: transparent; }
+.builder-context-actions [data-action="collapse-inspector"][aria-expanded="true"] { background: var(--game-highlight); border-color: var(--game-green); }
+.builder-view-button { min-width: 48px; background: transparent; border-color: var(--game-edge); }
+.builder-cue { gap: 8px; }
+.builder-shot-card { grid-template-columns: auto minmax(0,1fr) auto auto; gap: 10px; padding: 0 12px; border-left: 2px solid color-mix(in srgb,var(--game-green) 45%,var(--game-paper)); background: transparent; }
+.builder-shot-card-kicker { gap: 7px; }
+.builder-shot-card-number { color: var(--game-muted); font-size: .6rem; letter-spacing: .04em; }
+.builder-shot-card-family { font: 750 .875rem/1.2 ui-sans-serif,system-ui,sans-serif; }
+.builder-shot-card-description { font-weight: 500; color: var(--game-muted); }
+.builder-shot-card-player { display: none; }
+.builder-shot-card-flight { font: 500 .75rem/1.2 ui-sans-serif,system-ui,sans-serif; }
+.builder-shot-card .builder-chapter-menu > summary { min-height: 44px; padding: 12px 10px; color: var(--game-ink); font-size: .8125rem; background: var(--game-paper-deep); border-color: transparent; box-shadow: none; }
+.builder-save-pill { border: 0; background: transparent; padding-inline: 3px; font: 500 .6875rem/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing: 0; }
+.builder-menu-panel, .builder-chapter-list, .builder-inspector, .builder-dialog, #infoModal .modal-content {
+  border: 1px solid var(--game-edge);
+  border-top: 3px solid var(--game-green);
+  border-image: none;
+  border-radius: 3px;
+  background: var(--game-paper);
+  box-shadow: 0 4px 0 color-mix(in srgb,var(--game-ink) 30%,transparent);
+}
+.builder-menu-panel, .builder-chapter-list { padding: 12px; }
+.builder-menu-heading { color: var(--game-green); padding: 4px 3px 12px; border-bottom: 1px solid color-mix(in srgb,var(--game-edge) 24%,transparent); font-size: 1.125rem; }
+.builder-menu-group h3, .builder-control-group h3 { font: 750 .6875rem/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing: .09em; }
+.builder-menu-item, .builder-menu-submenu-summary, .builder-chapter-actions > summary, .builder-chapter-action-panel .builder-button { min-height: 44px; }
+.builder-menu-item { background: transparent; border-color: transparent; box-shadow: none; }
+.builder-menu-item.builder-button-primary { border-color: var(--game-green); box-shadow: none; }
+.builder-menu-submenu-summary { font-family: ui-sans-serif,system-ui,sans-serif; }
+.builder-menu-field input { min-height: 44px; }
+.builder-chapter-row { gap: 6px; margin-bottom: 8px; grid-template-columns: minmax(0,1fr) auto; }
+.builder-chapter-row .builder-chapter-actions { grid-column: 1 / -1; justify-self: end; margin-top: -7px; }
+.builder-chapter-actions > summary { padding: 12px 8px; font-family: ui-sans-serif,system-ui,sans-serif; }
+.builder-inspector { padding: 14px; scrollbar-gutter: auto; }
+.builder-inspector-header { top: -14px; margin: -1px 0 0; padding: 6px 0 12px; border-bottom: 1px solid color-mix(in srgb,var(--game-edge) 24%,transparent); font-size: 1.125rem; }
+.builder-inspector-header .builder-collapse { min-width: 64px; background: var(--game-paper-deep); }
+.builder-selected-summary { margin: 12px 0; font-size: .875rem; line-height: 1.5; }
+.builder-control-group { border-top: 1px solid color-mix(in srgb,var(--game-edge) 24%,transparent); padding-top: 10px; }
+.builder-choice-grid { gap: 10px; }
+.builder-choice-field { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.builder-choice-field::before, .builder-choice-field::after { display: none; }
+.builder-choice-field .builder-field-label { margin-bottom: 7px; font: 700 .6875rem/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing: .06em; }
+.builder-choice-field select { appearance: auto; padding: 9px 5px; border: 1px solid var(--game-edge); background: var(--game-paper-deep); font-size: 1rem; }
+.builder-choice-field:focus-within { box-shadow: none; }
+.builder-family-summary { min-height: 44px; padding: 9px; border: 1px solid var(--game-edge); border-radius: 2px; font-family: ui-sans-serif,system-ui,sans-serif; font-size: 1rem; }
+.builder-family-summary-glyph { font-size: 1rem; }
+.builder-family-options { border-width: 1px; padding: 5px; }
+.builder-family-option { min-height: 56px; border-color: transparent; background: transparent; }
+.builder-family-option-copy small { font-size: .75rem; line-height: 1.35; }
+.builder-ui :is(select,input[type=number],input[type=text],input[type=file],textarea) { border-width: 1px; border-radius: 2px; }
+.builder-ui input[type=checkbox] { accent-color: var(--game-green); }
+.builder-detail-tabs { gap: 6px; }
+.builder-detail-tab { min-height: 44px; border-width: 1px; font: 700 .75rem/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing: 0; text-transform: none; box-shadow: none; }
+.builder-detail-tab[aria-selected="true"] { border-width: 1px; box-shadow: none; }
+.builder-quick-actions, .builder-shot-actions-menu, .builder-shot-details { border-top: 1px solid color-mix(in srgb,var(--game-edge) 28%,transparent); }
+.builder-shot-actions-menu > summary, .builder-presets .builder-chip, .builder-finding-row .builder-button-quiet, .builder-quick-actions .builder-button { min-height: 44px; }
+.builder-shot-actions-menu > summary { font-family: ui-sans-serif,system-ui,sans-serif; }
+.builder-target-row { gap: 8px; }
+.builder-target-row .builder-button { white-space: normal; }
+.builder-transport { padding: 6px; }
+.builder-transport-top { gap: 10px; }
+.builder-history-controls { gap: 4px; }
+.builder-history-controls .builder-button { min-width: 44px; min-height: 44px; background: transparent; box-shadow: none; font-size: 1.125rem; }
+.builder-play-button { min-height: 48px; min-width: 88px; font-size: 1rem; }
+.builder-context-menu > summary { background: transparent; box-shadow: none; }
+.builder-transport .shot-timeline-identity { font: 650 .75rem/1.2 ui-sans-serif,system-ui,sans-serif; }
+.builder-transport .shot-timeline-time { font-weight: 500; }
+.builder-transport .shot-timeline-rail { height: 8px; border-width: 1px; box-shadow: none; }
+.builder-transport .shot-timeline-thumb { width: 12px; height: 20px; border-width: 1px; box-shadow: 1px 1px 0 var(--game-edge); background: var(--game-green); }
+.builder-transport .shot-timeline-marker { top: -4px; height: 14px; background: var(--game-muted); box-shadow: none; }
+.builder-transport .shot-timeline-marker.is-current { background: var(--game-accent); }
+
+@media (max-width: 980px) {
+  .builder-shot-card-flight { display: none; }
+}
+@media (max-width: 700px) {
+  .builder-ui { gap: 6px; padding: max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left)); }
+  .builder-meta { gap: 5px; padding: 5px; }
+  .builder-main-menu > summary { width: 48px; min-width: 48px; padding-inline: 4px; font-size: .8125rem; }
+  .builder-context-actions { gap: 5px; }
+  .builder-context-actions .builder-button, .builder-view-button { font-size: .8125rem; }
+  .builder-context-actions .builder-button[data-action="collapse-inspector"], .builder-context-actions .builder-button[data-action="add-shot"] { width: 44px; min-width: 44px; padding-inline: 3px; font-size: .8125rem; letter-spacing: 0; }
+  .builder-view-button { min-width: 44px; padding-inline: 5px; }
+  .builder-shot-card { min-width: 0; padding: 0; border-left: 0; }
+  .builder-shot-card .builder-chapter-menu > summary { min-width: 44px; padding: 12px 6px; font-size: .8125rem; }
+  .builder-save-pill { margin: 0; width: 6px; min-width: 6px; height: 6px; min-height: 6px; font-size: 0; }
+  .builder-save-pill::before { width: 6px; height: 6px; box-shadow: none; }
+  .builder-shot-card .builder-chapter-list { top: calc(var(--builder-visible-top,0px) + 72px); max-height: calc(var(--builder-visible-height,100dvh) - 90px); }
+  .builder-inspector:not(.builder-inspector-collapsed) { left: 0; right: 0; bottom: 0; width: auto; max-height: min(70dvh,100%); padding: 14px; }
+  .builder-ui :is(select,input[type=number],input[type=text],input[type=file],textarea) { font-size: 16px; }
+  .builder-transport { padding: 5px 7px; }
+  .builder-transport-top { grid-template-columns: auto minmax(0,1fr) auto; gap: 3px 8px; }
+  .builder-play-button { min-height: 44px; min-width: 78px; padding-inline: 9px; font-size: .9375rem; }
+  .builder-transport .shot-timeline { grid-template-columns: minmax(0,1fr) auto; gap: 0 8px; }
+  .builder-transport .shot-timeline-identity { display: none; }
+  .builder-transport .shot-timeline-target { grid-column: 1; grid-row: 1; height: 44px; }
+  .builder-transport .shot-timeline-range { height: 44px; }
+  .builder-transport .shot-timeline-time { grid-column: 2; grid-row: 1; font-size: .6875rem; }
+}
+@media (max-width: 360px) {
+  .builder-meta { gap: 4px; padding-inline: 4px; }
+  .builder-main-menu > summary { width: 44px; min-width: 44px; }
+  .builder-context-actions { gap: 4px; }
+  .builder-choice-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+  .builder-family-summary { gap: 5px; padding-inline: 7px; }
+  .builder-family-option { grid-template-columns: 18px minmax(0,1fr); gap: 4px; padding: 6px 4px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .builder-ui { gap: 4px; padding-top: max(4px,env(safe-area-inset-top)); padding-bottom: max(4px,env(safe-area-inset-bottom)); }
+  .builder-meta { min-height: 54px; padding: 3px 6px; gap: 6px; }
+  .builder-main-menu > summary { min-width: 64px; }
+  .builder-save-pill { display: none; }
+  .builder-shot-card { grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; }
+  .builder-shot-card-kicker { display: none; }
+  .builder-shot-card-description { display: block; }
+  .builder-transport { padding: 3px 6px; }
+  .builder-play-button { min-height: 44px; }
+  .builder-inspector { top: 0; bottom: 0; max-height: 100%; }
+  .builder-inspector:not(.builder-inspector-collapsed) { max-height: 100%; }
+  .builder-inspector-header { font-size: 1rem; }
+  .builder-inspector .builder-selected-summary { font-size: .8125rem; }
+}
+@media (hover: none) {
+  .builder-button:hover, .builder-view-button:hover, .builder-menu > summary:hover, .builder-chip:hover { background: var(--game-paper-deep); }
+  .builder-button-primary:hover, .builder-context-actions .builder-button-primary:hover, .builder-view-button.is-selected:hover { color: var(--game-filled-ink); background: var(--game-green); }
+  .builder-button-accent:hover { background: color-mix(in srgb,var(--game-accent) 23%,var(--game-paper)); }
+}
+.builder-group-shot > h3 { display: none; }
+.builder-control-group .builder-choice-field { margin: 0; }
+.builder-inspector-header { padding-block: 3px 8px; }
+.builder-shot-details { margin-top: 10px; }
+.builder-quick-label { font: 750 .6875rem/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing: .06em; }

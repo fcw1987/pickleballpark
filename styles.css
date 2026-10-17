@@ -387,3 +387,84 @@ body.play-mode .playback-controls { top: auto; right: auto; bottom: max(.7rem, e
 .build-diagnostic-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .build-diagnostic-actions button { min-height: 44px; padding: .5rem .75rem; font: inherit; }
 .build-diagnostics summary { min-height: 44px; cursor: pointer; padding-block: .6rem; }
+
+/* Guided replay shares the builder's compact field-note treatment. The
+   disclosure keeps complete lesson text available without covering the court. */
+.three-d-hud {
+  --replay-paper: var(--pb-panel, #fffbea);
+  --replay-ink: var(--pb-ink, #263449);
+  --replay-muted: #57686d;
+  --replay-action: #356b5b;
+  --replay-edge: #465a68;
+  gap: 12px;
+  padding: 8px;
+  color: var(--replay-ink);
+  background: var(--replay-paper);
+  border: 1px solid var(--replay-edge);
+  border-top: 3px solid var(--replay-action);
+  border-radius: 3px;
+  box-shadow: 0 3px 0 rgba(28,43,64,.25);
+}
+body[data-theme="dark"] .three-d-hud {
+  --replay-paper: #243846;
+  --replay-ink: #efe9d4;
+  --replay-muted: #bdcdc7;
+  --replay-action: #89bc9e;
+  --replay-edge: #8ba6a6;
+}
+.three-d-copy { position: relative; flex: 1 1 16rem; min-width: 0; max-width: 30rem; }
+.three-d-lesson-summary { display: grid; align-content: center; gap: 3px; min-height: 44px; padding: 4px 8px; list-style: none; cursor: pointer; border: 1px solid transparent; border-radius: 2px; }
+.three-d-lesson-summary::-webkit-details-marker { display: none; }
+.three-d-lesson-summary:hover, .three-d-copy[open] .three-d-lesson-summary { border-color: var(--replay-edge); background: color-mix(in srgb,var(--replay-action) 9%,var(--replay-paper)); }
+.three-d-lesson-summary:focus-visible { outline: 3px solid var(--pb-orange-dark); outline-offset: 2px; }
+.three-d-copy strong { color: var(--replay-ink); font-size: .875rem; line-height: 1.25; }
+.three-d-copy .three-d-step-label { color: var(--replay-action) !important; font-size: .8125rem !important; }
+.three-d-copy span { color: var(--replay-muted); }
+.three-d-notes-hint { font-size: .6875rem !important; }
+.three-d-notes-hint::after { content: ' ▾'; }
+.three-d-copy[open] .three-d-notes-hint::after { content: ' ▴'; }
+.three-d-lesson-notes { position: absolute; left: 0; bottom: calc(100% + 14px); z-index: 2; display: grid; gap: 8px; width: min(28rem,calc(100vw - 40px)); max-height: min(55dvh,24rem); padding: 14px; overflow-y: auto; overscroll-behavior: contain; background: var(--replay-paper); border: 1px solid var(--replay-edge); border-top: 3px solid var(--replay-action); border-radius: 3px; box-shadow: 0 4px 0 rgba(28,43,64,.25); }
+.three-d-description { max-width: none; font-size: .875rem !important; line-height: 1.5; }
+.three-d-copy .three-d-progress { color: var(--replay-action) !important; }
+.three-d-controls { min-width: min(42rem,62vw); gap: 6px; }
+.three-d-controls .transport-primary { align-items: center; gap: 10px; }
+.three-d-controls .transport-secondary { align-items: center; gap: 6px; }
+.three-d-controls button, .three-d-controls select, .three-d-controls .playback-options summary { min-width: 44px; min-height: 44px; padding: 8px 10px; border: 1px solid var(--replay-edge); border-radius: 2px; color: var(--replay-ink); background: var(--replay-paper); font-size: .8125rem; font-weight: 700; touch-action: manipulation; }
+.three-d-controls .transport-play { min-width: 56px; color: var(--replay-paper) !important; background: var(--replay-action) !important; border-color: var(--replay-action) !important; }
+.three-d-controls .playback-options { position: relative; }
+.three-d-controls .playback-options[open] { display: block; }
+.three-d-controls .playback-options label { position: absolute; right: 0; bottom: calc(100% + 12px); z-index: 3; width: min(16rem,calc(100vw - 40px)); padding: 12px; color: var(--replay-muted); background: var(--replay-paper); border: 1px solid var(--replay-edge); font-size: .75rem; }
+.three-d-controls .playback-options label:first-of-type { bottom: calc(100% + 98px); border-bottom: 0; }
+.three-d-controls select { width: 100%; margin-top: 4px; font-size: 16px; }
+.three-d-controls .shot-timeline { --game-ink: var(--replay-ink); --game-paper: var(--replay-paper); --game-paper-deep: color-mix(in srgb,var(--replay-ink) 12%,var(--replay-paper)); --game-green: var(--replay-action); --game-muted: var(--replay-muted); --game-edge: var(--replay-edge); --game-highlight: var(--replay-paper); --game-accent: var(--pb-orange-dark); }
+.three-d-controls .shot-timeline-identity { font: 650 .75rem/1.2 ui-sans-serif,system-ui,sans-serif; }
+.three-d-controls .shot-timeline-rail { height: 8px; border-width: 1px; box-shadow: none; }
+.three-d-controls .shot-timeline-thumb { border-width: 1px; background: var(--replay-action); box-shadow: 1px 1px 0 var(--replay-edge); }
+.three-d-controls .shot-timeline-marker { top: -4px; height: 14px; box-shadow: none; }
+
+@media (max-width: 700px), (max-height: 500px) and (orientation: landscape) {
+  .three-d-hud { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 4px 6px; left: max(6px,env(safe-area-inset-left)); right: max(6px,env(safe-area-inset-right)); bottom: max(6px,env(safe-area-inset-bottom)); padding: 6px; }
+  .three-d-copy { grid-column: 1; grid-row: 1; width: auto; max-width: none; }
+  .three-d-lesson-summary { gap: 1px; padding: 2px 5px; }
+  #threeDTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8125rem; }
+  .three-d-copy .three-d-step-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem !important; }
+  .three-d-notes-hint { font-size: .625rem !important; }
+  .three-d-controls, .three-d-controls .transport-primary, .three-d-controls .transport-secondary { display: contents; min-width: 0; }
+  .three-d-controls .transport-play { grid-column: 1; grid-row: 2; justify-self: start; width: 56px; }
+  .three-d-controls .shot-timeline-mount { grid-column: 1 / -1; grid-row: 2; margin-left: 66px; min-width: 0; }
+  .three-d-controls .shot-timeline { grid-template-columns: minmax(0,1fr) auto; gap: 0 8px; }
+  .three-d-controls .shot-timeline-identity { display: none; }
+  .three-d-controls .shot-timeline-target { grid-column: 1; grid-row: 1; height: 44px; }
+  .three-d-controls .shot-timeline-range { height: 44px; }
+  .three-d-controls .shot-timeline-time { grid-column: 2; grid-row: 1; font-size: .625rem; overflow: visible; max-width: none; }
+  .three-d-controls .playback-options { grid-column: 2; grid-row: 1; }
+  .three-d-controls #threeDExit { grid-column: 3; grid-row: 1; width: auto; }
+  .three-d-controls .playback-options label { right: -70px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .three-d-hud { grid-template-columns: minmax(12rem,.8fr) minmax(15rem,1fr) auto auto; }
+  .three-d-controls .transport-play { grid-column: 2; grid-row: 1; }
+  .three-d-controls .shot-timeline-mount { grid-column: 2; grid-row: 1; }
+  .three-d-controls .playback-options { grid-column: 3; }
+  .three-d-controls #threeDExit { grid-column: 4; }
+}

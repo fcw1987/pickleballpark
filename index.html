@@ -121,14 +121,19 @@
         <section id="threeDViewer" class="three-d-viewer" aria-label="3D Play playback" hidden>
             <div id="threeDCanvas" class="three-d-canvas" aria-label="Three-dimensional pickleball court"></div>
             <div class="three-d-hud">
-                <div class="three-d-copy">
-                    <strong id="threeDTitle">3D Play</strong>
-                    <span id="threeDStatus">Ready</span>
-                    <span id="threeDProgress" class="three-d-progress"></span>
-                    <strong id="threeDStepLabel" class="three-d-step-label"></strong>
-                    <span id="threeDDescription" class="three-d-description"></span>
-                    <span id="threeDShotCue" class="shot-cue" hidden></span>
-                </div>
+                <details class="three-d-copy">
+                    <summary class="three-d-lesson-summary" aria-label="Shot details">
+                        <strong id="threeDTitle">3D Play</strong>
+                        <strong id="threeDStepLabel" class="three-d-step-label"></strong>
+                        <span class="three-d-notes-hint" aria-hidden="true">Shot details</span>
+                    </summary>
+                    <div class="three-d-lesson-notes">
+                        <span id="threeDStatus">Ready</span>
+                        <span id="threeDProgress" class="three-d-progress"></span>
+                        <span id="threeDDescription" class="three-d-description"></span>
+                        <span id="threeDShotCue" class="shot-cue" hidden></span>
+                    </div>
+                </details>
                 <div class="three-d-controls">
                     <div class="transport-primary"><button id="threeDPlayPause" class="transport-play" type="button" aria-label="Play rally" aria-pressed="false">▶</button><div id="threeDTimelineMount" class="shot-timeline-mount"></div></div>
                     <div class="transport-secondary"><details class="playback-options"><summary>View</summary><label>Camera
