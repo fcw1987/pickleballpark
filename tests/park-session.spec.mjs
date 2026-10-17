@@ -123,7 +123,7 @@ test('thirty editor to 3D cycles restore the exact board and release replay reso
       if(!board.plays.load(i%2?'dink-exchange':'third-shot-drive'))throw new Error('play did not load');
       if(!await board.threeD.enter())throw new Error('3D did not enter');
       const live={canvas:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size,
-        sceneChildren:board.threeD.scene.children.length,textures:board.threeD.actorResources.textures.size};
+        sceneChildren:board.threeD.scene.children.length,geometries:board.threeD.actorResources.geometries.size,materials:board.threeD.actorResources.materials.size};
       board.threeD.exit(); board.plays.exit();
       return {live,after:{canvas:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size,
         active:board.threeD.active,hasRenderer:Boolean(board.threeD.renderer)},snapshot:board.captureBoardState()};
@@ -134,7 +134,10 @@ test('thirty editor to 3D cycles restore the exact board and release replay reso
     bounds.push(sample.live);
   }
   expect(new Set(bounds.map(item=>item.sceneChildren)).size).toBe(1);
-  expect(Math.max(...bounds.map(item=>item.textures))).toBeLessThanOrEqual(64);
+  expect(new Set(bounds.map(item=>item.geometries)).size).toBe(1);
+  expect(new Set(bounds.map(item=>item.materials)).size).toBe(1);
+  expect(bounds[0].geometries).toBeGreaterThan(0);
+  expect(bounds[0].materials).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
 

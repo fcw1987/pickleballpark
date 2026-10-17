@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { fitCameraPreset } from '../three-d-core.js';
+import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 
 test('camera fitting expands narrow views without changing preset sight lines', () => {
   const desktop = fitCameraPreset('sideline', 16 / 9, 0.12);
@@ -21,8 +23,9 @@ async function openWorld(page, viewport) {
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
   await page.locator('#play3dView').click();
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+  await installDimensionalAudit(page);
   await page.evaluate(() => {
-    window.__auditPixelWorld = ({ includeTrajectory = false } = {}) => {
+    window.__auditDimensionalWorld = ({ includeTrajectory = false } = {}) => {
       const viewer = window.pickleboard.threeD;
       viewer.scene.updateMatrixWorld(true);
       viewer.camera.updateMatrixWorld(true);
@@ -34,62 +37,23 @@ async function openWorld(page, viewport) {
           y: canvasRect.top + (1 - ndc.y) * canvasRect.height / 2
         };
       };
-      const surfacePoint = (mesh, pixelX, pixelY) => {
-        const frame = mesh.userData.currentFrame;
-        const widthSegments = mesh.geometry.parameters.widthSegments;
-        const heightSegments = mesh.geometry.parameters.heightSegments;
-        const fxGrid = Math.max(0, Math.min(widthSegments, pixelX / frame.rect[2] * widthSegments));
-        const fyGrid = Math.max(0, Math.min(heightSegments, pixelY / frame.rect[3] * heightSegments));
-        const column = Math.min(widthSegments - 1, Math.floor(fxGrid));
-        const row = Math.min(heightSegments - 1, Math.floor(fyGrid));
-        const fx = fxGrid - column;
-        const fy = fyGrid - row;
-        const stride = widthSegments + 1;
-        const indices = fx + fy <= 1
-          ? [[row * stride + column, 1 - fx - fy], [(row + 1) * stride + column, fy], [row * stride + column + 1, fx]]
-          : [[(row + 1) * stride + column, 1 - fx], [(row + 1) * stride + column + 1, fx + fy - 1], [row * stride + column + 1, 1 - fy]];
-        const attribute = mesh.geometry.attributes.position;
-        const point = mesh.position.clone().set(0, 0, 0);
-        for (const [index, weight] of indices) {
-          point.x += attribute.getX(index) * weight;
-          point.y += attribute.getY(index) * weight;
-          point.z += attribute.getZ(index) * weight;
-        }
-        return point.applyMatrix4(mesh.matrixWorld);
-      };
-      const actorPoints = root => {
-        const points = [];
-        for (const mesh of [root.userData.body, root.userData.arm]) {
-          const frame = mesh.userData.currentFrame;
-          const bounds = mesh.userData.layerIndex === 0 ? frame.bodyBounds : frame.actionBounds;
-          const [left, top, right, bottom] = bounds;
-          for (let x = left; x <= right; x += 1) {
-            points.push(project(surfacePoint(mesh, x, top)), project(surfacePoint(mesh, x, bottom)));
-          }
-          for (let y = top; y <= bottom; y += 1) {
-            points.push(project(surfacePoint(mesh, left, y)), project(surfacePoint(mesh, right, y)));
-          }
-          for (let x = Math.ceil(left / 4) * 4; x < right; x += 4) {
-            for (let y = Math.ceil(top / 4) * 4; y < bottom; y += 4) {
-              points.push(project(surfacePoint(mesh, x, y)));
-            }
-          }
-        }
-        return points;
-      };
+      // Project actual transformed solid vertices, including paddle and shoes.
+      const actorPoints = root => window.__athleteAudit(root).vertices.map(project);
       const ballPoints = (position, scale) => {
         const right = viewer.camera.position.clone().setFromMatrixColumn(viewer.camera.matrixWorld, 0);
         const up = viewer.camera.position.clone().setFromMatrixColumn(viewer.camera.matrixWorld, 1);
         const visibleRadius = scale * 12 / 16 / 2;
+        // The visible sprite sits on the near surface along the camera ray.
+        const surface = position.clone().addScaledVector(viewer.camera.position.clone().sub(position).normalize(), scale * 0.375);
         return [
-          project(position.clone().addScaledVector(right, visibleRadius)),
-          project(position.clone().addScaledVector(right, -visibleRadius)),
-          project(position.clone().addScaledVector(up, visibleRadius)),
-          project(position.clone().addScaledVector(up, -visibleRadius))
+          project(surface.clone().addScaledVector(right, visibleRadius)),
+          project(surface.clone().addScaledVector(right, -visibleRadius)),
+          project(surface.clone().addScaledVector(up, visibleRadius)),
+          project(surface.clone().addScaledVector(up, -visibleRadius))
         ];
       };
       const actors = [...viewer.playerObjects.values()].map(root => actorPoints(root));
-      const ball = ballPoints(viewer.ballObject.position, viewer.ballObject.scale.x);
+      const ball = ballPoints(viewer.ballObject.position, viewer.readableBall.sprite.scale.x);
       const trajectory = [];
       if (includeTrajectory) {
         for (const segment of viewer.timeline.segments.filter(item => item.trajectory)) {
@@ -121,74 +85,37 @@ async function openWorld(page, viewport) {
   });
 }
 
-test('3D world uses depth-tested pixel actors authored from the shared palette', async ({ page }) => {
+test('3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
   await openWorld(page, { width: 1280, height: 800 });
   const world = await page.evaluate(() => {
-    const viewer = window.pickleboard.threeD;
+    const viewer = window.pickleboard.threeD, garden = viewer.world;
     const players = [...viewer.playerObjects.values()].map(root => {
-      const layers = [root.userData.body, root.userData.arm];
-      const team = root.userData.team === 'team1' ? 'green' : 'orange';
-      const key = `${team}/${root.userData.handedness}/${root.userData.animation.viewDirection}`;
-      return {
-        team: root.userData.team,
-        handedness: root.userData.handedness,
-        pixelActor: root.userData.pixelActor,
-        positiveScale: root.scale.x > 0,
-        layerNames: layers.map(layer => layer.name),
-        frame: layers.map(layer => layer.userData.currentFrame.action),
-        layerIndices: layers.map(layer => layer.userData.layerIndex),
-        basicMaterials: layers.every(layer => layer.material.type === 'MeshBasicMaterial'),
-        depthTested: layers.every(layer => layer.material.depthTest && layer.material.depthWrite),
-        nearestSampled: layers.every(layer => layer.material.map.magFilter === 1003 && layer.material.map.minFilter === 1003),
-        noMipmaps: layers.every(layer => layer.material.map.generateMipmaps === false),
-        ownedMaps: layers.every(layer => [...viewer.actorResources.textures.values()].includes(layer.material.map)),
-        stableMapLookup: layers.every(layer => viewer.actorResources.texture(key, layer.userData.layerIndex) === layer.material.map)
-      };
+      const meshes = [];
+      root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
+      return { volumetric: root.userData.volumetricAthlete, positiveScale: root.scale.toArray().every(n => n > 0),
+        lit: meshes.every(mesh => mesh.material.type === 'MeshStandardMaterial'),
+        depthTested: meshes.every(mesh => mesh.material.depthTest && mesh.material.depthWrite),
+        owned: meshes.every(mesh => viewer.actorResources.geometries.has(mesh.geometry)),
+        shoeBottoms: window.__athleteAudit(root).shoeBottoms };
     });
-    const images = [...new Set([...viewer.playerObjects.values()].flatMap(root =>
-      [root.userData.body.material.map.image, root.userData.arm.material.map.image]))];
-    const colors = new Set();
-    for (const image of images) {
-      const canvas = document.createElement('canvas');
-      canvas.width = image.width; canvas.height = image.height;
-      const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0);
-      const pixels = context.getImageData(0, 0, image.width, image.height).data;
-      // Ignore the deliberately translucent foot-shadow row: canvas premultiplication
-      // can round its RGB channels even though its authored source is the ink color.
-      for (let index = 0; index < pixels.length; index += 4) if (pixels[index + 3] === 255) {
-        colors.add(`#${[pixels[index], pixels[index + 1], pixels[index + 2]]
-          .map(value => value.toString(16).padStart(2, '0')).join('')}`);
-      }
-    }
-    const palette = new Set(Object.values(window.PICKLEBOARD_VISUAL.palette).map(color => color.toLowerCase()));
-    return {
-      players,
-      colors: [...colors],
-      unexpectedColors: [...colors].filter(color => !palette.has(color)),
-      textureCount: viewer.actorResources.textures.size,
-      layerCount: players.length * 2,
-      court: `#${viewer.scene.getObjectByName('CourtSlab').material.color.getHexString()}`,
-      kitchen: `#${viewer.scene.getObjectByName('KitchenSurface').material.color.getHexString()}`,
-      surround: `#${viewer.scene.getObjectByName('CourtSurround').material.color.getHexString()}`,
+    return { players, worldName: garden.group.name, dimensional: garden.group.userData.dimensionalWorld,
+      textureCount: garden.resources.textures.size,
+      opaqueTextures: [...garden.resources.textures].every(texture => texture.image.data.every((value,index) => index % 4 !== 3 || value === 255)),
+      gardenMeshes: garden.resources.geometries.size,
+      actorGeometries: viewer.actorResources.geometries.size,
+      shadowEnabled: viewer.renderer.shadowMap.enabled,
       line: `#${viewer.scene.getObjectByName('GreenBaseline').material.color.getHexString()}`,
-      pixelScale: viewer.getState().pixelScale
-    };
+      pixelScale: viewer.getState().pixelScale };
   });
-  expect(world).toMatchObject({
-    court: '#4f8f88', kitchen: '#a7c7aa', surround: '#739b70', line: '#fff6db', pixelScale: 1
-  });
+  expect(world).toMatchObject({ worldName: 'DimensionalSportsGarden', dimensional: true,
+    textureCount: 3, opaqueTextures: true, shadowEnabled: true, line: '#fff6db', pixelScale: 1 });
   expect(world.players).toHaveLength(4);
   for (const player of world.players) {
-    expect(player).toMatchObject({ pixelActor: true, positiveScale: true, basicMaterials: true,
-      depthTested: true, nearestSampled: true, noMipmaps: true, ownedMaps: true, stableMapLookup: true });
-    expect(player.layerNames).toEqual(['PixelBody', 'PixelPaddleArm']);
-    expect(player.frame).toEqual(['ready', 'ready']);
-    expect(player.layerIndices).toEqual([0, 1]);
+    expect(player).toMatchObject({ volumetric: true, positiveScale: true, lit: true, depthTested: true, owned: true });
+    for (const bottom of player.shoeBottoms) expect(Math.abs(bottom)).toBeLessThanOrEqual(0.01);
   }
-  expect(world.unexpectedColors).toEqual([]);
-  expect(world.colors).toEqual(expect.arrayContaining(['#263449', '#304762', '#83bc65', '#df8b50', '#f5edd8']));
-  expect(world.textureCount).toBeLessThanOrEqual(world.layerCount);
+  expect(world.gardenMeshes).toBeLessThan(40);
+  expect(world.actorGeometries).toBeLessThan(400);
   expect(await page.evaluate(() => window.pickleboard.threeD.setPixelScale(2))).toBe(2);
   expect(await page.evaluate(() => window.pickleboard.threeD.setPixelScale(1))).toBe(1);
 });
@@ -216,7 +143,7 @@ test('camera presets reframe after portrait resize without resetting playback', 
     await page.locator('#threeDCamera').selectOption(name,{force:true});
     const { state, audit, restored } = await page.evaluate(before => ({
       state: window.pickleboard.threeD.getState(),
-      audit: window.__auditPixelWorld({ includeTrajectory: true }),
+      audit: window.__auditDimensionalWorld({ includeTrajectory: true }),
       restored: {
         elapsed: window.pickleboard.threeD.clock.elapsed,
         ball: window.pickleboard.threeD.ballObject.position.toArray(),
@@ -237,8 +164,9 @@ test('camera presets reframe after portrait resize without resetting playback', 
 });
 
 test('all Plays keep complete actors and trajectories above the HUD at every target viewport', async ({ page }) => {
+  test.setTimeout(90000);
   await openWorld(page, { width: 390, height: 844 });
-  const playIds = ['serve-and-return', 'third-shot-drop', 'third-shot-drive', 'fifth-shot-drop'];
+  const playIds = PICKLEBOARD_PLAYS.map(play => play.id);
   for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 1164, height: 696 }]) {
     await page.setViewportSize(viewport);
     for (const playId of playIds) {
@@ -272,7 +200,7 @@ test('all Plays keep complete actors and trajectories above the HUD at every tar
           let audit;
           times.forEach((time, index) => {
             viewer.applyAtTime(time);
-            audit = window.__auditPixelWorld({ includeTrajectory: index === 0 });
+            audit = window.__auditDimensionalWorld({ includeTrajectory: index === 0 });
             left = Math.min(left, audit.bounds.left);
             right = Math.max(right, audit.bounds.right);
             top = Math.min(top, audit.bounds.top);
@@ -309,12 +237,12 @@ test('phone cameras retain a visible ball without changing its trajectory or phy
       const s = v.timeline.segments.find(s => s.step.id === 'third-drive');
       v.applyAtTime(s.startTime + s.contactTime + 0.2);
       const center = v.ballObject.position.clone();
-      const points = window.__auditPixelWorld().ball;
+      const points = window.__auditDimensionalWorld().ball;
       return { diameterPixels: Math.max(...points.map(point => point.x)) - Math.min(...points.map(point => point.x)),
         physicalRadius: v.ballObject.userData.physicalRadius,
         center: center.toArray(), state: [v.lastState.x,v.lastState.y,v.lastState.z] };
     });
-    expect(sample.diameterPixels).toBeGreaterThanOrEqual(9.5);
+    expect(sample.diameterPixels).toBeGreaterThanOrEqual(11.5);
     expect(sample.physicalRadius).toBe(0.037);
     expect(sample.center).toEqual(sample.state);
   }

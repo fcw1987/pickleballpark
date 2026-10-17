@@ -22,11 +22,11 @@ test('3D View initializes regulation scene with players, ball, and handed paddle
   const scene = await page.evaluate(() => ({
     state: window.pickleboard.threeD.getState(),
     paddles: Object.fromEntries([...window.pickleboard.threeD.playerObjects]
-      .map(([id, object]) => [id, { handedness: object.userData.handedness, side: object.userData.animation.handedness, frameHand: object.userData.arm.userData.currentFrame.hand }]))
+      .map(([id, object]) => [id, { handedness: object.userData.handedness, side: object.userData.animation.handedness, physicalArm: object.userData.arms[object.userData.handedness].hand.name }]))
   }));
   expect(scene.state).toMatchObject({ active: true, playerCount: 4, hasBall: true, playId: 'third-shot-drop' });
-  expect(scene.paddles.player1).toMatchObject({ handedness: 'right', side: 'right', frameHand: 'right' });
-  expect(scene.paddles.player2).toMatchObject({ handedness: 'left', side: 'left', frameHand: 'left' });
+  expect(scene.paddles.player1).toMatchObject({ handedness: 'right', side: 'right', physicalArm: 'RightHand' });
+  expect(scene.paddles.player2).toMatchObject({ handedness: 'left', side: 'left', physicalArm: 'LeftHand' });
   expect(errors).toEqual([]);
 });
 
