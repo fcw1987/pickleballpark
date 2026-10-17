@@ -2,7 +2,7 @@ import { COURT_LINES, COURT_DIMENSIONS } from './court-geometry.js';
 import { boardToWorld, FEET_TO_METERS } from './three-d-core.js';
 
 /**
- * Original Pickleboard sports garden, authored in metres from regulation feet.
+ * Original Pickleball Park sports garden, authored in metres from regulation feet.
  * No downloaded art, sprite billboards, or screen-space pixelation. The three
  * tiny acrylic maps below are deterministic, original clustered pigment.
  * Static ornament is merged by material; semantic court/net parts stay named.
@@ -148,7 +148,9 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
     const sideHeight = COURT_DIMENSIONS.netSidelineHeightFeet * FEET_TO_METERS;
     const netWidth = width + 2 * FEET_TO_METERS;
     net.userData = { centerHeight, sideHeight, width: netWidth };
-    const heightAt = x => centerHeight + (sideHeight - centerHeight) * (2 * x / netWidth) ** 2;
+    // Regulation heights describe the visible tape TOP at the court sidelines,
+    // not the posts 1ft farther out. Continue that parabola to the posts.
+    const heightAt = x => centerHeight + (sideHeight - centerHeight) * (2 * x / width) ** 2;
     const vertices = [], columns = 48, rows = 7;
     for (let i = 0; i <= columns; i++) {
         const x = -netWidth / 2 + netWidth * i / columns;
@@ -161,9 +163,31 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
     const grid = new THREE.BufferGeometry(); grid.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3)); geometries.add(grid);
     const gridMat = new THREE.LineBasicMaterial({ color: colors.metal, transparent: true, opacity: .58 }); materials.add(gridMat);
     const netMesh = new THREE.LineSegments(grid, gridMat); netMesh.name = 'NetMesh'; net.add(netMesh);
-    const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(-netWidth / 2, sideHeight, 0),
-        new THREE.Vector3(0, 2 * centerHeight - sideHeight, 0), new THREE.Vector3(netWidth / 2, sideHeight, 0));
-    mesh('NetTopTape', new THREE.TubeGeometry(curve, 48, .022, 4, false), m.line, 0, 0, 0, net);
+    // Explicit stations make the actual triangulated top exactly 34in / 36in.
+    // A tube centered on those heights would add its radius to the net height.
+    const stations = [...new Set(
+        Array.from({ length: 49 }, (_, i) => -netWidth / 2 + netWidth * i / 48)
+            .concat([-width / 2, 0, width / 2])
+    )].sort((a, b) => a - b);
+    const tapePositions = [], tapeDepth = .024, tapeHeight = .044;
+    const quad = (a, b, c, d) => tapePositions.push(...a, ...b, ...c, ...a, ...c, ...d);
+    for (let i = 0; i < stations.length - 1; i++) {
+        const a = stations[i], b = stations[i + 1], ya = heightAt(a), yb = heightAt(b), z = tapeDepth / 2;
+        quad([a, ya, z], [b, yb, z], [b, yb, -z], [a, ya, -z]);
+        quad([a, ya - tapeHeight, z], [b, yb - tapeHeight, z], [b, yb, z], [a, ya, z]);
+        quad([b, yb - tapeHeight, -z], [a, ya - tapeHeight, -z], [a, ya, -z], [b, yb, -z]);
+        quad([a, ya - tapeHeight, -z], [b, yb - tapeHeight, -z], [b, yb - tapeHeight, z], [a, ya - tapeHeight, z]);
+    }
+    for (const [x, direction] of [[stations[0], -1], [stations.at(-1), 1]]) {
+        const top = heightAt(x), z = tapeDepth / 2;
+        const corners = [[x, top - tapeHeight, -z], [x, top - tapeHeight, z], [x, top, z], [x, top, -z]];
+        if (direction > 0) corners.reverse();
+        quad(...corners);
+    }
+    const tapeGeometry = new THREE.BufferGeometry();
+    tapeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(tapePositions, 3));
+    tapeGeometry.computeVertexNormals();
+    mesh('NetTopTape', tapeGeometry, m.line, 0, 0, 0, net);
     for (const x of [-netWidth / 2, netWidth / 2]) {
         mesh('NetPost', new THREE.CylinderGeometry(.04, .044, sideHeight + .08, 8), m.metal, x, (sideHeight + .08) / 2, 0, net);
         box(m.stoneShade, .19, .025, .19, x, -.007, 0);
