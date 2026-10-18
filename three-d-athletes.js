@@ -1,4 +1,4 @@
-// Original court-scale, faceted athletes. Local +Z is forward; the player root
+// Original court-scale, soft sculpted athletes. Local +Z is forward; the player root
 // is always the authored ground position. Every animated part has real depth.
 import * as THREE from './vendor/three.module.min.js';
 import { POSE_LIBRARY } from './three-d-animation.js';
@@ -8,17 +8,20 @@ const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const smooth = x => { const t = clamp(x); return t * t * (3 - 2 * t); };
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 
-// Bevelled octagonal cross sections, deliberately shaped at waist, ribs and
-// shoulders rather than stacked boxes or capsule primitives.
+// Sculpted rounded cross sections, shaped at waist, ribs, cheeks and shoulders.
+// Twelve shared contour points keep silhouettes soft without costly subdivision.
 function tailoredVolume(rings) {
     const positions = [], indices = [];
-    const outline = [[-.72,-1],[.72,-1],[1,-.62],[1,.62],[.72,1],[-.72,1],[-1,.62],[-1,-.62]];
+    const sides=12, outline=Array.from({length:sides},(_,i)=>{
+        const a=i*Math.PI*2/sides,x=Math.cos(a),z=Math.sin(a);
+        return [Math.sign(x)*Math.abs(x)**.86,Math.sign(z)*Math.abs(z)**.86];
+    });
     for (const [y, width, depth] of rings) for (const [x,z] of outline) positions.push(x*width/2,y,z*depth/2);
-    for (let r=0;r<rings.length-1;r++) for(let i=0;i<8;i++) {
-        const a=r*8+i,b=r*8+(i+1)%8,c=b+8,d=a+8;
+    for (let r=0;r<rings.length-1;r++) for(let i=0;i<sides;i++) {
+        const a=r*sides+i,b=r*sides+(i+1)%sides,c=b+sides,d=a+sides;
         indices.push(a,d,b,b,d,c);
     }
-    for(let i=1;i<7;i++) { indices.push(0,i,i+1);const k=(rings.length-1)*8;indices.push(k,k+i+1,k+i); }
+    for(let i=1;i<sides-1;i++) { indices.push(0,i,i+1);const k=(rings.length-1)*sides;indices.push(k,k+i+1,k+i); }
     const geometry=new THREE.BufferGeometry();
     geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
     return geometry;
@@ -27,7 +30,7 @@ function tailoredVolume(rings) {
 export class AthleteResources {
     constructor() { this.materials=new Map();this.geometries=new Set();this.extraMaterials=new Set();this.geometryCache=new Map(); }
     material(color) {
-        if(!this.materials.has(color))this.materials.set(color,new THREE.MeshStandardMaterial({color,roughness:.92,metalness:0,flatShading:true}));
+        if(!this.materials.has(color))this.materials.set(color,new THREE.MeshStandardMaterial({color,roughness:.92,metalness:0,flatShading:false}));
         return this.materials.get(color);
     }
     geometry(geometry) {
@@ -37,7 +40,7 @@ export class AthleteResources {
         if(key)this.geometryCache.set(key,geometry);this.geometries.add(geometry);return geometry;
     }
     coloredMaterial() {
-        if(!this.vertexMaterial){this.vertexMaterial=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.92,metalness:0,flatShading:true});this.extraMaterials.add(this.vertexMaterial);}
+        if(!this.vertexMaterial){this.vertexMaterial=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.92,metalness:0,flatShading:false});this.extraMaterials.add(this.vertexMaterial);}
         return this.vertexMaterial;
     }
     dispose() { for(const g of this.geometries)g.dispose();for(const m of this.materials.values())m.dispose();for(const m of this.extraMaterials)m.dispose();this.geometries.clear();this.materials.clear();this.extraMaterials.clear();this.geometryCache.clear();this.vertexMaterial=null; }
@@ -50,15 +53,15 @@ function mesh(resources,geometry,color,name,parent,x=0,y=0,z=0) {
 function box(r,parent,name,color,size,position) { return mesh(r,new THREE.BoxGeometry(...size),color,name,parent,...position); }
 function volume(r,parent,name,color,rings,x=0,y=0,z=0) { const geometry=tailoredVolume(rings);geometry.userData.cacheKey=`tailored:${JSON.stringify(rings)}`;return mesh(r,geometry,color,name,parent,x,y,z); }
 function limb(r,parent,name,color,top,bottom,length) {
-    return mesh(r,new THREE.CylinderGeometry(top,bottom,length,7,1),color,name,parent);
+    return mesh(r,new THREE.CylinderGeometry(top,bottom,length,8,1),color,name,parent);
 }
 function alignSegment(object,a,b,originalLength) {
     object.position.copy(a).add(b).multiplyScalar(.5);
     object.quaternion.setFromUnitVectors(UP,b.clone().sub(a).normalize());
     object.scale.y=a.distanceTo(b)/originalLength;
 }
-// Static cloth/face pixel details share a draw call per articulated body part.
-// Baked vertex colors preserve the tiny cream stitches without texture fetches.
+// Static cloth and face details share a draw call per articulated body part.
+// Baked vertex colors retain shaped eyes and outfit graphics without textures.
 function mergeDetails(r,parent,name,exclude=[]) {
     const parts=parent.children.filter(o=>o.isMesh&&!exclude.includes(o.name)),positions=[],normals=[],colors=[];
     if(parts.length<2)return;
@@ -79,94 +82,167 @@ function mergeDetails(r,parent,name,exclude=[]) {
 // PaddleFace stays independent so contact is the actual visible triangle surface.
 function batchArticulatedBody(r,visual) {
     const sources=[];visual.traverse(object=>{if(object.isMesh&&object.name!=='PaddleFace')sources.push(object);});
-    const positions=[],normals=[],colors=[],parts=[];
+    const positions=[],normals=[],colors=[],parts=[],drawIndices=[];
     for(const source of sources) {
         const geometry=source.geometry,p=geometry.attributes.position,n=geometry.attributes.normal,c=geometry.attributes.color,index=geometry.index,start=positions.length/3;
-        const localPositions=[],localNormals=[];
+        const localPositions=[],localNormals=[],canonicalVertices=new Map();
+        const keyFloats=new Float32Array(9),keyBits=new Uint32Array(keyFloats.buffer);
         for(let i=0;i<(index?index.count:p.count);i++) {
             const vertex=index?index.getX(i):i;
             localPositions.push(p.getX(vertex),p.getY(vertex),p.getZ(vertex));localNormals.push(n.getX(vertex),n.getY(vertex),n.getZ(vertex));
-            colors.push(c?c.getX(vertex):source.material.color.r,c?c.getY(vertex):source.material.color.g,c?c.getZ(vertex):source.material.color.b);
+            const red=c?c.getX(vertex):source.material.color.r,green=c?c.getY(vertex):source.material.color.g,blue=c?c.getZ(vertex):source.material.color.b;
+            colors.push(red,green,blue);
+            // Reuse exact GPU attribute bits only inside this articulated part.
+            // Keep expanded attributes and semantic start/count for rig auditing.
+            keyFloats.set([p.getX(vertex),p.getY(vertex),p.getZ(vertex),n.getX(vertex),n.getY(vertex),n.getZ(vertex),red,green,blue]);
+            const key=keyBits.join(',');let canonical=canonicalVertices.get(key);
+            if(canonical===undefined){canonical=i;canonicalVertices.set(key,canonical);}
+            drawIndices.push(start+canonical);
         }
         positions.push(...localPositions);normals.push(...localNormals);
-        parts.push({source,start,count:localPositions.length/3,positions:localPositions,normals:localNormals,matrix:new THREE.Matrix4(),normalMatrix:new THREE.Matrix3()});source.visible=false;source.castShadow=false;
+        parts.push({source,start,count:localPositions.length/3,positions:new Float32Array(localPositions),normals:new Float32Array(localNormals),matrix:new THREE.Matrix4(),normalMatrix:new THREE.Matrix3()});source.visible=false;source.castShadow=false;
     }
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3).setUsage(THREE.DynamicDrawUsage));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3).setUsage(THREE.DynamicDrawUsage));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+    geometry.setIndex(drawIndices);
     const batch=new THREE.Mesh(r.geometry(geometry),r.coloredMaterial());batch.name='AthleteBodyBatch';batch.frustumCulled=false;batch.castShadow=true;batch.receiveShadow=true;visual.add(batch);
     return {batch,parts,inverse:new THREE.Matrix4(),point:new THREE.Vector3(),normal:new THREE.Vector3()};
 }
 function updateBodyBatch(body,visual) {
     const position=body.batch.geometry.attributes.position,normal=body.batch.geometry.attributes.normal;
+    const targetPosition=position.array,targetNormal=normal.array;
     body.inverse.copy(visual.matrixWorld).invert();
     for(const part of body.parts) {
         part.matrix.multiplyMatrices(body.inverse,part.source.matrixWorld);part.normalMatrix.getNormalMatrix(part.matrix);
-        for(let i=0;i<part.count;i++) {
-            body.point.fromArray(part.positions,i*3).applyMatrix4(part.matrix);body.normal.fromArray(part.normals,i*3).applyNormalMatrix(part.normalMatrix);
-            position.setXYZ(part.start+i,body.point.x,body.point.y,body.point.z);normal.setXYZ(part.start+i,body.normal.x,body.normal.y,body.normal.z);
+        const m=part.matrix.elements,n=part.normalMatrix.elements,sourcePosition=part.positions,sourceNormal=part.normals;
+        let target=part.start*3;
+        // Match Vector3.applyMatrix4/applyNormalMatrix arithmetic while writing
+        // directly into GPU attributes: no per-vertex object or accessor calls.
+        for(let i=0;i<sourcePosition.length;i+=3,target+=3) {
+            const x=sourcePosition[i],y=sourcePosition[i+1],z=sourcePosition[i+2];
+            const w=1/(m[3]*x+m[7]*y+m[11]*z+m[15]);
+            targetPosition[target]=(m[0]*x+m[4]*y+m[8]*z+m[12])*w;
+            targetPosition[target+1]=(m[1]*x+m[5]*y+m[9]*z+m[13])*w;
+            targetPosition[target+2]=(m[2]*x+m[6]*y+m[10]*z+m[14])*w;
+            const sx=sourceNormal[i],sy=sourceNormal[i+1],sz=sourceNormal[i+2];
+            const nx=n[0]*sx+n[3]*sy+n[6]*sz,ny=n[1]*sx+n[4]*sy+n[7]*sz,nz=n[2]*sx+n[5]*sy+n[8]*sz;
+            const inverseLength=1/(Math.sqrt(nx*nx+ny*ny+nz*nz)||1);
+            targetNormal[target]=nx*inverseLength;targetNormal[target+1]=ny*inverseLength;targetNormal[target+2]=nz*inverseLength;
         }
     }
     position.needsUpdate=true;normal.needsUpdate=true;
 }
+// Small shaped patches read as cloth panels, hair locks and soft facial features.
+function patch(r,parent,name,color,points,depth=.008) {
+    const shape=new THREE.Shape();shape.moveTo(...points[0]);
+    for(const point of points.slice(1))shape.lineTo(...point);
+    shape.closePath();
+    return mesh(r,new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,steps:1}),color,name,parent);
+}
+// Facial markings follow the cheek curvature rather than protruding as spheres.
+// Thin projected shapes keep whites visible at the corners of tapered human eyes.
+function facePatch(r,parent,name,color,points,x,y,layer=0) {
+    const shape=new THREE.Shape();shape.moveTo(...points[0]);
+    for(const point of points.slice(1))shape.lineTo(...point);shape.closePath();
+    const object=mesh(r,new THREE.ShapeGeometry(shape),color,name,parent),position=object.geometry.attributes.position;
+    for(let i=0;i<position.count;i++) {
+        const faceX=position.getX(i)+x;
+        position.setZ(i,position.getZ(i)+.170-2.5*faceX*faceX+layer);
+    }
+    object.geometry.computeVertexNormals();object.position.set(x,y,0);return object;
+}
+function oval(r,parent,name,color,x,y,z,width,height,depth) {
+    const object=mesh(r,new THREE.SphereGeometry(1,8,4),color,name,parent,x,y,z);
+    object.scale.set(width,height,depth);return object;
+}
 function makeLeg(r,root,name,skin,cream,navy,accent) {
-    const thigh=limb(r,root,`${name}Thigh`,skin,.092,.072,.39);
-    const shorts=limb(r,root,`${name}Shorts`,navy,.116,.10,.27);
-    const knee=mesh(r,new THREE.SphereGeometry(.073,7,4),skin,`${name}Knee`,root);knee.scale.set(1,.95,.94);
-    const shin=limb(r,root,`${name}Shin`,skin,.067,.045,.34);
-    const sock=limb(r,root,`${name}Sock`,cream,.047,.048,.105);
+    const thigh=limb(r,root,`${name}Thigh`,skin,.066,.094,.39);
+    const shorts=limb(r,root,`${name}Shorts`,navy,.108,.12,.27);
+    const knee=oval(r,root,`${name}Knee`,skin,0,0,0,.074,.074,.073);
+    const shin=limb(r,root,`${name}Shin`,skin,.045,.061,.34);
+    const sock=limb(r,root,`${name}Sock`,cream,.048,.049,.105);
     const foot=new THREE.Group();foot.name=`${name}Foot`;root.add(foot);
-    volume(r,foot,`${name}Sneaker`,cream,[[0,.108,.23],[.035,.123,.26],[.09,.104,.20],[.113,.085,.12]],0,0,.047);
-    box(r,foot,`${name}Sole`,'#d4dbcf',[.125,.027,.266],[0,.017,.045]);
-    box(r,foot,`${name}ShoeStripe`,accent,[.129,.022,.075],[0,.062,.064]);
-    box(r,foot,`${name}Laces`,navy,[.058,.009,.055],[0,.106,.065]);
+    volume(r,foot,`${name}Sneaker`,cream,[[0,.115,.24],[.032,.137,.278],[.073,.131,.255],[.105,.102,.17],[.119,.081,.10]],0,0,.052);
+    volume(r,foot,`${name}Sole`,'#d4ddd3',[[.009,.138,.281],[.036,.138,.281]],0,0,.052);
+    for(const sign of [-1,1]) {
+        const stripe=patch(r,foot,`${name}ShoeStripe`,accent,[[-.062,.048],[.028,.048],[.062,.08],[-.028,.08]],.007);
+        stripe.rotation.y=sign*Math.PI/2;stripe.position.set(sign*.065,0,.07);
+    }
+    box(r,foot,`${name}Laces`,navy,[.052,.009,.047],[0,.107,.075]);
     return {thigh,shorts,knee,shin,sock,foot};
 }
 function makeArm(r,root,name,skin,jersey,cream) {
-    const upper=limb(r,root,`${name}UpperArm`,skin,.069,.054,.29);
-    const sleeve=limb(r,root,`${name}Sleeve`,jersey,.097,.081,.145);
-    const cuff=limb(r,root,`${name}Cuff`,cream,.082,.081,.023);
-    const forearm=limb(r,root,`${name}Forearm`,skin,.056,.039,.27);
-    const hand=mesh(r,new THREE.SphereGeometry(.052,7,4),skin,`${name}Hand`,root);hand.scale.set(.9,1.18,.8);
+    const upper=limb(r,root,`${name}UpperArm`,skin,.057,.074,.29);
+    const sleeve=volume(r,root,`${name}Sleeve`,jersey,[[-.098,.17,.18],[-.058,.235,.215],[.029,.194,.187],[.0725,.166,.166]]);
+    const cuff=limb(r,root,`${name}Cuff`,cream,.084,.086,.023);
+    const forearm=limb(r,root,`${name}Forearm`,skin,.039,.057,.27);
+    const hand=oval(r,root,`${name}Hand`,skin,0,0,0,.042,.058,.034);
+    // A thumb overlaps the palm and grip; it follows the existing wrist handle.
+    const thumb=oval(r,hand,`${name}Thumb`,skin,.75,-.12,.48,.58,.55,.65);
     return {upper,sleeve,cuff,forearm,hand};
 }
 
 export function createAthlete(resources,team,handedness,variant=handedness==='left'?1:0) {
     const r=resources||new AthleteResources(),root=new THREE.Group();root.name=`Athlete-${team}-${handedness}`;
     const green=team==='team1'||team==='green',alternate=variant%2!==0;
-    const colors={jersey:green?'#267751':'#dc7337',light:green?'#79ad72':'#f6ad68',dark:green?'#1d563c':'#a84928',cream:'#f3eed8',navy:'#263e49',skin:alternate?'#b97850':'#e5ad82',hair:alternate?'#302d2a':'#62452f'};
+    const colors={jersey:green?'#23866a':'#ed8549',light:green?'#95d4ad':'#ffd68a',dark:green?'#19654f':'#bd573d',cream:'#fff8e7',navy:'#344957',skin:alternate?'#bc805c':'#efbb96',hair:alternate?'#3e3030':'#70503c'};
     const visual=new THREE.Group();visual.name='AthleteOrientation';root.add(visual);
     const upper=new THREE.Group();upper.name='AthleteTorso';visual.add(upper);
-    volume(r,upper,'TaperedJersey',colors.jersey,[[.88,.36,.23],[.99,.40,.25],[1.24,.48,.27],[1.34,.54,.25],[1.40,.43,.22]]);
-    volume(r,upper,'JerseyHem',colors.dark,[[.88,.365,.235],[.928,.38,.24]]);
-    // Small cream stitch blocks remain crisp without pixelating the whole view.
+    volume(r,upper,'TaperedJersey',colors.jersey,[[.875,.365,.245],[.94,.395,.265],[1.13,.43,.285],[1.29,.51,.29],[1.36,.53,.26],[1.405,.39,.21]]);
+    volume(r,upper,'JerseyHem',colors.dark,[[.878,.37,.25],[.933,.395,.267]]);
+    // Bold diagonal athletic color blocking, with an original court-line badge.
+    const chest=patch(r,upper,'ChestColorBlock',colors.light,[[-.227,1.29],[.226,1.18],[.215,1.085],[-.218,1.195]],.009);chest.position.z=.146;
     for(const side of [-1,1]) {
-        box(r,upper,'ShoulderPiping',colors.cream,[.13,.024,.242],[side*.185,1.354,0]);
-        box(r,upper,'SideJerseyPanel',colors.light,[.035,.235,.025],[side*.2,1.12,.128]);
+        const panel=patch(r,upper,'SideJerseyPanel',colors.dark,[[0,.95],[.047,.96],[.056,1.19],[.016,1.25]].map(([x,y])=>[x*side,y]),.01);
+        panel.position.set(side*.185,0,.115);
     }
-    box(r,upper,'ChestClubMark',colors.cream,[.062,.061,.012],[-.112,1.269,.143]);
-    box(r,upper,'ChestMarkPixel',colors.light,[.025,.021,.014],[-.102,1.279,.152]);
-    // Two chunky original jersey digits on the back are readable from full court.
+    oval(r,upper,'ChestClubMark',colors.cream,-.115,1.312,.14,.036,.039,.01);
+    const badge=patch(r,upper,'ChestMarkPixel',colors.dark,[[-.018,-.016],[.018,-.016],[.018,-.007],[-.009,-.007],[-.009,.017],[-.018,.017]],.005);badge.position.set(-.115,1.312,.154);
     for(const x of [-.052,.04]) {
-        box(r,upper,'BackNumberTop',colors.cream,[.057,.022,.014],[x,1.27,-.142]);
-        box(r,upper,'BackNumberStem',colors.cream,[.022,.108,.014],[x+.017,1.225,-.143]);
-        box(r,upper,'BackNumberBase',colors.cream,[.057,.022,.014],[x,1.17,-.142]);
+        box(r,upper,'BackNumberTop',colors.cream,[.057,.022,.014],[x,1.27,-.151]);
+        box(r,upper,'BackNumberStem',colors.cream,[.022,.108,.014],[x+.017,1.225,-.152]);
+        box(r,upper,'BackNumberBase',colors.cream,[.057,.022,.014],[x,1.17,-.151]);
     }
-    volume(r,upper,'ShortsWaist',colors.navy,[[.80,.37,.235],[.91,.39,.24]]);
-    const neck=limb(r,upper,'Neck',colors.skin,.072,.083,.105);neck.position.set(0,1.424,0);
+    volume(r,upper,'ShortsWaist',colors.navy,[[.80,.38,.25],[.91,.40,.26]]);
+    const neck=limb(r,upper,'Neck',colors.skin,.071,.082,.105);neck.position.set(0,1.424,0);
+    // A .40-unit head makes a readable youthful 4.7-head silhouette. The neck,
+    // shoulders and articulated arm solver retain their authored contact anchors.
     const head=new THREE.Group();head.name='Head';head.position.set(0,1.455,0);upper.add(head);
-    volume(r,head,'FacetedFace',colors.skin,[[0,.17,.17],[.045,.23,.225],[.18,.258,.246],[.275,.23,.225],[.303,.16,.17]],0,0,.007);
-    for(const x of [-.127,.127])mesh(r,new THREE.SphereGeometry(.036,6,4),colors.skin,'Ear',head,x,.14,.005);
-    box(r,head,'Nose',colors.skin,[.045,.063,.044],[0,.133,.139]);
-    for(const x of [-.054,.054])box(r,head,'Eye',colors.hair,[.023,.019,.013],[x,.187,.133]);
-    box(r,head,'Mouth',colors.hair,[.047,.011,.01],[0,.078,.13]);
-    volume(r,head,'Hair',colors.hair,[[.22,.265,.25],[.29,.25,.245],[.323,.17,.17]],0,0,-.009);
+    volume(r,head,'FacetedFace',colors.skin,[[0,.15,.16],[.038,.24,.235],[.098,.316,.285],[.195,.351,.309],[.285,.334,.299],[.343,.268,.25],[.365,.18,.18]],0,0,.012);
+    for(const side of [-1,1]) {
+        oval(r,head,'Ear',colors.skin,side*.175,.186,.002,.035,.053,.033);
+        oval(r,head,'EarInner',alternate?'#a56c53':'#db9a7c',side*.196,.184,.016,.008,.026,.014);
+        const eyeX=side*.074,irisX=eyeX-.004,expression=alternate?-.002:.001;
+        const almond=[[-.052,0],[-.032,.021],[.004,.026],[.034,.018],[.052,.001],[.029,-.018],[-.009,-.021],[-.035,-.012]];
+        facePatch(r,head,'EyeWhite',colors.cream,almond.map(([x,y])=>[x*side,y]),eyeX,.230);
+        facePatch(r,head,'Eye',green?'#427263':'#79604a',[[0,.023],[.016,.018],[.023,.006],[.020,-.013],[.008,-.020],[-.009,-.020],[-.021,-.011],[-.022,.007],[-.015,.020]],irisX,.231,.002);
+        facePatch(r,head,'Pupil','#302b2d',[[-.010,.019],[.009,.019],[.012,.007],[.010,-.013],[0,-.017],[-.011,-.010]],irisX,.231,.004);
+        facePatch(r,head,'EyeHighlight','#ffffff',[[-.003,0],[0,.004],[.003,.002],[.002,-.004],[-.003,-.003]],irisX-.006,.241,.006);
+        const lid=[[-.054,.001],[-.034,.025],[.004,.031],[.036,.023],[.055,.001],[.049,.001],[.031,.017],[.002,.024],[-.031,.019],[-.049,-.001]];
+        facePatch(r,head,'UpperEyelid',colors.hair,lid.map(([x,y])=>[x*side,y]),eyeX,.230,.007);
+        facePatch(r,head,'Eyebrow',colors.hair,[[-.044,0],[-.017,.009],[.026,.006],[.040,-.002],[.027,-.004],[-.016,.003],[-.043,-.005]].map(([x,y])=>[x*side,y]),eyeX,.283+expression*side,.003);
+    }
+    oval(r,head,'Nose',colors.skin,0,.172,.174,.024,.033,.026);
+    const mouth=patch(r,head,'Mouth','#975c50',[[-.036,.003],[-.015,-.007],[.014,-.007],[.036,.006],[.022,.001],[-.014,-.001]],.004);mouth.position.set(0,.092,.157);
+    // Hair is a fitted sculpted crown and shaped fringe, with no franchise motifs.
+    volume(r,head,'Hair',colors.hair,[[.253,.348,.303],[.321,.354,.31],[.385,.285,.253],[.414,.15,.15]],0,0,-.022);
+    for(const side of [-1,1]) {
+        const lock=patch(r,head,'SideHair',colors.hair,[[0,.20],[.037,.16],[.053,.28],[.015,.33]].map(([x,y])=>[x*side,y]),.054);
+        lock.position.set(side*.142,0,-.045);
+    }
     if(!alternate) {
-        volume(r,head,'ClubCap',colors.jersey,[[.252,.272,.26],[.31,.251,.24],[.338,.14,.14]],0,0,-.005);
-        volume(r,head,'CapBrim',colors.cream,[[0,.244,.16],[.023,.244,.16]],0,.252,.15);
-        box(r,head,'CapBadge',colors.cream,[.044,.034,.013],[0,.284,.129]);
+        volume(r,head,'ClubCap',colors.jersey,[[.321,.368,.329],[.383,.326,.295],[.422,.204,.20],[.432,.11,.11]],0,0,-.014);
+        volume(r,head,'CapBrim',colors.cream,[[0,.312,.198],[.018,.32,.205],[.026,.29,.175]],0,.321,.158);
+        const seam=patch(r,head,'CapPanel',colors.light,[[-.027,.337],[.027,.337],[.025,.414],[-.025,.414]],.006);seam.position.z=.147;
+        const fringe=patch(r,head,'HairFringe',colors.hair,[[-.12,.315],[-.07,.263],[-.035,.307],[.018,.266],[.054,.324]],.035);fringe.position.z=.132;
     } else {
-        volume(r,head,'Headband',colors.cream,[[.219,.272,.253],[.254,.272,.253]],0,0,.001);
-        if(green) {const pony=mesh(r,new THREE.SphereGeometry(.079,7,4),colors.hair,'ShortPonytail',head,0,.195,-.164);pony.scale.set(.8,1.1,1.3);}
-        else box(r,head,'HairSweep',colors.hair,[.12,.041,.16],[-.045,.313,.025]);
+        volume(r,head,'Headband',colors.cream,[[.289,.361,.316],[.325,.361,.316]],0,0,-.014);
+        if(green) {
+            volume(r,head,'Visor',colors.jersey,[[0,.354,.228],[.023,.36,.236]],0,.29,.165);
+            const pony=volume(r,head,'ShortPonytail',colors.hair,[[-.11,.072,.07],[-.025,.12,.10],[.085,.148,.13],[.16,.089,.08]],0,.212,-.211);pony.rotation.x=-.43;
+            oval(r,head,'HairTie',colors.light,0,.313,-.177,.068,.035,.045);
+        }
+        const fringe=patch(r,head,'HairSweep',colors.hair,[[-.17,.332],[-.136,.267],[-.095,.31],[-.047,.279],[.016,.323],[.081,.286],[.135,.33],[.067,.39],[-.078,.389]],.055);fringe.position.z=.123;
+        const crown=patch(r,head,'HairSweepCrown',colors.hair,[[-.155,.354],[-.183,.412],[-.096,.401],[-.111,.452],[-.033,.423],[.023,.438],[.099,.396],[.143,.352]],.145);crown.position.z=-.093;
     }
     const legs={left:makeLeg(r,visual,'Left',colors.skin,colors.cream,colors.navy,colors.jersey),right:makeLeg(r,visual,'Right',colors.skin,colors.cream,colors.navy,colors.jersey)};
     const arms={left:makeArm(r,visual,'Left',colors.skin,colors.jersey,colors.cream),right:makeArm(r,visual,'Right',colors.skin,colors.jersey,colors.cream)};
@@ -184,7 +260,7 @@ export function createAthlete(resources,team,handedness,variant=handedness==='le
     const bodyBatch=batchArticulatedBody(r,visual);
     const shadowMaterial=new THREE.MeshBasicMaterial({color:'#263b37',transparent:true,opacity:.20,depthWrite:false});r.extraMaterials.add(shadowMaterial);
     const shadow=new THREE.Mesh(r.geometry(new THREE.CircleGeometry(.37,24)),shadowMaterial);shadow.name='AthleteContactShadow';shadow.rotation.x=-Math.PI/2;shadow.position.y=.008;shadow.scale.y=.61;root.add(shadow);
-    root.userData={team,handedness,variant,groundY:0,volumetricAthlete:true,pixelActor:false,visual,upper,head,legs,arms,paddle,shadow,bodyBatch,resources:r,paddleFaceWorld:new THREE.Vector3(),shoulderWorld:new THREE.Vector3(),height:1.79,animation:{}};
+    root.userData={team,handedness,variant,groundY:0,volumetricAthlete:true,pixelActor:false,visual,upper,head,legs,arms,paddle,shadow,bodyBatch,resources:r,paddleFaceWorld:new THREE.Vector3(),shoulderWorld:new THREE.Vector3(),height:1.89,animation:{}};
     return root;
 }
 

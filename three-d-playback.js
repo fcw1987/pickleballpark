@@ -218,7 +218,7 @@ class ThreeDPlaybackViewer {
 
     initializeScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color('#9eaf8b');
+        this.scene.background = new THREE.Color('#c3dcde');
         this.camera = new THREE.PerspectiveCamera(48, 1, 0.05, 100);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
         // Ground contact ellipses anchor athletes without a second scene pass.
@@ -228,11 +228,16 @@ class ThreeDPlaybackViewer {
         this.elements.canvas.replaceChildren(this.renderer.domElement);
         this.renderer.domElement.addEventListener('webglcontextlost',this.boundContextLost);
 
-        this.scene.add(new THREE.HemisphereLight('#fff5df', '#637d76', 1.2));
-        this.scene.add(new THREE.AmbientLight('#fff9ed', 0.32));
-        const key = new THREE.DirectionalLight('#fff2d9', 1.9);
+        // Warm sun and cool sky fill expose rounded faces and cream walls.
+        // Painted scene grounding stays static; no second shadow-map render pass.
+        this.scene.add(new THREE.HemisphereLight('#e8f3ff', '#94aa84', 1.6));
+        this.scene.add(new THREE.AmbientLight('#fff9ed', 0.42));
+        const key = new THREE.DirectionalLight('#fff2d9', 1.75);
         key.position.set(-3.5, 12, -2.5);
         this.scene.add(key);
+        const fill = new THREE.DirectionalLight('#e4f1ff', 1.0);
+        fill.position.set(7, 5, 9);
+        this.scene.add(fill);
         this.gradientMap = new THREE.DataTexture(new Uint8Array([72, 164, 255]), 3, 1, THREE.RedFormat);
         this.gradientMap.minFilter = THREE.NearestFilter;
         this.gradientMap.magFilter = THREE.NearestFilter;
