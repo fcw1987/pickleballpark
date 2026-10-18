@@ -1,5 +1,5 @@
 {
-  "source": "4438addfadcd2406b5d9200d356c9c5fa63c4fa3",
+  "source": "6e78018e6bd969cdb33cf9e625e84b6085bd4a2b",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -258,8 +258,8 @@
     },
     {
       "path": "build-metadata.js",
-      "bytes": 1247,
-      "sha256": "486373fb2617619d801e1d454b4a2d5a0444c3d3b6b0c09471a4aa1b5f2fc0df"
+      "bytes": 1239,
+      "sha256": "9a50d87812c01d2098b53015a376214be5f0fa3b99cea1015c091092b892870d"
     },
     {
       "path": "builder-court-tools.js",
@@ -484,7 +484,7 @@
     {
       "path": "sw.js",
       "bytes": 7314,
-      "sha256": "e7a56084709366585837b0e12970d6e35b1855d9d11421e9aaabbcb45a76d648"
+      "sha256": "6966cd0dcf652fcbf64b72fde74f37ced773a238f1717e9b621727198de59b83"
     },
     {
       "path": "three-d-animation.js",
@@ -493,8 +493,8 @@
     },
     {
       "path": "three-d-athletes.js",
-      "bytes": 21960,
-      "sha256": "fd93ddaed315e433bcb213a8f15cab9928be822ea76e8a61ed34224ab7ed0d5d"
+      "bytes": 28164,
+      "sha256": "093b0eca2465b17dbbb7ba6dc712c7022f92be71247bf6f77639a93d158969b9"
     },
     {
       "path": "three-d-ball.js",
@@ -518,8 +518,8 @@
     },
     {
       "path": "three-d-playback.js",
-      "bytes": 27825,
-      "sha256": "8e419e09b0ea7891feaa695e2f9f1cdd3077488b7ff1f17cb10857ba51ec522e"
+      "bytes": 28116,
+      "sha256": "b3968e8b5ac2e0bcdb6462ec1343f8e84e2e1f54132bb289b404e1a3efece7a9"
     },
     {
       "path": "three-d-presentation.js",
@@ -528,8 +528,8 @@
     },
     {
       "path": "three-d-world.js",
-      "bytes": 19057,
-      "sha256": "16011987b2ad2adc3c0a9c4b7219de14933deac4b0326982810bb357de11bb99"
+      "bytes": 37041,
+      "sha256": "8386906725b619c531a9339d18f13d374bfe46ad217ec7caf3bcbc017bec58cd"
     },
     {
       "path": "vendor/three.core.min.js",
@@ -543,8 +543,8 @@
     },
     {
       "path": "version.json",
-      "bytes": 911,
-      "sha256": "cc22efe7d3e0018b1f07851c3ac8bc8b5c7353e9863abfae1999c4af80e48106"
+      "bytes": 903,
+      "sha256": "4e2d8b31490a0a18cb0618295da5a472ed478aecd0745c8eb01aec53805e1480"
     },
     {
       "path": "visual-theme.js",
