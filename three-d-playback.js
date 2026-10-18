@@ -33,7 +33,7 @@ const DEFAULT_PIXEL_SCALE = [1, 2].includes(Number(VISUAL.render?.pixelScale)) ?
  */
 function createStaticWorldCache(renderer, scene, world) {
     const originalRender=renderer.render.bind(renderer),size=new THREE.Vector2();
-    const cacheScene=new THREE.Scene(),quadGeometry=new THREE.PlaneGeometry(2,2);
+    const cacheScene=new THREE.Scene(),blitScene=new THREE.Scene(),quadGeometry=new THREE.PlaneGeometry(2,2);
     const quadMaterial=new THREE.ShaderMaterial({
         uniforms:{colorMap:{value:null},depthMap:{value:null}},
         vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
@@ -44,14 +44,16 @@ function createStaticWorldCache(renderer, scene, world) {
     });
     const quad=new THREE.Mesh(quadGeometry,quadMaterial);
     quad.name='StaticWorldColorDepth';quad.frustumCulled=false;quad.renderOrder=-10000;quad.visible=false;scene.add(quad);
+    const blitQuad=new THREE.Mesh(quadGeometry,quadMaterial);blitQuad.frustumCulled=false;blitScene.add(blitQuad);
     const sourceNet=world.net.getObjectByName('NetMesh'),liveNet=sourceNet.clone();
     liveNet.name='StaticWorldLiveNetGrid';liveNet.matrixAutoUpdate=false;liveNet.visible=false;scene.add(liveNet);
     const resources={targets:new Set(),geometries:new Set([quadGeometry]),materials:new Set([quadMaterial])};
     const context=renderer.getContext();
     const samples=Math.min(context.getParameter(context.SAMPLES),renderer.capabilities.maxSamples),retired=new WeakSet(),cacheMaterials=new Map();
-    const stats={builds:0,reuses:0,invalidations:0,lastInvalidation:'initial',width:0,height:0,samples,estimatedBytes:0,residentBytes:0,failures:0,bypasses:0,disabledReason:null,disposed:false};
+    const stats={builds:0,reuses:0,invalidations:0,lastInvalidation:'initial',width:0,height:0,samples,buildSamples:samples,residentSamples:0,
+        estimatedBytes:0,estimatedBuildBytes:0,estimatedPeakBytes:0,residentBytes:0,transientBytes:0,failures:0,bypasses:0,disabledReason:null,disposed:false};
     let target=null,signature=null,disposed=false;
-    const retire=value=>{if(value&&!retired.has(value)){retired.add(value);value.dispose();}};
+    const retire=value=>{if(value&&!retired.has(value)){retired.add(value);resources.targets.delete(value);value.dispose();}};
     const invalidate=(reason='explicit')=>{if(disposed)return;signature=null;stats.invalidations++;stats.lastInvalidation=reason;};
     // Attribute versions and complete transform/material/light state make edits
     // visible automatically; invalidate() remains available for custom shaders.
@@ -92,9 +94,9 @@ function createStaticWorldCache(renderer, scene, world) {
         finish.customProgramCacheKey=()=>`static-display-cache:${source.customProgramCacheKey()}`;
         finish.needsUpdate=true;return finish;
     };
-    const cache={enabled:true,maxBytes:96*1024*1024,stats,resources,invalidate,dispose(){
+    const cache={enabled:true,maxBytes:96*1024*1024,maxPeakBytes:192*1024*1024,stats,resources,invalidate,dispose(){
         if(disposed)return;disposed=true;stats.disposed=true;cache.enabled=false;
-        renderer.render=originalRender;scene.remove(quad,liveNet);cacheScene.clear();
+        renderer.render=originalRender;scene.remove(quad,liveNet);cacheScene.clear();blitScene.clear();
         retire(target);quadGeometry.dispose();for(const material of resources.materials)material.dispose();
         target=null;signature=null;stats.residentBytes=0;cacheMaterials.clear();
     }};
@@ -108,10 +110,14 @@ function createStaticWorldCache(renderer, scene, world) {
         }
         stats.disabledReason=null;
         renderer.getDrawingBufferSize(size);
-        const estimatedBytes=size.x*size.y*(samples*8+8);
-        stats.memoryBudgetBytes=cache.maxBytes;
-        if(estimatedBytes>cache.maxBytes){
-            stats.bypasses++;stats.disabledReason='cache-memory-budget';stats.width=size.x;stats.height=size.y;stats.estimatedBytes=estimatedBytes;
+        // Keep only resolved RGBA8 color + 32-bit depth between frames. Native
+        // MSAA attachments exist just while rebuilding and are then released.
+        const estimatedBytes=size.x*size.y*8,estimatedBuildBytes=size.x*size.y*(samples*8+8);
+        const estimatedPeakBytes=estimatedBytes+estimatedBuildBytes;
+        Object.assign(stats,{width:size.x,height:size.y,estimatedBytes,estimatedBuildBytes,estimatedPeakBytes,
+            memoryBudgetBytes:cache.maxBytes,peakMemoryBudgetBytes:cache.maxPeakBytes});
+        if(estimatedBytes>cache.maxBytes||estimatedPeakBytes>cache.maxPeakBytes){
+            stats.bypasses++;stats.disabledReason='cache-memory-budget';
             retire(target);target=null;signature=null;stats.residentBytes=0;
             return originalRender(renderScene,camera);
         }
@@ -122,10 +128,10 @@ function createStaticWorldCache(renderer, scene, world) {
             if(signature!==key){
                 if(signature!==null){stats.invalidations++;stats.lastInvalidation='scene-or-view-changed';}
                 if(!target||target.width!==size.x||target.height!==size.y){
-                    retire(target);target=new THREE.WebGLRenderTarget(size.x,size.y,{samples,depthBuffer:true,stencilBuffer:false});
+                    retire(target);target=new THREE.WebGLRenderTarget(size.x,size.y,{samples:0,depthBuffer:true,stencilBuffer:false});
                     target.depthTexture=new THREE.DepthTexture(size.x,size.y,THREE.UnsignedIntType);resources.targets.add(target);
                     quadMaterial.uniforms.colorMap.value=target.texture;quadMaterial.uniforms.depthMap.value=target.depthTexture;
-                    stats.width=size.x;stats.height=size.y;stats.estimatedBytes=estimatedBytes;stats.residentBytes=estimatedBytes;
+                    stats.residentBytes=estimatedBytes;
                 }
                 cacheScene.clear();cacheScene.background=scene.background?.clone().convertLinearToSRGB()||null;cacheScene.fog=null;
                 cacheScene.backgroundIntensity=scene.backgroundIntensity;cacheScene.backgroundBlurriness=scene.backgroundBlurriness;
@@ -137,11 +143,26 @@ function createStaticWorldCache(renderer, scene, world) {
                     copy.matrixAutoUpdate=false;copy.matrix.copy(light.matrixWorld);copy.matrixWorldNeedsUpdate=true;
                     if(copy.target&&light.target){copy.target.matrixAutoUpdate=false;copy.target.matrix.copy(light.target.matrixWorld);copy.target.matrixWorldNeedsUpdate=true;copy.target.updateMatrixWorld(true);}
                     cacheScene.add(copy);});
-                renderer.setRenderTarget(target);try{
+                let buildTarget=null;
+                try{
+                    buildTarget=new THREE.WebGLRenderTarget(size.x,size.y,{samples,depthBuffer:true,stencilBuffer:false});
+                    buildTarget.depthTexture=new THREE.DepthTexture(size.x,size.y,THREE.UnsignedIntType);resources.targets.add(buildTarget);
+                    stats.transientBytes=estimatedBuildBytes;
+                    renderer.setRenderTarget(buildTarget);
                     const gl=renderer.getContext();
                     if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('World cache framebuffer unavailable.');
                     originalRender(cacheScene,camera);
-                }finally{renderer.setRenderTarget(null);}
+                    // Switching targets resolves native MSAA. Public Three.js
+                    // textures then copy both encoded color and resolved depth
+                    // into the small persistent target without resampling.
+                    quadMaterial.uniforms.colorMap.value=buildTarget.texture;quadMaterial.uniforms.depthMap.value=buildTarget.depthTexture;
+                    renderer.setRenderTarget(target);
+                    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Resolved world cache framebuffer unavailable.');
+                    originalRender(blitScene,camera);
+                }finally{
+                    renderer.setRenderTarget(null);retire(buildTarget);stats.transientBytes=0;
+                    quadMaterial.uniforms.colorMap.value=target.texture;quadMaterial.uniforms.depthMap.value=target.depthTexture;
+                }
                 signature=key;stats.builds++;
             }else stats.reuses++;
             // Shader writes the resolved world depth before live solids. The
