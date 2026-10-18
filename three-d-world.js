@@ -222,13 +222,13 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
     // Every decorative solid remains beyond the 10.8 x 18.8m terrace.
     // These paths meet the terrace without narrowing either player's runoff.
     box(m.path, 36, .018, 1.65, 0, -.125, -10.5);
-    box(m.path, 1.2, .018, 7.6, -.8, -.123, -13.4);
+    box(m.path, 1.2, .018, 7.6, 4.1, -.123, -13.4);
     for (const x of [-6.45, 6.45]) box(m.path, 1.25, .018, 24, x, -.125, 0);
     box(m.path, 19, .018, 1.35, 0, -.125, 10.7);
     box(m.path, 6.0, .018, 1.2, -10, -.123, -.2);
     // Broad inset strokes give the paths a brushed, sun-worn center.
     box(m.pathLight, 35, .006, .72, 0, -.113, -10.47);
-    box(m.pathLight, .62, .006, 6, -.8, -.111, -13.4);
+    box(m.pathLight, .62, .006, 6, 4.1, -.111, -13.4);
     for (const x of [-6.45, 6.45]) box(m.pathLight, .58, .006, 23.4, x, -.113, 0);
 
     // Deformed low-resolution spheres have smooth normals, asymmetrical lobes
@@ -321,10 +321,10 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
         }
     };
     for (const [x, z, scale, phase] of [
-        [-7.9, -8.9, 1.0, .2], [8.4, -11.2, 1.08, 1.0],
+        [-7.9, -8.9, 1.0, .2], [10.5, -10.8, 1.08, 1.0],
         [-7.9, 7.4, .96, 1.7], [8.7, 11.2, 1.06, .6],
         [-7.9, -3.4, .9, 2.1], [9.4, -13.0, .88, 1.3],
-        [-6.5, -15.0, 1.13, 2.4], [5.8, -15.2, 1.05, .5],
+        [-6.5, -15.0, 1.13, 2.4], [9.5, -16.0, 1.05, .5],
         [-12.6, 5.9, 1.1, 1.5], [12.2, -10.9, 1.15, 2.0]
     ]) tree(x, z, scale, phase);
 
@@ -339,7 +339,7 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
         }
         for (const y of [.22, .50]) pole(m.stone, [ax, y, az], [bx, y, bz], .042);
     };
-    fence(-8.8, -9.7, -1.8, -9.7, .66); fence(.4, -9.7, 8.8, -9.7, .66);
+    fence(-8.8, -9.7, 3.0, -9.7, .66); fence(5.2, -9.7, 8.8, -9.7, .66);
     fence(-9.0, -8.2, -9.0, -4.7); fence(-9.0, 1.8, -9.0, 9.4);
     fence(9.0, -8.2, 9.0, 9.4);
 
@@ -402,7 +402,7 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
         block(m.plasterShade, .43, .65, .46, width * .28, height + .56, -.4);
         block(m.stone, .55, .12, .58, width * .28, height + .89, -.4);
     };
-    cottage(-.1, -13.45, 0, 5.6, 3.0, 2.12, m.roof);
+    cottage(4.8, -13.45, 0, 5.6, 3.0, 2.12, m.roof);
     cottage(-11.15, -1.4, Math.PI / 2, 4.0, 3.0, 1.95, m.windowShade);
 
     // Slender pointed leaves and five-petal daisies make intentional planted beds.
@@ -426,8 +426,8 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
             stamp(new THREE.CircleGeometry(.045,5),m.flower,px,.30,pz,-Math.PI/2);
         }
     };
-    flowerBed(2.0, -11.70, true, 7, 2.2);
-    flowerBed(-2.0, -11.70, true, 4, 1.1);
+    flowerBed(6.9, -11.70, true, 7, 2.2);
+    flowerBed(2.9, -11.70, true, 4, 1.1);
     flowerBed(-7.35, 2.1, false, 12, 3.2);
     flowerBed(7.35, 2.4, false, 11, 3.0);
     flowerBed(-7.35, -6.6, false, 6, 1.8);
@@ -440,12 +440,12 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
             x+side*j*.065,-.085+j*.008,z+Math.sin(j*2.3)*.08,0,i+j*1.8,-.1);
     }
     // Leafy hedge rhythm across the village boundary, interrupted by the gateway.
-    for (const [ax, bx] of [[-7.8, -2.2], [1.0, 7.7]]) for (let x = ax; x < bx; x += .65)
+    for (const [ax, bx] of [[-7.8, 2.7], [5.5, 7.7]]) for (let x = ax; x < bx; x += .65)
         stamp(crown(.43, .28, .38, x), paintedLeaf, x, .14, -10.22);
 
     // Original raised-letter paddle sign; no font, downloaded art or extra map.
     artCategory='sign';
-    const sx = 4.5, sz = -11.0;
+    const sx = 8.3, sz = -11.0;
     for (const dx of [-.84, .84]) {
         box(m.wood, .13, 1.60, .13, sx + dx, .68, sz);
         stamp(new THREE.SphereGeometry(.10, 5, 3), m.stone, sx + dx, 1.52, sz);

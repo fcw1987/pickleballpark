@@ -27,6 +27,145 @@ const VISUAL = globalThis.PICKLEBOARD_VISUAL || { palette: FALLBACK_PALETTE, ren
 const PALETTE = { ...FALLBACK_PALETTE, ...VISUAL.palette };
 const DEFAULT_PIXEL_SCALE = [1, 2].includes(Number(VISUAL.render?.pixelScale)) ? Number(VISUAL.render.pixelScale) : 1;
 
+/** Cache only the fixed, multisampled world. Moving actors, ball, shadows and
+ * translucent net grid are still rendered live against its restored depth.
+ * Uses public Three.js targets/textures; never changes drawing-buffer quality.
+ */
+function createStaticWorldCache(renderer, scene, world) {
+    const originalRender=renderer.render.bind(renderer),size=new THREE.Vector2();
+    const cacheScene=new THREE.Scene(),quadGeometry=new THREE.PlaneGeometry(2,2);
+    const quadMaterial=new THREE.ShaderMaterial({
+        uniforms:{colorMap:{value:null},depthMap:{value:null}},
+        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+        fragmentShader:`uniform sampler2D colorMap;uniform sampler2D depthMap;varying vec2 vUv;
+            void main(){gl_FragColor=texture2D(colorMap,vUv);gl_FragDepth=texture2D(depthMap,vUv).r;
+            }`,
+        depthTest:true,depthWrite:true,depthFunc:THREE.AlwaysDepth
+    });
+    const quad=new THREE.Mesh(quadGeometry,quadMaterial);
+    quad.name='StaticWorldColorDepth';quad.frustumCulled=false;quad.renderOrder=-10000;quad.visible=false;scene.add(quad);
+    const sourceNet=world.net.getObjectByName('NetMesh'),liveNet=sourceNet.clone();
+    liveNet.name='StaticWorldLiveNetGrid';liveNet.matrixAutoUpdate=false;liveNet.visible=false;scene.add(liveNet);
+    const resources={targets:new Set(),geometries:new Set([quadGeometry]),materials:new Set([quadMaterial])};
+    const context=renderer.getContext();
+    const samples=Math.min(context.getParameter(context.SAMPLES),renderer.capabilities.maxSamples),retired=new WeakSet(),cacheMaterials=new Map();
+    const stats={builds:0,reuses:0,invalidations:0,lastInvalidation:'initial',width:0,height:0,samples,estimatedBytes:0,residentBytes:0,failures:0,bypasses:0,disabledReason:null,disposed:false};
+    let target=null,signature=null,disposed=false;
+    const retire=value=>{if(value&&!retired.has(value)){retired.add(value);value.dispose();}};
+    const invalidate=(reason='explicit')=>{if(disposed)return;signature=null;stats.invalidations++;stats.lastInvalidation=reason;};
+    // Attribute versions and complete transform/material/light state make edits
+    // visible automatically; invalidate() remains available for custom shaders.
+    const stateKey=camera=>{
+        const key=[camera.layers.mask,...camera.matrixWorld.elements,...camera.projectionMatrix.elements,
+            size.x,size.y,renderer.getPixelRatio(),renderer.outputColorSpace,renderer.toneMapping,renderer.toneMappingExposure];
+        const background=scene.background;
+        key.push(background?.isColor?background.getHex():background?.uuid,background?.version,scene.backgroundIntensity,scene.backgroundBlurriness,scene.backgroundRotation?.x,scene.backgroundRotation?.y,scene.backgroundRotation?.z,
+            scene.fog?.color?.getHex(),scene.fog?.near,scene.fog?.far,scene.fog?.density);
+        world.group.traverse(object=>{
+            key.push(object.uuid,object.visible,object.layers.mask,object.renderOrder,...object.matrixWorld.elements);
+            if(object.geometry){key.push(object.geometry.uuid,object.geometry.index?.version,object.geometry.drawRange.start,object.geometry.drawRange.count);
+                for(const [name,attribute]of Object.entries(object.geometry.attributes))key.push(name,attribute.version);}
+            for(const material of object.material?(Array.isArray(object.material)?object.material:[object.material]):[]){
+                key.push(material.uuid,material.version,material.visible,material.opacity,material.transparent,material.side,material.depthWrite,material.depthTest,material.depthFunc,material.alphaTest,material.polygonOffset,material.polygonOffsetFactor,material.polygonOffsetUnits,
+                    material.color?.r,material.color?.g,material.color?.b,material.emissive?.r,material.emissive?.g,material.emissive?.b,material.emissiveIntensity);
+                for(const name of ['map','alphaMap','lightMap','aoMap','emissiveMap','normalMap']){const map=material[name];
+                    if(map)key.push(name,map.uuid,map.version,map.colorSpace,map.rotation,map.offset.x,map.offset.y,map.repeat.x,map.repeat.y,map.center.x,map.center.y);}
+            }
+        });
+        scene.traverseVisible(light=>{if(!light.isLight)return;light.target?.updateMatrixWorld();
+            key.push(light.uuid,light.distance,light.decay,light.angle,light.penumbra,light.intensity,light.color.r,light.color.g,light.color.b,...light.matrixWorld.elements,
+                light.groundColor?.r,light.groundColor?.g,light.groundColor?.b,...(light.target?.matrixWorld.elements||[]));});
+        return key.join('|');
+    };
+    const cacheFinish=source=>{
+        let finish=cacheMaterials.get(source.uuid);
+        if(!finish){finish=source.clone();cacheMaterials.set(source.uuid,finish);resources.materials.add(finish);}
+        finish.copy(source);
+        finish.onBeforeCompile=(shader,renderer)=>{
+            source.onBeforeCompile(shader,renderer);
+            // The default framebuffer stores display-encoded values BEFORE
+            // multisample resolution/blending. Match that order in RGBA8;
+            // copying this texture needs no second output conversion.
+            shader.fragmentShader=shader.fragmentShader.replace('#include <colorspace_fragment>',
+                'gl_FragColor = sRGBTransferOETF( gl_FragColor );');
+        };
+        finish.customProgramCacheKey=()=>`static-display-cache:${source.customProgramCacheKey()}`;
+        finish.needsUpdate=true;return finish;
+    };
+    const cache={enabled:true,maxBytes:96*1024*1024,stats,resources,invalidate,dispose(){
+        if(disposed)return;disposed=true;stats.disposed=true;cache.enabled=false;
+        renderer.render=originalRender;scene.remove(quad,liveNet);cacheScene.clear();
+        retire(target);quadGeometry.dispose();for(const material of resources.materials)material.dispose();
+        target=null;signature=null;stats.residentBytes=0;cacheMaterials.clear();
+    }};
+    renderer.render=function(renderScene,camera){
+        if(disposed||!cache.enabled||renderScene!==scene||renderer.getRenderTarget()!==null||!world.group.visible||world.group.userData.disposed)
+            return originalRender(renderScene,camera);
+        // Display-encoded RGBA8 cache fits the current untone-mapped scene.
+        // Future HDR/tone, fog or texture backgrounds retain direct rendering.
+        if(renderer.outputColorSpace!==THREE.SRGBColorSpace||renderer.toneMapping!==THREE.NoToneMapping||renderer.clippingPlanes.length||renderer.localClippingEnabled||scene.fog||(scene.background&&!scene.background.isColor)){
+            stats.bypasses++;stats.disabledReason='tone-mapping-or-clipping';return originalRender(renderScene,camera);
+        }
+        stats.disabledReason=null;
+        renderer.getDrawingBufferSize(size);
+        const estimatedBytes=size.x*size.y*(samples*8+8);
+        stats.memoryBudgetBytes=cache.maxBytes;
+        if(estimatedBytes>cache.maxBytes){
+            stats.bypasses++;stats.disabledReason='cache-memory-budget';stats.width=size.x;stats.height=size.y;stats.estimatedBytes=estimatedBytes;
+            retire(target);target=null;signature=null;stats.residentBytes=0;
+            return originalRender(renderScene,camera);
+        }
+        scene.updateMatrixWorld();if(camera.parent===null)camera.updateMatrixWorld();
+        const key=stateKey(camera),autoReset=renderer.info.autoReset,worldVisible=world.group.visible,autoMatrix=scene.matrixWorldAutoUpdate;
+        if(autoReset)renderer.info.reset();renderer.info.autoReset=false;
+        try{
+            if(signature!==key){
+                if(signature!==null){stats.invalidations++;stats.lastInvalidation='scene-or-view-changed';}
+                if(!target||target.width!==size.x||target.height!==size.y){
+                    retire(target);target=new THREE.WebGLRenderTarget(size.x,size.y,{samples,depthBuffer:true,stencilBuffer:false});
+                    target.depthTexture=new THREE.DepthTexture(size.x,size.y,THREE.UnsignedIntType);resources.targets.add(target);
+                    quadMaterial.uniforms.colorMap.value=target.texture;quadMaterial.uniforms.depthMap.value=target.depthTexture;
+                    stats.width=size.x;stats.height=size.y;stats.estimatedBytes=estimatedBytes;stats.residentBytes=estimatedBytes;
+                }
+                cacheScene.clear();cacheScene.background=scene.background?.clone().convertLinearToSRGB()||null;cacheScene.fog=null;
+                cacheScene.backgroundIntensity=scene.backgroundIntensity;cacheScene.backgroundBlurriness=scene.backgroundBlurriness;
+                cacheScene.backgroundRotation.copy(scene.backgroundRotation);
+                const fixedWorld=world.group.clone(true);fixedWorld.getObjectByName('NetMesh').visible=false;
+                fixedWorld.traverse(object=>{if(object.material)object.material=Array.isArray(object.material)?object.material.map(cacheFinish):cacheFinish(object.material);});
+                cacheScene.add(fixedWorld);
+                scene.traverseVisible(light=>{if(!light.isLight)return;const copy=light.clone();
+                    copy.matrixAutoUpdate=false;copy.matrix.copy(light.matrixWorld);copy.matrixWorldNeedsUpdate=true;
+                    if(copy.target&&light.target){copy.target.matrixAutoUpdate=false;copy.target.matrix.copy(light.target.matrixWorld);copy.target.matrixWorldNeedsUpdate=true;copy.target.updateMatrixWorld(true);}
+                    cacheScene.add(copy);});
+                renderer.setRenderTarget(target);try{
+                    const gl=renderer.getContext();
+                    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('World cache framebuffer unavailable.');
+                    originalRender(cacheScene,camera);
+                }finally{renderer.setRenderTarget(null);}
+                signature=key;stats.builds++;
+            }else stats.reuses++;
+            // Shader writes the resolved world depth before live solids. The
+            // transparent grid stays live so it blends over players correctly.
+            liveNet.geometry=sourceNet.geometry;liveNet.material=sourceNet.material;liveNet.matrix.copy(sourceNet.matrixWorld);
+            liveNet.matrixWorldNeedsUpdate=true;liveNet.visible=true;
+            for(let ancestor=sourceNet;ancestor;ancestor=ancestor.parent)if(!ancestor.visible)liveNet.visible=false;
+            world.group.visible=false;quad.visible=true;scene.matrixWorldAutoUpdate=false;
+            liveNet.updateMatrixWorld(true);originalRender(scene,camera);
+        }catch(error){
+            // An optional cache allocation/driver failure must leave playback
+            // available through the ordinary renderer, at the same quality.
+            cache.enabled=false;stats.failures++;stats.disabledReason='cache-unavailable';stats.lastError=error.message;
+            renderer.setRenderTarget(null);world.group.visible=worldVisible;quad.visible=false;liveNet.visible=false;
+            scene.matrixWorldAutoUpdate=autoMatrix;retire(target);target=null;signature=null;stats.residentBytes=0;
+            originalRender(scene,camera);
+        }finally{
+            world.group.visible=worldVisible;quad.visible=false;liveNet.visible=false;
+            scene.matrixWorldAutoUpdate=autoMatrix;renderer.info.autoReset=autoReset;
+        }
+    };
+    return cache;
+}
+
 class ThreeDPlaybackViewer {
     constructor(board) {
         this.board = board;
@@ -249,6 +388,7 @@ class ThreeDPlaybackViewer {
         this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
+        this.staticWorldCache=createStaticWorldCache(this.renderer,this.scene,this.world);
 
         this.resize();
     }
@@ -512,6 +652,7 @@ class ThreeDPlaybackViewer {
 
     disposeScene() {
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
+        this.staticWorldCache?.dispose();this.staticWorldCache=null;
         if (this.world) { this.scene?.remove(this.world.group); this.world.dispose(); this.world=null; }
         this.readableBall?.dispose();this.readableBall=null;
         for (const actor of this.playerObjects.values()) this.scene?.remove(actor);

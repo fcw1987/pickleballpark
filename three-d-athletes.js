@@ -10,7 +10,7 @@ const v = (x, y, z) => new THREE.Vector3(x, y, z);
 
 // Sculpted rounded cross sections, shaped at waist, ribs, cheeks and shoulders.
 // Twelve shared contour points keep silhouettes soft without costly subdivision.
-function tailoredVolume(rings) {
+function tailoredVolume(rings,openEnds=false) {
     const positions = [], indices = [];
     const sides=12, outline=Array.from({length:sides},(_,i)=>{
         const a=i*Math.PI*2/sides,x=Math.cos(a),z=Math.sin(a);
@@ -21,7 +21,7 @@ function tailoredVolume(rings) {
         const a=r*sides+i,b=r*sides+(i+1)%sides,c=b+sides,d=a+sides;
         indices.push(a,d,b,b,d,c);
     }
-    for(let i=1;i<sides-1;i++) { indices.push(0,i,i+1);const k=(rings.length-1)*sides;indices.push(k,k+i+1,k+i); }
+    if(!openEnds)for(let i=1;i<sides-1;i++) { indices.push(0,i,i+1);const k=(rings.length-1)*sides;indices.push(k,k+i+1,k+i); }
     const geometry=new THREE.BufferGeometry();
     geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
     return geometry;
@@ -51,7 +51,7 @@ function mesh(resources,geometry,color,name,parent,x=0,y=0,z=0) {
     object.name=name;object.position.set(x,y,z);object.castShadow=true;object.receiveShadow=true;parent.add(object);return object;
 }
 function box(r,parent,name,color,size,position) { return mesh(r,new THREE.BoxGeometry(...size),color,name,parent,...position); }
-function volume(r,parent,name,color,rings,x=0,y=0,z=0) { const geometry=tailoredVolume(rings);geometry.userData.cacheKey=`tailored:${JSON.stringify(rings)}`;return mesh(r,geometry,color,name,parent,x,y,z); }
+function volume(r,parent,name,color,rings,x=0,y=0,z=0,openEnds=false) { const geometry=tailoredVolume(rings,openEnds);geometry.userData.cacheKey=`tailored:${openEnds}:${JSON.stringify(rings)}`;return mesh(r,geometry,color,name,parent,x,y,z); }
 function limb(r,parent,name,color,top,bottom,length) {
     return mesh(r,new THREE.CylinderGeometry(top,bottom,length,8,1),color,name,parent);
 }
@@ -81,7 +81,7 @@ function mergeDetails(r,parent,name,exclude=[]) {
 // as the rig's semantic handles; their vertices are transformed into this batch.
 // PaddleFace stays independent so contact is the actual visible triangle surface.
 function batchArticulatedBody(r,visual) {
-    const sources=[];visual.traverse(object=>{if(object.isMesh&&object.name!=='PaddleFace')sources.push(object);});
+    const sources=[];visual.traverse(object=>{if(object.isMesh&&object.name!=='PaddleFace'&&!object.userData.renderHandleOnly)sources.push(object);});
     const positions=[],normals=[],colors=[],parts=[],drawIndices=[];
     for(const source of sources) {
         const geometry=source.geometry,p=geometry.attributes.position,n=geometry.attributes.normal,c=geometry.attributes.color,index=geometry.index,start=positions.length/3;
@@ -154,11 +154,60 @@ function oval(r,parent,name,color,x,y,z,width,height,depth) {
     const object=mesh(r,new THREE.SphereGeometry(1,8,4),color,name,parent,x,y,z);
     object.scale.set(width,height,depth);return object;
 }
+const LEG_RING_CIRCLE=Array.from({length:8},(_,side)=>[Math.cos(side*Math.PI/4),Math.sin(side*Math.PI/4)]);
+// One swept skin surface follows the existing leg anchors. Shared rings avoid
+// overlapping knee caps; the old thigh/knee/shin objects remain audit handles.
+function makeLegSkin(r,root,name,skin) {
+    const rings=7,sides=8,indices=[];
+    for(let ring=0;ring<rings-1;ring++)for(let side=0;side<sides;side++) {
+        const a=ring*sides+side,b=ring*sides+(side+1)%sides,c=b+sides,d=a+sides;
+        indices.push(a,b,d,b,c,d);
+    }
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(indices.length*3),3));
+    geometry.setAttribute('normal',new THREE.Float32BufferAttribute(new Float32Array(indices.length*3),3));
+    const object=mesh(r,geometry,skin,`${name}LegSkin`,root);
+    object.userData.sweep={indices,centers:Array.from({length:rings},()=>new THREE.Vector3()),radii:[.094,.073,.068,.065,.063,.061,.045],points:new Float32Array(rings*sides*3),normals:new Float32Array(rings*sides*3),tangent:new THREE.Vector3(),axisX:new THREE.Vector3(),axisZ:new THREE.Vector3(),cornerA:new THREE.Vector3(),cornerB:new THREE.Vector3()};
+    return object;
+}
+function updateLegSkin(object,hip,knee,ankle) {
+    const d=object.userData.sweep,{centers,radii,tangent,axisX,axisZ,cornerA,cornerB}=d;
+    centers[0].copy(hip);centers[6].copy(ankle);
+    cornerA.copy(hip).lerp(knee,.8);cornerB.copy(knee).lerp(ankle,.2);
+    for(let ring=1;ring<=5;ring++) {
+        const t=(ring-1)/4,u=1-t;
+        centers[ring].copy(cornerA).multiplyScalar(u*u).addScaledVector(knee,2*u*t).addScaledVector(cornerB,t*t);
+    }
+    for(let ring=0;ring<7;ring++) {
+        const previous=Math.max(0,ring-1),next=Math.min(6,ring+1);
+        tangent.subVectors(centers[next],centers[previous]).normalize();
+        axisX.set(1,0,0).addScaledVector(tangent,-tangent.x).normalize();axisZ.crossVectors(tangent,axisX).normalize();
+        const slope=(radii[next]-radii[previous])/Math.max(.001,centers[next].distanceTo(centers[previous]));
+        for(let side=0;side<8;side++) {
+            const c=LEG_RING_CIRCLE[side][0],s=LEG_RING_CIRCLE[side][1],offset=(ring*8+side)*3;
+            const x=axisX.x*c+axisZ.x*s,y=axisX.y*c+axisZ.y*s,z=axisX.z*c+axisZ.z*s;
+            d.points[offset]=centers[ring].x+x*radii[ring];d.points[offset+1]=centers[ring].y+y*radii[ring];d.points[offset+2]=centers[ring].z+z*radii[ring];
+            const nx=x-tangent.x*slope,ny=y-tangent.y*slope,nz=z-tangent.z*slope,scale=1/Math.sqrt(nx*nx+ny*ny+nz*nz);
+            d.normals[offset]=nx*scale;d.normals[offset+1]=ny*scale;d.normals[offset+2]=nz*scale;
+        }
+    }
+    const p=object.geometry.attributes.position.array,n=object.geometry.attributes.normal.array;
+    for(let i=0;i<d.indices.length;i++) {
+        const source=d.indices[i]*3,target=i*3;
+        p[target]=d.points[source];p[target+1]=d.points[source+1];p[target+2]=d.points[source+2];
+        n[target]=d.normals[source];n[target+1]=d.normals[source+1];n[target+2]=d.normals[source+2];
+    }
+    // The expanded batch and source geometry stay identical for dimensional QA.
+    if(d.batchPart){d.batchPart.positions.set(p);d.batchPart.normals.set(n);}
+}
 function makeLeg(r,root,name,skin,cream,navy,accent) {
     const thigh=limb(r,root,`${name}Thigh`,skin,.066,.094,.39);
     const shorts=limb(r,root,`${name}Shorts`,navy,.108,.12,.27);
     const knee=oval(r,root,`${name}Knee`,skin,0,0,0,.074,.074,.073);
     const shin=limb(r,root,`${name}Shin`,skin,.045,.061,.34);
+    for(const handle of [thigh,knee,shin]){handle.visible=false;handle.userData.renderHandleOnly=true;}
+    const legSkin=makeLegSkin(r,root,name,skin),side=name==='Left'?1:-1;
+    updateLegSkin(legSkin,v(side*.13,.875,0),v(side*.205,.48,.185),v(side*.218,.095,.015));
     const sock=limb(r,root,`${name}Sock`,cream,.048,.049,.105);
     const foot=new THREE.Group();foot.name=`${name}Foot`;root.add(foot);
     volume(r,foot,`${name}Sneaker`,cream,[[0,.115,.24],[.032,.137,.278],[.073,.131,.255],[.105,.102,.17],[.119,.081,.10]],0,0,.052);
@@ -168,12 +217,13 @@ function makeLeg(r,root,name,skin,cream,navy,accent) {
         stripe.rotation.y=sign*Math.PI/2;stripe.position.set(sign*.065,0,.07);
     }
     box(r,foot,`${name}Laces`,navy,[.052,.009,.047],[0,.107,.075]);
-    return {thigh,shorts,knee,shin,sock,foot};
+    return {thigh,shorts,knee,shin,sock,foot,legSkin};
 }
 function makeArm(r,root,name,skin,jersey,cream) {
-    const upper=limb(r,root,`${name}UpperArm`,skin,.057,.074,.29);
-    const sleeve=volume(r,root,`${name}Sleeve`,jersey,[[-.098,.17,.18],[-.058,.235,.215],[.029,.194,.187],[.0725,.166,.166]]);
-    const cuff=limb(r,root,`${name}Cuff`,cream,.084,.086,.023);
+    // Proximal skin stays under the sleeve rather than capping the shoulder.
+    const upper=mesh(r,new THREE.CylinderGeometry(.057,.066,.173,8,1).translate(0,.0585,0),skin,`${name}UpperArm`,root);
+    const sleeve=volume(r,root,`${name}Sleeve`,jersey,[[-.0725,.107,.143],[-.037,.180,.182],[.027,.178,.175],[.0725,.160,.160]],0,0,0,true);
+    const cuff=limb(r,root,`${name}Cuff`,cream,.079,.081,.023);
     const forearm=limb(r,root,`${name}Forearm`,skin,.039,.057,.27);
     const hand=oval(r,root,`${name}Hand`,skin,0,0,0,.042,.058,.034);
     // A thumb overlaps the palm and grip; it follows the existing wrist handle.
@@ -187,7 +237,7 @@ export function createAthlete(resources,team,handedness,variant=handedness==='le
     const colors={jersey:green?'#23866a':'#ed8549',light:green?'#95d4ad':'#ffd68a',dark:green?'#19654f':'#bd573d',cream:'#fff8e7',navy:'#344957',skin:alternate?'#bc805c':'#efbb96',hair:alternate?'#3e3030':'#70503c'};
     const visual=new THREE.Group();visual.name='AthleteOrientation';root.add(visual);
     const upper=new THREE.Group();upper.name='AthleteTorso';visual.add(upper);
-    volume(r,upper,'TaperedJersey',colors.jersey,[[.875,.365,.245],[.94,.395,.265],[1.13,.43,.285],[1.29,.51,.29],[1.36,.53,.26],[1.405,.39,.21]]);
+    volume(r,upper,'TaperedJersey',colors.jersey,[[.875,.365,.245],[.94,.395,.265],[1.13,.43,.285],[1.29,.51,.29],[1.33,.558,.282],[1.36,.53,.26],[1.405,.39,.21]]);
     volume(r,upper,'JerseyHem',colors.dark,[[.878,.37,.25],[.933,.395,.267]]);
     // Bold diagonal athletic color blocking, with an original court-line badge.
     const chest=patch(r,upper,'ChestColorBlock',colors.light,[[-.227,1.29],[.226,1.18],[.215,1.085],[-.218,1.195]],.009);chest.position.z=.146;
@@ -258,6 +308,7 @@ export function createAthlete(resources,team,handedness,variant=handedness==='le
     mergeDetails(r,legs.left.foot,'LeftSneaker');mergeDetails(r,legs.right.foot,'RightSneaker');
     mergeDetails(r,paddle,'PaddleDetails',['PaddleFace']);
     const bodyBatch=batchArticulatedBody(r,visual);
+    for(const leg of Object.values(legs))leg.legSkin.userData.sweep.batchPart=bodyBatch.parts.find(part=>part.source===leg.legSkin);
     const shadowMaterial=new THREE.MeshBasicMaterial({color:'#263b37',transparent:true,opacity:.20,depthWrite:false});r.extraMaterials.add(shadowMaterial);
     const shadow=new THREE.Mesh(r.geometry(new THREE.CircleGeometry(.37,24)),shadowMaterial);shadow.name='AthleteContactShadow';shadow.rotation.x=-Math.PI/2;shadow.position.y=.008;shadow.scale.y=.61;root.add(shadow);
     root.userData={team,handedness,variant,groundY:0,volumetricAthlete:true,pixelActor:false,visual,upper,head,legs,arms,paddle,shadow,bodyBatch,resources:r,paddleFaceWorld:new THREE.Vector3(),shoulderWorld:new THREE.Vector3(),height:1.89,animation:{}};
@@ -290,7 +341,9 @@ function updateArm(arm,shoulder,wrist,side) {
     const elbow=elbowPoint(shoulder,wrist,side);
     alignSegment(arm.upper,shoulder,elbow,.29);alignSegment(arm.forearm,elbow,wrist,.27);
     const sleeveEnd=shoulder.clone().lerp(elbow,.48),cuffStart=shoulder.clone().lerp(elbow,.44);
-    alignSegment(arm.sleeve,shoulder,sleeveEnd,.145);alignSegment(arm.cuff,cuffStart,sleeveEnd,.023);
+    // Only the cloth root moves inward; anatomical and contact anchors stay fixed.
+    const sleeveStart=shoulder.clone();sleeveStart.x*=.74;
+    alignSegment(arm.sleeve,sleeveStart,sleeveEnd,.145);alignSegment(arm.cuff,cuffStart,sleeveEnd,.023);
     arm.hand.position.copy(wrist);arm.hand.quaternion.copy(arm.forearm.quaternion);
 }
 
@@ -316,6 +369,7 @@ export function updateAthlete(root,sample,camera,contactWeight=0) {
         const knee=v(s*(.205+stance*.6)+weightShift*.65,.48+upper.position.y*.4,.185+strokeActivity*.045-swing*.055);
         alignSegment(leg.thigh,hip,knee,.39);alignSegment(leg.shorts,hip,hip.clone().lerp(knee,.66),.27);leg.knee.position.copy(knee);
         alignSegment(leg.shin,knee,ankle.clone().add(v(0,.095,0)),.34);
+        updateLegSkin(leg.legSkin,hip,knee,ankle.clone().add(v(0,.095,0)));
         alignSegment(leg.sock,ankle.clone().add(v(0,.07,0)),ankle.clone().add(v(0,.175,0)),.105);
         leg.foot.position.copy(ankle);leg.foot.rotation.set(-Math.max(0,-swing)*.22,s*.08,0);
     }
