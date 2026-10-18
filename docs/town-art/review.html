@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pickleball Park · A human village court</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#253e43;background:#f5f2e8;color-scheme:light}*{box-sizing:border-box}body{max-width:1440px;margin:auto;padding:clamp(18px,4vw,54px)}a{color:#216c66;text-underline-offset:4px}h1{font-size:clamp(32px,5vw,64px);letter-spacing:-.05em;line-height:1.02;max-width:950px;margin:15px 0 25px}h2{font-size:25px;margin:48px 0 17px}p{max-width:850px;line-height:1.65}.eyebrow{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#537567}nav{display:flex;flex-wrap:wrap;gap:20px;margin:24px 0}.pair,.people{display:grid;grid-template-columns:1fr 1fr;gap:18px}.phones{max-width:800px;margin:auto}.people{grid-template-columns:repeat(4,1fr)}figure{margin:0;background:#fffdf3;border:1px solid #bcc9bd;border-radius:9px;overflow:hidden}figcaption{padding:12px 15px;font-size:13px;border-bottom:1px solid #d4dcce}img,video{display:block;width:100%;height:auto}video{background:#283e40}.note{font-size:13px;color:#596e6c}.compare{position:relative;aspect-ratio:1.6;border:1px solid #9fb3a7;border-radius:8px;overflow:hidden;background:#e7eddf}.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.compare .new{clip-path:inset(0 0 0 50%)}.compare .rule{position:absolute;left:50%;top:0;bottom:0;width:2px;background:white;box-shadow:0 0 0 1px #315e55}.compare b{position:absolute;top:12px;padding:6px 10px;font-size:12px;background:#fffbeaeb;border-radius:4px}.compare .old-label{left:12px}.compare .new-label{right:12px}label{display:flex;align-items:center;gap:16px;font-size:14px;margin:14px 0}input[type=range]{flex:1;accent-color:#27776a}footer{font-size:13px;line-height:1.6;border-top:1px solid #becdbf;margin-top:45px;padding-top:20px}.reference{max-height:420px;object-fit:contain;background:#e3e9dc}.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}@media(max-width:720px){.pair{grid-template-columns:1fr}.people,.phases{grid-template-columns:1fr 1fr}.compare b{font-size:10px;top:5px;padding:4px}body{padding:18px}}
+</style>
+<header>
+<div class="eyebrow">Local art-direction candidate · Original human world</div>
+<h1>A neighborhood court,<br>with people who belong there.</h1>
+<p>The previous scene was a sparse faceted sports park. This pass builds an original sunny village around the same working court: expressive human faces, softer shapes, cream cottages, colored roofs, planted paths and a more deliberate light palette.</p>
+<nav><a href="../../index.html">Open new candidate · port 4175</a><a href="REPORT.md">Verification and limitations</a><a href="final/screens/capture.json">Capture provenance</a><a href="final/motion/motion-report.json">Motion provenance</a></nav>
+</header>
+<main>
+<h2>Matched normal builder</h2>
+<p class="note">Drag to compare the owner-reviewed candidate on the left with this pass on the right. Same viewport, play and camera.</p>
+<div class="compare" id="compare"><img src="before/desktop-builder.png" alt="Previous faceted sports park"><img class="new" src="final/screens/desktop-builder.png" alt="New human village court"><div class="rule"></div><b class="old-label">Before · reviewed candidate</b><b class="new-label">After · village art pass</b></div>
+<label>Before / after <input id="comparison" type="range" min="0" max="100" value="50" aria-label="Move before and after divider"></label>
+<h2>Full scene and physical strokes</h2>
+<div class="pair"><figure><figcaption>Overhead · original village scenery around the regulation court</figcaption><a href="final/screens/desktop-3d.png"><img src="final/screens/desktop-3d.png" alt="Full court with two cottages, rounded trees, pale fences and flowers"></a></figure><figure><figcaption>Sideline · the court and ball remain unobstructed</figcaption><a href="final/screens/desktop-3d-sideline.png"><img src="final/screens/desktop-3d-sideline.png" alt="Sideline view with all four human athletes"></a></figure></div>
+<h2>Phone portrait · normal authoring</h2>
+<div class="pair phones"><figure><figcaption>Before · 390 × 844</figcaption><img loading="lazy" src="before/phone-portrait-builder.png" alt="Previous phone builder"></figure><figure><figcaption>After · 390 × 844</figcaption><img loading="lazy" src="final/screens/phone-portrait-builder.png" alt="New phone builder with readable court and compact controls"></figure></div>
+<h2>Phone landscape</h2>
+<figure><figcaption>After · 844 × 390, normal authoring</figcaption><img loading="lazy" src="final/screens/phone-landscape-builder.png" alt="Phone landscape builder"></figure>
+<h2>Human detail</h2>
+<p class="note">Inspection cameras, with the HUD hidden, show the original face, hair, uniform and anatomy work. These are detail views; the normal gameplay camera is shown above.</p>
+<div class="people">
+<figure><figcaption>Green · cap</figcaption><a href="final/details/athlete-player1.png"><img loading="lazy" src="final/details/athlete-player1.png" alt="Green athlete with cap and almond-shaped eyes"></a></figure>
+<figure><figcaption>Green · visor</figcaption><a href="final/details/athlete-player2.png"><img loading="lazy" src="final/details/athlete-player2.png" alt="Green athlete with visor and swept hair"></a></figure>
+<figure><figcaption>Orange · cap</figcaption><a href="final/details/athlete-player3.png"><img loading="lazy" src="final/details/athlete-player3.png" alt="Orange athlete with cap"></a></figure>
+<figure><figcaption>Orange · headband</figcaption><a href="final/details/athlete-player4.png"><img loading="lazy" src="final/details/athlete-player4.png" alt="Orange athlete with headband"></a></figure>
+</div>
+<h2>Motion · four representative plays</h2>
+<p class="note">Serve and return, third-shot drop, third-shot drive and fifth-shot drop. Each contact is inspected before normal playback. Existing timing, trajectory, contact, handedness and shared-clock behavior remain authoritative.</p>
+<div class="pair"><figure><figcaption>Before · reviewed candidate motion</figcaption><video controls playsinline preload="metadata" poster="before/desktop-contact.png" src="../art-overhaul/final/motion/four-play-motion.webm"></video></figure><figure><figcaption>After · frozen village art motion</figcaption><video controls playsinline preload="metadata" poster="final/screens/desktop-contact.png" src="final/motion/four-play-motion.webm"></video></figure></div>
+<h2>Reference and honest scope</h2>
+<p>The art direction was studied from the official <a href="https://pokemonletsgo.pokemon.com/en-us/kanto-region/">Pokémon: Let’s Go Kanto environment images</a> and <a href="https://www.pokemon.co.jp/ex/pika_vee/character/180713_02.html">official human character scene</a>. Reference images are retained only in these review documents. The application uses original generated geometry and surface colors; it includes no copied characters, creatures, buildings or franchise assets.</p>
+<div class="pair"><figure><figcaption>Official environment reference · The Pokémon Company</figcaption><img class="reference" loading="lazy" src="reference/official-pallet-town.jpg" alt="Official Let’s Go environment reference"></figure><figure><figcaption>Official human reference · The Pokémon Company</figcaption><img class="reference" loading="lazy" src="reference/official-human-scene.jpg" alt="Official Let’s Go human character reference"></figure></div>
+<p>The independent reviewer accepted a substantial move toward this human village direction. This is still a lighter procedural interpretation: foliage, cast shadows, material richness and some close-up joint seams remain less finished than the commercial reference.</p>
+<p class="note">Performance remains a tradeoff: the richer scene measures about 25 ms median callback cadence in headless software rendering, versus about 16.7 ms before. Pose CPU is lower and draw calls are fewer, but rendering parity is not achieved. See the verification report for the matched measurements. Physical phone performance has not been measured.</p>
+</main>
+<footer>Local isolated continuation branch. No push, merge or public deployment. The original preview on port 4173 and unpublished Smart Rally checkout remain unchanged. Captures use isolated repository headless browser profiles; phone sizes are emulations, not physical-device evidence.</footer>
+<script>document.querySelector('#comparison').addEventListener('input',event=>{const value=event.target.value;document.querySelector('.new').style.clipPath=`inset(0 0 0 ${value}%)`;document.querySelector('.rule').style.left=`${value}%`});</script>
+</html>
