@@ -9,7 +9,7 @@ export const BUILD_IDENTITY_METADATA = {
   "product": "Pickleball Park",
   "status": "local",
   "developmentStatus": "stamped local build",
-  "sourceRevision": "9ded1d86e728124598905b29700374448817af89",
+  "sourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
   "sourceBranch": "feature/town-art-perf",
   "sourceState": "clean",
   "sourceRevisionVerified": true,
@@ -17,8 +17,8 @@ export const BUILD_IDENTITY_METADATA = {
   "packageRevision": null,
   "evidenceRevision": null,
   "packageVerified": false,
-  "runtimeSha256": "62b48eed88fb40637b3eced00faf975baf171bdafc38c28ce0a8c63a59d7d513",
-  "runtimeDigest": "62b48eed88fb40637b3eced00faf975baf171bdafc38c28ce0a8c63a59d7d513",
+  "runtimeSha256": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+  "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
   "runtimeFileset": {
     "algorithm": "sha256",
     "include": "static application runtime files",
@@ -29,6 +29,6 @@ export const BUILD_IDENTITY_METADATA = {
       "runtime-manifest.json"
     ]
   },
-  "cacheVersion": "pickleboard-static-v27",
-  "buildTime": "2026-10-18T01:31:38.623Z"
+  "cacheVersion": "pickleboard-static-v28",
+  "buildTime": "2026-10-18T16:27:36.082Z"
 };
