@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-18T16:41:16.028Z",
+  "note": "Checked after final captures, package verification and all 18 matched trials; before the final evidence-only commit.",
+  "baseline": {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard",
+    "head": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+    "status": "?? docs/SMART_RALLY_REPORT.md",
+    "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129"
+  },
+  "reviewed": {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard",
+    "head": "3751cef343062667a2413d0add95bcb134331311",
+    "status": "",
+    "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748"
+  },
+  "optimized": {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf",
+    "head": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+    "status": "M tests/brand.unit.mjs\n M tools/art-overhaul-capture.mjs\n M tools/art-overhaul-matched-performance.mjs\n M tools/check-brand.mjs\n?? docs/town-art-performance/\n?? docs/town-art/cache-final/\n?? docs/town-art/cache-integrated/\n?? docs/town-art/perf-seam-pass/\n?? docs/town-art/performance-aa-study/\n?? docs/town-art/performance-cache-study/\n?? docs/town-art/performance-cache-validation/\n?? docs/town-art/performance-study/\n?? tools/capture-cache-differences.mjs\n?? tools/profile-town-renderer.mjs",
+    "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884"
+  },
+  "canonical": {
+    "root": "/Users/fdub/Geese/pickleboard",
+    "head": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "status": "?? docs/SMART_RALLY_REPORT.md",
+    "runtimeDigest": "d638da4f8ece2cbf1b056c93cda93e7bacab3bab3543ef6bc2b2cff2fb4d8b4c"
+  }
+}

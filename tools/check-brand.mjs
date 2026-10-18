@@ -51,7 +51,25 @@ const ARCHIVED_FILES = new Set([
 ]);
 const isArchived = file => ARCHIVED_FILES.has(file);
 
+const PERFORMANCE_IDENTITY_FILES = new Set([
+  'docs/town-art-performance/final/pre-memory-fix/matched-desktop.json',
+  'docs/town-art-performance/final/pre-memory-fix/matched-phone.json',
+  'docs/town-art-performance/final/matched-desktop.json',
+  'docs/town-art-performance/final/matched-phone.json',
+  'docs/town-art-performance/verification/resumed-source-identities.json',
+  'docs/town-art-performance/verification/final-source-identities.json'
+]);
+const VERIFIED_REPOSITORY_PATHS = [
+  '/Users/fdub/Geese/pickleboard',
+  '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard',
+  '/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard'
+];
+
 const removeApprovedLegacyContracts = (file, source) => {
+  // Exact machine-recorded source identities are compatibility evidence, not UI names.
+  if (PERFORMANCE_IDENTITY_FILES.has(file)) for (const repositoryPath of VERIFIED_REPOSITORY_PATHS) {
+    source = source.replaceAll(JSON.stringify(repositoryPath), JSON.stringify('[verified repository path]'));
+  }
   if (['docs/art-overhaul/SOURCE.md', 'docs/art-overhaul/before/README.md', 'tools/art-overhaul-matched-performance.mjs'].includes(file)) source = source.replaceAll('/Users/fdub/Geese/pickleboard', '[canonical repository path]');
   if (file === 'docs/rebrand/capture-metadata.json') {
     const data = JSON.parse(source);

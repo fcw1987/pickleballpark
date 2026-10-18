@@ -1,0 +1,41 @@
+{
+  "base": "http://127.0.0.1:4176",
+  "runtimeDigest": "56d93c4917aa3aeb6527ad6df49c82e552c81e12cc4280402d55f30875332b36",
+  "actors": [
+    "player1",
+    "player2",
+    "player3",
+    "player4"
+  ],
+  "detailCamera": "38 degree perspective, each athlete front 3/4, 1.75m eye",
+  "lights": [
+    {
+      "name": "current",
+      "sky": "#fff5df",
+      "ground": "#637d76",
+      "hemi": 1.2,
+      "ambient": 0.32,
+      "key": "#fff2d9",
+      "power": 1.9
+    },
+    {
+      "name": "daylight",
+      "sky": "#e5f5ff",
+      "ground": "#91aa89",
+      "hemi": 1.65,
+      "ambient": 0.42,
+      "key": "#fff3dd",
+      "power": 1.65
+    },
+    {
+      "name": "soft-sun",
+      "sky": "#e8f3ff",
+      "ground": "#94a888",
+      "hemi": 1.85,
+      "ambient": 0.42,
+      "key": "#fff6e9",
+      "power": 1.45
+    }
+  ],
+  "errors": []
+}

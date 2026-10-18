@@ -1,0 +1,598 @@
+{
+  "base": "http://127.0.0.1:4176",
+  "viewport": [
+    1440,
+    900
+  ],
+  "method": "One isolated browser, fresh page per mode, paused fixed camera. Warm12 frames;32 RAF-paced completed-render+1px-readPixels samples with changing poses (includes readback overhead, not pure GPU time); then2600ms normal active playback callback cadence. Diagnosis-only ablations are not product changes.",
+  "results": [
+    {
+      "mode": "full",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 24.799999952316284,
+        "p95": 26.600000023841858,
+        "mean": 27.73124999180436
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.44062500074505806
+      },
+      "rafMs": {
+        "count": 94,
+        "median": 25,
+        "p95": 33.40000000000009,
+        "mean": 27.74787234042553
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 10,
+      "errors": []
+    },
+    {
+      "mode": "frozen-actor-upload",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 24.799999952316284,
+        "p95": 25.699999928474426,
+        "mean": 27.584374997764826
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.5,
+        "p95": 0.5999999046325684,
+        "mean": 0.46562499925494194
+      },
+      "rafMs": {
+        "count": 96,
+        "median": 25,
+        "p95": 33.40000000000009,
+        "mean": 27.256249999999998
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 10,
+      "errors": []
+    },
+    {
+      "mode": "no-msaa",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 12.599999904632568,
+        "p95": 24.299999952316284,
+        "mean": 15.803125005215406
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.43437500670552254
+      },
+      "rafMs": {
+        "count": 179,
+        "median": 16.600000000000364,
+        "p95": 16.800000000000182,
+        "mean": 14.570391061452511
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 10,
+      "errors": []
+    },
+    {
+      "mode": "no-msaa-125",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1800,
+        1125
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 17.600000023841858,
+        "p95": 19.700000047683716,
+        "mean": 20.056249994784594
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.4468749910593033
+      },
+      "rafMs": {
+        "count": 123,
+        "median": 24.899999999999636,
+        "p95": 25.899999999999636,
+        "mean": 21.20569105691057
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 10,
+      "errors": []
+    },
+    {
+      "mode": "no-msaa-150",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        2160,
+        1350
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 24,
+        "p95": 25.300000071525574,
+        "mean": 26.231250021606684
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.5,
+        "p95": 0.5999999046325684,
+        "mean": 0.4593749977648258
+      },
+      "rafMs": {
+        "count": 90,
+        "median": 25.09999999999991,
+        "p95": 33.40000000000009,
+        "mean": 28.88888888888889
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 10,
+      "errors": []
+    },
+    {
+      "mode": "msaa2",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 24.399999976158142,
+        "p95": 25.700000047683716,
+        "mean": 27.12499998509884
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.5,
+        "p95": 0.5,
+        "mean": 0.45000000670552254
+      },
+      "rafMs": {
+        "count": 97,
+        "median": 25,
+        "p95": 33.40000000000009,
+        "mean": 26.804123711340207
+      },
+      "calls": 1,
+      "triangles": 2,
+      "programs": 11,
+      "errors": []
+    },
+    {
+      "mode": "fxaa-light",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 17.800000071525574,
+        "p95": 20.100000023841858,
+        "mean": 20.06249999627471
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.4437499940395355
+      },
+      "rafMs": {
+        "count": 133,
+        "median": 16.799999999999272,
+        "p95": 25.400000000000546,
+        "mean": 19.73609022556391
+      },
+      "calls": 1,
+      "triangles": 2,
+      "programs": 11,
+      "errors": []
+    },
+    {
+      "mode": "fxaa",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 22.700000047683716,
+        "p95": 24.299999952316284,
+        "mean": 24.90625
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.3999999761581421,
+        "p95": 0.6000000238418579,
+        "mean": 0.4437499903142452
+      },
+      "rafMs": {
+        "count": 106,
+        "median": 25,
+        "p95": 32.399999999999636,
+        "mean": 24.536792452830195
+      },
+      "calls": 1,
+      "triangles": 2,
+      "programs": 11,
+      "errors": []
+    },
+    {
+      "mode": "flat-fxaa",
+      "bakedMeshes": 20,
+      "bakedVertices": 1987,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 20.699999928474426,
+        "p95": 22,
+        "mean": 22.66874999552965
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.4437500089406967
+      },
+      "rafMs": {
+        "count": 115,
+        "median": 25,
+        "p95": 25.899999999999636,
+        "mean": 22.82608695652174
+      },
+      "calls": 1,
+      "triangles": 2,
+      "programs": 12,
+      "errors": []
+    },
+    {
+      "mode": "flat-no-msaa-125",
+      "bakedMeshes": 20,
+      "bakedVertices": 1987,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": false,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 0,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1800,
+        1125
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 14.800000071525574,
+        "p95": 16.300000071525574,
+        "mean": 17.012499999254942
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.6000000238418579,
+        "mean": 0.44062500819563866
+      },
+      "rafMs": {
+        "count": 146,
+        "median": 16.699999999999818,
+        "p95": 25,
+        "mean": 17.92191780821918
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 11,
+      "errors": []
+    },
+    {
+      "mode": "flat-bake-front-first",
+      "bakedMeshes": 20,
+      "bakedVertices": 1987,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 22.700000047683716,
+        "p95": 24.5,
+        "mean": 25.43749999254942
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.5,
+        "p95": 0.5,
+        "mean": 0.45625000819563866
+      },
+      "rafMs": {
+        "count": 105,
+        "median": 25,
+        "p95": 25.90000000000009,
+        "mean": 24.919999999999995
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 13,
+      "errors": []
+    },
+    {
+      "mode": "full",
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 25.100000023841858,
+        "p95": 26.699999928474426,
+        "mean": 27.928124990314245
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.4375
+      },
+      "rafMs": {
+        "count": 95,
+        "median": 25,
+        "p95": 33.400000000000546,
+        "mean": 27.36842105263158
+      },
+      "calls": 46,
+      "triangles": 26255,
+      "programs": 10,
+      "errors": []
+    }
+  ]
+}

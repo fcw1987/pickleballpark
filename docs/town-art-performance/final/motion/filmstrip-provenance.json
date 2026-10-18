@@ -1,0 +1,6 @@
+{
+  "video": "four-play-motion.webm",
+  "videoSha256": "6bfe67dbc3a6beeeb3cfc0b3bd4ea17e695382a4e10ecda7f5d9bf29d027b77e",
+  "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+  "sampling": "3fps,16frames at offsets0,6,12,18seconds;640x400 thumbnails; sampled stills do not establish every frame timing"
+}

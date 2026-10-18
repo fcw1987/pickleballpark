@@ -1,0 +1,39 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [chromium] › tests/static-world-cache.spec.mjs:11:1 › static scene cache reuses artwork and invalidates for camera, light and world changes (1.5s)
+  ✘  2 [chromium] › tests/static-world-cache.spec.mjs:36:1 › cached color and depth preserve moving ball, players and net across cameras (3.0s)
+  ✓  3 [chromium] › tests/static-world-cache.spec.mjs:75:1 › cache follows backing-buffer resize and disposes its owned resources once (1.4s)
+
+
+  1) [chromium] › tests/static-world-cache.spec.mjs:36:1 › cached color and depth preserve moving ball, players and net across cameras
+
+    Error: {"camera":"overhead","seconds":0,"mean":0.5708311631944445,"changedFraction":0.059793836805555556,"severeFraction":0.002310112847222222,"maximum":78}
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 0.012
+    Received:   0.059793836805555556
+
+      68 |   for (const item of evidence.cases) {
+      69 |     expect(item.mean, JSON.stringify(item)).toBeLessThan(0.6);
+    > 70 |     expect(item.changedFraction, JSON.stringify(item)).toBeLessThan(0.012);
+         |                                                        ^
+      71 |     expect(item.severeFraction, JSON.stringify(item)).toBeLessThan(0.002);
+      72 |   }
+      73 | });
+        at /Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf/tests/static-world-cache.spec.mjs:70:56
+
+    Error Context: test-results/static-world-cache-cached--8624e-yers-and-net-across-cameras-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/static-world-cache-cached--8624e-yers-and-net-across-cameras-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/static-world-cache-cached--8624e-yers-and-net-across-cameras-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/static-world-cache.spec.mjs:36:1 › cached color and depth preserve moving ball, players and net across cameras
+  2 passed (6.7s)

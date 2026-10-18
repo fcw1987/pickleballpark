@@ -1,0 +1,2519 @@
+{
+  "browser": "149.0.7827.55",
+  "startedAt": "2026-10-18T16:37:31.930Z",
+  "completedAt": "2026-10-18T16:38:45.941Z",
+  "viewport": "1440x900 DPR1",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "osRelease": "27.0.0",
+    "cpu": "Apple M3 Max",
+    "logicalCPUs": 16,
+    "node": "v22.4.0"
+  },
+  "workload": "third-shot-drop, overhead, playback rate 0.5, 1200ms active warm-up, pause/reset, then active play for 6 seconds",
+  "order": [
+    "baseline",
+    "reviewed",
+    "optimized",
+    "reviewed",
+    "optimized",
+    "baseline",
+    "optimized",
+    "baseline",
+    "reviewed"
+  ],
+  "methodology": "Targets executed sequentially in one isolated headless Chromium process in the recorded counterbalanced order, each in a fresh context with service workers blocked. Every served runtime file is byte-verified against its named root before launch. RAF interval is observer callback cadence, not display FPS; appRenderIntervalsMs is actual public renderer.render invocation cadence. CPU render timings wrap the complete public render call (including cache signature/copy/live work), not GPU completion. CPU totals per elapsed second permit comparison without assuming equal invocation counts. Start/end playback state verifies the active half-speed window. Three repeats per version are descriptive, not a statistical certification.",
+  "records": [
+    {
+      "label": "baseline",
+      "runIndex": 0,
+      "url": "http://127.0.0.1:4173/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard",
+      "currentHead": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+      "sourceRevision": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+      "stampedSourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+      "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+      "servedRuntimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 53.004459,
+      "sceneReadyMs": 719.2255419999999,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "staticWorldCache": null,
+        "drawCalls": 45,
+        "triangles": 11156,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 36.799999952316284,
+          "loadEvent": 41.200000047683716,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6021.600000023842,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.009950000000007,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7553008779292901,
+            "y": 1.9920300670486022,
+            "z": -2.9887050754845674,
+            "board": {
+              "x": 12.478021253048851,
+              "y": 12.194537153922024
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.009950000000007,
+            "elapsed": 3.009950000000007,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 272,
+          "medianMs": 25,
+          "p95Ms": 25.100000000000364,
+          "maxMs": 26.400000000000546,
+          "totalMs": 6016.668000000004,
+          "meanMs": 22.120102941176487
+        },
+        "appRenderIntervalsMs": {
+          "count": 272,
+          "medianMs": 22.200000047683716,
+          "p95Ms": 23.100000023841858,
+          "maxMs": 23.899999976158142,
+          "totalMs": 6016.799999952316,
+          "meanMs": 22.12058823511881
+        },
+        "applyAtTimeCPUms": {
+          "count": 273,
+          "medianMs": 1,
+          "p95Ms": 1.100000023841858,
+          "maxMs": 2.600000023841858,
+          "totalMs": 276.39999985694885,
+          "meanMs": 1.0124542119302156
+        },
+        "renderCPUms": {
+          "count": 273,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.30000007152557373,
+          "totalMs": 56.00000071525574,
+          "meanMs": 0.20512820774818952
+        },
+        "applyCPUmsPerSecond": 45.90142152515187,
+        "renderCPUmsPerSecond": 9.299853978184206,
+        "renderFrames": 326,
+        "renderFrameDelta": 273,
+        "staticWorldCache": null,
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.009950000000007,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7553008779292901,
+            "y": 1.9920300670486022,
+            "z": -2.9887050754845674,
+            "board": {
+              "x": 12.478021253048851,
+              "y": 12.194537153922024
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.009950000000007,
+            "elapsed": 3.009950000000007,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "reviewed",
+      "runIndex": 1,
+      "url": "http://127.0.0.1:4175/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard",
+      "currentHead": "3751cef343062667a2413d0add95bcb134331311",
+      "sourceRevision": "3751cef343062667a2413d0add95bcb134331311",
+      "stampedSourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+      "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+      "servedRuntimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 50.3622919999998,
+      "sceneReadyMs": 940.4189999999999,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 38,
+          "textures": 6
+        },
+        "staticWorldCache": null,
+        "drawCalls": 42,
+        "triangles": 25799,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 38,
+          "loadEvent": 40.5,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6027.599999904633,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.0113999999523227,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7512520671719439,
+            "y": 1.997534912214913,
+            "z": -2.9777623437079566,
+            "board": {
+              "x": 12.464737753188793,
+              "y": 12.230438504895156
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0113999999523227,
+            "elapsed": 3.0113999999523227,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 226,
+          "medianMs": 25,
+          "p95Ms": 33.40000000000009,
+          "maxMs": 34.399999999999636,
+          "totalMs": 6016.599999999998,
+          "meanMs": 26.6221238938053
+        },
+        "appRenderIntervalsMs": {
+          "count": 226,
+          "medianMs": 26.600000023841858,
+          "p95Ms": 27.40000009536743,
+          "maxMs": 27.899999976158142,
+          "totalMs": 6020.399999976158,
+          "meanMs": 26.63893805299185
+        },
+        "applyAtTimeCPUms": {
+          "count": 227,
+          "medianMs": 0.30000007152557373,
+          "p95Ms": 0.40000009536743164,
+          "maxMs": 1,
+          "totalMs": 79.90000057220459,
+          "meanMs": 0.3519823813753506
+        },
+        "renderCPUms": {
+          "count": 227,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.30000007152557373,
+          "totalMs": 46.299999833106995,
+          "meanMs": 0.20396475697403962
+        },
+        "applyCPUmsPerSecond": 13.255690585551257,
+        "renderCPUmsPerSecond": 7.68133250942988,
+        "renderFrames": 271,
+        "renderFrameDelta": 227,
+        "staticWorldCache": null,
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.0113999999523227,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7512520671719439,
+            "y": 1.997534912214913,
+            "z": -2.9777623437079566,
+            "board": {
+              "x": 12.464737753188793,
+              "y": 12.230438504895156
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0113999999523227,
+            "elapsed": 3.0113999999523227,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "optimized",
+      "runIndex": 2,
+      "url": "http://127.0.0.1:4176/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf",
+      "currentHead": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+      "sourceRevision": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+      "stampedSourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+      "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+      "servedRuntimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+        "sourceBranch": "feature/town-art-perf",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v28",
+        "buildTime": "2026-10-18T16:27:36.082Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 48.979458999998315,
+      "sceneReadyMs": 1006.3487499999974,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "staticWorldCache": {
+          "enabled": true,
+          "builds": 1,
+          "reuses": 79,
+          "invalidations": 0,
+          "lastInvalidation": "initial",
+          "width": 1440,
+          "height": 900,
+          "samples": 4,
+          "buildSamples": 4,
+          "residentSamples": 0,
+          "estimatedBytes": 10368000,
+          "estimatedBuildBytes": 51840000,
+          "estimatedPeakBytes": 62208000,
+          "residentBytes": 10368000,
+          "transientBytes": 0,
+          "failures": 0,
+          "bypasses": 0,
+          "disabledReason": null,
+          "disposed": false,
+          "memoryBudgetBytes": 100663296,
+          "peakMemoryBudgetBytes": 201326592
+        },
+        "drawCalls": 17,
+        "triangles": 11090,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 37.10000002384186,
+          "loadEvent": 39.700000047683716,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6025.899999976158,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.0105000000119277,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7537651220409889,
+            "y": 1.9941239752515787,
+            "z": -2.9845543838945643,
+            "board": {
+              "x": 12.472982683861511,
+              "y": 12.2081549084824
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0105000000119277,
+            "elapsed": 3.0105000000119277,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 426,
+          "medianMs": 16.59999999999991,
+          "p95Ms": 16.899999999999636,
+          "maxMs": 18.09999999999991,
+          "totalMs": 6016.600000000008,
+          "meanMs": 14.123474178403773
+        },
+        "appRenderIntervalsMs": {
+          "count": 426,
+          "medianMs": 14.100000023841858,
+          "p95Ms": 14.600000023841858,
+          "maxMs": 15.100000023841858,
+          "totalMs": 6020.600000023842,
+          "meanMs": 14.132863849821225
+        },
+        "applyAtTimeCPUms": {
+          "count": 427,
+          "medianMs": 0.3999999761581421,
+          "p95Ms": 0.40000009536743164,
+          "maxMs": 0.5,
+          "totalMs": 153.00000190734863,
+          "meanMs": 0.3583138217970694
+        },
+        "renderCPUms": {
+          "count": 427,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.5999999046325684,
+          "totalMs": 92.2999986410141,
+          "meanMs": 0.2161592474028433
+        },
+        "applyCPUmsPerSecond": 25.390398431429993,
+        "renderCPUmsPerSecond": 15.317213800657045,
+        "renderFrames": 509,
+        "renderFrameDelta": 427,
+        "staticWorldCache": {
+          "enabled": true,
+          "builds": 1,
+          "reuses": 506,
+          "invalidations": 0,
+          "lastInvalidation": "initial",
+          "width": 1440,
+          "height": 900,
+          "samples": 4,
+          "buildSamples": 4,
+          "residentSamples": 0,
+          "estimatedBytes": 10368000,
+          "estimatedBuildBytes": 51840000,
+          "estimatedPeakBytes": 62208000,
+          "residentBytes": 10368000,
+          "transientBytes": 0,
+          "failures": 0,
+          "bypasses": 0,
+          "disabledReason": null,
+          "disposed": false,
+          "memoryBudgetBytes": 100663296,
+          "peakMemoryBudgetBytes": 201326592
+        },
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.0105000000119277,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7537651220409889,
+            "y": 1.9941239752515787,
+            "z": -2.9845543838945643,
+            "board": {
+              "x": 12.472982683861511,
+              "y": 12.2081549084824
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0105000000119277,
+            "elapsed": 3.0105000000119277,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "reviewed",
+      "runIndex": 3,
+      "url": "http://127.0.0.1:4175/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard",
+      "currentHead": "3751cef343062667a2413d0add95bcb134331311",
+      "sourceRevision": "3751cef343062667a2413d0add95bcb134331311",
+      "stampedSourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+      "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+      "servedRuntimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 47.46725000000151,
+      "sceneReadyMs": 898.4962079999968,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 38,
+          "textures": 6
+        },
+        "staticWorldCache": null,
+        "drawCalls": 42,
+        "triangles": 25799,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 36,
+          "loadEvent": 38.5,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6025.100000023842,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.011799999988083,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7501351537229892,
+            "y": 1.999044724933198,
+            "z": -2.974743658710782,
+            "board": {
+              "x": 12.461073338986186,
+              "y": 12.240342327064363
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.011799999988083,
+            "elapsed": 3.011799999988083,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 227,
+          "medianMs": 25,
+          "p95Ms": 33.30000000000018,
+          "maxMs": 34.600000000000364,
+          "totalMs": 6016.700000000003,
+          "meanMs": 26.505286343612347
+        },
+        "appRenderIntervalsMs": {
+          "count": 227,
+          "medianMs": 26.5,
+          "p95Ms": 27.299999952316284,
+          "maxMs": 27.899999976158142,
+          "totalMs": 6017.200000047684,
+          "meanMs": 26.5074889869942
+        },
+        "applyAtTimeCPUms": {
+          "count": 228,
+          "medianMs": 0.3999999761581421,
+          "p95Ms": 0.5,
+          "maxMs": 1,
+          "totalMs": 83.69999945163727,
+          "meanMs": 0.36710526075279504
+        },
+        "renderCPUms": {
+          "count": 228,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.3999999761581421,
+          "totalMs": 51.09999990463257,
+          "meanMs": 0.22412280659926564
+        },
+        "applyCPUmsPerSecond": 13.891885520789042,
+        "renderCPUmsPerSecond": 8.481187018378177,
+        "renderFrames": 272,
+        "renderFrameDelta": 228,
+        "staticWorldCache": null,
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.011799999988083,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7501351537229892,
+            "y": 1.999044724933198,
+            "z": -2.974743658710782,
+            "board": {
+              "x": 12.461073338986186,
+              "y": 12.240342327064363
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.011799999988083,
+            "elapsed": 3.011799999988083,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "optimized",
+      "runIndex": 4,
+      "url": "http://127.0.0.1:4176/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf",
+      "currentHead": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+      "sourceRevision": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+      "stampedSourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+      "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+      "servedRuntimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+        "sourceBranch": "feature/town-art-perf",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v28",
+        "buildTime": "2026-10-18T16:27:36.082Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 48.94312500000524,
+      "sceneReadyMs": 974.4380000000019,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "staticWorldCache": {
+          "enabled": true,
+          "builds": 1,
+          "reuses": 79,
+          "invalidations": 0,
+          "lastInvalidation": "initial",
+          "width": 1440,
+          "height": 900,
+          "samples": 4,
+          "buildSamples": 4,
+          "residentSamples": 0,
+          "estimatedBytes": 10368000,
+          "estimatedBuildBytes": 51840000,
+          "estimatedPeakBytes": 62208000,
+          "residentBytes": 10368000,
+          "transientBytes": 0,
+          "failures": 0,
+          "bypasses": 0,
+          "disabledReason": null,
+          "disposed": false,
+          "memoryBudgetBytes": 100663296,
+          "peakMemoryBudgetBytes": 201326592
+        },
+        "drawCalls": 17,
+        "triangles": 11090,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 36.89999997615814,
+          "loadEvent": 39.39999997615814,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6005,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.0002000000000093,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7825256408136424,
+            "y": 1.9537212324584867,
+            "z": -3.062285515712547,
+            "board": {
+              "x": 12.567341341252106,
+              "y": 11.95313151012944
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0002000000000093,
+            "elapsed": 3.0002000000000093,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 426,
+          "medianMs": 16.599999999999454,
+          "p95Ms": 16.899999999999636,
+          "maxMs": 17.899999999999636,
+          "totalMs": 6000.000000000005,
+          "meanMs": 14.084507042253533
+        },
+        "appRenderIntervalsMs": {
+          "count": 426,
+          "medianMs": 14.100000023841858,
+          "p95Ms": 14.700000047683716,
+          "maxMs": 16.100000023841858,
+          "totalMs": 6002.400000095367,
+          "meanMs": 14.09014084529429
+        },
+        "applyAtTimeCPUms": {
+          "count": 427,
+          "medianMs": 0.3999999761581421,
+          "p95Ms": 0.5,
+          "maxMs": 0.6000000238418579,
+          "totalMs": 154.19999885559082,
+          "meanMs": 0.3611241190997443
+        },
+        "renderCPUms": {
+          "count": 427,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 2.100000023841858,
+          "totalMs": 90.10000228881836,
+          "meanMs": 0.21100703112135447
+        },
+        "applyCPUmsPerSecond": 25.678600975119203,
+        "renderCPUmsPerSecond": 15.004163578487654,
+        "renderFrames": 509,
+        "renderFrameDelta": 427,
+        "staticWorldCache": {
+          "enabled": true,
+          "builds": 1,
+          "reuses": 506,
+          "invalidations": 0,
+          "lastInvalidation": "initial",
+          "width": 1440,
+          "height": 900,
+          "samples": 4,
+          "buildSamples": 4,
+          "residentSamples": 0,
+          "estimatedBytes": 10368000,
+          "estimatedBuildBytes": 51840000,
+          "estimatedPeakBytes": 62208000,
+          "residentBytes": 10368000,
+          "transientBytes": 0,
+          "failures": 0,
+          "bypasses": 0,
+          "disabledReason": null,
+          "disposed": false,
+          "memoryBudgetBytes": 100663296,
+          "peakMemoryBudgetBytes": 201326592
+        },
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.0002000000000093,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7825256408136424,
+            "y": 1.9537212324584867,
+            "z": -3.062285515712547,
+            "board": {
+              "x": 12.567341341252106,
+              "y": 11.95313151012944
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0002000000000093,
+            "elapsed": 3.0002000000000093,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "baseline",
+      "runIndex": 5,
+      "url": "http://127.0.0.1:4173/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard",
+      "currentHead": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+      "sourceRevision": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+      "stampedSourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+      "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+      "servedRuntimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 49.2635420000006,
+      "sceneReadyMs": 665.0618340000001,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "staticWorldCache": null,
+        "drawCalls": 45,
+        "triangles": 11156,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 37.60000002384186,
+          "loadEvent": 40,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6021.399999976158,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.008400000011928,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7596289171237726,
+            "y": 1.986090497088956,
+            "z": -3.000402478712899,
+            "board": {
+              "x": 12.492220856705291,
+              "y": 12.156159846742458
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.008400000011928,
+            "elapsed": 3.008400000011928,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 278,
+          "medianMs": 24.90000000000009,
+          "p95Ms": 25.100000000000364,
+          "maxMs": 26.699999999999818,
+          "totalMs": 6016.600000000002,
+          "meanMs": 21.642446043165474
+        },
+        "appRenderIntervalsMs": {
+          "count": 278,
+          "medianMs": 21.600000023841858,
+          "p95Ms": 22.699999928474426,
+          "maxMs": 24.399999976158142,
+          "totalMs": 6017.899999976158,
+          "meanMs": 21.64712230207251
+        },
+        "applyAtTimeCPUms": {
+          "count": 279,
+          "medianMs": 1,
+          "p95Ms": 1.100000023841858,
+          "maxMs": 2.899999976158142,
+          "totalMs": 276.69999957084656,
+          "meanMs": 0.9917562708632494
+        },
+        "renderCPUms": {
+          "count": 279,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.30000007152557373,
+          "totalMs": 54.40000033378601,
+          "meanMs": 0.19498208004941223
+        },
+        "applyCPUmsPerSecond": 45.9527683880729,
+        "renderCPUmsPerSecond": 9.034443872521575,
+        "renderFrames": 334,
+        "renderFrameDelta": 279,
+        "staticWorldCache": null,
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.008400000011928,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7596289171237726,
+            "y": 1.986090497088956,
+            "z": -3.000402478712899,
+            "board": {
+              "x": 12.492220856705291,
+              "y": 12.156159846742458
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.008400000011928,
+            "elapsed": 3.008400000011928,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "optimized",
+      "runIndex": 6,
+      "url": "http://127.0.0.1:4176/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf",
+      "currentHead": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+      "sourceRevision": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+      "stampedSourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+      "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+      "servedRuntimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+        "sourceBranch": "feature/town-art-perf",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v28",
+        "buildTime": "2026-10-18T16:27:36.082Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 48.73829200000182,
+      "sceneReadyMs": 976.4922499999957,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "staticWorldCache": {
+          "enabled": true,
+          "builds": 1,
+          "reuses": 79,
+          "invalidations": 0,
+          "lastInvalidation": "initial",
+          "width": 1440,
+          "height": 900,
+          "samples": 4,
+          "buildSamples": 4,
+          "residentSamples": 0,
+          "estimatedBytes": 10368000,
+          "estimatedBuildBytes": 51840000,
+          "estimatedPeakBytes": 62208000,
+          "residentBytes": 10368000,
+          "transientBytes": 0,
+          "failures": 0,
+          "bypasses": 0,
+          "disabledReason": null,
+          "disposed": false,
+          "memoryBudgetBytes": 100663296,
+          "peakMemoryBudgetBytes": 201326592
+        },
+        "drawCalls": 17,
+        "triangles": 11090,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 37.5,
+          "loadEvent": 40,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6001.5,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.000249999952324,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7823860267781549,
+            "y": 1.9539234327467943,
+            "z": -3.0619081804815,
+            "board": {
+              "x": 12.566883289954577,
+              "y": 11.954369486609252
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.000249999952324,
+            "elapsed": 3.000249999952324,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 428,
+          "medianMs": 16.600000000000364,
+          "p95Ms": 16.799999999999272,
+          "maxMs": 17.800000000000182,
+          "totalMs": 6000.100000000005,
+          "meanMs": 14.018925233644872
+        },
+        "appRenderIntervalsMs": {
+          "count": 428,
+          "medianMs": 14,
+          "p95Ms": 14.699999928474426,
+          "maxMs": 16,
+          "totalMs": 5998.899999976158,
+          "meanMs": 14.016121495271397
+        },
+        "applyAtTimeCPUms": {
+          "count": 429,
+          "medianMs": 0.3999999761581421,
+          "p95Ms": 0.40000009536743164,
+          "maxMs": 0.5,
+          "totalMs": 152.89999914169312,
+          "meanMs": 0.35641025440954105
+        },
+        "renderCPUms": {
+          "count": 429,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 2.200000047683716,
+          "totalMs": 88.10000157356262,
+          "meanMs": 0.2053613090292835
+        },
+        "applyCPUmsPerSecond": 25.476963949294863,
+        "renderCPUmsPerSecond": 14.679663679673851,
+        "renderFrames": 511,
+        "renderFrameDelta": 429,
+        "staticWorldCache": {
+          "enabled": true,
+          "builds": 1,
+          "reuses": 508,
+          "invalidations": 0,
+          "lastInvalidation": "initial",
+          "width": 1440,
+          "height": 900,
+          "samples": 4,
+          "buildSamples": 4,
+          "residentSamples": 0,
+          "estimatedBytes": 10368000,
+          "estimatedBuildBytes": 51840000,
+          "estimatedPeakBytes": 62208000,
+          "residentBytes": 10368000,
+          "transientBytes": 0,
+          "failures": 0,
+          "bypasses": 0,
+          "disabledReason": null,
+          "disposed": false,
+          "memoryBudgetBytes": 100663296,
+          "peakMemoryBudgetBytes": 201326592
+        },
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.000249999952324,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7823860267781549,
+            "y": 1.9539234327467943,
+            "z": -3.0619081804815,
+            "board": {
+              "x": 12.566883289954577,
+              "y": 11.954369486609252
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.000249999952324,
+            "elapsed": 3.000249999952324,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "baseline",
+      "runIndex": 7,
+      "url": "http://127.0.0.1:4173/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard",
+      "currentHead": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+      "sourceRevision": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+      "stampedSourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+      "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+      "servedRuntimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+        "sourceBranch": "feature/dimensional-art-mobile",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v25",
+        "buildTime": "2026-10-17T23:17:53.392Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 50.77295800000138,
+      "sceneReadyMs": 658.4616659999956,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "staticWorldCache": null,
+        "drawCalls": 45,
+        "triangles": 11156,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 38.10000002384186,
+          "loadEvent": 40.800000071525574,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6018.299999952316,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.005999999964243,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7663303973515344,
+            "y": 1.9767814509066755,
+            "z": -3.018514587436579,
+            "board": {
+              "x": 12.514207340392172,
+              "y": 12.096736917858992
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.005999999964243,
+            "elapsed": 3.005999999964243,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 277,
+          "medianMs": 24.900000000000546,
+          "p95Ms": 25.100000000000364,
+          "maxMs": 25.5,
+          "totalMs": 6008.300000000004,
+          "meanMs": 21.690613718411566
+        },
+        "appRenderIntervalsMs": {
+          "count": 277,
+          "medianMs": 21.700000047683716,
+          "p95Ms": 22.700000047683716,
+          "maxMs": 24.199999928474426,
+          "totalMs": 6013.100000023842,
+          "meanMs": 21.70794223835322
+        },
+        "applyAtTimeCPUms": {
+          "count": 278,
+          "medianMs": 1,
+          "p95Ms": 1.100000023841858,
+          "maxMs": 2.899999976158142,
+          "totalMs": 277.0999997854233,
+          "meanMs": 0.9967625891561989
+        },
+        "renderCPUms": {
+          "count": 278,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.40000009536743164,
+          "totalMs": 55.29999768733978,
+          "meanMs": 0.19892085499043088
+        },
+        "applyCPUmsPerSecond": 46.04290244547776,
+        "renderCPUmsPerSecond": 9.188640926470587,
+        "renderFrames": 332,
+        "renderFrameDelta": 278,
+        "staticWorldCache": null,
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.005999999964243,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7663303973515344,
+            "y": 1.9767814509066755,
+            "z": -3.018514587436579,
+            "board": {
+              "x": 12.514207340392172,
+              "y": 12.096736917858992
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.005999999964243,
+            "elapsed": 3.005999999964243,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "reviewed",
+      "runIndex": 8,
+      "url": "http://127.0.0.1:4175/index.html",
+      "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard",
+      "currentHead": "3751cef343062667a2413d0add95bcb134331311",
+      "sourceRevision": "3751cef343062667a2413d0add95bcb134331311",
+      "stampedSourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+      "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+      "servedRuntimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+      "servedRuntimeFiles": 108,
+      "servedVersion": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "servedBytesVerified": true,
+      "moduleReadyMs": 48.8942090000055,
+      "sceneReadyMs": 907.1089999999967,
+      "initial": {
+        "playId": "third-shot-drop",
+        "duration": 4.457919709744057,
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "contextAttributes": {
+          "alpha": true,
+          "antialias": true,
+          "depth": true,
+          "desynchronized": false,
+          "failIfMajorPerformanceCaveat": false,
+          "powerPreference": "high-performance",
+          "premultipliedAlpha": true,
+          "preserveDrawingBuffer": false,
+          "stencil": false,
+          "xrCompatible": false
+        },
+        "samples": 4,
+        "devicePixelRatio": 1,
+        "renderPixelRatio": 1,
+        "memory": {
+          "geometries": 38,
+          "textures": 6
+        },
+        "staticWorldCache": null,
+        "drawCalls": 42,
+        "triangles": 25799,
+        "pixels": [
+          1440,
+          900
+        ],
+        "navigation": {
+          "domContentLoaded": 37,
+          "loadEvent": 39.60000002384186,
+          "transferBytes": 21780
+        }
+      },
+      "activity": {
+        "elapsedMs": 6022.5,
+        "startState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 0,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 1.8897599999999999,
+            "y": 0.85344,
+            "z": -6.7056000000000004,
+            "board": {
+              "x": 16.2,
+              "y": 0
+            },
+            "phase": "ready",
+            "launched": false,
+            "rallyLeg": 1,
+            "time": 0,
+            "elapsed": 0,
+            "stepIndex": 0
+          }
+        },
+        "endState": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": true,
+          "elapsed": 3.0084999999642412,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7593496889196526,
+            "y": 1.9864754125234418,
+            "z": -2.9996478078909528,
+            "board": {
+              "x": 12.4913047536734,
+              "y": 12.158635800882701
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0084999999642412,
+            "elapsed": 3.0084999999642412,
+            "stepIndex": 3
+          }
+        },
+        "activeWindowVerified": true,
+        "rafIntervalsMs": {
+          "count": 225,
+          "medianMs": 25,
+          "p95Ms": 33.399999999999636,
+          "maxMs": 33.90000000000009,
+          "totalMs": 6016.599999999997,
+          "meanMs": 26.74044444444443
+        },
+        "appRenderIntervalsMs": {
+          "count": 225,
+          "medianMs": 26.700000047683716,
+          "p95Ms": 27.800000071525574,
+          "maxMs": 28.5,
+          "totalMs": 6019.699999928474,
+          "meanMs": 26.75422222190433
+        },
+        "applyAtTimeCPUms": {
+          "count": 226,
+          "medianMs": 0.3999999761581421,
+          "p95Ms": 0.40000009536743164,
+          "maxMs": 0.5,
+          "totalMs": 79.4000004529953,
+          "meanMs": 0.35132743563272256
+        },
+        "renderCPUms": {
+          "count": 226,
+          "medianMs": 0.20000004768371582,
+          "p95Ms": 0.30000007152557373,
+          "maxMs": 0.7999999523162842,
+          "totalMs": 49.299999475479126,
+          "meanMs": 0.21814159059946517
+        },
+        "applyCPUmsPerSecond": 13.183893807056089,
+        "renderCPUmsPerSecond": 8.185969194766148,
+        "renderFrames": 270,
+        "renderFrameDelta": 226,
+        "staticWorldCache": null,
+        "state": {
+          "active": true,
+          "loop": true,
+          "holding": false,
+          "iteration": 0,
+          "playing": false,
+          "elapsed": 3.0084999999642412,
+          "playbackRate": 0.5,
+          "camera": "overhead",
+          "playId": "third-shot-drop",
+          "playerCount": 4,
+          "hasBall": true,
+          "artStyle": "dimensional-court-garden",
+          "renderLoopCount": 3,
+          "pixelScale": 1,
+          "framing": {
+            "aspect": 1.6,
+            "usableAspect": 1.8997361477572559,
+            "reservedPixels": 142,
+            "distanceScale": 1.3345668561675956,
+            "position": [
+              7.340117708921776,
+              15.897703874352489,
+              12.67838513359216
+            ],
+            "target": [
+              0,
+              0.35,
+              0
+            ]
+          },
+          "lastState": {
+            "x": 0.7593496889196526,
+            "y": 1.9864754125234418,
+            "z": -2.9996478078909528,
+            "board": {
+              "x": 12.4913047536734,
+              "y": 12.158635800882701
+            },
+            "phase": "flight",
+            "launched": true,
+            "rallyLeg": 3,
+            "time": 3.0084999999642412,
+            "elapsed": 3.0084999999642412,
+            "stepIndex": 3
+          }
+        }
+      },
+      "errors": []
+    }
+  ]
+}

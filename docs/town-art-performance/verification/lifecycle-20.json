@@ -1,0 +1,40 @@
+{
+  "previewURL": "http://127.0.0.1:4176/index.html",
+  "results": [
+    {
+      "browser": "chromium",
+      "iterations": 20,
+      "forcedContextLosses": 0,
+      "baseline": {
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "loopStarts": 1
+      },
+      "final": {
+        "active": true,
+        "canvasCount": 1,
+        "contextLost": false,
+        "drawingBuffer": [
+          1424,
+          744
+        ],
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "programs": 11,
+        "renderFrames": 17,
+        "renderLoopStarts": 87,
+        "rendererScheduler": null,
+        "guidedScheduler": null,
+        "holdTimer": null,
+        "pendingAnimationFrames": 0,
+        "playing": false
+      },
+      "errors": [],
+      "failures": []
+    }
+  ]
+}

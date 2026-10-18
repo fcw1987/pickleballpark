@@ -1,0 +1,226 @@
+{
+  "base": "http://127.0.0.1:4176",
+  "viewport": [
+    1440,
+    900
+  ],
+  "method": "One isolated browser, fresh page per mode, paused fixed camera. Warm12 frames;32 RAF-paced completed-render+1px-readPixels samples with changing poses (includes readback overhead, not pure GPU time); then2600ms normal active playback callback cadence. Diagnosis-only ablations are not product changes.",
+  "results": [
+    {
+      "mode": "full",
+      "sourceHashes": {
+        "three-d-world.js": "8386906725b619c531a9339d18f13d374bfe46ad217ec7caf3bcbc017bec58cd",
+        "three-d-playback.js": "b3968e8b5ac2e0bcdb6462ec1343f8e84e2e1f54132bb289b404e1a3efece7a9",
+        "three-d-athletes.js": "842199a60c345a6d6ab623069ffbd860db624e948d1fb8d2cd403dca557ddce4"
+      },
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 24.899999976158142,
+        "p95": 26.100000023841858,
+        "mean": 27.481249999254942
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.6000000238418579,
+        "mean": 0.44999999552965164
+      },
+      "rafMs": {
+        "count": 96,
+        "median": 25,
+        "p95": 33.400000000000546,
+        "mean": 27.083333333333332
+      },
+      "calls": 46,
+      "triangles": 25615,
+      "programs": 10,
+      "errors": []
+    },
+    {
+      "mode": "cached-world",
+      "sourceHashes": {
+        "three-d-world.js": "8386906725b619c531a9339d18f13d374bfe46ad217ec7caf3bcbc017bec58cd",
+        "three-d-playback.js": "b3968e8b5ac2e0bcdb6462ec1343f8e84e2e1f54132bb289b404e1a3efece7a9",
+        "three-d-athletes.js": "842199a60c345a6d6ab623069ffbd860db624e948d1fb8d2cd403dca557ddce4"
+      },
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 13.200000047683716,
+        "p95": 14.900000095367432,
+        "mean": 15.25000000745058
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.5,
+        "mean": 0.44062499329447746
+      },
+      "rafMs": {
+        "count": 169,
+        "median": 16.699999999999818,
+        "p95": 17.5,
+        "mean": 15.433136094674557
+      },
+      "calls": 21,
+      "triangles": 11098,
+      "programs": 15,
+      "errors": []
+    },
+    {
+      "mode": "cached-world",
+      "sourceHashes": {
+        "three-d-world.js": "8386906725b619c531a9339d18f13d374bfe46ad217ec7caf3bcbc017bec58cd",
+        "three-d-playback.js": "b3968e8b5ac2e0bcdb6462ec1343f8e84e2e1f54132bb289b404e1a3efece7a9",
+        "three-d-athletes.js": "842199a60c345a6d6ab623069ffbd860db624e948d1fb8d2cd403dca557ddce4"
+      },
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 13.100000023841858,
+        "p95": 14,
+        "mean": 15.146875001490116
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.5,
+        "p95": 0.5,
+        "mean": 0.4531249962747097
+      },
+      "rafMs": {
+        "count": 170,
+        "median": 16.600000000000364,
+        "p95": 17.40000000000009,
+        "mean": 15.343529411764704
+      },
+      "calls": 21,
+      "triangles": 11098,
+      "programs": 15,
+      "errors": []
+    },
+    {
+      "mode": "full",
+      "sourceHashes": {
+        "three-d-world.js": "8386906725b619c531a9339d18f13d374bfe46ad217ec7caf3bcbc017bec58cd",
+        "three-d-playback.js": "b3968e8b5ac2e0bcdb6462ec1343f8e84e2e1f54132bb289b404e1a3efece7a9",
+        "three-d-athletes.js": "842199a60c345a6d6ab623069ffbd860db624e948d1fb8d2cd403dca557ddce4"
+      },
+      "bakedMeshes": 0,
+      "bakedVertices": 0,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "attributes": {
+        "alpha": true,
+        "antialias": true,
+        "depth": true,
+        "desynchronized": false,
+        "failIfMajorPerformanceCaveat": false,
+        "powerPreference": "high-performance",
+        "premultipliedAlpha": true,
+        "preserveDrawingBuffer": false,
+        "stencil": false,
+        "xrCompatible": false
+      },
+      "timerQuery": false,
+      "samples": 4,
+      "supportedSamples": [
+        4
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "completedRenderReadbackMs": {
+        "count": 32,
+        "median": 24.899999976158142,
+        "p95": 26.399999976158142,
+        "mean": 27.67187499627471
+      },
+      "applyMs": {
+        "count": 32,
+        "median": 0.40000009536743164,
+        "p95": 0.6000000238418579,
+        "mean": 0.45624999701976776
+      },
+      "rafMs": {
+        "count": 96,
+        "median": 25,
+        "p95": 33.40000000000009,
+        "mean": 27.16875
+      },
+      "calls": 46,
+      "triangles": 25615,
+      "programs": 10,
+      "errors": []
+    }
+  ]
+}

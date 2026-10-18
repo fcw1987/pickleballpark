@@ -1,0 +1,855 @@
+{
+  "aggregation": "Median of the three per-run statistics, not pooled percentiles. Ranges show all three runs.",
+  "desktop": {
+    "viewport": "1440x900 DPR1",
+    "startedAt": "2026-10-18T16:37:31.930Z",
+    "completedAt": "2026-10-18T16:38:45.941Z",
+    "browser": "149.0.7827.55",
+    "host": {
+      "platform": "darwin",
+      "arch": "arm64",
+      "osRelease": "27.0.0",
+      "cpu": "Apple M3 Max",
+      "logicalCPUs": 16,
+      "node": "v22.4.0"
+    },
+    "driver": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "order": [
+      "baseline",
+      "reviewed",
+      "optimized",
+      "reviewed",
+      "optimized",
+      "baseline",
+      "optimized",
+      "baseline",
+      "reviewed"
+    ],
+    "versions": {
+      "baseline": {
+        "runs": 3,
+        "pixels": [
+          1440,
+          900
+        ],
+        "deviceDPR": 1,
+        "renderDPR": 1,
+        "samples": 4,
+        "rafMedianMs": 24.900000000000546,
+        "rafP95Ms": 25.100000000000364,
+        "rafMeanMs": 21.690613718411566,
+        "rafPerRun": [
+          {
+            "count": 272,
+            "medianMs": 25,
+            "p95Ms": 25.100000000000364,
+            "meanMs": 22.120102941176487
+          },
+          {
+            "count": 278,
+            "medianMs": 24.90000000000009,
+            "p95Ms": 25.100000000000364,
+            "meanMs": 21.642446043165474
+          },
+          {
+            "count": 277,
+            "medianMs": 24.900000000000546,
+            "p95Ms": 25.100000000000364,
+            "meanMs": 21.690613718411566
+          }
+        ],
+        "appRenderMedianMs": 21.700000047683716,
+        "appRenderP95Ms": 22.700000047683716,
+        "appRenderMeanMs": 21.70794223835322,
+        "appRenderPerRun": [
+          {
+            "count": 273,
+            "intervalCount": 272,
+            "medianMs": 22.200000047683716,
+            "p95Ms": 23.100000023841858,
+            "meanMs": 22.12058823511881,
+            "elapsedMs": 6021.600000023842,
+            "startElapsed": 0,
+            "endElapsed": 3.009950000000007
+          },
+          {
+            "count": 279,
+            "intervalCount": 278,
+            "medianMs": 21.600000023841858,
+            "p95Ms": 22.699999928474426,
+            "meanMs": 21.64712230207251,
+            "elapsedMs": 6021.399999976158,
+            "startElapsed": 0,
+            "endElapsed": 3.008400000011928
+          },
+          {
+            "count": 278,
+            "intervalCount": 277,
+            "medianMs": 21.700000047683716,
+            "p95Ms": 22.700000047683716,
+            "meanMs": 21.70794223835322,
+            "elapsedMs": 6018.299999952316,
+            "startElapsed": 0,
+            "endElapsed": 3.005999999964243
+          }
+        ],
+        "renderCallsRange": [
+          273,
+          279
+        ],
+        "rafIntervalsRange": [
+          272,
+          278
+        ],
+        "elapsedMsRange": [
+          6018.299999952316,
+          6021.600000023842
+        ],
+        "renderWrapperCPUmedianMs": 0.20000004768371582,
+        "renderCPUmsPerSecond": 9.188640926470587,
+        "applyCPUmedianMs": 1,
+        "applyCPUmsPerSecond": 45.9527683880729,
+        "moduleReadyMs": 50.77295800000138,
+        "sceneReadyMs": 665.0618340000001,
+        "allActive": true,
+        "playElapsedSecondsRange": [
+          3.005999999964243,
+          3.009950000000007
+        ],
+        "errors": [],
+        "cache": [
+          null,
+          null,
+          null
+        ],
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "servedRuntimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "head": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+        "stampedSourceRevision": "39670b72c532b256b96f2554d13065ef783d2223"
+      },
+      "reviewed": {
+        "runs": 3,
+        "pixels": [
+          1440,
+          900
+        ],
+        "deviceDPR": 1,
+        "renderDPR": 1,
+        "samples": 4,
+        "rafMedianMs": 25,
+        "rafP95Ms": 33.399999999999636,
+        "rafMeanMs": 26.6221238938053,
+        "rafPerRun": [
+          {
+            "count": 226,
+            "medianMs": 25,
+            "p95Ms": 33.40000000000009,
+            "meanMs": 26.6221238938053
+          },
+          {
+            "count": 227,
+            "medianMs": 25,
+            "p95Ms": 33.30000000000018,
+            "meanMs": 26.505286343612347
+          },
+          {
+            "count": 225,
+            "medianMs": 25,
+            "p95Ms": 33.399999999999636,
+            "meanMs": 26.74044444444443
+          }
+        ],
+        "appRenderMedianMs": 26.600000023841858,
+        "appRenderP95Ms": 27.40000009536743,
+        "appRenderMeanMs": 26.63893805299185,
+        "appRenderPerRun": [
+          {
+            "count": 227,
+            "intervalCount": 226,
+            "medianMs": 26.600000023841858,
+            "p95Ms": 27.40000009536743,
+            "meanMs": 26.63893805299185,
+            "elapsedMs": 6027.599999904633,
+            "startElapsed": 0,
+            "endElapsed": 3.0113999999523227
+          },
+          {
+            "count": 228,
+            "intervalCount": 227,
+            "medianMs": 26.5,
+            "p95Ms": 27.299999952316284,
+            "meanMs": 26.5074889869942,
+            "elapsedMs": 6025.100000023842,
+            "startElapsed": 0,
+            "endElapsed": 3.011799999988083
+          },
+          {
+            "count": 226,
+            "intervalCount": 225,
+            "medianMs": 26.700000047683716,
+            "p95Ms": 27.800000071525574,
+            "meanMs": 26.75422222190433,
+            "elapsedMs": 6022.5,
+            "startElapsed": 0,
+            "endElapsed": 3.0084999999642412
+          }
+        ],
+        "renderCallsRange": [
+          226,
+          228
+        ],
+        "rafIntervalsRange": [
+          225,
+          227
+        ],
+        "elapsedMsRange": [
+          6022.5,
+          6027.599999904633
+        ],
+        "renderWrapperCPUmedianMs": 0.20000004768371582,
+        "renderCPUmsPerSecond": 8.185969194766148,
+        "applyCPUmedianMs": 0.3999999761581421,
+        "applyCPUmsPerSecond": 13.255690585551257,
+        "moduleReadyMs": 48.8942090000055,
+        "sceneReadyMs": 907.1089999999967,
+        "allActive": true,
+        "playElapsedSecondsRange": [
+          3.0084999999642412,
+          3.011799999988083
+        ],
+        "errors": [],
+        "cache": [
+          null,
+          null,
+          null
+        ],
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "servedRuntimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "head": "3751cef343062667a2413d0add95bcb134331311",
+        "stampedSourceRevision": "b65504187f8e9e741908dd07690db0b79158a960"
+      },
+      "optimized": {
+        "runs": 3,
+        "pixels": [
+          1440,
+          900
+        ],
+        "deviceDPR": 1,
+        "renderDPR": 1,
+        "samples": 4,
+        "rafMedianMs": 16.59999999999991,
+        "rafP95Ms": 16.899999999999636,
+        "rafMeanMs": 14.084507042253533,
+        "rafPerRun": [
+          {
+            "count": 426,
+            "medianMs": 16.59999999999991,
+            "p95Ms": 16.899999999999636,
+            "meanMs": 14.123474178403773
+          },
+          {
+            "count": 426,
+            "medianMs": 16.599999999999454,
+            "p95Ms": 16.899999999999636,
+            "meanMs": 14.084507042253533
+          },
+          {
+            "count": 428,
+            "medianMs": 16.600000000000364,
+            "p95Ms": 16.799999999999272,
+            "meanMs": 14.018925233644872
+          }
+        ],
+        "appRenderMedianMs": 14.100000023841858,
+        "appRenderP95Ms": 14.699999928474426,
+        "appRenderMeanMs": 14.09014084529429,
+        "appRenderPerRun": [
+          {
+            "count": 427,
+            "intervalCount": 426,
+            "medianMs": 14.100000023841858,
+            "p95Ms": 14.600000023841858,
+            "meanMs": 14.132863849821225,
+            "elapsedMs": 6025.899999976158,
+            "startElapsed": 0,
+            "endElapsed": 3.0105000000119277
+          },
+          {
+            "count": 427,
+            "intervalCount": 426,
+            "medianMs": 14.100000023841858,
+            "p95Ms": 14.700000047683716,
+            "meanMs": 14.09014084529429,
+            "elapsedMs": 6005,
+            "startElapsed": 0,
+            "endElapsed": 3.0002000000000093
+          },
+          {
+            "count": 429,
+            "intervalCount": 428,
+            "medianMs": 14,
+            "p95Ms": 14.699999928474426,
+            "meanMs": 14.016121495271397,
+            "elapsedMs": 6001.5,
+            "startElapsed": 0,
+            "endElapsed": 3.000249999952324
+          }
+        ],
+        "renderCallsRange": [
+          427,
+          429
+        ],
+        "rafIntervalsRange": [
+          426,
+          428
+        ],
+        "elapsedMsRange": [
+          6001.5,
+          6025.899999976158
+        ],
+        "renderWrapperCPUmedianMs": 0.20000004768371582,
+        "renderCPUmsPerSecond": 15.004163578487654,
+        "applyCPUmedianMs": 0.3999999761581421,
+        "applyCPUmsPerSecond": 25.476963949294863,
+        "moduleReadyMs": 48.94312500000524,
+        "sceneReadyMs": 976.4922499999957,
+        "allActive": true,
+        "playElapsedSecondsRange": [
+          3.0002000000000093,
+          3.0105000000119277
+        ],
+        "errors": [],
+        "cache": [
+          {
+            "enabled": true,
+            "builds": 1,
+            "reuses": 506,
+            "invalidations": 0,
+            "lastInvalidation": "initial",
+            "width": 1440,
+            "height": 900,
+            "samples": 4,
+            "buildSamples": 4,
+            "residentSamples": 0,
+            "estimatedBytes": 10368000,
+            "estimatedBuildBytes": 51840000,
+            "estimatedPeakBytes": 62208000,
+            "residentBytes": 10368000,
+            "transientBytes": 0,
+            "failures": 0,
+            "bypasses": 0,
+            "disabledReason": null,
+            "disposed": false,
+            "memoryBudgetBytes": 100663296,
+            "peakMemoryBudgetBytes": 201326592
+          },
+          {
+            "enabled": true,
+            "builds": 1,
+            "reuses": 506,
+            "invalidations": 0,
+            "lastInvalidation": "initial",
+            "width": 1440,
+            "height": 900,
+            "samples": 4,
+            "buildSamples": 4,
+            "residentSamples": 0,
+            "estimatedBytes": 10368000,
+            "estimatedBuildBytes": 51840000,
+            "estimatedPeakBytes": 62208000,
+            "residentBytes": 10368000,
+            "transientBytes": 0,
+            "failures": 0,
+            "bypasses": 0,
+            "disabledReason": null,
+            "disposed": false,
+            "memoryBudgetBytes": 100663296,
+            "peakMemoryBudgetBytes": 201326592
+          },
+          {
+            "enabled": true,
+            "builds": 1,
+            "reuses": 508,
+            "invalidations": 0,
+            "lastInvalidation": "initial",
+            "width": 1440,
+            "height": 900,
+            "samples": 4,
+            "buildSamples": 4,
+            "residentSamples": 0,
+            "estimatedBytes": 10368000,
+            "estimatedBuildBytes": 51840000,
+            "estimatedPeakBytes": 62208000,
+            "residentBytes": 10368000,
+            "transientBytes": 0,
+            "failures": 0,
+            "bypasses": 0,
+            "disabledReason": null,
+            "disposed": false,
+            "memoryBudgetBytes": 100663296,
+            "peakMemoryBudgetBytes": 201326592
+          }
+        ],
+        "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "servedRuntimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "head": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+        "stampedSourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+        "cacheWindowDeltas": [
+          {
+            "builds": 0,
+            "invalidations": 0,
+            "reuses": 427
+          },
+          {
+            "builds": 0,
+            "invalidations": 0,
+            "reuses": 427
+          },
+          {
+            "builds": 0,
+            "invalidations": 0,
+            "reuses": 429
+          }
+        ]
+      }
+    },
+    "changes": {
+      "optimizedVsReviewed": {
+        "rafMedianPercent": -33.600000000000364,
+        "rafP95Percent": -49.40119760479096,
+        "appRenderMeanPercent": -47.10697244287555
+      },
+      "optimizedVsBaseline": {
+        "rafMedianPercent": -33.333333333335155,
+        "rafP95Percent": -32.66932270916577,
+        "appRenderMeanPercent": -35.092231725215896
+      }
+    }
+  },
+  "phone": {
+    "viewport": "390x844 DPR3",
+    "startedAt": "2026-10-18T16:39:00.609Z",
+    "completedAt": "2026-10-18T16:40:15.484Z",
+    "browser": "149.0.7827.55",
+    "host": {
+      "platform": "darwin",
+      "arch": "arm64",
+      "osRelease": "27.0.0",
+      "cpu": "Apple M3 Max",
+      "logicalCPUs": 16,
+      "node": "v22.4.0"
+    },
+    "driver": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "order": [
+      "baseline",
+      "reviewed",
+      "optimized",
+      "reviewed",
+      "optimized",
+      "baseline",
+      "optimized",
+      "baseline",
+      "reviewed"
+    ],
+    "versions": {
+      "baseline": {
+        "runs": 3,
+        "pixels": [
+          1170,
+          2532
+        ],
+        "deviceDPR": 3,
+        "renderDPR": 3,
+        "samples": 4,
+        "rafMedianMs": 50,
+        "rafP95Ms": 58.400000000000546,
+        "rafMeanMs": 50.91779661016948,
+        "rafPerRun": [
+          {
+            "count": 116,
+            "medianMs": 50,
+            "p95Ms": 58.400000000000546,
+            "meanMs": 51.86724137931033
+          },
+          {
+            "count": 120,
+            "medianMs": 50,
+            "p95Ms": 58.29999999999973,
+            "meanMs": 50.137499999999996
+          },
+          {
+            "count": 118,
+            "medianMs": 50,
+            "p95Ms": 58.400000000000546,
+            "meanMs": 50.91779661016948
+          }
+        ],
+        "appRenderMedianMs": 50.60000002384186,
+        "appRenderP95Ms": 53.200000047683716,
+        "appRenderMeanMs": 50.92627118603658,
+        "appRenderPerRun": [
+          {
+            "count": 117,
+            "intervalCount": 116,
+            "medianMs": 52.200000047683716,
+            "p95Ms": 53.200000047683716,
+            "meanMs": 51.92844827524547,
+            "elapsedMs": 6030.5,
+            "startElapsed": 0,
+            "endElapsed": 3.01100000001192
+          },
+          {
+            "count": 121,
+            "intervalCount": 120,
+            "medianMs": 50.199999928474426,
+            "p95Ms": 52.799999952316284,
+            "meanMs": 50.189999999602634,
+            "elapsedMs": 6029.700000047684,
+            "startElapsed": 0,
+            "endElapsed": 3.011050000047682
+          },
+          {
+            "count": 119,
+            "intervalCount": 118,
+            "medianMs": 50.60000002384186,
+            "p95Ms": 53.800000071525574,
+            "meanMs": 50.92627118603658,
+            "elapsedMs": 6013.700000047684,
+            "startElapsed": 0,
+            "endElapsed": 3.0056499999761566
+          }
+        ],
+        "renderCallsRange": [
+          117,
+          121
+        ],
+        "rafIntervalsRange": [
+          116,
+          120
+        ],
+        "elapsedMsRange": [
+          6013.700000047684,
+          6030.5
+        ],
+        "renderWrapperCPUmedianMs": 0.20000004768371582,
+        "renderCPUmsPerSecond": 4.311988948268705,
+        "applyCPUmedianMs": 1.0999999046325684,
+        "applyCPUmsPerSecond": 21.800222768873486,
+        "moduleReadyMs": 50.347083000000566,
+        "sceneReadyMs": 714.4446250000037,
+        "allActive": true,
+        "playElapsedSecondsRange": [
+          3.0056499999761566,
+          3.011050000047682
+        ],
+        "errors": [],
+        "cache": [
+          null,
+          null,
+          null
+        ],
+        "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "servedRuntimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+        "head": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+        "stampedSourceRevision": "39670b72c532b256b96f2554d13065ef783d2223"
+      },
+      "reviewed": {
+        "runs": 3,
+        "pixels": [
+          1170,
+          2532
+        ],
+        "deviceDPR": 3,
+        "renderDPR": 3,
+        "samples": 4,
+        "rafMedianMs": 58.29999999999973,
+        "rafP95Ms": 58.400000000000546,
+        "rafMeanMs": 54.924545454545445,
+        "rafPerRun": [
+          {
+            "count": 110,
+            "medianMs": 58.29999999999973,
+            "p95Ms": 58.5,
+            "meanMs": 54.8481818181818
+          },
+          {
+            "count": 109,
+            "medianMs": 58.30000000000018,
+            "p95Ms": 58.40000000000009,
+            "meanMs": 55.2743119266055
+          },
+          {
+            "count": 110,
+            "medianMs": 58.29999999999927,
+            "p95Ms": 58.400000000000546,
+            "meanMs": 54.924545454545445
+          }
+        ],
+        "appRenderMedianMs": 55,
+        "appRenderP95Ms": 57.299999952316284,
+        "appRenderMeanMs": 55.000909091125834,
+        "appRenderPerRun": [
+          {
+            "count": 111,
+            "intervalCount": 110,
+            "medianMs": 54.799999952316284,
+            "p95Ms": 56.89999997615814,
+            "meanMs": 54.90818181796507,
+            "elapsedMs": 6046,
+            "startElapsed": 0,
+            "endElapsed": 3.0192500000000013
+          },
+          {
+            "count": 110,
+            "intervalCount": 109,
+            "medianMs": 55.200000047683716,
+            "p95Ms": 58.09999990463257,
+            "meanMs": 55.35229357776292,
+            "elapsedMs": 6040.5,
+            "startElapsed": 0,
+            "endElapsed": 3.0155499999999993
+          },
+          {
+            "count": 111,
+            "intervalCount": 110,
+            "medianMs": 55,
+            "p95Ms": 57.299999952316284,
+            "meanMs": 55.000909091125834,
+            "elapsedMs": 6050.899999976158,
+            "startElapsed": 0,
+            "endElapsed": 3.020849999999999
+          }
+        ],
+        "renderCallsRange": [
+          110,
+          111
+        ],
+        "rafIntervalsRange": [
+          109,
+          110
+        ],
+        "elapsedMsRange": [
+          6040.5,
+          6050.899999976158
+        ],
+        "renderWrapperCPUmedianMs": 0.2999999523162842,
+        "renderCPUmsPerSecond": 5.148580399740513,
+        "applyCPUmedianMs": 0.3999999761581421,
+        "applyCPUmsPerSecond": 7.486489565862301,
+        "moduleReadyMs": 49.43233300000429,
+        "sceneReadyMs": 936.2012920000125,
+        "allActive": true,
+        "playElapsedSecondsRange": [
+          3.0155499999999993,
+          3.020849999999999
+        ],
+        "errors": [],
+        "cache": [
+          null,
+          null,
+          null
+        ],
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "servedRuntimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "head": "3751cef343062667a2413d0add95bcb134331311",
+        "stampedSourceRevision": "b65504187f8e9e741908dd07690db0b79158a960"
+      },
+      "optimized": {
+        "runs": 3,
+        "pixels": [
+          1170,
+          2532
+        ],
+        "deviceDPR": 3,
+        "renderDPR": 3,
+        "samples": 4,
+        "rafMedianMs": 25,
+        "rafP95Ms": 33.399999999999636,
+        "rafMeanMs": 26.740302222222198,
+        "rafPerRun": [
+          {
+            "count": 225,
+            "medianMs": 25,
+            "p95Ms": 33.399999999999636,
+            "meanMs": 26.74044444444444
+          },
+          {
+            "count": 228,
+            "medianMs": 25,
+            "p95Ms": 33.399999999999636,
+            "meanMs": 26.35161403508774
+          },
+          {
+            "count": 225,
+            "medianMs": 25,
+            "p95Ms": 33.400000000000546,
+            "meanMs": 26.740302222222198
+          }
+        ],
+        "appRenderMedianMs": 26.799999952316284,
+        "appRenderP95Ms": 27.200000047683716,
+        "appRenderMeanMs": 26.75111111111111,
+        "appRenderPerRun": [
+          {
+            "count": 226,
+            "intervalCount": 225,
+            "medianMs": 26.799999952316284,
+            "p95Ms": 27.200000047683716,
+            "meanMs": 26.75111111111111,
+            "elapsedMs": 6025.800000071526,
+            "startElapsed": 0,
+            "endElapsed": 3.0112499999880806
+          },
+          {
+            "count": 229,
+            "intervalCount": 228,
+            "medianMs": 26.5,
+            "p95Ms": 27.200000047683716,
+            "meanMs": 26.373684210735455,
+            "elapsedMs": 6014.100000023842,
+            "startElapsed": 0,
+            "endElapsed": 3.004084000000003
+          },
+          {
+            "count": 226,
+            "intervalCount": 225,
+            "medianMs": 26.799999952316284,
+            "p95Ms": 27.299999952316284,
+            "meanMs": 26.767555555237664,
+            "elapsedMs": 6023.600000023842,
+            "startElapsed": 0,
+            "endElapsed": 3.008284000000006
+          }
+        ],
+        "renderCallsRange": [
+          226,
+          229
+        ],
+        "rafIntervalsRange": [
+          225,
+          228
+        ],
+        "elapsedMsRange": [
+          6014.100000023842,
+          6025.800000071526
+        ],
+        "renderWrapperCPUmedianMs": 0.20000004768371582,
+        "renderCPUmsPerSecond": 9.260181034679269,
+        "applyCPUmedianMs": 0.3999999761581421,
+        "applyCPUmsPerSecond": 14.603870163865459,
+        "moduleReadyMs": 49.8940419999999,
+        "sceneReadyMs": 1029.693166000001,
+        "allActive": true,
+        "playElapsedSecondsRange": [
+          3.004084000000003,
+          3.0112499999880806
+        ],
+        "errors": [],
+        "cache": [
+          {
+            "enabled": true,
+            "builds": 2,
+            "reuses": 265,
+            "invalidations": 1,
+            "lastInvalidation": "scene-or-view-changed",
+            "width": 1170,
+            "height": 2532,
+            "samples": 4,
+            "buildSamples": 4,
+            "residentSamples": 0,
+            "estimatedBytes": 23699520,
+            "estimatedBuildBytes": 118497600,
+            "estimatedPeakBytes": 142197120,
+            "residentBytes": 23699520,
+            "transientBytes": 0,
+            "failures": 0,
+            "bypasses": 0,
+            "disabledReason": null,
+            "disposed": false,
+            "memoryBudgetBytes": 100663296,
+            "peakMemoryBudgetBytes": 201326592
+          },
+          {
+            "enabled": true,
+            "builds": 2,
+            "reuses": 269,
+            "invalidations": 1,
+            "lastInvalidation": "scene-or-view-changed",
+            "width": 1170,
+            "height": 2532,
+            "samples": 4,
+            "buildSamples": 4,
+            "residentSamples": 0,
+            "estimatedBytes": 23699520,
+            "estimatedBuildBytes": 118497600,
+            "estimatedPeakBytes": 142197120,
+            "residentBytes": 23699520,
+            "transientBytes": 0,
+            "failures": 0,
+            "bypasses": 0,
+            "disabledReason": null,
+            "disposed": false,
+            "memoryBudgetBytes": 100663296,
+            "peakMemoryBudgetBytes": 201326592
+          },
+          {
+            "enabled": true,
+            "builds": 2,
+            "reuses": 265,
+            "invalidations": 1,
+            "lastInvalidation": "scene-or-view-changed",
+            "width": 1170,
+            "height": 2532,
+            "samples": 4,
+            "buildSamples": 4,
+            "residentSamples": 0,
+            "estimatedBytes": 23699520,
+            "estimatedBuildBytes": 118497600,
+            "estimatedPeakBytes": 142197120,
+            "residentBytes": 23699520,
+            "transientBytes": 0,
+            "failures": 0,
+            "bypasses": 0,
+            "disabledReason": null,
+            "disposed": false,
+            "memoryBudgetBytes": 100663296,
+            "peakMemoryBudgetBytes": 201326592
+          }
+        ],
+        "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "servedRuntimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+        "head": "c354c3c6cbf52ca2040c46a7c4d6e59b97412a88",
+        "stampedSourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+        "cacheWindowDeltas": [
+          {
+            "builds": 0,
+            "invalidations": 0,
+            "reuses": 226
+          },
+          {
+            "builds": 0,
+            "invalidations": 0,
+            "reuses": 229
+          },
+          {
+            "builds": 0,
+            "invalidations": 0,
+            "reuses": 226
+          }
+        ]
+      }
+    },
+    "changes": {
+      "optimizedVsReviewed": {
+        "rafMedianPercent": -57.11835334476824,
+        "rafP95Percent": -42.80821917808335,
+        "appRenderMeanPercent": -51.362420088748515
+      },
+      "optimizedVsBaseline": {
+        "rafMedianPercent": -50,
+        "rafP95Percent": -42.80821917808335,
+        "appRenderMeanPercent": -47.470901583609425
+      }
+    }
+  }
+}

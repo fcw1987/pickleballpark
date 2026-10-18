@@ -1,0 +1,51 @@
+{
+  "source": "three-d-athletes.js",
+  "sha256": "d3472910d82640b7348e22e175a60f12a514066b7c295db0bef5d43c1e3c6f3e",
+  "samples": 396,
+  "maxAnchorError": 0,
+  "maxBatchError": 1.164945600864952e-7,
+  "indexedTriangleMismatchBits": 0,
+  "inwardLegTriangles": 0,
+  "finite": true,
+  "disposalExactlyOnce": true,
+  "sizes": [
+    {
+      "team": "team1",
+      "hand": "right",
+      "beforeTriangles": 2726,
+      "afterTriangles": 2678,
+      "expandedVertices": 8034,
+      "effectiveVertices": 2356,
+      "bodyParts": 23
+    },
+    {
+      "team": "team1",
+      "hand": "left",
+      "beforeTriangles": 2826,
+      "afterTriangles": 2778,
+      "expandedVertices": 8334,
+      "effectiveVertices": 2452,
+      "bodyParts": 23
+    },
+    {
+      "team": "team2",
+      "hand": "right",
+      "beforeTriangles": 2726,
+      "afterTriangles": 2678,
+      "expandedVertices": 8034,
+      "effectiveVertices": 2356,
+      "bodyParts": 23
+    },
+    {
+      "team": "team2",
+      "hand": "left",
+      "beforeTriangles": 2642,
+      "afterTriangles": 2594,
+      "expandedVertices": 7782,
+      "effectiveVertices": 2350,
+      "bodyParts": 23
+    }
+  ],
+  "visuals": "final-details",
+  "unitChecks": "17 animation and presentation tests passed"
+}

@@ -5,13 +5,17 @@ import {readFileSync} from 'node:fs';
 import {runtimeFileset} from './stamp-build.mjs';
 const out=process.env.CAPTURE_DIR||'docs/art-overhaul/prototype';
 const base=process.env.PREVIEW_URL||'http://127.0.0.1:4173';
+const captureDpr=Number(process.env.CAPTURE_DPR||1);
+const requestedProfiles=process.env.CAPTURE_PROFILES?.split(',');
+if(!Number.isFinite(captureDpr)||captureDpr<=0)throw new Error('Invalid capture DPR');
 const runtimeRoot=process.env.RUNTIME_ROOT||process.cwd();
 const currentHead=execFileSync('git',['-C',runtimeRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch();
 const errors=[],metrics=[];
 for(const [name,width,height] of [['desktop',1440,900],['phone-portrait',390,844],['phone-landscape',844,390]]){
- const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,serviceWorkers:'block'});
+ if(requestedProfiles&&!requestedProfiles.includes(name))continue;
+ const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:captureDpr,serviceWorkers:'block'});
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`${base}/?workspace=planner`);
  await page.waitForFunction(()=>window.pickleboard?.plays);
@@ -63,5 +67,5 @@ for(const [name,width,height] of [['desktop',1440,900],['phone-portrait',390,844
  await context.close();
 }
 await browser.close();
-await writeFile(`${out}/capture.json`,JSON.stringify({base,currentHead,revision:currentHead,stampedSourceRevision:JSON.parse(readFileSync(`${runtimeRoot}/version.json`,'utf8')).sourceRevision,runtimeDigest:runtimeFileset(runtimeRoot).digest,workingChanges:execFileSync('git',['-C',runtimeRoot,'status','--short'],{encoding:'utf8'}),errors,metrics},null,2));
+await writeFile(`${out}/capture.json`,JSON.stringify({base,captureDpr,requestedProfiles,currentHead,revision:currentHead,stampedSourceRevision:JSON.parse(readFileSync(`${runtimeRoot}/version.json`,'utf8')).sourceRevision,runtimeDigest:runtimeFileset(runtimeRoot).digest,workingChanges:execFileSync('git',['-C',runtimeRoot,'status','--short'],{encoding:'utf8'}),errors,metrics},null,2));
 console.log(JSON.stringify({out,errors,summary:metrics.map(m=>({screen:m.screen,memory:m.memory,drawCalls:m.drawCalls,triangles:m.triangles}))},null,2));

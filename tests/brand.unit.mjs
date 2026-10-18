@@ -46,3 +46,12 @@ test('allows only the actual accepted before title in comparison metadata', () =
 test('catches case-insensitive spaced brand variants without treating lowercase Paeth variables as a wordmark', () => {
   for (const name of ['PICKLE BOARD', 'pickle board', 'pIcKlEbOaRd']) assert(errorsAfter('docs/new.md', name).some(error => error.includes('unapproved')));
 });
+
+
+test('permits exact repository paths only in named performance identity evidence', () => {
+  const file = 'docs/town-art-performance/final/matched-desktop.json';
+  const evidence = { runtimeRoot: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard' };
+  assert.deepEqual(errorsAfter(file, JSON.stringify(evidence)), []);
+  assert(errorsAfter(file, JSON.stringify({ ...evidence, title: 'Pickleboard app' })).some(error => error.includes('unapproved')));
+  assert(errorsAfter('docs/new-evidence.json', JSON.stringify(evidence)).some(error => error.includes('unapproved')));
+});

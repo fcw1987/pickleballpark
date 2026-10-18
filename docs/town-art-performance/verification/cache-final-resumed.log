@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [chromium] › tests/static-world-cache.spec.mjs:11:1 › static scene cache reuses artwork and invalidates for camera, light and world changes (1.4s)
+  ✓  2 [chromium] › tests/static-world-cache.spec.mjs:36:1 › cached color and depth preserve moving ball, players and net across cameras (2.8s)
+  ✓  3 [chromium] › tests/static-world-cache.spec.mjs:75:1 › cache follows backing-buffer resize and disposes its owned resources once (1.2s)
+  ✓  4 [chromium] › tests/static-world-cache.spec.mjs:105:1 › oversized high-DPR surfaces retain direct rendering and cache again after shrinking (1.6s)
+
+  4 passed (7.5s)

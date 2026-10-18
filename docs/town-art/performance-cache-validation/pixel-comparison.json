@@ -1,0 +1,308 @@
+{
+  "cases": [
+    {
+      "camera": "overhead",
+      "seconds": 0,
+      "mean": 0.023373119212962964,
+      "changedFraction": 0.0011686197916666668,
+      "severeFraction": 0.00006076388888888889,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 0.45599999999999996,
+      "mean": 0.023486689814814814,
+      "changedFraction": 0.0011436631944444445,
+      "severeFraction": 0.00006727430555555556,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 1.15643149743955,
+      "mean": 0.024056712962962964,
+      "changedFraction": 0.0011653645833333334,
+      "severeFraction": 0.000068359375,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 1.7260171603575372,
+      "mean": 0.02360894097222222,
+      "changedFraction": 0.0011675347222222222,
+      "severeFraction": 0.00005642361111111111,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 2.4456866259036905,
+      "mean": 0.02413447627314815,
+      "changedFraction": 0.0011208767361111111,
+      "severeFraction": 0.00005750868055555555,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 2.8001506910234375,
+      "mean": 0.024236834490740742,
+      "changedFraction": 0.0011338975694444445,
+      "severeFraction": 0.00005859375,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 3.3413559335662524,
+      "mean": 0.024928385416666667,
+      "changedFraction": 0.0012141927083333334,
+      "severeFraction": 0.00005859375,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 3.6079197097440567,
+      "mean": 0.02409035011574074,
+      "changedFraction": 0.0011089409722222223,
+      "severeFraction": 0.00005642361111111111,
+      "maximum": 78
+    },
+    {
+      "camera": "overhead",
+      "seconds": 4.177419709744057,
+      "mean": 0.024401765046296296,
+      "changedFraction": 0.00115234375,
+      "severeFraction": 0.00005642361111111111,
+      "maximum": 78
+    },
+    {
+      "camera": "sideline",
+      "seconds": 0,
+      "mean": 0.015104528356481482,
+      "changedFraction": 0.0011707899305555556,
+      "severeFraction": 0.000022786458333333334,
+      "maximum": 34
+    },
+    {
+      "camera": "sideline",
+      "seconds": 0.45599999999999996,
+      "mean": 0.015278862847222222,
+      "changedFraction": 0.000986328125,
+      "severeFraction": 0.000042317708333333335,
+      "maximum": 34
+    },
+    {
+      "camera": "sideline",
+      "seconds": 1.15643149743955,
+      "mean": 0.016775535300925924,
+      "changedFraction": 0.0013216145833333333,
+      "severeFraction": 0.00003255208333333333,
+      "maximum": 57
+    },
+    {
+      "camera": "sideline",
+      "seconds": 1.7260171603575372,
+      "mean": 0.014802155671296295,
+      "changedFraction": 0.0012554253472222222,
+      "severeFraction": 0.0000010850694444444444,
+      "maximum": 30
+    },
+    {
+      "camera": "sideline",
+      "seconds": 2.4456866259036905,
+      "mean": 0.014980830439814815,
+      "changedFraction": 0.0012152777777777778,
+      "severeFraction": 0,
+      "maximum": 23
+    },
+    {
+      "camera": "sideline",
+      "seconds": 2.8001506910234375,
+      "mean": 0.014936342592592593,
+      "changedFraction": 0.0012131076388888888,
+      "severeFraction": 0,
+      "maximum": 22
+    },
+    {
+      "camera": "sideline",
+      "seconds": 3.3413559335662524,
+      "mean": 0.01751591435185185,
+      "changedFraction": 0.0015744357638888889,
+      "severeFraction": 0.000002170138888888889,
+      "maximum": 29
+    },
+    {
+      "camera": "sideline",
+      "seconds": 3.6079197097440567,
+      "mean": 0.01586624710648148,
+      "changedFraction": 0.0012434895833333334,
+      "severeFraction": 0.000006510416666666667,
+      "maximum": 121
+    },
+    {
+      "camera": "sideline",
+      "seconds": 4.177419709744057,
+      "mean": 0.01606915509259259,
+      "changedFraction": 0.0013009982638888889,
+      "severeFraction": 0.000006510416666666667,
+      "maximum": 121
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 0,
+      "mean": 0.015100911458333333,
+      "changedFraction": 0.0005523003472222223,
+      "severeFraction": 0.00006076388888888889,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 0.45599999999999996,
+      "mean": 0.01709418402777778,
+      "changedFraction": 0.0006857638888888889,
+      "severeFraction": 0.00006510416666666667,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 1.15643149743955,
+      "mean": 0.019141710069444446,
+      "changedFraction": 0.0007986111111111112,
+      "severeFraction": 0.00006184895833333334,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 1.7260171603575372,
+      "mean": 0.014359085648148149,
+      "changedFraction": 0.0005023871527777778,
+      "severeFraction": 0.00006076388888888889,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 2.4456866259036905,
+      "mean": 0.014413700810185184,
+      "changedFraction": 0.0005197482638888889,
+      "severeFraction": 0.00006618923611111112,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 2.8001506910234375,
+      "mean": 0.015452835648148148,
+      "changedFraction": 0.0005826822916666667,
+      "severeFraction": 0.00007921006944444444,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 3.3413559335662524,
+      "mean": 0.018308015046296297,
+      "changedFraction": 0.0011968315972222222,
+      "severeFraction": 0.000078125,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 3.6079197097440567,
+      "mean": 0.01743706597222222,
+      "changedFraction": 0.0013172743055555555,
+      "severeFraction": 0.00004991319444444445,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-green",
+      "seconds": 4.177419709744057,
+      "mean": 0.01600115740740741,
+      "changedFraction": 0.0010948350694444445,
+      "severeFraction": 0.000040147569444444445,
+      "maximum": 124
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 0,
+      "mean": 0.016368272569444446,
+      "changedFraction": 0.0009168836805555556,
+      "severeFraction": 0.00006944444444444444,
+      "maximum": 93
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 0.45599999999999996,
+      "mean": 0.015679615162037037,
+      "changedFraction": 0.0008832465277777778,
+      "severeFraction": 0.00005208333333333334,
+      "maximum": 93
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 1.15643149743955,
+      "mean": 0.01662398726851852,
+      "changedFraction": 0.0009733072916666667,
+      "severeFraction": 0.00007052951388888888,
+      "maximum": 93
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 1.7260171603575372,
+      "mean": 0.01623480902777778,
+      "changedFraction": 0.0009157986111111112,
+      "severeFraction": 0.00007052951388888888,
+      "maximum": 93
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 2.4456866259036905,
+      "mean": 0.01665256076388889,
+      "changedFraction": 0.001015625,
+      "severeFraction": 0.00006727430555555556,
+      "maximum": 79
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 2.8001506910234375,
+      "mean": 0.018186848958333335,
+      "changedFraction": 0.0013509114583333333,
+      "severeFraction": 0.000068359375,
+      "maximum": 92
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 3.3413559335662524,
+      "mean": 0.019254557291666665,
+      "changedFraction": 0.0014171006944444444,
+      "severeFraction": 0.00007921006944444444,
+      "maximum": 98
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 3.6079197097440567,
+      "mean": 0.019219111689814813,
+      "changedFraction": 0.0013606770833333333,
+      "severeFraction": 0.00010199652777777778,
+      "maximum": 91
+    },
+    {
+      "camera": "behind-orange",
+      "seconds": 4.177419709744057,
+      "mean": 0.01970015914351852,
+      "changedFraction": 0.001437717013888889,
+      "severeFraction": 0.00010959201388888889,
+      "maximum": 87
+    }
+  ],
+  "stats": {
+    "builds": 4,
+    "reuses": 33,
+    "invalidations": 3,
+    "lastInvalidation": "scene-or-view-changed",
+    "width": 1280,
+    "height": 720,
+    "samples": 4,
+    "estimatedBytes": 36864000,
+    "residentBytes": 36864000,
+    "failures": 0,
+    "bypasses": 0,
+    "disabledReason": null,
+    "disposed": false,
+    "memoryBudgetBytes": 100663296
+  }
+}
