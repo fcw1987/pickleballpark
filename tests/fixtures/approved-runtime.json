@@ -1,10 +1,10 @@
 {
-  "source": "efbf53b056becd1bee575fa0633ee6af70c28b38",
+  "source": "dbd8f224ff9b6d2d71fc2f39e1f3ead99bdcb0d8",
   "files": [
     {
       "path": "assets/park/banner.png",
-      "bytes": 280,
-      "sha256": "769f4f576989b0f1637d55bd79c354d63f0c9074df6c4d5a368dace7b80ad66c"
+      "bytes": 254,
+      "sha256": "4bf2f9f3b6d2a8d58bad4ab5f4016684576ae239a23da4f5a6c0c0480a28947b"
     },
     {
       "path": "assets/park/bench.png",
@@ -248,18 +248,18 @@
     },
     {
       "path": "build-diagnostics.js",
-      "bytes": 7301,
-      "sha256": "948cc62a6b0e579e96a9e2feca4c9b455de3d8393d1b85e80520bd9be716afc1"
+      "bytes": 7297,
+      "sha256": "9a67253b83566ce0000a75d956a44455e012e25c0faeb563a49a23393b47be0b"
     },
     {
       "path": "build-identity.js",
-      "bytes": 5714,
-      "sha256": "ea09ce9238b0ace15707c2c94e13ae2ab113224834894094b62f92ccceff27a5"
+      "bytes": 5706,
+      "sha256": "23b8baf868eeb1b654c8489e578383ae6c1302934a2ed76dba846bcea7e161e7"
     },
     {
       "path": "build-metadata.js",
-      "bytes": 1238,
-      "sha256": "07df27d425d7ba088892f42e963156e95e003517623742699b847f53ef9e390c"
+      "bytes": 1239,
+      "sha256": "aaecae2ae47787d169e5ede8ca8583221e2a9ed7b6c2aeb2f0a21f9179178c9f"
     },
     {
       "path": "builder-court-tools.js",
@@ -288,8 +288,8 @@
     },
     {
       "path": "builder-ui.js",
-      "bytes": 79666,
-      "sha256": "a461ab6dea62891e3bc188bd240a018dea9d0b14a5f0b0f5d36fb5ad111c44c0"
+      "bytes": 79662,
+      "sha256": "4af3ffc0cab13c25d78814e26dc315ca4c3ef300b2503390f9d8aed68c06e74c"
     },
     {
       "path": "builder-waypoint-policy.js",
@@ -318,8 +318,8 @@
     },
     {
       "path": "guided-pixel-actors.js",
-      "bytes": 9819,
-      "sha256": "adb0d4625f1a0433a02901f9208aabcba3fe46bb6a4c9df67a22cef0bdcafb38"
+      "bytes": 9815,
+      "sha256": "168db2f13f8b807377f323d86cf2b84cd64012c6ee82cd7996ce3155cd3e3eab"
     },
     {
       "path": "guided-plays.js",
@@ -383,8 +383,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 21480,
-      "sha256": "61892b4793831f1529eb8c43f672111880080150f79176cb3e02171f6de1cfa0"
+      "bytes": 21464,
+      "sha256": "866223f5a7fdd748295abe22e580971c985baddebafbca114a6f1a0988c4fdff"
     },
     {
       "path": "keyboard-shortcuts.js",
@@ -393,8 +393,8 @@
     },
     {
       "path": "manifest.json",
-      "bytes": 1506,
-      "sha256": "7bc93c20daeb6807a4b6053b520b0532d179a6a7bf53ddb51536152c52258fdf"
+      "bytes": 1494,
+      "sha256": "92581a5886533087059c7f51405d19729d2d54802ece96591af455cc121295ae"
     },
     {
       "path": "park-layout.js",
@@ -413,8 +413,8 @@
     },
     {
       "path": "play-builder.js",
-      "bytes": 47302,
-      "sha256": "4a5466be8573a7c32a38e3d0e98d284db43d0a566fb1ddfdb19ec7e1ce9f97bb"
+      "bytes": 47299,
+      "sha256": "226f363167fa5f63a52947b7bc52ce3c5709429697c22ade835a8f5249568fdc"
     },
     {
       "path": "play-catalog.js",
@@ -453,8 +453,8 @@
     },
     {
       "path": "script.js",
-      "bytes": 62651,
-      "sha256": "430dbf04578665ecbf4532b6251904a34d3b059b9765a872dc82f27c5abdc988"
+      "bytes": 62639,
+      "sha256": "fd376c07f0780fd152c6aed343c6715170f6005813a18cf8ce8b920abb452090"
     },
     {
       "path": "shot-chapters.js",
@@ -478,23 +478,23 @@
     },
     {
       "path": "styles.css",
-      "bytes": 32472,
-      "sha256": "e05117d47463bca239a40c40aca03b5e61e3411635ce2030c35a6aef0699786a"
+      "bytes": 32468,
+      "sha256": "9e809a47333e0c015e6870417a3eea5a0a96f6af9a988ca43f0965f1e975f2f0"
     },
     {
       "path": "sw.js",
-      "bytes": 7314,
-      "sha256": "e3bbf59901b11e371d0d81eb39d18fc1361d99781611588945b6d5ab68cba1bb"
+      "bytes": 7310,
+      "sha256": "6763bae312ff3fe27d11db708e059bda08ef3794a233214b0f16f27d0527eb73"
     },
     {
       "path": "three-d-animation.js",
-      "bytes": 12897,
-      "sha256": "227e7e437a906a5e9afb5e53c97737888ed783eea66c5c9ad0b664135f3a2f8c"
+      "bytes": 14893,
+      "sha256": "eda72a24ee5f9abcdb2265f5a984471d1e731f6fda3d88c9ec9b2049378902ae"
     },
     {
       "path": "three-d-athletes.js",
-      "bytes": 32322,
-      "sha256": "d3472910d82640b7348e22e175a60f12a514066b7c295db0bef5d43c1e3c6f3e"
+      "bytes": 37761,
+      "sha256": "bc4c0e5a33dc494feae8ac8f51f18e5dfb254eb8c787149967c8ec953ddb4008"
     },
     {
       "path": "three-d-ball.js",
@@ -503,8 +503,8 @@
     },
     {
       "path": "three-d-core.js",
-      "bytes": 23407,
-      "sha256": "6809e28cb47dbaef3768ddec01250662ef9323307926ab4367f50bfc36a3f0a2"
+      "bytes": 23403,
+      "sha256": "354ecea77f5e06b0204bdf92a29f0cfd2192c8a531eb9a8f362f55a659b20527"
     },
     {
       "path": "three-d-loader.js",
@@ -518,18 +518,18 @@
     },
     {
       "path": "three-d-playback.js",
-      "bytes": 41564,
-      "sha256": "a9cdf06ec6147428bc87e4792910023f97b5b81ec96b55c6d0af5328b57512bc"
+      "bytes": 41591,
+      "sha256": "4ecbbc83e1cdbe48779db7ae5a2fb7d356671c0d8ee9ab2a59dccd687b914f9b"
     },
     {
       "path": "three-d-presentation.js",
-      "bytes": 12621,
-      "sha256": "4a148d6c81582c8bfc07882ea2b74df0f0d9234fe45a59e2a6b2100b79c42094"
+      "bytes": 17711,
+      "sha256": "2a91fa63b49a9e70d59a6b57129ff28f4afa53a89810602e4ebb2481963fe815"
     },
     {
       "path": "three-d-world.js",
-      "bytes": 37040,
-      "sha256": "78d7dc420b2857bc4cb24da024be62956b5509f4b58a724800d97bb0cba708d5"
+      "bytes": 37334,
+      "sha256": "46181d4e0b00d7e4bcdf42c9652c12691d4685402ad443a75a3ce0f0e9052590"
     },
     {
       "path": "vendor/three.core.min.js",
@@ -543,13 +543,13 @@
     },
     {
       "path": "version.json",
-      "bytes": 902,
-      "sha256": "2555fc1b0e06718ef71ff94f6fc22e35c8c5f98ceda9ef1c1312fe3964952d05"
+      "bytes": 903,
+      "sha256": "4e11412b1c352788c6962d415e1c2dcc23b66197cd94c55c2cfb728b1f93c82c"
     },
     {
       "path": "visual-theme.js",
-      "bytes": 1470,
-      "sha256": "4c33b37ca6e3f0b7ec62c370683ba09e7862ba9343eafdf99562d50e4506489d"
+      "bytes": 1466,
+      "sha256": "034a4bf462eb97ab93a94e44b3428ba8239655a2c52ef4a1b6b8eb17cb85fb49"
     }
   ]
 }
