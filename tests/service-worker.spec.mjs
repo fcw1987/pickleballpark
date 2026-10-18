@@ -52,7 +52,7 @@ test.describe('service worker lifecycle', () => {
 
     await context.setOffline(true);
     await page.goto('/index.html?workspace=planner&offline=1');
-    await expect(page).toHaveTitle('Pickleball Park - Build a Play');
+    await expect(page).toHaveTitle('Pickleboard - Build a Play');
     await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard))).toBe(true);
     const offlinePlayerAssets = await page.evaluate(async () => Promise.all(
       [...document.querySelectorAll('.player-artwork')].map(async image => {
@@ -108,7 +108,7 @@ test.describe('service worker lifecycle', () => {
 
     await context.setOffline(true);
     await page.goto('/unknown/offline-route');
-    await expect(page).toHaveTitle('Pickleball Park - Build a Play');
+    await expect(page).toHaveTitle('Pickleboard - Build a Play');
     await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard))).toBe(true);
     await context.setOffline(false);
   });

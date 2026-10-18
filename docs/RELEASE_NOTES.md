@@ -1,3 +1,9 @@
+# Pickleboard name restoration — current local candidate
+
+Pickleboard is the product name. Current interface text, install label, package description, banner and raised village sign restore it. The sign retains its original footprint and materials; the accepted village and court remain unchanged. Existing install identity, repository and hosted URLs, service-worker scope, cache namespace, theme key, draft keys and JSON play compatibility remain stable. The entries below describe earlier candidates and retain their historical labels.
+
+---
+
 # Unified iPhone builder candidate — draft review
 
 This successor candidate retains the complete court-centered builder at `4816210` and the earlier pushed builder at `d9b75d7`. It adds a shallow phone shot editor with full details, per-player movement placement, safer touch cancellation and local save conflict recovery. File/Plays, direct paused target editing, explicit waypoint acknowledgement, eight lessons, shared 2D/3D time, planner and original artwork remain.

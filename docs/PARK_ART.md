@@ -1,6 +1,6 @@
 # Park art contract
 
-Current product: **Pickleball Park**. The permanent name changes lettering only; approved geometry, poses, grips, anchors and palette remain the accepted baseline.
+Current product: **Pickleboard**. The permanent name changes lettering only; approved geometry, poses, grips, anchors and palette remain the accepted baseline.
 
 The park setting is original repository-authored pixel art with no external
 assets or runtime dependencies. `tools/generate-park-art.mjs` deterministically

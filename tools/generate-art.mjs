@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Deterministic Pickleball Park artwork generator.
+ * Deterministic Pickleboard artwork generator.
  *
  * The pixel canvas is intentionally tiny. Shapes are authored on a 48x48
  * grid and encoded with only Node's standard library, so regeneration never

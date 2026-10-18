@@ -1,4 +1,4 @@
-// Pure, renderer-independent foundations for Pickleball Park playback.
+// Pure, renderer-independent foundations for Pickleboard playback.
 import { COURT_DIMENSIONS } from './court-geometry.js';
 export { COURT_DIMENSIONS } from './court-geometry.js';
 

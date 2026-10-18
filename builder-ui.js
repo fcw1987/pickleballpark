@@ -321,7 +321,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const menuIcon=el('span','builder-menu-icon','☰');menuIcon.setAttribute('aria-hidden','true');
     menuSummary.append(menuIcon,el('span','builder-menu-word','Menu'));mainMenu.append(menuSummary);
     const menuPanel = el('div', 'builder-menu-panel');
-    const menuHeading = el('div', 'builder-menu-heading'); menuHeading.append(el('span', 'builder-park-mark', '◆'), el('strong', '', 'PICKLEBALL PARK'));
+    const menuHeading = el('div', 'builder-menu-heading'); menuHeading.append(el('span', 'builder-park-mark', '◆'), el('strong', '', 'PICKLEBOARD'));
     const rename = button('Rename play', 'rename', 'builder-menu-item builder-button');
     const titleInput = el('input'); titleInput.type = 'text'; titleInput.value = doc.title || 'Untitled play'; titleInput.maxLength = 80; titleInput.dataset.action = 'title'; titleInput.setAttribute('aria-label', 'Play title');
     const titleField = labelled('Play name', titleInput); titleField.classList.add('builder-menu-field');

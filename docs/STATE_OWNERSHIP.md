@@ -1,4 +1,4 @@
-# Pickleball Park state ownership
+# Pickleboard state ownership
 
 Audited from the recoverable engine checkpoint `13758356d65f154b19ca631e6ecb9bdb8afd875b` on 2026-09-14. This map records the runtime that exists; it does not propose another document, compiler, clock, renderer, or persistence architecture.
 

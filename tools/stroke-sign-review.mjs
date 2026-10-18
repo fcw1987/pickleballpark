@@ -1,0 +1,13 @@
+import {chromium} from '@playwright/test';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {runtimeFileset} from './stamp-build.mjs';
+const base=process.env.PREVIEW_URL||'http://127.0.0.1:4177',out=resolve(process.env.CAPTURE_DIR||'docs/stroke-review/sign');await mkdir(out,{recursive:true});
+const digest=runtimeFileset().digest,browser=await chromium.launch(),context=await browser.newContext({viewport:{width:402,height:874},deviceScaleFactor:3,serviceWorkers:'block'}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto(`${base}/?workspace=planner&stroke-sign-review=1`);await page.waitForFunction(()=>pickleboard?.threeD);await page.evaluate(()=>pickleboard.plays.load('third-shot-drive'));await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);
+await page.evaluate(()=>{const v=pickleboard.threeD,s=v.timeline.segments.find(s=>s.step.id==='third-drive');v.cancelRenderWork();v.session.pause();v.session.seek(s.startTime+s.contactTime);v.applyAtTime(v.clock.elapsed);v.updateUI();v.renderer.render(v.scene,v.camera);});
+const phone=await page.evaluate(()=>{const v=pickleboard.threeD;return {devicePixelRatio,viewport:[innerWidth,innerHeight],rendererPixelRatio:v.renderer.getPixelRatio(),drawingBuffer:[v.renderer.domElement.width,v.renderer.domElement.height],emulation:'Isolated Chromium viewport/DPR emulation, not a physical phone.'};});
+await page.screenshot({path:join(out,'phone-dpr3.png')});
+await page.addStyleTag({content:'.three-d-hud{visibility:hidden!important}'});
+const camera=await page.evaluate(()=>{const v=pickleboard.threeD;v.cancelRenderWork();v.session.pause();v.applyAtTime(0);v.camera.clearViewOffset();v.camera.aspect=v.elements.canvas.clientWidth/v.elements.canvas.clientHeight;v.camera.fov=38;v.camera.position.set(8.8,1.35,-6.8);v.camera.lookAt(8.3,1.1,-11);v.camera.updateProjectionMatrix();v.camera.updateMatrixWorld(true);v.renderer.render(v.scene,v.camera);return {position:v.camera.position.toArray(),target:[8.3,1.1,-11],fov:38};});
+await page.screenshot({path:join(out,'stroke-sign-phone-close.png')});await context.close();await browser.close();await writeFile(join(out,'stroke-sign-provenance.json'),JSON.stringify({base,runtimeDigest:digest,runtimeDigestAfter:runtimeFileset().digest,viewport:[402,874],deviceScaleFactor:3,phone,camera,note:'Temporary inspection camera only; ordinary phone screenshots kept in stroke suite.',errors},null,2));console.log(JSON.stringify({out,errors}));

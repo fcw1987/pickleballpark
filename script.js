@@ -4,7 +4,7 @@ import './guided-plays.js';
 import { COURT_LINES } from './court-geometry.js';
 import { mountBuildDiagnostics } from './build-diagnostics-ui.js';
 import { playerLabel } from './player-labels.js';
-// Pickleball Park - Interactive Pickleball Coaching and Strategy
+// Pickleboard - Interactive Pickleball Coaching and Strategy
 
 // Register Service Worker for PWA support
 if ('serviceWorker' in navigator) {
@@ -22,7 +22,7 @@ class Pickleboard {
     constructor() {
         this.court = document.getElementById('court');
         this.projection = window.PickleboardProjection;
-        if (!this.projection) throw new Error('Pickleball Park projection is unavailable');
+        if (!this.projection) throw new Error('Pickleboard projection is unavailable');
         this.actorLayer = document.getElementById('actorLayer');
         this.tracerLayer = document.getElementById('tracerLayer');
         const touchLayer = document.getElementById('touchLayer');
@@ -1413,7 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
     window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
     
-    console.log('Pickleball Park initialized successfully');
+    console.log('Pickleboard initialized successfully');
 });
 
 // Handle browser back/forward navigation

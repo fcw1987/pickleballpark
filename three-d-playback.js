@@ -451,7 +451,7 @@ class ThreeDPlaybackViewer {
     applyAthletes(segment,localTime) {
         for(const [id,actor] of this.playerObjects) {
             let sample;
-            if(segment) sample=sampleActorPresentation({segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
+            if(segment) sample=sampleActorPresentation({instructionalMovement:true,segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
             else {
                 const position=this.currentPlay.steps[0].positions[id],world=boardToWorld(position);
                 const facing={x:0,z:position.y<22?1:-1};

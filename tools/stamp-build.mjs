@@ -111,7 +111,7 @@ export function createBuildMetadata(options = {}) {
     : (status === 'verified' ? 'verified source and package' : 'stamped local build');
   return {
     schemaVersion: 1,
-    product: 'Pickleball Park',
+    product: 'Pickleboard',
     status,
     developmentStatus,
     sourceRevision,

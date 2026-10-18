@@ -7,7 +7,7 @@ export const TEST_FILE_HASHES = Object.freeze({
   'tests/pixel-replay.spec.mjs': '11e47959d5a67ec9d22f78c3e8fd014e86142419ed11aef16442b9688c1b0808',
   'tests/plays.spec.mjs': 'a081abea40b87dc7d6f345eb31bf0e09da10655ccc84bdef0120f01acd3826cf',
   'tests/three-d.spec.mjs': '596165ad01f342efb923d888dd32bf0332914ef9bc7e79adab105f820317df2f',
-  'tests/service-worker.spec.mjs': 'b6a12a2c0a4fc00776df5877f108e79c96cc67402a9ee7a7040eea9085c713f1',
+  'tests/service-worker.spec.mjs': '1e464aeaae67b764796806db9985737599525ddcc6d62f17d084e1a9f6bb7437',
 });
 
 export const ALLOWED_FAILURES = Object.freeze([

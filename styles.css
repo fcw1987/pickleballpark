@@ -1,4 +1,4 @@
-/* Pickleball Park's compact handheld-adventure visual system.
+/* Pickleboard's compact handheld-adventure visual system.
    visual-theme.js owns the shared palette; this file maps it to UI surfaces. */
 :root {
   color-scheme: light;

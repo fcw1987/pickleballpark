@@ -1,4 +1,4 @@
-// Isolated WebKit diagnostic: no Pickleball Park code or cache deletion is served.
+// Isolated WebKit diagnostic: no Pickleboard code or cache deletion is served.
 import {createServer} from 'node:http';
 import {writeFileSync} from 'node:fs';
 import {webkit} from '@playwright/test';

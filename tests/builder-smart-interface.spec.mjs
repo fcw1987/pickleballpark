@@ -19,7 +19,7 @@ test.describe('smart rally builder interface', () => {
   test('keeps the title clean and puts routine file work under Manage plays', async ({ page }) => {
     await mount(page);
     await page.locator('.builder-main-menu > summary').last().click();
-    await expect(page.locator('.builder-menu-heading')).toContainText('PICKLEBALL PARK');
+    await expect(page.locator('.builder-menu-heading')).toContainText('PICKLEBOARD');
     await expect(page.locator('.builder-menu-kicker')).toHaveCount(0);
     await expect(page.getByRole('group', { name: 'Manage plays' })).toHaveCount(0);
     await expect(page.getByLabel('Manage plays', { exact: true })).toBeVisible();

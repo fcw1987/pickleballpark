@@ -7,8 +7,7 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OLD_BRAND = /\bpickle\s*board\b/gi;
-const OLD_WORDMARK = /\bPB\b/g;
+const OLD_BRAND = /\b(?:pickle\s*ball\s+park|paddle\s+park)\b/gi;
 const TEXT_FILE = /(?:^|\/)[^/]+\.(?:css|html|js|json|md|mjs|svg|txt|ya?ml)$/i;
 
 // Immutable evidence, explicitly listed so a new archive cannot silently escape review.
@@ -51,62 +50,51 @@ const ARCHIVED_FILES = new Set([
 ]);
 const isArchived = file => ARCHIVED_FILES.has(file);
 
-const PERFORMANCE_IDENTITY_FILES = new Set([
-  'docs/town-art-performance/final/pre-memory-fix/matched-desktop.json',
-  'docs/town-art-performance/final/pre-memory-fix/matched-phone.json',
+// These checked-in reports describe earlier named builds. New files are checked.
+const HISTORICAL_BRAND_FILES = new Set([
+  'docs/BETA_STABILIZATION_REPORT.md',
+  'docs/PARK_COACHING_VERIFICATION.md',
+  'docs/PIXEL_GAME_LUNA_REVIEW.md',
+  'docs/REBRAND_VERIFICATION.md',
+  'docs/RELEASE_PUBLICATION_SUMMARY.md',
+  'docs/VISUAL_DIRECTION.md',
+  'docs/art-overhaul/OFFLINE_ENGINE_CONTROL.md',
+  'docs/art-overhaul/before/README.md',
+  'docs/art-overhaul/build-stamp.json',
+  'docs/art-overhaul/final/package-verification.json',
+  'docs/art-overhaul/review.html',
+  'docs/court-first/index.html',
+  'docs/fidelity/REPORT.md',
+  'docs/fidelity/review-wave1/observations.json',
+  'docs/fidelity/review-wave1.md',
+  'docs/fidelity/review-wave2.md',
+  'docs/fidelity/review-wave3.md',
+  'docs/smart-visible/report.md',
+  'docs/town-art/review.html',
+  'docs/town-art/verification/package-verification.json',
   'docs/town-art-performance/final/matched-desktop.json',
   'docs/town-art-performance/final/matched-phone.json',
-  'docs/town-art-performance/verification/resumed-source-identities.json',
-  'docs/town-art-performance/verification/final-source-identities.json'
+  'docs/town-art-performance/final/pre-memory-fix/matched-desktop.json',
+  'docs/town-art-performance/final/pre-memory-fix/matched-phone.json',
+  'docs/town-art-performance/review.html',
+  'docs/town-art-performance/verification/cache-pixel-final-resumed.json',
+  'docs/town-art-performance/verification/final-preview-http.json',
+  'docs/town-art-performance/verification/package-v28.json',
+  'docs/town-art-performance/verification/package-verification.json',
 ]);
-const VERIFIED_REPOSITORY_PATHS = [
-  '/Users/fdub/Geese/pickleboard',
-  '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard',
-  '/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard'
-];
-
-const removeApprovedLegacyContracts = (file, source) => {
-  // Exact machine-recorded source identities are compatibility evidence, not UI names.
-  if (PERFORMANCE_IDENTITY_FILES.has(file)) for (const repositoryPath of VERIFIED_REPOSITORY_PATHS) {
-    source = source.replaceAll(JSON.stringify(repositoryPath), JSON.stringify('[verified repository path]'));
+const removeApprovedHistoricalLabels = (file, source) => {
+  if (HISTORICAL_BRAND_FILES.has(file) || ['tools/check-brand.mjs', 'tests/brand.unit.mjs'].includes(file)) return '';
+  if (file === 'tests/rebrand.spec.mjs') source = source.replace('/\\b(?:Pickleball Park|Paddle Park)\\b/i', '[rejected temporary names]');
+  // Only the retained historical release entries and art-history section are exempt.
+  if (file === 'docs/RELEASE_NOTES.md') source = source.split('\n---\n')[0];
+  if (file === 'docs/ASSET_PROVENANCE.md') {
+    const historyStart = source.indexOf('## Pickleball Park rebrand (historical)');
+    const historyEnd = source.indexOf('## Pickleboard name restoration (current candidate)');
+    if (historyStart >= 0 && historyEnd > historyStart) source = source.slice(0, historyStart) + source.slice(historyEnd);
+    source = source.replace('local Pickleball Park palette', 'local palette');
   }
-  if (['docs/art-overhaul/SOURCE.md', 'docs/art-overhaul/before/README.md', 'tools/art-overhaul-matched-performance.mjs'].includes(file)) source = source.replaceAll('/Users/fdub/Geese/pickleboard', '[canonical repository path]');
-  if (file === 'docs/rebrand/capture-metadata.json') {
-    const data = JSON.parse(source);
-    for (const record of data.records || []) {
-      if (record.name === 'before' && record.revision === 'dd0c3fa' && record.actual?.title === 'Pickleboard - Pickleball Court Planner') record.actual.title = '[verified historical title]';
-    }
-    source = JSON.stringify(data);
-  }
-
-  if (['tools/check-brand.mjs', 'tests/brand.unit.mjs', '.goose/memory/project.txt'].includes(file)) return '';
-  let text = source
-    .replace(/https:\/\/github\.com\/fcw1987\/pickleboard(?:\.git)?\/?/gi, '')
-    .replace(/https:\/\/fcw1987\.github\.io\/pickleboard\/?/gi, '')
-    .replace(/\bPICKLEBOARD_(?:VISUAL|PLAYS|TEST_URL)\b/g, '')
-    .replace(/\bPickleboardProjection\b/g, '')
-    .replace(/\bwindow\.pickleboard\b|\bpickleboard(?=[?.\[])|\bpickleboard:ready\b/g, '')
-    .replace(/=\s*pickleboard\b/g, '=')
-    .replace(/\bpickleboard-theme\b|pickleboard-/g, '')
-    .replace(/--pb-[a-z0-9-]+/g, '')
-    .replace(/\b(?:class\s+|new\s+)Pickleboard\b/g, '');
-  if (['README.md', 'docs/RELEASE_NOTES.md'].includes(file)) text = text.replace(/\b[Ff]ormerly Pickleboard\b/g, '');
-  if (['README.md', 'docs/REBRAND_STATUS.md', 'docs/rebrand/technical-notes.md', 'docs/rebrand/technical-review.md'].includes(file)) {
-    text = text.replace(/`Pickleboard`/g, '').replace(/\bPickleboard releases\b/g, 'releases');
-  }
-  if (file === 'docs/REBRAND_STATUS.md' || file === 'docs/rebrand/technical-notes.md') text = text.replace(/`?pickleboard`?/g, '');
-  if (file === 'docs/RENAME_HANDOFF.md') {
-    text = text.replace(/\bfcw1987\/pickleboard\b/g, '');
-  }
-  if (file === 'tools/diagnose-webkit-cache.mjs') text = text.replace(/Old Pickleboard/g, '');
-  if (file === 'tests/fixtures/cache-setup.html' || file === 'tests/service-worker.spec.mjs') text = text.replace(/Old Pickleboard/g, '');
-  if (['tests/service-worker.spec.mjs', 'tools/webkit-policy.mjs'].includes(file)) text = text.replace(/old Pickleboard caches/g, 'old caches');
-  if (file === 'tools/generate-art.mjs') text = text.replace(/\bpb\b/g, '');
-  if (file === 'docs/REBRAND_STATUS.md') text = text.replace(/visible PB wordmark/g, 'visible wordmark').replace(/lowercase `pb`/g, 'lowercase');
-  if (file === 'docs/ASSET_PROVENANCE.md') text = text.replace(/old PB lettering/g, 'old lettering');
-  if (file === 'docs/rebrand/art-review/README.md') text = text.replace(/old `PB` or product lettering/g, 'old product lettering').replace(/`PB` or new acronym/g, 'new acronym');
-  if (file === 'docs/rebrand/technical-review.md') text = text.replace(/the spaced `Pickle Board` variant/g, 'the spaced-name variant').replace(/uppercase `PB` wordmark/g, 'uppercase acronym wordmark');
-  return text;
+  if (file === 'docs/RENAME_HANDOFF.md') source = source.replace('Earlier Pickleball Park and Paddle Park labels were temporary naming drift;', 'Earlier labels were temporary naming drift;');
+  return source;
 };
 
 const localReferences = (file, source) => {
@@ -134,32 +122,35 @@ export function validateBrandFiles(files) {
   const generator = required('tools/generate-park-art.mjs');
   try {
     const manifest = JSON.parse(manifestText);
-    if (manifest.name !== 'Pickleball Park') errors.push('manifest.json: name must be Pickleball Park');
-    if (manifest.short_name !== 'Pickleball Park') errors.push('manifest.json: short_name must be Pickleball Park');
+    if (manifest.name !== 'Pickleboard') errors.push('manifest.json: name must be Pickleboard');
+    if (manifest.short_name !== 'Pickleboard') errors.push('manifest.json: short_name must be Pickleboard');
     if (manifest.start_url !== './index.html') errors.push('manifest.json: start_url must remain ./index.html');
     if (Object.hasOwn(manifest, 'id')) errors.push('manifest.json: id must remain absent to preserve install identity');
   } catch (error) { errors.push(`manifest.json: invalid JSON (${error.message})`); }
   try {
     const pkg = JSON.parse(packageText), lock = JSON.parse(lockText);
-    if (pkg.name !== 'pickleballpark') errors.push('package.json: package name must be pickleballpark');
-    if (!pkg.description?.includes('Pickleball Park')) errors.push('package.json: description must name Pickleball Park');
-    if (lock.name !== 'pickleballpark' || lock.packages?.['']?.name !== 'pickleballpark') errors.push('package-lock.json: root names must be pickleballpark');
+    if (pkg.name !== 'pickleboard') errors.push('package.json: package name must be pickleboard');
+    if (!pkg.description?.includes('Pickleboard')) errors.push('package.json: description must name Pickleboard');
+    if (lock.name !== 'pickleboard' || lock.packages?.['']?.name !== 'pickleboard') errors.push('package-lock.json: root names must be pickleboard');
   } catch (error) { errors.push(`package metadata: invalid JSON (${error.message})`); }
-  if (!/<title>Pickleball Park - Build a Play<\/title>/.test(index)) errors.push('index.html: canonical title is missing');
-  if (!/^# Pickleball Park\b/m.test(readme)) errors.push('README.md: canonical heading is missing');
+  if (!/<title>Pickleboard - Build a Play<\/title>/.test(index)) errors.push('index.html: canonical title is missing');
+  if (!/^# Pickleboard\b/m.test(readme)) errors.push('README.md: canonical heading is missing');
   if (!/const CACHE_PREFIX = 'pickleboard-';/.test(worker)) errors.push('sw.js: compatibility cache prefix changed');
-  if (!/const STATIC_CACHE = `\$\{CACHE_PREFIX\}static-v28`;/.test(worker)) errors.push('sw.js: v28 cache identity is missing');
-  if (!/Pickleball Park static cache/.test(worker)) errors.push('sw.js: current cache diagnostic name is missing');
-  if (!/text\(c,\s*'PICKLEBALL'\s*,/.test(generator) || !/text\(c,\s*'PARK'\s*,/.test(generator)) errors.push('tools/generate-park-art.mjs: sign must emit full PICKLEBALL and PARK lettering');
-  for (const letter of new Set('PICKLEBALLPARK')) {
+  if (!/const STATIC_CACHE = `\$\{CACHE_PREFIX\}static-v\d+`;/.test(worker)) errors.push('sw.js: versioned compatibility cache identity is missing');
+  if (!/Pickleboard static cache/.test(worker)) errors.push('sw.js: current cache diagnostic name is missing');
+  if (!/text\(c,\s*'PICKLEBOARD'\s*,/.test(generator)) errors.push('tools/generate-park-art.mjs: sign must emit full PICKLEBOARD lettering');
+  const world = required('three-d-world.js'), builder = required('builder-ui.js');
+  if (!/lettering\('PICKLE',/.test(world) || !/lettering\('BOARD',/.test(world)) errors.push('three-d-world.js: village sign must spell PICKLEBOARD');
+  if (!/PICKLEBOARD/.test(builder)) errors.push('builder-ui.js: Pickleboard menu heading is missing');
+  for (const letter of new Set('PICKLEBOARD')) {
     if (!new RegExp(`(?:^|[,{\\s])${letter}:\\s*\\[`, 'm').test(generator)) errors.push(`tools/generate-park-art.mjs: sign glyph ${letter} is missing`);
   }
   for (const [file, source] of files) {
     if (typeof source !== 'string' || !TEXT_FILE.test(file) || isArchived(file)) continue;
-    const remaining = removeApprovedLegacyContracts(file, source);
-    for (const match of [...remaining.matchAll(OLD_BRAND), ...remaining.matchAll(OLD_WORDMARK)]) {
+    const remaining = removeApprovedHistoricalLabels(file, source);
+    for (const match of remaining.matchAll(OLD_BRAND)) {
       const line = remaining.slice(0, match.index).split('\n').length;
-      errors.push(`${file}:${line}: unapproved former brand token ${JSON.stringify(match[0])}`);
+      errors.push(`${file}:${line}: unapproved product-name drift ${JSON.stringify(match[0])}`);
     }
   }
   for (const file of ['manifest.json', 'sw.js', 'index.html']) {
@@ -191,5 +182,5 @@ async function repositoryFiles() {
 if (path.resolve(process.argv[1] || '') === fileURLToPath(import.meta.url)) {
   const errors = validateBrandFiles(await repositoryFiles());
   if (errors.length) throw new Error(`Brand integrity failures:\n${errors.map(error => `- ${error}`).join('\n')}`);
-  console.log('Pickleball Park brand integrity checks passed; generated sign source still needs visual review.');
+  console.log('Pickleboard brand integrity checks passed; generated sign source still needs visual review.');
 }

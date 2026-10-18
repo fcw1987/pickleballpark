@@ -1,7 +1,7 @@
 # Replay pixel actor assets
 
 `tools/generate-replay-art.mjs` produces the replay atlas family from the
-shared Pickleball Park palette. It does not modify the editor artwork. Each atlas
+shared Pickleboard palette. It does not modify the editor artwork. Each atlas
 uses 64×64 cells containing the original 48×48 character construction with
 8px transparent padding. The stable foot pivot is `(32,54)`.
 

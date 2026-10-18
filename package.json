@@ -1,9 +1,9 @@
 {
-  "name": "pickleballpark",
+  "name": "pickleboard",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Development checks for the Pickleball Park static application and optional Three.js playback mode",
+  "description": "Development checks for the Pickleboard static application and optional Three.js playback mode",
   "scripts": {
     "start": "node tests/helpers/static-server.mjs",
     "check": "node --check script.js && node --check sw.js && node --check guided-plays.js && node --check three-d-playback.js && node --test tests/*.unit.mjs && node tests/helpers/validate-static-assets.mjs && node tools/check-brand.mjs",

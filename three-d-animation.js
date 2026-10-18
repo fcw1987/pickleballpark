@@ -1,4 +1,4 @@
-// Renderer-independent authored poses for the procedural Pickleball Park rig.
+// Renderer-independent authored poses for the procedural Pickleboard rig.
 
 const vec = (x = 0, y = 0, z = 0) => ({ x, y, z });
 const channel = (rotation = vec(), position = null) => ({ rotation, position });
@@ -20,7 +20,9 @@ export const REQUIRED_POSES = Object.freeze([
     'backhand-prepare', 'backhand-contact', 'backhand-follow',
     'drive-prepare', 'drive-contact', 'drive-follow',
     'drop-contact', 'drop-follow',
-    'block-prepare', 'block-contact', 'block-follow'
+    'block-prepare', 'block-contact', 'block-follow',
+    'lob-prepare', 'lob-contact', 'lob-follow',
+    'overhead-prepare', 'overhead-contact', 'overhead-follow'
 ]);
 
 export const POSE_LIBRARY = Object.freeze({
@@ -66,7 +68,7 @@ export const POSE_LIBRARY = Object.freeze({
         PaddleAttachment: channel(vec(-0.04, -0.02, 0.06))
     },
     'forehand-prepare': {
-        Hips: channel(vec(-0.035, 0.24, 0)), Torso: channel(vec(-0.045, 0.38, 0.02)),
+        Hips: channel(vec(-0.035, 0.28, 0), vec(0, -0.025, -0.045)), Torso: channel(vec(-0.045, 0.52, 0.02)),
         dominantArm: channel(vec(-0.1, 0.08, -0.62)), dominantElbow: channel(vec(-0.4, 0, 0.12)),
         nonDominantArm: channel(vec(-0.12, 0, 0.28)), nonDominantElbow: channel(vec(-0.18, 0, -0.06)),
         dominantKnee: channel(vec(0.24, 0, 0)), nonDominantKnee: channel(vec(0.1, 0, 0)),
@@ -89,28 +91,28 @@ export const POSE_LIBRARY = Object.freeze({
         PaddleAttachment: channel(vec(0.02, 0.02, -0.04))
     },
     'drive-prepare': {
-        Hips: channel(vec(-0.03, 0.18, 0)), Torso: channel(vec(-0.04, 0.28, 0)),
+        Hips: channel(vec(-0.03, 0.30, 0), vec(0, -0.028, -0.05)), Torso: channel(vec(-0.04, 0.58, 0)),
         dominantArm: channel(vec(-0.04, 0.04, -0.48)), dominantElbow: channel(vec(-0.3, 0, 0.08)),
         nonDominantArm: channel(vec(-0.08, 0, 0.22)), nonDominantElbow: channel(vec(-0.16, 0, -0.04)),
         dominantKnee: channel(vec(0.2, 0, 0)), nonDominantKnee: channel(vec(0.08, 0, 0)),
         PaddleAttachment: channel(vec(-0.02, 0.03, -0.05))
     },
     'drive-contact': {
-        Hips: channel(vec(-0.04, -0.14, 0), vec(0, -0.012, 0)), Torso: channel(vec(-0.055, -0.2, -0.02)),
+        Hips: channel(vec(-0.04, -0.10, 0), vec(0, -0.012, 0.025)), Torso: channel(vec(-0.055, -0.18, -0.02)),
         dominantArm: channel(vec(0.24, -0.08, -0.08)), dominantElbow: channel(vec(-0.12, 0, 0.03)),
         nonDominantArm: channel(vec(-0.03, 0, 0.14)), nonDominantElbow: channel(vec(-0.12, 0, -0.03)),
         dominantKnee: channel(vec(0.12, 0, 0)), nonDominantKnee: channel(vec(0.05, 0, 0)),
         PaddleAttachment: channel(vec(0, 0.03, -0.09))
     },
     'drive-follow': {
-        Hips: channel(vec(-0.03, -0.2, 0)), Torso: channel(vec(-0.035, -0.26, -0.02)),
+        Hips: channel(vec(-0.03, -0.25, 0), vec(0, -0.005, 0.06)), Torso: channel(vec(-0.035, -0.48, -0.02)),
         dominantArm: channel(vec(0.26, -0.12, 0.14)), dominantElbow: channel(vec(-0.2, 0, 0.06)),
         nonDominantArm: channel(vec(-0.02, 0, 0.08)),
         dominantKnee: channel(vec(0.08, 0, 0)), nonDominantKnee: channel(vec(0.04, 0, 0)),
         PaddleAttachment: channel(vec(0.01, 0.02, -0.05))
     },
     'backhand-prepare': {
-        Hips: channel(vec(-0.035, -0.24, 0)), Torso: channel(vec(-0.045, -0.38, 0)),
+        Hips: channel(vec(-0.035, -0.28, 0), vec(0, -0.025, -0.045)), Torso: channel(vec(-0.045, -0.52, 0)),
         dominantArm: channel(vec(-0.08, -0.05, 0.58)), dominantElbow: channel(vec(-0.34, 0, -0.08)),
         nonDominantArm: channel(vec(-0.08, 0, -0.3)), nonDominantElbow: channel(vec(-0.18, 0, 0.06)),
         dominantKnee: channel(vec(0.18, 0, 0)), nonDominantKnee: channel(vec(0.08, 0, 0)),
@@ -143,6 +145,38 @@ export const POSE_LIBRARY = Object.freeze({
         dominantArm: channel(vec(0.16, -0.05, 0.02)), dominantElbow: channel(vec(-0.32, 0, 0.03)),
         dominantKnee: channel(vec(0.24, 0, 0)), nonDominantKnee: channel(vec(0.22, 0, 0)),
         PaddleAttachment: channel(vec(0.06, 0, 0.09))
+    },
+    // A lob loads through the knees and shoulder, then lifts with a quiet wrist.
+    // The paddle path and face opening are sampled separately by the physical rig.
+    'lob-prepare': {
+        Hips: channel(vec(-0.06, 0.18, 0), vec(0, -0.07, -0.045)),
+        Torso: channel(vec(-0.075, 0.30, 0)),
+        dominantKnee: channel(vec(0.32, 0, 0)), nonDominantKnee: channel(vec(0.27, 0, 0)),
+        dominantElbow: channel(vec(-0.28, 0, 0)), PaddleAttachment: channel(vec(0.48, 0, 0))
+    },
+    'lob-contact': {
+        Hips: channel(vec(-0.045, -0.06, 0), vec(0, -0.045, 0.025)),
+        Torso: channel(vec(-0.055, -0.10, 0)),
+        dominantKnee: channel(vec(0.24, 0, 0)), nonDominantKnee: channel(vec(0.20, 0, 0)),
+        dominantElbow: channel(vec(-0.20, 0, 0)), PaddleAttachment: channel(vec(0.48, 0, 0))
+    },
+    'lob-follow': {
+        Hips: channel(vec(-0.025, -0.12, 0), vec(0, -0.01, 0.055)),
+        Torso: channel(vec(-0.025, -0.18, 0)),
+        dominantKnee: channel(vec(0.12, 0, 0)), nonDominantKnee: channel(vec(0.10, 0, 0)),
+        dominantElbow: channel(vec(-0.16, 0, 0)), PaddleAttachment: channel(vec(0.42, 0, 0))
+    },
+    'overhead-prepare': {
+        Hips: channel(vec(-0.025, 0.27, 0)), Torso: channel(vec(0.035, 0.45, 0)),
+        dominantElbow: channel(vec(-0.6, 0, 0)), nonDominantArm: channel(vec(0.5, 0, 0))
+    },
+    'overhead-contact': {
+        Hips: channel(vec(-0.03, -0.10, 0)), Torso: channel(vec(-0.06, -0.20, 0)),
+        dominantElbow: channel(vec(-0.10, 0, 0))
+    },
+    'overhead-follow': {
+        Hips: channel(vec(-0.035, -0.18, 0)), Torso: channel(vec(-0.08, -0.30, 0)),
+        dominantElbow: channel(vec(-0.32, 0, 0))
     },
     'block-prepare': {
         Hips: channel(vec(-0.035, 0, 0), vec(0, -0.025, 0)), Torso: channel(vec(-0.04, 0, 0)),
@@ -185,7 +219,9 @@ const strokePoseNames = stroke => {
     if (stroke === 'backhand') return ['backhand-prepare', 'backhand-contact', 'backhand-follow'];
     if (stroke === 'drive') return ['drive-prepare', 'drive-contact', 'drive-follow'];
     if (stroke === 'drop') return ['forehand-prepare', 'drop-contact', 'drop-follow'];
-    if (stroke === 'block') return ['block-prepare', 'block-contact', 'block-follow'];
+    if (stroke === 'block') return ['block-prepare', 'block-contact', 'block-follow',
+    'lob-prepare', 'lob-contact', 'lob-follow',
+    'overhead-prepare', 'overhead-contact', 'overhead-follow'];
     return ['forehand-prepare', 'forehand-contact', 'forehand-follow'];
 };
 

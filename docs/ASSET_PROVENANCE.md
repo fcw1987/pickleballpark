@@ -1,6 +1,6 @@
 # Asset provenance
 
-Current visual assets are original Pickleball Park artwork authored in this repository. No Nintendo/Pokémon assets, fonts, logos, extracted panels, sound, or music are used. DS Diamond/Pearl is an art-direction reference only.
+Current visual assets are original Pickleboard artwork authored in this repository. No Nintendo/Pokémon assets, fonts, logos, extracted panels, sound, or music are used. DS Diamond/Pearl is an art-direction reference only.
 
 The following revision entries retain the history of the artwork. The current assets and display font are described in the final entry below; historical counts are not the current package inventory.
 
@@ -41,3 +41,7 @@ Inspection found no old PB lettering in the approved replay athletes, editor com
 `tools/generate-menu-font.mjs` generates `assets/park/menu-labels.ttf` (15,520 bytes, 45 glyphs) from repository-authored rectangle patterns. This is the original **Park Labels** display font, not a redistributed system, commercial or game font. Short labels use it; settings, values, play names and paragraphs use readable local system fallbacks. There are no remote font requests or font installations.
 
 The approved athlete files in `assets/players/` and `assets/replay/`, outlined ball, paddle anchors, court coordinates and net geometry remain unchanged from checkpoint `1375835`. No new external artwork, dependency, license, copied game resource or asset service was introduced. `npm run check:generated` verifies all 66 generated asset paths in a temporary directory. See [PIXEL_GAME_ART.md](PIXEL_GAME_ART.md) for current dimensions, palette and generation details.
+
+## Pickleboard name restoration (current candidate)
+
+The product name is Pickleboard. The original 128×32 banner now reads `PICKLEBOARD` in one centered line; the raised village sign reads `PICKLE` above `BOARD`. Both use repository-authored glyphs, existing colors and the original sign footprint. The village, court, foliage, props, athlete artwork, anchors and surrounding materials retain their accepted layout. Historical rebrand entries and captures above preserve the labels used at capture time.

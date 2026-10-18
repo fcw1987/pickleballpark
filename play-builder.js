@@ -516,7 +516,7 @@ export class PlayBuilder {
                 else if(action==='template'){const template=PICKLEBOARD_PLAYS.find(p=>p.id===value);if(template){const draft=documentFromTemplate(template);draft.id=id();this.loadDocument(draft);}}
                 else {const imported=this.store.importJSON(value);imported.id=id();this.loadDocument(imported);this.message='Imported as a separate copy. Existing saved plays were kept.';}
             }
-            else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleballpark-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+            else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleboard-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
             else if(action==='usePlanner') {
                 const plannerIntent=++this.sourceIntent;
                 this.pause();

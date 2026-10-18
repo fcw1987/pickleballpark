@@ -1,7 +1,7 @@
 // Original court-scale, soft sculpted athletes. Local +Z is forward; the player root
 // is always the authored ground position. Every animated part has real depth.
 import * as THREE from './vendor/three.module.min.js';
-import { POSE_LIBRARY } from './three-d-animation.js';
+import { POSE_LIBRARY, sampleStrokePose } from './three-d-animation.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
@@ -320,22 +320,51 @@ function blendChannel(pose,name,component,axis) {
     const a=POSE_LIBRARY[pose?.from]||POSE_LIBRARY.ready,b=POSE_LIBRARY[pose?.to]||a;
     return THREE.MathUtils.lerp(mixChannel(a,name,component,axis),mixChannel(b,name,component,axis),smooth(pose?.progress||0));
 }
-function paddleKey(name,action,side,target) {
-    const ready=v(side*.17,1.105,.43);
-    if(name==='ready'||name==='split-step')return ready;
-    const phase=name.split('-').at(-1);
-    const back=action==='backhand',compact=action==='block',low=action==='drop'||action==='serve';
-    if(phase==='prepare')return compact?v(side*.15,1.2,.36):action==='overhead'?v(side*.41,1.91,-.12):back?v(-side*.37,1.04,.12):v(side*(low?.48:.62),low?.67:1.09,-.15);
+function strokeFamily(sample) {
+    const type=sample.shotType;
+    if(['lob','overhead','serve','drive','drop','dink','volley','block','reset','short-hop'].includes(type))return type;
+    return sample.action||'ready';
+}
+function paddleKey(phase,family,side,target,back) {
+    if(phase==='ready')return v(side*.17,1.105,.43);
+    const compact=['block','volley','reset'].includes(family),soft=['drop','dink','short-hop'].includes(family);
+    const sign=back?-side:side;
+    if(phase==='prepare'){
+        if(compact)return v(sign*.22,Math.max(.85,target.y+.04),.30);
+        if(family==='overhead')return v(sign*.34,1.80,-.12);
+        if(family==='lob')return v(sign*.40,Math.max(.45,target.y-.18),.08);
+        if(soft)return v(sign*.36,Math.max(.48,target.y-.06),.12);
+        if(family==='serve')return v(sign*.43,.64,-.12);
+        return v(sign*(back?.39:.51),Math.max(.72,Math.min(1.08,target.y+.14)),back?.04:-.13);
+    }
     if(phase==='contact')return target.clone();
-    if(phase==='follow')return compact?target.clone().add(v(-side*.06,.06,.07)):action==='overhead'?v(-side*.42,1.05,.50):action==='lob'?v(-side*.12,1.91,.44):v(-side*(back?-.45:.42),low?1.15:1.47,.43);
-    return ready;
+    if(compact)return target.clone().add(v(-sign*.035,.055,family==='volley'?.12:.065));
+    if(family==='overhead')return v(-sign*.35,1.02,.47);
+    if(family==='lob')return v(sign*.17,1.70,.48);
+    if(soft)return target.clone().add(v(-sign*.10,.25,.18));
+    return v(-sign*.40,family==='serve'?1.29:1.43,.42);
+}
+// Cubic Hermite interpolation uses one shared velocity at contact. The paddle
+// accelerates through the ball rather than easing to a stop at every phase key.
+function strokeFace(sample,family,side,target,back) {
+    const p=sample.profile,t=sample.strokeTime;
+    if(!p||t===null||t===undefined)return paddleKey('ready',family,side,target,back);
+    const times=[0,p.duration*p.prepareRatio,p.duration*p.contactRatio,p.duration*p.recoverRatio,p.duration];
+    const keys=['ready','prepare','contact','follow','ready'].map(phase=>paddleKey(phase,family,side,target,back));
+    let index=0;while(index<3&&t>times[index+1])index++;
+    const duration=times[index+1]-times[index],u=clamp((t-times[index])/duration),u2=u*u,u3=u2*u;
+    const tangent=i=>i===0||i===4?v():keys[i+1].clone().sub(keys[i-1]).multiplyScalar(1/(times[i+1]-times[i-1]));
+    return keys[index].clone().multiplyScalar(2*u3-3*u2+1)
+        .addScaledVector(tangent(index),duration*(u3-2*u2+u))
+        .addScaledVector(keys[index+1],-2*u3+3*u2)
+        .addScaledVector(tangent(index+1),duration*(u3-u2));
 }
 function elbowPoint(shoulder,wrist,side) {
     const delta=wrist.clone().sub(shoulder),distance=Math.max(.001,delta.length()),axis=delta.clone().normalize();
-    const upper=.29,lower=.285,reach=Math.min(distance,upper+lower-.002);
+    const upper=.29,lower=.285,reach=clamp(distance,Math.abs(upper-lower)+.001,upper+lower-.002);
     const along=(upper*upper-lower*lower+reach*reach)/(2*reach),height=Math.sqrt(Math.max(.0002,upper*upper-along*along));
     const bend=v(side*.55,-.85,-.18);bend.addScaledVector(axis,-bend.dot(axis)).normalize();
-    return shoulder.clone().addScaledVector(axis,Math.min(along,distance*.55)).addScaledVector(bend,height);
+    return shoulder.clone().addScaledVector(axis,along).addScaledVector(bend,height);
 }
 function updateArm(arm,shoulder,wrist,side) {
     const elbow=elbowPoint(shoulder,wrist,side);
@@ -351,54 +380,108 @@ export function updateAthlete(root,sample,camera,contactWeight=0) {
     const d=root.userData,{visual,upper,head,legs,arms,paddle}=d,side=d.handedness==='right'?-1:1;
     root.position.set(sample.worldPosition.x,0,sample.worldPosition.z);
     const facing=sample.bodyFacing||{x:0,z:d.team==='team1'?1:-1};visual.rotation.y=Math.atan2(facing.x,facing.z);
-    const pose=sample.strokePose,action=sample.action||'ready',phase=sample.phase||'ready';
+    const action=sample.action||'ready',phase=sample.phase||'ready',family=strokeFamily(sample);
+    const back=sample.strokeSide==='backhand'||family==='backhand';
+    const compact=['block','volley','reset'].includes(family),soft=['drop','dink','short-hop'].includes(family);
+    const poseFamily=compact?'block':soft?'drop':family;
+    const pose=sample.strokePose&&sample.profile?sampleStrokePose(poseFamily,sample.profile,sample.strokeTime):sample.strokePose;
     const strokeActivity=pose?(pose.from==='ready'?smooth(pose.progress):pose.to==='ready'?1-smooth(pose.progress):1):0;
-    const travel=action==='shuffle'?clamp((sample.travelSpeed||1.2)/1.9):0,clock=sample.timeSeconds||0;
-    const gait=sample.travelPhase??clock*9,stance=phase==='split-step'?.045:0;
-    const bodyDrop=blendChannel(pose,'Hips','position','y')-.048-stance-(action==='block'?.018:.045)*strokeActivity;
-    const weightShift=side*blendChannel(pose,'Hips','rotation','y')*.25;
-    upper.position.set(weightShift+Math.sin(gait)*travel*.018,bodyDrop+travel*Math.abs(Math.sin(gait))*.028,0);
-    // In this rig +X pitch tips the chest toward local +Z (the net). The
-    // renderer-independent pose library uses the opposite pitch convention.
-    upper.rotation.set(.06-blendChannel(pose,'Torso','rotation','x')*.65,blendChannel(pose,'Torso','rotation','y')*(-side)*1.25,blendChannel(pose,'Torso','rotation','z')*(-side));
+    // Locomotion continues during preparation, then ends when the route settles.
+    const travel=clamp((sample.travelSpeed??(action==='shuffle'?1.2:0))/1.9),clock=sample.timeSeconds||0;
+    const gait=sample.travelPhase??clock*9,stance=(sample.splitStep||0)*.025;
+    let bodyDrop=blendChannel(pose,'Hips','position','y')-.048-stance-(compact?.012:.025)*strokeActivity;
+    const contactHeight=sample.paddle?.worldContactTarget?.y;
+    if(Number.isFinite(contactHeight)){
+        const lowLoad=Math.min(0,contactHeight+.69-1.325);
+        bodyDrop=Math.min(bodyDrop,-.048+lowLoad*strokeActivity);
+        if(family==='overhead')bodyDrop+=.14*strokeActivity;
+    }
+    const mirror=back&&poseFamily!=='backhand'?-1:1;
+    const weightShift=side*mirror*blendChannel(pose,'Hips','rotation','y')*.14;
+    // Rotate around the pelvis, not the ground origin. This keeps the head and
+    // shoulders over the support base while the torso coils above planted feet.
+    upper.rotation.set(.055-blendChannel(pose,'Torso','rotation','x')*.55,
+        blendChannel(pose,'Torso','rotation','y')*(-side)*mirror,blendChannel(pose,'Torso','rotation','z')*(-side));
+    const pivot=v(0,.88,0),rotatedPivot=pivot.clone().applyEuler(upper.rotation);
+    upper.position.copy(pivot).sub(rotatedPivot).add(v(weightShift,bodyDrop,blendChannel(pose,'Hips','position','z')));
     upper.updateMatrixWorld(true);visual.updateMatrixWorld(true);
     for(const [name,s] of [['left',1],['right',-1]]) {
         const leg=legs[name],swing=Math.sin(gait+(s===1?0:Math.PI))*travel;
-        const ankle=v(s*(.218+stance),Math.max(0,swing)*.085,swing*.19+.015);
-        const hip=v(s*.13+weightShift,.875+upper.position.y,0);
-        const knee=v(s*(.205+stance*.6)+weightShift*.65,.48+upper.position.y*.4,.185+strokeActivity*.045-swing*.055);
+        const footTarget=sample.footTargets?.[name];
+        const ankle=footTarget?visual.worldToLocal(v(footTarget.x,footTarget.y,footTarget.z)):
+            v(s*(.23+stance),Math.max(0,swing)*.075,swing*.19+.015);
+        const hip=visual.worldToLocal(upper.localToWorld(v(s*.13,.875,0)));
+        const shinEnd=ankle.clone().add(v(0,.095,0));
+        const legAxis=shinEnd.clone().sub(hip),legDistance=Math.max(.001,legAxis.length());legAxis.divideScalar(legDistance);
+        const thighLength=.445,shinLength=.425,reach=clamp(legDistance,.021,thighLength+shinLength-.001);
+        const along=(thighLength*thighLength-shinLength*shinLength+reach*reach)/(2*reach);
+        const kneeBend=v(0,0,1).addScaledVector(legAxis,-legAxis.z).normalize();
+        const knee=hip.clone().addScaledVector(legAxis,along).addScaledVector(kneeBend,Math.sqrt(Math.max(0,thighLength*thighLength-along*along)));
         alignSegment(leg.thigh,hip,knee,.39);alignSegment(leg.shorts,hip,hip.clone().lerp(knee,.66),.27);leg.knee.position.copy(knee);
-        alignSegment(leg.shin,knee,ankle.clone().add(v(0,.095,0)),.34);
-        updateLegSkin(leg.legSkin,hip,knee,ankle.clone().add(v(0,.095,0)));
+        alignSegment(leg.shin,knee,shinEnd,.34);updateLegSkin(leg.legSkin,hip,knee,shinEnd);
         alignSegment(leg.sock,ankle.clone().add(v(0,.07,0)),ankle.clone().add(v(0,.175,0)),.105);
-        leg.foot.position.copy(ankle);leg.foot.rotation.set(-Math.max(0,-swing)*.22,s*.08,0);
+        leg.foot.position.copy(ankle);
+        // Shoes retain court-facing orientation while the torso tracks the shot.
+        const courtYaw=sample.footTargets?(sample.worldPosition.z<0?0:Math.PI)-visual.rotation.y:0;
+        leg.foot.rotation.set(0,courtYaw+s*.08,0);
     }
     const contact=sample.paddle?.worldContactTarget;
     const target=contact?visual.worldToLocal(v(contact.x,contact.y,contact.z)):v(side*.36,.8,.37);
-    const bounded=target.clone();const shoulderApprox=v(side*.265,1.33+upper.position.y,0),offset=bounded.clone().sub(shoulderApprox);
-    if(offset.length()>.84)bounded.copy(shoulderApprox).add(offset.setLength(.84));
-    let face;
-    if(pose) {
-        face=paddleKey(pose.from,action,side,bounded).lerp(paddleKey(pose.to,action,side,bounded),smooth(pose.progress));
-    } else face=v(side*.17,1.105+upper.position.y,.43);
-    // The renderer alone adjusts the arm at contact. The trajectory and player root
-    // stay authoritative, including low contacts and left handed strokes.
-    if(contact&&contactWeight>0)face.lerp(target,contactWeight);
-    const shoulder=visual.worldToLocal(upper.localToWorld(v(side*.258,1.325,.0)));
-    const direction=v(0,1,.13).normalize().lerp(face.clone().sub(shoulder).normalize(),Math.max(strokeActivity,contactWeight)).normalize();
-    const paddleNormal=v(0,0,1).addScaledVector(direction,-direction.z).normalize();
-    if(paddleNormal.lengthSq()<.01)paddleNormal.set(1,0,0);
+    let face=pose?strokeFace(sample,family,side,target,back):v(side*.17,1.105+bodyDrop,.43);
+    // Contact is already a curve key; this correction is only for legacy callers
+    // with a target but no sampled stroke. Never alter the authoritative ball.
+    if(contact&&contactWeight>0&&!pose)face.lerp(target,contactWeight);
+    const shoulder=visual.worldToLocal(upper.localToWorld(v(side*.258,1.325,0)));
+    let radial=face.clone().sub(shoulder).normalize();
+    const lobFinish=sample.profile?clamp((sample.strokeTime/sample.profile.duration-sample.profile.contactRatio)/(sample.profile.recoverRatio-sample.profile.contactRatio)):0;
+    const authoredOpen=family==='lob'?.64-.48*smooth(lobFinish):soft?.28:family==='serve'?.13:compact?.07:.045;
+    const open=.045+(authoredOpen-.045)*strokeActivity;
+    const paddleNormal=v(side*.08,open,1).normalize();
+    let direction=v(0,1,0).lerp(radial,(compact?.22:family==='lob'?.32:.68)*strokeActivity).normalize();
+    direction.addScaledVector(paddleNormal,-direction.dot(paddleNormal)).normalize();
+    const maxReach=.573,grip=.235;
+    // Keep the wrist inside the fixed two-segment arm envelope. A low paddle
+    // tip can point below its grip; forcing the long axis upward stretches the
+    // forearm. Solve the permitted angle in the paddle plane continuously.
+    let delta=face.clone().sub(shoulder),normalDistance=delta.dot(paddleNormal);
+    let planar=delta.clone().addScaledVector(paddleNormal,-normalDistance);
+    const planarLength=planar.length();
+    if(normalDistance*normalDistance+(planarLength-grip)**2>maxReach*maxReach){
+        let low=0,high=1;
+        for(let i=0;i<12;i++){
+            const middle=(low+high)/2;
+            if((normalDistance*middle)**2+(planarLength*middle-grip)**2<=maxReach*maxReach)low=middle;else high=middle;
+        }
+        face.copy(shoulder).addScaledVector(delta,low);
+    }
+    delta=face.clone().sub(shoulder);normalDistance=delta.dot(paddleNormal);
+    planar=delta.clone().addScaledVector(paddleNormal,-normalDistance);
+    if(planar.lengthSq()>1e-10){
+        const optimal=planar.clone().normalize();
+        const needed=(delta.lengthSq()+grip*grip-maxReach*maxReach)/(2*grip);
+        if(direction.dot(delta)<needed){
+            const angle=Math.acos(clamp(needed/planar.length(),-1,1));
+            const signed=Math.atan2(paddleNormal.dot(new THREE.Vector3().crossVectors(optimal,direction)),optimal.dot(direction));
+            const allowed=clamp(signed,-angle,angle);
+            direction.copy(optimal).multiplyScalar(Math.cos(allowed))
+                .addScaledVector(new THREE.Vector3().crossVectors(paddleNormal,optimal),Math.sin(allowed)).normalize();
+        }
+    }
     const paddleX=new THREE.Vector3().crossVectors(direction,paddleNormal).normalize();
     paddleNormal.crossVectors(paddleX,direction).normalize();
     paddle.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(paddleX,direction,paddleNormal));paddle.position.copy(face);
     const wrist=face.clone().addScaledVector(direction,-.235);
     updateArm(d.handedness==='right'?arms.right:arms.left,shoulder,wrist,side);
     const supportShoulder=visual.worldToLocal(upper.localToWorld(v(-side*.258,1.325,0)));
-    const supportWrist=action==='backhand'?wrist.clone().add(v(-side*.11,.015,-.025)):v(-side*.18,.98+upper.position.y,.34+travel*Math.cos(gait)*.04);
+    // A single-handed backhand keeps the free hand clear as a counterbalance.
+    // There is no floating second hand masquerading as a two-handed grip.
+    const supportWrist=visual.worldToLocal(upper.localToWorld(v(-side*(.23+(back?.13*strokeActivity:0)),1.02,.28-(back?.20*strokeActivity:0))));
     updateArm(d.handedness==='right'?arms.left:arms.right,supportShoulder,supportWrist,-side);
-    head.rotation.set(clamp((face.y-1.2)*-.13,-.12,.15),clamp(face.x*.24,-.22,.22),0);
+    head.rotation.set(clamp((face.y-1.2)*-.15,-.14,.15),clamp(face.x*.20,-.20,.20),0);
     root.updateMatrixWorld(true);updateBodyBatch(d.bodyBatch,visual);d.paddleFaceWorld.copy(face).applyMatrix4(visual.matrixWorld);d.shoulderWorld.copy(shoulder).applyMatrix4(visual.matrixWorld);
-    d.animation={...sample,frame:pose?`${pose.from}:${pose.to}`:action,poseProgress:pose?.progress??0,contactWeight,bodyYaw:visual.rotation.y,volumetric:true};
+    d.animation={...sample,frame:pose?`${pose.from}:${pose.to}`:action,poseProgress:pose?.progress??0,contactWeight,bodyYaw:visual.rotation.y,volumetric:true,
+        strokeFamily:family,backhand:back,wristReach:shoulder.distanceTo(wrist),paddleFaceNormal:paddleNormal.toArray(),
+        supportFeet:Object.fromEntries(Object.entries(legs).map(([name,leg])=>[name,leg.foot.getWorldPosition(new THREE.Vector3()).toArray()]))};
 }
 
 // The replay can switch renderers without changing its presentation contract.

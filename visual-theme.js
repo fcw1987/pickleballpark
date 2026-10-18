@@ -1,4 +1,4 @@
-/* Original Pickleball Park visual contract; shared by DOM, SVG, 3D and asset tools. */
+/* Original Pickleboard visual contract; shared by DOM, SVG, 3D and asset tools. */
 globalThis.PICKLEBOARD_VISUAL = Object.freeze({
   palette: Object.freeze({
     ink: '#263449', navy: '#304762', navyLight: '#526d86', navyDark: '#1c2b40',

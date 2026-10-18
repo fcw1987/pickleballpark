@@ -25,7 +25,7 @@ test('Help diagnostics preserve the loaded snapshot when the server changes or d
 
 test('the source version endpoint exists and Help remains available in Planner',async({page,request})=>{
   const endpoint=await request.get('/version.json');expect(endpoint.ok()).toBe(true);
-  expect((await endpoint.json()).product).toBe('Pickleball Park');
+  expect((await endpoint.json()).product).toBe('Pickleboard');
   await page.goto('/');await settleBuilderStartup(page);
   await page.evaluate(()=>playBuilder.action('workspace','planner'));
   await page.getByRole('button',{name:'Open help and information',exact:true}).click();

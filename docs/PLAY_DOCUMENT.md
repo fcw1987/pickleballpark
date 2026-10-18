@@ -1,4 +1,4 @@
-# Pickleball Park play document and compiler
+# Pickleboard play document and compiler
 
 Status: schema version 1, trajectory model version 1. Rules reference checked 2026-09-07 against the [2026 USA Pickleball Official Rulebook PDF](https://usapickleball.org/docs/rules/USAP-Official-Rulebook.pdf), the [official rules page](https://usapickleball.org/rules/), and the [USA Pickleball Rules Summary](https://usapickleball.org/rules/summary/). The implemented standing-doubles subset follows serve position in 7.A, volley-serve requirements in 7.C, drop-serve requirements in 7.D, serve placement in 7.E, the opening two-bounce rule in 10.A, and non-volley-zone volley footing and momentum in 11.A. These references use the reorganized 2026 section numbers.
 

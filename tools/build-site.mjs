@@ -8,7 +8,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const approvedManifestSha256 = '0a41d77f3543744a90381c83a61b4bd99ae7738aa3cd60af3f1b75030dc15802';
 const approved = JSON.parse(await readFile('tests/fixtures/approved-runtime.json'));
 const version = JSON.parse(await readFile('version.json'));
-if (version.product !== 'Pickleball Park' || !Number.isInteger(version.schemaVersion)) throw Error('Invalid version.json metadata');
+if (version.product !== 'Pickleboard' || !Number.isInteger(version.schemaVersion)) throw Error('Invalid version.json metadata');
 if (!version.sourceRevision || !/^[0-9a-f]{40}$/.test(version.sourceRevision)) throw Error('version.json must identify a full source revision');
 const rootFiles = await readdir('.');
 const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(async e => e.isDirectory() ? walk(`${dir}/${e.name}`) : `${dir}/${e.name}`))).flat();
@@ -31,5 +31,5 @@ const manifest = JSON.stringify({ approvedSource: approved.source, files }, null
 if (hash(manifest) !== approvedManifestSha256) throw Error('Approved manifest changed; a new reviewed baseline is required');
 await writeFile('dist/runtime-manifest.json', manifest);
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-await writeFile('dist/build-info.json', JSON.stringify({ product: 'Pickleball Park', revision, approvedSource: approved.source, sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null, runtimeManifestSha256: hash(manifest), runtimeFiles: files.length, runtimeBytes: files.reduce((n, f) => n + f.bytes, 0), publicationMetadata: ['build-info.json', 'runtime-manifest.json'] }, null, 2) + '\n');
+await writeFile('dist/build-info.json', JSON.stringify({ product: 'Pickleboard', revision, approvedSource: approved.source, sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null, runtimeManifestSha256: hash(manifest), runtimeFiles: files.length, runtimeBytes: files.reduce((n, f) => n + f.bytes, 0), publicationMetadata: ['build-info.json', 'runtime-manifest.json'] }, null, 2) + '\n');
 console.log(`Packaged ${files.length} unchanged approved runtime files (${files.reduce((n, f) => n + f.bytes, 0)} bytes), plus 2 publication metadata files; revision ${revision}`);

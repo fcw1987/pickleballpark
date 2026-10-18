@@ -7,7 +7,7 @@ import { compilePlayTimeline } from '../three-d-core.js';
 import { PICKLEBOARD_PLAYS as plays } from '../play-catalog.js';
 
 const camera={x:9,y:6,z:4};
-const sample=(segment,handedness,time)=>sampleActorPresentation({segment,playerId:segment.shotSemantics.playerId,localTime:time,cameraPosition:camera,handedness});
+const sample=(segment,handedness,time)=>sampleActorPresentation({instructionalMovement:true,segment,playerId:segment.shotSemantics.playerId,localTime:time,cameraPosition:camera,handedness});
 const sampleReady={worldPosition:{x:1.1,z:-2.7},bodyFacing:{x:0,z:1},action:'ready',phase:'ready',timeSeconds:0};
 
 test('original athletes have court-scale shaped depth, clothing, exposed legs and individuality',()=>{

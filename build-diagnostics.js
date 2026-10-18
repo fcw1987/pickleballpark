@@ -39,7 +39,7 @@ const safeServerStatus = value => typeof value === 'string' && SAFE_STATUS.test(
 export function formatBuildDiagnostics({ running = BUILD_IDENTITY, server = null, environment = 'online' } = {}) {
   const loaded = publicIdentity(running);
   const lines = [
-    'Pickleball Park build diagnostics',
+    'Pickleboard build diagnostics',
     `Running build: ${buildIdentityLabel(loaded)}`,
     `Running status: ${loaded.status} (${loaded.developmentStatus})`,
     `Source revision: ${loaded.sourceRevision || 'unavailable'}`,

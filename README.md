@@ -1,12 +1,12 @@
-# Pickleball Park 🏓
+# Pickleboard 🏓
 
-Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same pixel art park.
+Pickleboard opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same pixel art park.
 
 The local Smart Rally candidate adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the current requirements and verification ledger](docs/SMART_RALLY_STATUS.md). This local continuation does not change the public fidelity candidate.
 
-Pickleball Park remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
+Pickleboard remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
 
-Formerly Pickleboard. The public snapshot preserves the accepted coaching behavior under the Pickleball Park name. See [rebrand verification](docs/REBRAND_VERIFICATION.md), [release notes](docs/RELEASE_NOTES.md), and [rename handoff](docs/RENAME_HANDOFF.md).
+The product name is **Pickleboard**. Earlier review evidence contains temporary park names; those records remain historical. The current title, menus, install label and park signs use Pickleboard. See [release notes](docs/RELEASE_NOTES.md) and [identity continuity](docs/RENAME_HANDOFF.md).
 
 Phone authoring now includes a shallow shot editor, full movement/contact details, direct placement with cancellation, and recoverable local saving. See the [unified iPhone candidate report](docs/UNIFIED_IPHONE_VERIFICATION.md) for the preserved baseline, screenshots, limitations, and verification.
 
@@ -169,7 +169,7 @@ These starting positions and team assignments are intentional game behavior.
 
 ## Public API
 
-For compatibility, the browser continues to expose the current instance as `window.pickleboard`. This internal API name is not the product identity:
+For compatibility, the browser continues to expose the current instance as `window.pickleboard`. This API name remains stable:
 
 ```javascript
 window.pickleboard.getTokenPositions()
@@ -201,7 +201,7 @@ Changing a shell asset—including any player PNG—requires incrementing the st
 
 ## Browser support
 
-The production code targets current evergreen Chrome, Edge, Firefox, and Safari releases with SVG, CSS custom properties, service workers, Cache Storage, and modern JavaScript support. Chromium is the primary automated quality gate. Supplementary WebKit checks run with `npx playwright test --config playwright.webkit.config.mjs` after `npx playwright install webkit`. See [current verification](docs/REBRAND_VERIFICATION.md) for public evidence scope and browser limitations.
+The production code targets current evergreen Chrome, Edge, Firefox, and Safari releases with SVG, CSS custom properties, service workers, Cache Storage, and modern JavaScript support. Chromium is the primary automated quality gate. Supplementary WebKit checks run with `npx playwright test --config playwright.webkit.config.mjs` after `npx playwright install webkit`. See [historical verification](docs/REBRAND_VERIFICATION.md) for public evidence scope and browser limitations.
 
 ## Contributing
 
@@ -215,17 +215,17 @@ This repository does not currently include a formal software license. The owner 
 
 The default visual language uses original compact game-inspired artwork across the editor, guided Plays and 3D. Run `node tools/generate-art.mjs` to regenerate sprites, icons and density comparisons without external tools or dependencies. The default builder requests Three.js; the explicit planner entry defers it until 3D is requested, and the service worker still caches its local modules in the background for offline replay.
 
-See [visual direction](docs/VISUAL_DIRECTION.md), [asset provenance](docs/ASSET_PROVENANCE.md), [current verification](docs/REBRAND_VERIFICATION.md), and [public release snapshot](docs/RELEASE_PUBLICATION_SUMMARY.md). Reproducible generators and local review tools remain available in the source tree; their historical capture outputs are not part of the public evidence set.
+See [visual direction](docs/VISUAL_DIRECTION.md), [asset provenance](docs/ASSET_PROVENANCE.md), [historical verification](docs/REBRAND_VERIFICATION.md), and [public release snapshot](docs/RELEASE_PUBLICATION_SUMMARY.md). Reproducible generators and local review tools remain available in the source tree; their historical capture outputs are not part of the public evidence set.
 
 ## Pixel replay implementation
 
 3D replay now uses original directional pixel athletes inside the 3D court, with animated paddle contact, a high-contrast ball and stable elevated camera framing. The editable SVG board retains precise dragging/drawing and snapshot restoration. Replay runs one timeline and renders unchanged paused views only when needed.
 
-See [current rebrand verification](docs/REBRAND_VERIFICATION.md) and [reproducible actor asset contract](docs/PIXEL_ACTOR_ASSETS.md). Run `node tools/generate-replay-art.mjs` to regenerate replay art; no additional dependency is needed.
+See [historical rebrand verification](docs/REBRAND_VERIFICATION.md) and [reproducible actor asset contract](docs/PIXEL_ACTOR_ASSETS.md). Run `node tools/generate-replay-art.mjs` to regenerate replay art; no additional dependency is needed.
 
-## Rebrand maintenance
+## Product name maintenance
 
-Use **Pickleball Park** in prose, **PICKLEBALL PARK** in wordmarks, and `pickleballpark` for new project-owned machine names. Keep existing remote URLs factual until the coordinated rename is authorized. `npm run check:brand` checks active branding and documented compatibility/history exceptions. Regenerate art at its source; do not patch exported pixels alone. Installation identity, the theme key, service-worker path and internal API names deliberately retain continuity; see [rename handoff](docs/RENAME_HANDOFF.md).
+Use **Pickleboard** in prose, **PICKLEBOARD** in wordmarks, and `pickleboard` for package identity. Preserve existing URLs and saved-data keys. `npm run check:brand` checks active branding and explicit historical evidence exceptions. Regenerate art at its source; do not patch exported pixels alone. Installation identity, the theme key, service-worker path and internal API names deliberately retain continuity; see [rename handoff](docs/RENAME_HANDOFF.md).
 
 ## Court-first local layout candidate
 

@@ -3,55 +3,50 @@ import test from 'node:test';
 import { validateBrandFiles } from '../tools/check-brand.mjs';
 
 const baseline = new Map([
-  ['index.html', '<title>Pickleball Park - Build a Play</title><img src="icons/icon.png">'],
-  ['manifest.json', JSON.stringify({ name: 'Pickleball Park', short_name: 'Pickleball Park', start_url: './index.html', icons: [{ src: 'icons/icon.png' }] })],
-  ['package.json', JSON.stringify({ name: 'pickleballpark', description: 'Pickleball Park app' })],
-  ['package-lock.json', JSON.stringify({ name: 'pickleballpark', packages: { '': { name: 'pickleballpark' } } })],
-  ['sw.js', "const CACHE_PREFIX = 'pickleboard-';\nconst STATIC_CACHE = `${CACHE_PREFIX}static-v28`;\nconsole.warn('Pickleball Park static cache');"],
-  ['README.md', '# Pickleball Park\n'],
-  ['tools/generate-park-art.mjs', "const glyphs={P:['1'],I:['1'],C:['1'],K:['1'],L:['1'],E:['1'],B:['1'],A:['1'],R:['1']}; text(c, 'PICKLEBALL', 1, 1, C.x); text(c, 'PARK', 1, 2, C.x);"],
+  ['index.html', '<title>Pickleboard - Build a Play</title><img src="icons/icon.png">'],
+  ['manifest.json', JSON.stringify({ name: 'Pickleboard', short_name: 'Pickleboard', start_url: './index.html', icons: [{ src: 'icons/icon.png' }] })],
+  ['package.json', JSON.stringify({ name: 'pickleboard', description: 'Pickleboard app' })],
+  ['package-lock.json', JSON.stringify({ name: 'pickleboard', packages: { '': { name: 'pickleboard' } } })],
+  ['sw.js', "const CACHE_PREFIX = 'pickleboard-';\nconst STATIC_CACHE = `${CACHE_PREFIX}static-v28`;\nconsole.warn('Pickleboard static cache');"],
+  ['README.md', '# Pickleboard\n'],
+  ['tools/generate-park-art.mjs', "const glyphs={P:['1'],I:['1'],C:['1'],K:['1'],L:['1'],E:['1'],B:['1'],O:['1'],A:['1'],R:['1'],D:['1']}; text(c, 'PICKLEBOARD', 25, 11, C.x, 2);"],
+  ['three-d-world.js', "lettering('PICKLE', 1.12, .235); lettering('BOARD', .80, .21);"],
+  ['builder-ui.js', "el('strong', '', 'PICKLEBOARD')"],
   ['icons/icon.png', null]
 ]);
 const errorsAfter = (file, content) => validateBrandFiles(new Map([...baseline, [file, content]]));
 
-test('accepts canonical metadata and exact compatibility identities', () => assert.deepEqual(validateBrandFiles(baseline), []));
-test('rejects former branding in active UI, README, and current docs', () => {
-  assert(errorsAfter('index.html', '<title>Pickleboard</title><img src="icons/icon.png">').some(error => error.includes('index.html')));
-  assert(errorsAfter('index.html', '<title>Pickle Board</title><img src="icons/icon.png">').some(error => error.includes('index.html')));
-  assert(errorsAfter('index.html', '<title>PB Court Planner</title><img src="icons/icon.png">').some(error => error.includes('index.html')));
-  assert(errorsAfter('README.md', '# Pickleboard\n').some(error => error.includes('README.md')));
-  assert(errorsAfter('docs/current.md', '# Pickleboard release\n').some(error => error.includes('docs/current.md')));
-  assert(errorsAfter('docs/park-coaching/new-current.md', '# Pickleboard returns\n').some(error => error.includes('new-current.md')));
-  assert(errorsAfter('tools/new-report.mjs', "console.log('pickleboard app')").some(error => error.includes('new-report.mjs')));
+test('accepts Pickleboard with stable install and saved-data contracts', () => {
+  const files = new Map(baseline);
+  files.set('builder-storage.js', "export const STORAGE_KEY = 'pickleballpark-builder-v1';");
+  files.set('script.js', 'class Pickleboard {}; window.pickleboard = new Pickleboard();');
+  assert.deepEqual(validateBrandFiles(files), []);
 });
-test('rejects stale package metadata and incorrectly cased asset references', () => {
-  assert(errorsAfter('package.json', JSON.stringify({ name: 'pickleboard', description: 'Pickleboard app' })).some(error => error.includes('package.json')));
-  assert(errorsAfter('index.html', '<title>Pickleball Park - Build a Play</title><img src="icons/Icon.png">').some(error => error.includes('incorrectly cased')));
+test('rejects temporary park names in active UI, current docs and new evidence', () => {
+  for (const name of ['Pickleball Park', 'Paddle Park', 'PICKLEBALL PARK', 'pickleball park']) {
+    for (const file of ['index.html', 'README.md', 'docs/current.md', 'docs/park-coaching/new-current.md', 'tools/new-report.mjs']) {
+      assert(errorsAfter(file, name).some(error => error.includes('unapproved product-name drift')));
+    }
+  }
 });
-test('rejects an incomplete generated sign while allowing exact archive and contract exceptions', () => {
-  assert(errorsAfter('tools/generate-park-art.mjs', "const glyphs={P:['1'],A:['1'],R:['1'],K:['1']}; text(c, 'PARK', 1, 2, C.x);").some(error => error.includes('full PICKLEBALL')));
-  const allowed = new Map(baseline);
-  allowed.set('script.js', 'class Pickleboard {}; window.pickleboard = new Pickleboard(); const x = PICKLEBOARD_VISUAL;');
-  allowed.set('docs/park-coaching/technical-review.md', '# Pickleboard historical evidence');
-  assert.deepEqual(validateBrandFiles(allowed), []);
+test('requires exact current package identity and correctly cased references', () => {
+  assert(errorsAfter('package.json', JSON.stringify({ name: 'pickleballpark', description: 'Pickleboard app' })).some(error => error.includes('package name')));
+  assert(errorsAfter('index.html', '<title>Pickleboard - Build a Play</title><img src="icons/Icon.png">').some(error => error.includes('incorrectly cased')));
 });
-
-test('allows only the actual accepted before title in comparison metadata', () => {
-  const records = [{name:'before', revision:'dd0c3fa', actual:{title:'Pickleboard - Pickleball Court Planner'}}, {name:'after', actual:{title:'Pickleball Park - Build a Play'}}];
-  assert.deepEqual(errorsAfter('docs/rebrand/capture-metadata.json', JSON.stringify({records})), []);
-  records[1].actual.title = 'Pickleboard - Pickleball Court Planner';
-  assert(errorsAfter('docs/rebrand/capture-metadata.json', JSON.stringify({records})).some(error => error.includes('unapproved')));
+test('requires complete banner and village sign lettering', () => {
+  assert(errorsAfter('tools/generate-park-art.mjs', "text(c, 'PARK', 1, 2, C.x);").some(error => error.includes('full PICKLEBOARD')));
+  assert(errorsAfter('three-d-world.js', "lettering('PADDLE', 1.12, .235); lettering('PARK', .80, .21);").some(error => error.includes('village sign')));
+  assert(errorsAfter('builder-ui.js', "el('strong', '', 'PARK')").some(error => error.includes('menu heading')));
 });
-
-test('catches case-insensitive spaced brand variants without treating lowercase Paeth variables as a wordmark', () => {
-  for (const name of ['PICKLE BOARD', 'pickle board', 'pIcKlEbOaRd']) assert(errorsAfter('docs/new.md', name).some(error => error.includes('unapproved')));
+test('allows named historical captures without exempting new sibling reports', () => {
+  const capture = JSON.stringify({ actual: { title: 'Pickleball Park - Build a Play' } });
+  assert.deepEqual(errorsAfter('docs/town-art-performance/final/matched-desktop.json', capture), []);
+  assert(errorsAfter('docs/town-art-performance/final/new-report.json', capture).some(error => error.includes('unapproved')));
+  assert.deepEqual(errorsAfter('docs/RELEASE_NOTES.md', '# Pickleboard current\n\n---\n\n# Pickleball Park historical'), []);
+  assert(errorsAfter('docs/RELEASE_NOTES.md', '# Pickleball Park current\n\n---\n\n# Pickleball Park historical').some(error => error.includes('unapproved')));
 });
-
-
-test('permits exact repository paths only in named performance identity evidence', () => {
-  const file = 'docs/town-art-performance/final/matched-desktop.json';
-  const evidence = { runtimeRoot: '/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard' };
-  assert.deepEqual(errorsAfter(file, JSON.stringify(evidence)), []);
-  assert(errorsAfter(file, JSON.stringify({ ...evidence, title: 'Pickleboard app' })).some(error => error.includes('unapproved')));
-  assert(errorsAfter('docs/new-evidence.json', JSON.stringify(evidence)).some(error => error.includes('unapproved')));
+test('preserves install identity and owned cache namespace across versions', () => {
+  assert(errorsAfter('manifest.json', JSON.stringify({ name: 'Pickleboard', short_name: 'Pickleboard', start_url: '/new', id: '/new' })).some(error => error.includes('install identity')));
+  assert(errorsAfter('sw.js', "const CACHE_PREFIX = 'new-';\nconst STATIC_CACHE = `${CACHE_PREFIX}static-v29`;\nconsole.warn('Pickleboard static cache');").some(error => error.includes('cache prefix')));
+  assert.deepEqual(errorsAfter('sw.js', "const CACHE_PREFIX = 'pickleboard-';\nconst STATIC_CACHE = `${CACHE_PREFIX}static-v29`;\nconsole.warn('Pickleboard static cache');"), []);
 });

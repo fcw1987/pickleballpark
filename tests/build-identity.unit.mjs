@@ -5,7 +5,7 @@ import { BUILD_IDENTITY, normalizeBuildIdentity, snapshotBuildIdentity, isBuildI
 
 test('development identity is explicit and has digest exclusions', () => {
   const development = normalizeBuildIdentity();
-  assert.equal(development.product, 'Pickleball Park');
+  assert.equal(development.product, 'Pickleboard');
   assert.equal(development.status, 'development');
   assert.equal(development.sourceRevision, null);
   assert.deepEqual(development.runtimeFileset.exclusions, ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json']);
