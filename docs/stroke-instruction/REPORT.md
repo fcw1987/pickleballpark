@@ -1,6 +1,6 @@
 # Pickleboard instructional stroke pass
 
-The scoped 3D stroke improvement is implemented and independently accepted from actual rendered phase sheets and dense motion samples. Pickleboard naming is restored, including the existing village sign. The accepted environment is retained. The default 2D presentation matches frozen baseline signatures; the 3D renderer explicitly opts into the new choreography.
+The scoped 3D stroke improvement is implemented and independently accepted from actual rendered phase sheets and dense motion samples. Start with the concise [handoff and launch notes](../STROKE_HANDOFF.md). Pickleboard naming is restored, including the existing village sign. The accepted environment is retained. The default 2D presentation matches frozen baseline signatures; the 3D renderer explicitly opts into the new choreography.
 
 Forehand and backhand use distinct preparation/contact sides and finishing arcs. Lob starts low and lifts to a high finish. World-space stance feet, fixed-length arm/leg IK, continuous paddle contact paths and gradual facing/recovery remove the observed skating, limb stretching and segment-boundary snaps. Ball paths, the shared clock, authoring/compiler/storage and Smart Rally mechanics are preserved.
 

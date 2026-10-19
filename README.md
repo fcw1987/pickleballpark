@@ -1,6 +1,8 @@
 # Pickleboard 🏓
 
-Pickleboard opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same pixel art park.
+Pickleboard opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same application.
+
+**Latest completed local candidate:** `feature/stroke-instruction`, with a rounded 3D town court, articulated athletes and distinct instructional strokes. Start with the [handoff and launch notes](docs/STROKE_HANDOFF.md) for its location, port 4177, exact verification results and remaining limitations. The [visual review](docs/stroke-instruction/review.html) contains actual before/after captures. This branch is a local review candidate; the public release is separate.
 
 The local Smart Rally candidate adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the current requirements and verification ledger](docs/SMART_RALLY_STATUS.md). This local continuation does not change the public fidelity candidate.
 
@@ -106,21 +108,23 @@ Fresh launch, draft restoration, import and lesson selection stay paused. Choosi
 
 The builder rests on the court, with a compact main menu and contextual editor. Speed, camera and Undo/Redo live in Playback options. The chapter picker keeps every shot reachable without a permanent sequence toolbar. Ordinary guided lessons retain their compact instruction context. Shot cues and chapter marks derive from the compiled timeline, with no independent animation timer.
 
-## Pixel actors and shared park
+## 2D actors and 3D town court
 
-The main editor uses compact 64px composites of the liked replay body/action artwork, with a stable `(32,54)` foot pivot and a 16/3-foot presentation box. Guided SVG and 3D animate the same authored atlas layers. Eight directional views, both teams and physical handedness preserve the connected sleeve, wrist, grip and paddle; the old centered free-hand artwork is no longer used. The replay court, net, positions and ball flight remain genuinely 3D. No visible volumetric toy athletes remain.
+The retained 2D presentation uses compact 64px composites of the replay body/action artwork, with a stable `(32,54)` foot pivot and a 16/3-foot presentation box. Its directional artwork and default shared sampler remain compatible with the accepted baseline.
 
-`three-d-presentation.js` separates world facing, travel, stroke phase and camera-relative artwork selection. Incoming players prepare before contact; both views share contact targets. The elevated SVG projection includes the vertical component of physical ball height, so overhead contacts do not stretch the arm to compensate for an incorrect projection. The ball retains its high-contrast outlined treatment, short past-position trail in replay and projected ground cue.
+The current 3D view uses articulated solid athletes in the accepted town-court environment. It explicitly opts into instructional choreography: distinct forehand, backhand and lob arcs, world-space planted feet, fixed-length limb IK, and continuous contact/recovery. Physical handedness is preserved. These are stylized teaching illustrations; the phone view shows broad stroke identity rather than fine wrist technique.
 
-`court-geometry.js` defines regulation dimensions and two centerline segments, baseline to kitchen only. `park-layout.js` places shared trees, shrubs, bench, sign and path outside the court. Quiet original pixel textures use teal, sage, layered greens and terracotta; geometry and annotations retain exact court coordinates.
+`three-d-presentation.js` separates world facing, travel and stroke phase, retaining camera-relative artwork selection for 2D. Incoming players prepare before contact; both views use the authoritative timeline and ball contacts. The elevated SVG projection includes physical ball height. The ball retains its high-contrast outlined treatment, short past-position trail in replay and projected ground cue.
+
+`court-geometry.js` defines regulation dimensions and two centerline segments, baseline to kitchen only. `park-layout.js` retains the 2D park layout; `three-d-world.js` builds the accepted rounded town scenery outside the 3D court. Teal, sage, layered greens and terracotta remain coordinated across the views; geometry and annotations retain exact court coordinates.
 
 ## Rendering and lifecycle
 
 Three.js **0.185.1** remains the only production dependency and loads when 3D is requested, including default builder startup. Local vendor modules and all runtime art are cached for offline use. The editor does not import Three.js. Its ground projection and inverse stay in `board-projection.js`; physical feet map to world meters at 0.3048 m/ft.
 
-Replay uses CSS size × DPR (capped at 2), antialiasing, no coarse full-scene pixel pass, and the existing Overhead, Sideline, Behind Green and Behind Orange cameras. Artwork pixels provide the style. Unchanged paused scenes and end holds do not continuously render. One session clock owns playback; hidden-tab return resets its timestamp baseline. Owned render resources and pending park fetches are released on exit, failure or replacement. Recoverable errors leave the board intact.
+Replay uses CSS size × DPR (capped at 3), antialiasing, and the existing Overhead, Sideline, Behind Green and Behind Orange cameras. A static color/depth cache reuses the town scenery while players and ball remain live. Unchanged paused scenes and end holds do not continuously render. One session clock owns playback; hidden-tab return resets its timestamp baseline. Owned render resources and pending park fetches are released on exit, failure or replacement. Recoverable errors leave the board intact.
 
-The original standalone trajectory/rig utilities remain for compatibility and tests; the normal visible replay uses the shared compiled rally sampler and pixel actors. No second Play catalog or clock is introduced. See [asset contract](docs/PIXEL_ACTOR_ASSETS.md), [park art](docs/PARK_ART.md), and [mission evidence](docs/PARK_COACHING_VERIFICATION.md).
+The original standalone trajectory/rig utilities remain for compatibility and tests. Both views use the shared compiled rally sampler; instructional 3D pose selection does not change ball paths or default 2D samples. No second Play catalog or clock is introduced. See the [current stroke handoff](docs/STROKE_HANDOFF.md), retained [2D asset contract](docs/PIXEL_ACTOR_ASSETS.md), and historical [park art](docs/PARK_ART.md) and [mission evidence](docs/PARK_COACHING_VERIFICATION.md).
 
 ## Court coordinate model
 
@@ -162,9 +166,9 @@ These starting positions and team assignments are intentional game behavior.
 ## Court appearance
 
 - Muted jade court and sage kitchen, cream lines, navy net
-- Navy faceless athletes with green and orange team bands
+- Solid 3D athletes in green and orange sportswear; retained pixel artwork in 2D
 - Yellow-green ball, orange user annotations, golden Play paths
-- Crisp pixel sprites and restrained 3D pixels; readable system-font controls
+- Rounded 3D town scenery, original 2D pixel sprites, and readable controls
 - Coordinated cream/day and navy/night panels
 
 ## Public API
