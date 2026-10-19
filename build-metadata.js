@@ -9,7 +9,7 @@ export const BUILD_IDENTITY_METADATA = {
   "product": "Pickleboard",
   "status": "local",
   "developmentStatus": "stamped local build",
-  "sourceRevision": "041f2856b0384c09a23e6c3fbca15c1f405431ea",
+  "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
   "sourceBranch": "feature/stroke-instruction",
   "sourceState": "clean",
   "sourceRevisionVerified": true,
@@ -17,8 +17,8 @@ export const BUILD_IDENTITY_METADATA = {
   "packageRevision": null,
   "evidenceRevision": null,
   "packageVerified": false,
-  "runtimeSha256": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
-  "runtimeDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+  "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
   "runtimeFileset": {
     "algorithm": "sha256",
     "include": "static application runtime files",
@@ -29,6 +29,6 @@ export const BUILD_IDENTITY_METADATA = {
       "runtime-manifest.json"
     ]
   },
-  "cacheVersion": "pickleboard-static-v29",
-  "buildTime": "2026-10-18T23:36:06.074Z"
+  "cacheVersion": "pickleboard-static-v30",
+  "buildTime": "2026-10-19T00:12:01.254Z"
 };
