@@ -1,0 +1,18 @@
+{
+  "rowOrder": [
+    "overhead-right",
+    "short-hop-right",
+    "moving-return-right",
+    "forehand-drive-right",
+    "backhand-drive-right",
+    "lob-right",
+    "forehand-drive-left",
+    "backhand-drive-left",
+    "lob-left",
+    "dink-right",
+    "backhand-dink-right",
+    "volley-right",
+    "backhand-block-right"
+  ],
+  "columns": "-0.32,-0.14,contact,+0.15,+0.44 seconds"
+}

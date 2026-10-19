@@ -13,6 +13,7 @@ const targets = (process.env.MATCHED_TARGETS || 'before=http://127.0.0.1:4174/in
   .split(',').map(entry => { const [label, url] = entry.split('='); return { label, url }; });
 const output = process.argv[2] || 'docs/art-overhaul/final/matched-performance.json';
 const roots = JSON.parse(process.env.MATCHED_ROOTS || '{}');
+const snapshotRevisions = JSON.parse(process.env.MATCHED_SNAPSHOT_REVISIONS || '{}');
 const [width, height] = (process.env.MATCHED_VIEWPORT || '1440x900').split('x').map(Number);
 const deviceScaleFactor = Number(process.env.MATCHED_DPR || 1);
 if (![width, height, deviceScaleFactor].every(n => Number.isFinite(n) && n > 0)) throw new Error('Invalid matched viewport or DPR');
@@ -43,8 +44,13 @@ for (const target of targets) {
   const servedVersion = await response.json();
   const localVersion = JSON.parse(readFileSync(`${runtimeRoot}/version.json`, 'utf8'));
   if (JSON.stringify(servedVersion) !== JSON.stringify(localVersion)) throw new Error(`${target.label}: served version differs`);
-  const currentHead = execFileSync('git', ['-C', runtimeRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-  identities[target.label] = { url: target.url, runtimeRoot, currentHead, sourceRevision: currentHead,
+  const snapshotRevision=snapshotRevisions[target.label];
+  if(snapshotRevision){
+    if(!/^[a-f0-9]{40}$/.test(snapshotRevision))throw new Error('Snapshot revision must be an exact commit');
+    for(const file of fileset.files){const source=execFileSync('git',['show',`${snapshotRevision}:${file.path}`],{maxBuffer:20*1024*1024});if(sha256(source)!==file.sha256)throw new Error(`Snapshot differs from source: ${file.path}`);}
+  }
+  const currentHead = snapshotRevision?null:execFileSync('git', ['-C', runtimeRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  identities[target.label] = { url: target.url, runtimeRoot, currentHead, sourceRevision: snapshotRevision||currentHead, snapshotSourceVerified:Boolean(snapshotRevision),
     stampedSourceRevision: localVersion.sourceRevision, runtimeDigest: fileset.digest,
     servedRuntimeDigest, servedRuntimeFiles: servedFiles.length, servedVersion, servedBytesVerified: true };
 }
@@ -57,8 +63,8 @@ const save = async completed => writeFile(output, JSON.stringify({ browser: brow
   viewport: `${width}x${height} DPR${deviceScaleFactor}`,
   host: { platform: process.platform, arch: process.arch, osRelease: os.release(), cpu: os.cpus()[0]?.model, logicalCPUs: os.cpus().length, node: process.version },
   workload: 'third-shot-drop, overhead, playback rate 0.5, 1200ms active warm-up, pause/reset, then active play for 6 seconds',
-  order: targets.map(target => target.label),
-  methodology: 'Targets executed sequentially in one isolated headless Chromium process in the recorded counterbalanced order, each in a fresh context with service workers blocked. Every served runtime file is byte-verified against its named root before launch. RAF interval is observer callback cadence, not display FPS; appRenderIntervalsMs is actual public renderer.render invocation cadence. CPU render timings wrap the complete public render call (including cache signature/copy/live work), not GPU completion. CPU totals per elapsed second permit comparison without assuming equal invocation counts. Start/end playback state verifies the active half-speed window. Three repeats per version are descriptive, not a statistical certification.',
+  order: targets.map(target => target.label), repetitionsPerLabel:Object.fromEntries([...new Set(targets.map(t=>t.label))].map(label=>[label,targets.filter(t=>t.label===label).length])),
+  methodology: 'Targets executed sequentially in one isolated headless Chromium process in the recorded target order, each in a fresh context with service workers blocked. Every served runtime file is byte-verified against its named root before launch. RAF interval is observer callback cadence, not display FPS; appRenderIntervalsMs is actual public renderer.render invocation cadence. CPU render timings wrap the complete public render call (including cache signature/copy/live work), not GPU completion. CPU totals per elapsed second permit comparison without assuming equal invocation counts. Start/end playback state verifies the active half-speed window. Repetition counts are recorded per label; these observations are descriptive, not a statistical certification.',
   records }, null, 2) + '\n');
 
 try {

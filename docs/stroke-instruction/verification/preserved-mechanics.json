@@ -1,0 +1,54 @@
+{
+  "baseline": "ac7ca5ff3a3022de3cb4ba843f2111b0f53987db",
+  "files": [
+    {
+      "path": "play-document.js",
+      "byteIdentical": true,
+      "sha256": "e82930383864d2dccd7a53e36e4c1f54de7026a8f23646cda94f9be8b237d5b4"
+    },
+    {
+      "path": "play-compiler.js",
+      "byteIdentical": true,
+      "sha256": "0a691e9bd5baf219bd819ebeac02f819ba06a202c3af698057cad41affd3fbb2"
+    },
+    {
+      "path": "builder-storage.js",
+      "byteIdentical": true,
+      "sha256": "1c29dc00fcd5e7b2546adf29eaad8a65dfbbdd962275a74f0149004bd2485b9e"
+    },
+    {
+      "path": "smart-rally-generator.js",
+      "byteIdentical": true,
+      "sha256": "808ebbe37385e1c4666307f7637ac7994ad0c6dbe66c23e91868fd1f8e2ed65e"
+    },
+    {
+      "path": "rally-proposals.js",
+      "byteIdentical": true,
+      "sha256": "6e084c15790f0e8327db59fbf3dc6c90f1177caba5fa61098b1263d09b361f8b"
+    },
+    {
+      "path": "coaching-session.js",
+      "byteIdentical": true,
+      "sha256": "7f8afd72689345ba2488a2511d714cad54299dbffd047c834bb038b8d03069f2"
+    },
+    {
+      "path": "guided-plays.js",
+      "byteIdentical": true,
+      "sha256": "3c0026759323efa725ef4307f1ab6bcd476a3122ec4a39f0d2bc145f4d102210"
+    },
+    {
+      "path": "three-d-ball.js",
+      "byteIdentical": true,
+      "sha256": "77e3047135c2b4093da60260aa85f462890b2decd7da8ca1c39d443050bee4e3"
+    },
+    {
+      "path": "play-catalog.js",
+      "byteIdentical": true,
+      "sha256": "62e5897fc1652c8dbf76afb17ec434dcf6e3e3ab6aa007f756db185d4a947f98"
+    },
+    {
+      "path": "three-d-core.js",
+      "identicalExceptProductComment": true
+    }
+  ]
+}

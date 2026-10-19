@@ -1,0 +1,32 @@
+[
+  {
+    "root": "/Users/fdub/Geese/pickleboard",
+    "head": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "branch": "integration/smart-rally-authoring",
+    "status": "?? docs/SMART_RALLY_REPORT.md"
+  },
+  {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-3/pickleboard",
+    "head": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+    "branch": "feature/dimensional-art-mobile",
+    "status": "?? docs/SMART_RALLY_REPORT.md"
+  },
+  {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard",
+    "head": "3751cef343062667a2413d0add95bcb134331311",
+    "branch": "feature/town-court-art",
+    "status": ""
+  },
+  {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf",
+    "head": "ac7ca5ff3a3022de3cb4ba843f2111b0f53987db",
+    "branch": "feature/town-art-perf",
+    "status": ""
+  },
+  {
+    "root": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+    "head": "a951019ab0833dc11277dfd1e6199c69c4477978",
+    "branch": "feature/stroke-instruction",
+    "status": "M tools/stroke-sheets.py\n?? docs/stroke-instruction/\n?? docs/stroke-review/"
+  }
+]

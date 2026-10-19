@@ -1,0 +1,343 @@
+{
+  "runtimeDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+  "sampling": "Each segment, both handednesses, all four actors: start, contact, contact±60ms where available, 15/35/65/85% and end. Actual rendered batch vertices checked finite; actual articulated segment scale checked.",
+  "scope": "Read-only renderer sweep. Deliberate overhead family + short-hop contactStyle remains inconsistent compiler metadata and is reported separately; compiler and trajectories were not modified.",
+  "cases": [
+    {
+      "id": "smart-99-seed12648430",
+      "shots": 99,
+      "samples": 5560,
+      "contactError": 1.807312143953211e-15,
+      "maxArmReach": 0.5730000000000002,
+      "thighError": 1.6653345369377348e-16,
+      "shinError": 2.7755575615628914e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "smart-shot-43",
+        "hand": "right",
+        "stroke": "drive",
+        "side": "forehand",
+        "target": {
+          "x": 0.9144000000000001,
+          "y": 0.67056,
+          "z": -4.8006
+        }
+      }
+    },
+    {
+      "id": "extreme-short-hop-reset-forehand",
+      "shots": 3,
+      "samples": 184,
+      "contactError": 4.965068306494546e-16,
+      "maxArmReach": 0.573,
+      "thighError": 5.551115123125783e-17,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "pressure-feed",
+        "hand": "left",
+        "stroke": "drive",
+        "side": "forehand",
+        "target": {
+          "x": -0.9144000000000001,
+          "y": 0.67056,
+          "z": 2.4384
+        }
+      }
+    },
+    {
+      "id": "extreme-short-hop-reset-backhand",
+      "shots": 3,
+      "samples": 184,
+      "contactError": 2.220446049250313e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "reset",
+        "hand": "left",
+        "stroke": "reset",
+        "side": "backhand",
+        "target": {
+          "x": 1.1166666976744186,
+          "y": 0.9144000000000001,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-short-hop-reset-short-hop",
+      "shots": 3,
+      "samples": 184,
+      "contactError": 4.965068306494546e-16,
+      "maxArmReach": 0.573,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 2.7755575615628914e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "pressure-feed",
+        "hand": "left",
+        "stroke": "short-hop",
+        "side": "forehand",
+        "target": {
+          "x": -0.9144000000000001,
+          "y": 0.24384000000000003,
+          "z": 2.4384
+        }
+      }
+    },
+    {
+      "id": "extreme-volley-block-forehand",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 4.965068306494546e-16,
+      "maxArmReach": 0.573,
+      "thighError": 5.551115123125783e-17,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "backhand-block",
+        "hand": "left",
+        "stroke": "volley",
+        "side": "forehand",
+        "target": {
+          "x": -1.1582400000000004,
+          "y": 0.9144000000000001,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-volley-block-backhand",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 2.220446049250313e-16,
+      "maxArmReach": 0.573,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "backhand-block",
+        "hand": "right",
+        "stroke": "volley",
+        "side": "backhand",
+        "target": {
+          "x": -1.1582400000000004,
+          "y": 0.9144000000000001,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-volley-block-short-hop",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 4.965068306494546e-16,
+      "maxArmReach": 0.573,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "backhand-block",
+        "hand": "left",
+        "stroke": "short-hop",
+        "side": "forehand",
+        "target": {
+          "x": -1.1582400000000004,
+          "y": 0.24384000000000003,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-lob-overhead-forehand",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 4.440892098500626e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 1.6653345369377348e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "overhead",
+        "hand": "left",
+        "stroke": "overhead",
+        "side": "forehand",
+        "target": {
+          "x": -0.8906256000000002,
+          "y": 2.1336,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-lob-overhead-backhand",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 4.577566798522237e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "overhead",
+        "hand": "right",
+        "stroke": "overhead",
+        "side": "backhand",
+        "target": {
+          "x": -0.8906256000000002,
+          "y": 2.1336,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-lob-overhead-short-hop",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 0.22047782226779045,
+      "maxArmReach": 0.573,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "overhead",
+        "hand": "right",
+        "stroke": "short-hop",
+        "side": "forehand",
+        "target": {
+          "x": -0.8906256000000002,
+          "y": 2.1336,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-dink-exchange-forehand",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 2.220446049250313e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 5.551115123125783e-17,
+      "shinError": 2.7755575615628914e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "backhand-dink",
+        "hand": "right",
+        "stroke": "dink",
+        "side": "forehand",
+        "target": {
+          "x": -0.5791200000000002,
+          "y": 0.67056,
+          "z": 1.7526000000000002
+        }
+      }
+    },
+    {
+      "id": "extreme-dink-exchange-backhand",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 4.440892098500626e-16,
+      "maxArmReach": 0.573,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "forehand-dink",
+        "hand": "left",
+        "stroke": "dink",
+        "side": "backhand",
+        "target": {
+          "x": -1.15824,
+          "y": 0.67056,
+          "z": -2.3774400000000004
+        }
+      }
+    },
+    {
+      "id": "extreme-dink-exchange-short-hop",
+      "shots": 2,
+      "samples": 128,
+      "contactError": 2.482534153247273e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 2.7755575615628914e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "backhand-dink",
+        "hand": "right",
+        "stroke": "short-hop",
+        "side": "forehand",
+        "target": {
+          "x": -0.5791200000000002,
+          "y": 0.24384000000000003,
+          "z": 1.6154400000000002
+        }
+      }
+    },
+    {
+      "id": "extreme-third-shot-drive-forehand",
+      "shots": 4,
+      "samples": 240,
+      "contactError": 8.881784197001252e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 2.7755575615628914e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "third-drive",
+        "hand": "right",
+        "stroke": "drive",
+        "side": "forehand",
+        "target": {
+          "x": 1.524,
+          "y": 0.67056,
+          "z": -5.1054
+        }
+      }
+    },
+    {
+      "id": "extreme-third-shot-drive-backhand",
+      "shots": 4,
+      "samples": 240,
+      "contactError": 4.440892098500626e-16,
+      "maxArmReach": 0.5730000000000001,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "fourth-block",
+        "hand": "right",
+        "stroke": "volley",
+        "side": "backhand",
+        "target": {
+          "x": 1.350264,
+          "y": 0.9144000000000001,
+          "z": 2.3164800000000008
+        }
+      }
+    },
+    {
+      "id": "extreme-third-shot-drive-short-hop",
+      "shots": 4,
+      "samples": 240,
+      "contactError": 9.930136612989092e-16,
+      "maxArmReach": 0.573,
+      "thighError": 1.1102230246251565e-16,
+      "shinError": 1.6653345369377348e-16,
+      "nonfinite": 0,
+      "worst": {
+        "step": "return",
+        "hand": "left",
+        "stroke": "short-hop",
+        "side": "forehand",
+        "target": {
+          "x": -1.4935200000000002,
+          "y": 0.24384000000000003,
+          "z": 4.96824
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+TAP version 13
+# Subtest: a support shoe remains world-fixed while approach steps continue during stroke preparation
+ok 1 - a support shoe remains world-fixed while approach steps continue during stroke preparation
+  ---
+  duration_ms: 55.815583
+  ...
+# Subtest: both soles remain grounded and fixed throughout the planted contact window for either hand
+ok 2 - both soles remain grounded and fixed throughout the planted contact window for either hand
+  ---
+  duration_ms: 44.85975
+  ...
+# Subtest: forehand and backhand contact occupy opposite lateral sides and mirror with physical handedness
+ok 3 - forehand and backhand contact occupy opposite lateral sides and mirror with physical handedness
+  ---
+  duration_ms: 38.6945
+  ...
+# Subtest: the paddle passes contact with a coherent nonzero tangent and lob has a controlled upward face
+ok 4 - the paddle passes contact with a coherent nonzero tangent and lob has a controlled upward face
+  ---
+  duration_ms: 8.754959
+  ...
+# Subtest: fixed-length arm IK stays within reach through low balls, lobs, overheads and recovery
+ok 5 - fixed-length arm IK stays within reach through low balls, lobs, overheads and recovery
+  ---
+  duration_ms: 410.336083
+  ...
+# Subtest: all rendered actors remain continuous across adjacent rally segments, including off hands and readiness
+ok 6 - all rendered actors remain continuous across adjacent rally segments, including off hands and readiness
+  ---
+  duration_ms: 36.583375
+  ...
+# Subtest: rendered thigh and shin lengths remain fixed while stepping and deeply loading low shots
+ok 7 - rendered thigh and shin lengths remain fixed while stepping and deeply loading low shots
+  ---
+  duration_ms: 409.149834
+  ...
+# Subtest: default shared presentation retains frozen 2D positions, facing, action, planting and timing
+ok 8 - default shared presentation retains frozen 2D positions, facing, action, planting and timing
+  ---
+  duration_ms: 12.942916
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1103.622083

@@ -1,0 +1,21 @@
+✔ existing overhead/short-hop source imports losslessly and its semantic conflict is reported by rule evaluation (2.664917ms)
+✔ ordinary automatic, forehand and backhand overheads retain exact contacts and bounded rendered limbs for both hands (202.413083ms)
+✔ builder-created and imported overhead/short-hop combinations meet their unchanged high contact with either hand and lateral placement (43.449625ms)
+✔ legacy combination keeps compiled Play, event arrays, sampled ball trajectory and default 2D presentation byte-for-byte unchanged (4.620875ms)
+✔ a support shoe remains world-fixed while approach steps continue during stroke preparation (46.744916ms)
+✔ both soles remain grounded and fixed throughout the planted contact window for either hand (30.7865ms)
+✔ forehand and backhand contact occupy opposite lateral sides and mirror with physical handedness (33.212708ms)
+✔ the paddle passes contact with a coherent nonzero tangent and lob has a controlled upward face (8.513208ms)
+✔ fixed-length arm IK stays within reach through low balls, lobs, overheads and recovery (344.966292ms)
+✔ all rendered actors remain continuous across adjacent rally segments, including off hands and readiness (30.123167ms)
+✔ rendered thigh and shin lengths remain fixed while stepping and deeply loading low shots (335.8625ms)
+✔ default shared presentation retains frozen 2D positions, facing, action, planting and timing (11.472125ms)
+✔ a complete generated 99-hit rally keeps both handed rigs finite, in reach and exactly on every contact (451.85975ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1343.506875

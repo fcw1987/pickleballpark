@@ -1,0 +1,16 @@
+{
+  "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+  "packageRevision": "2b4559abe460681e166d2d1a883119c0504b841d",
+  "main": "candidate-contact-final/stroke-report.json",
+  "acceptance": "candidate-contact-final/stroke-acceptance-summary.json",
+  "dense": "candidate-contact-final-dense/stroke-report.json",
+  "phone": "candidate-contact-final/stroke-sign-provenance.json",
+  "baseline": "baseline-contactv29/stroke-report.json",
+  "mainCases": 17,
+  "denseCases": 2,
+  "actualTokenAndActorHandVerifiedEveryFrame": true,
+  "allRuntimeDigestsMatch": true,
+  "errors": [],
+  "supersededHandednessEvidence": "Old candidate-final *-left images and baseline-contactv29-unverified-hands are not accepted handedness evidence; use the final verified cases. Card-occluded captures are preserved separately."
+}

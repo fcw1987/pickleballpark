@@ -1,0 +1,81 @@
+{
+  "runtimeDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+  "method": "Actual dynamic batch sneaker vertex minima at contact; source meshes compared independently; court acrylicY0, kitchenY0.001",
+  "results": [
+    {
+      "case": "overhead-backhand-right",
+      "courtSurfaceY": 0,
+      "kitchenSurfaceY": 0.001,
+      "feet": {
+        "Left": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        },
+        "Right": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        }
+      }
+    },
+    {
+      "case": "overhead-right",
+      "courtSurfaceY": 0,
+      "kitchenSurfaceY": 0.001,
+      "feet": {
+        "Left": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        },
+        "Right": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        }
+      }
+    },
+    {
+      "case": "short-hop-right",
+      "courtSurfaceY": 0,
+      "kitchenSurfaceY": 0.001,
+      "feet": {
+        "Left": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        },
+        "Right": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        }
+      }
+    },
+    {
+      "case": "forehand-drive-right",
+      "courtSurfaceY": 0,
+      "kitchenSurfaceY": 0.001,
+      "feet": {
+        "Left": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        },
+        "Right": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        }
+      }
+    },
+    {
+      "case": "lob-right",
+      "courtSurfaceY": 0,
+      "kitchenSurfaceY": 0.001,
+      "feet": {
+        "Left": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        },
+        "Right": {
+          "sourceMinY": 0,
+          "actualBodyBatchMinY": 0
+        }
+      }
+    }
+  ]
+}

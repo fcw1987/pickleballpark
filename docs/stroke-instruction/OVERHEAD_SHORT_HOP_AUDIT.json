@@ -1,0 +1,735 @@
+{
+  "head": "a951019ab0833dc11277dfd1e6199c69c4477978",
+  "runtimeDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+  "method": "Node source/runtime inspection only. No browser, no runtime mutation; 120 Hz simulation sampling of the actual articulated rig and GPU batch.",
+  "classification": "Schema-valid and available through ordinary editor/import surfaces, but semantically contradictory: compiler emits short-hop at seven feet. Existing rule validation rejects it; normal builder preview compilation does not invoke that rule check.",
+  "importPreservedSource": true,
+  "sourceUnchangedAfterCompile": true,
+  "nativeOverhead": {
+    "from": {
+      "x": 7,
+      "y": 34
+    },
+    "to": {
+      "x": 15,
+      "y": 5
+    },
+    "type": "overhead",
+    "stroke": "overhead",
+    "playerId": "player3",
+    "contact": {
+      "kind": "volley",
+      "heightFeet": 7.2,
+      "strokeSide": "forehand",
+      "feet": [
+        {
+          "x": 6.5,
+          "y": 33.2
+        },
+        {
+          "x": 7.4,
+          "y": 33.2
+        }
+      ],
+      "momentumEntersNonVolleyZone": false
+    },
+    "flight": {
+      "bounces": 1,
+      "apexFeet": 8.5
+    }
+  },
+  "cases": [
+    {
+      "id": "schema-valid-imported-overhead-short-hop",
+      "sourceRecipe": {
+        "id": "overhead",
+        "family": "overhead",
+        "hitter": "player3",
+        "receiver": "auto",
+        "contactStyle": "short-hop",
+        "target": {
+          "x": 15,
+          "y": 5
+        },
+        "arc": "medium",
+        "pace": "firm",
+        "movement": {
+          "intent": "hold",
+          "pinned": false
+        }
+      },
+      "schemaAccepted": true,
+      "compiledShotCount": 2,
+      "compilerFindings": [],
+      "effectiveShotCount": 2,
+      "effectiveFindings": [],
+      "evaluation": {
+        "ok": false,
+        "reason": "A short-hop contact must follow one nearby bounce at a low contact height."
+      },
+      "rules": {
+        "valid": false,
+        "violations": [
+          {
+            "code": "short-hop-contact",
+            "message": "A short-hop contact must follow one nearby bounce at a low contact height.",
+            "stepId": "overhead",
+            "playId": "overhead-short-hop-investigation",
+            "actor": "player3"
+          }
+        ]
+      },
+      "compiledOverheadShot": {
+        "from": {
+          "x": 7,
+          "y": 29.6
+        },
+        "to": {
+          "x": 15,
+          "y": 5
+        },
+        "intendedTarget": {
+          "x": 15,
+          "y": 5
+        },
+        "type": "short-hop",
+        "stroke": "short-hop",
+        "playerId": "player3",
+        "contact": {
+          "kind": "short-hop",
+          "heightFeet": 7,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1,
+          "speedMph": 40,
+          "apexFeet": 8.5,
+          "netClearanceInches": 16,
+          "bounceHeightFeet": 1.15,
+          "spin": {
+            "type": "topspin",
+            "rpm": 850
+          }
+        },
+        "authoring": {
+          "recipeId": "overhead",
+          "family": "overhead",
+          "receiver": "auto",
+          "movement": {
+            "intent": "hold",
+            "pinned": false
+          }
+        }
+      },
+      "semantics": {
+        "playerId": "player3",
+        "stroke": "short-hop",
+        "shotType": "short-hop",
+        "strokeSide": "forehand",
+        "artAction": "drop",
+        "visualStroke": "drop",
+        "profile": {
+          "duration": 0.54,
+          "contactRatio": 0.46,
+          "prepareRatio": 0.28,
+          "recoverRatio": 0.76,
+          "intensity": 0.45
+        },
+        "contact": {
+          "kind": "short-hop",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 7,
+            "y": 29.6,
+            "heightFeet": 7
+          },
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 7,
+          "y": 29.6,
+          "heightFeet": 7
+        }
+      },
+      "incomingBounces": 1,
+      "positions": [
+        {
+          "hand": "left",
+          "contactErrorMeters": 0.22047782226779045,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9212889420602147,
+            1.921612150544589,
+            2.3766810321548433
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000001,
+          "thighError": 1.1102230246251565e-16,
+          "shinError": 1.6653345369377348e-16
+        },
+        {
+          "hand": "right",
+          "contactErrorMeters": 0.2204778222677905,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9442390614663762,
+            1.921612150544589,
+            2.369217578689425
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000001,
+          "thighError": 1.1102230246251565e-16,
+          "shinError": 1.6653345369377348e-16
+        }
+      ]
+    },
+    {
+      "id": "ordinary-overhead-auto",
+      "sourceRecipe": {
+        "id": "overhead",
+        "family": "overhead",
+        "hitter": "player3",
+        "receiver": "auto",
+        "contactStyle": "auto",
+        "target": {
+          "x": 15,
+          "y": 5
+        },
+        "arc": "medium",
+        "pace": "firm",
+        "movement": {
+          "intent": "hold",
+          "pinned": false
+        }
+      },
+      "schemaAccepted": true,
+      "compiledShotCount": 2,
+      "compilerFindings": [],
+      "effectiveShotCount": 2,
+      "effectiveFindings": [],
+      "evaluation": {
+        "ok": true,
+        "reason": ""
+      },
+      "rules": {
+        "valid": true,
+        "violations": []
+      },
+      "compiledOverheadShot": {
+        "from": {
+          "x": 7,
+          "y": 29.6
+        },
+        "to": {
+          "x": 15,
+          "y": 5
+        },
+        "intendedTarget": {
+          "x": 15,
+          "y": 5
+        },
+        "type": "overhead",
+        "stroke": "overhead",
+        "playerId": "player3",
+        "contact": {
+          "kind": "volley",
+          "heightFeet": 7,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1,
+          "speedMph": 40,
+          "apexFeet": 8.5,
+          "netClearanceInches": 16,
+          "bounceHeightFeet": 1.15,
+          "spin": {
+            "type": "topspin",
+            "rpm": 850
+          }
+        },
+        "authoring": {
+          "recipeId": "overhead",
+          "family": "overhead",
+          "receiver": "auto",
+          "movement": {
+            "intent": "hold",
+            "pinned": false
+          }
+        }
+      },
+      "semantics": {
+        "playerId": "player3",
+        "stroke": "overhead",
+        "shotType": "overhead",
+        "strokeSide": "forehand",
+        "artAction": "overhead",
+        "visualStroke": "overhead",
+        "profile": {
+          "duration": 0.7,
+          "contactRatio": 0.46,
+          "prepareRatio": 0.28,
+          "recoverRatio": 0.78,
+          "intensity": 1.2
+        },
+        "contact": {
+          "kind": "volley",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 7,
+            "y": 29.6,
+            "heightFeet": 7
+          },
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 7,
+          "y": 29.6,
+          "heightFeet": 7
+        }
+      },
+      "incomingBounces": 0,
+      "positions": [
+        {
+          "hand": "left",
+          "contactErrorMeters": 4.965068306494546e-16,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9144000000000003,
+            2.1336,
+            2.316480000000001
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000001,
+          "thighError": 1.6653345369377348e-16,
+          "shinError": 0.05671267507343064
+        },
+        {
+          "hand": "right",
+          "contactErrorMeters": 4.965068306494546e-16,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9144000000000003,
+            2.1336,
+            2.316480000000001
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000002,
+          "thighError": 1.6653345369377348e-16,
+          "shinError": 3.3306690738754696e-16
+        }
+      ]
+    },
+    {
+      "id": "ordinary-overhead-forehand",
+      "sourceRecipe": {
+        "id": "overhead",
+        "family": "overhead",
+        "hitter": "player3",
+        "receiver": "auto",
+        "contactStyle": "forehand",
+        "target": {
+          "x": 15,
+          "y": 5
+        },
+        "arc": "medium",
+        "pace": "firm",
+        "movement": {
+          "intent": "hold",
+          "pinned": false
+        }
+      },
+      "schemaAccepted": true,
+      "compiledShotCount": 2,
+      "compilerFindings": [],
+      "effectiveShotCount": 2,
+      "effectiveFindings": [],
+      "evaluation": {
+        "ok": true,
+        "reason": ""
+      },
+      "rules": {
+        "valid": true,
+        "violations": []
+      },
+      "compiledOverheadShot": {
+        "from": {
+          "x": 7,
+          "y": 29.6
+        },
+        "to": {
+          "x": 15,
+          "y": 5
+        },
+        "intendedTarget": {
+          "x": 15,
+          "y": 5
+        },
+        "type": "overhead",
+        "stroke": "overhead",
+        "playerId": "player3",
+        "contact": {
+          "kind": "volley",
+          "heightFeet": 7,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1,
+          "speedMph": 40,
+          "apexFeet": 8.5,
+          "netClearanceInches": 16,
+          "bounceHeightFeet": 1.15,
+          "spin": {
+            "type": "topspin",
+            "rpm": 850
+          }
+        },
+        "authoring": {
+          "recipeId": "overhead",
+          "family": "overhead",
+          "receiver": "auto",
+          "movement": {
+            "intent": "hold",
+            "pinned": false
+          }
+        }
+      },
+      "semantics": {
+        "playerId": "player3",
+        "stroke": "overhead",
+        "shotType": "overhead",
+        "strokeSide": "forehand",
+        "artAction": "overhead",
+        "visualStroke": "overhead",
+        "profile": {
+          "duration": 0.7,
+          "contactRatio": 0.46,
+          "prepareRatio": 0.28,
+          "recoverRatio": 0.78,
+          "intensity": 1.2
+        },
+        "contact": {
+          "kind": "volley",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 7,
+            "y": 29.6,
+            "heightFeet": 7
+          },
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 7,
+          "y": 29.6,
+          "heightFeet": 7
+        }
+      },
+      "incomingBounces": 0,
+      "positions": [
+        {
+          "hand": "left",
+          "contactErrorMeters": 4.965068306494546e-16,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9144000000000003,
+            2.1336,
+            2.316480000000001
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000001,
+          "thighError": 1.6653345369377348e-16,
+          "shinError": 2.7755575615628914e-16
+        },
+        {
+          "hand": "right",
+          "contactErrorMeters": 4.965068306494546e-16,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9144000000000003,
+            2.1336,
+            2.316480000000001
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000002,
+          "thighError": 1.6653345369377348e-16,
+          "shinError": 3.3306690738754696e-16
+        }
+      ]
+    },
+    {
+      "id": "ordinary-overhead-backhand",
+      "sourceRecipe": {
+        "id": "overhead",
+        "family": "overhead",
+        "hitter": "player3",
+        "receiver": "auto",
+        "contactStyle": "backhand",
+        "target": {
+          "x": 15,
+          "y": 5
+        },
+        "arc": "medium",
+        "pace": "firm",
+        "movement": {
+          "intent": "hold",
+          "pinned": false
+        }
+      },
+      "schemaAccepted": true,
+      "compiledShotCount": 2,
+      "compilerFindings": [],
+      "effectiveShotCount": 2,
+      "effectiveFindings": [],
+      "evaluation": {
+        "ok": true,
+        "reason": ""
+      },
+      "rules": {
+        "valid": true,
+        "violations": []
+      },
+      "compiledOverheadShot": {
+        "from": {
+          "x": 7,
+          "y": 29.6
+        },
+        "to": {
+          "x": 15,
+          "y": 5
+        },
+        "intendedTarget": {
+          "x": 15,
+          "y": 5
+        },
+        "type": "overhead",
+        "stroke": "overhead",
+        "playerId": "player3",
+        "contact": {
+          "kind": "volley",
+          "heightFeet": 7,
+          "strokeSide": "backhand",
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1,
+          "speedMph": 40,
+          "apexFeet": 8.5,
+          "netClearanceInches": 16,
+          "bounceHeightFeet": 1.15,
+          "spin": {
+            "type": "topspin",
+            "rpm": 850
+          }
+        },
+        "authoring": {
+          "recipeId": "overhead",
+          "family": "overhead",
+          "receiver": "auto",
+          "movement": {
+            "intent": "hold",
+            "pinned": false
+          }
+        }
+      },
+      "semantics": {
+        "playerId": "player3",
+        "stroke": "overhead",
+        "shotType": "overhead",
+        "strokeSide": "backhand",
+        "artAction": "overhead",
+        "visualStroke": "overhead",
+        "profile": {
+          "duration": 0.7,
+          "contactRatio": 0.46,
+          "prepareRatio": 0.28,
+          "recoverRatio": 0.78,
+          "intensity": 1.2
+        },
+        "contact": {
+          "kind": "volley",
+          "strokeSide": "backhand",
+          "point": {
+            "x": 7,
+            "y": 29.6,
+            "heightFeet": 7
+          },
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 29.6
+            },
+            {
+              "x": 7.42,
+              "y": 29.6
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 7,
+          "y": 29.6,
+          "heightFeet": 7
+        }
+      },
+      "incomingBounces": 0,
+      "positions": [
+        {
+          "hand": "left",
+          "contactErrorMeters": 1.1102230246251565e-16,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9144000000000002,
+            2.1336,
+            2.3164800000000008
+          ],
+          "finite": true,
+          "maxArmReach": 0.5730000000000001,
+          "thighError": 1.6653345369377348e-16,
+          "shinError": 2.7755575615628914e-16
+        },
+        {
+          "hand": "right",
+          "contactErrorMeters": 1.1102230246251565e-16,
+          "target": [
+            -0.9144000000000001,
+            2.1336,
+            2.3164800000000008
+          ],
+          "visiblePaddle": [
+            -0.9144000000000002,
+            2.1336,
+            2.3164800000000008
+          ],
+          "finite": true,
+          "maxArmReach": 0.573,
+          "thighError": 1.1102230246251565e-16,
+          "shinError": 1.6653345369377348e-16
+        }
+      ]
+    }
+  ],
+  "generated": [
+    {
+      "seed": 1,
+      "ok": true,
+      "shotCount": 99,
+      "overheadCount": 11,
+      "overheadContactStyles": [
+        "auto"
+      ],
+      "shortHopFamilies": []
+    },
+    {
+      "seed": 12648430,
+      "ok": true,
+      "shotCount": 99,
+      "overheadCount": 15,
+      "overheadContactStyles": [
+        "auto"
+      ],
+      "shortHopFamilies": [
+        "reset"
+      ]
+    }
+  ]
+}

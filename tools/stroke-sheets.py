@@ -23,3 +23,12 @@ for row,(_,ims) in enumerate(allrows):
         im.thumbnail((w,h));blind.paste(im,(col*w+(w-im.width)//2,row*h))
 blind.save(os.path.join(out,'stroke-unlabelled.jpg'),quality=92)
 json.dump({'rowOrder':[c['case']['id'] for c,_ in allrows],'columns':'-0.32,-0.14,contact,+0.15,+0.44 seconds'},open(os.path.join(out,'stroke-unlabelled-key.json'),'w'),indent=2)
+core_ids=['lob-right','backhand-drive-right','forehand-drive-right']
+core_rows=[(c,ims) for wanted in core_ids for c,ims in allrows if c['case']['id']==wanted]
+if len(core_rows)==3:
+    core=Image.new('RGB',(w*5,h*3),'#172733')
+    for row,(_,ims) in enumerate(core_rows):
+        for col,im in enumerate(ims):
+            im=im.copy();im.thumbnail((w,h));core.paste(im,(col*w+(w-im.width)//2,row*h))
+    core.save(os.path.join(out,'stroke-unlabelled-core.jpg'),quality=92)
+    json.dump({'rowOrder':core_ids,'columns':'-0.32,-0.14,contact,+0.15,+0.44 seconds'},open(os.path.join(out,'stroke-unlabelled-core-key.json'),'w'),indent=2)

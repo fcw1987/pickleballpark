@@ -1,0 +1,76 @@
+{
+  "desktop": {
+    "viewport": "1440x900 DPR1",
+    "node": "v24.11.0",
+    "records": [
+      {
+        "label": "v29",
+        "moduleReadyMs": 55.76724999999999,
+        "sceneReadyMs": 1076.53625,
+        "appRenderMedianMs": 14.200000047683716,
+        "appRenderP95Ms": 15,
+        "applyCPUmsPerSecond": 27.158195813114542,
+        "renderCPUmsPerSecond": 16.138682961182027,
+        "drawCalls": 17,
+        "triangles": 11090,
+        "activeVerified": true,
+        "bytesVerified": true,
+        "runtimeDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+        "errors": []
+      },
+      {
+        "label": "v30",
+        "moduleReadyMs": 50.463832999999795,
+        "sceneReadyMs": 994.0593329999992,
+        "appRenderMedianMs": 14.200000047683716,
+        "appRenderP95Ms": 14.899999976158142,
+        "applyCPUmsPerSecond": 28.37880441565499,
+        "renderCPUmsPerSecond": 16.22357689733095,
+        "drawCalls": 17,
+        "triangles": 11090,
+        "activeVerified": true,
+        "bytesVerified": true,
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "errors": []
+      }
+    ],
+    "combinedCPUChangePct": 3.0152347597498963
+  },
+  "phone": {
+    "viewport": "390x844 DPR3",
+    "node": "v24.11.0",
+    "records": [
+      {
+        "label": "v29",
+        "moduleReadyMs": 53.25254200000006,
+        "sceneReadyMs": 1129.6595,
+        "appRenderMedianMs": 26.899999976158142,
+        "appRenderP95Ms": 27.899999976158142,
+        "applyCPUmsPerSecond": 16.114027351641553,
+        "renderCPUmsPerSecond": 10.283075620052976,
+        "drawCalls": 17,
+        "triangles": 11090,
+        "activeVerified": true,
+        "bytesVerified": true,
+        "runtimeDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+        "errors": []
+      },
+      {
+        "label": "v30",
+        "moduleReadyMs": 48.67645900000025,
+        "sceneReadyMs": 1089.8455830000003,
+        "appRenderMedianMs": 27.299999952316284,
+        "appRenderP95Ms": 28.200000047683716,
+        "applyCPUmsPerSecond": 16.488169396552074,
+        "renderCPUmsPerSecond": 10.743046816378127,
+        "drawCalls": 17,
+        "triangles": 11090,
+        "activeVerified": true,
+        "bytesVerified": true,
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "errors": []
+      }
+    ],
+    "combinedCPUChangePct": 3.1598666040363765
+  }
+}

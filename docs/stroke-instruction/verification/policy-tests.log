@@ -1,0 +1,60 @@
+TAP version 13
+# Subtest: accepts exactly the seven confirmed failures with identical retries
+ok 1 - accepts exactly the seven confirmed failures with identical retries
+  ---
+  duration_ms: 1.511042
+  ...
+# Subtest: rejects an unknown error signature
+ok 2 - rejects an unknown error signature
+  ---
+  duration_ms: 0.7085
+  ...
+# Subtest: rejects an unexpected pass of an allowed failure
+ok 3 - rejects an unexpected pass of an allowed failure
+  ---
+  duration_ms: 0.175042
+  ...
+# Subtest: rejects a changed Playwright version or missing diagnostics
+ok 4 - rejects a changed Playwright version or missing diagnostics
+  ---
+  duration_ms: 0.257625
+  ...
+# Subtest: rejects timed out and skipped results
+ok 5 - rejects timed out and skipped results
+  ---
+  duration_ms: 0.552417
+  ...
+# Subtest: rejects an extra assertion error on an allowed failure
+ok 6 - rejects an extra assertion error on an allowed failure
+  ---
+  duration_ms: 0.183667
+  ...
+# Subtest: rejects a wrong failure line
+ok 7 - rejects a wrong failure line
+  ---
+  duration_ms: 0.204667
+  ...
+# Subtest: rejects changed protected test source
+ok 8 - rejects changed protected test source
+  ---
+  duration_ms: 0.218083
+  ...
+# Subtest: rejects wrong cache assertion details and expired review
+ok 9 - rejects wrong cache assertion details and expired review
+  ---
+  duration_ms: 0.510875
+  ...
+# Subtest: accepts real reporter paths relative to testDir without relaxing error locations
+ok 10 - accepts real reporter paths relative to testDir without relaxing error locations
+  ---
+  duration_ms: 0.428167
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 68.196959

@@ -52,6 +52,8 @@ const isArchived = file => ARCHIVED_FILES.has(file);
 
 // These checked-in reports describe earlier named builds. New files are checked.
 const HISTORICAL_BRAND_FILES = new Set([
+  'docs/stroke-instruction/verification/performance-desktop.json',
+  'docs/stroke-instruction/verification/performance-phone.json',
   'docs/BETA_STABILIZATION_REPORT.md',
   'docs/PARK_COACHING_VERIFICATION.md',
   'docs/PIXEL_GAME_LUNA_REVIEW.md',

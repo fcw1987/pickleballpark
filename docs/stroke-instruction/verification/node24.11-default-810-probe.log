@@ -1,0 +1,6 @@
+{"binary":"/Users/fdub/Library/Application Support/xyz.block.berd/packages/node/v24.11.0/darwin-arm64/bin/node","argv":["/tmp/pickleboard-independent-route-probe.mjs"],"cwd":"/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes","node":"v24.11.0","v8":"13.6.233.10-node.28","arch":"arm64","platform":"darwin","binarySha256":"8d66cad090d087ed8fac66d8f7248c8a9a55454680232a6d109f609aa2decf89","sourceDigestSha256":"662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e","exitCode":0}
+
+STDOUT
+{ calls: 810, failed: 0 }
+
+STDERR

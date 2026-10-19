@@ -1,0 +1,3122 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": null,
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "01d86f36-0fbf-4d84-834f-d040251a7e0b",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "4816210",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "beta-starting-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "beta-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "stabilized-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "13758356d65f154b19ca631e6ecb9bdb8afd875b",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "fidelity-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "1d2e4cd67330d2efc444fd99868c22442222465c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "public-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "a2b717a6-a93a-44fb-95c1-f183d5bd88c4",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "smart-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "8b499009-2417-41ff-aa3b-a4ba080c6a6f",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "art-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "8864041c-252c-4688-8df9-ce1d8bf2cf56",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "town-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "3751cef343062667a2413d0add95bcb134331311",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "8f1c75c7-83a4-478a-b018-baecdf45b8c6",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "cache-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "8aafabf9401d4fad3f807bcc16a7ecea27606444",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "e6b4f5b8-eca3-4b3d-b3e2-591d4f70e140",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "stroke-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "ac7ca5ff3a3022de3cb4ba843f2111b0f53987db",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "22606a2f-4054-47c8-bcb3-29d458f58e04",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "stroke-contact-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "a951019ab0833dc11277dfd1e6199c69c4477978",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "10549588-a335-43cd-b755-ebd8313fd554",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": null,
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "d17adbc3-3b2d-41d0-a3f2-17036baec68c",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "4816210",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "beta-starting-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "beta-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "stabilized-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "13758356d65f154b19ca631e6ecb9bdb8afd875b",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "fidelity-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "1d2e4cd67330d2efc444fd99868c22442222465c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "public-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "7046e3db-b2af-4993-9b8e-cfa103b1fc9a",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "smart-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "c3ca59fb-7b8b-4168-bb0a-66487dffb92c",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "art-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "f279b4be-10ae-4fc6-b4ef-af1ceb05a8a7",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "town-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "3751cef343062667a2413d0add95bcb134331311",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "d1e218e9-a862-457d-bc27-0ee04495e848",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "cache-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "8aafabf9401d4fad3f807bcc16a7ecea27606444",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "08d6fa95-503b-4f7b-ae6a-089b28ccbc46",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "stroke-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "ac7ca5ff3a3022de3cb4ba843f2111b0f53987db",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "114a04fe-2691-41d0-b504-6efdd5110232",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "stroke-contact-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "previousPublicSource": "a951019ab0833dc11277dfd1e6199c69c4477978",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleboard",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+        "sourceBranch": "feature/stroke-instruction",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v30",
+        "buildTime": "2026-10-19T00:12:01.254Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "6e4d3c86-e262-4dda-95ac-3e697f82f702",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  }
+]

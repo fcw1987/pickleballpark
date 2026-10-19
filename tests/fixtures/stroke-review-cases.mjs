@@ -1,5 +1,8 @@
 // Authored visual acceptance scenarios. Existing catalog metadata remains intact.
 export const strokeReviewCases = [
+ { id:'overhead-left', playId:'lob-overhead', stepId:'overhead', hand:'left' },
+ { id:'overhead-short-hop-right', playId:'lob-overhead', stepId:'overhead', hand:'right', fixture:'tests/fixtures/overhead-short-hop-document.json' },
+ { id:'overhead-short-hop-left', playId:'lob-overhead', stepId:'overhead', hand:'left', fixture:'tests/fixtures/overhead-short-hop-document.json' },
  { id:'overhead-backhand-right', playId:'lob-overhead', stepId:'overhead', hand:'right', authored:'overhead-backhand' },
  { id:'overhead-right', playId:'lob-overhead', stepId:'overhead', hand:'right' },
  { id:'short-hop-right', playId:'short-hop-reset', stepId:'short-hop', hand:'right' },

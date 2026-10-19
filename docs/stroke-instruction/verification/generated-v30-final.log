@@ -1,0 +1,5 @@
+
+> pickleboard@1.0.0 check:generated
+> node tools/check-generated.mjs
+
+Node v24.11.0, zlib 1.3.1-470d3a2: validated 65 generated asset paths without modifying the checkout; 43 PNGs differed only in lossless compression bytes.

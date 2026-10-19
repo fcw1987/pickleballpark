@@ -1,0 +1,103 @@
+{"binary":"/opt/homebrew/Cellar/node/22.4.0/bin/node","argv":["/tmp/pickleboard-independent-route-probe.mjs"],"cwd":"/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes","node":"v22.4.0","v8":"12.4.254.21-node.15","arch":"arm64","platform":"darwin","binarySha256":"617a9b803db0a617af138cf91147bba6082acf7d39e835f09b7e06d339ea6aaf","sourceDigestSha256":"662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e","exitCode":1}
+
+STDOUT
+{
+  "calls": 271,
+  "style": "forehand",
+  "hand": "left",
+  "localTime": 0,
+  "side": "left",
+  "shin": 0.4817126750734307,
+  "root": {
+    "x": -0.6845109177518689,
+    "y": 0,
+    "z": 2.443818171272844
+  },
+  "world": {
+    "x": -0.6845109177518689,
+    "y": 0,
+    "z": 2.443818171272844
+  },
+  "feet": {
+    "left": {
+      "x": -1.1444,
+      "y": 0,
+      "z": 2.3014800000000006
+    },
+    "right": {
+      "x": -0.6844000000000001,
+      "y": 0,
+      "z": 2.3014800000000006
+    }
+  },
+  "travel": 0,
+  "dir": {
+    "x": 0,
+    "z": -1
+  },
+  "contactTime": 0,
+  "from": {
+    "x": 7,
+    "y": 29.6
+  },
+  "to": {
+    "x": 7,
+    "y": 29.6
+  },
+  "secondPosition": {
+    "x": -0.6845109177518689,
+    "y": 0,
+    "z": 2.443818171272844
+  }
+}
+{
+  "calls": 271,
+  "style": "forehand",
+  "hand": "left",
+  "localTime": 0,
+  "side": "right",
+  "shin": 0.42781646078780716,
+  "root": {
+    "x": -0.6845109177518689,
+    "y": 0,
+    "z": 2.443818171272844
+  },
+  "world": {
+    "x": -0.6845109177518689,
+    "y": 0,
+    "z": 2.443818171272844
+  },
+  "feet": {
+    "left": {
+      "x": -1.1444,
+      "y": 0,
+      "z": 2.3014800000000006
+    },
+    "right": {
+      "x": -0.6844000000000001,
+      "y": 0,
+      "z": 2.3014800000000006
+    }
+  },
+  "travel": 0,
+  "dir": {
+    "x": 0,
+    "z": -1
+  },
+  "contactTime": 0,
+  "from": {
+    "x": 7,
+    "y": 29.6
+  },
+  "to": {
+    "x": 7,
+    "y": 29.6
+  },
+  "secondPosition": {
+    "x": -0.6845109177518689,
+    "y": 0,
+    "z": 2.443818171272844
+  }
+}
+
+STDERR
