@@ -30,8 +30,12 @@ function contactPlant(semantics, shot, handedness, fallback) {
     const hand = (handedness === 'right' ? 1 : -1) * (semantics.strokeSide === 'backhand' ? -1 : 1);
     // High backhand contact stays close above the head; a groundstroke-sized
     // cross-body offset would require a longer arm than the rig possesses.
-    const lateral = semantics.stroke === 'overhead' ? (semantics.strokeSide === 'backhand' ? 0 : .258) : semantics.strokeSide === 'backhand' ? .16 : .30;
-    const forward = semantics.stroke === 'overhead' ? .05 : .30;
+    // Existing documents can explicitly author an overhead family while the
+    // compiler emits a short-hop stroke. Preserve its high contact and clock;
+    // only the opted-in 3D presentation uses the authored overhead support base.
+    const overhead = semantics.stroke === 'overhead' || shot?.authoring?.family === 'overhead';
+    const lateral = overhead ? (semantics.strokeSide === 'backhand' ? 0 : .258) : semantics.strokeSide === 'backhand' ? .16 : .30;
+    const forward = overhead ? .05 : .30;
     return { x: contact.x - facing.x * forward + facing.z * lateral * hand, y: 0,
         z: contact.z - facing.z * forward - facing.x * lateral * hand };
 }
@@ -240,6 +244,7 @@ export function sampleActorPresentation({
     const contactTarget = segment.trajectory ? (isStriker ? Object.freeze({ ...segment.trajectory.start }) :
         isIncomingStriker ? Object.freeze({ ...segment.trajectory.end }) : null) : null;
     const activeSemantics = isStriker ? segment.shotSemantics : isIncomingStriker ? segment.nextShotSemantics : null;
+    const activeShot = isStriker ? segment.step.shot : isIncomingStriker ? segment.nextStep?.shot : null;
     const profile = activeSemantics?.profile || null;
     const strokeTime = profile ? Math.max(0, Math.min(profile.duration,
         profile.duration * profile.contactRatio + (isStriker ? localTime - segment.contactTime : localTime - segment.duration))) : null;
@@ -257,6 +262,7 @@ export function sampleActorPresentation({
         locomotionFrame: state.locomotionFrame, planted: state.planted, handedness,
         artFamily, artAction: state.action,
         shotType: activeSemantics?.shotType || null, strokeSide: activeSemantics?.strokeSide || null,
+        ...(instructionalMovement && activeShot?.authoring?.family === 'overhead' ? {instructionalFamily:'overhead'} : {}),
         strokeIntensity: activeSemantics?.profile.intensity || 0,
         strokePose, strokeTime, profile, timeSeconds: seconds ?? segment.startTime + localTime,
         travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,

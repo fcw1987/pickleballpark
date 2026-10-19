@@ -321,6 +321,9 @@ function blendChannel(pose,name,component,axis) {
     return THREE.MathUtils.lerp(mixChannel(a,name,component,axis),mixChannel(b,name,component,axis),smooth(pose?.progress||0));
 }
 function strokeFamily(sample) {
+    // Visual compatibility for schema-valid overhead/short-hop documents. The
+    // profile still supplies the original event timing and contact ratio.
+    if(sample.instructionalFamily==='overhead')return 'overhead';
     const type=sample.shotType;
     if(['lob','overhead','serve','drive','drop','dink','volley','block','reset','short-hop'].includes(type))return type;
     return sample.action||'ready';
