@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const openScene = async page => {
-  await page.goto(`http://127.0.0.1:${process.env.PORT || 4176}/?workspace=planner`);
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.plays);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
   await page.locator('#play3dView').click();
