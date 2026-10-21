@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v31`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v32`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -130,7 +130,17 @@ self.addEventListener('activate', event => {
       cacheName !== STATIC_CACHE &&
       (cacheName.startsWith(CACHE_PREFIX) || LEGACY_CACHES.has(cacheName))
     );
-    await Promise.all(obsoletePickleboardCaches.map(cacheName => caches.delete(cacheName)));
+    // CacheStorage is shared by every worker on this origin. A project-path
+    // move must retain the old path's offline shell and any mixed-scope data.
+    const scope = new URL(self.registration.scope);
+    await Promise.all(obsoletePickleboardCaches.map(async cacheName => {
+      const cache = await caches.open(cacheName);
+      for (const request of await cache.keys()) {
+        const url = new URL(request.url);
+        if (url.origin === scope.origin && url.pathname.startsWith(scope.pathname)) await cache.delete(request);
+      }
+      if (!(await cache.keys()).length) await caches.delete(cacheName);
+    }));
     await self.clients.claim();
   })());
 });
