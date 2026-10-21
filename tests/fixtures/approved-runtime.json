@@ -1,5 +1,5 @@
 {
-  "source": "63ae0fdc2295e1aaef239331e2936f48b3a33589",
+  "source": "47de2b314db9f1177a2aa1b20f40fbb5bba79c8b",
   "files": [
     {
       "path": "assets/park/banner.png",
@@ -278,18 +278,18 @@
     },
     {
       "path": "builder-storage.js",
-      "bytes": 9257,
-      "sha256": "1c29dc00fcd5e7b2546adf29eaad8a65dfbbdd962275a74f0149004bd2485b9e"
+      "bytes": 10169,
+      "sha256": "aed41431e02e187101188b12aaaf60a1eb56fa809e51269c5c08077b7afa65fb"
     },
     {
       "path": "builder-ui.css",
-      "bytes": 51548,
-      "sha256": "5d39f69edb64f5e6421cc4fe562149011a04872af5e6a1dcc426ad531fb49f82"
+      "bytes": 51763,
+      "sha256": "6454b158ab1de9105b381ee864c487d47935461c2ea2a9b7924b611bcebd7fd9"
     },
     {
       "path": "builder-ui.js",
-      "bytes": 79666,
-      "sha256": "a461ab6dea62891e3bc188bd240a018dea9d0b14a5f0b0f5d36fb5ad111c44c0"
+      "bytes": 84982,
+      "sha256": "d23d719502201dd5f4d127601495f1ba69a690d3dfab94f20bf824dd73dc6d83"
     },
     {
       "path": "builder-waypoint-policy.js",
@@ -413,8 +413,8 @@
     },
     {
       "path": "play-builder.js",
-      "bytes": 47299,
-      "sha256": "226f363167fa5f63a52947b7bc52ce3c5709429697c22ade835a8f5249568fdc"
+      "bytes": 50307,
+      "sha256": "3beb3685324be15c7f2e6de0e2aa47106ce54ff28a248b6f4c440b6c15819834"
     },
     {
       "path": "play-catalog.js",
@@ -423,8 +423,8 @@
     },
     {
       "path": "play-compiler.js",
-      "bytes": 20167,
-      "sha256": "0a691e9bd5baf219bd819ebeac02f819ba06a202c3af698057cad41affd3fbb2"
+      "bytes": 20933,
+      "sha256": "545af1e71baca42412b5c2233328a81765c3da7e3f8e0504f9cd468e303a3742"
     },
     {
       "path": "play-document.js",
@@ -453,8 +453,8 @@
     },
     {
       "path": "script.js",
-      "bytes": 62732,
-      "sha256": "7cdf5b0455a4f396683fe58321c4e69ec25c8e6b45f04297c18092a8b25db1b6"
+      "bytes": 61675,
+      "sha256": "8face3e81ffab7447cddd47668dd89ae6bc25f7be1c64aad0cfffde11c28c70d"
     },
     {
       "path": "shot-chapters.js",
@@ -484,7 +484,7 @@
     {
       "path": "sw.js",
       "bytes": 7846,
-      "sha256": "f126bdb2542486fd828af39c35ca16171019f8d06b850f8111127b26975d7657"
+      "sha256": "fa5f0b86d1e9696c027f806f2a2b7f1ce41f4b382ddc747444a98e7b2ed093ae"
     },
     {
       "path": "three-d-animation.js",
