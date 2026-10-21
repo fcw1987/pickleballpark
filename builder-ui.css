@@ -178,6 +178,8 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 .builder-dialog h2 { margin: 0 0 12px; font: 1.5rem/1.2 'Park Labels',ui-monospace,monospace; }
 .builder-dialog-copy { color: var(--game-muted); font: 1rem/1.45 ui-sans-serif,system-ui,sans-serif; }
 .builder-dialog-list { display: grid; gap: 8px; }
+.builder-saved-play-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.builder-saved-play-row [data-action="template-open"] { min-width: 0; overflow-wrap: anywhere; }
 .builder-dialog-list .builder-button { justify-content: flex-start; text-align: left; }
 .builder-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .builder-dialog textarea { min-height: 9rem; resize: vertical; }

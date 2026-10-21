@@ -10,9 +10,6 @@ import { playerLabel } from './player-labels.js';
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-                console.log('Service Worker registered with scope:', registration.scope);
-            })
             .catch(error => {
                 console.error('Service Worker registration failed:', error);
             });
@@ -817,7 +814,6 @@ class Pickleboard {
             }
         }
         
-        console.log(`Game mode set to: ${mode}`);
         return true;
     }
     
@@ -868,7 +864,6 @@ class Pickleboard {
     resetPositions() {
         if (this.playInteractionLocked) return false;
         this.setGameMode(this.currentGameMode);
-        console.log('Positions reset');
     }
     
     captureBoardState() {
@@ -966,7 +961,6 @@ class Pickleboard {
         // Save theme preference
         localStorage.setItem('pickleboard-theme', newTheme);
         
-        console.log(`Theme switched to: ${newTheme}`);
     }
     
     loadTheme() {
@@ -977,7 +971,6 @@ class Pickleboard {
         document.body.setAttribute('data-theme', theme);
         this.updateThemeControl(theme);
         
-        console.log(`Theme loaded: ${theme}`);
     }
     
     // Public API for external interaction
@@ -1007,7 +1000,6 @@ class Pickleboard {
     shouldCreateTracer(token, newX, newY) {
         // Don't create tracers during initialization or reset
         if (!this.dragState.isDragging) {
-            console.log('No tracer: not dragging');
             return false;
         }
         
@@ -1016,12 +1008,10 @@ class Pickleboard {
         const dy = newY - token.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        console.log(`Distance moved: ${distance}, min required: ${this.tracerSettings.minDistance}`);
         return distance >= this.tracerSettings.minDistance;
     }
     
     createTracerDot(token, x, y) {
-        console.log('Creating tracer dot at:', x, y, 'for token:', token.type);
         
         // Limit number of tracer dots for performance
         if (this.tracerDots.length >= this.tracerSettings.maxTracers) {
@@ -1059,12 +1049,10 @@ class Pickleboard {
             }
         }
         
-        console.log('Tracer element classes:', tracerElement.classList.toString());
         
         // Ground marks share the same projection as lines, drawings, and Play paths.
         (this.tracerLayer || this.court).appendChild(tracerElement);
         
-        console.log('Tracer element added to DOM');
         
         // Create tracer object
         const tracer = {
@@ -1114,7 +1102,6 @@ class Pickleboard {
         // Clear the array
         this.tracerDots = [];
         
-        console.log('All tracer dots cleared');
     }
     
     // Drawing mode methods
@@ -1243,7 +1230,6 @@ class Pickleboard {
         if (this.drawingPaths.length > 0) {
             const lastPath = this.drawingPaths.pop();
             lastPath.remove();
-            console.log('Undid last drawing stroke');
         }
     }
     
@@ -1257,7 +1243,6 @@ class Pickleboard {
             this.drawingLayer.removeChild(this.drawingLayer.firstChild);
         }
         
-        console.log('All drawings cleared');
     }
     
     // New UI methods
@@ -1412,7 +1397,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
     window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
     
-    console.log('Pickleball Park initialized successfully');
 });
 
 // Handle browser back/forward navigation
@@ -1430,9 +1414,5 @@ document.addEventListener('visibilitychange', () => {
         window.pickleboard?.endDrag();
         if (window.pickleboard?.isDrawing) window.pickleboard.endDrawing();
         window.pickleboard?.clearPendingTouchTap();
-        console.log('Page hidden');
-    } else {
-        // Page is visible - could resume animations if any
-        console.log('Page visible');
     }
 });

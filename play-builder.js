@@ -1,5 +1,5 @@
 import { createStarterDocument, validateDocument, documentFromTemplate, MAX_SHOTS } from './play-document.js';
-import { DraftStore, EditHistory, STORAGE_KEY } from './builder-storage.js';
+import { DraftStore, EditHistory, STORAGE_KEY, DRAFT_CAPACITY_CODE } from './builder-storage.js';
 import { mountBuilderUI } from './builder-ui.js';
 import { BuilderCourtTools } from './builder-court-tools.js';
 import { builderViewBox } from './builder-framing.js';
@@ -46,6 +46,8 @@ export class PlayBuilder {
         // let a later first save overwrite another tab before either observed it.
         if(!document)this.document.id=id();
         if(document)this.saveStatus='Saved on this device';
+        this.pristineSource=JSON.stringify(this.document);
+        this.persistedSource=document?this.pristineSource:null;
         this.saveError=null;this.libraryDirty=true;this.library=[];
         this.history = new EditHistory(this.document); this.selectedShotId = this.document.shots[0]?.id || null;
         this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value) });
@@ -98,12 +100,22 @@ export class PlayBuilder {
         return this.cachedWaypointPolicy;
     }
     get selectedShot() { return this.document.shots.find(shot => shot.id === this.selectedShotId); }
+    get hasUnsavedChanges() {
+        const baseline=this.persistedSource??this.pristineSource;
+        // Authored edits replace the document. Playback renders reuse it and
+        // must not serialize a long rally or inspect storage on every frame.
+        if(this.dirtyDocument!==this.document||this.dirtyBaseline!==baseline){
+            this.dirtyDocument=this.document;this.dirtyBaseline=baseline;
+            this.dirtySource=JSON.stringify(this.document)!==baseline;
+        }
+        return this.dirtySource;
+    }
     scheduleRender() {
         if (this.frame !== null) return;
         this.frame = requestAnimationFrame(() => { this.frame = null; this.render(); });
     }
     render() {
-        if(this.libraryDirty){try{this.library=this.store.list();}catch{/* Save status retains recovery information. */}this.libraryDirty=false;}const library=this.library;
+        if(this.libraryDirty){try{this.library=this.store.list({includeRevision:true});}catch{/* Save status retains recovery information. */}this.libraryDirty=false;}const library=this.library;
         const segment=this.compiled?.timeline?.segments.find(s=>this.session.clock.elapsed<=s.endTime)||this.compiled?.timeline?.segments.at(-1);
         const currentChapter=chapterAtTime(this.chapters,this.session.clock.elapsed);
         // Playback identity follows the sampled chapter even while paused. The
@@ -111,7 +123,7 @@ export class PlayBuilder {
         const cue={shotId:currentChapter?.shotId,title:currentChapter?`${currentChapter.number}. ${currentChapter.label}`:'Choose a shot',description:segment?.step.description||'Choose your first shot.'};
         this.ui.render({cue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
             playing:this.session.playing, time:this.session.clock.elapsed, duration:this.session.duration, chapters:this.chapters, currentShotId:currentChapter?.shotId || null,
-            view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, library,
+            view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, unsavedChanges:this.hasUnsavedChanges, library,
             templates:PICKLEBOARD_PLAYS.map(({id,name})=>({id,name})), loop:true, rate:this.session.clock.playbackRate,
             busy:this.busy, targetPlacement:this.courtTools.placing&&!this.courtTools.placement?.player, movementPlacement:Boolean(this.courtTools.placing&&this.courtTools.placement?.player), message:this.message, canUndo:this.history.canUndo, canRedo:this.history.canRedo,
             proposalBusy:this.proposalBusy, proposalProgress:this.proposalProgress, coachOptions:this.coachOptions,
@@ -178,8 +190,8 @@ export class PlayBuilder {
         this.courtTools?.render();
     }
     save() {
-        try { this.store.save(this.document); this.saveStatus='Saved on this device';this.saveError=null;this.libraryDirty=true;return true; }
-        catch(error) { this.saveError={conflict:error.code==='DRAFT_CONFLICT',message:error.message};this.saveStatus=this.saveError.conflict?'Not saved · changed in another tab':'Not saved · retry or export';return false; }
+        try { this.store.save(this.document);this.persistedSource=JSON.stringify(this.document);this.saveStatus='Saved on this device';this.saveError=null;this.libraryDirty=true;return true; }
+        catch(error) { this.saveError={conflict:error.code==='DRAFT_CONFLICT',libraryFull:error.code===DRAFT_CAPACITY_CODE,message:error.message};this.saveStatus=this.saveError.conflict?'Not saved · changed in another tab':this.saveError.libraryFull?'Not saved · My Plays is full':'Not saved · retry or export';return false; }
     }
     edit(change, { automatic = false, proposalGeneration = null } = {}) {
         if(proposalGeneration!==null&&proposalGeneration!==this.proposalGeneration)throw Error('A newer edit was kept. Please try again.');
@@ -191,13 +203,15 @@ export class PlayBuilder {
         const draft=copy(this.document); change(draft);
         if (!automatic) claimChangedShotFields(this.document, draft);
         validateDocument(draft);
+        const changed=JSON.stringify(draft)!==JSON.stringify(this.document);
         this.history.commit(draft); this.document=this.history.current;
         if(!this.document.shots.some(s=>s.id===this.selectedShotId))this.selectedShotId=this.document.shots[0]?.id || null;
         // Findings have their own affected-shot route; routine edits should not
         // leave a permanent paragraph in the compact viewing strip.
         this.message='';
         this.installPlay(false);
-        this.save(); this.render();
+        if(changed||this.persistedSource!==null||this.hasUnsavedChanges)this.save();
+        this.render();
     }
     cancelPendingProposals() {
         this.proposalController?.abort(); this.proposalController=null;
@@ -253,7 +267,8 @@ export class PlayBuilder {
         this.cancelPendingProposals();this.pause();this.courtTools.clear();
         if(!Number.isInteger(count)||count<1||count>MAX_SHOTS){this.message=`Choose a whole number of hits from 1 to ${MAX_SHOTS}.`;this.render();return {ok:false,error:this.message};}
         // Claim no new draft until the current one is safely retained.
-        if(!this.save()){this.message='Keep this play first: retry saving, Save As a copy, or export a backup.';this.render();return {ok:false,error:this.message};}
+        if((this.hasUnsavedChanges||this.saveError)&&!this.save()){this.message='Keep this play first: retry saving, Save As a copy, or export a backup.';this.render();return {ok:false,error:this.message};}
+        const previousWasSaved=this.persistedSource!==null;
         const generation=this.proposalGeneration,revision=this.sourceIntent;
         const controller=this.proposalController=new AbortController();
         this.proposalBusy=true;this.proposalProgress={label:'Building rally',completed:0,total:count};this.render();
@@ -265,7 +280,7 @@ export class PlayBuilder {
             if(!authorized.ok){this.message=authorized.reason;return {ok:false,error:this.message};}
             const candidate=authorized.document;candidate.id=id();
             this.loadDocument(candidate);
-            this.message=`New ${count}-hit rally ready. The previous play remains in My Plays. Press Play when ready.`;
+            this.message=previousWasSaved?`New ${count}-hit rally ready. The previous play remains in My Plays. Press Play when ready.`:`New ${count}-hit rally saved in My Plays. Press Play when ready.`;
             return {ok:true};
         } catch(error){if(generation===this.proposalGeneration)this.message=error.message;return {ok:false,error:error.message};}
         finally {if(generation===this.proposalGeneration){this.proposalBusy=false;this.proposalProgress=null;this.proposalController=null;}this.render();}
@@ -412,12 +427,19 @@ export class PlayBuilder {
         }
         this.render();
     }
-    loadDocument(value) {
+    loadDocument(value, { persist = true, saved = false } = {}) {
+        // Explicit copies/imports/generation commit before replacing the visible
+        // draft. Quota, capacity and conflict errors leave that draft untouched.
+        validateDocument(value);
+        const next=copy(value);
+        if(persist)this.store.save(next);
         this.cancelPendingProposals();
         this.sourceIntent++;
-        this.cancelPendingView(); this.pause(); validateDocument(value);
-        this.document=copy(value); this.history=new EditHistory(this.document); this.selectedShotId=this.document.shots[0]?.id || null;
-        this.installPlay(false,0); this.save(); this.render();
+        this.cancelPendingView(); this.pause();
+        this.document=next;this.pristineSource=JSON.stringify(next);this.persistedSource=persist||saved?this.pristineSource:null;
+        this.saveError=null;this.saveStatus=this.persistedSource?'Saved on this device':'Draft · not saved yet';this.libraryDirty=true;
+        this.history=new EditHistory(this.document); this.selectedShotId=this.document.shots[0]?.id || null;
+        this.installPlay(false,0); this.render();
     }
     async action(action,value) {
         const replacesSource=['new','open','template','import'].includes(action);
@@ -425,8 +447,21 @@ export class PlayBuilder {
         const sourceIntent=replacesSource?++this.sourceIntent:null;
         try {
             if(value?.shotId&&['editShot','editMovement'].includes(action)&&value.shotId!==this.selectedShotId)return {ok:false,error:'The selected shot changed; placement was cancelled.'};
-            if(replacesSource&&this.saveError){this.message='Keep this unsaved work first: Retry save, Save As a copy, or export a backup before opening another play.';this.render();return {ok:false,error:this.message};}
+            if(replacesSource&&(this.hasUnsavedChanges||(this.saveError&&!this.saveError.libraryFull))){this.message='Keep this unsaved work first: Retry save or Save As a copy before opening another play. My Plays remains available to delete a saved play and make room; Export creates a backup.';this.render();return {ok:false,error:this.message};}
             if(action==='retrySave'){this.save();this.render();return;}
+            if(action==='deletePlay'){
+                const playId=typeof value==='string'?value:value?.id;
+                const revision=typeof value==='string'?this.library.find(item=>item.id===playId)?.revision:value?.revision;
+                const deleted=this.store.remove(playId,{expectedRevision:revision});
+                if(deleted&&playId===this.document.id){
+                    const dirty=this.hasUnsavedChanges;
+                    this.persistedSource=null;
+                    if(!dirty){this.pristineSource=JSON.stringify(this.document);this.saveError=null;}
+                    this.saveStatus=dirty?'Saved copy deleted · current changes not saved':'Removed from My Plays · not saved yet';
+                }
+                this.libraryDirty=true;this.message=deleted?'Saved play deleted. Your current court stays here.':'That saved play is already gone.';this.render();
+                return {ok:true,deleted,id:playId};
+            }
             if(action==='addShot')return await this.queueSmartAdd(value);
             if(action==='randomRally')return await this.randomRally(value);
             if(action==='insertShot')return await this.insertShot(value);
@@ -503,7 +538,7 @@ export class PlayBuilder {
             else if(action==='undo'||action==='redo') {
                 this.cancelPendingProposals();
                 this.sourceIntent++;
-                this.pause();this.cancelPendingView();const restored=this.history[action]();if(restored){this.document=restored;if(!restored.shots.some(shot=>shot.id===this.selectedShotId))this.selectedShotId=restored.shots[0]?.id||null;this.installPlay(false);this.save();}
+                this.pause();this.cancelPendingView();const before=JSON.stringify(this.document),restored=this.history[action]();if(restored){this.document=restored;if(!restored.shots.some(shot=>shot.id===this.selectedShotId))this.selectedShotId=restored.shots[0]?.id||null;this.installPlay(false);if(JSON.stringify(restored)!==before||this.persistedSource!==null||this.hasUnsavedChanges)this.save();}
             }
             else if(action==='saveAs'){const draft=copy(this.document);draft.id=id();draft.title=`${draft.title} — copy`.slice(0,120);this.loadDocument(draft);}
             else if(replacesSource){
@@ -511,9 +546,9 @@ export class PlayBuilder {
                 // Restoring the 3D view may await assets. A later play choice,
                 // edit, history operation or return to Planner owns the source.
                 if(sourceIntent!==this.sourceIntent)return {ok:false,error:'A newer edit or play choice was kept.'};
-                if(action==='new'){const fresh=createStarterDocument();fresh.id=id();fresh.title='Untitled play';fresh.shots=[];this.loadDocument(fresh);this.message='Choose Add to create the first hit. Each Add continues your rally.';}
-                else if(action==='open')this.loadDocument(this.store.open(value));
-                else if(action==='template'){const template=PICKLEBOARD_PLAYS.find(p=>p.id===value);if(template){const draft=documentFromTemplate(template);draft.id=id();this.loadDocument(draft);}}
+                if(action==='new'){const fresh=createStarterDocument();fresh.id=id();fresh.title='Untitled play';fresh.shots=[];this.loadDocument(fresh,{persist:false});this.message='Choose Add to create the first hit. Each Add continues your rally.';}
+                else if(action==='open')this.loadDocument(this.store.open(value),{persist:false,saved:true});
+                else if(action==='template'){const template=PICKLEBOARD_PLAYS.find(p=>p.id===value);if(template){const draft=documentFromTemplate(template);draft.id=id();this.loadDocument(draft,{persist:false});}}
                 else {const imported=this.store.importJSON(value);imported.id=id();this.loadDocument(imported);this.message='Imported as a separate copy. Existing saved plays were kept.';}
             }
             else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleboard-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

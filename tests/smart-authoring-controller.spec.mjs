@@ -48,6 +48,7 @@ test('a newer edit cancels Random Rally without replacing current work',async({p
 
 test('99-hit generation is exact, persisted as a new draft and editable after reload',async({page})=>{
   const result=await page.evaluate(async()=>{
+    await playBuilder.action('title','Authored play before Random');
     const prior=structuredClone(playBuilder.document);
     const result=await playBuilder.action('randomRally',{count:99,seed:12648430});
     const saved=JSON.parse(localStorage.getItem('pickleballpark-builder-v1'));

@@ -2,7 +2,7 @@
 
 Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same application.
 
-**Current branch:** `branding/pickleball-park-strokes` preserves the completed `feature/stroke-instruction` candidate, its rounded 3D town court, articulated athletes and instructional strokes, with consistent Pickleball Park branding. The site address is <https://fcw1987.github.io/pickleballpark/>; see [Pages publication and migration](docs/PAGES_PUBLICATION.md). The [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md), [October 19 strokes handoff](docs/STROKE_HANDOFF.md), and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence.
+**Publication branch:** `main` preserves the completed `feature/stroke-instruction` candidate, its rounded 3D town court, articulated athletes and instructional strokes, with consistent Pickleball Park branding. The site address is <https://fcw1987.github.io/pickleballpark/>; see [Pages publication and migration](docs/PAGES_PUBLICATION.md). The [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md), [October 19 strokes handoff](docs/STROKE_HANDOFF.md), and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence.
 
 Smart Rally adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the requirements and verification ledger](docs/SMART_RALLY_STATUS.md).
 
@@ -17,7 +17,7 @@ Phone authoring now includes a shallow shot editor, full movement/contact detail
 - Custom rallies up to 99 shots, validated targets, valid-prefix preview, movement pins, Undo/Redo, and a shared playhead
 - Validated Smart Add continuations, seeded offline Random Rally, and reversible Coach repairs with explicit permission for protected intent
 - Independent Auto Shading and Suggested Coverage guides; a bounded instructional approximation, not optimal strategy
-- Named local drafts, Save As, and bounded versioned JSON backups
+- Named local drafts with Open/Delete recovery, Save As, and bounded versioned JSON backups
 
 - Four draggable branded player tokens: Team 1 uses green artwork and Team 2 uses orange artwork
 - Per-player left/right handedness: all players start right-handed; double click on desktop or double tap on touch devices to toggle
@@ -32,20 +32,20 @@ Phone authoring now includes a shallow shot editor, full movement/contact detail
 - Eight guided Plays with exact shot chapters and playback that repeats until paused
 - No backend, account, analytics, or remote persistence
 
-Builder source documents are autosaved locally, including incomplete drafts, with named copies and versioned JSON import/export. Browser storage is not a backup guarantee: export important plays. Court Planner arrangements remain session-only; explicitly use a planner layout as a draft starting state to save it. Theme preference retains its compatible storage key. See [document and trajectory contract](docs/PLAY_DOCUMENT.md), [storage](docs/BUILDER_STORAGE.md), and [builder verification](docs/BUILDER_VERIFICATION.md).
+Edits to builder source documents are autosaved locally, including incomplete drafts. Untouched lessons and New Play stay transient until the first edit; Save As, accepted Random Rally and import are explicit saves. My Plays can open and delete saved entries even when the 50-play library is full. Failed saves keep the current work and existing library. Browser storage is not a backup guarantee: export important plays. Court Planner arrangements remain session-only; explicitly use a planner layout as a draft starting state to save it. Theme preference retains its compatible storage key. See [document and trajectory contract](docs/PLAY_DOCUMENT.md), [storage](docs/BUILDER_STORAGE.md), and [builder verification](docs/BUILDER_VERIFICATION.md).
 
 ## Run locally
 
 Service workers do not operate from a normal `file://` page. Use the included local HTTP server for development and PWA testing:
 
 ```bash
-npm install
+npm ci
 npm start
 ```
 
 Then open <http://127.0.0.1:4173/>.
 
-The application has no build step and can be hosted by any static HTTPS server. The checked-in `vendor/` modules provide the sole production dependency, Three.js, for offline 3D playback. Opening `index.html` directly may display the basic application, but it is not a supported way to test modules, installation, updates, or offline behavior.
+The source application can be served directly for local development. Production uses the verified runtime-only package produced by `npm run build:site`; do not publish the source checkout. The checked-in `vendor/` modules provide the sole production dependency, Three.js, for offline 3D playback. Opening `index.html` directly may display the basic application, but it is not a supported way to test modules, installation, updates, or offline behavior.
 
 ## Test
 
@@ -201,11 +201,11 @@ Changing a shell asset—including any player PNG—requires incrementing the st
 
 ## CI
 
-`.github/workflows/quality.yml` runs locked installation, syntax/unit/brand/asset checks, reproducible generation, full Chromium and WebKit suites, and exact-package/offline/production-upgrade checks on pull requests and pushes to `main`. Every required job must succeed for **Quality gate**. Pages publication is manual, selects the tested main artifact, and does not deploy pull requests. See [live testing delivery](docs/LIVE_TESTING_DELIVERY.md).
+`.github/workflows/quality.yml` runs locked installation, syntax/unit/brand/asset checks, reproducible generation, full Chromium and WebKit suites, and exact-package/offline/production-upgrade checks on pull requests and pushes to `main`. Every required job must succeed for **Quality gate**. Pages publication selects the verified artifact for the exact current main commit after all required Quality jobs pass. Subsequent main pushes use the same gated workflow, and manual publication accepts the full current-main SHA. Pull-request artifacts cannot deploy. See [publication rules](docs/PAGES_PUBLICATION.md) and [contributor guidance](AGENTS.md).
 
 ## Browser support
 
-The production code targets current evergreen Chrome, Edge, Firefox, and Safari releases with SVG, CSS custom properties, service workers, Cache Storage, and modern JavaScript support. Chromium is the primary automated quality gate. Supplementary WebKit checks run with `npx playwright test --config playwright.webkit.config.mjs` after `npx playwright install webkit`. See [historical verification](docs/REBRAND_VERIFICATION.md) for public evidence scope and browser limitations.
+The production code targets current evergreen Chrome, Edge, Firefox, and Safari releases with SVG, CSS custom properties, service workers, Cache Storage, and modern JavaScript support. Chromium and WebKit are required automated quality gates; WebKit allows no failure exceptions, retries or skipped tests. Focused WebKit checks run with `npx playwright test --config playwright.webkit.config.mjs` after `npx playwright install webkit`. See [historical verification](docs/REBRAND_VERIFICATION.md) for public evidence scope and browser limitations.
 
 ## Contributing
 

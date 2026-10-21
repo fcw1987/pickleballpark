@@ -18,6 +18,10 @@ Writing the complete envelope with one `setItem` call is the commit point. A quo
 
 JSON import only returns a validated detached document; callers choose whether to save it. JSON export emits only the validated source document. Browser storage remains local to the current browser profile and origin and is not an absolute backup, so export is the durable manual backup path.
 
+Untouched lesson copies and New Play previews remain in memory until an actual authored edit. Playback, no-op edits and opening an existing saved play do not create new library entries. Save As, import and accepted Random Rally results explicitly create saved copies; the candidate is committed before replacing the visible document, so failed capacity or quota writes preserve the current document and history.
+
+My Plays remains accessible when all 50 slots are occupied. Its Delete action confirms removal of the saved copy, preserves the current court and checks for changes from another tab before deleting. Deleting the currently open saved play leaves an unsaved preview; it is saved again only on an edit or explicit save. A capacity-only error permits opening an existing play when the current document has no unsaved edits. Dirty work must first be saved or retained as a copy; users can delete a different saved play and retry, or export a backup without losing the visible work.
+
 `EditHistory` stores detached source snapshots. `commit` drops the redo branch, `undo` and `redo` return clones, and the configured limit bounds retained undo transitions. Playback frames and derived compiler output must never be committed. The integrating session decides which user operations form a single authored edit and separately marks dependent later shots for review.
 
 ## Intermediate movement paths

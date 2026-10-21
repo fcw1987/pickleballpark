@@ -1,83 +1,93 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-
+import { buildSite } from '../tools/build-site.mjs';
+import { assertNoPrivatePaths, createRuntimePackage, jsonBytes, regularFilePaths, sha256 } from '../tools/runtime-package.mjs';
 import { validateDeploymentArtifact } from '../tools/verify-deployment-artifact.mjs';
+import { makePackageSource } from './helpers/package-source.mjs';
 
-const REVISION = '0'.repeat(40);
-const fixture = JSON.parse(readFileSync('tests/fixtures/approved-runtime.json'));
-const version = JSON.parse(readFileSync('version.json'));
-const manifestBytes = Buffer.from(`${JSON.stringify({ approvedSource: fixture.source, files: fixture.files }, null, 2)}\n`);
-const stage = () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'pickleballpark-deploy-test-'));
-  for (const file of fixture.files) {
-    const target = path.join(root, file.path);
-    mkdirSync(path.dirname(target), { recursive: true });
-    cpSync(file.path, target);
-  }
-  writeFileSync(path.join(root, 'runtime-manifest.json'), manifestBytes);
-  writeFileSync(path.join(root, 'build-info.json'), `${JSON.stringify({
-    product: 'Pickleball Park', revision: REVISION, approvedSource: fixture.source,
-    sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null,
-    runtimeManifestSha256: 'bed87f0f2694623f489cdb4ae2f2183add4107d0ed57b342241c48fb5585acc7',
-    runtimeFiles: fixture.files.length,
-    runtimeBytes: fixture.files.reduce((sum, file) => sum + file.bytes, 0),
-    publicationMetadata: ['build-info.json', 'runtime-manifest.json'],
-  }, null, 2)}\n`);
-  return root;
+const withStage = run => {
+  const source = makePackageSource();
+  const root = path.join(source.root, 'dist');
+  try {
+    buildSite({ sourceRoot: source.root, output: root, requireCommittedSource: true });
+    return run({ ...source, sourceRoot: source.root, artifact: root });
+  } finally { rmSync(source.root, { recursive: true, force: true }); }
 };
-const withStage = (run) => {
-  const root = stage();
-  try { run(root); } finally { rmSync(root, { recursive: true, force: true }); }
-};
+const validate = data => validateDeploymentArtifact(data.artifact, data.revision, { sourceRoot: data.sourceRoot, requireCommittedSource: true });
 
-test('accepts the exact staged runtime fixture from the working tree', () => withStage((root) => {
-  assert.deepEqual(validateDeploymentArtifact(root, REVISION), {
-    revision: REVISION, runtimeFiles: 110, runtimeBytes: 1927768,
-    manifestSha256: 'bed87f0f2694623f489cdb4ae2f2183add4107d0ed57b342241c48fb5585acc7',
-  });
+test('packages only runtime files with deterministic exact-commit metadata without changing root stamps', () => withStage(data => {
+  const result = validate(data);
+  assert.equal(result.revision, data.revision);
+  assert.equal(result.runtimeFiles, data.paths.length);
+  assert.deepEqual(regularFilePaths(data.artifact).sort(), [...data.paths, 'build-info.json', 'runtime-manifest.json'].sort());
+  const version = JSON.parse(readFileSync(path.join(data.artifact, 'version.json')));
+  const module = readFileSync(path.join(data.artifact, 'build-metadata.js'), 'utf8');
+  assert.equal(version.sourceRevision, data.revision);
+  assert.equal(version.sourceBranch, null);
+  assert.equal(version.runtimeMatchesSource, true);
+  assert.equal(version.status, 'packaged');
+  assert(module.includes(JSON.stringify(version, null, 2)));
+  assert.equal(readFileSync(path.join(data.sourceRoot, 'version.json'), 'utf8'), '{"historical":true}\n');
+  assert.equal(sha256(readFileSync(path.join(data.artifact, 'runtime-manifest.json'))), result.manifestSha256);
 }));
 
-test('rejects missing and extra artifact files', () => {
-  withStage((root) => { rmSync(path.join(root, fixture.files[0].path)); assert.throws(() => validateDeploymentArtifact(root, REVISION), /path set mismatch/); });
-  withStage((root) => { writeFileSync(path.join(root, 'extra.txt'), 'extra'); assert.throws(() => validateDeploymentArtifact(root, REVISION), /path set mismatch/); });
+test('routine build accepts a one-line edit with truthful dirty identity and no pin/stamp update', () => withStage(data => {
+  writeFileSync(path.join(data.sourceRoot, 'app.js'), 'export const app = 2;\n');
+  const info = buildSite({ sourceRoot: data.sourceRoot, output: data.artifact });
+  assert.equal(info.sourceState, 'dirty');
+  assert.equal(JSON.parse(readFileSync(path.join(data.artifact, 'version.json'))).status, 'development');
+  assert.doesNotThrow(() => validateDeploymentArtifact(data.artifact, data.revision, { sourceRoot: data.sourceRoot }));
+  assert.throws(() => validate(data), /differs from the expected source commit/);
+  assert.throws(() => buildSite({ sourceRoot: data.sourceRoot, requireCommittedSource: true }), /differs from the expected source commit/);
+}));
+
+test('rejects missing and extra artifact files including source documents', () => {
+  withStage(data => { rmSync(path.join(data.artifact, 'app.js')); assert.throws(() => validate(data), /path set mismatch/); });
+  withStage(data => { writeFileSync(path.join(data.artifact, 'README.md'), 'source-only'); assert.throws(() => validate(data), /path set mismatch/); });
 });
 
-test('rejects changed runtime bytes', () => withStage((root) => {
-  writeFileSync(path.join(root, fixture.files[0].path), 'changed');
-  assert.throws(() => validateDeploymentArtifact(root, REVISION), /Runtime file mismatch/);
+test('rejects modified runtime and even a self-consistently rehashed forged manifest', () => withStage(data => {
+  writeFileSync(path.join(data.artifact, 'app.js'), 'forged');
+  assert.throws(() => validate(data), /Runtime file mismatch/);
+  const manifest = JSON.parse(readFileSync(path.join(data.artifact, 'runtime-manifest.json')));
+  const entry = manifest.files.find(file => file.path === 'app.js');
+  entry.bytes = 6; entry.sha256 = sha256(Buffer.from('forged'));
+  const bytes = jsonBytes(manifest);
+  writeFileSync(path.join(data.artifact, 'runtime-manifest.json'), bytes);
+  const info = JSON.parse(readFileSync(path.join(data.artifact, 'build-info.json')));
+  info.runtimeManifestSha256 = sha256(bytes);
+  writeFileSync(path.join(data.artifact, 'build-info.json'), jsonBytes(info));
+  assert.throws(() => validate(data), /manifest differs from trusted source/);
 }));
 
-test('rejects the wrong expected revision', () => withStage((root) => {
-  assert.throws(() => validateDeploymentArtifact(root, '1'.repeat(40)), /revision mismatch/);
-}));
+test('rejects a wrong commit identity or altered generated metadata', () => {
+  withStage(data => assert.throws(() => validateDeploymentArtifact(data.artifact, 'f'.repeat(40), { sourceRoot: data.sourceRoot }), /revision|commit|git/));
+  withStage(data => { writeFileSync(path.join(data.artifact, 'version.json'), '{}'); assert.throws(() => validate(data), /Runtime file mismatch/); });
+  withStage(data => { writeFileSync(path.join(data.artifact, 'build-info.json'), '{}'); assert.throws(() => validate(data), /Build metadata/); });
+});
 
-test('rejects a changed runtime manifest', () => withStage((root) => {
-  writeFileSync(path.join(root, 'runtime-manifest.json'), `${manifestBytes} `);
-  assert.throws(() => validateDeploymentArtifact(root, REVISION), /manifest digest/);
-}));
+test('rejects artifact and source symlinks and unexpected runtime paths', () => {
+  withStage(data => {
+    const file = path.join(data.artifact, 'app.js'); rmSync(file); symlinkSync(path.join(data.sourceRoot, 'app.js'), file);
+    assert.throws(() => validate(data), /symbolic link/);
+  });
+  withStage(data => {
+    const file = path.join(data.sourceRoot, 'app.js'); rmSync(file); symlinkSync(path.join(data.sourceRoot, 'index.html'), file);
+    assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /symbolic link/);
+  });
+  withStage(data => { writeFileSync(path.join(data.sourceRoot, 'secret.js'), 'private'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /path set differs/); });
+});
 
-test('rejects symbolic links', () => withStage((root) => {
-  const target = path.join(root, fixture.files[0].path);
-  rmSync(target);
-  symlinkSync(path.join(process.cwd(), fixture.files[0].path), target);
-  assert.throws(() => validateDeploymentArtifact(root, REVISION), /symbolic link/);
-}));
+test('rejects vendor divergence, private paths and unsafe allowlist entries', () => {
+  withStage(data => { writeFileSync(path.join(data.sourceRoot, 'vendor/three.module.min.js'), 'modified'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Vendor differs/); });
+  withStage(data => { writeFileSync(path.join(data.sourceRoot, 'app.js'), 'const path = "/Users/private/source";'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Private local path/); });
+  withStage(data => { writeFileSync(path.join(data.sourceRoot, 'tools/runtime-files.json'), '["../private"]'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Invalid runtime/); });
+});
 
-test('rejects the obsolete hidden-file metadata contract', () => withStage((root) => {
-  const file = path.join(root, 'build-info.json');
-  const info = JSON.parse(readFileSync(file));
-  info.publicationMetadata.push('.nojekyll');
-  writeFileSync(file, JSON.stringify(info));
-  assert.throws(() => validateDeploymentArtifact(root, REVISION), /Publication metadata set mismatch/);
-}));
-
-test('rejects package metadata naming a different source from its runtime', () => withStage(root => {
-  const file = path.join(root, 'build-info.json');
-  const info = JSON.parse(readFileSync(file));
-  info.sourceRevision = '1'.repeat(40);
-  writeFileSync(file, JSON.stringify(info));
-  assert.throws(() => validateDeploymentArtifact(root, REVISION), /Version metadata source mismatch/);
-}));
+test('private-path scanning covers SVG, text and embedded binary asset strings', () => {
+  for (const file of ['assets/icon.svg', 'vendor/notice.txt', 'icons/font.ttf']) {
+    assert.throws(() => assertNoPrivatePaths(new Map([[file, Buffer.from('embedded /Users/private/source')]])), /Private local path/);
+  }
+});

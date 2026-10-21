@@ -3,6 +3,7 @@ export const STORAGE_SCHEMA_VERSION = 1;
 export const MAX_JSON_BYTES = 512 * 1024;
 export const MAX_DRAFTS = 50;
 export const DRAFT_CONFLICT_CODE = 'DRAFT_CONFLICT';
+export const DRAFT_CAPACITY_CODE = 'DRAFT_CAPACITY';
 
 const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -92,6 +93,9 @@ export class DraftStore {
     // Values are tracked per document so another tab changing a different
     // draft does not prevent this store from saving the document it opened.
     this.observedDrafts = new Map();
+    // A library listing authorizes deletion of its displayed revision, but
+    // must never advance the active editor's independent save observation.
+    this.listedDrafts = new Map();
   }
 
   _validatedDocument(value) {
@@ -161,8 +165,10 @@ export class DraftStore {
     return clone(envelope.drafts.find(doc => doc.id === envelope.lastId));
   }
 
-  list() {
-    return this._readEnvelope().drafts.map(({ id, title }) => ({ id, title }));
+  list({ includeRevision = false } = {}) {
+    const drafts = this._readEnvelope().drafts;
+    this.listedDrafts = new Map(drafts.map(doc => [doc.id, JSON.stringify(doc)]));
+    return drafts.map(({ id, title }) => includeRevision ? { id, title, revision: this.listedDrafts.get(id) } : { id, title });
   }
 
   save(value) {
@@ -171,7 +177,11 @@ export class DraftStore {
     this._assertObservedDraftUnchanged(envelope, doc.id);
     const index = envelope.drafts.findIndex(saved => saved.id === doc.id);
     if (index < 0) {
-      if (envelope.drafts.length >= MAX_DRAFTS) throw fail(`library is limited to ${MAX_DRAFTS} drafts`);
+      if (envelope.drafts.length >= MAX_DRAFTS) {
+        const error = fail(`library is limited to ${MAX_DRAFTS} drafts; delete a saved play in My Plays to make room`);
+        error.code = DRAFT_CAPACITY_CODE;
+        throw error;
+      }
       envelope.drafts.push(doc);
     } else {
       envelope.drafts[index] = doc;
@@ -198,9 +208,13 @@ export class DraftStore {
     return clone(doc);
   }
 
-  remove(id) {
+  remove(id, { expectedRevision } = {}) {
     if (typeof id !== 'string') throw fail('draft id must be a string');
     const envelope = this._readEnvelope();
+    const listed = expectedRevision === undefined ? this.listedDrafts.get(id) : expectedRevision;
+    if (listed !== undefined) {
+      if (typeof listed !== 'string' || listed !== this._serializedDraft(envelope, id)) throw conflict(id);
+    } else this._assertObservedDraftUnchanged(envelope, id);
     const index = envelope.drafts.findIndex(saved => saved.id === id);
     if (index < 0) return false;
     envelope.drafts.splice(index, 1);

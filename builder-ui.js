@@ -158,6 +158,8 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   let renderedSaveErrorKey = '';
   let renderedProposalKey = '';
   let renderedCoachOptionsKey = '';
+  let renderedSettingsKey = '';
+  let renderedControlsState = [];
   let userInspectorExpanded = null;
   let inspectorManualCollapsed = null;
   let advancedOpen = false;
@@ -184,15 +186,28 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   importDialog.setAttribute('aria-label', 'Import or export play');
   randomDialog.setAttribute('aria-label', 'Random rally');
   function closeDialog(dialog) { if (dialog.open) dialog.close(); }
-  function openTemplateDialog(mode = 'learn') {
+  function openTemplateDialog(mode = 'learn', message = '') {
     timelineControl?.cancel?.();
     const libraryMode = mode === 'library';
     templateDialog.setAttribute('aria-label', libraryMode ? 'My Plays' : 'Learn and templates');
     templateDialog.replaceChildren(el('h2', '', libraryMode ? 'My Plays' : 'Learn / Templates'), el('p', 'builder-dialog-copy', libraryMode ? 'Open a saved play from this device.' : 'Choose a lesson or template to open as a copy.'));
     const list = el('div', 'builder-dialog-list'); const entries = (libraryMode ? current.library || [] : current.templates || []).map(item => ({ ...item, __kind: libraryMode ? 'open' : 'template' }));
-    entries.forEach(item => { const id = item.id; const label = item.name || item.title || id; const b = button(label, 'template-open', 'builder-button'); b.dataset.id = id; b.dataset.kind = item.__kind; list.appendChild(b); });
+    entries.forEach(item => {
+      const id = item.id; const label = item.name || item.title || id;
+      const b = button(label, 'template-open', 'builder-button'); b.dataset.id = id; b.dataset.kind = item.__kind;
+      if (libraryMode) {
+        const row = el('div', 'builder-saved-play-row'); row.dataset.playId = id;
+        const remove = button('Delete', 'delete-play', 'builder-button builder-button-danger'); remove.dataset.id = id; remove.setAttribute('aria-label', `Delete ${label}`);
+        // Keep the revision the user actually saw, even if a storage event
+        // refreshes current.library while this dialog remains open.
+        remove.savedPlaySnapshot = { id, title: item.title, name: item.name, revision: item.revision };
+        row.append(b, remove); list.appendChild(row);
+      } else list.appendChild(b);
+    });
     if (!entries.length) list.appendChild(el('p', 'builder-dialog-copy', 'No saved plays or templates yet.'));
-    templateDialog.appendChild(list); templateDialog.appendChild(button('Close', 'dialog-close', 'builder-button'));
+    templateDialog.appendChild(list);
+    const status = el('p', 'builder-library-status', message); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); templateDialog.appendChild(status);
+    templateDialog.appendChild(button('Close', 'dialog-close', 'builder-button'));
     if (!templateDialog.open) templateDialog.showModal();
   }
   function openImportDialog() {
@@ -206,12 +221,14 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   function openRandomDialog() {
     timelineControl?.cancel?.();
     const count = el('input'); count.type = 'number'; count.min = '1'; count.max = String(UI_MAX_SHOTS); count.step = '1'; count.value = '7'; count.inputMode = 'numeric'; count.dataset.action = 'random-count'; count.setAttribute('aria-label', 'Number of hits');
-    const seed = el('input'); seed.type = 'text'; seed.maxLength = 40; seed.placeholder = 'Optional seed'; seed.dataset.action = 'random-seed'; seed.setAttribute('aria-label', 'Random seed');
+    const seed = el('input'); seed.type = 'number'; seed.min = '0'; seed.max = '4294967295'; seed.step = '1'; seed.inputMode = 'numeric'; seed.placeholder = 'Optional number'; seed.dataset.action = 'random-seed'; seed.setAttribute('aria-label', 'Random seed'); seed.setAttribute('aria-describedby', 'builder-random-seed-help');
+    const seedHelp = el('p', 'builder-dialog-copy', 'Optional whole number from 0 to 4294967295. Reuse a number to repeat a rally, or leave it blank for a new one.'); seedHelp.id = 'builder-random-seed-help';
     randomDialog.replaceChildren(
       el('h2', '', 'Random Rally'),
       el('p', 'builder-dialog-copy', `Create a fresh playable rally with exactly the requested number of paddle contacts (1–${UI_MAX_SHOTS}). Your current play stays safe until you choose to use the result.`),
       labelled('Hits', count),
       labelled('Seed', seed),
+      seedHelp,
       el('p', 'builder-dialog-copy builder-proposal-status', current.proposalBusy ? (typeof current.proposalProgress === 'object' && current.proposalProgress ? `${current.proposalProgress.label || 'Building rally'}${Number.isFinite(current.proposalProgress.completed) && Number.isFinite(current.proposalProgress.total) ? ` · ${current.proposalProgress.completed}/${current.proposalProgress.total}` : '…'}` : 'Building rally…') : ''),
       (() => { const actions = el('div', 'builder-dialog-actions'); const cancel = button('Cancel', 'cancel-proposal', 'builder-button'); const create = button('Create rally', 'random-rally', 'builder-button builder-button-primary'); create.disabled = Boolean(current.proposalBusy); actions.append(cancel, create); return actions; })()
     );
@@ -249,10 +266,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       inspectorManualCollapsed = false;
       userInspectorExpanded = true;
     }
-    root.classList.toggle('builder-placing',Boolean(current.targetPlacement||current.movementPlacement));
     const doc = current.document || { title: 'Build a Play', shots: [], players: {}, assistance: {} };
-    const labels = getPlayerLabels(doc);
-    const players = playerChoices(doc);
     const shots = Array.isArray(doc.shots) ? doc.shots : [];
     const selected = shots.find(shot => shot.id === current.selectedShotId) || shots[0];
     if (selected) current.selectedShotId = selected.id;
@@ -260,9 +274,19 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const saveErrorKey = JSON.stringify(current.saveError || null);
     const proposalKey = JSON.stringify([current.proposalBusy, current.proposalProgress]);
     const coachOptionsKey = JSON.stringify(current.coachOptions || null);
-    const structureChanged = renderedDocument !== doc || renderedSelectedShotId !== current.selectedShotId || renderedView !== current.view || renderedWorkspace !== current.workspace || renderedWaypointKey !== waypointKey || renderedSaveErrorKey !== saveErrorKey || renderedProposalKey !== proposalKey || renderedCoachOptionsKey !== coachOptionsKey;
+    const settingsKey = JSON.stringify([current.rate, current.camera, current.canUndo, current.canRedo, current.findings, document.body.dataset.theme]);
+    const structureChanged = renderedDocument !== doc || renderedSelectedShotId !== current.selectedShotId || renderedView !== current.view || renderedWorkspace !== current.workspace || renderedWaypointKey !== waypointKey || renderedSaveErrorKey !== saveErrorKey || renderedProposalKey !== proposalKey || renderedCoachOptionsKey !== coachOptionsKey || renderedSettingsKey !== settingsKey;
+    // The clock still updates the timeline every frame. Other controls change
+    // only when their displayed state changes, preserving focused inputs and
+    // avoiding repeated DOM queries and live-region writes during playback.
+    timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
+    const controlsState = [current.currentShotId, current.selectedChapterId, current.cue?.title, current.playing, current.busy, current.saveStatus, current.message, current.targetPlacement, current.movementPlacement, inspectorManualCollapsed, pendingField];
+    if (!structureChanged && controlsState.every((value, index) => value === renderedControlsState[index])) return;
+    renderedControlsState = controlsState;
+    root.classList.toggle('builder-placing', placementActive);
+    const labels = getPlayerLabels(doc);
+    const players = playerChoices(doc);
     if (!structureChanged && root.childElementCount) {
-      timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
       const liveChapterId = current.currentShotId || current.selectedChapterId || null;
       root.querySelectorAll('[data-action="chapter"]').forEach(chapter => chapter.setAttribute('aria-current', String(Boolean(liveChapterId && chapter.dataset.shotId === liveChapterId))));
       const save = root.querySelector('.builder-save-status'); if (save) save.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft';
@@ -299,7 +323,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       }
       return;
     }
-    renderedDocument = doc; renderedSelectedShotId = current.selectedShotId; renderedView = current.view; renderedWorkspace = current.workspace; renderedWaypointKey = waypointKey; renderedSaveErrorKey = saveErrorKey; renderedProposalKey = proposalKey; renderedCoachOptionsKey = coachOptionsKey;
+    renderedDocument = doc; renderedSelectedShotId = current.selectedShotId; renderedView = current.view; renderedWorkspace = current.workspace; renderedWaypointKey = waypointKey; renderedSaveErrorKey = saveErrorKey; renderedProposalKey = proposalKey; renderedCoachOptionsKey = coachOptionsKey; renderedSettingsKey = settingsKey;
     const previousAdvanced = root.querySelector('.builder-advanced'); if (previousAdvanced) advancedOpen = previousAdvanced.open;
     const oldDetails=root.querySelector('.builder-shot-details');if(oldDetails)shotDetailsOpen=oldDetails.open;
     const oldFamilyPicker=root.querySelector('.builder-family-picker');if(oldFamilyPicker && !preserveFamilyPickerState)familyPickerOpen=oldFamilyPicker.open;
@@ -349,9 +373,11 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     meta.appendChild(compactMessage);
     if (current.saveError) {
       const error = el('div', 'builder-save-error');
-      error.append(el('strong', '', current.saveError.conflict ? 'This draft changed elsewhere.' : 'Could not save this draft.'), el('span', '', current.saveError.message || 'Your edits are still here. Retry or save a copy.'));
+      error.append(el('strong', '', current.saveError.libraryFull ? 'My Plays is full.' : current.saveError.conflict ? 'This draft changed elsewhere.' : 'Could not save this draft.'), el('span', '', current.saveError.message || 'Your edits are still here. Retry or save a copy.'));
       if (!current.saveError.conflict) error.append(button('Retry save', 'retry-save', 'builder-button builder-button-accent'));
-      error.append(button(current.saveError.conflict ? 'Save a copy' : 'Save a copy', 'save-as', 'builder-button'));
+      if (current.saveError.libraryFull) {
+        error.append(el('span', '', 'Delete a saved play in My Plays to make room, then retry saving. You can export this draft as a backup.'), button('Manage saved plays', 'open', 'builder-button'), button('Export this draft', 'export', 'builder-button'));
+      } else error.append(button('Save a copy', 'save-as', 'builder-button'));
       meta.appendChild(error);
     }
     const cue = current.cue || (selected ? { title: shotLabel(selected, shots.indexOf(selected)), description: '' } : null);
@@ -535,7 +561,6 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       if (progress) progress.textContent = current.proposalBusy ? (typeof info === 'object' && info ? `${info.label || 'Building rally'}${Number.isFinite(info.completed) && Number.isFinite(info.total) ? ` · ${info.completed}/${info.total}` : '…'}` : 'Building rally…') : (typeof info === 'string' ? info : '');
       const create = randomDialog.querySelector('[data-action="random-rally"]'); if (create) create.disabled = Boolean(current.proposalBusy);
     }
-    timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
     if(placementJustFinished){
       root.querySelector('.builder-inspector [data-action="collapse-inspector"]')?.focus({preventScroll:true});
@@ -585,7 +610,26 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'choose-family') { familyPickerOpen = false; preserveFamilyPickerState = true; rerenderAction('editShot', { field: 'family', value: target.dataset.family }); }
     else if (action === 'new') rerenderAction('new');
     else if (action === 'templates') openTemplateDialog('learn');
-    else if (action === 'template-open') { closeDialog(templateDialog); rerenderAction(target.dataset.kind === 'open' ? 'open' : 'template', target.dataset.id); }
+    else if (action === 'template-open') {
+      const result = await rerenderAction(target.dataset.kind === 'open' ? 'open' : 'template', target.dataset.id);
+      if (!result || result.ok !== false) closeDialog(templateDialog);
+      else {
+        const status = templateDialog.querySelector('.builder-library-status');
+        status.textContent = result.error || 'This play could not be opened. Your current draft was kept.'; status.setAttribute('role', 'alert');
+      }
+    }
+    else if (action === 'delete-play') {
+      const item = target.savedPlaySnapshot;
+      if (!item) return;
+      if (!await confirmDeletePlay(item)) { target.focus(); return; }
+      const result = await rerenderAction('deletePlay', typeof item.revision === 'string' ? { id: item.id, revision: item.revision } : item.id);
+      if (result?.ok === false) {
+        const status = templateDialog.querySelector('.builder-library-status'); status.textContent = result.error || 'This saved play could not be deleted.'; status.setAttribute('role', 'alert'); target.focus();
+      } else {
+        openTemplateDialog('library', `${result?.deleted === false ? 'Already removed' : 'Deleted'} ${item.name || item.title || item.id}. Your current draft is still open.`);
+        templateDialog.querySelector('[data-action="template-open"], [data-action="dialog-close"]')?.focus();
+      }
+    }
     else if (action === 'dialog-close') { closeDialog(templateDialog); closeDialog(importDialog); }
     else if (action === 'review-findings') { fire('pauseForEditing'); if (target.dataset.shotId) rerenderAction('selectShot', target.dataset.shotId); inspectorManualCollapsed=false;render({});root.querySelector('.builder-findings')?.scrollIntoView({block:'nearest'}); }
     else if (action === 'finding-shot') { fire('pauseForEditing'); inspectorManualCollapsed=false; userInspectorExpanded=true; current.movementPlayer=null; rerenderAction('selectShot', target.dataset.shotId); }
@@ -626,7 +670,26 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'open') openTemplateDialog('library');
     else if (action === 'import-export') openImportDialog();
     else if (action === 'random') openRandomDialog();
-    else if (action === 'random-rally') { const count = Number(randomDialog.querySelector('[data-action="random-count"]')?.value); const seed = randomDialog.querySelector('[data-action="random-seed"]')?.value.trim() || undefined; if (!Number.isInteger(count) || count < 1 || count > UI_MAX_SHOTS) { const field = randomDialog.querySelector('[data-action="random-count"]'); if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); } return; } const result = await rerenderAction('randomRally', { count, ...(seed ? { seed } : {}) }); if (!result || result.ok !== false) closeDialog(randomDialog); else { const status = randomDialog.querySelector('.builder-proposal-status'); if (status) { status.textContent = result.error || 'Rally generation could not complete. Your current play was kept.'; status.setAttribute('role', 'alert'); status.setAttribute('aria-live', 'assertive'); } } }
+    else if (action === 'random-rally') {
+      const countField = randomDialog.querySelector('[data-action="random-count"]');
+      const seedField = randomDialog.querySelector('[data-action="random-seed"]');
+      const count = Number(countField.value);
+      const seed = seedField.value.trim() === '' ? undefined : Number(seedField.value);
+      if (!countField.checkValidity() || !Number.isInteger(count) || count < 1 || count > UI_MAX_SHOTS) {
+        markInvalidField(countField, `Enter a whole number of hits from 1 to ${UI_MAX_SHOTS}.`); countField.focus(); return;
+      }
+      clearInvalidField(countField);
+      if (!seedField.checkValidity() || (seed !== undefined && (!Number.isInteger(seed) || seed < 0 || seed > 4294967295))) {
+        markInvalidField(seedField, 'Enter a whole number from 0 to 4294967295, or leave the seed blank.'); seedField.focus(); return;
+      }
+      clearInvalidField(seedField);
+      const result = await rerenderAction('randomRally', { count, ...(seed !== undefined ? { seed } : {}) });
+      if (!result || result.ok !== false) closeDialog(randomDialog);
+      else {
+        const status = randomDialog.querySelector('.builder-proposal-status');
+        if (status) { status.textContent = result.error || 'Rally generation could not complete. Your current play was kept.'; status.setAttribute('role', 'alert'); status.setAttribute('aria-live', 'assertive'); }
+      }
+    }
     else if (action === 'cancel-proposal') { closeDialog(randomDialog); rerenderAction('cancelProposal'); }
     else if (action === 'import-json') { const area = importDialog.querySelector('textarea'); const result = await rerenderAction('import', area?.value || ''); if (!result || result.ok !== false) { importFileGeneration += 1; closeDialog(importDialog); } else { const status = importDialog.querySelector('.builder-import-status') || el('p', 'builder-import-status'); status.textContent = result.error || 'Import could not be completed. Check the JSON and try again.'; importDialog.insertBefore(status, importDialog.querySelector('.builder-dialog-actions')); } }
     else if (action === 'export') rerenderAction('export');
@@ -722,14 +785,33 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   function markInvalidField(target, message) {
     target.setAttribute('aria-invalid', 'true');
     const field = target.closest('.builder-field') || target.parentElement;
-    if (field && !field.querySelector('.builder-field-error')) {const error=el('span','builder-field-error',message);error.id=`builder-error-${target.dataset.action.replace(/[^a-z0-9]/gi,'-')}`;error.setAttribute('role','alert');field.appendChild(error);target.setAttribute('aria-describedby',error.id);}
+    if (field && !field.querySelector('.builder-field-error')) {const error=el('span','builder-field-error',message);error.id=`builder-error-${target.dataset.action.replace(/[^a-z0-9]/gi,'-')}`;error.setAttribute('role','alert');field.appendChild(error);target.setAttribute('aria-describedby',[target.getAttribute('aria-describedby'),error.id].filter(Boolean).join(' '));}
   }
   function clearInvalidField(target) {
     pendingField=false;
-    target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');
-    target.closest('.builder-field')?.querySelector('.builder-field-error')?.remove();
+    target.removeAttribute('aria-invalid');
+    const error = target.closest('.builder-field')?.querySelector('.builder-field-error');
+    const descriptions = (target.getAttribute('aria-describedby') || '').split(/\s+/).filter(id => id && id !== error?.id);
+    if (descriptions.length) target.setAttribute('aria-describedby', descriptions.join(' ')); else target.removeAttribute('aria-describedby');
+    error?.remove();
   }
   let plannerConfirmation = null;
+  function confirmDeletePlay(item) {
+    const dialog = el('dialog', 'builder-dialog builder-confirm-dialog');
+    dialog.setAttribute('aria-label', 'Delete saved play');
+    dialog.append(el('h2', '', 'Delete saved play?'), el('p', 'builder-dialog-copy', `Delete “${item.name || item.title || item.id}” from this device? This removes the saved copy. The play currently open in the builder will stay open.`));
+    const actions = el('div', 'builder-dialog-actions');
+    const cancel = button('Cancel', 'delete-cancel', 'builder-button');
+    const accept = button('Delete saved play', 'delete-confirm', 'builder-button builder-button-danger');
+    actions.append(cancel, accept); dialog.append(actions); root.appendChild(dialog);
+    return new Promise(resolve => {
+      const finish = value => { dialog.close(); dialog.remove(); resolve(value); };
+      cancel.addEventListener('click', () => finish(false));
+      accept.addEventListener('click', () => finish(true));
+      dialog.addEventListener('cancel', event => { event.preventDefault(); finish(false); }, { once: true });
+      dialog.showModal(); cancel.focus();
+    });
+  }
   const confirmPlanner = () => {
     if (plannerConfirmation) return plannerConfirmation;
     const dialog = el('dialog', 'builder-dialog builder-confirm-dialog');

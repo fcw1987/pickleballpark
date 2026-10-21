@@ -1,5 +1,7 @@
 # Pickleboard local handoff — 19 October 2026
 
+This is the historical v30 handoff. The October 21 follow-up now surfaces the Overhead + Short hop rule warning in ordinary preview without rewriting saved intent or motion; see [current limitations](KNOWN_LIMITATIONS.md). The frozen results and original limitation description below remain provenance for that earlier build.
+
 The completed candidate is on **`feature/stroke-instruction`**, in:
 
 `/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes`

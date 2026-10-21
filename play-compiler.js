@@ -247,6 +247,17 @@ export function compileDocument(document) {
   }
   labelOutcome(play);
   timeline = relabelTimeline(timeline, accepted.map(shot => shot.id));
+  // Legacy drafts can combine an overhead's high contact with Short hop. Keep
+  // their authored data and playable motion, but expose the same rule conflict
+  // that Smart Rally/Coach already detect through whole-rally evaluation.
+  const shortHopOverheads = new Set(accepted.filter(shot => shot.family === 'overhead' && shot.contactStyle === 'short-hop').map(shot => shot.id));
+  if (shortHopOverheads.size) {
+    for (const item of validateRallyRules(play, timeline).violations) {
+      if (item.code === 'short-hop-contact' && shortHopOverheads.has(item.stepId)) {
+        findings.push(finding('rule', 'warning', item.stepId, `This overhead uses a 7 ft contact. ${item.message} Choose Automatic, Forehand, or Backhand for this overhead.`));
+      }
+    }
+  }
   return Object.freeze({
     play: Object.freeze(play), timeline, findings: Object.freeze(findings),
     validShotCount: accepted.length, coverage: Object.freeze([])

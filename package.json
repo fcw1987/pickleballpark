@@ -17,7 +17,8 @@
     "build:site": "node tools/build-site.mjs",
     "pin:local-candidate": "node tools/pin-local-candidate.mjs",
     "verify:deployment-artifact": "node tools/verify-deployment-artifact.mjs",
-    "verify:package": "node tools/verify-package.mjs"
+    "verify:package": "node tools/verify-package.mjs",
+    "verify:release-baseline": "node tools/verify-release-baseline.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.0"

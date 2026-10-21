@@ -1,35 +1,22 @@
-// An explicit runtime-only package. Approved application bytes are immutable.
-import { readFile, writeFile, mkdir, rm, readdir, copyFile } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+// Build only the explicit application allowlist and deterministic metadata.
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-// Frozen release contract, independently compared with the locally retained approved source.
-const approvedManifestSha256 = 'bed87f0f2694623f489cdb4ae2f2183add4107d0ed57b342241c48fb5585acc7';
-const approved = JSON.parse(await readFile('tests/fixtures/approved-runtime.json'));
-const version = JSON.parse(await readFile('version.json'));
-if (version.product !== 'Pickleball Park' || !Number.isInteger(version.schemaVersion)) throw Error('Invalid version.json metadata');
-if (!version.sourceRevision || !/^[0-9a-f]{40}$/.test(version.sourceRevision)) throw Error('version.json must identify a full source revision');
-const rootFiles = await readdir('.');
-const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(async e => e.isDirectory() ? walk(`${dir}/${e.name}`) : `${dir}/${e.name}`))).flat();
-const actualPaths = [...rootFiles.filter(p => /\.(?:js|css|html)$/.test(p) || ['manifest.json', 'version.json'].includes(p)), ...await walk('icons'), ...await walk('vendor'), ...(await walk('assets')).filter(p => !p.startsWith('assets/source/'))].sort();
-if (JSON.stringify(actualPaths) !== JSON.stringify(approved.files.map(f => f.path).sort())) throw Error('Runtime path set differs from approved source; explicit review required');
-const files = [];
-for (const file of approved.files) {
-  const bytes = await readFile(file.path);
-  if (hash(bytes) !== file.sha256 || bytes.length !== file.bytes) throw Error(`Unapproved runtime change: ${file.path}`);
-  files.push(file);
+import { fileURLToPath } from 'node:url';
+import { createRuntimePackage } from './runtime-package.mjs';
+
+export function buildSite({ sourceRoot = '.', output = path.join(sourceRoot, 'dist'), requireCommittedSource = false } = {}) {
+  const data = createRuntimePackage({ sourceRoot, requireCommittedSource });
+  output = path.resolve(output);
+  if (output === path.resolve(sourceRoot) || path.resolve(sourceRoot).startsWith(`${output}${path.sep}`)) throw Error('Output cannot replace the source directory');
+  rmSync(output, { recursive: true, force: true });
+  mkdirSync(output, { recursive: true });
+  for (const [file, bytes] of [...data.files, ['runtime-manifest.json', data.manifestBytes], ['build-info.json', data.infoBytes]]) {
+    mkdirSync(path.dirname(path.join(output, file)), { recursive: true });
+    writeFileSync(path.join(output, file), bytes);
+  }
+  return data.info;
 }
-const lock = JSON.parse(await readFile('package-lock.json'));
-for (const name of ['three.module.min.js', 'three.core.min.js']) {
-  if (hash(await readFile(`vendor/${name}`)) !== hash(await readFile(`node_modules/three/build/${name}`))) throw Error(`Vendor differs from locked Three.js ${lock.packages['node_modules/three'].version}: ${name}`);
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  const info = buildSite({ requireCommittedSource: process.argv.includes('--require-clean') });
+  console.log(`Packaged ${info.runtimeFiles} runtime files (${info.runtimeBytes} bytes) plus 2 metadata files; source ${info.revision} (${info.sourceState})`);
 }
-await rm('dist', { recursive: true, force: true });
-await mkdir('dist');
-for (const file of files) { await mkdir(path.dirname(`dist/${file.path}`), { recursive: true }); await copyFile(file.path, `dist/${file.path}`); }
-const manifest = JSON.stringify({ approvedSource: approved.source, files }, null, 2) + '\n';
-if (hash(manifest) !== approvedManifestSha256) throw Error('Approved manifest changed; a new reviewed baseline is required');
-await writeFile('dist/runtime-manifest.json', manifest);
-const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-await writeFile('dist/build-info.json', JSON.stringify({ product: 'Pickleball Park', revision, approvedSource: approved.source, sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null, runtimeManifestSha256: hash(manifest), runtimeFiles: files.length, runtimeBytes: files.reduce((n, f) => n + f.bytes, 0), publicationMetadata: ['build-info.json', 'runtime-manifest.json'] }, null, 2) + '\n');
-console.log(`Packaged ${files.length} unchanged approved runtime files (${files.reduce((n, f) => n + f.bytes, 0)} bytes), plus 2 publication metadata files; revision ${revision}`);
