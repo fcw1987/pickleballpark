@@ -30,7 +30,9 @@ test('Help on a later paused chapter keeps the visible target and edit authority
     playing: playBuilder.session.playing,
     selected: playBuilder.selectedShotId,
     current: playBuilder.chapters.findLast(item => item.anchor <= playBuilder.session.clock.elapsed)?.shotId
-  }))).toEqual({ playing: true, selected: source.firstId, current: source.secondId });
+  // Explicit chapter choices select that shot (62f5677); automatic playback
+  // and timeline seeks remain separate from an already-open editor.
+  }))).toEqual({ playing: true, selected: source.secondId, current: source.secondId });
   await page.getByLabel('Menu', { exact: true }).click();
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Help & Information' })).toBeVisible();
@@ -45,6 +47,7 @@ test('Help on a later paused chapter keeps the visible target and edit authority
   });
 
   expect(before.current).toBe(source.secondId);
+  expect(before.selected).toBe(source.secondId);
 
   await page.getByRole('button', { name: 'Close help and information' }).click();
   await expect(page.getByRole('dialog', { name: 'Help & Information' })).toBeHidden();

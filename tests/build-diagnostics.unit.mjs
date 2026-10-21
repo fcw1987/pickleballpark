@@ -24,7 +24,7 @@ test('captures a loaded identity and keeps a later server response separate', as
   const calls = [];
   const diagnostics = createBuildDiagnostics({
     loadedIdentity: running,
-    locationHref: 'https://fcw1987.github.io/pickleboard/index.html',
+    locationHref: 'https://fcw1987.github.io/pickleballpark/index.html',
     fetchImpl: async (url, options) => {
       calls.push({ url: String(url), options });
       return { ok: true, json: async () => ({ ...running, sourceRevision: 'a'.repeat(40), status: 'verified' }) };

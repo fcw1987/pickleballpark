@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './helpers/offline-app.mjs';
 
 async function openApp(page) {
   const errors = [];
@@ -119,13 +119,13 @@ test('reduced motion retains 3D endpoints and camera controls', async ({ page })
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().lastState.phase)).toBe('ready');
 });
 
-test('offline repeat visit can open the locally cached Three.js viewer', async ({ page, context }) => {
-  await openApp(page);
+test('offline repeat visit can open the locally cached Three.js viewer', async ({ page, offlineApp }) => {
+  await page.goto(`${offlineApp.url}/index.html?workspace=planner&three-d-e2e=1`);
+  await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
-  await context.setOffline(true);
+  await offlineApp.stop();
   await page.reload();
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await openDrop3d(page);
   expect(await page.evaluate(() => window.pickleboard.threeD.getState())).toMatchObject({ active: true, hasBall: true, playerCount: 4 });
-  await context.setOffline(false);
 });

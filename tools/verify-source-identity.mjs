@@ -12,7 +12,7 @@ assert.equal(runtimeMatchesSource('.', metadata.sourceRevision), true);
 assert.equal(runtimeFileset('.').digest, metadata.runtimeSha256);
 const files = new Map(discoverRuntimeFiles('.').map(file => [relative('.', file), readFileSync(file)]));
 const types = { '.js': 'text/javascript', '.json': 'application/json', '.html': 'text/html', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
-const scopePath = new URL('https://fcw1987.github.io/pickleboard/').pathname;
+const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
 const server = createServer((request, response) => {
   const pathname = decodeURIComponent(new URL(request.url, 'http://local').pathname);
   const file = pathname.startsWith(scopePath) ? pathname.slice(scopePath.length) || 'index.html' : null;

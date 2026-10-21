@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './helpers/offline-app.mjs';
 
 async function openApp(page) {
   const errors = [];
@@ -221,10 +221,11 @@ test('play controls remain inside required viewports without document overflow',
   }
 });
 
-test('guided plays start and advance on an offline repeat visit', async ({ page, context }) => {
-  await openApp(page);
+test('guided plays start and advance on an offline repeat visit', async ({ page, offlineApp }) => {
+  await page.goto(`${offlineApp.url}/index.html?workspace=planner&plays-e2e=1`);
+  await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
-  await context.setOffline(true);
+  await offlineApp.stop();
   await page.reload();
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
   await loadPlay(page, 'third-shot-drop');
@@ -238,5 +239,4 @@ test('guided plays start and advance on an offline repeat visit', async ({ page,
   });
   expect(returnState).toMatchObject({ playId: 'third-shot-drop', stepIndex: 2, stepId: 'return', currentShotId: 'return' });
   expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
-  await context.setOffline(false);
 });

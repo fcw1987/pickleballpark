@@ -9,6 +9,7 @@ for (const scenario of QA_SCENARIOS) {
     await page.goto('/?qa-scenario-browser=1');
     await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
     const result = await page.evaluate(async ({ document: source, expected }) => {
+      const { sampleActorWorldPosition } = await import('./three-d-presentation.js');
       const b = playBuilder;
       b.loadDocument(source);
       if (b.view !== '3d') await b.switchView('3d');
@@ -19,6 +20,7 @@ for (const scenario of QA_SCENARIOS) {
       const failures = [];
       let contacts = 0;
       let worldComparisons = 0;
+      let instructionalComparisons = 0;
       const close = (left, right, label, tolerance = 1e-7) => {
         if (!Number.isFinite(left) || !Number.isFinite(right) || Math.abs(left - right) > tolerance)
           failures.push({ label, left, right });
@@ -42,6 +44,14 @@ for (const scenario of QA_SCENARIOS) {
         const tactical = Object.fromEntries([...viewer.playerObjects].map(([id, actor]) => [id, {
           position: actor.position.toArray(), facing: actor.userData.animation.bodyFacing
         }]));
+        // Accepted stroke source 041f285 opts 3D into instructional approach
+        // and recovery, while retaining the frozen canonical 2D movement.
+        // Assert each renderer's exact route instead of equating those routes.
+        for (const [id, state] of Object.entries(tactical)) {
+          const position = sampleActorWorldPosition(segment, id, segment.contactTime, source.players[id].handedness, true);
+          [position.x, position.y, position.z].forEach((value, axis) => close(state.position[axis], value, `${id}: instructional 3D axis ${axis}`));
+          instructionalComparisons++;
+        }
         for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
           if (!viewer.setCamera(camera)) throw Error(`Camera unavailable: ${camera}`);
           viewer.applyAtTime(time);
@@ -61,9 +71,10 @@ for (const scenario of QA_SCENARIOS) {
         b.seek(time);
         close(b.board.tokens.ball.x, (ball[0] / .3048) + 10, '2D/3D ball x');
         close(b.board.tokens.ball.y, (ball[2] / .3048) + 22, '2D/3D ball y');
-        for (const [id, state] of Object.entries(tactical)) {
-          close(b.board.tokens[id].x, (state.position[0] / .3048) + 10, `${id}: 2D/3D x`);
-          close(b.board.tokens[id].y, (state.position[2] / .3048) + 22, `${id}: 2D/3D y`);
+        for (const id of Object.keys(tactical)) {
+          const position = sampleActorWorldPosition(segment, id, segment.contactTime, source.players[id].handedness, false);
+          close(b.board.tokens[id].x, (position.x / .3048) + 10, `${id}: canonical 2D x`);
+          close(b.board.tokens[id].y, (position.z / .3048) + 22, `${id}: canonical 2D y`);
           worldComparisons++;
         }
         await b.switchView('3d');
@@ -71,7 +82,7 @@ for (const scenario of QA_SCENARIOS) {
         viewer.ballObject.position.toArray().forEach((value, axis) => close(value, ball[axis], 'seek history independence'));
       }
       b.pause(); viewer.setCamera('overhead');
-      return { invalid: false, failures, contacts, worldComparisons,
+      return { invalid: false, failures, contacts, worldComparisons, instructionalComparisons,
         sourcePreserved: initial === JSON.stringify(b.document), historyPreserved: history === JSON.stringify(b.history),
         live: viewer.active && !viewer.renderer.getContext().isContextLost(),
         canvases: document.querySelectorAll('#threeDViewer canvas').length };
@@ -84,6 +95,7 @@ for (const scenario of QA_SCENARIOS) {
     } else {
       expect(result.contacts).toBe(scenario.document.shots.length);
       expect(result.worldComparisons).toBe(result.contacts * 4);
+      expect(result.instructionalComparisons).toBe(result.contacts * 4);
       expect(result.historyPreserved).toBe(true);
       expect(result.live).toBe(true);
       expect(result.canvases).toBe(1);

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const evidenceDir = 'docs/smart-visible/evidence';
+const evidenceDir = 'release-results/smart-visible';
 
 async function freshBuilder(page) {
   await page.setViewportSize({ width: 390, height: 844 });

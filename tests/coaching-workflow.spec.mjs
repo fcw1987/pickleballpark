@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './helpers/offline-app.mjs';
 
 for (const [name, viewport, touch] of [
   ['phone portrait', { width: 390, height: 844 }, true],
@@ -115,10 +115,10 @@ for (const [name, viewport, touch] of [
   });
 }
 
-test('cached coaching engine resumes an interrupted shot offline', async ({ page, context }) => {
-  await page.goto('/?workspace=planner');
+test('cached coaching engine resumes an interrupted shot offline', async ({ page, offlineApp }) => {
+  await page.goto(`${offlineApp.url}/?workspace=planner`);
   await page.waitForFunction(() => window.pickleboard?.plays && navigator.serviceWorker.controller);
-  await context.setOffline(true);
+  await offlineApp.stop();
   await page.reload();
   await page.waitForFunction(() => window.pickleboard?.plays);
   await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});
@@ -140,5 +140,4 @@ test('cached coaching engine resumes an interrupted shot offline', async ({ page
   expect(resumed.state.status).toBe('playing');
   await page.locator('#playExit').click();
   expect(await page.evaluate(() => pickleboard.playInteractionLocked)).toBe(false);
-  await context.setOffline(false);
 });

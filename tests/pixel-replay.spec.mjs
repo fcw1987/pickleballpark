@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/offline-app.mjs';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 async function open(page){await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);}
@@ -63,9 +63,9 @@ test('context loss exits safely and replay can be opened again',async({page})=>{
  await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
 });
 
-test('fresh cached installation opens all four solid athletes fully offline',async({browser})=>{
+test('fresh cached installation opens all four solid athletes fully offline',async({browser,offlineApp})=>{
  const context=await browser.newContext({serviceWorkers:'allow'}),page=await context.newPage();
- await page.goto('/?workspace=planner');await page.waitForFunction(()=>navigator.serviceWorker.controller);await context.setOffline(true);await page.reload();
+ await page.goto(`${offlineApp.url}/?workspace=planner`);await page.waitForFunction(()=>navigator.serviceWorker.controller);await offlineApp.stop();await page.reload();
  await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);
  expect(await page.evaluate(()=>[...pickleboard.threeD.playerObjects.values()].filter(a=>a.userData.volumetricAthlete&&a.getObjectByName('PaddleFace')?.geometry.attributes.position.count>0).length)).toBe(4);
  await page.locator('#threeDExit').click();await page.locator('#playExit').click();await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);await context.close();

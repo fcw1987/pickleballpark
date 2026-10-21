@@ -166,33 +166,46 @@ test('120 Help, playback, visibility, and view transitions settle to one finite 
   expect(errors).toEqual([]);
 });
 
-test('a real delayed actor load cancelled by 2D cannot attach a stale renderer', async ({ page }) => {
-  let releaseAsset;
+test('a real delayed 3D module cancelled by 2D cannot attach a stale renderer', async ({ browser }) => {
+  const context = await browser.newContext({ serviceWorkers: 'block' });
+  const page = await context.newPage();
+  let releaseModule;
   let markRequested;
-  const assetGate = new Promise(resolve => { releaseAsset = resolve; });
-  const assetRequested = new Promise(resolve => { markRequested = resolve; });
-  let held = false;
-  await page.route('**/assets/replay/*.png', async route => {
-    if (held) { await route.continue(); return; }
-    held = true;
+  const moduleGate = new Promise(resolve => { releaseModule = resolve; });
+  const moduleRequested = new Promise(resolve => { markRequested = resolve; });
+  // The procedural world has no actor downloads. Hold the real lazy entry
+  // without allowing service-worker precaching to impersonate a blocked load.
+  await page.route('**/three-d-playback.js', async route => {
     markRequested();
-    await assetGate;
+    await moduleGate;
     await route.continue();
   });
-  const navigation = page.goto('/index.html?qa-delayed-renderer=1');
-  await assetRequested;
-  await expect.poll(() => page.evaluate(() => Boolean(window.playBuilder?.busy))).toBe(true);
-  await page.evaluate(() => playBuilder.switchView('2d'));
-  releaseAsset();
-  await navigation;
-  await expect.poll(() => page.evaluate(() => Boolean(window.playBuilder && !playBuilder.busy))).toBe(true);
-  await settleFrames(page);
-  expect(await page.evaluate(() => ({
-    view: playBuilder.view,
-    active: pickleboard.threeD.active,
-    loading: Boolean(pickleboard.threeD.loading),
-    scene: Boolean(pickleboard.threeD.scene),
-    renderer: Boolean(pickleboard.threeD.renderer),
-    canvasCount: document.querySelectorAll('#threeDCanvas canvas').length
-  }))).toEqual({ view: '2d', active: false, loading: false, scene: false, renderer: false, canvasCount: 0 });
+  try {
+    await page.goto('/index.html?qa-delayed-renderer=1', { waitUntil: 'domcontentloaded' });
+    await moduleRequested;
+    await expect.poll(() => page.evaluate(() => Boolean(window.playBuilder?.busy))).toBe(true);
+    const draft = await page.evaluate(() => JSON.stringify(playBuilder.document));
+    await page.evaluate(() => playBuilder.switchView('2d'));
+    // Cancellation must settle before the old module response is released.
+    expect(await page.evaluate(() => ({ view: playBuilder.view, busy: playBuilder.busy })))
+      .toEqual({ view: '2d', busy: false });
+    releaseModule();
+    // Imports cannot abort their network request. Await the held module's full
+    // evaluation so the final check covers its stale continuation as well.
+    await page.evaluate(async () => { await import('./three-d-playback.js'); });
+    await settleFrames(page);
+    expect(await page.evaluate(() => ({
+      view: playBuilder.view,
+      active: pickleboard.threeD.active,
+      loading: Boolean(pickleboard.threeD.loading),
+      scene: Boolean(pickleboard.threeD.scene),
+      renderer: Boolean(pickleboard.threeD.renderer),
+      canvasCount: document.querySelectorAll('#threeDCanvas canvas').length
+    }))).toEqual({ view: '2d', active: false, loading: false, scene: false, renderer: false, canvasCount: 0 });
+    expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(draft);
+    expect(await page.evaluate(() => pickleboard.plays.session.owner)).toBe('guided');
+  } finally {
+    releaseModule();
+    await context.close();
+  }
 });

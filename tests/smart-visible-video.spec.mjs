@@ -36,7 +36,7 @@ test('ordinary phone workflow records Add, Random, then visible Coach repair', a
   if (!(await picker.evaluate(element => element.open))) await page.locator('.builder-family-summary').click();
   await page.locator('.builder-family-option').filter({ hasText: 'Return' }).click();
   await expect(page.getByRole('button', { name: 'Fix for me', exact: true })).toBeVisible();
-  await page.screenshot({ path: 'docs/smart-visible/evidence/phone-390-video-repair-before.png', fullPage: true });
+  await page.screenshot({ path: 'release-results/smart-visible/phone-390-video-repair-before.png', fullPage: true });
   await page.getByRole('button', { name: 'Fix for me', exact: true }).click();
   await page.waitForTimeout(500);
 });

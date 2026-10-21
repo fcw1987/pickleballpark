@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const evidenceDir = 'docs/smart-visible/evidence';
+const evidenceDir = 'release-results/smart-visible';
 
 async function freshBuilder(page, viewport) {
   await page.setViewportSize(viewport);
@@ -73,15 +73,26 @@ test.describe('smart rally visible acceptance', () => {
     await freshBuilder(page, { width: 844, height: 390 });
     await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; window.dispatchEvent(new Event('resize')); });
     await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+    await expect(page.getByLabel('Hitter', { exact: true })).toBeVisible();
+    // The enlarged editor covers the court controls. Use its visible Close
+    // action before moving to the next surface, rather than clicking through it.
+    await page.getByRole('button', { name: 'Close editor', exact: true }).click();
     await page.locator('.builder-main-menu > summary').click();
     await expect(page.getByLabel('Menu', { exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(844);
-    await page.locator('.builder-context-menu > summary').click({ force: true });
+    await page.locator('.builder-main-menu > summary').click();
+    await expect(page.locator('.builder-main-menu > .builder-menu-panel')).toBeHidden();
+    await page.getByLabel('Playback options', { exact: true }).click();
     const playbackPanel = page.locator('.builder-context-menu > .builder-menu-panel');
     await expect(playbackPanel).toBeVisible();
     const panelBox = await playbackPanel.boundingBox();
     expect(panelBox?.x).toBeGreaterThanOrEqual(0);
     expect((panelBox?.x || 0) + (panelBox?.width || 0)).toBeLessThanOrEqual(844);
+    expect(panelBox?.y).toBeGreaterThanOrEqual(0);
+    expect((panelBox?.y || 0) + (panelBox?.height || 0)).toBeLessThanOrEqual(390);
+    await page.getByLabel('Playback speed', { exact: true }).selectOption('0.5');
+    await expect.poll(() => page.evaluate(() => playBuilder.session.clock.playbackRate)).toBe(0.5);
+    await expect(playbackPanel).toBeVisible();
     await page.screenshot({ path: `${evidenceDir}/landscape-844-large-text-menus.png`, fullPage: true });
   });
 

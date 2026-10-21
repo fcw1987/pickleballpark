@@ -2,9 +2,9 @@ name: Quality
 
 on:
   push:
-    branches: [main]
+    branches: [main, branding/pickleball-park-strokes]
   pull_request:
-    branches: [main]
+    branches: [main, branding/pickleball-park-strokes]
   workflow_dispatch:
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -45,7 +45,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -73,15 +73,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - name: Install dependencies
         run: npm ci
       - name: Install WebKit
         run: npx playwright install --with-deps webkit
-      - name: Confirm isolated WebKit infrastructure signatures
-        run: node tools/verify-webkit-infrastructure.mjs
-      - name: Run full WebKit suite with strict documented infrastructure policy
+      - name: Run full WebKit suite with no failure exceptions
         run: node tools/run-webkit-ci.mjs
       - name: Retain full WebKit diagnostic report
         if: always()
@@ -108,7 +106,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - name: Install dependencies
         run: npm ci

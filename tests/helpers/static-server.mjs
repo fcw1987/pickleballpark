@@ -1,10 +1,8 @@
 import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = process.cwd();
-const port = Number(process.env.PORT || 4173);
-const host = process.env.HOST || '127.0.0.1';
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -15,7 +13,8 @@ const contentTypes = {
 };
 const varyResponseMarker = '// playwright-vary-response';
 
-const server = createServer((request, response) => {
+export function createStaticServer({ root = process.cwd(), workerSource = () => null } = {}) {
+  return createServer((request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const pathname = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
   const filePath = resolve(root, `.${pathname}`);
@@ -29,6 +28,8 @@ const server = createServer((request, response) => {
     if (!statSync(filePath).isFile()) throw new Error('Not a file');
     response.setHeader('Content-Type', contentTypes[extname(filePath)] || 'application/octet-stream');
     response.setHeader('Cache-Control', pathname === '/sw.js' ? 'no-cache' : 'no-store');
+    const overriddenWorker = pathname === '/sw.js' ? workerSource() : null;
+    if (overriddenWorker !== null) { response.end(overriddenWorker); return; }
     if (pathname === '/script.js' && request.headers.cookie?.includes('test-cache-write-failure=1')) {
       response.setHeader('Vary', '*');
       createReadStream(filePath).on('end', () => response.end(`\n${varyResponseMarker}\n`)).pipe(response, { end: false });
@@ -38,8 +39,13 @@ const server = createServer((request, response) => {
   } catch {
     response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Not found');
   }
-});
+  });
+}
 
-server.listen(port, host, () => {
-  console.log(`Pickleball Park available at http://${host}:${port}`);
-});
+if (resolve(process.argv[1] || '') === fileURLToPath(import.meta.url)) {
+  const port = Number(process.env.PORT || 4173);
+  const host = process.env.HOST || '127.0.0.1';
+  createStaticServer().listen(port, host, () => {
+    console.log(`Pickleball Park available at http://${host}:${port}`);
+  });
+}

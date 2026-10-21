@@ -68,7 +68,7 @@ test('Pause during a scrub wins over release and resize cancellation stays safel
   expect(await page.evaluate(() => playBuilder.session.playing)).toBe(false);
 });
 
-test('chapter seeking preserves playback while Edit selects the shot and pauses', async ({ page }) => {
+test('explicit chapter selection preserves playback while Edit pauses the selected shot', async ({ page }) => {
   await open(page);
   const state = await page.evaluate(() => ({
     selected: playBuilder.selectedShotId,
@@ -82,7 +82,7 @@ test('chapter seeking preserves playback while Edit selects the shot and pauses'
   const jumped = await page.evaluate(() => ({ time: playBuilder.session.clock.elapsed, current: playBuilder.chapters.findLast(chapter => chapter.anchor <= playBuilder.session.clock.elapsed)?.shotId, intent: playBuilder.session.playing, selected: playBuilder.selectedShotId, history: `${playBuilder.history.index}/${playBuilder.history.snapshots.length}` }));
   expect(jumped.time).toBeGreaterThanOrEqual(state.chapter.anchor);
   expect(jumped.time).toBeLessThan(state.chapter.anchor + .5);
-  expect(jumped).toMatchObject({ current: state.chapter.shotId, intent: true, selected: state.selected, history: state.history });
+  expect(jumped).toMatchObject({ current: state.chapter.shotId, intent: true, selected: state.chapter.shotId, history: state.history });
 
   const picker = page.getByLabel('Choose shot chapter');
   if (!(await picker.locator('..').evaluate(node => node.open))) await picker.click();

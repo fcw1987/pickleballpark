@@ -102,7 +102,11 @@ for (const f of fidelityFixture.files) {
 // inventory before hashing every byte.
 const publicBranch = 'integration/robustness-visual-fidelity';
 const publicRevision = 'b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585';
-expect(execFileSync('git', ['rev-parse', publicBranch], { encoding: 'utf8' }).trim(), `public source branch ${publicBranch}`).toBe(publicRevision);
+expect(execFileSync('git', ['rev-parse', `${publicRevision}^{commit}`], { encoding: 'utf8' }).trim(), 'frozen public commit must exist').toBe(publicRevision);
+let publicRef = publicBranch;
+try { execFileSync('git', ['rev-parse', '--verify', publicRef], { stdio: 'ignore' }); }
+catch { publicRef = `origin/${publicBranch}`; }
+expect(execFileSync('git', ['rev-parse', publicRef], { encoding: 'utf8' }).trim(), `public source ref ${publicRef}`).toBe(publicRevision);
 const publicServiceWorker = gitText(publicRevision, 'sw.js');
 const publicSwPaths = [...new Set(serviceWorkerAssets(publicServiceWorker))];
 const publicInventory = runtimeInventory(publicRevision);
@@ -287,14 +291,158 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   return { adds, random, coach: { protectedKept: true, optionsShown: true, fixed: true, undoRestored: true }, restoredSavedLibrary: storageAfter !== storageBefore };
 }
 
+// This is a path move on one origin, rather than an in-place worker update.
+// Desktop engines verify registration/manifest identities; they do not install
+// an operating-system home-screen shortcut or claim that its old URL redirects.
+async function verifyPathMigration(browserName, browserType, mode) {
+  const baselineFiles = mode === 'branding-path-migration' ? brandingFiles : publicFiles;
+  const baselineRevision = mode === 'branding-path-migration' ? brandingRevision : publicRevision;
+  const baselineCache = `pickleboard-static-${serviceWorkerCache(baselineFiles.get('sw.js').toString())}`;
+  let legacyAvailable = true, stopped = false;
+  const server = createServer((request, response) => {
+    const pathname = decodeURIComponent(new URL(request.url, 'http://local').pathname);
+    if (pathname.split('/').includes('..')) return response.writeHead(404).end();
+    const legacy = pathname.startsWith(legacyScopePath);
+    const prefix = legacy ? legacyScopePath : scopePath;
+    if ((!legacy && !pathname.startsWith(scopePath)) || (legacy && !legacyAvailable)) return response.writeHead(404).end('Old project path is no longer hosted');
+    const file = pathname.slice(prefix.length) || 'index.html';
+    try {
+      const bytes = legacy ? baselineFiles.get(file) : readFileSync(`${artifact}/${file}`);
+      if (!bytes) throw Error('Missing asset');
+      response.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' }).end(bytes);
+    } catch { response.writeHead(404).end('Not found'); }
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  const oldBase = origin + legacyScopePath, newBase = origin + scopePath;
+  const browser = await browserType.launch();
+  try {
+    const context = await browser.newContext({ serviceWorkers: 'allow' });
+    const oldPage = await context.newPage();
+    const errors = [];
+    oldPage.on('pageerror', error => errors.push(error.message));
+    await oldPage.goto(oldBase);
+    await oldPage.waitForFunction(() => navigator.serviceWorker.controller && window.playBuilder && !playBuilder.busy);
+    const oldManifest = await oldPage.evaluate(async () => (await fetch('./manifest.json')).json());
+    expect(Object.hasOwn(oldManifest, 'id'), 'historical manifest uses its implicit start URL identity').toBe(false);
+    await oldPage.evaluate(async () => {
+      await playBuilder.action('title', 'Preserved project-path migration draft');
+      await playBuilder.action('editShot', { field: 'target.x', value: 6.25 });
+      localStorage.setItem('pickleboard-theme', 'dark');
+      localStorage.setItem('migration-unrelated-key', 'keep this origin data');
+      const unrelated = await caches.open('unrelated-application-cache');
+      await unrelated.put('/keep', new Response('preserve'));
+    });
+    const before = await oldPage.evaluate(async cacheName => {
+      const cache = await caches.open(cacheName);
+      const entries = [];
+      for (const request of await cache.keys()) {
+        const bytes = await (await cache.match(request)).arrayBuffer();
+        const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).map(value => value.toString(16).padStart(2, '0')).join('');
+        entries.push({ url: request.url, sha256: digest });
+      }
+      return { storage: Object.fromEntries(Object.keys(localStorage).sort().map(key => [key, localStorage.getItem(key)])), draft: JSON.stringify(playBuilder.document), entries: entries.sort((a, b) => a.url.localeCompare(b.url)) };
+    }, baselineCache);
+    expect(before.storage['pickleballpark-builder-v1']).toBeTruthy();
+    expect(before.entries.length).toBeGreaterThan(0);
+    const page = await context.newPage();
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(newBase);
+    await page.waitForFunction(() => navigator.serviceWorker.controller && window.playBuilder && !playBuilder.busy);
+    await expect(page).toHaveTitle('Pickleball Park - Build a Play');
+    const after = await page.evaluate(async ({ baselineCache, candidateCache }) => {
+      const manifest = await (await fetch('./manifest.json')).json();
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      const cacheNames = await caches.keys();
+      const oldEntries = [];
+      if (cacheNames.includes(baselineCache)) {
+        const cache = await caches.open(baselineCache);
+        for (const request of await cache.keys()) {
+          const bytes = await (await cache.match(request)).arrayBuffer();
+          const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).map(value => value.toString(16).padStart(2, '0')).join('');
+          oldEntries.push({ url: request.url, sha256: digest });
+        }
+      }
+      return {
+        manifest, controller: navigator.serviceWorker.controller.scriptURL,
+        registrations: registrations.map(registration => ({ scope: registration.scope, worker: registration.active?.scriptURL })).sort((a, b) => a.scope.localeCompare(b.scope)),
+        storage: Object.fromEntries(Object.keys(localStorage).sort().map(key => [key, localStorage.getItem(key)])),
+        draft: JSON.stringify(playBuilder.document), theme: document.body.dataset.theme, caches: cacheNames,
+        oldEntries: oldEntries.sort((a, b) => a.url.localeCompare(b.url)),
+        currentCacheEntries: (await (await caches.open(candidateCache)).keys()).map(request => request.url),
+        unrelatedCache: await (await (await caches.open('unrelated-application-cache')).match('/keep')).text(),
+      };
+    }, { baselineCache, candidateCache });
+    expect(after.storage, 'origin storage must survive the path move byte for byte').toEqual(before.storage);
+    expect(after.draft, 'real saved draft must reopen at the new project path').toBe(before.draft);
+    expect(after.theme).toBe('dark');
+    expect(after.registrations).toEqual([
+      { scope: newBase, worker: `${newBase}sw.js` }, { scope: oldBase, worker: `${oldBase}sw.js` }
+    ].sort((a, b) => a.scope.localeCompare(b.scope)));
+    expect(after.controller).toBe(`${newBase}sw.js`);
+    expect(after.caches).toEqual(expect.arrayContaining([baselineCache, candidateCache, 'unrelated-application-cache']));
+    expect(after.oldEntries, 'installing at the new path must retain the old offline shell bytes').toEqual(before.entries);
+    expect(after.unrelatedCache).toBe('preserve');
+    expect(after.currentCacheEntries.length).toBeGreaterThan(0);
+    expect(after.currentCacheEntries.every(url => url.startsWith(newBase))).toBe(true);
+    expect(Object.hasOwn(after.manifest, 'id')).toBe(false);
+    expect(Object.hasOwn(oldManifest, 'scope')).toBe(false);
+    expect(Object.hasOwn(after.manifest, 'scope')).toBe(false);
+    const oldInstallIdentity = new URL(oldManifest.start_url, `${oldBase}manifest.json`).href;
+    const newInstallIdentity = new URL(after.manifest.start_url, `${newBase}manifest.json`).href;
+    expect(oldInstallIdentity).toBe(`${oldBase}index.html`);
+    expect(newInstallIdentity).toBe(`${newBase}index.html`);
+    expect(newInstallIdentity, 'the path move creates a distinct implicit manifest identity').not.toBe(oldInstallIdentity);
+    const hashes = await page.evaluate(async files => {
+      const results = [];
+      for (const file of files) {
+        const response = await fetch(`./${file.path}`);
+        if (!response.ok) throw Error(`${file.path}: HTTP ${response.status}`);
+        const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await response.arrayBuffer()))).map(value => value.toString(16).padStart(2, '0')).join('');
+        results.push({ path: file.path, sha256: digest });
+      }
+      return results;
+    }, manifest.files);
+    expect(hashes).toEqual(manifest.files.map(file => ({ path: file.path, sha256: file.sha256 })));
+    const identity = await verifyPackageIdentity(page, context, newBase, info.sourceRevision);
+    legacyAvailable = false;
+    const oldShortcut = await context.request.get(oldBase);
+    expect(oldShortcut.status(), 'an old hosted shortcut has no automatic project-path redirect').toBe(404);
+    await page.screenshot({ path: `release-results/package-${browserName}-${mode}.png` });
+    server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); stopped = true;
+    await page.reload();
+    await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+    expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(before.draft);
+    expect(await page.evaluate(() => document.body.dataset.theme)).toBe('dark');
+    // The old installed worker retains its own offline fallback; a real HTTP 404
+    // above is deliberately not disguised as an offline navigation success.
+    await oldPage.reload();
+    await oldPage.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+    expect(await oldPage.evaluate(() => JSON.stringify(playBuilder.document))).toBe(before.draft);
+    expect(await page.evaluate(() => Object.fromEntries(Object.keys(localStorage).sort().map(key => [key, localStorage.getItem(key)])))).toEqual(before.storage);
+    expect(errors).toEqual([]);
+    return { browser: browserName, mode, status: 'PASS', priorSource: baselineRevision, source: info.sourceRevision, oldPath: legacyScopePath, newPath: scopePath, runtimeHashes: hashes.length, preservedOldCacheEntries: before.entries.length, oldCache: baselineCache, newCache: candidateCache, savedDraftAndStoragePreserved: true, theme: after.theme, distinctWorkerScopes: after.registrations, implicitManifestIdentities: { old: oldInstallIdentity, current: newInstallIdentity }, legacyShortcutNetworkStatus: oldShortcut.status(), shortcutLimitation: 'The old hosted path returns 404; users must open the new URL and install a new shortcut. Retained old offline caches do not redirect online HTTP 404 responses.', offlineReloads: ['old path', 'new path'], offlineMethod: 'owned server stopped', identity };
+  } finally {
+    await browser.close();
+    if (!stopped) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+  }
+}
+
 const results = [];
-const allModes = ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade'];
+const allModes = ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration'];
 const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allModes;
 if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
-const scopePath = new URL('https://fcw1987.github.io/pickleboard/').pathname;
+const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
+const legacyScopePath = '/pickleboard/';
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.ttf': 'font/ttf' };
 for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
   for (const mode of modes) {
+    if (mode === 'path-migration' || mode === 'branding-path-migration') {
+      try { results.push(await verifyPathMigration(browserName, browserType, mode)); }
+      catch (error) { results.push({ browser: browserName, mode, status: 'FAIL', error: error.message }); throw error; }
+      finally { writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
+      continue;
+    }
     const upgrading = mode !== 'fresh';
     const previousFiles = mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
     const priorCache = mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
