@@ -207,7 +207,7 @@ try {
       };
       await page.touchscreen.tap(point[0], point[1]);
       await page.waitForTimeout(150);
-      result.responsiveMenu.openedByMeasuredTouch = (await bodyText(page)).includes('Pickleboard');
+      result.responsiveMenu.openedByMeasuredTouch = (await bodyText(page)).includes('Pickleball Park');
       await page.touchscreen.tap(point[0], point[1]);
     }
     await shot(page, `09-responsive-${widthPx}x${heightPx}`);

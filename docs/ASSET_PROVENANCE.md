@@ -1,6 +1,6 @@
 # Asset provenance
 
-Current visual assets are original Pickleboard artwork authored in this repository. No Nintendo/Pokémon assets, fonts, logos, extracted panels, sound, or music are used. DS Diamond/Pearl is an art-direction reference only.
+Current visual assets are original Pickleball Park artwork authored in this repository. No Nintendo/Pokémon assets, fonts, logos, extracted panels, sound, or music are used. DS Diamond/Pearl is an art-direction reference only.
 
 The following revision entries retain the history of the artwork. The current assets and display font are described in the final entry below; historical counts are not the current package inventory.
 
@@ -42,6 +42,10 @@ Inspection found no old PB lettering in the approved replay athletes, editor com
 
 The approved athlete files in `assets/players/` and `assets/replay/`, outlined ball, paddle anchors, court coordinates and net geometry remain unchanged from checkpoint `1375835`. No new external artwork, dependency, license, copied game resource or asset service was introduced. `npm run check:generated` verifies all 66 generated asset paths in a temporary directory. See [PIXEL_GAME_ART.md](PIXEL_GAME_ART.md) for current dimensions, palette and generation details.
 
-## Pickleboard name restoration (current candidate)
+## Pickleboard name restoration (historical October 18 candidate)
 
 The product name is Pickleboard. The original 128×32 banner now reads `PICKLEBOARD` in one centered line; the raised village sign reads `PICKLE` above `BOARD`. Both use repository-authored glyphs, existing colors and the original sign footprint. The village, court, foliage, props, athlete artwork, anchors and surrounding materials retain their accepted layout. Historical rebrand entries and captures above preserve the labels used at capture time.
+
+## Pickleball Park branding continuation (current candidate)
+
+The owner confirmed Pickleball Park as the authoritative name. The existing 128×32 banner is regenerated from `tools/generate-park-art.mjs` with the complete PICKLEBALL PARK wordmark. The raised village sign uses two centered lines, PICKLEBALL and PARK, within the existing sign geometry. Materials, sign position, court, athletes, accepted stroke motion and all other artwork remain unchanged. Historical images and prior verification reports keep their original names. No external assets, fonts, dependencies or licenses were introduced.

@@ -32,7 +32,7 @@ export function validateDeploymentArtifact(root, expectedRevision) {
   const manifest = JSON.parse(manifestBytes);
   const info = JSON.parse(readFileSync(path.join(root, 'build-info.json')));
   if (manifest.approvedSource !== APPROVED_SOURCE || info.approvedSource !== APPROVED_SOURCE) throw new Error('Approved source mismatch');
-  if (info.product !== 'Pickleboard') throw new Error('Artifact product mismatch');
+  if (info.product !== 'Pickleball Park') throw new Error('Artifact product mismatch');
   if (info.revision !== expectedRevision) throw new Error('Artifact revision mismatch');
   if (info.runtimeManifestSha256 !== APPROVED_MANIFEST_SHA256) throw new Error('Build metadata manifest digest mismatch');
   if (JSON.stringify(info.publicationMetadata) !== JSON.stringify(METADATA_FILES)) throw new Error('Publication metadata set mismatch');
@@ -55,7 +55,7 @@ export function validateDeploymentArtifact(root, expectedRevision) {
   if (info.runtimeFiles !== manifest.files.length) throw new Error('Runtime file count mismatch');
   if (info.runtimeBytes !== runtimeBytes) throw new Error('Runtime byte count mismatch');
   const version = JSON.parse(readFileSync(path.join(root, 'version.json')));
-  if (version.product !== 'Pickleboard' || version.sourceRevision !== info.sourceRevision) throw new Error('Version metadata source mismatch');
+  if (version.product !== 'Pickleball Park' || version.sourceRevision !== info.sourceRevision) throw new Error('Version metadata source mismatch');
   if (!/^[0-9a-f]{40}$/.test(version.sourceRevision ?? '')) throw new Error('Version metadata source revision is invalid');
   if (info.runtimeDigest !== (version.runtimeSha256 || null)) throw new Error('Build metadata runtime digest mismatch');
   const exclusions = ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json'];

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v30`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v31`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -140,7 +140,7 @@ async function updateStaticCache(request, response) {
     const cache = await caches.open(STATIC_CACHE);
     await cache.put(request, response);
   } catch (error) {
-    console.warn('Unable to refresh the Pickleboard static cache:', error);
+    console.warn('Unable to refresh the Pickleball Park static cache:', error);
   }
 }
 

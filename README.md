@@ -1,14 +1,14 @@
-# Pickleboard 🏓
+# Pickleball Park 🏓
 
-Pickleboard opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same application.
+Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same application.
 
-**Latest completed local candidate:** `feature/stroke-instruction`, with a rounded 3D town court, articulated athletes and distinct instructional strokes. Start with the [handoff and launch notes](docs/STROKE_HANDOFF.md) for its location, port 4177, exact verification results and remaining limitations. The [visual review](docs/stroke-instruction/review.html) contains actual before/after captures. This branch is a local review candidate; the public release is separate.
+**Current local continuation:** `branding/pickleball-park-strokes` preserves the completed `feature/stroke-instruction` candidate, its rounded 3D town court, articulated athletes and instructional strokes, with consistent Pickleball Park branding. See the [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md). The [October 19 strokes handoff](docs/STROKE_HANDOFF.md) and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence. This branch is a local review candidate; the public release is separate.
 
 The local Smart Rally candidate adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the current requirements and verification ledger](docs/SMART_RALLY_STATUS.md). This local continuation does not change the public fidelity candidate.
 
-Pickleboard remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
+Pickleball Park remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
 
-The product name is **Pickleboard**. Earlier review evidence contains temporary park names; those records remain historical. The current title, menus, install label and park signs use Pickleboard. See [release notes](docs/RELEASE_NOTES.md) and [identity continuity](docs/RENAME_HANDOFF.md).
+The product name is **Pickleball Park**. The current title, menus, install label and both park signs use that name. Earlier review evidence retains the names it actually captured. See [release notes](docs/RELEASE_NOTES.md) and [identity continuity](docs/RENAME_HANDOFF.md).
 
 Phone authoring now includes a shallow shot editor, full movement/contact details, direct placement with cancellation, and recoverable local saving. See the [unified iPhone candidate report](docs/UNIFIED_IPHONE_VERIFICATION.md) for the preserved baseline, screenshots, limitations, and verification.
 
@@ -221,15 +221,15 @@ The default visual language uses original compact game-inspired artwork across t
 
 See [visual direction](docs/VISUAL_DIRECTION.md), [asset provenance](docs/ASSET_PROVENANCE.md), [historical verification](docs/REBRAND_VERIFICATION.md), and [public release snapshot](docs/RELEASE_PUBLICATION_SUMMARY.md). Reproducible generators and local review tools remain available in the source tree; their historical capture outputs are not part of the public evidence set.
 
-## Pixel replay implementation
+## Replay implementation
 
-3D replay now uses original directional pixel athletes inside the 3D court, with animated paddle contact, a high-contrast ball and stable elevated camera framing. The editable SVG board retains precise dragging/drawing and snapshot restoration. Replay runs one timeline and renders unchanged paused views only when needed.
+The current 3D replay uses articulated volumetric athletes and distinct instructional strokes in the rounded village court. The original directional pixel athletes remain available to the 2D presentation, with animated paddle contact, a high-contrast ball and stable court framing. The editable SVG board retains precise dragging/drawing and snapshot restoration. Replay runs one timeline and renders unchanged paused views only when needed.
 
 See [historical rebrand verification](docs/REBRAND_VERIFICATION.md) and [reproducible actor asset contract](docs/PIXEL_ACTOR_ASSETS.md). Run `node tools/generate-replay-art.mjs` to regenerate replay art; no additional dependency is needed.
 
 ## Product name maintenance
 
-Use **Pickleboard** in prose, **PICKLEBOARD** in wordmarks, and `pickleboard` for package identity. Preserve existing URLs and saved-data keys. `npm run check:brand` checks active branding and explicit historical evidence exceptions. Regenerate art at its source; do not patch exported pixels alone. Installation identity, the theme key, service-worker path and internal API names deliberately retain continuity; see [rename handoff](docs/RENAME_HANDOFF.md).
+Use **Pickleball Park** in prose and **PICKLEBALL PARK** in wordmarks. Retain `pickleboard` as the internal development package identity. Preserve existing URLs and saved-data keys. `npm run check:brand` checks active branding and explicit historical evidence exceptions. Regenerate art at its source; do not patch exported pixels alone. Installation identity, the theme key, service-worker path and internal API names deliberately retain continuity; see [rename handoff](docs/RENAME_HANDOFF.md).
 
 ## Court-first local layout candidate
 

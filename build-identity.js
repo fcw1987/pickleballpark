@@ -64,7 +64,7 @@ export function normalizeBuildIdentity(value = {}) {
     : (requestedStatus === 'packaged' && !sourceProof ? 'development' : requestedStatus);
   const normalized = {
     schemaVersion: Number.isInteger(source.schemaVersion) ? source.schemaVersion : 1,
-    product: source.product === 'Pickleboard' ? source.product : 'Pickleboard',
+    product: ['Pickleball Park', 'Pickleboard'].includes(source.product) ? source.product : 'Pickleball Park',
     status,
     developmentStatus: optionalString(source.developmentStatus) || (status === 'development' ? 'unverified local source' : status),
     sourceRevision: optionalSha(source.sourceRevision, SHA1),

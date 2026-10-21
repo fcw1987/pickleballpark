@@ -5,7 +5,7 @@ import { BUILD_IDENTITY, normalizeBuildIdentity, snapshotBuildIdentity, isBuildI
 
 test('development identity is explicit and has digest exclusions', () => {
   const development = normalizeBuildIdentity();
-  assert.equal(development.product, 'Pickleboard');
+  assert.equal(development.product, 'Pickleball Park');
   assert.equal(development.status, 'development');
   assert.equal(development.sourceRevision, null);
   assert.deepEqual(development.runtimeFileset.exclusions, ['version.json', 'build-metadata.js', 'build-info.json', 'runtime-manifest.json']);
@@ -52,4 +52,10 @@ test('metadata labels are bounded and cannot carry paths', () => {
 test('embedded identity exactly matches the stamped version snapshot', () => {
   const version = JSON.parse(readFileSync(new URL('../version.json', import.meta.url)));
   assert.deepEqual(BUILD_IDENTITY, normalizeBuildIdentity(version));
+});
+
+test('retains the historical server product while defaulting new builds to Pickleball Park', () => {
+  assert.equal(normalizeBuildIdentity({ product: 'Pickleboard' }).product, 'Pickleboard');
+  assert.equal(normalizeBuildIdentity({ product: 'Pickleball Park' }).product, 'Pickleball Park');
+  assert.equal(normalizeBuildIdentity({ product: 'unknown' }).product, 'Pickleball Park');
 });

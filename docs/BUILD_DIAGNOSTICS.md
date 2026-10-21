@@ -1,6 +1,6 @@
 # Build identity and diagnostics
 
-Pickleboard exposes `version.json` at the source root and in a packaged
+Pickleball Park exposes `version.json` at the source root and in a packaged
 `dist/` artifact. The endpoint contains build metadata only. It does not
 contain saved plays, browser storage, credentials, absolute paths, or a claim
 that an unstamped working tree is a release.

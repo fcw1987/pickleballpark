@@ -151,6 +151,7 @@ const glyphs = {
 };
 const text = (c, value, x, y, color, scale = 1) => {
   for (const letter of value) {
+    if (letter === ' ') { x += scale; continue; } // Compact word gap keeps the full name inside the banner.
     const pattern = glyphs[letter];
     if (!pattern) { x += 4 * scale; continue; }
     pattern.forEach((row, dy) => [...row].forEach((pixel, dx) => { if (pixel === '1') c.rect(x + dx * scale, y + dy * scale, scale, scale, color); }));
@@ -163,7 +164,7 @@ const banner = () => {
   c.rect(4, 4, 120, 24, C.parkSign);
   c.rect(6, 6, 116, 20, C.line);
   // The complete name is centered at double-pixel scale on the original sign.
-  text(c, 'PICKLEBOARD', 25, 11, C.navyDark, 2);
+  text(c, 'PICKLEBALL PARK', 9, 11, C.navyDark, 2);
   return c;
 };
 

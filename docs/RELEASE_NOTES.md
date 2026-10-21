@@ -1,4 +1,10 @@
-# Pickleboard name restoration — current local candidate
+# Pickleball Park branding — current local continuation
+
+The product name is Pickleball Park. The title, menus, install label, metadata, raster banner and raised village sign now use the full name. The completed strokes candidate, rounded village court and gameplay are retained. Existing install identity, repository and hosted URLs, service-worker scope, cache namespace, theme/draft keys and JSON play compatibility remain stable. Cache v31 refreshes the changed assets locally. No remote publication or repository rename is part of this change.
+
+---
+
+# Pickleboard name restoration — historical October 18 candidate
 
 Pickleboard is the product name. Current interface text, install label, package description, banner and raised village sign restore it. The sign retains its original footprint and materials; the accepted village and court remain unchanged. Existing install identity, repository and hosted URLs, service-worker scope, cache namespace, theme key, draft keys and JSON play compatibility remain stable. The entries below describe earlier candidates and retain their historical labels.
 

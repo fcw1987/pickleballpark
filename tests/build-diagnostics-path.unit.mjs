@@ -19,5 +19,5 @@ test('version endpoint resolves from a project subpath like a packaged static si
   assert.equal(new URL(requested).pathname, new URL('version.json', 'https://fcw1987.github.io/pickleboard/').pathname);
   assert.ok(new URL(requested).searchParams.has('diagnostic'));
   assert.equal(result.serverFetch.status, 'complete');
-  assert.equal(result.server.identity.product, 'Pickleboard');
+  assert.equal(result.server.identity.product, 'Pickleball Park');
 });

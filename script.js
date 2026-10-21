@@ -4,7 +4,7 @@ import './guided-plays.js';
 import { COURT_LINES } from './court-geometry.js';
 import { mountBuildDiagnostics } from './build-diagnostics-ui.js';
 import { playerLabel } from './player-labels.js';
-// Pickleboard - Interactive Pickleball Coaching and Strategy
+// Pickleball Park - Interactive Pickleball Coaching and Strategy
 
 // Register Service Worker for PWA support
 if ('serviceWorker' in navigator) {
@@ -1413,7 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
     window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
     
-    console.log('Pickleboard initialized successfully');
+    console.log('Pickleball Park initialized successfully');
 });
 
 // Handle browser back/forward navigation

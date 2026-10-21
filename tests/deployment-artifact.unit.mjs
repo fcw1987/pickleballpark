@@ -19,7 +19,7 @@ const stage = () => {
   }
   writeFileSync(path.join(root, 'runtime-manifest.json'), manifestBytes);
   writeFileSync(path.join(root, 'build-info.json'), `${JSON.stringify({
-    product: 'Pickleboard', revision: REVISION, approvedSource: fixture.source,
+    product: 'Pickleball Park', revision: REVISION, approvedSource: fixture.source,
     sourceRevision: version.sourceRevision, runtimeDigest: version.runtimeSha256 || null,
     runtimeManifestSha256: '5c677edd11817fa552c0e4c0c6262cd14b676c78bafeaa6a841edd61d7d7282f',
     runtimeFiles: fixture.files.length,

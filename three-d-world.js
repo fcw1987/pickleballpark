@@ -2,7 +2,7 @@ import { COURT_LINES, COURT_DIMENSIONS } from './court-geometry.js';
 import { boardToWorld, FEET_TO_METERS } from './three-d-core.js';
 
 /**
- * Original sunny Pickleboard neighborhood, authored in regulation metres.
+ * Original sunny Pickleball Park neighborhood, authored in regulation metres.
  * No downloaded art, sprite billboards, or screen-space pixelation. The three
  * tiny acrylic maps below are deterministic, original clustered pigment.
  * Static ornament is merged by material; semantic court/net parts stay named.
@@ -443,7 +443,7 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
     for (const [ax, bx] of [[-7.8, 2.7], [5.5, 7.7]]) for (let x = ax; x < bx; x += .65)
         stamp(crown(.43, .28, .38, x), paintedLeaf, x, .14, -10.22);
 
-    // Original raised-letter Pickleboard sign; no font, downloaded art or extra map.
+    // Original raised-letter Pickleball Park sign; no font, downloaded art or extra map.
     artCategory='sign';
     const sx = 8.3, sz = -11.0;
     for (const dx of [-.84, .84]) {
@@ -471,7 +471,7 @@ export function createDimensionalWorld(THREE, { palette = {} } = {}) {
             pole(m.petal, [sx - span / 2 + (i * .92 + ax) * scale, y + ay * scale, sz + .115],
                 [sx - span / 2 + (i * .92 + bx) * scale, y + by * scale, sz + .115], .012);
     };
-    lettering('PICKLE', 1.12, .235); lettering('BOARD', .80, .21);
+    lettering('PICKLEBALL', 1.12, .18); lettering('PARK', .80, .21);
     // A paddle medallion above the sign is recognizable at the distant camera.
     const paddle = new THREE.SphereGeometry(1, 7, 4); paddle.scale(.24, .29, .055);
     stamp(paddle, m.roofLight, sx, 1.86, sz + .03, 0, 0, -.24);

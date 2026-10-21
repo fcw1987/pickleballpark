@@ -1,23 +1,23 @@
 import { expect, test } from '@playwright/test';
 
-test('publishes Pickleboard metadata and visible identity', async ({ page }) => {
+test('publishes Pickleball Park metadata and visible identity', async ({ page }) => {
   await page.goto('/?workspace=planner');
-  await expect(page).toHaveTitle('Pickleboard - Build a Play');
+  await expect(page).toHaveTitle('Pickleball Park - Build a Play');
 
   const manifest = await page.evaluate(async () => (await fetch('manifest.json')).json());
   expect(manifest).toMatchObject({
-    name: 'Pickleboard',
-    short_name: 'Pickleboard',
+    name: 'Pickleball Park',
+    short_name: 'Pickleball Park',
     start_url: './index.html'
   });
   expect(manifest).not.toHaveProperty('id');
 
   const banner = page.locator('h1.park-banner img');
-  await expect(banner).toHaveAttribute('alt', 'Pickleboard');
-  await expect(page.locator('h1.park-banner')).toHaveAccessibleName('Pickleboard');
+  await expect(banner).toHaveAttribute('alt', 'Pickleball Park');
+  await expect(page.locator('h1.park-banner')).toHaveAccessibleName('Pickleball Park');
   await expect.poll(() => banner.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
   const visibleText = await page.locator('body').innerText();
-  expect(visibleText).not.toMatch(/\b(?:Pickleball Park|Paddle Park)\b/i);
+  expect(visibleText).not.toMatch(/\b(?:Pickleboard|Paddle Park)\b/i);
 });
 
 test('keeps the legacy theme and public API compatible across the rebrand', async ({ page }) => {
@@ -47,7 +47,7 @@ for (const width of [320, 390, 768]) {
     await page.goto('/?workspace=planner');
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const brand = page.locator('h1.park-banner');
-    await expect(brand).toHaveAccessibleName('Pickleboard');
+    await expect(brand).toHaveAccessibleName('Pickleball Park');
     await expect.poll(() => brand.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
     const brandBox = await brand.boundingBox();
     expect(brandBox.x).toBeGreaterThanOrEqual(0);
@@ -62,7 +62,7 @@ for (const width of [320, 390, 768]) {
     expect(overlaps(menu, player)).toBe(false);
     await page.locator('#menuToggle').click();
     const heading = page.locator('.menu-header h2');
-    await expect(heading).toHaveText('Pickleboard');
+    await expect(heading).toHaveText('Pickleball Park');
     const headingBox = await heading.boundingBox();
     expect(headingBox.x + headingBox.width).toBeLessThanOrEqual(width);
   });
