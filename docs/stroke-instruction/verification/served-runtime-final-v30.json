@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:4177/index.html",
+  "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "servedFiles": 108,
+  "mismatch": [],
+  "version": {
+    "schemaVersion": 1,
+    "product": "Pickleboard",
+    "status": "local",
+    "developmentStatus": "stamped local build",
+    "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+    "sourceBranch": "feature/stroke-instruction",
+    "sourceState": "clean",
+    "sourceRevisionVerified": true,
+    "runtimeMatchesSource": true,
+    "packageRevision": null,
+    "evidenceRevision": null,
+    "packageVerified": false,
+    "runtimeSha256": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+    "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+    "runtimeFileset": {
+      "algorithm": "sha256",
+      "include": "static application runtime files",
+      "exclusions": [
+        "version.json",
+        "build-metadata.js",
+        "build-info.json",
+        "runtime-manifest.json"
+      ]
+    },
+    "cacheVersion": "pickleboard-static-v30",
+    "buildTime": "2026-10-19T00:12:01.254Z"
+  },
+  "node": "v24.11.0",
+  "checkedAt": "2026-10-19T01:13:40.588Z"
+}

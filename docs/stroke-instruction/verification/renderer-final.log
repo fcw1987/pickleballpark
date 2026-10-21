@@ -1,0 +1,36 @@
+
+[WebServer] (node:82255) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 29 tests using 1 worker
+
+[1/29] [chromium] › tests/pixel-game-world.spec.mjs:3:1 › modeled garden remains fixed when cameras switch, reuses resources, and disposes every owned asset
+[2/29] [chromium] › tests/renderer-buffer.spec.mjs:4:3 › 3D buffer follows the actual court after layout changes (reduce)
+[3/29] [chromium] › tests/renderer-buffer.spec.mjs:4:3 › 3D buffer follows the actual court after layout changes (no-preference)
+[4/29] [chromium] › tests/static-world-cache.spec.mjs:51:1 › static scene cache reuses artwork and invalidates for camera, light and world changes
+[5/29] [chromium] › tests/static-world-cache.spec.mjs:76:1 › cached color and depth preserve moving ball, players and net across cameras
+[6/29] [chromium] › tests/static-world-cache.spec.mjs:83:1 › cache follows backing-buffer resize and disposes its owned resources once
+[7/29] [chromium] › tests/static-world-cache.spec.mjs:118:1 › oversized high-DPR surfaces retain direct rendering and cache again after shrinking
+[8/29] [chromium] › tests/static-world-cache.spec.mjs:146:1 › native DPR3 phones retain MSAA quality with bounded resolved-cache memory
+[9/29] [chromium] › tests/three-d-animation.spec.mjs:35:1 › serve, return, drive, block, and fifth drop resolve actors and synchronize ball launch to contact
+[10/29] [chromium] › tests/three-d-animation.spec.mjs:62:1 › right and left handed forehands animate their dominant physical arm
+[11/29] [chromium] › tests/three-d-animation.spec.mjs:93:1 › striker plants both world axes before contact and non-strikers use locomotion or split-step
+[12/29] [chromium] › tests/three-d-animation.spec.mjs:120:1 › quality guardrails keep mesh anchors finite and contact ball at the visible paddle face
+[13/29] [chromium] › tests/three-d-animation.spec.mjs:145:1 › pause freezes player pose and ball together, rate scales both, and seeking to start restores ready
+[14/29] [chromium] › tests/three-d-animation.spec.mjs:167:1 › 3D chapter seeking uses canonical anchors and reduced motion remains inspectable
+[15/29] [chromium] › tests/three-d-visual.spec.mjs:12:1 › visible athletes have articulated solid anatomy and physical handedness
+[16/29] [chromium] › tests/three-d-visual.spec.mjs:44:1 › court, sagging net, surround, and camera framing preserve authoritative dimensions
+[17/29] [chromium] › tests/three-d-visual.spec.mjs:102:1 › ball keeps its physical radius while enforcing a readable projected diameter
+[18/29] [chromium] › tests/three-d.spec.mjs:18:1 › 3D View initializes regulation scene with players, ball, and handed paddles
+[19/29] [chromium] › tests/three-d.spec.mjs:33:1 › named cameras switch without resetting the Play
+[20/29] [chromium] › tests/three-d.spec.mjs:43:1 › play, pause, playback rate, timeline seek, and proof bounce share one clock
+[21/29] [chromium] › tests/three-d.spec.mjs:70:1 › exit stops render loop, re-entry creates one new loop, and 2D Play remains intact
+[22/29] [chromium] › tests/three-d.spec.mjs:92:1 › 3D viewer fits portrait, landscape, and desktop controls
+[23/29] [chromium] › tests/three-d.spec.mjs:112:1 › reduced motion retains 3D endpoints and camera controls
+[24/29] [chromium] › tests/three-d.spec.mjs:122:1 › offline repeat visit can open the locally cached Three.js viewer
+[25/29] [chromium] › tests/visual-world.spec.mjs:6:1 › camera fitting expands narrow views without changing preset sight lines
+[26/29] [chromium] › tests/visual-world.spec.mjs:88:1 › 3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources
+[27/29] [chromium] › tests/visual-world.spec.mjs:128:1 › camera presets reframe after portrait resize without resetting playback
+[28/29] [chromium] › tests/visual-world.spec.mjs:171:1 › all Plays keep complete actors and trajectories above the HUD at every target viewport
+[29/29] [chromium] › tests/visual-world.spec.mjs:236:1 › phone cameras retain a visible ball without changing its trajectory or physical radius
+  29 passed (1.7m)

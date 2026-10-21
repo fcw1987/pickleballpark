@@ -1,0 +1,38 @@
+{
+  "base": "http://127.0.0.1:4177",
+  "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "runtimeDigestAfter": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "viewport": [
+    402,
+    874
+  ],
+  "deviceScaleFactor": 3,
+  "phone": {
+    "devicePixelRatio": 3,
+    "viewport": [
+      402,
+      874
+    ],
+    "rendererPixelRatio": 3,
+    "drawingBuffer": [
+      1206,
+      2622
+    ],
+    "emulation": "Isolated Chromium viewport/DPR emulation, not a physical phone."
+  },
+  "camera": {
+    "position": [
+      8.8,
+      1.35,
+      -6.8
+    ],
+    "target": [
+      8.3,
+      1.1,
+      -11
+    ],
+    "fov": 38
+  },
+  "note": "Temporary inspection camera only; ordinary phone screenshots kept in stroke suite.",
+  "errors": []
+}

@@ -1,5 +1,4 @@
-import { createPark3D, disposePark3D, updateParkCamera } from './park-scene.js';
-import { COURT_LINES } from './court-geometry.js';
+import { createDimensionalWorld } from './three-d-world.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import * as THREE from './vendor/three.module.min.js';
 import {
@@ -12,8 +11,10 @@ import {
     fitCameraPreset
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
-import { loadPixelActorAssets, PixelActorResources, createPixelActor, updatePixelActor } from './three-d-pixel-actors.js';
+import { AthleteResources, createAthlete, updateAthlete } from './three-d-athletes.js';
 import { ReadableBall } from './three-d-ball.js';
+import { chapterAtTime } from './shot-chapters.js';
+import { mountShotTimeline } from './shot-timeline.js';
 
 const FALLBACK_PALETTE = Object.freeze({
     ink: '#263449', navy: '#304762', navyLight: '#526d86', navyDark: '#1c2b40',
@@ -26,6 +27,166 @@ const VISUAL = globalThis.PICKLEBOARD_VISUAL || { palette: FALLBACK_PALETTE, ren
 const PALETTE = { ...FALLBACK_PALETTE, ...VISUAL.palette };
 const DEFAULT_PIXEL_SCALE = [1, 2].includes(Number(VISUAL.render?.pixelScale)) ? Number(VISUAL.render.pixelScale) : 1;
 
+/** Cache only the fixed, multisampled world. Moving actors, ball, shadows and
+ * translucent net grid are still rendered live against its restored depth.
+ * Uses public Three.js targets/textures; never changes drawing-buffer quality.
+ */
+function createStaticWorldCache(renderer, scene, world) {
+    const originalRender=renderer.render.bind(renderer),size=new THREE.Vector2();
+    const cacheScene=new THREE.Scene(),blitScene=new THREE.Scene(),quadGeometry=new THREE.PlaneGeometry(2,2);
+    const quadMaterial=new THREE.ShaderMaterial({
+        uniforms:{colorMap:{value:null},depthMap:{value:null}},
+        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+        fragmentShader:`uniform sampler2D colorMap;uniform sampler2D depthMap;varying vec2 vUv;
+            void main(){gl_FragColor=texture2D(colorMap,vUv);gl_FragDepth=texture2D(depthMap,vUv).r;
+            }`,
+        depthTest:true,depthWrite:true,depthFunc:THREE.AlwaysDepth
+    });
+    const quad=new THREE.Mesh(quadGeometry,quadMaterial);
+    quad.name='StaticWorldColorDepth';quad.frustumCulled=false;quad.renderOrder=-10000;quad.visible=false;scene.add(quad);
+    const blitQuad=new THREE.Mesh(quadGeometry,quadMaterial);blitQuad.frustumCulled=false;blitScene.add(blitQuad);
+    const sourceNet=world.net.getObjectByName('NetMesh'),liveNet=sourceNet.clone();
+    liveNet.name='StaticWorldLiveNetGrid';liveNet.matrixAutoUpdate=false;liveNet.visible=false;scene.add(liveNet);
+    const resources={targets:new Set(),geometries:new Set([quadGeometry]),materials:new Set([quadMaterial])};
+    const context=renderer.getContext();
+    const samples=Math.min(context.getParameter(context.SAMPLES),renderer.capabilities.maxSamples),retired=new WeakSet(),cacheMaterials=new Map();
+    const stats={builds:0,reuses:0,invalidations:0,lastInvalidation:'initial',width:0,height:0,samples,buildSamples:samples,residentSamples:0,
+        estimatedBytes:0,estimatedBuildBytes:0,estimatedPeakBytes:0,residentBytes:0,transientBytes:0,failures:0,bypasses:0,disabledReason:null,disposed:false};
+    let target=null,signature=null,disposed=false;
+    const retire=value=>{if(value&&!retired.has(value)){retired.add(value);resources.targets.delete(value);value.dispose();}};
+    const invalidate=(reason='explicit')=>{if(disposed)return;signature=null;stats.invalidations++;stats.lastInvalidation=reason;};
+    // Attribute versions and complete transform/material/light state make edits
+    // visible automatically; invalidate() remains available for custom shaders.
+    const stateKey=camera=>{
+        const key=[camera.layers.mask,...camera.matrixWorld.elements,...camera.projectionMatrix.elements,
+            size.x,size.y,renderer.getPixelRatio(),renderer.outputColorSpace,renderer.toneMapping,renderer.toneMappingExposure];
+        const background=scene.background;
+        key.push(background?.isColor?background.getHex():background?.uuid,background?.version,scene.backgroundIntensity,scene.backgroundBlurriness,scene.backgroundRotation?.x,scene.backgroundRotation?.y,scene.backgroundRotation?.z,
+            scene.fog?.color?.getHex(),scene.fog?.near,scene.fog?.far,scene.fog?.density);
+        world.group.traverse(object=>{
+            key.push(object.uuid,object.visible,object.layers.mask,object.renderOrder,...object.matrixWorld.elements);
+            if(object.geometry){key.push(object.geometry.uuid,object.geometry.index?.version,object.geometry.drawRange.start,object.geometry.drawRange.count);
+                for(const [name,attribute]of Object.entries(object.geometry.attributes))key.push(name,attribute.version);}
+            for(const material of object.material?(Array.isArray(object.material)?object.material:[object.material]):[]){
+                key.push(material.uuid,material.version,material.visible,material.opacity,material.transparent,material.side,material.depthWrite,material.depthTest,material.depthFunc,material.alphaTest,material.polygonOffset,material.polygonOffsetFactor,material.polygonOffsetUnits,
+                    material.color?.r,material.color?.g,material.color?.b,material.emissive?.r,material.emissive?.g,material.emissive?.b,material.emissiveIntensity);
+                for(const name of ['map','alphaMap','lightMap','aoMap','emissiveMap','normalMap']){const map=material[name];
+                    if(map)key.push(name,map.uuid,map.version,map.colorSpace,map.rotation,map.offset.x,map.offset.y,map.repeat.x,map.repeat.y,map.center.x,map.center.y);}
+            }
+        });
+        scene.traverseVisible(light=>{if(!light.isLight)return;light.target?.updateMatrixWorld();
+            key.push(light.uuid,light.distance,light.decay,light.angle,light.penumbra,light.intensity,light.color.r,light.color.g,light.color.b,...light.matrixWorld.elements,
+                light.groundColor?.r,light.groundColor?.g,light.groundColor?.b,...(light.target?.matrixWorld.elements||[]));});
+        return key.join('|');
+    };
+    const cacheFinish=source=>{
+        let finish=cacheMaterials.get(source.uuid);
+        if(!finish){finish=source.clone();cacheMaterials.set(source.uuid,finish);resources.materials.add(finish);}
+        finish.copy(source);
+        finish.onBeforeCompile=(shader,renderer)=>{
+            source.onBeforeCompile(shader,renderer);
+            // The default framebuffer stores display-encoded values BEFORE
+            // multisample resolution/blending. Match that order in RGBA8;
+            // copying this texture needs no second output conversion.
+            shader.fragmentShader=shader.fragmentShader.replace('#include <colorspace_fragment>',
+                'gl_FragColor = sRGBTransferOETF( gl_FragColor );');
+        };
+        finish.customProgramCacheKey=()=>`static-display-cache:${source.customProgramCacheKey()}`;
+        finish.needsUpdate=true;return finish;
+    };
+    const cache={enabled:true,maxBytes:96*1024*1024,maxPeakBytes:192*1024*1024,stats,resources,invalidate,dispose(){
+        if(disposed)return;disposed=true;stats.disposed=true;cache.enabled=false;
+        renderer.render=originalRender;scene.remove(quad,liveNet);cacheScene.clear();blitScene.clear();
+        retire(target);quadGeometry.dispose();for(const material of resources.materials)material.dispose();
+        target=null;signature=null;stats.residentBytes=0;cacheMaterials.clear();
+    }};
+    renderer.render=function(renderScene,camera){
+        if(disposed||!cache.enabled||renderScene!==scene||renderer.getRenderTarget()!==null||!world.group.visible||world.group.userData.disposed)
+            return originalRender(renderScene,camera);
+        // Display-encoded RGBA8 cache fits the current untone-mapped scene.
+        // Future HDR/tone, fog or texture backgrounds retain direct rendering.
+        if(renderer.outputColorSpace!==THREE.SRGBColorSpace||renderer.toneMapping!==THREE.NoToneMapping||renderer.clippingPlanes.length||renderer.localClippingEnabled||scene.fog||(scene.background&&!scene.background.isColor)){
+            stats.bypasses++;stats.disabledReason='tone-mapping-or-clipping';return originalRender(renderScene,camera);
+        }
+        stats.disabledReason=null;
+        renderer.getDrawingBufferSize(size);
+        // Keep only resolved RGBA8 color + 32-bit depth between frames. Native
+        // MSAA attachments exist just while rebuilding and are then released.
+        const estimatedBytes=size.x*size.y*8,estimatedBuildBytes=size.x*size.y*(samples*8+8);
+        const estimatedPeakBytes=estimatedBytes+estimatedBuildBytes;
+        Object.assign(stats,{width:size.x,height:size.y,estimatedBytes,estimatedBuildBytes,estimatedPeakBytes,
+            memoryBudgetBytes:cache.maxBytes,peakMemoryBudgetBytes:cache.maxPeakBytes});
+        if(estimatedBytes>cache.maxBytes||estimatedPeakBytes>cache.maxPeakBytes){
+            stats.bypasses++;stats.disabledReason='cache-memory-budget';
+            retire(target);target=null;signature=null;stats.residentBytes=0;
+            return originalRender(renderScene,camera);
+        }
+        scene.updateMatrixWorld();if(camera.parent===null)camera.updateMatrixWorld();
+        const key=stateKey(camera),autoReset=renderer.info.autoReset,worldVisible=world.group.visible,autoMatrix=scene.matrixWorldAutoUpdate;
+        if(autoReset)renderer.info.reset();renderer.info.autoReset=false;
+        try{
+            if(signature!==key){
+                if(signature!==null){stats.invalidations++;stats.lastInvalidation='scene-or-view-changed';}
+                if(!target||target.width!==size.x||target.height!==size.y){
+                    retire(target);target=new THREE.WebGLRenderTarget(size.x,size.y,{samples:0,depthBuffer:true,stencilBuffer:false});
+                    target.depthTexture=new THREE.DepthTexture(size.x,size.y,THREE.UnsignedIntType);resources.targets.add(target);
+                    quadMaterial.uniforms.colorMap.value=target.texture;quadMaterial.uniforms.depthMap.value=target.depthTexture;
+                    stats.residentBytes=estimatedBytes;
+                }
+                cacheScene.clear();cacheScene.background=scene.background?.clone().convertLinearToSRGB()||null;cacheScene.fog=null;
+                cacheScene.backgroundIntensity=scene.backgroundIntensity;cacheScene.backgroundBlurriness=scene.backgroundBlurriness;
+                cacheScene.backgroundRotation.copy(scene.backgroundRotation);
+                const fixedWorld=world.group.clone(true);fixedWorld.getObjectByName('NetMesh').visible=false;
+                fixedWorld.traverse(object=>{if(object.material)object.material=Array.isArray(object.material)?object.material.map(cacheFinish):cacheFinish(object.material);});
+                cacheScene.add(fixedWorld);
+                scene.traverseVisible(light=>{if(!light.isLight)return;const copy=light.clone();
+                    copy.matrixAutoUpdate=false;copy.matrix.copy(light.matrixWorld);copy.matrixWorldNeedsUpdate=true;
+                    if(copy.target&&light.target){copy.target.matrixAutoUpdate=false;copy.target.matrix.copy(light.target.matrixWorld);copy.target.matrixWorldNeedsUpdate=true;copy.target.updateMatrixWorld(true);}
+                    cacheScene.add(copy);});
+                let buildTarget=null;
+                try{
+                    buildTarget=new THREE.WebGLRenderTarget(size.x,size.y,{samples,depthBuffer:true,stencilBuffer:false});
+                    buildTarget.depthTexture=new THREE.DepthTexture(size.x,size.y,THREE.UnsignedIntType);resources.targets.add(buildTarget);
+                    stats.transientBytes=estimatedBuildBytes;
+                    renderer.setRenderTarget(buildTarget);
+                    const gl=renderer.getContext();
+                    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('World cache framebuffer unavailable.');
+                    originalRender(cacheScene,camera);
+                    // Switching targets resolves native MSAA. Public Three.js
+                    // textures then copy both encoded color and resolved depth
+                    // into the small persistent target without resampling.
+                    quadMaterial.uniforms.colorMap.value=buildTarget.texture;quadMaterial.uniforms.depthMap.value=buildTarget.depthTexture;
+                    renderer.setRenderTarget(target);
+                    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Resolved world cache framebuffer unavailable.');
+                    originalRender(blitScene,camera);
+                }finally{
+                    renderer.setRenderTarget(null);retire(buildTarget);stats.transientBytes=0;
+                    quadMaterial.uniforms.colorMap.value=target.texture;quadMaterial.uniforms.depthMap.value=target.depthTexture;
+                }
+                signature=key;stats.builds++;
+            }else stats.reuses++;
+            // Shader writes the resolved world depth before live solids. The
+            // transparent grid stays live so it blends over players correctly.
+            liveNet.geometry=sourceNet.geometry;liveNet.material=sourceNet.material;liveNet.matrix.copy(sourceNet.matrixWorld);
+            liveNet.matrixWorldNeedsUpdate=true;liveNet.visible=true;
+            for(let ancestor=sourceNet;ancestor;ancestor=ancestor.parent)if(!ancestor.visible)liveNet.visible=false;
+            world.group.visible=false;quad.visible=true;scene.matrixWorldAutoUpdate=false;
+            liveNet.updateMatrixWorld(true);originalRender(scene,camera);
+        }catch(error){
+            // An optional cache allocation/driver failure must leave playback
+            // available through the ordinary renderer, at the same quality.
+            cache.enabled=false;stats.failures++;stats.disabledReason='cache-unavailable';stats.lastError=error.message;
+            renderer.setRenderTarget(null);world.group.visible=worldVisible;quad.visible=false;liveNet.visible=false;
+            scene.matrixWorldAutoUpdate=autoMatrix;retire(target);target=null;signature=null;stats.residentBytes=0;
+            originalRender(scene,camera);
+        }finally{
+            world.group.visible=worldVisible;quad.visible=false;liveNet.visible=false;
+            scene.matrixWorldAutoUpdate=autoMatrix;renderer.info.autoReset=autoReset;
+        }
+    };
+    return cache;
+}
+
 class ThreeDPlaybackViewer {
     constructor(board) {
         this.board = board;
@@ -33,16 +194,12 @@ class ThreeDPlaybackViewer {
             root: document.getElementById('threeDViewer'),
             canvas: document.getElementById('threeDCanvas'),
             title: document.getElementById('threeDTitle'),
-            loop: document.getElementById('threeDLoop'),
             progress: document.getElementById('threeDProgress'),
             stepLabel: document.getElementById('threeDStepLabel'),
             description: document.getElementById('threeDDescription'),
             shotCue: document.getElementById('threeDShotCue'),
             status: document.getElementById('threeDStatus'),
-            previous: document.getElementById('threeDPrevious'),
             playPause: document.getElementById('threeDPlayPause'),
-            next: document.getElementById('threeDNext'),
-            restart: document.getElementById('threeDRestart'),
             camera: document.getElementById('threeDCamera'),
             rate: document.getElementById('threeDRate'),
             exit: document.getElementById('threeDExit'),
@@ -74,25 +231,27 @@ class ThreeDPlaybackViewer {
         };
         this.boundContextLost = event => {
             event.preventDefault();
-            if(!this.active)return;
+            // A suspended builder view retains its scene for fast re-entry. A
+            // context can still be reclaimed while that canvas is hidden; do
+            // not leave the dead renderer available for the reuse path.
+            if (!this.scene || event.currentTarget !== this.renderer?.domElement) return;
             this.exit();
             this.elements.loadStatus.textContent='Graphics were interrupted. Your board is safe. Try 3D View again.';
             this.elements.loadStatus.hidden=false;
         };
         this.bindControls();
+        const timelineMount = document.getElementById('threeDTimelineMount');
+        this.shotTimeline = timelineMount ? mountShotTimeline({ onAction: (action, value) => this.board.plays.timelineAction(action, value) }) : null;
+        if (timelineMount && this.shotTimeline) timelineMount.replaceChildren(this.shotTimeline.element);
         this.updateEntryAvailability();
     }
 
     bindControls() {
         this.elements.enter.addEventListener('click', () => this.enter());
-        this.elements.previous.addEventListener('click', () => this.previous());
         this.elements.playPause.addEventListener('click', () => this.togglePlay());
-        this.elements.next.addEventListener('click', () => this.next());
-        this.elements.restart.addEventListener('click', () => this.restart());
         this.elements.camera.addEventListener('change', event => this.setCamera(event.target.value));
         this.elements.rate.addEventListener('change', event => this.setPlaybackRate(Number(event.target.value)));
         this.elements.exit.addEventListener('click', () => this.exit());
-        this.elements.loop.addEventListener('click', () => this.board.plays.setLoop(!this.session.loop));
     }
 
     updateEntryAvailability() {
@@ -105,31 +264,70 @@ class ThreeDPlaybackViewer {
         this.loading=false;
         this.elements.enter.removeAttribute('aria-busy');
         this.updateEntryAvailability();
+        const suspension=this.loadSuspension;this.loadSuspension=null;
+        if (suspension && this.session.resumeSuspension(suspension)) this.board.plays.startPlaybackLoop();
     }
 
+    cancelRenderWork() {
+        if (this.renderLoopId !== null) cancelAnimationFrame(this.renderLoopId);
+        this.renderLoopId = null;
+    }
+
+    renderSessionSample() {
+        if (!this.scene || !this.currentPlay) return;
+        this.applyAtTime(this.clock.elapsed);
+        this.renderer?.render(this.scene, this.camera);
+        this.updateUI();
+    }
+
+    // A builder view toggle parks this renderer; leaving the workspace still disposes it.
+    suspend() {
+        if (!this.active) return false;
+        const suspension=this.session.suspend(performance.now(), this.board.plays.timingScale);
+        this.board.plays.cancelScheduledWork();
+        this.cancelRenderWork(); this.active = false; this.session.owner = 'guided';
+        this.elements.root.hidden = true; document.body.classList.remove('three-d-active');
+        this.board.plays.applyAtTime(this.clock.elapsed);
+        if (this.session.resumeSuspension(suspension)) this.board.plays.startPlaybackLoop();
+        return true;
+    }
+    replaceDefinition(play, timeline) {
+        this.currentPlay = play; this.timeline = timeline; this.sceneEnvelope = null;
+        for (const [id, actor] of this.playerObjects) actor.userData.handedness = this.board.tokens[id].handedness;
+        if (this.renderer) { this.applyAtTime(this.clock.elapsed); this.applyCameraFraming(); this.startRenderLoop(); }
+    }
     async enter() {
         const play = this.board.plays?.activePlay;
         if (!play || this.active || this.loading) return false;
+        if (this.scene && this.currentPlay === play) {
+            this.session.owner = 'replay'; this.active = true;
+            this.elements.root.hidden = false; document.body.classList.add('three-d-active');
+            this.resize(); this.applyAtTime(this.clock.elapsed); this.updateUI(); this.startRenderLoop();
+            return true;
+        }
         const snapshot=this.board.plays.snapshot;
-        this.board.plays.pause();
+        const playbackSuspension = this.session.suspend(performance.now(), this.board.plays.timingScale);
+        this.loadSuspension=playbackSuspension;
+        this.board.plays.cancelScheduledWork({ preserveTransition: true });
         const generation=++this.loadGeneration;
         const controller=new AbortController();this.loadAbort=controller;
         this.loading=true;
         this.updateEntryAvailability();
         this.elements.enter.setAttribute('aria-busy','true');
-        let loadingSubject='Pixel athletes';
+        let loadingSubject='The court';
         try {
-            this.pixelAssets=await loadPixelActorAssets();
-            loadingSubject='The park';
-            if(generation!==this.loadGeneration)return false;
-            const park = await createPark3D(THREE,{signal:controller.signal});
-            if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot){disposePark3D(park);return false;}
-            this.parkObject=park;
+            // Keep asynchronous intent cancellation at the renderer boundary.
+            // The dimensional scene uses locally authored geometry and needs no
+            // raster actor download; the existing 2D artwork remains unchanged.
+            await Promise.resolve();
+            if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
         } catch(error) {
             if(generation!==this.loadGeneration)return false;
             controller.abort();
             this.elements.loadStatus.textContent=`${loadingSubject} could not load. Your board is safe. Try 3D View again.`;
             this.elements.loadStatus.hidden=false;
+            this.loadSuspension=null;
+            if (this.session.resumeSuspension(playbackSuspension)) this.board.plays.startPlaybackLoop();
             return false;
         } finally {
             if(generation===this.loadGeneration){this.loading=false;this.loadAbort=null;
@@ -138,7 +336,6 @@ class ThreeDPlaybackViewer {
         this.currentPlay = play;
         this.timeline = this.board.plays.timeline;
         this.session.owner = 'replay';
-        this.board.plays.pause();
         this.elements.root.hidden = false;
         document.body.classList.add('three-d-active');
         try {
@@ -154,6 +351,8 @@ class ThreeDPlaybackViewer {
             this.active = false;
             this.currentPlay = null;
             this.timeline = null;
+            this.loadSuspension=null;
+            if (this.session.resumeSuspension(playbackSuspension)) this.board.plays.startPlaybackLoop();
             if (this.elements.loadStatus) {
                 this.elements.loadStatus.textContent = `3D view unavailable: ${error?.message || 'WebGL could not start.'}`;
                 this.elements.loadStatus.hidden = false;
@@ -169,6 +368,8 @@ class ThreeDPlaybackViewer {
         }
         window.addEventListener('resize', this.boundResize);
         document.addEventListener('visibilitychange', this.boundVisibilityChange);
+        this.loadSuspension=null;
+        this.session.resumeSuspension(playbackSuspension);
         this.startRenderLoop();
         this.updateUI();
         this.elements.playPause.focus?.();
@@ -177,37 +378,38 @@ class ThreeDPlaybackViewer {
 
     initializeScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(PALETTE.surround).multiplyScalar(0.72);
+        this.scene.background = new THREE.Color('#c3dcde');
         this.camera = new THREE.PerspectiveCamera(48, 1, 0.05, 100);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+        // Ground contact ellipses anchor athletes without a second scene pass.
         this.renderer.shadowMap.enabled = false;
-        this.renderer.shadowMap.type = THREE.BasicShadowMap;
         this.renderer.setPixelRatio(this.renderPixelRatio());
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.elements.canvas.replaceChildren(this.renderer.domElement);
         this.renderer.domElement.addEventListener('webglcontextlost',this.boundContextLost);
 
-        this.scene.add(new THREE.HemisphereLight(PALETTE.line, PALETTE.greenDark, 0.85));
-        this.scene.add(new THREE.AmbientLight(PALETTE.line, 0.45));
-        const key = new THREE.DirectionalLight(PALETTE.line, 1.35);
-        key.position.set(-5, 10, -4);
-        key.castShadow = false;
-        key.shadow.mapSize.set(1024, 1024);
-        key.shadow.camera.left = -8;
-        key.shadow.camera.right = 8;
-        key.shadow.camera.top = 10;
-        key.shadow.camera.bottom = -10;
-        key.shadow.bias = -0.00035;
+        // Warm sun and cool sky fill expose rounded faces and cream walls.
+        // Painted scene grounding stays static; no second shadow-map render pass.
+        this.scene.add(new THREE.HemisphereLight('#e8f3ff', '#94aa84', 1.6));
+        this.scene.add(new THREE.AmbientLight('#fff9ed', 0.42));
+        const key = new THREE.DirectionalLight('#fff2d9', 1.75);
+        key.position.set(-3.5, 12, -2.5);
         this.scene.add(key);
+        const fill = new THREE.DirectionalLight('#e4f1ff', 1.0);
+        fill.position.set(7, 5, 9);
+        this.scene.add(fill);
         this.gradientMap = new THREE.DataTexture(new Uint8Array([72, 164, 255]), 3, 1, THREE.RedFormat);
         this.gradientMap.minFilter = THREE.NearestFilter;
         this.gradientMap.magFilter = THREE.NearestFilter;
         this.gradientMap.generateMipmaps = false;
         this.gradientMap.needsUpdate = true;
-        this.buildCourt();
-        this.scene.add(this.parkObject);
+        this.world = createDimensionalWorld(THREE, { palette: PALETTE, gradientMap: this.gradientMap });
+        this.scene.add(this.world.group);
+        this.courtObject = this.world.court;
+        this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
+        this.staticWorldCache=createStaticWorldCache(this.renderer,this.scene,this.world);
 
         this.resize();
     }
@@ -235,145 +437,32 @@ class ThreeDPlaybackViewer {
         return this.pixelScale;
     }
 
-    buildCourt() {
-        const width = COURT_DIMENSIONS.widthFeet * FEET_TO_METERS;
-        const length = COURT_DIMENSIONS.lengthFeet * FEET_TO_METERS;
-        const courtGroup = new THREE.Group();
-        courtGroup.name = 'Court';
-        courtGroup.userData = { width, length, kitchenDepth: COURT_DIMENSIONS.kitchenDepthFeet * FEET_TO_METERS };
-        this.scene.add(courtGroup);
-
-        const surround = new THREE.Mesh(
-            new THREE.PlaneGeometry(width + 10, length + 10),
-            this.flatMaterial(PALETTE.surround)
-        );
-        surround.name = 'CourtSurround';
-        surround.rotation.x = -Math.PI / 2;
-        surround.position.y = -0.075;
-        surround.receiveShadow = true;
-        courtGroup.add(surround);
-
-        const slab = new THREE.Mesh(
-            new THREE.BoxGeometry(width, 0.11, length),
-            this.flatMaterial(PALETTE.court)
-        );
-        slab.name = 'CourtSlab';
-        slab.position.y = -0.055;
-        slab.receiveShadow = true;
-        courtGroup.add(slab);
-
-        const kitchen = new THREE.Mesh(
-            new THREE.PlaneGeometry(width - 0.04, 14 * FEET_TO_METERS),
-            this.flatMaterial(PALETTE.kitchen)
-        );
-        kitchen.name = 'KitchenSurface';
-        kitchen.rotation.x = -Math.PI / 2;
-        kitchen.position.y = 0.004;
-        kitchen.receiveShadow = true;
-        courtGroup.add(kitchen);
-
-        const lineMaterial = this.flatMaterial(PALETTE.line);
-        const lineWidth = 0.045;
-        const addLine = (name, x, z, w, d) => {
-            const line = new THREE.Mesh(new THREE.BoxGeometry(w, 0.022, d), lineMaterial);
-            line.name = name;
-            line.position.set(x, 0.018, z);
-            courtGroup.add(line);
-        };
-        const names = ['GreenBaseline','OrangeBaseline','LeftSideline','RightSideline','GreenKitchenLine','OrangeKitchenLine','GreenCenterline','OrangeCenterline'];
-        COURT_LINES.forEach((line,index) => {
-            const from=boardToWorld(line.from),to=boardToWorld(line.to),thickness=line.lineWidthFeet*FEET_TO_METERS;
-            addLine(names[index],(from.x+to.x)/2,(from.z+to.z)/2,Math.abs(to.x-from.x)||thickness,Math.abs(to.z-from.z)||thickness);
-            const mesh=courtGroup.children.at(-1); mesh.userData.courtLine=line;
-        });
-
-        const shadowReceiver = new THREE.Mesh(
-            new THREE.PlaneGeometry(width + 10, length + 10),
-            new THREE.ShadowMaterial({ color: PALETTE.ink, opacity: 0.13, depthWrite: false })
-        );
-        shadowReceiver.name = 'CourtShadowReceiver';
-        shadowReceiver.rotation.x = -Math.PI / 2;
-        shadowReceiver.position.y = 0.032;
-        shadowReceiver.receiveShadow = true;
-        courtGroup.add(shadowReceiver);
-
-        const centerHeight = COURT_DIMENSIONS.netCenterHeightFeet * FEET_TO_METERS;
-        const sideHeight = COURT_DIMENSIONS.netSidelineHeightFeet * FEET_TO_METERS;
-        const netWidth = width + 0.55;
-        const netGroup = new THREE.Group();
-        netGroup.name = 'Net';
-        netGroup.userData = { centerHeight, sideHeight, width: netWidth };
-        courtGroup.add(netGroup);
-
-        const netMaterial = new THREE.LineBasicMaterial({ color: PALETTE.ink, transparent: true, opacity: 0.62 });
-        const points = [];
-        const segments = 16;
-        const heightAt = x => centerHeight + (sideHeight - centerHeight) * Math.pow(Math.abs(x) / (netWidth / 2), 1.7);
-        for (let index = 0; index <= segments; index += 1) {
-            const x = -netWidth / 2 + (netWidth * index / segments);
-            points.push(x, 0.03, 0, x, heightAt(x), 0);
-        }
-        for (let row = 1; row < 7; row += 1) {
-            for (let index = 0; index < segments; index += 1) {
-                const x1 = -netWidth / 2 + netWidth * index / segments;
-                const x2 = -netWidth / 2 + netWidth * (index + 1) / segments;
-                const ratio = row / 7;
-                points.push(x1, heightAt(x1) * ratio, 0, x2, heightAt(x2) * ratio, 0);
-            }
-        }
-        const netGeometry = new THREE.BufferGeometry();
-        netGeometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-        const net = new THREE.LineSegments(netGeometry, netMaterial);
-        net.name = 'NetMesh';
-        netGroup.add(net);
-
-        const curve = new THREE.QuadraticBezierCurve3(
-            new THREE.Vector3(-netWidth / 2, sideHeight, 0),
-            new THREE.Vector3(0, centerHeight - 0.025, 0),
-            new THREE.Vector3(netWidth / 2, sideHeight, 0)
-        );
-        const tape = new THREE.Mesh(
-            new THREE.TubeGeometry(curve, 24, 0.028, 6, false),
-            this.toonMaterial(PALETTE.line)
-        );
-        tape.name = 'NetTopTape';
-        netGroup.add(tape);
-        const postMaterial = this.toonMaterial(PALETTE.navyDark);
-        for (const x of [-netWidth / 2, netWidth / 2]) {
-            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, sideHeight + 0.12, 12), postMaterial);
-            post.name = 'NetPost';
-            post.position.set(x, (sideHeight + 0.12) / 2, 0);
-            netGroup.add(post);
-        }
-        this.courtObject = courtGroup;
-        this.netObject = netGroup;
-    }
 
     buildPlayers() {
-        this.actorResources=new PixelActorResources(this.pixelAssets);
+        this.actorResources=new AthleteResources();
         for(let index=1;index<=4;index++) {
             const token=this.board.tokens[`player${index}`];
             const team=token.element.classList.contains('team2-player')?'team2':'team1';
-            const actor=createPixelActor(this.actorResources,team,token.handedness);
+            const actor=createAthlete(this.actorResources,team,token.handedness,index-1);
             actor.userData.id=token.id;this.scene.add(actor);this.playerObjects.set(token.id,actor);
         }
     }
 
-    applyPixelActors(segment,localTime) {
+    applyAthletes(segment,localTime) {
         for(const [id,actor] of this.playerObjects) {
             let sample;
-            if(segment) sample=sampleActorPresentation({segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
+            if(segment) sample=sampleActorPresentation({instructionalMovement:true,segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
             else {
                 const position=this.currentPlay.steps[0].positions[id],world=boardToWorld(position);
                 const facing={x:0,z:position.y<22?1:-1};
-                sample={handedness:actor.userData.handedness,worldPosition:world,viewDirection:selectCameraRelativeDirection(facing,world,this.camera.position,this.cameraTarget),action:'ready',phase:'ready',locomotionFrame:null,paddle:null};
+                sample={handedness:actor.userData.handedness,worldPosition:world,bodyFacing:facing,facing,timeSeconds:0,travelPhase:0,viewDirection:selectCameraRelativeDirection(facing,world,this.camera.position,this.cameraTarget),action:'ready',phase:'ready',locomotionFrame:null,paddle:null};
             }
             const isStriker=segment?.shotSemantics?.playerId===id;
             const isIncoming=segment?.nextShotSemantics?.playerId===id;
             const distance=isStriker?Math.abs(localTime-segment.contactTime):isIncoming?Math.abs(segment.duration-localTime):Infinity;
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
-            updatePixelActor(actor,sample,this.camera,weight);
+            updateAthlete(actor,sample,this.camera,weight);
         }
     }
 
@@ -384,7 +473,7 @@ class ThreeDPlaybackViewer {
 
     currentStepIndex() {
         if (!this.timeline || this.clock.elapsed <= 0) return 0;
-        const index = this.timeline.segments.findIndex(segment => this.clock.elapsed <= segment.endTime);
+        const index = this.timeline.segments.findIndex(segment => this.clock.elapsed < segment.endTime - 1e-9);
         return index < 0 ? this.currentPlay.steps.length - 1 : this.timeline.segments[index].index;
     }
 
@@ -418,6 +507,7 @@ class ThreeDPlaybackViewer {
     setCamera(name) {
         if (!CAMERA_PRESETS[name] || !this.camera) return false;
         this.cameraPreset = name;
+        this.elements.camera.value = name;
         this.applyCameraFraming();
         if(this.currentPlay&&this.ballObject)this.applyAtTime(this.clock.elapsed);
         this.startRenderLoop();
@@ -429,9 +519,9 @@ class ThreeDPlaybackViewer {
         const width = Math.max(1, this.elements.canvas.clientWidth);
         const height = Math.max(1, this.elements.canvas.clientHeight);
         const hudHeight = this.elements.root.hidden ? 0 : (this.elements.root.querySelector('.three-d-hud')?.getBoundingClientRect().height || 0);
-        const reservedPixels = Math.min(height * 0.8, hudHeight + 24);
+        const reservedPixels = this.board.courtFirstComposition ? 0 : Math.min(height * 0.8, hudHeight + 24);
         // Include every authored position and shot, so playback never needs camera chasing.
-        // Conservative upright pixel-actor bounds include cap, feet and stroke reach.
+        // Bounds include upright athletes and paddle reach without framing empty scenery.
         const envelope = this.sceneEnvelope || [];
         if (!this.sceneEnvelope) {
         const halfWidth = COURT_DIMENSIONS.widthFeet * FEET_TO_METERS / 2;
@@ -442,7 +532,7 @@ class ThreeDPlaybackViewer {
             for (const [id, position] of Object.entries(step.positions)) {
                 if (id === 'ball') continue;
                 const point = boardToWorld(position);
-                for (const x of [-1, 1]) for (const y of [0, 2.4]) for (const z of [-1, 1]) {
+                for (const x of [-0.7, 0.7]) for (const y of [0, 2.0]) for (const z of [-0.7, 0.7]) {
                     envelope.push([point.x + x, y, point.z + z]);
                 }
             }
@@ -455,7 +545,7 @@ class ThreeDPlaybackViewer {
         }
         this.sceneEnvelope=envelope;
         }
-        const framing = fitCameraPreset(this.cameraPreset, width / height, reservedPixels / height, envelope);
+        const framing = fitCameraPreset(this.cameraPreset, width / height, reservedPixels / height, envelope, {courtFirst:Boolean(this.board.courtFirstComposition),compactLandscape:height<=500&&width/height>=1.35});
         this.camera.clearViewOffset();
         this.camera.aspect = width / height;
         this.camera.fov = framing.fov;
@@ -466,7 +556,6 @@ class ThreeDPlaybackViewer {
         this.camera.setViewOffset(width, height, 0, reservedPixels / 2, width, height);
         this.camera.updateProjectionMatrix();
         this.camera.updateMatrixWorld(true);
-        updateParkCamera(this.parkObject,this.camera);
         this.updateBallReadability();
         this.cameraFraming = {
             aspect: width / height,
@@ -490,7 +579,7 @@ class ThreeDPlaybackViewer {
     togglePlay() {
         if (!this.active) return;
         this.board.plays.cancelScheduledWork({preserveTransition:true});
-        if (this.clock.playing) this.session.pause(performance.now(), this.board.plays.timingScale);
+        if (this.session.playing) this.session.pause(performance.now(), this.board.plays.timingScale);
         else this.session.play();
         this.updateUI(); this.startRenderLoop();
     }
@@ -516,16 +605,16 @@ class ThreeDPlaybackViewer {
                 return;
             }
             this.updateUI();
-            if (this.session.holding && this.clock.playing) this.board.plays.scheduleHold();
-            else if (this.clock.playing) this.renderLoopId = requestAnimationFrame(frame);
+            if (this.session.holding && this.session.playing && this.clock.playing) this.board.plays.scheduleHold();
+            else if (this.session.playing && this.clock.playing) this.renderLoopId = requestAnimationFrame(frame);
         };
         this.renderLoopId = requestAnimationFrame(frame);
     }
 
     applyAtTime(seconds) {
-        const segment=seconds>0?(this.timeline.segments.find(item=>seconds<=item.endTime)||this.timeline.segments.at(-1)):null;
+        const segment=seconds>0?(this.timeline.segments.find(item=>seconds<item.endTime-1e-9)||this.timeline.segments.at(-1)):null;
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
-        this.applyPixelActors(segment,local);
+        this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
@@ -547,29 +636,34 @@ class ThreeDPlaybackViewer {
     updateUI() {
         if (!this.currentPlay) return;
         const index=this.currentStepIndex(),step=this.currentPlay.steps[index];
-        const segment=this.timeline.segments.find(item=>this.clock.elapsed<=item.endTime);
+        const segment=this.timeline.segments.find(item=>this.clock.elapsed<item.endTime-1e-9)||this.timeline.segments.at(-1);
         const cueStep=this.timeline.segments.find(s=>s.rallyLeg===this.lastState?.rallyLeg)?.step;
-        updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:this.session.loop,reducedMotion:this.board.plays.reducedMotion.matches});
+        updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:true,reducedMotion:this.board.plays.reducedMotion.matches});
         this.elements.rate.value=String(this.clock.playbackRate);
-        this.elements.playPause.textContent = this.clock.playing ? 'Pause' : this.session.holding ? 'Resume' : this.clock.elapsed >= this.timeline.duration ? 'Replay' : 'Play';
-        this.elements.playPause.setAttribute('aria-pressed', String(this.clock.playing));
-        const stepIndex = this.currentStepIndex();
-        this.elements.previous.disabled = this.clock.playing || stepIndex === 0;
-        this.elements.next.disabled = this.clock.playing || stepIndex >= this.currentPlay.steps.length - 1;
-        if (!this.clock.playing && this.clock.elapsed === 0) this.elements.status.textContent = 'Ready';
+        const playPauseText = this.session.playing ? 'Ⅱ' : '▶';
+        if (this.elements.playPause.textContent !== playPauseText) this.elements.playPause.textContent = playPauseText;
+        this.elements.playPause.setAttribute('aria-label', this.session.playing ? 'Pause rally' : 'Play rally');
+        this.elements.playPause.setAttribute('aria-pressed', String(this.session.playing));
+        if (!this.session.playing && this.clock.elapsed === 0) this.elements.status.textContent = 'Ready';
+        const chapters = this.board.plays.chapters || [];
+        const chapter = chapterAtTime(chapters, this.clock.elapsed);
+        this.shotTimeline?.update({ chapters, time: this.clock.elapsed, duration: this.session.duration,
+            playing: this.session.playing, busy: Boolean(this.loading), currentShotId: chapter?.shotId || null });
+        this.board.onCoachingState?.();
     }
 
     getState() {
         return {
             active: this.active,
-            loop: this.session.loop, holding: this.session.holding, iteration: this.session.iteration,
-            playing: this.clock.playing,
+            loop: true, holding: this.session.holding, iteration: this.session.iteration,
+            playing: this.session.playing,
             elapsed: this.clock.elapsed,
             playbackRate: this.clock.playbackRate,
             camera: this.cameraPreset,
             playId: this.currentPlay?.id || null,
             playerCount: this.playerObjects.size,
             hasBall: Boolean(this.ballObject),
+            artStyle: 'dimensional-court-garden',
             renderLoopCount: this.renderLoopCount,
             pixelScale: this.pixelScale,
             framing: this.cameraFraming ? { ...this.cameraFraming } : null,
@@ -579,8 +673,10 @@ class ThreeDPlaybackViewer {
 
     disposeScene() {
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
-        disposePark3D(this.parkObject);this.parkObject=null;
+        this.staticWorldCache?.dispose();this.staticWorldCache=null;
+        if (this.world) { this.scene?.remove(this.world.group); this.world.dispose(); this.world=null; }
         this.readableBall?.dispose();this.readableBall=null;
+        for (const actor of this.playerObjects.values()) this.scene?.remove(actor);
         this.actorResources?.dispose();this.actorResources=null;
         this.scene?.traverse(object => {
             object.geometry?.dispose?.();
@@ -603,9 +699,10 @@ class ThreeDPlaybackViewer {
         this.sceneEnvelope=null;
     }
 
-    exit() {
-        if (!this.active) return false;
-        this.session.pause(performance.now(),this.board.plays.timingScale);
+    exit({ preservePlayback = true } = {}) {
+        if (!this.active && !this.scene) return false;
+        const suspension=preservePlayback?this.session.suspend(performance.now(),this.board.plays.timingScale):null;
+        if(!preservePlayback)this.session.pause(performance.now(),this.board.plays.timingScale);
         this.board.plays.cancelScheduledWork();
         this.session.owner='guided';
         this.active = false;
@@ -621,6 +718,7 @@ class ThreeDPlaybackViewer {
         this.board.plays.applyAtTime(this.clock.elapsed);
         this.board.plays.status = this.session.complete ? 'complete' : 'paused';
         this.board.plays.updateUI();
+        if(suspension&&this.session.resumeSuspension(suspension))this.board.plays.startPlaybackLoop();
         this.elements.enter.focus?.();
         return true;
     }

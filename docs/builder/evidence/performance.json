@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "candidateRevision": "5d38cd5",
+  "measuredAt": "2026-09-07T23:59:01Z",
+  "method": {
+    "browser": "Chromium 149.0.7827.55",
+    "mode": "isolated headless Chromium",
+    "viewport": "1440x900",
+    "deviceScaleFactor": 1,
+    "warmupSeconds": 3,
+    "sampleSecondsPerRun": 30,
+    "runs": 2,
+    "workload": "eight-shot-drive-drop custom document, 3D, Loop on, foreground visible",
+    "cadenceDefinition": "requestAnimationFrame callback intervals; not displayed FPS",
+    "missDefinition": "interval greater than 1.5 times that run's observed median callback interval",
+    "renderWorkTiming": "not measured"
+  },
+  "startup": {
+    "candidate": {
+      "coldFirstReadyMs": [185.076917, 141.819167],
+      "coldFirstReadyMeanMs": 163.448042,
+      "warmEntryMs": [86.121416, 83.18025],
+      "warmEntryMeanMs": 84.650833,
+      "domContentLoadedMs": [106.1, 73.5],
+      "loadEventMs": [120, 83.7]
+    },
+    "acceptedBaseline": {
+      "revision": "e4e23a9",
+      "workspace": "planner",
+      "coldReadyMs": 49.268125,
+      "domContentLoadedMs": 32.6,
+      "loadEventMs": 36.6,
+      "note": "Clean archived snapshot, fresh context, 2D planner; this is a smaller prior front door rather than a 3D feature-equivalent workload."
+    },
+    "comparison": {
+      "candidateColdMeanMinusBaselineMs": 114.179917,
+      "candidateColdMeanMultiple": 3.3178
+    }
+  },
+  "loadedResources": {
+    "candidateCold": {
+      "entriesIncludingDocument": 85,
+      "transferBytesIncludingDocument": 1575758,
+      "encodedBodyBytesIncludingDocument": 1550258,
+      "decodedBodyBytesIncludingDocument": 1550258,
+      "packagedRuntime": { "files": 91, "bytes": 1574087 }
+    },
+    "acceptedBaselineCold": {
+      "entriesIncludingDocument": 28,
+      "encodedBodyBytesIncludingDocument": 219529,
+      "resourceTransferBytesExcludingDocument": 208892,
+      "documentBodyBytes": 18737
+    },
+    "note": "Browser resource timing reports loaded entries; packaged runtime totals include files not fetched on this startup path."
+  },
+  "callbackCadence": {
+    "run1": { "callbacks": 3357, "observedCadenceMs": 8.3, "medianMs": 8.3, "p95Ms": 16.6, "p99Ms": 16.9, "missThresholdMs": 12.45, "missedCallbacks": 245, "missProportion": 0.073003576, "maxMs": 17.6 },
+    "run2": { "callbacks": 3354, "observedCadenceMs": 8.3, "medianMs": 8.3, "p95Ms": 16.6, "p99Ms": 17, "missThresholdMs": 12.45, "missedCallbacks": 248, "missProportion": 0.073963615, "maxMs": 17.6 },
+    "twoRunSummary": { "medianMs": 8.3, "p95Ms": 16.6, "p99RangeMs": [16.9, 17], "missProportionRange": [0.073003576, 0.073963615], "meanMissProportion": 0.073483595 }
+  },
+  "renderer": {
+    "vendor": "Google Inc. (Google)",
+    "renderer": "ANGLE Vulkan SwiftShader Device",
+    "note": "Software renderer; results do not represent physical GPU throughput.",
+    "canvas": { "cssWidth": 1069.609375, "cssHeight": 508.78125, "bufferWidth": 1070, "bufferHeight": 509, "effectiveDevicePixelRatio": 1 },
+    "steadyResourcesBothRuns": { "geometries": 43, "textures": 17, "programs": 10, "drawCalls": 57, "triangles": 8830, "lines": 113, "points": 0 }
+  },
+  "workloadChecks": { "visibilityState": "visible", "view": "3d", "shots": 8, "loop": true, "playingAtEnd": true, "completedLoopIterationsPerRun": 3 },
+  "excluded": { "concurrentExploratoryPasses": 1, "reason": "Other browser automation was active; excluded from all reported distributions and summaries." },
+  "limitations": [
+    "Callback cadence measures browser scheduling callbacks, not displayed frames or physical display refresh.",
+    "Headless SwiftShader and the prior 2D planner baseline limit hardware and direct feature-to-feature conclusions.",
+    "Cold timing varies between runs; both observations are retained rather than selecting the faster result."
+  ]
+}

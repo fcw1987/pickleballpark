@@ -1,0 +1,31 @@
+{
+  "conditions": "Controlled Chromium DPR3, pixel-ratio override only, 120 rally samples, CPU command submission. Not GPU completion or physical-device timing.",
+  "result": [
+    {
+      "ratio": 2,
+      "buffer": [
+        756,
+        1374
+      ],
+      "median": 0.20000001788139343,
+      "p95": 0.5,
+      "memory": {
+        "geometries": 44,
+        "textures": 19
+      }
+    },
+    {
+      "ratio": 3,
+      "buffer": [
+        1134,
+        2061
+      ],
+      "median": 0.20000001788139343,
+      "p95": 0.30000001192092896,
+      "memory": {
+        "geometries": 44,
+        "textures": 19
+      }
+    }
+  ]
+}

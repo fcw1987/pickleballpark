@@ -1,0 +1,26 @@
+{"binary":"/Users/fdub/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-aHh3VZ/runtime/bin/node","argv":["--test","tests/overhead-contact-compatibility.unit.mjs","tests/stroke-instruction.unit.mjs"],"cwd":"/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes","node":"v24.19.0","v8":"13.6.233.17-node.51","arch":"arm64","platform":"darwin","binarySha256":"613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2","sourceDigestSha256":"662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e","exitCode":0}
+
+STDOUT
+✔ existing overhead/short-hop source imports losslessly and its semantic conflict is reported by rule evaluation (3.2885ms)
+✔ ordinary automatic, forehand and backhand overheads retain exact contacts and bounded rendered limbs for both hands (202.849209ms)
+✔ builder-created and imported overhead/short-hop combinations meet their unchanged high contact with either hand and lateral placement (45.062125ms)
+✔ legacy combination keeps compiled Play, event arrays, sampled ball trajectory and default 2D presentation byte-for-byte unchanged (4.786ms)
+✔ a support shoe remains world-fixed while approach steps continue during stroke preparation (44.258125ms)
+✔ both soles remain grounded and fixed throughout the planted contact window for either hand (31.826916ms)
+✔ forehand and backhand contact occupy opposite lateral sides and mirror with physical handedness (33.5165ms)
+✔ the paddle passes contact with a coherent nonzero tangent and lob has a controlled upward face (8.763166ms)
+✔ fixed-length arm IK stays within reach through low balls, lobs, overheads and recovery (357.192875ms)
+✔ all rendered actors remain continuous across adjacent rally segments, including off hands and readiness (30.76075ms)
+✔ rendered thigh and shin lengths remain fixed while stepping and deeply loading low shots (350.708083ms)
+✔ default shared presentation retains frozen 2D positions, facing, action, planting and timing (11.753542ms)
+✔ a complete generated 99-hit rally keeps both handed rigs finite, in reach and exactly on every contact (439.894625ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1359.513375
+
+STDERR

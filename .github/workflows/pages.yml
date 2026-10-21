@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Full 40-character commit SHA currently at main
+        description: Full 40-character SHA currently at main with successful Quality checks
         required: true
         type: string
+  workflow_run:
+    workflows: [Quality]
+    branches: [main]
+    types: [completed]
 
 permissions:
   actions: read
@@ -18,49 +22,42 @@ concurrency:
 
 jobs:
   select-artifact:
-    name: Select verified artifact
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    name: Select verified main artifact
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
-      quality_run_id: ${{ steps.quality.outputs.run_id }}
+      commit_sha: ${{ steps.selection.outputs.commit_sha }}
+      quality_run_id: ${{ steps.selection.outputs.quality_run_id }}
+      artifact_id: ${{ steps.selection.outputs.artifact_id }}
+      artifact_digest: ${{ steps.selection.outputs.artifact_digest }}
     steps:
-      - name: Check out requested commit
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check out trusted main selection code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha }}
-          fetch-depth: 0
-      - name: Require the current main commit
-        env:
-          COMMIT_SHA: ${{ inputs.commit_sha }}
-        run: |
-          if ! printf '%s' "$COMMIT_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
-            echo 'commit_sha must be a lowercase, full 40-character SHA' >&2
-            exit 1
-          fi
-          git fetch --no-tags origin main:refs/remotes/origin/main
-          test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
-          test "$(git rev-parse origin/main)" = "$COMMIT_SHA"
-          git merge-base --is-ancestor "$COMMIT_SHA" origin/main
-      - name: Find the successful main push quality run
-        id: quality
+          ref: main
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Select current-main push run with all required jobs and immutable artifact
+        id: selection
         env:
           GH_TOKEN: ${{ github.token }}
-          COMMIT_SHA: ${{ inputs.commit_sha }}
-        run: |
-          run_id="$(gh api -X GET "repos/${GITHUB_REPOSITORY}/actions/workflows/quality.yml/runs" \
-            -f branch=main -f event=push -f status=success -f head_sha="$COMMIT_SHA" -f per_page=20 \
-            --jq '[.workflow_runs[] | select(.head_sha == env.COMMIT_SHA and .event == "push" and .head_branch == "main" and .conclusion == "success")][0].id // empty')"
-          if ! printf '%s' "$run_id" | grep -Eq '^[0-9]+$'; then
-            echo 'No successful Quality push run exists for the requested main commit' >&2
-            exit 1
-          fi
-          printf 'run_id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+        run: node tools/select-pages-artifact.mjs
 
   deploy:
     name: Deploy exact verified artifact
     needs: select-artifact
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
       name: github-pages
@@ -71,48 +68,47 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - name: Check out the exact trusted validation code
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check out exact trusted validation source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit_sha }}
-      - name: Reconfirm current main
-        env:
-          GH_TOKEN: ${{ github.token }}
-          COMMIT_SHA: ${{ inputs.commit_sha }}
-        run: |
-          current="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha)"
-          test "$current" = "$COMMIT_SHA"
-      - name: Download the verified Pages artifact
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+          ref: ${{ needs.select-artifact.outputs.commit_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Download the selected verified Pages artifact by immutable ID
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ needs.select-artifact.outputs.quality_run_id }}
-          name: github-pages
+          artifact-ids: ${{ needs.select-artifact.outputs.artifact_id }}
+          digest-mismatch: error
           path: verified-artifact
-      - name: Validate artifact identity and manifest digest
+      - name: Validate archive safety and exact commit-derived runtime bytes
         env:
-          COMMIT_SHA: ${{ inputs.commit_sha }}
+          COMMIT_SHA: ${{ needs.select-artifact.outputs.commit_sha }}
         run: |
-          test -f verified-artifact/artifact.tar
-          mkdir verified-contents
-          if tar -tf verified-artifact/artifact.tar | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
-            echo 'Artifact contains an unsafe path' >&2
-            exit 1
-          fi
-          if tar -tvf verified-artifact/artifact.tar | grep -Eq '^[^-d]'; then
-            echo 'Artifact contains a link or nonregular entry' >&2
-            exit 1
-          fi
-          tar -xf verified-artifact/artifact.tar -C verified-contents
-          node tools/verify-deployment-artifact.mjs verified-contents "$COMMIT_SHA"
-      - name: Re-upload the unchanged verified artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+          node tools/extract-pages-artifact.mjs verified-artifact/artifact.tar verified-contents
+          node tools/verify-deployment-artifact.mjs verified-contents "$COMMIT_SHA" --require-clean
+      - name: Re-upload the unchanged verified tar
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: github-pages
           path: verified-artifact/artifact.tar
           if-no-files-found: error
           retention-days: 7
+      - name: Reconfirm current main, required jobs and original artifact identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ needs.select-artifact.outputs.commit_sha }}
+          QUALITY_RUN_ID: ${{ needs.select-artifact.outputs.quality_run_id }}
+          PAGES_ARTIFACT_ID: ${{ needs.select-artifact.outputs.artifact_id }}
+          PAGES_ARTIFACT_DIGEST: ${{ needs.select-artifact.outputs.artifact_digest }}
+        run: node tools/select-pages-artifact.mjs --confirm
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

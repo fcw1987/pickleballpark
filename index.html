@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#304762">
-    <meta name="description" content="Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and spatial replay in one original pixel art park.">
-    <title>Pickleball Park - Pickleball Court Planner</title>
+    <meta name="description" content="Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and spatial replay in an original rounded village court.">
+    <title>Pickleball Park - Build a Play</title>
     <script src="visual-theme.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
@@ -14,24 +14,24 @@
     <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180.png">
     <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-152x152.png">
-</head>
+<link rel="stylesheet" href="builder-ui.css"><link rel="stylesheet" href="builder-integration.css"><link rel="stylesheet" href="shot-timeline.css"></head>
 <body>
     <div class="app">
-        <div class="world-label" aria-label="Pickleball Park court planner"><strong>Pickleball Park</strong><span>Court planner</span></div>
-        <!-- Floating Action Button: Hamburger Menu -->
-        <button id="menuToggle" class="fab fab-menu" aria-label="Open menu" aria-controls="menuOverlay" aria-expanded="false">
+        <main class="court-container-fullscreen">
+        <div id="parkStage" class="park-stage">
+        <h1 class="park-banner"><img src="assets/park/banner.png" alt="Pickleball Park"></h1>
+        <button id="menuToggle" class="park-control park-menu" aria-label="Open menu" aria-controls="menuOverlay" aria-expanded="false">
             <span class="hamburger-icon">
                 <span></span>
                 <span></span>
                 <span></span>
-            </span>
+            </span><span class="control-label">Menu</span>
         </button>
 
         <!-- Floating Action Button: Info -->
-        <button id="infoToggle" class="fab fab-info" aria-label="Open help and information" aria-controls="infoModal">?</button>
+        <button id="infoToggle" class="park-control park-help" aria-label="Open help and information" aria-controls="infoModal"><span class="help-icon" aria-hidden="true">?</span><span class="control-label" aria-hidden="true">Help</span></button>
 
         <!-- Full-Screen Court Container -->
-        <main class="court-container-fullscreen">
             <svg id="court" class="court-svg" viewBox="-13 -11 47 60" preserveAspectRatio="xMidYMid meet">
                 <defs>
                     <linearGradient id="slabFace" x1="0" y1="0" x2="0" y2="1">
@@ -95,7 +95,7 @@
                 <circle id="player4-touch" class="touch-target" cx="15" cy="45" r="2.0" data-type="player" data-target="player4"/>
                 <circle id="ball-touch" class="touch-target" cx="19" cy="45" r="1.5" data-type="ball" data-target="ball"/>
                 </g>
-            </svg>
+            </svg></div>
         </main>
 
         <!-- Compact Guided Play controls -->
@@ -110,8 +110,8 @@
                 <span id="playShotCue" class="shot-cue" hidden></span>
             </div>
             <div class="playback-buttons">
-                <div class="transport-primary"><button id="playPrevious" type="button" aria-label="Previous step">Previous</button><button id="playPlayPause" class="transport-play" type="button" aria-pressed="false">Play</button><button id="playNext" type="button" aria-label="Next step">Next</button></div>
-                <div class="transport-secondary"><button id="playRestart" type="button">Restart</button><button id="playLoop" type="button" aria-pressed="false">Loop</button><label class="play-rate">Speed<select id="playRate"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25×</option></select></label><button id="play3dView" type="button">3D View</button><button id="playExit" type="button">Exit</button></div>
+                <div class="transport-primary"><button id="playPlayPause" class="transport-play" type="button" aria-label="Play rally" aria-pressed="false">▶</button><div id="playTimelineMount" class="shot-timeline-mount"></div></div>
+                <div class="transport-secondary"><details class="playback-options"><summary>Playback</summary><label class="play-rate">Speed<select id="playRate"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25×</option></select></label></details><button id="play3dView" type="button">3D View</button><button id="playExit" type="button">Exit</button></div>
             </div>
             <p id="threeDLoadStatus" class="three-d-load-status" role="status" aria-live="polite" hidden></p>
         </section>
@@ -121,17 +121,22 @@
         <section id="threeDViewer" class="three-d-viewer" aria-label="3D Play playback" hidden>
             <div id="threeDCanvas" class="three-d-canvas" aria-label="Three-dimensional pickleball court"></div>
             <div class="three-d-hud">
-                <div class="three-d-copy">
-                    <strong id="threeDTitle">3D Play</strong>
-                    <span id="threeDStatus">Ready</span>
-                    <span id="threeDProgress" class="three-d-progress"></span>
-                    <strong id="threeDStepLabel" class="three-d-step-label"></strong>
-                    <span id="threeDDescription" class="three-d-description"></span>
-                    <span id="threeDShotCue" class="shot-cue" hidden></span>
-                </div>
+                <details class="three-d-copy">
+                    <summary class="three-d-lesson-summary" aria-label="Shot details">
+                        <strong id="threeDTitle">3D Play</strong>
+                        <strong id="threeDStepLabel" class="three-d-step-label"></strong>
+                        <span class="three-d-notes-hint" aria-hidden="true">Shot details</span>
+                    </summary>
+                    <div class="three-d-lesson-notes">
+                        <span id="threeDStatus">Ready</span>
+                        <span id="threeDProgress" class="three-d-progress"></span>
+                        <span id="threeDDescription" class="three-d-description"></span>
+                        <span id="threeDShotCue" class="shot-cue" hidden></span>
+                    </div>
+                </details>
                 <div class="three-d-controls">
-                    <div class="transport-primary"><button id="threeDPrevious" type="button">Previous</button><button id="threeDPlayPause" class="transport-play" type="button" aria-pressed="false">Play</button><button id="threeDNext" type="button">Next</button></div>
-                    <div class="transport-secondary"><button id="threeDRestart" type="button">Restart</button><button id="threeDLoop" type="button" aria-pressed="false">Loop</button><label>Camera
+                    <div class="transport-primary"><button id="threeDPlayPause" class="transport-play" type="button" aria-label="Play rally" aria-pressed="false">▶</button><div id="threeDTimelineMount" class="shot-timeline-mount"></div></div>
+                    <div class="transport-secondary"><details class="playback-options"><summary>View</summary><label>Camera
                         <select id="threeDCamera">
                             <option value="overhead">Overhead 3D</option>
                             <option value="sideline">Sideline</option>
@@ -145,7 +150,7 @@
                             <option value="0.5">0.5×</option>
                             <option value="0.25">0.25×</option>
                         </select>
-                    </label>
+                    </label></details>
                     <button id="threeDExit" type="button">Exit 3D</button></div>
                 </div>
             </div>
@@ -215,6 +220,15 @@
                     <button id="infoClose" class="close-btn">×</button>
                 </div>
                 <div class="modal-body">
+<section><h2>Build a Play</h2><p>Choose a shot chapter, then Edit to change its hitter, flight or landing target. Drag the paused target, choose Place target for a tap, or open Customize to choose Target, Flight, Players, Movement, Coach tools or Precision. Undo and Redo stay beside Play in the builder footer, with Command/Control-Z available outside text fields. Space toggles Play/Pause when focus is outside other controls. Coach explains rule or movement limits. Fix for me evaluates a repair using automatic settings; Show options lists changes that need your approval. Smart Add creates a compatible continuation without changing earlier shots. Random Rally creates a new saved draft with the requested number of hits, up to 99.</p><p>Play resumes the current position and repeats until you choose Pause. Seek to any moment on the timeline or choose an exact shot chapter. Opening Edit pauses playback. 2D and 3D share one draft and playhead.</p><p>Menu contains saved plays, lessons, import/export and Court Planner. Manage plays contains the play name, My Plays and Save As. Planner keeps a separate arrangement; Use as starting layout explicitly copies it. Completed edits save on this device. If another tab changed the same play, use Save As to keep both versions. Export JSON for a backup: local storage can be cleared by the browser and is not cloud storage.</p><p>Auto Shading adjusts eligible generated movement. Coverage Guides only explain suggested positions. These are coaching approximations, not optimal-strategy predictions.</p></section>
+                    <section id="buildDiagnostics" class="info-section build-diagnostics">
+                        <h3 tabindex="-1">Build diagnostics</h3>
+                        <p data-running-build></p>
+                        <p>Running build is the metadata loaded with this page. Check server build compares it with the current endpoint; it does not update this tab.</p>
+                        <div class="build-diagnostic-actions"><button type="button" data-check-server>Check server build</button><button type="button" data-copy-build>Copy diagnostics</button></div>
+                        <p role="status" aria-live="polite"></p>
+                        <details><summary>Diagnostic details</summary><pre tabindex="0" aria-label="Build diagnostic text"></pre></details>
+                    </section>
                     <!-- Instructions -->
                     <section class="info-section">
                         <h3>How to Use</h3>
@@ -232,16 +246,16 @@
                     
                     <section class="info-section">
                         <h3>Plays</h3>
-                        <p>Plays demonstrate common patterns rather than mandatory strategy. Choose one from the menu, then use Previous, Play/Pause, Next, Restart, or Exit to study it.</p>
-                        <p>While a Play is open, choose 3D View for a spatial replay. Use Previous/Next to inspect contacts, switch cameras, use Play/Pause or Restart, choose a playback speed, and Exit 3D to return to the same 2D Play.</p>
+                        <p>Plays demonstrate common patterns rather than mandatory strategy. Choose one from the menu, then use Play/Pause and the shot-marked timeline to study it. Playback repeats until paused.</p>
+                        <p>While a Play is open, choose 3D View for a spatial replay. Seek or choose shot chapters to inspect contacts, switch cameras, choose a playback speed, and Exit 3D to return to the same shared playhead.</p>
                     </section>
 
                     <!-- Court Information -->
                     <section class="info-section">
                         <h3>Court Layout</h3>
                         <ul>
-                            <li>Grey area: Non-volley zone (Kitchen)</li>
-                            <li>Navy blue area: Service boxes</li>
+                            <li>Pale green area: Non-volley zone (Kitchen)</li>
+                            <li>Teal area: Service boxes</li>
                             <li>Net runs through the center</li>
                             <li>Court is 44' x 20' regulation size</li>
                             <li>Players/ball can move outside court boundaries</li>
@@ -262,15 +276,15 @@
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot ball"></div>
-                                <span>Ball (Neon Green)</span>
+                                <span>Ball (pale yellow with a navy outline)</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot kitchen"></div>
-                                <span>Non-Volley Zone (Grey)</span>
+                                <span>Non-Volley Zone (Pale Green)</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot service-box"></div>
-                                <span>Service Boxes (Navy Blue)</span>
+                                <span>Service Boxes (Teal)</span>
                             </div>
                         </div>
                     </section>
@@ -284,5 +298,5 @@
     <script type="module" src="script.js"></script>
     <script type="module" src="coaching-ui.js"></script>
     <script src="three-d-loader.js"></script>
-</body>
+<script type="module" src="play-builder.js"></script></body>
 </html>

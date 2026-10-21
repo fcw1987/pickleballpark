@@ -1,0 +1,12 @@
+{
+  "seeds": 32,
+  "stepsPerSeed": 500,
+  "totalMutations": 12487,
+  "totalUndos": 3165,
+  "totalRedos": 348,
+  "persistenceChecks": 1248,
+  "nearLimitShots": 64,
+  "retainedWaypointCount": 2,
+  "quotaAtomic": true,
+  "staleRevisionConflict": true
+}

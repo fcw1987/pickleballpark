@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { inflateSync } from 'node:zlib';
 
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-const GENERATORS = ['generate-replay-art.mjs', 'generate-art.mjs', 'generate-park-art.mjs'];
+const GENERATORS = ['generate-replay-art.mjs', 'generate-art.mjs', 'generate-park-art.mjs', 'generate-menu-font.mjs'];
 
 const crc32 = (buffer) => {
   let crc = 0xffffffff;

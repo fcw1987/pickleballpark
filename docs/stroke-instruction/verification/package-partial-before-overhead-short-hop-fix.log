@@ -1,0 +1,10 @@
+node:internal/modules/run_main:115
+    triggerUncaughtException(
+    ^
+
+page.evaluate: Target page, context or browser has been closed
+    at /Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tools/verify-package.mjs:371:39 {
+  log: []
+}
+
+Node.js v22.4.0

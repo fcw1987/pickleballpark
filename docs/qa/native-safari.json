@@ -1,0 +1,107 @@
+{
+  "browser": "Native macOS Safari 27, controlled through the application UI and Web Inspector",
+  "physicalMobile": false,
+  "isolatedWindow": true,
+  "origins": [
+    "http://localhost:4173/",
+    "http://127.0.0.1:4184/"
+  ],
+  "helpBeforeFix": {
+    "visibleChecks": "Paused court, Menu, Help open/close rendered on both origins",
+    "controlledProbeRounds": 24,
+    "samples": 51,
+    "contextLosses": 0,
+    "errors": [],
+    "final": {
+      "frame": 108,
+      "geometry": 43,
+      "textures": 17,
+      "canvases": 1,
+      "pendingRendererFrame": false,
+      "playing": false
+    }
+  },
+  "parkedContextBefore": {
+    "runtime": "d669348 renderer",
+    "mechanism": "Switch to 2D; induce real WEBGL_lose_context on retained renderer; wait for contextlost; reopen 3D",
+    "view": "3d",
+    "active": true,
+    "sameRenderer": true,
+    "originalConnected": true,
+    "contextLost": true,
+    "canvases": 1,
+    "sourcePreserved": true,
+    "ok": false,
+    "visual": "Court and athletes absent; target and application controls still visible"
+  },
+  "parkedContextAfter": {
+    "fix": "572c561",
+    "view": "3d",
+    "active": true,
+    "sameRenderer": false,
+    "originalConnected": false,
+    "contextLost": false,
+    "canvases": 1,
+    "sourcePreserved": true,
+    "ok": true,
+    "diagnosticWarning": "Three.js disposal attempted forceContextLoss on an already lost context; its extension was then unavailable"
+  },
+  "helpAfterRecovery": {
+    "controlledProbeRounds": 48,
+    "samples": 99,
+    "viewSwitchPairs": 16,
+    "seeks": 48,
+    "contextLosses": 0,
+    "errors": [],
+    "final": {
+      "frame": 212,
+      "geometry": 43,
+      "textures": 17,
+      "canvases": 1,
+      "pendingRendererFrame": false,
+      "playing": false,
+      "elapsed": 1.122136874713284
+    },
+    "visual": "Rendered court, athletes, ball and target inspected after recovery and all repeated Help transitions"
+  },
+  "limits": [
+    "The historical Help-only blank observation has not been causally connected to parked context loss. Its spontaneous cause is not claimed resolved by this evidence alone.",
+    "Controlled probes are distinct from visible-interface journeys; they use application methods and the real WebGL loss extension.",
+    "Native screenshots were inspected in the tool transcript; no personal browser windows, clipboard content or account data were stored in repository evidence.",
+    "The first local probe import failed because .mjs was served as application/octet-stream. The probe was renamed .js, and subsequent imports executed. This was a QA helper MIME issue, not a product error.",
+    "Some native UI actions returned before the accessibility state settled. A later observation established console execution; no Safari settings or security permissions were changed."
+  ],
+  "visibleCloseAndBackground": {
+    "source": "977f290 (runtime unchanged from prior fixes)",
+    "pendingTitleClose": "Menu > Rename play; type Native close pending title; Cmd-W while field remains focused and status says Editing; new owned window at same origin reloads exact title",
+    "helpDuringPlayback": "Visible Play > Menu > Help > Close; court, four athletes, outlined ball and target remain rendered; paused at final Drop chapter",
+    "backgroundReturn": "Open disposable second tab then close it; same paused time 3.78252 and rendered court retained",
+    "automationLimit": "Native about:blank entry was autocompleted to a public page; that owned test tab was closed. No interaction with that page or other user tabs."
+  },
+  "finalPackagedCheck": {
+    "packageRevision": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "runtimeRevision": "c4e88626846b0bbcd227e077dbe7b384c11543ec",
+    "origin": "http://127.0.0.1:4173/",
+    "visiblePath": "Play > Menu > Help > Close, preserved Fifth Shot Drop Copy, paused at2.924202s, complete court/athletes/ball visible",
+    "loadedRuntimeProof": {
+      "caches": [
+        "pickleboard-static-v21"
+      ],
+      "sourceIntent": 0,
+      "lossHandlerContainsOwnedCanvasGuard": true
+    },
+    "inspector": "Console evaluated successfully; Inspector closed afterward; owned window left at paused court"
+  },
+  "finalV22Package": {
+    "runtime": "e0177cc706e316a8011db348deed133fcaf3ec47",
+    "packageMetadata": "89d4b4c7455de9c4af339e663b969f58ccc89ef7",
+    "origin": "http://127.0.0.1:4173",
+    "cache": "pickleboard-static-v22",
+    "loadedPauseGuard": true,
+    "preservedSavedPlay": "Fifth Shot Drop Copy",
+    "visibleJourney": "Reload paused; Play, Menu, Help, Close; visible full 3D court; Play, Pause; timeline stayed at 0.5799788 while auxiliary tab closed",
+    "helpBlankReproduced": false,
+    "historicalHelpOnlyCauseEstablished": false,
+    "method": "Native Safari through CUA; Inspector version proof, visible AX controls and screenshot inspection; no user storage cleared"
+  }
+}

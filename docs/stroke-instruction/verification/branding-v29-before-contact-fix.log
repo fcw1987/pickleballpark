@@ -1,0 +1,13 @@
+
+Running 9 tests using 1 worker
+
+[1/9] [chromium] › tests/builder-smart-interface.spec.mjs:19:3 › smart rally builder interface › keeps the title clean and puts routine file work under Manage plays
+[2/9] [chromium] › tests/builder-smart-interface.spec.mjs:30:3 › smart rally builder interface › uses a semantic shot family picker and does not open it with Customize
+[3/9] [chromium] › tests/builder-smart-interface.spec.mjs:42:3 › smart rally builder interface › exposes structural shot actions beside the selected shot
+[4/9] [chromium] › tests/builder-smart-interface.spec.mjs:52:3 › smart rally builder interface › keeps Chrome playback options open while a native select changes
+[5/9] [chromium] › tests/rebrand.spec.mjs:3:1 › publishes Pickleboard metadata and visible identity
+[6/9] [chromium] › tests/rebrand.spec.mjs:23:1 › keeps the legacy theme and public API compatible across the rebrand
+[7/9] [chromium] › tests/rebrand.spec.mjs:40:3 › full brand remains readable at 200% text size in 320px viewport
+[8/9] [chromium] › tests/rebrand.spec.mjs:40:3 › full brand remains readable at 200% text size in 390px viewport
+[9/9] [chromium] › tests/rebrand.spec.mjs:40:3 › full brand remains readable at 200% text size in 768px viewport
+  9 passed (2.2s)

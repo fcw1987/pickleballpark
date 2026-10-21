@@ -1,0 +1,32 @@
+{
+  "engine": "Playwright WebKit headless",
+  "result": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "renderer": {
+        "geometries": 43,
+        "textures": 14
+      },
+      "drawCalls": 53,
+      "triangles": 8822,
+      "webgl": "WebGL 2.0"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "renderer": {
+        "geometries": 43,
+        "textures": 14
+      },
+      "drawCalls": 53,
+      "triangles": 8822,
+      "webgl": "WebGL 2.0"
+    }
+  ],
+  "errors": []
+}

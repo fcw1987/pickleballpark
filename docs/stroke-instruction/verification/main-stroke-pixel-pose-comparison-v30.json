@@ -1,0 +1,232 @@
+{
+  "baselineDigest": "1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6",
+  "finalDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "sameCurrentHarness": true,
+  "core": [
+    {
+      "id": "forehand-drive-right",
+      "frames": [
+        {
+          "offset": -0.46,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.32,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.23,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.14,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.07,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.07,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.15,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.27,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.44,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        }
+      ],
+      "allPixelsEqual": true,
+      "allPosesEqual": true
+    },
+    {
+      "id": "backhand-drive-right",
+      "frames": [
+        {
+          "offset": -0.46,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.32,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.23,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.14,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.07,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.07,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.15,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.27,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.44,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        }
+      ],
+      "allPixelsEqual": true,
+      "allPosesEqual": true
+    },
+    {
+      "id": "lob-right",
+      "frames": [
+        {
+          "offset": -0.46,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.32,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.23,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.14,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": -0.07,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.07,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.15,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.27,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        },
+        {
+          "offset": 0.44,
+          "samePixels": true,
+          "samePose": true,
+          "maxPixelChannelDifference": 0
+        }
+      ],
+      "allPixelsEqual": true,
+      "allPosesEqual": true
+    }
+  ],
+  "edges": [
+    {
+      "id": "overhead-short-hop-right",
+      "sameAuthoringDocument": true,
+      "sameCompiledPlay": true,
+      "sameTimelineEvents": true,
+      "sameBallSamples": true,
+      "beforeContactErrorMeters": 0.2204778222677905,
+      "afterContactErrorMeters": 4.965068306494546e-16,
+      "actualBeforeHand": "right",
+      "actualAfterHand": "right"
+    },
+    {
+      "id": "overhead-short-hop-left",
+      "sameAuthoringDocument": true,
+      "sameCompiledPlay": true,
+      "sameTimelineEvents": true,
+      "sameBallSamples": true,
+      "beforeContactErrorMeters": 0.22047782226779045,
+      "afterContactErrorMeters": 4.965068306494546e-16,
+      "actualBeforeHand": "left",
+      "actualAfterHand": "left"
+    }
+  ]
+}

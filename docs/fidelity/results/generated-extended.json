@@ -1,0 +1,98 @@
+{
+  "seeds": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    13,
+    324508639,
+    610839776,
+    826366246,
+    2654435769,
+    3735928559,
+    4294967295
+  ],
+  "lengths": [
+    1,
+    2,
+    8,
+    31,
+    64
+  ],
+  "validDocuments": 446,
+  "validShots": 9435,
+  "pairwiseRows": 446,
+  "pairwiseDimensionPairs": 446,
+  "invalidDocuments": 24,
+  "invalidByExpected": {
+    "validation": 17,
+    "rule": 6,
+    "feasibility": 1
+  },
+  "sampledBoundaryPoints": 77873,
+  "guidedCoverageRecords": 4744,
+  "observed": {
+    "lengths": [
+      1,
+      2,
+      31,
+      64,
+      8
+    ],
+    "hitterPairs": [
+      "player1/player3",
+      "player1/player4",
+      "player1/single",
+      "player2/player3",
+      "player2/player4",
+      "player2/single"
+    ],
+    "regions": [
+      1,
+      10,
+      15,
+      19,
+      5
+    ],
+    "families": [
+      "dink",
+      "drive",
+      "drop",
+      "lob",
+      "overhead",
+      "reset",
+      "return",
+      "volley"
+    ],
+    "contactStyles": [
+      "auto",
+      "backhand",
+      "forehand",
+      "short-hop"
+    ],
+    "movementIntents": [
+      "advance",
+      "hold",
+      "manual",
+      "recover"
+    ],
+    "assistanceModes": [
+      "false/false",
+      "false/true",
+      "true/false",
+      "true/true"
+    ],
+    "shadeTeams": [
+      "both",
+      "green",
+      "orange"
+    ],
+    "handPatterns": [
+      "LLLL",
+      "LRRL",
+      "RLLR",
+      "RRRR"
+    ]
+  }
+}

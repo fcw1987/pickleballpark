@@ -1,0 +1,10 @@
+{
+  "durationSeconds": 10.48,
+  "captureFramesPerSecond": 25,
+  "sampledEverySeconds": 0.5,
+  "frames": 21,
+  "sheets": 4,
+  "method": "Installed Playwright FFmpeg decoding; capture rate is not runtime FPS.",
+  "runtimeCheckpoint": "2f9d4763a2412bc4162b8d3df6542571ddfbed4e",
+  "continuationNote": "Final 634bc6b adds text-enlargement control stacking and actual control reservation; final viewport matrix and zoom evidence were recaptured there."
+}

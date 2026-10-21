@@ -10,7 +10,7 @@ test('capture deterministic Fifth Shot Drop contact neighborhoods', async ({ pag
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
   await page.locator('#play3dView').click();
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
-  await page.locator('#threeDCamera').selectOption('sideline');
+  await page.locator('#threeDCamera').selectOption('sideline',{force:true});
 
   const records = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;

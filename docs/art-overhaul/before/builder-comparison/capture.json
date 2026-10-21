@@ -1,0 +1,533 @@
+{
+  "base": "http://127.0.0.1:4174",
+  "revision": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+  "runtimeDigest": "d638da4f8ece2cbf1b056c93cda93e7bacab3bab3543ef6bc2b2cff2fb4d8b4c",
+  "workingChanges": "?? docs/SMART_RALLY_REPORT.md\n",
+  "errors": [],
+  "metrics": [
+    {
+      "screen": [
+        1440,
+        900
+      ],
+      "state": {
+        "active": true,
+        "loop": true,
+        "holding": false,
+        "iteration": 0,
+        "playing": false,
+        "elapsed": 2.8001506910234375,
+        "playbackRate": 1,
+        "camera": "overhead",
+        "playId": "third-shot-drop",
+        "playerCount": 4,
+        "hasBall": true,
+        "renderLoopCount": 5,
+        "pixelScale": 1,
+        "framing": {
+          "aspect": 1.6,
+          "usableAspect": 1.9240083507306889,
+          "reservedPixels": 151.5625,
+          "distanceScale": 1.3478089098895618,
+          "position": [
+            7.4129490043925905,
+            16.051973800213396,
+            12.804184643950839
+          ],
+          "target": [
+            0,
+            0.35,
+            0
+          ]
+        },
+        "lastState": {
+          "x": 1.34112,
+          "y": 0.67056,
+          "z": -4.572,
+          "board": {
+            "x": 14.4,
+            "y": 7
+          },
+          "phase": "contact",
+          "launched": true,
+          "rallyLeg": 3,
+          "time": 2.8001506910234375,
+          "elapsed": 2.8001506910234375,
+          "stepIndex": 3
+        }
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 21
+      },
+      "drawCalls": 57,
+      "triangles": 8830,
+      "actors": [
+        {
+          "id": "player1",
+          "position": [
+            1.7522786318314503,
+            0,
+            -4.761072947484536
+          ],
+          "animation": {
+            "playerId": "player1",
+            "worldPosition": {
+              "x": 1.7522786318314503,
+              "y": 0,
+              "z": -4.761072947484536
+            },
+            "bodyFacing": {
+              "x": -0.34700888179205436,
+              "z": 0.9378618426812279
+            },
+            "viewDirection": "front-left",
+            "action": "drop",
+            "phase": "contact",
+            "frameIndex": 2,
+            "locomotionFrame": null,
+            "planted": true,
+            "handedness": "right",
+            "artFamily": "green",
+            "artAction": "drop",
+            "shotType": "drop",
+            "strokeSide": "forehand",
+            "strokeIntensity": 0.52,
+            "atlasKey": "green/right/front-left/drop/contact",
+            "paddle": {
+              "anchorId": "right-paddle-face",
+              "worldContactTarget": {
+                "x": 1.34112,
+                "y": 0.67056,
+                "z": -4.572
+              }
+            },
+            "frame": "drop-contact"
+          },
+          "paddleError": 1.1102230246251565e-16
+        },
+        {
+          "id": "player2",
+          "position": [
+            -1.524,
+            0,
+            -6.096
+          ],
+          "animation": {
+            "playerId": "player2",
+            "worldPosition": {
+              "x": -1.524,
+              "y": 0,
+              "z": -6.096
+            },
+            "bodyFacing": {
+              "x": 0,
+              "z": 1
+            },
+            "viewDirection": "front-left",
+            "action": "ready",
+            "phase": "ready",
+            "frameIndex": 0,
+            "locomotionFrame": null,
+            "planted": true,
+            "handedness": "right",
+            "artFamily": "green",
+            "artAction": "ready",
+            "shotType": null,
+            "strokeSide": null,
+            "strokeIntensity": 0,
+            "atlasKey": "green/right/front-left/ready/ready",
+            "paddle": {
+              "anchorId": "right-paddle-face",
+              "worldContactTarget": null
+            },
+            "frame": "ready"
+          },
+          "paddleError": 3.7386340423067606
+        },
+        {
+          "id": "player3",
+          "position": [
+            -1.524,
+            0,
+            2.7432000000000003
+          ],
+          "animation": {
+            "playerId": "player3",
+            "worldPosition": {
+              "x": -1.524,
+              "y": 0,
+              "z": 2.7432000000000003
+            },
+            "bodyFacing": {
+              "x": 0,
+              "z": -1
+            },
+            "viewDirection": "back-right",
+            "action": "ready",
+            "phase": "ready",
+            "frameIndex": 0,
+            "locomotionFrame": null,
+            "planted": true,
+            "handedness": "right",
+            "artFamily": "green",
+            "artAction": "ready",
+            "shotType": null,
+            "strokeSide": null,
+            "strokeIntensity": 0,
+            "atlasKey": "green/right/back-right/ready/ready",
+            "paddle": {
+              "anchorId": "right-paddle-face",
+              "worldContactTarget": null
+            },
+            "frame": "ready"
+          },
+          "paddleError": 7.324336453479133
+        },
+        {
+          "id": "player4",
+          "position": [
+            1.524,
+            0,
+            2.4384
+          ],
+          "animation": {
+            "playerId": "player4",
+            "worldPosition": {
+              "x": 1.524,
+              "y": 0,
+              "z": 2.4384
+            },
+            "bodyFacing": {
+              "x": 0,
+              "z": -1
+            },
+            "viewDirection": "back-right",
+            "action": "ready",
+            "phase": "ready",
+            "frameIndex": 0,
+            "locomotionFrame": null,
+            "planted": true,
+            "handedness": "right",
+            "artFamily": "green",
+            "artAction": "ready",
+            "shotType": null,
+            "strokeSide": null,
+            "strokeIntensity": 0,
+            "atlasKey": "green/right/back-right/ready/ready",
+            "paddle": {
+              "anchorId": "right-paddle-face",
+              "worldContactTarget": null
+            },
+            "frame": "ready"
+          },
+          "paddleError": 6.725011543952723
+        }
+      ]
+    },
+    {
+      "screen": [
+        390,
+        844
+      ],
+      "state": {
+        "active": true,
+        "loop": true,
+        "holding": false,
+        "iteration": 0,
+        "playing": false,
+        "elapsed": 0,
+        "playbackRate": 1,
+        "camera": "overhead",
+        "playId": "third-shot-drop",
+        "playerCount": 4,
+        "hasBall": true,
+        "renderLoopCount": 1,
+        "pixelScale": 1,
+        "framing": {
+          "aspect": 0.46208530805687204,
+          "usableAspect": 0.6008521701451578,
+          "reservedPixels": 194.921875,
+          "distanceScale": 1.6773755463979414,
+          "position": [
+            2.348325764957118,
+            19.89142511553602,
+            15.935067690780444
+          ],
+          "target": [
+            0,
+            0.35,
+            0
+          ]
+        },
+        "lastState": {
+          "x": 1.8897599999999999,
+          "y": 0.85344,
+          "z": -6.7056000000000004,
+          "board": {
+            "x": 16.2,
+            "y": 0
+          },
+          "phase": "ready",
+          "launched": false,
+          "rallyLeg": 1,
+          "time": 0,
+          "elapsed": 0,
+          "stepIndex": 0
+        }
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 14
+      },
+      "drawCalls": 53,
+      "triangles": 8822,
+      "actors": [
+        {
+          "id": "player1",
+          "position": [
+            1.524,
+            0,
+            -7.010400000000001
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": 1.524,
+              "y": 0,
+              "z": -7.010400000000001
+            },
+            "viewDirection": "front",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 1.1975555277647558
+        },
+        {
+          "id": "player2",
+          "position": [
+            -1.524,
+            0,
+            -7.010400000000001
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": -1.524,
+              "y": 0,
+              "z": -7.010400000000001
+            },
+            "viewDirection": "front",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 4.17056494188269
+        },
+        {
+          "id": "player3",
+          "position": [
+            -1.524,
+            0,
+            6.096
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": -1.524,
+              "y": 0,
+              "z": 6.096
+            },
+            "viewDirection": "back",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 12.986471058596342
+        },
+        {
+          "id": "player4",
+          "position": [
+            1.524,
+            0,
+            2.4384
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": 1.524,
+              "y": 0,
+              "z": 2.4384
+            },
+            "viewDirection": "back",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 9.058896353470756
+        }
+      ]
+    },
+    {
+      "screen": [
+        844,
+        390
+      ],
+      "state": {
+        "active": true,
+        "loop": true,
+        "holding": false,
+        "iteration": 0,
+        "playing": false,
+        "elapsed": 0,
+        "playbackRate": 1,
+        "camera": "overhead",
+        "playId": "third-shot-drop",
+        "playerCount": 4,
+        "hasBall": true,
+        "renderLoopCount": 1,
+        "pixelScale": 1,
+        "framing": {
+          "aspect": 2.164102564102564,
+          "usableAspect": 4.760796756566191,
+          "reservedPixels": 212.71875,
+          "distanceScale": 2.281140791133776,
+          "position": [
+            12.546274351235766,
+            26.92529021670849,
+            21.67083751577087
+          ],
+          "target": [
+            0,
+            0.35,
+            0
+          ]
+        },
+        "lastState": {
+          "x": 1.8897599999999999,
+          "y": 0.85344,
+          "z": -6.7056000000000004,
+          "board": {
+            "x": 16.2,
+            "y": 0
+          },
+          "phase": "ready",
+          "launched": false,
+          "rallyLeg": 1,
+          "time": 0,
+          "elapsed": 0,
+          "stepIndex": 0
+        }
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 14
+      },
+      "drawCalls": 53,
+      "triangles": 8822,
+      "actors": [
+        {
+          "id": "player1",
+          "position": [
+            1.524,
+            0,
+            -7.010400000000001
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": 1.524,
+              "y": 0,
+              "z": -7.010400000000001
+            },
+            "viewDirection": "front-left",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 1.0986785107876553
+        },
+        {
+          "id": "player2",
+          "position": [
+            -1.524,
+            0,
+            -7.010400000000001
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": -1.524,
+              "y": 0,
+              "z": -7.010400000000001
+            },
+            "viewDirection": "front-left",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 4.074495804787033
+        },
+        {
+          "id": "player3",
+          "position": [
+            -1.524,
+            0,
+            6.096
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": -1.524,
+              "y": 0,
+              "z": 6.096
+            },
+            "viewDirection": "back-right",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 12.74945041642152
+        },
+        {
+          "id": "player4",
+          "position": [
+            1.524,
+            0,
+            2.4384
+          ],
+          "animation": {
+            "handedness": "right",
+            "worldPosition": {
+              "x": 1.524,
+              "y": 0,
+              "z": 2.4384
+            },
+            "viewDirection": "back-right",
+            "action": "ready",
+            "phase": "ready",
+            "locomotionFrame": null,
+            "paddle": null,
+            "frame": "ready"
+          },
+          "paddleError": 8.793977809909151
+        }
+      ]
+    }
+  ]
+}

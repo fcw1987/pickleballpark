@@ -1,0 +1,2142 @@
+{
+  "base": "http://127.0.0.1:4190/",
+  "method": "Fresh isolated contexts; completed view changes and CSS transitions disabled for still captures; CSS-pixel captures plus phone DPR3 original. Court fraction is projected regulation surface, not a usability score; host/UI fractions are separate rectangles.",
+  "records": [
+    {
+      "label": "phone",
+      "metric": {
+        "viewport": [
+          390,
+          844
+        ],
+        "devicePixelRatio": 3,
+        "canvas": {
+          "x": 6,
+          "y": 68,
+          "width": 378,
+          "height": 688.8125
+        },
+        "buffer": [
+          756,
+          1378
+        ],
+        "ui": [
+          {
+            "x": 6,
+            "y": 6,
+            "width": 378,
+            "height": 56
+          },
+          {
+            "x": 6,
+            "y": 762.8125,
+            "width": 378,
+            "height": 75.1875
+          }
+        ],
+        "worldHostFraction": 0.7910169066715276,
+        "permanentUiFraction": 0.15065279803135254,
+        "projectedCourtFraction": 0.3150205339263568,
+        "courtCorners": [
+          {
+            "x": 128.20291551870585,
+            "y": 228.72674580104493
+          },
+          {
+            "x": 323.57956838412184,
+            "y": 248.4715436542394
+          },
+          {
+            "x": 290.66703129967874,
+            "y": 692.8491110254628
+          },
+          {
+            "x": 18.730751486918276,
+            "y": 654.0821219867702
+          }
+        ],
+        "allCourtCornersInViewport": true,
+        "controls": [
+          {
+            "name": "Menu",
+            "rect": {
+              "x": 12,
+              "y": 12,
+              "width": 69.03125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play title",
+            "rect": {
+              "x": 28,
+              "y": 145.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "Rename play",
+            "rect": {
+              "x": 28,
+              "y": 198.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "New Play",
+            "rect": {
+              "x": 28,
+              "y": 248.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "My Plays",
+            "rect": {
+              "x": 28,
+              "y": 298.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Save As",
+            "rect": {
+              "x": 28,
+              "y": 348.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Learn",
+            "rect": {
+              "x": 28,
+              "y": 398.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Court Planner",
+            "rect": {
+              "x": 28,
+              "y": 448.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Import / Export",
+            "rect": {
+              "x": 28,
+              "y": 498.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Help",
+            "rect": {
+              "x": 28,
+              "y": 548.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Appearance",
+            "rect": {
+              "x": 28,
+              "y": 598.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Choose shot chapter",
+            "rect": {
+              "x": 85.03125,
+              "y": 12,
+              "width": 90.609375,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "◆ Shot 1 · Serve",
+            "rect": {
+              "x": 105.03125,
+              "y": 78,
+              "width": 268.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 1",
+            "rect": {
+              "x": 381.3125,
+              "y": 78,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "↶ Shot 2 · Return",
+            "rect": {
+              "x": 105.03125,
+              "y": 128,
+              "width": 268.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 2",
+            "rect": {
+              "x": 381.3125,
+              "y": 128,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◇ Shot 3 · Drop",
+            "rect": {
+              "x": 105.03125,
+              "y": 178,
+              "width": 268.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 3",
+            "rect": {
+              "x": 381.3125,
+              "y": 178,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit shot",
+            "rect": {
+              "x": 179.640625,
+              "y": 12,
+              "width": 46.828125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "Add shot",
+            "rect": {
+              "x": 229.46875,
+              "y": 12,
+              "width": 54.53125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "3D",
+            "rect": {
+              "x": 287,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "2D",
+            "rect": {
+              "x": 334,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "Play",
+            "rect": {
+              "x": 13,
+              "y": 776.40625,
+              "width": 70.5625,
+              "height": 48
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Rally timeline",
+            "rect": {
+              "x": 91.5625,
+              "y": 783,
+              "width": 233.4375,
+              "height": 48
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Playback options",
+            "rect": {
+              "x": 333,
+              "y": 778.40625,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "24px"
+          },
+          {
+            "name": "Undo authored edit",
+            "rect": {
+              "x": 73,
+              "y": 754.40625,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          },
+          {
+            "name": "Redo authored edit",
+            "rect": {
+              "x": 123,
+              "y": 754.40625,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "label": "phone-large",
+      "metric": {
+        "viewport": [
+          430,
+          932
+        ],
+        "devicePixelRatio": 2,
+        "canvas": {
+          "x": 6,
+          "y": 68,
+          "width": 418,
+          "height": 776.8125
+        },
+        "buffer": [
+          836,
+          1554
+        ],
+        "ui": [
+          {
+            "x": 6,
+            "y": 6,
+            "width": 418,
+            "height": 56
+          },
+          {
+            "x": 6,
+            "y": 850.8125,
+            "width": 418,
+            "height": 75.1875
+          }
+        ],
+        "worldHostFraction": 0.8102296262102007,
+        "permanentUiFraction": 0.13683095867851083,
+        "projectedCourtFraction": 0.3190915756618884,
+        "courtCorners": [
+          {
+            "x": 140.59547058431133,
+            "y": 251.801385746311
+          },
+          {
+            "x": 358.1910570024607,
+            "y": 273.83674957618473
+          },
+          {
+            "x": 321.00049687322314,
+            "y": 767.1507005261335
+          },
+          {
+            "x": 19.60497860067653,
+            "y": 724.312980188641
+          }
+        ],
+        "allCourtCornersInViewport": true,
+        "controls": [
+          {
+            "name": "Menu",
+            "rect": {
+              "x": 12,
+              "y": 12,
+              "width": 69.03125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play title",
+            "rect": {
+              "x": 28,
+              "y": 145.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "Rename play",
+            "rect": {
+              "x": 28,
+              "y": 198.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "New Play",
+            "rect": {
+              "x": 28,
+              "y": 248.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "My Plays",
+            "rect": {
+              "x": 28,
+              "y": 298.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Save As",
+            "rect": {
+              "x": 28,
+              "y": 348.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Learn",
+            "rect": {
+              "x": 28,
+              "y": 398.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Court Planner",
+            "rect": {
+              "x": 28,
+              "y": 448.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Import / Export",
+            "rect": {
+              "x": 28,
+              "y": 498.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Help",
+            "rect": {
+              "x": 28,
+              "y": 548.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Appearance",
+            "rect": {
+              "x": 28,
+              "y": 598.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Choose shot chapter",
+            "rect": {
+              "x": 85.03125,
+              "y": 12,
+              "width": 130.609375,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "◆ Shot 1 · Serve",
+            "rect": {
+              "x": 105.03125,
+              "y": 78,
+              "width": 308.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 1",
+            "rect": {
+              "x": 421.3125,
+              "y": 78,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "↶ Shot 2 · Return",
+            "rect": {
+              "x": 105.03125,
+              "y": 128,
+              "width": 308.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 2",
+            "rect": {
+              "x": 421.3125,
+              "y": 128,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◇ Shot 3 · Drop",
+            "rect": {
+              "x": 105.03125,
+              "y": 178,
+              "width": 308.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 3",
+            "rect": {
+              "x": 421.3125,
+              "y": 178,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit shot",
+            "rect": {
+              "x": 219.640625,
+              "y": 12,
+              "width": 46.828125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "Add shot",
+            "rect": {
+              "x": 269.46875,
+              "y": 12,
+              "width": 54.53125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "3D",
+            "rect": {
+              "x": 327,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "2D",
+            "rect": {
+              "x": 374,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "Play",
+            "rect": {
+              "x": 13,
+              "y": 864.40625,
+              "width": 70.5625,
+              "height": 48
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Rally timeline",
+            "rect": {
+              "x": 91.5625,
+              "y": 871,
+              "width": 273.4375,
+              "height": 48
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Playback options",
+            "rect": {
+              "x": 373,
+              "y": 866.40625,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "24px"
+          },
+          {
+            "name": "Undo authored edit",
+            "rect": {
+              "x": 113,
+              "y": 842.40625,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          },
+          {
+            "name": "Redo authored edit",
+            "rect": {
+              "x": 163,
+              "y": 842.40625,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "label": "phone-small",
+      "metric": {
+        "viewport": [
+          320,
+          568
+        ],
+        "devicePixelRatio": 2,
+        "canvas": {
+          "x": 6,
+          "y": 68,
+          "width": 308,
+          "height": 413.6875
+        },
+        "buffer": [
+          616,
+          828
+        ],
+        "ui": [
+          {
+            "x": 6,
+            "y": 6,
+            "width": 308,
+            "height": 56
+          },
+          {
+            "x": 6,
+            "y": 487.6875,
+            "width": 308,
+            "height": 74.3125
+          }
+        ],
+        "worldHostFraction": 0.7010109485035211,
+        "permanentUiFraction": 0.22082003741197184,
+        "projectedCourtFraction": 0.2640601192784928,
+        "courtCorners": [
+          {
+            "x": 115.72939681607848,
+            "y": 153.16663886859675
+          },
+          {
+            "x": 245.3794182308983,
+            "y": 166.04036820284196
+          },
+          {
+            "x": 226.35870546433904,
+            "y": 469.27687499999973
+          },
+          {
+            "x": 38.20617552147885,
+            "y": 441.7498728523971
+          }
+        ],
+        "allCourtCornersInViewport": true,
+        "controls": [
+          {
+            "name": "Menu",
+            "rect": {
+              "x": 12,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play title",
+            "rect": {
+              "x": 28,
+              "y": 145.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "Rename play",
+            "rect": {
+              "x": 28,
+              "y": 198.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "New Play",
+            "rect": {
+              "x": 28,
+              "y": 248.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "My Plays",
+            "rect": {
+              "x": 28,
+              "y": 298.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Save As",
+            "rect": {
+              "x": 28,
+              "y": 348.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Learn",
+            "rect": {
+              "x": 28,
+              "y": 398.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Court Planner",
+            "rect": {
+              "x": 28,
+              "y": 448.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Import / Export",
+            "rect": {
+              "x": 28,
+              "y": 498.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Help",
+            "rect": {
+              "x": 28,
+              "y": 548.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Appearance",
+            "rect": {
+              "x": 28,
+              "y": 598.171875,
+              "width": 264,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Choose shot chapter",
+            "rect": {
+              "x": 59,
+              "y": 12,
+              "width": 50.640625,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "◆ Shot 1 · Serve",
+            "rect": {
+              "x": 79,
+              "y": 78,
+              "width": 198.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 1",
+            "rect": {
+              "x": 285.28125,
+              "y": 78,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "↶ Shot 2 · Return",
+            "rect": {
+              "x": 79,
+              "y": 128,
+              "width": 198.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 2",
+            "rect": {
+              "x": 285.28125,
+              "y": 128,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◇ Shot 3 · Drop",
+            "rect": {
+              "x": 79,
+              "y": 178,
+              "width": 198.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 3",
+            "rect": {
+              "x": 285.28125,
+              "y": 178,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit shot",
+            "rect": {
+              "x": 112.640625,
+              "y": 12,
+              "width": 46.828125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "Add shot",
+            "rect": {
+              "x": 161.46875,
+              "y": 12,
+              "width": 54.53125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "3D",
+            "rect": {
+              "x": 218,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "2D",
+            "rect": {
+              "x": 264,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "12.8px"
+          },
+          {
+            "name": "Play",
+            "rect": {
+              "x": 13,
+              "y": 500.84375,
+              "width": 70.5625,
+              "height": 48
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Rally timeline",
+            "rect": {
+              "x": 91.5625,
+              "y": 507,
+              "width": 163.4375,
+              "height": 48
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Playback options",
+            "rect": {
+              "x": 263,
+              "y": 502.84375,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "24px"
+          },
+          {
+            "name": "Undo authored edit",
+            "rect": {
+              "x": 27,
+              "y": 478.84375,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          },
+          {
+            "name": "Redo authored edit",
+            "rect": {
+              "x": 77,
+              "y": 478.84375,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "label": "landscape",
+      "metric": {
+        "viewport": [
+          844,
+          390
+        ],
+        "devicePixelRatio": 2,
+        "canvas": {
+          "x": 6,
+          "y": 60,
+          "width": 832,
+          "height": 260
+        },
+        "buffer": [
+          1664,
+          520
+        ],
+        "ui": [
+          {
+            "x": 6,
+            "y": 4,
+            "width": 832,
+            "height": 52
+          },
+          {
+            "x": 6,
+            "y": 324,
+            "width": 832,
+            "height": 62
+          }
+        ],
+        "worldHostFraction": 0.6571879936808847,
+        "permanentUiFraction": 0.2881516587677725,
+        "projectedCourtFraction": 0.11649082374470066,
+        "courtCorners": [
+          {
+            "x": 529.2190165529196,
+            "y": 122.12467921572622
+          },
+          {
+            "x": 603.5694527354773,
+            "y": 215.84250740829128
+          },
+          {
+            "x": 250.1990287015688,
+            "y": 312.19999999999993
+          },
+          {
+            "x": 257.8946326243231,
+            "y": 176.4761994512092
+          }
+        ],
+        "allCourtCornersInViewport": true,
+        "controls": [
+          {
+            "name": "Menu",
+            "rect": {
+              "x": 12,
+              "y": 8,
+              "width": 75.03125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play title",
+            "rect": {
+              "x": 28,
+              "y": 141.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "Rename play",
+            "rect": {
+              "x": 28,
+              "y": 194.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "New Play",
+            "rect": {
+              "x": 28,
+              "y": 244.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "My Plays",
+            "rect": {
+              "x": 28,
+              "y": 294.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Save As",
+            "rect": {
+              "x": 28,
+              "y": 344.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Learn",
+            "rect": {
+              "x": 28,
+              "y": 394.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Court Planner",
+            "rect": {
+              "x": 28,
+              "y": 444.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Import / Export",
+            "rect": {
+              "x": 28,
+              "y": 494.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Help",
+            "rect": {
+              "x": 28,
+              "y": 544.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Appearance",
+            "rect": {
+              "x": 28,
+              "y": 594.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Choose shot chapter",
+            "rect": {
+              "x": 91.03125,
+              "y": 8,
+              "width": 320,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◆ Shot 1 · Serve",
+            "rect": {
+              "x": 111.03125,
+              "y": 74,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 1",
+            "rect": {
+              "x": 469.3125,
+              "y": 74,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "↶ Shot 2 · Return",
+            "rect": {
+              "x": 111.03125,
+              "y": 124,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 2",
+            "rect": {
+              "x": 469.3125,
+              "y": 124,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◇ Shot 3 · Drop",
+            "rect": {
+              "x": 111.03125,
+              "y": 174,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 3",
+            "rect": {
+              "x": 469.3125,
+              "y": 174,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit shot",
+            "rect": {
+              "x": 609.125,
+              "y": 8,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Add shot",
+            "rect": {
+              "x": 670.84375,
+              "y": 8,
+              "width": 66.15625,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "3D",
+            "rect": {
+              "x": 741,
+              "y": 8,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "2D",
+            "rect": {
+              "x": 788,
+              "y": 8,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play",
+            "rect": {
+              "x": 13,
+              "y": 331,
+              "width": 76,
+              "height": 48
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Rally timeline",
+            "rect": {
+              "x": 217.796875,
+              "y": 331,
+              "width": 451.578125,
+              "height": 48
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Playback options",
+            "rect": {
+              "x": 787,
+              "y": 333,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "24px"
+          },
+          {
+            "name": "Undo authored edit",
+            "rect": {
+              "x": 527,
+              "y": 309,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          },
+          {
+            "name": "Redo authored edit",
+            "rect": {
+              "x": 577,
+              "y": 309,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "label": "tablet",
+      "metric": {
+        "viewport": [
+          768,
+          1024
+        ],
+        "devicePixelRatio": 2,
+        "canvas": {
+          "x": 6,
+          "y": 68,
+          "width": 756,
+          "height": 882
+        },
+        "buffer": [
+          1512,
+          1764
+        ],
+        "ui": [
+          {
+            "x": 6,
+            "y": 6,
+            "width": 756,
+            "height": 56
+          },
+          {
+            "x": 6,
+            "y": 956,
+            "width": 756,
+            "height": 62
+          }
+        ],
+        "worldHostFraction": 0.847869873046875,
+        "permanentUiFraction": 0.113433837890625,
+        "projectedCourtFraction": 0.2772071215041593,
+        "courtCorners": [
+          {
+            "x": 289.6843671299063,
+            "y": 249.5790312303425
+          },
+          {
+            "x": 565.8952823180007,
+            "y": 277.026390100998
+          },
+          {
+            "x": 525.3728942501136,
+            "y": 923.5399999999995
+          },
+          {
+            "x": 124.52620002402016,
+            "y": 864.8512170559039
+          }
+        ],
+        "allCourtCornersInViewport": true,
+        "controls": [
+          {
+            "name": "Menu",
+            "rect": {
+              "x": 12,
+              "y": 12,
+              "width": 75.03125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play title",
+            "rect": {
+              "x": 28,
+              "y": 145.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "Rename play",
+            "rect": {
+              "x": 28,
+              "y": 198.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "New Play",
+            "rect": {
+              "x": 28,
+              "y": 248.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "My Plays",
+            "rect": {
+              "x": 28,
+              "y": 298.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Save As",
+            "rect": {
+              "x": 28,
+              "y": 348.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Learn",
+            "rect": {
+              "x": 28,
+              "y": 398.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Court Planner",
+            "rect": {
+              "x": 28,
+              "y": 448.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Import / Export",
+            "rect": {
+              "x": 28,
+              "y": 498.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Help",
+            "rect": {
+              "x": 28,
+              "y": 548.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Appearance",
+            "rect": {
+              "x": 28,
+              "y": 598.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Choose shot chapter",
+            "rect": {
+              "x": 91.03125,
+              "y": 12,
+              "width": 320,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◆ Shot 1 · Serve",
+            "rect": {
+              "x": 111.03125,
+              "y": 78,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 1",
+            "rect": {
+              "x": 469.3125,
+              "y": 78,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "↶ Shot 2 · Return",
+            "rect": {
+              "x": 111.03125,
+              "y": 128,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 2",
+            "rect": {
+              "x": 469.3125,
+              "y": 128,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◇ Shot 3 · Drop",
+            "rect": {
+              "x": 111.03125,
+              "y": 178,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 3",
+            "rect": {
+              "x": 469.3125,
+              "y": 178,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit shot",
+            "rect": {
+              "x": 533.125,
+              "y": 12,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Add shot",
+            "rect": {
+              "x": 594.84375,
+              "y": 12,
+              "width": 66.15625,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "3D",
+            "rect": {
+              "x": 665,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "2D",
+            "rect": {
+              "x": 712,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play",
+            "rect": {
+              "x": 13,
+              "y": 963,
+              "width": 76,
+              "height": 48
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Rally timeline",
+            "rect": {
+              "x": 217.796875,
+              "y": 963,
+              "width": 375.578125,
+              "height": 48
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Playback options",
+            "rect": {
+              "x": 711,
+              "y": 965,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "24px"
+          },
+          {
+            "name": "Undo authored edit",
+            "rect": {
+              "x": 451,
+              "y": 941,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          },
+          {
+            "name": "Redo authored edit",
+            "rect": {
+              "x": 501,
+              "y": 941,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "label": "desktop",
+      "metric": {
+        "viewport": [
+          1440,
+          900
+        ],
+        "devicePixelRatio": 2,
+        "canvas": {
+          "x": 6,
+          "y": 68,
+          "width": 1428,
+          "height": 758
+        },
+        "buffer": [
+          2856,
+          1516
+        ],
+        "ui": [
+          {
+            "x": 6,
+            "y": 6,
+            "width": 1428,
+            "height": 56
+          },
+          {
+            "x": 6,
+            "y": 832,
+            "width": 1428,
+            "height": 62
+          }
+        ],
+        "worldHostFraction": 0.8352037037037037,
+        "permanentUiFraction": 0.1300185185185185,
+        "projectedCourtFraction": 0.2423991131417659,
+        "courtCorners": [
+          {
+            "x": 1028.2290644765922,
+            "y": 251.87466403817146
+          },
+          {
+            "x": 1239.81767459856,
+            "y": 520.984868624045
+          },
+          {
+            "x": 230.22396035319815,
+            "y": 795.371907286101
+          },
+          {
+            "x": 249.3657729641931,
+            "y": 408.21538545844084
+          }
+        ],
+        "allCourtCornersInViewport": true,
+        "controls": [
+          {
+            "name": "Menu",
+            "rect": {
+              "x": 12,
+              "y": 12,
+              "width": 75.03125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play title",
+            "rect": {
+              "x": 28,
+              "y": 145.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "Rename play",
+            "rect": {
+              "x": 28,
+              "y": 198.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "New Play",
+            "rect": {
+              "x": 28,
+              "y": 248.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "My Plays",
+            "rect": {
+              "x": 28,
+              "y": 298.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Save As",
+            "rect": {
+              "x": 28,
+              "y": 348.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Learn",
+            "rect": {
+              "x": 28,
+              "y": 398.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Court Planner",
+            "rect": {
+              "x": 28,
+              "y": 448.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Import / Export",
+            "rect": {
+              "x": 28,
+              "y": 498.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Help",
+            "rect": {
+              "x": 28,
+              "y": 548.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Appearance",
+            "rect": {
+              "x": 28,
+              "y": 598.171875,
+              "width": 288,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Choose shot chapter",
+            "rect": {
+              "x": 91.03125,
+              "y": 12,
+              "width": 320,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◆ Shot 1 · Serve",
+            "rect": {
+              "x": 111.03125,
+              "y": 78,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 1",
+            "rect": {
+              "x": 469.3125,
+              "y": 78,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "↶ Shot 2 · Return",
+            "rect": {
+              "x": 111.03125,
+              "y": 128,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 2",
+            "rect": {
+              "x": 469.3125,
+              "y": 128,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "◇ Shot 3 · Drop",
+            "rect": {
+              "x": 111.03125,
+              "y": 178,
+              "width": 350.28125,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit Shot 3",
+            "rect": {
+              "x": 469.3125,
+              "y": 178,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Edit shot",
+            "rect": {
+              "x": 1205.125,
+              "y": 12,
+              "width": 57.71875,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Add shot",
+            "rect": {
+              "x": 1266.84375,
+              "y": 12,
+              "width": 66.15625,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "3D",
+            "rect": {
+              "x": 1337,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "2D",
+            "rect": {
+              "x": 1384,
+              "y": 12,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Play",
+            "rect": {
+              "x": 13,
+              "y": 839,
+              "width": 76,
+              "height": 48
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Rally timeline",
+            "rect": {
+              "x": 217.796875,
+              "y": 839,
+              "width": 1047.578125,
+              "height": 48
+            },
+            "font": "ui-sans-serif, system-ui, sans-serif",
+            "fontSize": "14px"
+          },
+          {
+            "name": "Playback options",
+            "rect": {
+              "x": 1383,
+              "y": 841,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "24px"
+          },
+          {
+            "name": "Undo authored edit",
+            "rect": {
+              "x": 1123,
+              "y": 817,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          },
+          {
+            "name": "Redo authored edit",
+            "rect": {
+              "x": 1173,
+              "y": 817,
+              "width": 44,
+              "height": 44
+            },
+            "font": "ui-monospace, Menlo, Consolas, monospace",
+            "fontSize": "20px"
+          }
+        ]
+      },
+      "errors": []
+    }
+  ]
+}

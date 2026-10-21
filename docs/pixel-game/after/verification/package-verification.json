@@ -1,0 +1,122 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "chromium",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
+  },
+  {
+    "browser": "chromium",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "4816210"
+  },
+  {
+    "browser": "chromium",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241"
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "webkit",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
+  },
+  {
+    "browser": "webkit",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "4816210"
+  },
+  {
+    "browser": "webkit",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 99,
+    "cacheEntries": 97,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "ab4432da4fc0b86d26421dac0310ccc20b082ec5",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241"
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 1,
+  "id": "eight-shot-drive-drop",
+  "title": "Eight Shot Drive and Drop Exchange",
+  "initialLayout": {
+    "player1": { "x": 15, "y": -1 },
+    "player2": { "x": 5, "y": -1 },
+    "player3": { "x": 5, "y": 42 },
+    "player4": { "x": 15, "y": 30 },
+    "ball": { "x": 16.2, "y": 0 }
+  },
+  "players": {
+    "player1": { "team": "green", "handedness": "right" },
+    "player2": { "team": "green", "handedness": "right" },
+    "player3": { "team": "orange", "handedness": "right" },
+    "player4": { "team": "orange", "handedness": "left" }
+  },
+  "shots": [
+    { "id": "serve-1", "family": "serve", "hitter": "player1", "receiver": "player3", "contactStyle": "forehand", "target": { "x": 5, "y": 38 }, "arc": "high", "pace": "medium", "movement": { "intent": "hold", "pinned": false }, "serveMethod": "volley" },
+    { "id": "return-2", "family": "return", "hitter": "player3", "receiver": "player1", "contactStyle": "forehand", "target": { "x": 15, "y": 6 }, "arc": "high", "pace": "medium", "movement": { "intent": "advance", "pinned": false } },
+    { "id": "drop-3", "family": "drop", "hitter": "player1", "receiver": "player3", "contactStyle": "forehand", "target": { "x": 7, "y": 27 }, "arc": "high", "pace": "soft", "movement": { "intent": "advance", "pinned": false } },
+    { "id": "drive-4", "family": "drive", "hitter": "player3", "receiver": "player1", "contactStyle": "forehand", "target": { "x": 15, "y": 8 }, "arc": "low", "pace": "firm", "movement": { "intent": "hold", "pinned": false } },
+    { "id": "drop-5", "family": "drop", "hitter": "player1", "receiver": "player3", "contactStyle": "forehand", "target": { "x": 7, "y": 28 }, "arc": "high", "pace": "soft", "movement": { "intent": "hold", "pinned": false } },
+    { "id": "drive-6", "family": "drive", "hitter": "player3", "receiver": "player1", "contactStyle": "forehand", "target": { "x": 15, "y": 8 }, "arc": "low", "pace": "firm", "movement": { "intent": "hold", "pinned": false } },
+    { "id": "drop-7", "family": "drop", "hitter": "player1", "receiver": "player3", "contactStyle": "forehand", "target": { "x": 7, "y": 28 }, "arc": "high", "pace": "soft", "movement": { "intent": "hold", "pinned": false } },
+    { "id": "drive-8", "family": "drive", "hitter": "player3", "receiver": "auto", "contactStyle": "forehand", "target": { "x": 15, "y": 8 }, "arc": "low", "pace": "firm", "movement": { "intent": "hold", "pinned": false } }
+  ],
+  "annotations": [],
+  "assistance": { "autoShading": false, "showGuides": false, "team": "both" },
+  "opening": "serve",
+  "ending": "stop",
+  "intentionalFault": false
+}

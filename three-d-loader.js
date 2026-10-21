@@ -18,13 +18,15 @@ function initialize() {
             entry.disabled = Boolean(loading) || !board.plays.activePlay;
         },
         getState() { return { active: false, playing: false, elapsed: 0, renderLoopCount: 0 }; },
-        cancelLoading(){generation+=1;loading=null;entry.removeAttribute('aria-busy');announce('');loader.updateEntryAvailability();},
+        cancelLoading(){generation+=1;loading=null;entry.removeAttribute('aria-busy');announce('');loader.updateEntryAvailability();const token=loader.suspension;loader.suspension=null;if(token&&board.plays.session.resumeSuspension(token))board.plays.startPlaybackLoop();},
         async enter() {
             if (loading || !board.plays.activePlay) return false;
             const requestGeneration=++generation;
             const requestedPlay = board.plays.activePlay;
             const requestedSnapshot = board.plays.snapshot;
-            board.plays.pause();
+            const playbackSuspension=board.plays.session.suspend(performance.now(),board.plays.timingScale);
+            loader.suspension=playbackSuspension;
+            board.plays.cancelScheduledWork({preserveTransition:true});
             announce('Opening 3D court…');
             entry.setAttribute('aria-busy', 'true');
             // Failed module requests can remain cached by the browser. A retry gets a
@@ -41,12 +43,15 @@ function initialize() {
                 entry.removeEventListener('click', enter);
                 const viewer = new ThreeDPlaybackViewer(board);
                 board.threeD = viewer;
+                loader.suspension=null;
                 announce('');
                 return viewer.enter();
             } catch (error) {
                 if(requestGeneration!==generation)return false;
                 announce('The 3D court could not open. Your board is safe. Try 3D View again.');
                 console.warn('3D court unavailable:', error);
+                loader.suspension=null;
+                if(board.plays.session.resumeSuspension(playbackSuspension))board.plays.startPlaybackLoop();
                 return false;
             } finally {
                 if(requestGeneration===generation){loading = null;

@@ -1,0 +1,138 @@
+.shot-timeline {
+  --game-ink: var(--builder-game-ink, #183348);
+  --game-paper: var(--builder-game-paper, #fff4c9);
+  --game-paper-deep: var(--builder-game-paper-deep, #ebc977);
+  --game-green: var(--builder-game-green, #30705c);
+  --game-accent: var(--builder-game-accent, #d77a38);
+  --game-muted: var(--builder-game-muted, #6f705d);
+  --game-edge: var(--builder-game-edge, #8c603a);
+  --game-highlight: var(--builder-game-highlight, #fffce5);
+  --shot-timeline-progress: 0;
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) minmax(8rem, 1fr) auto;
+  align-items: center;
+  gap: .55rem;
+  width: 100%;
+  min-width: 0;
+  color: var(--game-ink);
+}
+
+body[data-theme="dark"] .shot-timeline {
+  --game-ink: #fff1bd;
+  --game-paper: #182d3c;
+  --game-paper-deep: #294556;
+  --game-green: #69b487;
+  --game-accent: #f0a34f;
+  --game-muted: #c0c3aa;
+  --game-edge: #0b1d29;
+  --game-highlight: #fff0b0;
+}
+
+.shot-timeline-identity {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 800 .75rem/1.1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+  letter-spacing: .01em;
+}
+
+.shot-timeline-target {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  min-width: 0;
+  isolation: isolate;
+}
+
+.shot-timeline-rail {
+  position: absolute;
+  inset: 50% 8px auto;
+  height: 12px;
+  transform: translateY(-50%);
+  border: 2px solid var(--game-ink);
+  background: var(--game-paper-deep);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--game-highlight) 70%, transparent), 0 2px 0 var(--game-edge);
+  overflow: visible;
+}
+
+.shot-timeline-fill {
+  position: absolute;
+  inset: 2px auto 2px 2px;
+  width: calc((100% - 4px) * var(--shot-timeline-progress));
+  background: var(--game-green);
+}
+
+.shot-timeline-markers { position: absolute; inset: 0 6px; }
+.shot-timeline-marker {
+  --shot-marker-position: 0;
+  position: absolute;
+  z-index: 2;
+  left: calc(100% * var(--shot-marker-position));
+  top: -5px;
+  width: 2px;
+  height: 18px;
+  transform: translateX(-1px);
+  background: var(--game-edge);
+  box-shadow: 1px 0 0 var(--game-paper);
+}
+.shot-timeline-marker.is-current { width: 4px; transform: translateX(-2px); background: var(--game-accent); box-shadow: 1px 0 0 var(--game-highlight); }
+
+.shot-timeline-thumb {
+  position: absolute;
+  z-index: 3;
+  left: calc(6px + (100% - 12px) * var(--shot-timeline-progress));
+  top: 50%;
+  width: 12px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--game-ink);
+  background: var(--game-accent);
+  box-shadow: inset 2px 2px 0 var(--game-highlight), 2px 2px 0 var(--game-edge);
+}
+
+.shot-timeline-range {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+.shot-timeline-range:disabled { cursor: wait; }
+.shot-timeline-target:has(.shot-timeline-range:focus-visible) .shot-timeline-rail {
+  outline: 3px solid var(--game-accent);
+  outline-offset: 4px;
+}
+.shot-timeline[data-scrubbing="true"] .shot-timeline-thumb { background: var(--game-highlight); }
+.shot-timeline[data-busy="true"] { opacity: .62; }
+
+.shot-timeline-time {
+  color: var(--game-muted);
+  white-space: nowrap;
+  font: 700 .7rem/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .shot-timeline { grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; }
+  .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; }
+  .shot-timeline-identity { grid-column: 1; grid-row: 1; }
+  .shot-timeline-time { grid-column: 2; grid-row: 1; }
+}
+
+@media (max-width: 340px) {
+  .shot-timeline { grid-template-columns: minmax(0, 1fr) minmax(0, 4.4rem); }
+  .shot-timeline-time { font-size: .65rem; }
+  .shot-timeline-time { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .shot-timeline-identity { font-size: .7rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shot-timeline * { transition: none !important; }
+}

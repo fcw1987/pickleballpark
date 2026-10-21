@@ -1,0 +1,10 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 [chromium] › tests/static-world-cache.spec.mjs:51:1 › static scene cache reuses artwork and invalidates for camera, light and world changes (1.6s)
+  ✓  2 [chromium] › tests/static-world-cache.spec.mjs:76:1 › cached color and depth preserve moving ball, players and net across cameras (2.8s)
+  ✓  3 [chromium] › tests/static-world-cache.spec.mjs:83:1 › cache follows backing-buffer resize and disposes its owned resources once (1.3s)
+  ✓  4 [chromium] › tests/static-world-cache.spec.mjs:118:1 › oversized high-DPR surfaces retain direct rendering and cache again after shrinking (1.8s)
+  ✓  5 [chromium] › tests/static-world-cache.spec.mjs:146:1 › native DPR3 phones retain MSAA quality with bounded resolved-cache memory (5.5s)
+
+  5 passed (13.4s)

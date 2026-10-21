@@ -1,0 +1,80 @@
+{"binary":"/opt/homebrew/Cellar/node/22.4.0/bin/node","argv":["--no-maglev","--test","tests/overhead-contact-compatibility.unit.mjs","tests/stroke-instruction.unit.mjs"],"cwd":"/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes","node":"v22.4.0","v8":"12.4.254.21-node.15","arch":"arm64","platform":"darwin","binarySha256":"617a9b803db0a617af138cf91147bba6082acf7d39e835f09b7e06d339ea6aaf","sourceDigestSha256":"662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e","exitCode":0}
+
+STDOUT
+TAP version 13
+# Subtest: existing overhead/short-hop source imports losslessly and its semantic conflict is reported by rule evaluation
+ok 1 - existing overhead/short-hop source imports losslessly and its semantic conflict is reported by rule evaluation
+  ---
+  duration_ms: 3.1045
+  ...
+# Subtest: ordinary automatic, forehand and backhand overheads retain exact contacts and bounded rendered limbs for both hands
+ok 2 - ordinary automatic, forehand and backhand overheads retain exact contacts and bounded rendered limbs for both hands
+  ---
+  duration_ms: 241.624792
+  ...
+# Subtest: builder-created and imported overhead/short-hop combinations meet their unchanged high contact with either hand and lateral placement
+ok 3 - builder-created and imported overhead/short-hop combinations meet their unchanged high contact with either hand and lateral placement
+  ---
+  duration_ms: 55.027083
+  ...
+# Subtest: legacy combination keeps compiled Play, event arrays, sampled ball trajectory and default 2D presentation byte-for-byte unchanged
+ok 4 - legacy combination keeps compiled Play, event arrays, sampled ball trajectory and default 2D presentation byte-for-byte unchanged
+  ---
+  duration_ms: 6.780625
+  ...
+# Subtest: a support shoe remains world-fixed while approach steps continue during stroke preparation
+ok 5 - a support shoe remains world-fixed while approach steps continue during stroke preparation
+  ---
+  duration_ms: 66.850209
+  ...
+# Subtest: both soles remain grounded and fixed throughout the planted contact window for either hand
+ok 6 - both soles remain grounded and fixed throughout the planted contact window for either hand
+  ---
+  duration_ms: 49.447292
+  ...
+# Subtest: forehand and backhand contact occupy opposite lateral sides and mirror with physical handedness
+ok 7 - forehand and backhand contact occupy opposite lateral sides and mirror with physical handedness
+  ---
+  duration_ms: 41.946167
+  ...
+# Subtest: the paddle passes contact with a coherent nonzero tangent and lob has a controlled upward face
+ok 8 - the paddle passes contact with a coherent nonzero tangent and lob has a controlled upward face
+  ---
+  duration_ms: 8.567834
+  ...
+# Subtest: fixed-length arm IK stays within reach through low balls, lobs, overheads and recovery
+ok 9 - fixed-length arm IK stays within reach through low balls, lobs, overheads and recovery
+  ---
+  duration_ms: 396.727792
+  ...
+# Subtest: all rendered actors remain continuous across adjacent rally segments, including off hands and readiness
+ok 10 - all rendered actors remain continuous across adjacent rally segments, including off hands and readiness
+  ---
+  duration_ms: 32.947292
+  ...
+# Subtest: rendered thigh and shin lengths remain fixed while stepping and deeply loading low shots
+ok 11 - rendered thigh and shin lengths remain fixed while stepping and deeply loading low shots
+  ---
+  duration_ms: 385.233459
+  ...
+# Subtest: default shared presentation retains frozen 2D positions, facing, action, planting and timing
+ok 12 - default shared presentation retains frozen 2D positions, facing, action, planting and timing
+  ---
+  duration_ms: 15.093166
+  ...
+# Subtest: a complete generated 99-hit rally keeps both handed rigs finite, in reach and exactly on every contact
+ok 13 - a complete generated 99-hit rally keeps both handed rigs finite, in reach and exactly on every contact
+  ---
+  duration_ms: 472.645125
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1552.186792
+
+STDERR

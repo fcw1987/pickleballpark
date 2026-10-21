@@ -1,0 +1,90 @@
+{
+  "baseline": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+  "candidate": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+  "added": [],
+  "removed": [],
+  "changed": [
+    {
+      "path": "builder-court-tools.js",
+      "beforeBytes": 7624,
+      "afterBytes": 9984,
+      "sha256": "b9c3095e6918caf5485aa38468e3dafe16550de0108e6cb5c6161b581e668838"
+    },
+    {
+      "path": "builder-integration.css",
+      "beforeBytes": 17250,
+      "afterBytes": 21049,
+      "sha256": "dfa07a0296dbfdfb43f4a446600432bfc10b7157d81eba164ef635320d9c92c0"
+    },
+    {
+      "path": "builder-storage.js",
+      "beforeBytes": 7983,
+      "afterBytes": 9257,
+      "sha256": "1c29dc00fcd5e7b2546adf29eaad8a65dfbbdd962275a74f0149004bd2485b9e"
+    },
+    {
+      "path": "builder-ui.css",
+      "beforeBytes": 16563,
+      "afterBytes": 19929,
+      "sha256": "501c45edfbb50dd7cb91bf5c2e97b12a5c02de2f663e1778aea9cafa904e5562"
+    },
+    {
+      "path": "builder-ui.js",
+      "beforeBytes": 34776,
+      "afterBytes": 42456,
+      "sha256": "a265220108fb665de78551c67040e210227b97b3b330b999f87e951defcee9de"
+    },
+    {
+      "path": "builder-waypoint-policy.js",
+      "beforeBytes": 2737,
+      "afterBytes": 2845,
+      "sha256": "19f644878813b1813081bca325ddb328a24db065958a2341692705f8b677dcea"
+    },
+    {
+      "path": "coverage-assistance.js",
+      "beforeBytes": 5747,
+      "afterBytes": 5602,
+      "sha256": "22e8aabccddab71d2b3c04e5d52351e21fd37cd42ca9e1e04d954ae2cf25ef3c"
+    },
+    {
+      "path": "index.html",
+      "beforeBytes": 19574,
+      "afterBytes": 19809,
+      "sha256": "79eaaf79916907af664d48e2ca01860db3b9043f44fea0fffb435c09b41ee858"
+    },
+    {
+      "path": "play-builder.js",
+      "beforeBytes": 21224,
+      "afterBytes": 26964,
+      "sha256": "86b7911c08b8c7765fde4425dd2803377c3de8949373008413a36527a72921e9"
+    },
+    {
+      "path": "play-compiler.js",
+      "beforeBytes": 19144,
+      "afterBytes": 20119,
+      "sha256": "2bbe051570d29c1beae41f21a7cc646b3785f0529e2be15d6f21deac16ade328"
+    },
+    {
+      "path": "play-document.js",
+      "beforeBytes": 14331,
+      "afterBytes": 15435,
+      "sha256": "2259569e1a6ce2af7894f9f0b8004c7d9bf53f4e14bc6f6603ff95f15131e571"
+    },
+    {
+      "path": "sw.js",
+      "beforeBytes": 6561,
+      "afterBytes": 6561,
+      "sha256": "42f5382490e338888c9b037812d7c85e21be89d6aa3a51ff64a8d123b6a4b10b"
+    },
+    {
+      "path": "three-d-core.js",
+      "beforeBytes": 23364,
+      "afterBytes": 23364,
+      "sha256": "8d3519e0327f35dd7b138b9e178a28209c76274b3339bc6eaa4659329cd8155e"
+    }
+  ],
+  "beforeBytes": 1599946,
+  "afterBytes": 1626442,
+  "runtimeFiles": 93,
+  "manifestSha256": "d1f19dd68bd834ba4a2b37bb7c679932c1c3f32ee6e8e5211174abcab2cca0b6"
+}

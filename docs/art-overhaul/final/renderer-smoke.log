@@ -1,0 +1,14 @@
+
+Running 9 tests using 1 worker
+
+  ✓  1 [chromium] › tests/pixel-game-world.spec.mjs:3:1 › modeled garden remains fixed when cameras switch, reuses resources, and disposes every owned asset (850ms)
+  ✓  2 [chromium] › tests/three-d.spec.mjs:18:1 › 3D View initializes regulation scene with players, ball, and handed paddles (772ms)
+  ✓  3 [chromium] › tests/three-d.spec.mjs:33:1 › named cameras switch without resetting the Play (882ms)
+  ✓  4 [chromium] › tests/three-d.spec.mjs:43:1 › play, pause, playback rate, timeline seek, and proof bounce share one clock (1.6s)
+  ✓  5 [chromium] › tests/three-d.spec.mjs:70:1 › exit stops render loop, re-entry creates one new loop, and 2D Play remains intact (1.4s)
+  ✓  6 [chromium] › tests/three-d.spec.mjs:92:1 › 3D viewer fits portrait, landscape, and desktop controls (2.2s)
+  ✓  7 [chromium] › tests/three-d.spec.mjs:112:1 › reduced motion retains 3D endpoints and camera controls (836ms)
+  ✓  8 [chromium] › tests/three-d.spec.mjs:122:1 › offline repeat visit can open the locally cached Three.js viewer (910ms)
+  ✓  9 [chromium] › tests/visual-world.spec.mjs:88:1 › 3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources (838ms)
+
+  9 passed (10.8s)

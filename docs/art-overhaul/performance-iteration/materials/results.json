@@ -1,0 +1,175 @@
+{
+  "method": "One headless Chromium process, sequential contexts,1440x900 DPR1,6s active third-shot-drop overhead after1.5s material warm-up; RAF callback cadence and CPU submission durations,not display FPS/GPU completion.",
+  "records": [
+    {
+      "mode": "none-lambert-world",
+      "stats": {
+        "raf": {
+          "count": 347,
+          "median": 16.699999999999818,
+          "p95": 25.09999999999991,
+          "max": 91.69999999999982
+        },
+        "applyCPU": {
+          "count": 231,
+          "median": 1,
+          "p95": 1.2000000476837158,
+          "max": 4.5
+        },
+        "renderCPU": {
+          "count": 230,
+          "median": 0.2999999523162842,
+          "p95": 0.3999999761581421,
+          "max": 1.100000023841858
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "calls": 46,
+        "triangles": 11158,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "basic512-lambert-world",
+      "stats": {
+        "raf": {
+          "count": 317,
+          "median": 24.90000000000009,
+          "p95": 25.100000000000364,
+          "max": 91.69999999999982
+        },
+        "applyCPU": {
+          "count": 201,
+          "median": 1,
+          "p95": 1.2000000476837158,
+          "max": 5
+        },
+        "renderCPU": {
+          "count": 200,
+          "median": 0.30000007152557373,
+          "p95": 0.5,
+          "max": 1.7999999523162842
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 8
+        },
+        "calls": 83,
+        "triangles": 22194,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "none-lambert-all",
+      "stats": {
+        "raf": {
+          "count": 346,
+          "median": 16.699999999999818,
+          "p95": 25.099999999999454,
+          "max": 83.30000000000018
+        },
+        "applyCPU": {
+          "count": 229,
+          "median": 1,
+          "p95": 1.2000000476837158,
+          "max": 4.399999976158142
+        },
+        "renderCPU": {
+          "count": 228,
+          "median": 0.20000004768371582,
+          "p95": 0.3999999761581421,
+          "max": 1.5
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "calls": 46,
+        "triangles": 11158,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "soft1024-lambert-world",
+      "stats": {
+        "raf": {
+          "count": 275,
+          "median": 25,
+          "p95": 33.40000000000009,
+          "max": 91.69999999999982
+        },
+        "applyCPU": {
+          "count": 160,
+          "median": 1,
+          "p95": 1.2999999523162842,
+          "max": 4.400000095367432
+        },
+        "renderCPU": {
+          "count": 159,
+          "median": 0.30000007152557373,
+          "p95": 0.5,
+          "max": 1.5
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 8
+        },
+        "calls": 83,
+        "triangles": 22194,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    },
+    {
+      "mode": "none",
+      "stats": {
+        "raf": {
+          "count": 278,
+          "median": 25,
+          "p95": 33.400000000000546,
+          "max": 100
+        },
+        "applyCPU": {
+          "count": 162,
+          "median": 1.0999999046325684,
+          "p95": 1.2999999523162842,
+          "max": 4.899999976158142
+        },
+        "renderCPU": {
+          "count": 161,
+          "median": 0.2999999523162842,
+          "p95": 0.40000009536743164,
+          "max": 1.5
+        },
+        "memory": {
+          "geometries": 41,
+          "textures": 6
+        },
+        "calls": 46,
+        "triangles": 11158,
+        "pixels": [
+          1440,
+          900
+        ]
+      },
+      "errors": []
+    }
+  ]
+}

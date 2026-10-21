@@ -1,0 +1,417 @@
+{
+  "config": {
+    "argv": [
+      "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+      "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/node_modules/.bin/playwright",
+      "test",
+      "tests/rebrand.spec.mjs",
+      "tests/builder-smart-interface.spec.mjs",
+      "--workers=1",
+      "--reporter=line,json"
+    ],
+    "configFile": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/playwright.config.mjs",
+    "rootDir": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tests",
+        "testIgnore": [
+          "**/*.unit.mjs",
+          "**/three-d-frame-sequence.mjs"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run start",
+      "url": "http://127.0.0.1:4177/index.html",
+      "reuseExistingServer": true,
+      "stdout": "ignore",
+      "stderr": "pipe"
+    }
+  },
+  "suites": [
+    {
+      "title": "builder-smart-interface.spec.mjs",
+      "file": "builder-smart-interface.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "smart rally builder interface",
+          "file": "builder-smart-interface.spec.mjs",
+          "line": 18,
+          "column": 6,
+          "specs": [
+            {
+              "title": "keeps the title clean and puts routine file work under Manage plays",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 214,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T00:04:18.264Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51863b5a6c3ee888ba6f-8f09cde87f1266e7baee",
+              "file": "builder-smart-interface.spec.mjs",
+              "line": 19,
+              "column": 3
+            },
+            {
+              "title": "uses a semantic shot family picker and does not open it with Customize",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 225,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T00:04:18.584Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51863b5a6c3ee888ba6f-2d13fdd7f6e698e58f4b",
+              "file": "builder-smart-interface.spec.mjs",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "exposes structural shot actions beside the selected shot",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 229,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T00:04:18.816Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51863b5a6c3ee888ba6f-f224ca7d274c35487731",
+              "file": "builder-smart-interface.spec.mjs",
+              "line": 42,
+              "column": 3
+            },
+            {
+              "title": "keeps Chrome playback options open while a native select changes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 182,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-19T00:04:19.049Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51863b5a6c3ee888ba6f-eb365eeea6707d1c2e03",
+              "file": "builder-smart-interface.spec.mjs",
+              "line": 52,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "rebrand.spec.mjs",
+      "file": "rebrand.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "publishes Pickleboard metadata and visible identity",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 127,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T00:04:19.243Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b85ec5e5e9d52f57fe38-dddcba641017d94012ba",
+          "file": "rebrand.spec.mjs",
+          "line": 3,
+          "column": 1
+        },
+        {
+          "title": "keeps the legacy theme and public API compatible across the rebrand",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 176,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T00:04:19.374Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b85ec5e5e9d52f57fe38-28994a8d999d62b73ac5",
+          "file": "rebrand.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "full brand remains readable at 200% text size in 320px viewport",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 184,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T00:04:19.555Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b85ec5e5e9d52f57fe38-bfe4f64f376a3c3815ee",
+          "file": "rebrand.spec.mjs",
+          "line": 40,
+          "column": 3
+        },
+        {
+          "title": "full brand remains readable at 200% text size in 390px viewport",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 178,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T00:04:19.745Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b85ec5e5e9d52f57fe38-6d8be26e489f5dd73aeb",
+          "file": "rebrand.spec.mjs",
+          "line": 40,
+          "column": 3
+        },
+        {
+          "title": "full brand remains readable at 200% text size in 768px viewport",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 179,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-19T00:04:19.928Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b85ec5e5e9d52f57fe38-4f8056e8cbc1b7fbce7e",
+          "file": "rebrand.spec.mjs",
+          "line": 40,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-19T00:04:17.958Z",
+    "duration": 2190.718,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

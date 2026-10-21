@@ -1,4 +1,4 @@
-// Pure, renderer-independent foundations for Pickleball Park playback.
+// Pure, renderer-independent foundations for Pickleboard playback.
 import { COURT_DIMENSIONS } from './court-geometry.js';
 export { COURT_DIMENSIONS } from './court-geometry.js';
 
@@ -10,9 +10,13 @@ export const CAMERA_PRESETS = Object.freeze({
     'behind-orange':{label:'Behind Orange',position:[0,1.95,10.2],target:[0,.8,-1.4],fov:52}
 });
 
-export function fitCameraPreset(name,aspect=16/9,hudFraction=0,envelope=null){
+export function fitCameraPreset(name,aspect=16/9,hudFraction=0,envelope=null,{courtFirst=false,compactLandscape=false}={}){
     let preset=CAMERA_PRESETS[name]; if(name==='overhead'&&aspect<.9)preset={...preset,position:[1.4,12,9.5]};
     if(!preset)throw new RangeError(`Unknown camera preset: ${name}.`);
+    // Builder composition follows the available playing surface, not scenery.
+    // Keep the same elevated preset identity while fitting the long court axis
+    // across wide screens. Other camera presets retain their existing views.
+    if((courtFirst||compactLandscape)&&name==='overhead')preset={...preset,position:aspect>=1.35?[12,16,3.5]:[1.4,16,10],target:[0,.35,0]};
     const safeAspect=Number.isFinite(aspect)&&aspect>0?aspect:1,reserved=Number.isFinite(hudFraction)?Math.max(0,Math.min(.8,hudFraction)):0;
     const target=[...preset.target],direction=preset.position.map((v,i)=>v-target[i]),originalDistance=Math.hypot(...direction);
     const normal=direction.map(v=>v/originalDistance),horizontalLength=Math.hypot(normal[0],normal[2]);
@@ -93,6 +97,19 @@ export function resolveShotSemantics(shot,previousPositions={}){
 }
 
 function arc(start,end,apexFeet){const lift=Math.max(0,apexFeet*FEET_TO_METERS-(start.y+end.y)/2);return p=>{const t=clamp01(p);return{x:lerp(start.x,end.x,t),y:lerp(start.y,end.y,t)+4*t*(1-t)*lift,z:lerp(start.z,end.z,t)}};}
+function compileServePreparation(shot,semantics){
+    const source=shot.servePreparation;if(!source)return null;
+    if(semantics.contact.kind!=='serve'||source.method!=='drop')throw new TypeError('servePreparation is only supported for a drop serve.');
+    const releaseHeightFeet=source.releaseHeightFeet??3.5,reboundDuration=source.reboundDuration??.34;
+    if(!Number.isFinite(releaseHeightFeet)||releaseHeightFeet!==3.5)throw new RangeError('A drop serve must use the modelVersion 1 fixed 3.5ft release height.');
+    if(!Number.isFinite(reboundDuration)||reboundDuration<.25||reboundDuration>.5)throw new RangeError('Drop-serve reboundDuration must be between 0.25 and 0.5 seconds.');
+    const radiusFeet=COURT_DIMENSIONS.ballDiameterMeters/FEET_TO_METERS/2,contactHeightFeet=semantics.contact.point.heightFeet;
+    if(contactHeightFeet<=radiusFeet)throw new RangeError('Drop-serve contact must occur above the preparatory bounce.');
+    const gravity=32.174,fallDuration=Math.sqrt(2*(releaseHeightFeet-radiusFeet)/gravity),riseVelocity=(contactHeightFeet-radiusFeet+.5*gravity*reboundDuration*reboundDuration)/reboundDuration,totalDuration=fallDuration+reboundDuration;
+    const release=boardToWorld(semantics.contact.point,releaseHeightFeet),ground=boardToWorld(semantics.contact.point,radiusFeet),contact=boardToWorld(semantics.contact.point,contactHeightFeet);
+    const sample=seconds=>{const time=Math.max(0,Math.min(totalDuration,seconds));if(time<=fallDuration){const height=Math.max(radiusFeet,releaseHeightFeet-.5*gravity*time*time);return{...boardToWorld(semantics.contact.point,height),phase:Math.abs(time-fallDuration)<1e-9?'preparation-bounce':'serve-release',preparationBounced:time>=fallDuration}}const t=time-fallDuration,height=Math.max(radiusFeet,radiusFeet+riseVelocity*t-.5*gravity*t*t);return{...boardToWorld(semantics.contact.point,height),phase:time>=totalDuration?'contact':'serve-rise',preparationBounced:true}};
+    return Object.freeze({method:'drop',release,ground,contact,releaseHeightFeet,fallDuration,reboundDuration,totalDuration,bounceTime:fallDuration,sample});
+}
 function compileLeg(shot,semantics,next){
     const metadata=normalizeShotMetadata({...shot,from:{x:semantics.contact.point.x,y:semantics.contact.point.y},trajectory3d:{...(shot.trajectory3d||{}),contactHeightFeet:semantics.contact.point.heightFeet}}),declared=shot.flight?.bounces;if(declared!==undefined&&![0,1].includes(declared))throw new RangeError('A rally leg must declare zero or one bounce.');
     const bounces=declared??(next?.contact.kind==='volley'?0:1),start=boardToWorld(semantics.contact.point,semantics.contact.point.heightFeet),radiusFeet=COURT_DIMENSIONS.ballDiameterMeters/FEET_TO_METERS/2,landing=boardToWorld(shot.to,radiusFeet),nextContact=next?boardToWorld(next.contact.point,next.contact.point.heightFeet):null,directEnd=nextContact||boardToWorld(shot.to,shot.flight?.endHeightFeet??radiusFeet),firstEnd=bounces?landing:directEnd;
@@ -107,15 +124,15 @@ function compileLeg(shot,semantics,next){
     const end=nextContact||firstEnd;return Object.freeze({metadata,start,landing,bounceEnd:end,flightDuration:firstDuration,bounceDuration:reboundDuration,totalDuration,netCrossingHeightMeters:netPoint?.y??null,netTime,netPoint,bounces,end,endpoint:nextContact?'next-contact':bounces?'bounce':'flight-end',sample});
 }
 
-const freezeEvent=e=>Object.freeze({...e,position:Object.freeze({...e.position})}),priority={'net-crossing':0,bounce:1,end:2,contact:3};
+const freezeEvent=e=>Object.freeze({...e,position:Object.freeze({...e.position})}),priority={'preparation-bounce':0,'net-crossing':1,bounce:2,end:3,contact:4};
 export function compilePlayTimeline(play){
     if(!play?.steps?.length)throw new TypeError('A Play requires at least one step.');const segments=[],events=[];let cursor=0,rallyLeg=0,previousLeg=null;
     for(let index=1;index<play.steps.length;index++){
-        const previous=play.steps[index-1],step=play.steps[index],shotSemantics=step.shot?resolveShotSemantics(step.shot,previous.positions):null,nextStep=play.steps[index+1],nextShotSemantics=nextStep?.shot?resolveShotSemantics(nextStep.shot,step.positions):null,contactTime=shotSemantics?(previous.shot?0:shotSemantics.profile.duration*shotSemantics.profile.contactRatio):null;
+        const previous=play.steps[index-1],step=play.steps[index],shotSemantics=step.shot?resolveShotSemantics(step.shot,previous.positions):null,nextStep=play.steps[index+1],nextShotSemantics=nextStep?.shot?resolveShotSemantics(nextStep.shot,step.positions):null,servePreparation=shotSemantics?compileServePreparation(step.shot,shotSemantics):null,contactTime=shotSemantics?(servePreparation?.totalDuration??(previous.shot?0:shotSemantics.profile.duration*shotSemantics.profile.contactRatio)):null;
         let trajectory=null,duration,endpoint='movement';if(shotSemantics){rallyLeg++;trajectory=compileLeg(step.shot,shotSemantics,nextShotSemantics);duration=contactTime+trajectory.totalDuration;endpoint=trajectory.endpoint;}else duration=Math.max(.35,(step.durationMs||850)/1000);
-        const segment={index,previous,step,nextStep,trajectory,shotSemantics,nextShotSemantics,startTime:cursor,duration,endTime:cursor+duration,contactTime,trajectoryStartTime:contactTime,trajectoryEndTime:trajectory?contactTime+trajectory.totalDuration:null,rallyLeg:shotSemantics?rallyLeg:null,endpoint,ballStart:trajectory?.start||previousLeg?.end||boardToWorld(previous.positions.ball,1.2)};
+        const segment={index,previous,step,nextStep,trajectory,servePreparation,shotSemantics,nextShotSemantics,startTime:cursor,duration,endTime:cursor+duration,contactTime,trajectoryStartTime:contactTime,trajectoryEndTime:trajectory?contactTime+trajectory.totalDuration:null,rallyLeg:shotSemantics?rallyLeg:null,endpoint,ballStart:servePreparation?.release||trajectory?.start||previousLeg?.end||boardToWorld(previous.positions.ball,1.2)};
         segment.ballEnd=trajectory?.end||(previousLeg?.end&&step.positions.ball.x===previous.positions.ball.x&&step.positions.ball.y===previous.positions.ball.y?previousLeg.end:boardToWorld(step.positions.ball,1.2));segments.push(Object.freeze(segment));
-        if(trajectory){const prefix=`${play.id||'play'}:leg-${rallyLeg}`,base=cursor+contactTime;events.push(freezeEvent({id:`${prefix}:contact`,type:'contact',time:base,actor:shotSemantics.playerId,position:trajectory.start,rallyLeg}));if(trajectory.netTime!==null)events.push(freezeEvent({id:`${prefix}:net-crossing`,type:'net-crossing',time:base+trajectory.netTime,actor:null,position:trajectory.netPoint,rallyLeg}));if(trajectory.bounces)events.push(freezeEvent({id:`${prefix}:bounce`,type:'bounce',time:base+trajectory.flightDuration,actor:null,position:trajectory.landing,rallyLeg}));events.push(freezeEvent({id:`${prefix}:end`,type:'end',time:cursor+duration,actor:nextShotSemantics?.playerId||null,position:trajectory.end,rallyLeg}));previousLeg=trajectory;}cursor+=duration;
+        if(trajectory){const prefix=`${play.id||'play'}:leg-${rallyLeg}`,base=cursor+contactTime;if(servePreparation)events.push(freezeEvent({id:`${prefix}:preparation-bounce`,type:'preparation-bounce',time:cursor+servePreparation.bounceTime,actor:shotSemantics.playerId,position:servePreparation.ground,rallyLeg}));events.push(freezeEvent({id:`${prefix}:contact`,type:'contact',time:base,actor:shotSemantics.playerId,position:trajectory.start,rallyLeg}));if(trajectory.netTime!==null)events.push(freezeEvent({id:`${prefix}:net-crossing`,type:'net-crossing',time:base+trajectory.netTime,actor:null,position:trajectory.netPoint,rallyLeg}));if(trajectory.bounces)events.push(freezeEvent({id:`${prefix}:bounce`,type:'bounce',time:base+trajectory.flightDuration,actor:null,position:trajectory.landing,rallyLeg}));events.push(freezeEvent({id:`${prefix}:end`,type:'end',time:cursor+duration,actor:nextShotSemantics?.playerId||null,position:trajectory.end,rallyLeg}));previousLeg=trajectory;}cursor+=duration;
     }
     events.sort((a,b)=>a.time-b.time||priority[a.type]-priority[b.type]||a.id.localeCompare(b.id));return Object.freeze({play,segments:Object.freeze(segments),events:Object.freeze(events),duration:cursor});
 }
@@ -123,7 +140,7 @@ export function compilePlayTimeline(play){
 function segmentAt(timeline,time){return timeline.segments.find(s=>time<s.endTime-1e-9)||timeline.segments.at(-1)||null;}
 export function samplePlayBall(timeline,seconds){
     if(!timeline?.segments||!Number.isFinite(seconds))throw new TypeError('A compiled timeline and finite time are required.');const time=Math.max(0,Math.min(timeline.duration,seconds)),segment=segmentAt(timeline,time);if(!segment){const board=timeline.play.steps[0].positions.ball,world=boardToWorld(board,1.2);return Object.freeze({...world,board:Object.freeze({...board}),phase:'ready',launched:false,rallyLeg:null,time});}
-    const local=Math.max(0,Math.min(segment.duration,time-segment.startTime));let point,phase,launched=false;if(segment.trajectory){if(local<segment.contactTime-1e-9){point=segment.trajectory.start;phase='waiting-contact';}else{const sampled=segment.trajectory.sample(local-segment.trajectoryStartTime);point=sampled;phase=Math.abs(local-segment.contactTime)<1e-9?'contact':sampled.phase;launched=true;}}else{const p=segment.duration?clamp01(local/segment.duration):1,e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;point={x:lerp(segment.ballStart.x,segment.ballEnd.x,e),y:lerp(segment.ballStart.y,segment.ballEnd.y,e),z:lerp(segment.ballStart.z,segment.ballEnd.z,e)};phase='held';}
+    const local=Math.max(0,Math.min(segment.duration,time-segment.startTime));let point,phase,launched=false;if(segment.trajectory){if(local<segment.contactTime-1e-9){if(segment.servePreparation){const sampled=segment.servePreparation.sample(local);point=sampled;phase=sampled.phase;}else{point=segment.trajectory.start;phase='waiting-contact';}}else{const sampled=segment.trajectory.sample(local-segment.trajectoryStartTime);point=sampled;phase=Math.abs(local-segment.contactTime)<1e-9?'contact':sampled.phase;launched=true;}}else{const p=segment.duration?clamp01(local/segment.duration):1,e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;point={x:lerp(segment.ballStart.x,segment.ballEnd.x,e),y:lerp(segment.ballStart.y,segment.ballEnd.y,e),z:lerp(segment.ballStart.z,segment.ballEnd.z,e)};phase='held';}
     return Object.freeze({x:point.x,y:point.y,z:point.z,board:Object.freeze(worldToBoard(point)),phase:time===0?'ready':timeline.events.some(event=>event.type==='bounce'&&Math.abs(event.time-time)<1e-9)?'bounce':phase,launched,rallyLeg:segment.rallyLeg,time});
 }
 export function samplePlayState(timeline,seconds,settings={}){

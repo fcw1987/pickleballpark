@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
+import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 
 async function openViewer(page) {
-  await page.goto('/index.html?second-render=1');
+  await page.goto('/index.html?workspace=planner&second-render=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
   await page.locator('#play3dView').click();
@@ -31,36 +32,29 @@ test('3D renderer uses antialiasing and native DPR up to the quality cap', async
   await context.close();
 });
 
-// The former mesh anatomy/material checks described the rejected toy model.
-// This contract instead proves the shipped pixel layers, sampling, and identity.
-test('pixel athletes use complete independent layers with team and handedness metadata', async ({ page }) => {
+test('solid athlete meshes own lit materials and release every resource on exit', async ({ page }) => {
   await openViewer(page);
-  const players = await page.evaluate(() => [...window.pickleboard.threeD.playerObjects.values()].map(root => {
-    return {
-      team: root.userData.team,
-      handedness: root.userData.handedness,
-      pixelActor: root.userData.pixelActor,
-      bodyTexture: root.userData.body.material.map.image.src,
-      actionTexture: root.userData.arm.material.map.image.src,
-      distinctMaps: root.userData.body.material.map !== root.userData.arm.material.map,
-      bodyVisible: root.userData.body.visible,
-      actionVisible: root.userData.arm.visible,
-      alphaTest: root.userData.body.material.alphaTest,
-      groundY: root.userData.groundY,
-      worldY: root.position.y
-    };
-  }));
-  expect(players).toHaveLength(4);
-  for (const player of players) {
-    expect(player).toMatchObject({ pixelActor: true, distinctMaps: true, bodyVisible: true, actionVisible: true, alphaTest: 0.25, groundY: 0, worldY: 0 });
-    expect(player.bodyTexture).toContain(`${player.team === 'team1' ? 'green' : 'orange'}-${player.handedness}`);
-    expect(player.bodyTexture).toContain('-body.png');
-    expect(player.actionTexture).toContain('-action.png');
-  }
+  const result = await page.evaluate(() => {
+    const viewer = window.pickleboard.threeD, resources = viewer.actorResources;
+    const meshes = [];
+    for (const root of viewer.playerObjects.values()) root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
+    const ownedGeometry = meshes.every(mesh => resources.geometries.has(mesh.geometry));
+    const ownedMaterial = meshes.every(mesh => [...resources.materials.values(), ...resources.extraMaterials].includes(mesh.material));
+    const lit = meshes.every(mesh => mesh.material.type === 'MeshStandardMaterial' && mesh.material.depthTest && mesh.material.depthWrite && !mesh.material.map);
+    const tracked = [...resources.geometries, ...resources.materials.values(), ...resources.extraMaterials];
+    const counts = tracked.map(() => 0);
+    tracked.forEach((resource, i) => resource.addEventListener('dispose', () => counts[i]++));
+    viewer.exit();
+    return { ownedGeometry, ownedMaterial, lit, meshCount: meshes.length, counts, remaining: resources.geometries.size + resources.materials.size + resources.extraMaterials.size };
+  });
+  expect(result).toMatchObject({ ownedGeometry: true, ownedMaterial: true, lit: true, remaining: 0 });
+  expect(result.meshCount).toBe(8);
+  expect(result.counts.every(count => count === 1)).toBe(true);
 });
 
-test('stroke sprites remain upright, continuously positioned, grounded, and contact calibrated', async ({ page }) => {
+test('articulated strokes remain upright, continuously positioned, grounded, and contact calibrated', async ({ page }) => {
   await openViewer(page);
+  await installDimensionalAudit(page);
   const audit = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
     return viewer.timeline.segments.filter(segment => segment.shotSemantics).map(segment => {
@@ -74,7 +68,9 @@ test('stroke sprites remain upright, continuously positioned, grounded, and cont
           ball: viewer.ballObject.position.toArray(),
           frame: actor.userData.animation.frame,
           groundY: actor.position.y,
-          visualPitch: actor.userData.visual.rotation.x
+          visualPitch: actor.userData.visual.rotation.x,
+          shoeBottoms: window.__athleteAudit(actor).shoeBottoms,
+          batchError: window.__athleteAudit(actor).batchError()
         });
       }
       return { samples };
@@ -83,6 +79,11 @@ test('stroke sprites remain upright, continuously positioned, grounded, and cont
   for (const shot of audit) {
     expect(shot.samples.every(sample => sample.groundY === 0 && Math.abs(sample.visualPitch) < 0.001)).toBe(true);
     expect(new Set(shot.samples.map(sample => sample.frame)).size).toBeGreaterThan(1);
+    for (const sample of shot.samples) {
+      expect(sample.batchError).toBeLessThan(2e-6);
+      expect(Math.min(...sample.shoeBottoms)).toBeGreaterThanOrEqual(-0.005);
+      expect(Math.min(...sample.shoeBottoms)).toBeLessThanOrEqual(0.01);
+    }
     for (let i = 1; i < shot.samples.length; i++) {
       expect(Math.hypot(...shot.samples[i].position.map((value, axis) => value - shot.samples[i - 1].position[axis]))).toBeLessThan(0.4);
     }

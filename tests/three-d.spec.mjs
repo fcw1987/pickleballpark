@@ -1,9 +1,9 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './helpers/offline-app.mjs';
 
 async function openApp(page) {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/index.html?three-d-e2e=1');
+  await page.goto('/index.html?workspace=planner&three-d-e2e=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   return errors;
 }
@@ -22,11 +22,11 @@ test('3D View initializes regulation scene with players, ball, and handed paddle
   const scene = await page.evaluate(() => ({
     state: window.pickleboard.threeD.getState(),
     paddles: Object.fromEntries([...window.pickleboard.threeD.playerObjects]
-      .map(([id, object]) => [id, { handedness: object.userData.handedness, side: object.userData.animation.handedness, frameHand: object.userData.arm.userData.currentFrame.hand }]))
+      .map(([id, object]) => [id, { handedness: object.userData.handedness, side: object.userData.animation.handedness, physicalArm: object.userData.arms[object.userData.handedness].hand.name }]))
   }));
   expect(scene.state).toMatchObject({ active: true, playerCount: 4, hasBall: true, playId: 'third-shot-drop' });
-  expect(scene.paddles.player1).toMatchObject({ handedness: 'right', side: 'right', frameHand: 'right' });
-  expect(scene.paddles.player2).toMatchObject({ handedness: 'left', side: 'left', frameHand: 'left' });
+  expect(scene.paddles.player1).toMatchObject({ handedness: 'right', side: 'right', physicalArm: 'RightHand' });
+  expect(scene.paddles.player2).toMatchObject({ handedness: 'left', side: 'left', physicalArm: 'LeftHand' });
   expect(errors).toEqual([]);
 });
 
@@ -34,16 +34,16 @@ test('named cameras switch without resetting the Play', async ({ page }) => {
   await openApp(page);
   await openDrop3d(page);
   for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
-    await page.locator('#threeDCamera').selectOption(camera);
+    await page.locator('#threeDCamera').selectOption(camera,{force:true});
     expect(await page.evaluate(() => window.pickleboard.threeD.getState().camera)).toBe(camera);
     expect(await page.evaluate(() => window.pickleboard.threeD.getState().elapsed)).toBe(0);
   }
 });
 
-test('play, pause, playback rate, restart, and proof bounce share one clock', async ({ page }) => {
+test('play, pause, playback rate, timeline seek, and proof bounce share one clock', async ({ page }) => {
   await openApp(page);
   await openDrop3d(page);
-  await page.locator('#threeDRate').selectOption('0.25');
+  await page.locator('#threeDRate').selectOption('0.25',{force:true});
   await page.locator('#threeDPlayPause').click();
   await page.waitForTimeout(300);
   const slowState = await page.evaluate(() => window.pickleboard.threeD.getState());
@@ -63,7 +63,7 @@ test('play, pause, playback rate, restart, and proof bounce share one clock', as
   const proof = await page.evaluate(() => window.pickleboard.threeD.getState().lastState);
   expect(proof.y).toBeCloseTo(0.037, 6);
   expect(proof.phase).toBe('bounce');
-  await page.locator('#threeDRestart').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.getState())).toMatchObject({ elapsed: 0, playing: false });
 });
 
@@ -75,8 +75,15 @@ test('exit stops render loop, re-entry creates one new loop, and 2D Play remains
   await expect(page.locator('#threeDViewer')).toBeHidden();
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().active)).toBe(false);
   expect(await page.evaluate(() => window.pickleboard.plays.getState().playId)).toBe('third-shot-drop');
-  await page.locator('#playNext').click();
-  expect(await page.evaluate(() => window.pickleboard.plays.getState().stepIndex)).toBe(1);
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
+  const returnState = await page.evaluate(() => {
+    const engine = window.pickleboard.plays;
+    const chapter = engine.chapters.find(item => item.shotId === 'return');
+    return { ...engine.getState(), anchor: chapter.anchor, stepId: engine.lastState.segment.step.id,
+      currentShotId: document.querySelector('#playTimelineMount .shot-timeline-marker.is-current')?.dataset.shotId };
+  });
+  expect(returnState).toMatchObject({ stepIndex: 2, stepId: 'return', currentShotId: 'return' });
+  expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
   await page.locator('#play3dView').click();
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().renderLoopCount)).toBe(firstLoopCount + 1);
@@ -106,19 +113,19 @@ test('reduced motion retains 3D endpoints and camera controls', async ({ page })
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openApp(page);
   await openDrop3d(page);
-  await page.locator('#threeDCamera').selectOption('sideline');
+  await page.locator('#threeDCamera').selectOption('sideline',{force:true});
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().camera)).toBe('sideline');
-  await page.locator('#threeDRestart').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().lastState.phase)).toBe('ready');
 });
 
-test('offline repeat visit can open the locally cached Three.js viewer', async ({ page, context }) => {
-  await openApp(page);
+test('offline repeat visit can open the locally cached Three.js viewer', async ({ page, offlineApp }) => {
+  await page.goto(`${offlineApp.url}/index.html?workspace=planner&three-d-e2e=1`);
+  await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
-  await context.setOffline(true);
+  await offlineApp.stop();
   await page.reload();
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await openDrop3d(page);
   expect(await page.evaluate(() => window.pickleboard.threeD.getState())).toMatchObject({ active: true, hasBall: true, playerCount: 4 });
-  await context.setOffline(false);
 });

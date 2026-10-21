@@ -1,0 +1,55 @@
+{
+  "source": "195dd49da319d3ca5c41eb97105270badeae2a8d",
+  "baseline": "f1308015d9e3848909e35d3919735b265e71fb7f",
+  "files": 82,
+  "bytes": 1444069,
+  "digest": "999354a660ec00236e0777d68b528fb68e1321c66861e2ac66a5d3713f661414",
+  "changed": [
+    {
+      "path": "assets/park/banner.png",
+      "bytes": 280,
+      "sha256": "769f4f576989b0f1637d55bd79c354d63f0c9074df6c4d5a368dace7b80ad66c"
+    },
+    {
+      "path": "assets/park/sign.png",
+      "bytes": 248,
+      "sha256": "3b210a502b6a0431e87f76ce7ed1e9c575924dd1ee992ec1120af1d8468ef12b"
+    },
+    {
+      "path": "board-projection.js",
+      "bytes": 2463,
+      "sha256": "ec1ae76b9241c4f570b58d167e26c6b6c67e65a0a327b5f1451905ad7b5cbd0a"
+    },
+    {
+      "path": "index.html",
+      "bytes": 18737,
+      "sha256": "fbfa14f5e12477e8427e7a7f22e52667b98abe24d14c574ad9394dea15e6c4d8"
+    },
+    {
+      "path": "park-layout.js",
+      "bytes": 2488,
+      "sha256": "9007dfd5b3bc98ff23d0e0444f982999eff0148b314002a18c12531ae48ee460"
+    },
+    {
+      "path": "park-scene.js",
+      "bytes": 10989,
+      "sha256": "87b8a7cf230683cfadb802a6790cf447acac5f83bdaab37890edacde36d897d8"
+    },
+    {
+      "path": "script.js",
+      "bytes": 59033,
+      "sha256": "a16c7768589057b7918a3df8bb7f417074dd71348621ebf6180d6f02a4fe8882"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 23644,
+      "sha256": "9c30fcf37e090812b23c89885964120e94099a664623e2f3e567e5b3360ad19d"
+    },
+    {
+      "path": "sw.js",
+      "bytes": 6248,
+      "sha256": "edef406544023ffa98e568310ef7d5e259d6af93119b49fbcbe4fdea6ecdb6c5"
+    }
+  ],
+  "removed": []
+}

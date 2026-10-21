@@ -1,0 +1,322 @@
+{
+  "method": "Capture listeners record delivered events without replacing application handlers; 60 play/pause cycles per workspace and engine.",
+  "before": [
+    {
+      "workspace": "planner",
+      "trials": 60,
+      "failures": []
+    },
+    {
+      "workspace": "builder",
+      "trials": 60,
+      "failures": [
+        {
+          "trial": 6,
+          "playing": {
+            "playing": true,
+            "clockPlaying": true,
+            "elapsed": 0.07425000000000002,
+            "owner": "replay",
+            "events": [
+              {
+                "type": "pointerdown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "mousedown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "pointerup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "mouseup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "click",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              }
+            ]
+          },
+          "immediate": {
+            "playing": true,
+            "clockPlaying": true,
+            "elapsed": 0.08675000000000004,
+            "owner": "replay",
+            "events": [
+              {
+                "type": "pointerdown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "mousedown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "pointerup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "mouseup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "click",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "pointerdown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3841,
+                "playing": true,
+                "elapsed": 0.08425000000000003,
+                "label": "Pause",
+                "detail": 1
+              },
+              {
+                "type": "mousedown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3841,
+                "playing": true,
+                "elapsed": 0.08425000000000003,
+                "label": "Pause",
+                "detail": 1
+              },
+              {
+                "type": "pointerup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3843,
+                "playing": true,
+                "elapsed": 0.08675000000000004,
+                "label": "Pause",
+                "detail": 1
+              },
+              {
+                "type": "mouseup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3843,
+                "playing": true,
+                "elapsed": 0.08675000000000004,
+                "label": "Pause",
+                "detail": 1
+              }
+            ]
+          },
+          "later": {
+            "playing": true,
+            "clockPlaying": true,
+            "elapsed": 0.12425000000000007,
+            "owner": "replay",
+            "events": [
+              {
+                "type": "pointerdown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "mousedown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "pointerup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "mouseup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "click",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3493,
+                "playing": false,
+                "elapsed": 0,
+                "label": "Play",
+                "detail": 1
+              },
+              {
+                "type": "pointerdown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3841,
+                "playing": true,
+                "elapsed": 0.08425000000000003,
+                "label": "Pause",
+                "detail": 1
+              },
+              {
+                "type": "mousedown",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3841,
+                "playing": true,
+                "elapsed": 0.08425000000000003,
+                "label": "Pause",
+                "detail": 1
+              },
+              {
+                "type": "pointerup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3843,
+                "playing": true,
+                "elapsed": 0.08675000000000004,
+                "label": "Pause",
+                "detail": 1
+              },
+              {
+                "type": "mouseup",
+                "id": "",
+                "action": "play-pause",
+                "target": "SPAN",
+                "time": 3843,
+                "playing": true,
+                "elapsed": 0.08675000000000004,
+                "label": "Pause",
+                "detail": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "after": [
+    {
+      "engine": "chromium",
+      "workspace": "planner",
+      "trials": 60,
+      "failures": []
+    },
+    {
+      "engine": "chromium",
+      "workspace": "builder",
+      "trials": 60,
+      "failures": []
+    },
+    {
+      "engine": "webkit",
+      "workspace": "planner",
+      "trials": 60,
+      "failures": []
+    },
+    {
+      "engine": "webkit",
+      "workspace": "builder",
+      "trials": 60,
+      "failures": []
+    }
+  ]
+}

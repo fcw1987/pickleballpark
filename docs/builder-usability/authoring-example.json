@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 1,
+  "id": "starter-draft",
+  "title": "Starter Serve, Return & Third",
+  "initialLayout": {
+    "player1": {
+      "x": 15,
+      "y": -1
+    },
+    "player2": {
+      "x": 5,
+      "y": -1
+    },
+    "player3": {
+      "x": 5,
+      "y": 42
+    },
+    "player4": {
+      "x": 15,
+      "y": 30
+    },
+    "ball": {
+      "x": 16.2,
+      "y": 0
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "serve-1",
+      "family": "serve",
+      "hitter": "player1",
+      "receiver": "player3",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 5.9937880873699925,
+        "y": 35.609442237447965
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "serveMethod": "volley"
+    },
+    {
+      "id": "return-2",
+      "family": "return",
+      "hitter": "player3",
+      "receiver": "player1",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 15,
+        "y": 6
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      }
+    },
+    {
+      "id": "drop-3",
+      "family": "drive",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 7,
+        "y": 27
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      }
+    },
+    {
+      "id": "10b93667-f39c-44b2-923e-2cfd8f581d72",
+      "family": "drop",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15,
+        "y": 8
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": true,
+    "team": "both"
+  },
+  "opening": "serve",
+  "ending": "stop",
+  "intentionalFault": false
+}

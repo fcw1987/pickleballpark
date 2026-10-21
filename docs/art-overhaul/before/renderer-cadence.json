@@ -1,0 +1,70 @@
+{
+  "browser": "149.0.7827.55",
+  "environment": "headless Chromium on macOS, desktop emulation, DPR1, 1440x900",
+  "workload": "starter three-shot draft, overhead, Loop, 1x",
+  "warmup": "logical time >2 seconds",
+  "sampleSeconds": 30,
+  "runs": [
+    {
+      "startup": {
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "readyMs": 862.2999999523163,
+        "bytes": 1766687,
+        "buffer": [
+          1428,
+          731
+        ]
+      },
+      "cadence": {
+        "count": 1864,
+        "median": 16.69999999999891,
+        "p95": 25.099999999998545,
+        "p99": 25.299999999999272
+      },
+      "missFraction": 0.05257510729613734,
+      "renderWorkMs": {
+        "count": 1160,
+        "median": 0.30000007152557373,
+        "p95": 0.40000009536743164,
+        "p99": 0.6000000238418579
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 16
+      },
+      "drawCalls": 57,
+      "pausedFramesOverOneSecond": 0
+    },
+    {
+      "startup": {
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "readyMs": 811.8999999761581,
+        "bytes": 1766687,
+        "buffer": [
+          1428,
+          731
+        ]
+      },
+      "cadence": {
+        "count": 1783,
+        "median": 16.69999999999709,
+        "p95": 33.19999999999982,
+        "p99": 33.900000000001455
+      },
+      "missFraction": 0.12058328659562535,
+      "renderWorkMs": {
+        "count": 1080,
+        "median": 0.30000007152557373,
+        "p95": 0.5,
+        "p99": 0.6000000238418579
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 16
+      },
+      "drawCalls": 57,
+      "pausedFramesOverOneSecond": 0
+    }
+  ],
+  "limitations": "RAF intervals do not prove presentation; render work includes CPU command submission, not GPU completion. No physical phone or Safari claim."
+}

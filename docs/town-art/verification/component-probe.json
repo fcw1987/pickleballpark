@@ -1,0 +1,50 @@
+[
+  {
+    "mode": "full",
+    "count": 149,
+    "median": 25,
+    "p95": 33.40000000000009,
+    "calls": 42,
+    "triangles": 25799
+  },
+  {
+    "mode": "no-fill",
+    "count": 154,
+    "median": 25,
+    "p95": 33.30000000000018,
+    "calls": 42,
+    "triangles": 25799
+  },
+  {
+    "mode": "no-ground-shadows",
+    "count": 154,
+    "median": 25,
+    "p95": 33.30000000000109,
+    "calls": 39,
+    "triangles": 25151
+  },
+  {
+    "mode": "no-village",
+    "count": 192,
+    "median": 24.099999999998545,
+    "p95": 25.099999999998545,
+    "calls": 34,
+    "triangles": 11898
+  },
+  {
+    "mode": "no-actors",
+    "count": 174,
+    "median": 25,
+    "p95": 25.100000000002183,
+    "calls": 30,
+    "triangles": 14543
+  },
+  {
+    "mode": "full",
+    "count": 150,
+    "median": 25,
+    "p95": 33.400000000001455,
+    "calls": 42,
+    "triangles": 25799
+  }
+]

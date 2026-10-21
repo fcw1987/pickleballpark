@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pickleball Park · Dimensional art review</title>
+<style>
+:root{color-scheme:light;background:#f6f3e9;color:#203d42;font-family:system-ui,sans-serif}
+body{max-width:1380px;margin:auto;padding:clamp(16px,4vw,56px)}
+h1{font-size:clamp(28px,4vw,52px);letter-spacing:-.045em;line-height:1.05;margin:12px 0 24px}
+h2{margin:44px 0 16px;font-size:24px}p{max-width:850px;line-height:1.6}.eyebrow{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#477564}
+a{color:#286956;text-underline-offset:3px}nav{display:flex;gap:18px;flex-wrap:wrap;margin:22px 0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}.phones{max-width:820px;margin:auto}
+figure{margin:0;border:1px solid #b5c3b6;border-radius:9px;overflow:hidden;background:#e4e8db}
+figcaption{font-size:13px;padding:10px 14px;background:#fffdf4;border-bottom:1px solid #b5c3b6}
+img,video{display:block;width:100%;height:auto}video{background:#182b30;border-radius:8px}
+.note{font-size:13px;color:#526365}.badge{display:inline-block;padding:5px 9px;background:#dbe6da;border-radius:3px;font-size:12px}
+footer{border-top:1px solid #b5c3b6;margin-top:40px;padding-top:20px;font-size:13px;line-height:1.6}
+@media(max-width:680px){.pair{grid-template-columns:1fr}.phones{max-width:390px}}
+</style>
+<header>
+<div class="eyebrow">Local candidate · Art and mobile interface</div>
+<h1>A dimensional sports park,<br>with room to build a rally.</h1>
+<p>Original articulated athletes, a coherent faceted court garden, readable contact and a compact phone interface. The builder, shared playback clock and shot mechanics remain the foundation.</p>
+<nav><a href="../../index.html">Open local candidate</a><a href="REPORT.md">Review report and verification</a><a href="final/screens/capture.json">Screenshot provenance</a><a href="final/motion/motion-report.json">Motion provenance</a></nav>
+</header>
+<main>
+<h2>Normal builder · Desktop</h2>
+<div class="pair">
+<figure><figcaption>Before · original local Smart Rally source <code>fc46c60</code></figcaption><img src="before/builder-comparison/desktop-builder.png" alt="Original desktop builder with sprite actors and large yellow interface."></figure>
+<figure><figcaption>After · dimensional athletes and compact ivory controls</figcaption><img src="final/screens/desktop-builder.png" alt="Revised desktop builder with dimensional athletes and a coherent court garden."></figure>
+</div>
+<h2>Normal builder · Phone portrait</h2>
+<div class="pair phones">
+<figure><figcaption>Before · 390 × 844</figcaption><img loading="lazy" src="before/builder-comparison/phone-portrait-builder.png" alt="Original phone portrait builder."></figure>
+<figure><figcaption>After · 390 × 844</figcaption><img loading="lazy" src="final/screens/phone-portrait-builder.png" alt="Revised phone portrait builder with a larger clear court area."></figure>
+</div>
+<h2>Normal builder · Phone landscape</h2>
+<div class="pair">
+<figure><figcaption>Before · 844 × 390</figcaption><img loading="lazy" src="before/builder-comparison/phone-landscape-builder.png" alt="Original phone landscape builder."></figure>
+<figure><figcaption>After · 844 × 390</figcaption><img loading="lazy" src="final/screens/phone-landscape-builder.png" alt="Revised phone landscape builder with bounded controls."></figure>
+</div>
+<h2>Motion · Four representative plays</h2>
+<p class="note">Serve and return, third-shot drop, third-shot drive, and fifth-shot drop. Contact holds precede playback so preparation, contact and recovery can be inspected. All eight supported plays receive separate geometry, framing and offline checks.</p>
+<video controls playsinline preload="metadata" poster="final/screens/desktop-contact.png" src="final/motion/four-play-motion.webm"></video>
+<h2>Camera and contact</h2>
+<div class="pair">
+<figure><figcaption>Sideline · physical bodies and paddles</figcaption><img loading="lazy" src="final/screens/desktop-3d-sideline.png" alt="Dimensional athletes seen from the sideline camera."></figure>
+<figure><figcaption>Behind orange · readable contact</figcaption><img loading="lazy" src="final/screens/desktop-3d-behind-orange.png" alt="Court and player poses from behind the orange team."></figure>
+</div>
+</main>
+<footer>Captured locally with installed headless browser tooling. Phone sizes are emulations, not physical iPhone or Safari-device evidence. Exact source revision and runtime digest accompany each final capture. No deployment, push or merge was performed.</footer>
+</html>

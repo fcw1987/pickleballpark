@@ -1,0 +1,89 @@
+{
+  "conditions": "Headless Chromium, macOS, 1440x900 DPR2, fresh context per run. Wall readiness includes browser automation. Idle callback sample is not displayed FPS.",
+  "results": [
+    {
+      "label": "before",
+      "run": 0,
+      "editor": {
+        "readyMs": 83.6000000089407,
+        "resourceBytes": 194147,
+        "threeLoaded": false
+      },
+      "firstReplayMs": 127,
+      "idleRendersOver120Callbacks": 0,
+      "resources": {
+        "geometries": 43,
+        "textures": 14
+      },
+      "calls": 53,
+      "buffer": [
+        2880,
+        1800
+      ],
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)"
+    },
+    {
+      "label": "before",
+      "run": 1,
+      "editor": {
+        "readyMs": 45.79999999701977,
+        "resourceBytes": 194147,
+        "threeLoaded": false
+      },
+      "firstReplayMs": 116,
+      "idleRendersOver120Callbacks": 0,
+      "resources": {
+        "geometries": 43,
+        "textures": 14
+      },
+      "calls": 53,
+      "buffer": [
+        2880,
+        1800
+      ],
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)"
+    },
+    {
+      "label": "after",
+      "run": 0,
+      "editor": {
+        "readyMs": 50.29999999701977,
+        "resourceBytes": 200792,
+        "threeLoaded": false
+      },
+      "firstReplayMs": 138,
+      "idleRendersOver120Callbacks": 0,
+      "resources": {
+        "geometries": 43,
+        "textures": 15
+      },
+      "calls": 53,
+      "buffer": [
+        2880,
+        1800
+      ],
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)"
+    },
+    {
+      "label": "after",
+      "run": 1,
+      "editor": {
+        "readyMs": 43.5,
+        "resourceBytes": 200792,
+        "threeLoaded": false
+      },
+      "firstReplayMs": 120,
+      "idleRendersOver120Callbacks": 0,
+      "resources": {
+        "geometries": 43,
+        "textures": 15
+      },
+      "calls": 53,
+      "buffer": [
+        2880,
+        1800
+      ],
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)"
+    }
+  ]
+}

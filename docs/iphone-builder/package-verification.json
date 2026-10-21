@@ -1,0 +1,98 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "chromium",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
+  },
+  {
+    "browser": "chromium",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": "4816210"
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "webkit",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
+  },
+  {
+    "browser": "webkit",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7bfb7ddf49627aae29e326ff3342c4e0e2f8ca38",
+    "previousPublicSource": "4816210"
+  }
+]

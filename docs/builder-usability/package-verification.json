@@ -1,0 +1,74 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "chromium",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "webkit",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 93,
+    "cacheEntries": 91,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "634bc6b20fe87730f0abc3503af6eedcfb42ba16",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c"
+  }
+]

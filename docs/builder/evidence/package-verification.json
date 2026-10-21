@@ -1,0 +1,50 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 91,
+    "cacheEntries": 89,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7ef3961857b41731712bb3697eca29ff5664e43f",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 91,
+    "cacheEntries": 89,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7ef3961857b41731712bb3697eca29ff5664e43f",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 91,
+    "cacheEntries": 89,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7ef3961857b41731712bb3697eca29ff5664e43f",
+    "previousPublicSource": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 91,
+    "cacheEntries": 89,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "7ef3961857b41731712bb3697eca29ff5664e43f",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f"
+  }
+]

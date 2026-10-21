@@ -1,11 +1,33 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v15`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v33`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
   './',
   './index.html',
   './script.js',
+  './build-metadata.js',
+  './build-identity.js',
+  './build-diagnostics.js',
+  './build-diagnostics-ui.js',
+  './version.json',
+  './play-builder.js',
+  './keyboard-shortcuts.js',
+  './rally-proposals.js',
+  './smart-rally-generator.js',
+  './rally-coach.js',
+  './play-document.js',
+  './play-compiler.js',
+  './builder-storage.js',
+  './builder-ui.js',
+  './player-labels.js',
+  './builder-ui.css',
+  './builder-integration.css',
+  './builder-court-tools.js',
+  './builder-framing.js',
+  './builder-waypoint-policy.js',
+  './coverage-assistance.js',
+  './rally-rules.js',
   './visual-theme.js',
   './board-projection.js',
   './three-d-loader.js',
@@ -15,6 +37,9 @@ const STATIC_ASSETS = [
   './play-catalog.js',
   './court-geometry.js',
   './coaching-session.js',
+  './shot-chapters.js',
+  './shot-timeline.js',
+  './shot-timeline.css',
   './coaching-ui.js',
   './park-layout.js',
   './park-scene.js',
@@ -24,11 +49,16 @@ const STATIC_ASSETS = [
   './assets/park/tree.png',
   './assets/park/shrub.png',
   './assets/park/bench.png',
-  './assets/park/sign.png',
+  './assets/park/banner.png',
+  './assets/park/menu-frame-light.png',
+  './assets/park/menu-frame-dark.png',
+  './assets/park/menu-labels.ttf',
 
   './three-d-core.js',
   './three-d-animation.js',
   './three-d-playback.js',
+  './three-d-athletes.js',
+  './three-d-world.js',
   './three-d-presentation.js',
   './three-d-pixel-actors.js',
   './three-d-ball.js',
@@ -100,7 +130,17 @@ self.addEventListener('activate', event => {
       cacheName !== STATIC_CACHE &&
       (cacheName.startsWith(CACHE_PREFIX) || LEGACY_CACHES.has(cacheName))
     );
-    await Promise.all(obsoletePickleboardCaches.map(cacheName => caches.delete(cacheName)));
+    // CacheStorage is shared by every worker on this origin. A project-path
+    // move must retain the old path's offline shell and any mixed-scope data.
+    const scope = new URL(self.registration.scope);
+    await Promise.all(obsoletePickleboardCaches.map(async cacheName => {
+      const cache = await caches.open(cacheName);
+      for (const request of await cache.keys()) {
+        const url = new URL(request.url);
+        if (url.origin === scope.origin && url.pathname.startsWith(scope.pathname)) await cache.delete(request);
+      }
+      if (!(await cache.keys()).length) await caches.delete(cacheName);
+    }));
     await self.clients.claim();
   })());
 });
@@ -165,6 +205,9 @@ self.addEventListener('fetch', event => {
 
   const requestUrl = new URL(request.url);
   if (requestUrl.origin !== self.location.origin) return;
+  // A Server build comparison must reach the server, including when offline.
+  // Never relabel a cached endpoint as the current server response.
+  if (requestUrl.pathname === new URL('./version.json', self.location).pathname && requestUrl.searchParams.has('diagnostic')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(handleNavigation(request));

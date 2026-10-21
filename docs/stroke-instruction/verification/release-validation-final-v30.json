@@ -1,0 +1,70 @@
+{
+  "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+  "packageRevision": "2b4559abe460681e166d2d1a883119c0504b841d",
+  "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+  "cacheVersion": "pickleboard-static-v30",
+  "nodeValidationRuntime": "v24.11.0",
+  "browserTests": {
+    "passed": 45,
+    "skipped": 0,
+    "unexpected": 0,
+    "report": "browser-final-v30.json"
+  },
+  "lifecycle": {
+    "cycles": 60,
+    "engines": [
+      "chromium",
+      "webkit"
+    ],
+    "report": "lifecycle-final-v30.json",
+    "failures": []
+  },
+  "package": {
+    "scenarios": 32,
+    "passed": 32,
+    "report": "package-final-v30.json",
+    "immediateV29UpgradeVerifiedBothEngines": true
+  },
+  "captures": {
+    "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+    "sourceRevision": "50a49a5ce7d795e39844cfe0dce288930cf2c485",
+    "packageRevision": "2b4559abe460681e166d2d1a883119c0504b841d",
+    "main": "candidate-contact-final/stroke-report.json",
+    "acceptance": "candidate-contact-final/stroke-acceptance-summary.json",
+    "dense": "candidate-contact-final-dense/stroke-report.json",
+    "phone": "candidate-contact-final/stroke-sign-provenance.json",
+    "baseline": "baseline-contactv29/stroke-report.json",
+    "mainCases": 17,
+    "denseCases": 2,
+    "actualTokenAndActorHandVerifiedEveryFrame": true,
+    "allRuntimeDigestsMatch": true,
+    "errors": [],
+    "supersededHandednessEvidence": "Old candidate-final *-left images and baseline-contactv29-unverified-hands are not accepted handedness evidence; use the final verified cases. Card-occluded captures are preserved separately."
+  },
+  "singleApplyHistoryErrorMeters": 0,
+  "performance": "performance-postfix-summary.json",
+  "livePreview": "http://127.0.0.1:4177/index.html",
+  "servedByteMismatches": [],
+  "remainingBlockers": [],
+  "compositeCheck": {
+    "command": "npm run check",
+    "node": "v24.11.0",
+    "exitCode": 0,
+    "unitPassed": 247,
+    "staticAssets": 107,
+    "brandIntegrity": "PASS",
+    "report": "check-v30-final.log"
+  },
+  "generatedAssets": {
+    "semanticMatches": 65,
+    "pngCompressionOnlyDifferences": 43,
+    "sourceAssetsChanged": false,
+    "report": "generated-v30-final.log"
+  },
+  "limitations": [
+    "The builder/import-supported overhead with Short hop retains its separate rule-validator conflict; the repair only corrects 3D presentation.",
+    "The host Node 22.4 default optimized history test still exhibits a documented discrepancy; installed Node 24 and both actual browser engines pass, and the precise compiler mechanism is unproven.",
+    "Visual acceptance uses saved actual frames and dense sequences, not continuous WebM playback; phone views do not teach fine wrist mechanics.",
+    "Final performance is a one-pair-per-viewport host SwiftShader confirmation, not physical-device frame-rate or statistical certification."
+  ]
+}

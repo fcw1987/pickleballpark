@@ -1,0 +1,158 @@
+[
+  {
+    "w": 1440,
+    "h": 900,
+    "mode": "board",
+    "area": 229625.1227040516,
+    "width": 480.06329317943437,
+    "height": 573.0304751640995,
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "overflow": false
+  },
+  {
+    "w": 1440,
+    "h": 900,
+    "mode": "guided",
+    "area": 122209.39697815661,
+    "width": 350.2201259633962,
+    "height": 418.0423874187449,
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "overflow": false
+  },
+  {
+    "w": 680,
+    "h": 1000,
+    "mode": "board",
+    "area": 201779.94753831066,
+    "width": 347.324406779661,
+    "height": 632.0793432203391,
+    "viewport": {
+      "width": 680,
+      "height": 1000
+    },
+    "overflow": false
+  },
+  {
+    "w": 680,
+    "h": 1000,
+    "mode": "guided",
+    "area": 126290.34135979242,
+    "width": 274.77762711864403,
+    "height": 500.0548728813559,
+    "viewport": {
+      "width": 680,
+      "height": 1000
+    },
+    "overflow": false
+  },
+  {
+    "w": 768,
+    "h": 1024,
+    "mode": "board",
+    "area": 228246.62789742526,
+    "width": 369.4013559322034,
+    "height": 672.2561440677966,
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "overflow": false
+  },
+  {
+    "w": 768,
+    "h": 1024,
+    "mode": "guided",
+    "area": 132879.05656375684,
+    "width": 281.8542372881356,
+    "height": 512.9332627118645,
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "overflow": false
+  },
+  {
+    "w": 1024,
+    "h": 768,
+    "mode": "board",
+    "area": 165749.54336855214,
+    "width": 407.86362011815635,
+    "height": 486.84889546658064,
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "overflow": false
+  },
+  {
+    "w": 1024,
+    "h": 768,
+    "mode": "guided",
+    "area": 77010.3665050592,
+    "width": 278.01190552753997,
+    "height": 331.85060509547765,
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "overflow": false
+  },
+  {
+    "w": 390,
+    "h": 844,
+    "mode": "board",
+    "area": 65831.58918728454,
+    "width": 198.38711864406778,
+    "height": 361.03538135593226,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "overflow": false
+  },
+  {
+    "w": 390,
+    "h": 844,
+    "mode": "guided",
+    "area": 64435.46923196909,
+    "width": 196.27220338983054,
+    "height": 357.1865466101695,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "overflow": false
+  },
+  {
+    "w": 844,
+    "h": 390,
+    "mode": "board",
+    "area": 40285.349813453475,
+    "width": 201.07698694999016,
+    "height": 240.01677073329373,
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "overflow": false
+  },
+  {
+    "w": 844,
+    "h": 390,
+    "mode": "guided",
+    "area": 40285.34981345347,
+    "width": 201.07698694999013,
+    "height": 240.01677073329373,
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "overflow": false
+  }
+]

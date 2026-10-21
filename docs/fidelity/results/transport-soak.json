@@ -1,0 +1,141 @@
+{
+  "method": "accelerated real browser callbacks; three boundary samples per repetition",
+  "results": [
+    {
+      "browser": "chromium",
+      "label": "opening",
+      "shots": 5,
+      "view": "2d",
+      "repetitions": 150,
+      "samples": 450,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 17
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 17
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "chromium",
+      "label": "opening",
+      "shots": 5,
+      "view": "3d",
+      "repetitions": 150,
+      "samples": 450,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 17
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "chromium",
+      "label": "maximum",
+      "shots": 64,
+      "view": "2d",
+      "repetitions": 10,
+      "samples": 30,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "chromium",
+      "label": "maximum",
+      "shots": 64,
+      "view": "3d",
+      "repetitions": 10,
+      "samples": 30,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "webkit",
+      "label": "opening",
+      "shots": 5,
+      "view": "2d",
+      "repetitions": 150,
+      "samples": 450,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 17
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 17
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "webkit",
+      "label": "opening",
+      "shots": 5,
+      "view": "3d",
+      "repetitions": 150,
+      "samples": 450,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 17
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "webkit",
+      "label": "maximum",
+      "shots": 64,
+      "view": "2d",
+      "repetitions": 10,
+      "samples": 30,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "pausedIdle": true
+    },
+    {
+      "browser": "webkit",
+      "label": "maximum",
+      "shots": 64,
+      "view": "3d",
+      "repetitions": 10,
+      "samples": 30,
+      "initialMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "warmMemory": {
+        "geometries": 44,
+        "textures": 19
+      },
+      "pausedIdle": true
+    }
+  ]
+}

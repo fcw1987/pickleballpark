@@ -1,40 +1,55 @@
 {
-  "source": "f89cdfd6b7a0a9cbf4e1662c192634d6b794460f",
+  "source": "47de2b314db9f1177a2aa1b20f40fbb5bba79c8b",
   "files": [
     {
+      "path": "assets/park/banner.png",
+      "bytes": 274,
+      "sha256": "129c373775caba923d99c32dd7fd7baa8424131dad89a55c7bd54cd786089375"
+    },
+    {
       "path": "assets/park/bench.png",
-      "bytes": 200,
-      "sha256": "f33274d9d7842bf021ec8b33daa0747bfe01dae0d68aa763ff080d9230d5df7e"
+      "bytes": 266,
+      "sha256": "95f494158346c46dc57cbfed344e0e6c83e23578df5d5f9058367bddb2def5a6"
     },
     {
       "path": "assets/park/grass.png",
-      "bytes": 481,
-      "sha256": "43504f0422c443c2c925086ffd74548813f62d0decf215a25d841b268a0cfc26"
+      "bytes": 739,
+      "sha256": "a4c56d7463fe47fc86fe802ce26dab4c5f54ce93627853af84ca5aef5aefe168"
+    },
+    {
+      "path": "assets/park/menu-frame-dark.png",
+      "bytes": 149,
+      "sha256": "b5a5e51f8681a691ee34a2b258cf360eaab710d294c2f41e0940b40c3ab41dc9"
+    },
+    {
+      "path": "assets/park/menu-frame-light.png",
+      "bytes": 149,
+      "sha256": "12e71f3b3b44a1c72e3a3f52602c1979ffdd930bd093dcbedb8eccc40e32feb2"
+    },
+    {
+      "path": "assets/park/menu-labels.ttf",
+      "bytes": 15520,
+      "sha256": "badbe699869422d9f14f8d646715935d8da67f146d83cd6d00c61b8fa06b6c9f"
     },
     {
       "path": "assets/park/path.png",
-      "bytes": 418,
-      "sha256": "9aea7517ebba2513dd7bf1e8169738b584717cc1913f02cf25b3b79ef9dac851"
+      "bytes": 607,
+      "sha256": "5cb16df7ae092167f4a8a3dbfe620ef486069a9eb4ddc7dd5c9192d8ec306fc9"
     },
     {
       "path": "assets/park/quiet-court.png",
-      "bytes": 346,
-      "sha256": "ef7a3e45335222449dafba0ba5b63c8ccc3733e1035e38338d5e342b5fb57dd9"
+      "bytes": 381,
+      "sha256": "78dddd22016eb3dacfab9308bb1653d1852fa9d89c0aabd2450311ddd54ca98a"
     },
     {
       "path": "assets/park/shrub.png",
-      "bytes": 255,
-      "sha256": "396b1da0d9fdbb63ccb094eb06b655c0d85e999b6995a2f2c7473c093115d5ce"
-    },
-    {
-      "path": "assets/park/sign.png",
-      "bytes": 306,
-      "sha256": "2c240cb309280fa9dc786cc48f44c40d548cc988558238cd0d0728488fb443b2"
+      "bytes": 288,
+      "sha256": "4f97c750f789a6f0bb8f51809e45721550991dd857a9e231f5ea85837c75c3e8"
     },
     {
       "path": "assets/park/tree.png",
-      "bytes": 416,
-      "sha256": "ffd4de7504798bc912de89b0400cb8a457958f14c5f754f7e9ee5a37401c1acb"
+      "bytes": 527,
+      "sha256": "75cd0f96eaea9701d12efad209e9c8e2893f622b4b94040c39943541d4633813"
     },
     {
       "path": "assets/players/green-left-handed.png",
@@ -223,13 +238,68 @@
     },
     {
       "path": "board-projection.js",
-      "bytes": 1529,
-      "sha256": "8a85a0ba9a1fd2d32c9b06a9eceb5c3a8664d55e1a82499437994ef2da874563"
+      "bytes": 2463,
+      "sha256": "ec1ae76b9241c4f570b58d167e26c6b6c67e65a0a327b5f1451905ad7b5cbd0a"
+    },
+    {
+      "path": "build-diagnostics-ui.js",
+      "bytes": 1796,
+      "sha256": "99270a7764a4e13026a0369dec575e6f4baa5a635c7983e763237b7d60106130"
+    },
+    {
+      "path": "build-diagnostics.js",
+      "bytes": 7301,
+      "sha256": "948cc62a6b0e579e96a9e2feca4c9b455de3d8393d1b85e80520bd9be716afc1"
+    },
+    {
+      "path": "build-identity.js",
+      "bytes": 5737,
+      "sha256": "28683fc2c32703740b4b51ac051217ea7ba2199473304dad61e6ca57030b9cc4"
+    },
+    {
+      "path": "build-metadata.js",
+      "bytes": 1249,
+      "sha256": "a5392901331b4e7ba3d0a4d1daebe622e57f6fdd403cb40d99695e61ae196926"
+    },
+    {
+      "path": "builder-court-tools.js",
+      "bytes": 10545,
+      "sha256": "3e42238824acc81dbfd9d0163195b3a5c321bc3a29783e1a9059957b51caf1ce"
+    },
+    {
+      "path": "builder-framing.js",
+      "bytes": 1485,
+      "sha256": "e3dd3fe811e90d4e353be9bd96d7e02bb20df94c34c80c8cf97cc9fb9cc1e360"
+    },
+    {
+      "path": "builder-integration.css",
+      "bytes": 3073,
+      "sha256": "87e0d95082872567be8c29adf107e2501c91447685d6b91aaab62674fd3df226"
+    },
+    {
+      "path": "builder-storage.js",
+      "bytes": 10169,
+      "sha256": "aed41431e02e187101188b12aaaf60a1eb56fa809e51269c5c08077b7afa65fb"
+    },
+    {
+      "path": "builder-ui.css",
+      "bytes": 51763,
+      "sha256": "6454b158ab1de9105b381ee864c487d47935461c2ea2a9b7924b611bcebd7fd9"
+    },
+    {
+      "path": "builder-ui.js",
+      "bytes": 84982,
+      "sha256": "d23d719502201dd5f4d127601495f1ba69a690d3dfab94f20bf824dd73dc6d83"
+    },
+    {
+      "path": "builder-waypoint-policy.js",
+      "bytes": 2845,
+      "sha256": "19f644878813b1813081bca325ddb328a24db065958a2341692705f8b677dcea"
     },
     {
       "path": "coaching-session.js",
-      "bytes": 3182,
-      "sha256": "686aad197c76814c64d9857aa235b93711de4c53bb2a03bcf08569eb1b150af7"
+      "bytes": 5777,
+      "sha256": "7f8afd72689345ba2488a2511d714cad54299dbffd047c834bb038b8d03069f2"
     },
     {
       "path": "coaching-ui.js",
@@ -242,14 +312,19 @@
       "sha256": "b7db55f59459012441a1f30e9a92ee40514b67951ee7f7811ed8eeac2ca28149"
     },
     {
+      "path": "coverage-assistance.js",
+      "bytes": 5602,
+      "sha256": "22e8aabccddab71d2b3c04e5d52351e21fd37cd42ca9e1e04d954ae2cf25ef3c"
+    },
+    {
       "path": "guided-pixel-actors.js",
-      "bytes": 9819,
-      "sha256": "adb0d4625f1a0433a02901f9208aabcba3fe46bb6a4c9df67a22cef0bdcafb38"
+      "bytes": 9815,
+      "sha256": "168db2f13f8b807377f323d86cf2b84cd64012c6ee82cd7996ce3155cd3e3eab"
     },
     {
       "path": "guided-plays.js",
-      "bytes": 16954,
-      "sha256": "67e897e4679d5da9ddb9245b8fea705e672e548a91cd9a8d7e3c09834f7664d0"
+      "bytes": 20116,
+      "sha256": "3c0026759323efa725ef4307f1ab6bcd476a3122ec4a39f0d2bc145f4d102210"
     },
     {
       "path": "icons/apple-icon-180.png",
@@ -308,23 +383,28 @@
     },
     {
       "path": "index.html",
-      "bytes": 18619,
-      "sha256": "0e2a033522a53b70e3e9bf639f929d9d7e2dafa5a1077861f6c6de64ca975abb"
+      "bytes": 21486,
+      "sha256": "ce3681a644e8e88ae2263941c857536e2ad219a656b5e5fae5bcfac668e4c103"
+    },
+    {
+      "path": "keyboard-shortcuts.js",
+      "bytes": 2861,
+      "sha256": "a65f39ee3a9bd6533c70079680a330fe810cdbd7bc247096a0f852aa14dfc565"
     },
     {
       "path": "manifest.json",
-      "bytes": 1506,
-      "sha256": "7bc93c20daeb6807a4b6053b520b0532d179a6a7bf53ddb51536152c52258fdf"
+      "bytes": 1512,
+      "sha256": "dc7c2117fee69d50f49e1e62b7f261d32d9aa636ffa7f8d59fcf2380bc59ddb0"
     },
     {
       "path": "park-layout.js",
-      "bytes": 2289,
-      "sha256": "de6e5ed38a81bd80457d00aab77e890cd916bf82a461fcce69f0ed9bd66fec5d"
+      "bytes": 2479,
+      "sha256": "d565bcd3bb848fdc5211f5b5277034d319173e2890ed679dee79523614e8ff38"
     },
     {
       "path": "park-scene.js",
-      "bytes": 10497,
-      "sha256": "f9c607a09f387d2f982d5d69d457cb88780d7842435985ae2c857d48d7441c10"
+      "bytes": 12961,
+      "sha256": "f83736f3de508afdf94f3a7897dd9efbe40bb0d6af1d023012064a142a3e7773"
     },
     {
       "path": "pixel-actor-assets.js",
@@ -332,9 +412,39 @@
       "sha256": "78b2ca63f5fb0dd44f6fe1ab0a104f3afca6840fa02a8eef85953ed35cd1d8d8"
     },
     {
+      "path": "play-builder.js",
+      "bytes": 50307,
+      "sha256": "3beb3685324be15c7f2e6de0e2aa47106ce54ff28a248b6f4c440b6c15819834"
+    },
+    {
       "path": "play-catalog.js",
       "bytes": 11399,
       "sha256": "62e5897fc1652c8dbf76afb17ec434dcf6e3e3ab6aa007f756db185d4a947f98"
+    },
+    {
+      "path": "play-compiler.js",
+      "bytes": 20933,
+      "sha256": "545af1e71baca42412b5c2233328a81765c3da7e3f8e0504f9cd468e303a3742"
+    },
+    {
+      "path": "play-document.js",
+      "bytes": 17406,
+      "sha256": "e82930383864d2dccd7a53e36e4c1f54de7026a8f23646cda94f9be8b237d5b4"
+    },
+    {
+      "path": "player-labels.js",
+      "bytes": 1874,
+      "sha256": "b910d2939a179e8bb2b078829324dd4920ff2b33f7975f4d5caa7b3cc4a17640"
+    },
+    {
+      "path": "rally-coach.js",
+      "bytes": 22017,
+      "sha256": "0e84921af19cbd041ff3e37e4e03ed7d0ff7989de61e73aafc8d19d0d49909ac"
+    },
+    {
+      "path": "rally-proposals.js",
+      "bytes": 11656,
+      "sha256": "6e084c15790f0e8327db59fbf3dc6c90f1177caba5fa61098b1263d09b361f8b"
     },
     {
       "path": "rally-rules.js",
@@ -343,38 +453,63 @@
     },
     {
       "path": "script.js",
-      "bytes": 53794,
-      "sha256": "6a426cc21a2a125c1c29d34f978823f19e00da06562c177838c032f5d2fec6e3"
+      "bytes": 61675,
+      "sha256": "8face3e81ffab7447cddd47668dd89ae6bc25f7be1c64aad0cfffde11c28c70d"
+    },
+    {
+      "path": "shot-chapters.js",
+      "bytes": 3928,
+      "sha256": "fc98333bdb7aaae7b04b20148b67315f0b62e9371d1b637726b2f3e3e9bafb46"
+    },
+    {
+      "path": "shot-timeline.css",
+      "bytes": 4019,
+      "sha256": "78f85426f0df2dbdfe778c7fce6af92f9007be96380270e9960e98ca89589a08"
+    },
+    {
+      "path": "shot-timeline.js",
+      "bytes": 13285,
+      "sha256": "9896d04fba7dc60bf132a34f6c23bef5a01b1e36adcde74684fcdde1297a6c1b"
+    },
+    {
+      "path": "smart-rally-generator.js",
+      "bytes": 17561,
+      "sha256": "808ebbe37385e1c4666307f7637ac7994ad0c6dbe66c23e91868fd1f8e2ed65e"
     },
     {
       "path": "styles.css",
-      "bytes": 24085,
-      "sha256": "c0ea3beb82762ce8c0ed2c757c32662e58bcff8cd45940fc1c7184e757f311d8"
+      "bytes": 32468,
+      "sha256": "9e809a47333e0c015e6870417a3eea5a0a96f6af9a988ca43f0965f1e975f2f0"
     },
     {
       "path": "sw.js",
-      "bytes": 6218,
-      "sha256": "d68c0a64cf32a691309b5f43e0c277e014176155d37d8d1c9d801e53975046b0"
+      "bytes": 7846,
+      "sha256": "fa5f0b86d1e9696c027f806f2a2b7f1ce41f4b382ddc747444a98e7b2ed093ae"
     },
     {
       "path": "three-d-animation.js",
-      "bytes": 12897,
-      "sha256": "227e7e437a906a5e9afb5e53c97737888ed783eea66c5c9ad0b664135f3a2f8c"
+      "bytes": 14893,
+      "sha256": "eda72a24ee5f9abcdb2265f5a984471d1e731f6fda3d88c9ec9b2049378902ae"
+    },
+    {
+      "path": "three-d-athletes.js",
+      "bytes": 37981,
+      "sha256": "b2a0b199c2475ebbb5e15abff0c2ee2b655428bbc955f303a8235337e0593e0f"
     },
     {
       "path": "three-d-ball.js",
-      "bytes": 4919,
-      "sha256": "641468c5470c0d03edee3f3e4002715f757f8562ffcd286a6c6cd7ea38e6de9a"
+      "bytes": 4959,
+      "sha256": "77e3047135c2b4093da60260aa85f462890b2decd7da8ca1c39d443050bee4e3"
     },
     {
       "path": "three-d-core.js",
-      "bytes": 20349,
-      "sha256": "800b76975c4aea6ead331f947bae3cd0113405dda29778a1997b4feebb751144"
+      "bytes": 23403,
+      "sha256": "354ecea77f5e06b0204bdf92a29f0cfd2192c8a531eb9a8f362f55a659b20527"
     },
     {
       "path": "three-d-loader.js",
-      "bytes": 3249,
-      "sha256": "0e12384e5c30a6b6a84aa329c9b89580f24a99c7408cb7a65681d04ff07eb5d4"
+      "bytes": 3775,
+      "sha256": "555830ece2e4b075dcd82a0a416fc7f5ecdb86001d91f7ea582eca9a30d6255e"
     },
     {
       "path": "three-d-pixel-actors.js",
@@ -383,13 +518,18 @@
     },
     {
       "path": "three-d-playback.js",
-      "bytes": 29729,
-      "sha256": "1563f3ca6c1b251eb0bae8a7ed143c6725a5a1dc0bec56e998a6b296b8b2fe4d"
+      "bytes": 41591,
+      "sha256": "4ecbbc83e1cdbe48779db7ae5a2fb7d356671c0d8ee9ab2a59dccd687b914f9b"
     },
     {
       "path": "three-d-presentation.js",
-      "bytes": 11429,
-      "sha256": "54257f5281c20bc8ce8c8353943f75ea49d79814c3092103d719e9d710ac2ca8"
+      "bytes": 18229,
+      "sha256": "151c5d8993db6a3ea63ab92241b38d205f86e38763961154762d6f42fe867d72"
+    },
+    {
+      "path": "three-d-world.js",
+      "bytes": 37344,
+      "sha256": "5301da366fea27ecaca956f5638d1a31ff790b4e849c09e6d0d469dbea0333f4"
     },
     {
       "path": "vendor/three.core.min.js",
@@ -402,9 +542,14 @@
       "sha256": "86bcee248b64f44bcfc23c331ae74619061957d59cab040171dcb6fb5900beb6"
     },
     {
+      "path": "version.json",
+      "bytes": 913,
+      "sha256": "c5ecc6a6cabee8624ec57353e9eaf54174223ebef20ea3e46f0a5d0f9dcefba8"
+    },
+    {
       "path": "visual-theme.js",
-      "bytes": 1308,
-      "sha256": "abdaeb7a601974b8e115371ec38f436bea1daf129e3650440c8c5bfdb0448dfc"
+      "bytes": 1466,
+      "sha256": "034a4bf462eb97ab93a94e44b3428ba8239655a2c52ef4a1b6b8eb17cb85fb49"
     }
   ]
 }

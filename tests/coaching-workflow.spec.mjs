@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './helpers/offline-app.mjs';
 
 for (const [name, viewport, touch] of [
   ['phone portrait', { width: 390, height: 844 }, true],
@@ -8,7 +8,7 @@ for (const [name, viewport, touch] of [
   test.describe(name, () => {
     test.use({ viewport, hasTouch: touch });
     test('all coaching instructions are readable without clipping', async ({ page }) => {
-      await page.goto('/');
+      await page.goto('/?workspace=planner');
       await page.waitForFunction(() => window.pickleboard?.plays);
       await page.emulateMedia({ reducedMotion: 'reduce' });
       const plays = await page.evaluate(() => pickleboard.plays.list());
@@ -21,7 +21,7 @@ for (const [name, viewport, touch] of [
           const panel = await page.locator('#playbackControls').boundingBox();
           expect(panel.y).toBeGreaterThanOrEqual(0);
           expect(panel.y + panel.height).toBeLessThanOrEqual(viewport.height);
-          if (i < count - 1) await page.locator('#playNext').click();
+          if (i < count - 1) await page.evaluate(index => pickleboard.plays.timelineAction('seek',pickleboard.plays.segmentEndpointTime(index + 1)),i);
         }
       }
     });
@@ -29,7 +29,7 @@ for (const [name, viewport, touch] of [
     test('arranged annotated board survives repeated 2D and 3D round trips', async ({ page, browserName }) => {
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
-      await page.goto('/');
+      await page.goto('/?workspace=planner');
       await page.waitForFunction(() => window.pickleboard?.threeD);
       const activate = selector => touch ? page.locator(selector).tap() : page.locator(selector).click();
       async function stroke(selector, dx, dy) {
@@ -80,21 +80,18 @@ for (const [name, viewport, touch] of [
         await activate('#playPlayPause');
         await page.clock.runFor(300);
         await activate('#play3dView');
-        const paused = await page.evaluate(() => ({state: pickleboard.plays.getState(), positions: pickleboard.getTokenPositions()}));
+        const entered = await page.evaluate(() => ({state: pickleboard.plays.getState(), positions: pickleboard.getTokenPositions()}));
         await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
-        await activate('#threeDPlayPause');
-        await page.clock.runFor(350);
+        expect(entered.state.playing).toBe(true);
         await activate('#threeDPlayPause');
         const elapsed = await page.evaluate(() => pickleboard.threeD.clock.elapsed);
         expect(elapsed).toBeGreaterThan(0);
         await page.clock.runFor(200);
         expect(await page.evaluate(() => pickleboard.threeD.clock.elapsed)).toBe(elapsed);
-        await activate('#threeDNext');
-        await activate('#threeDPrevious');
-        await activate('#threeDRestart');
+        await page.locator('#threeDTimelineMount input[type=range]').fill('0');
         expect(await page.evaluate(() => pickleboard.threeD.clock.elapsed)).toBe(0);
         await activate('#threeDExit');
-        // Both views now share the same playhead: Restart in 3D returns 2D to setup.
+        // Both views share the same playhead: seeking in 3D returns 2D to setup.
         expect(await page.evaluate(() => pickleboard.plays.getState())).toMatchObject({elapsed:0,stepIndex:0,status:'paused',playing:false});
         expect(await page.evaluate(() => pickleboard.plays.snapshot.positions)).toEqual(before.positions);
         await activate('#playPlayPause');
@@ -118,10 +115,10 @@ for (const [name, viewport, touch] of [
   });
 }
 
-test('cached coaching engine resumes an interrupted shot offline', async ({ page, context }) => {
-  await page.goto('/');
+test('cached coaching engine resumes an interrupted shot offline', async ({ page, offlineApp }) => {
+  await page.goto(`${offlineApp.url}/?workspace=planner`);
   await page.waitForFunction(() => window.pickleboard?.plays && navigator.serviceWorker.controller);
-  await context.setOffline(true);
+  await offlineApp.stop();
   await page.reload();
   await page.waitForFunction(() => window.pickleboard?.plays);
   await page.clock.install({time:new Date('2026-01-01T00:00:00Z')});
@@ -143,5 +140,4 @@ test('cached coaching engine resumes an interrupted shot offline', async ({ page
   expect(resumed.state.status).toBe('playing');
   await page.locator('#playExit').click();
   expect(await page.evaluate(() => pickleboard.playInteractionLocked)).toBe(false);
-  await context.setOffline(false);
 });

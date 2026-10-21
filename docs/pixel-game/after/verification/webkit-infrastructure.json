@@ -1,0 +1,12 @@
+{
+  "playwright": "1.61.0",
+  "platform": "darwin",
+  "browserVersion": "26.5",
+  "appCodeServed": false,
+  "cacheDeletionCodeServed": false,
+  "cacheSeed": "keep me",
+  "cacheAfterNavigation": null,
+  "offlineSignature": "page.reload: WebKit encountered an internal error",
+  "realOfflineWithoutEmulation": true,
+  "result": "confirmed"
+}

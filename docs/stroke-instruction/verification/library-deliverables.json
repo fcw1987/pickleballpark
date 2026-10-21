@@ -1,0 +1,102 @@
+{
+  "files": [
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-before-strokes.jpg",
+      "file_id": "file_0000000010ac8243854cd3ba54afeaac",
+      "library_file_id": "libfile_5c29199241b8819196bb3713f74b7b8b",
+      "file_name": "Pickleboard-before-strokes.jpg",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "image/jpeg",
+      "library_artifact_type": "image",
+      "file_size_bytes": 273952
+    },
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-v29-strokes.jpg",
+      "file_id": "file_00000000da888230b35b1e7f579adc79",
+      "library_file_id": "libfile_fd47d17dc30c8191af188e75a6df2fc1",
+      "file_name": "Pickleboard-v29-strokes.jpg",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "image/jpeg",
+      "library_artifact_type": "image",
+      "file_size_bytes": 275218
+    },
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-v29-phone.png",
+      "file_id": "file_000000006e10823083d214d7b85f1a6f",
+      "library_file_id": "libfile_815da68151ac8191977441e6011212eb",
+      "file_name": "Pickleboard-v29-phone.png",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "image/png",
+      "library_artifact_type": "image",
+      "file_size_bytes": 346062
+    },
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-v29-forehand-slow.webm",
+      "file_id": "file_0000000017b08230b9fb21400d8ed59e",
+      "library_file_id": "libfile_d1a5bcdbf0248191aed9ab9b7aadd6d4",
+      "file_name": "Pickleboard-v29-forehand-slow.webm",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "video/webm",
+      "library_artifact_type": "other",
+      "file_size_bytes": 892354
+    },
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-v29-backhand-slow.webm",
+      "file_id": "file_000000000e788230898f3736f6a6ad0a",
+      "library_file_id": "libfile_61bed4cfa88c8191827a77e0879dddaf",
+      "file_name": "Pickleboard-v29-backhand-slow.webm",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "video/webm",
+      "library_artifact_type": "other",
+      "file_size_bytes": 896791
+    },
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-v29-lob-slow.webm",
+      "file_id": "file_0000000097ac8230aa53adc3a8a2c043",
+      "library_file_id": "libfile_f18698151d248191834d267e5d86ed00",
+      "file_name": "Pickleboard-v29-lob-slow.webm",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "video/webm",
+      "library_artifact_type": "other",
+      "file_size_bytes": 908769
+    },
+    {
+      "operation": "create_library_file",
+      "status": "succeeded",
+      "path": "/Pickleboard-v29-return-and-advance-slow.webm",
+      "file_id": "file_0000000058bc823081b7bd70aa5f3ba3",
+      "library_file_id": "libfile_6ceb698dda8c8191bdd24c561a6c9586",
+      "file_name": "Pickleboard-v29-return-and-advance-slow.webm",
+      "current_version_number": 0,
+      "restored_from_version_number": null,
+      "directory_id": "libdir_497d9f70a3108191af33fd5239d06992",
+      "mime_type": "video/webm",
+      "library_artifact_type": "other",
+      "file_size_bytes": 1466964
+    }
+  ]
+}

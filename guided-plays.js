@@ -5,6 +5,8 @@ import { compilePlayTimeline, samplePlayBall, boardToWorld, FEET_TO_METERS } fro
 import { sampleActorPresentation } from './three-d-presentation.js';
 import { CoachingSession } from './coaching-session.js';
 import { updateCoachingUI } from './coaching-ui.js';
+import { buildShotChapters, chapterAtTime } from './shot-chapters.js';
+import { mountShotTimeline } from './shot-timeline.js';
 
 class GuidedPlayEngine {
     constructor(board, plays, elements) {
@@ -17,6 +19,7 @@ class GuidedPlayEngine {
         this.session = new CoachingSession();
         this.clock = this.session.clock;
         this.timeline = null;
+        this.chapters = Object.freeze([]);
         this.stepIndex = 0;
         this.status = 'idle';
         this.animationFrame = null;
@@ -29,6 +32,9 @@ class GuidedPlayEngine {
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         this.lastRenderedStep = null;
         this.bindControls();
+        const timelineMount = this.elements.timelineMount || document.getElementById('playTimelineMount');
+        this.shotTimeline = timelineMount ? mountShotTimeline({ onAction: (action, value) => this.timelineAction(action, value) }) : null;
+        if (timelineMount && this.shotTimeline) timelineMount.replaceChildren(this.shotTimeline.element);
         this.renderLibrary();
         this.updateUI();
         document.addEventListener('visibilitychange', () => {
@@ -43,7 +49,7 @@ class GuidedPlayEngine {
     getState() {
         return { status: this.status, playId: this.activePlay?.id || null,
             stepIndex: this.activePlay ? this.stepIndex : null, stepCount: this.activePlay?.steps.length || 0,
-            playing: this.clock.playing, elapsed: this.clock.elapsed, loop: this.session.loop,
+            playing: this.session.playing, elapsed: this.clock.elapsed, loop: true, chapters: this.chapters,
             holding: this.session.holding, iteration: this.session.iteration, playbackRate: this.clock.playbackRate };
     }
     renderLibrary() {
@@ -57,24 +63,21 @@ class GuidedPlayEngine {
         });
     }
     bindControls() {
-        this.elements.previous.addEventListener('click', () => this.previous());
         this.elements.playPause.addEventListener('click', () => this.togglePlayPause());
-        this.elements.next.addEventListener('click', () => this.next());
-        this.elements.restart.addEventListener('click', () => this.restart());
         this.elements.exit.addEventListener('click', () => this.exit());
-        this.elements.loop?.addEventListener('click', () => this.setLoop(!this.session.loop));
         this.elements.rate?.addEventListener('change', event => this.setPlaybackRate(Number(event.target.value)));
     }
-    load(playId) {
-        const play = this.plays.get(playId);
+    load(playId) { return this.loadDefinition(this.plays.get(playId)); }
+    loadDefinition(play, suppliedTimeline = null) {
         if (!play) return false;
         if (this.activePlay) this.exit();
         this.validatePlay(play);
-        const timeline = compilePlayTimeline(play);
+        const timeline = suppliedTimeline || compilePlayTimeline(play);
         this.snapshot = this.board.captureBoardState();
         this.board.prepareForPlay(); this.board.setPlayInteractionLocked(true);
         this.board.setGameMode(play.mode, { source: 'playback' });
         this.activePlay = play; this.timeline = timeline;
+        this.chapters = buildShotChapters(timeline);
         this.session.reset(timeline.duration); this.session.owner = 'guided';
         this.status = 'paused'; this.stepIndex = 0; this.lastRenderedStep = null;
         this.elements.controls.hidden = false; document.body.classList.add('play-mode');
@@ -82,9 +85,21 @@ class GuidedPlayEngine {
         const snapshot=this.snapshot;
         this.pixelActors.load().then(loaded=>{if(loaded&&this.activePlay===play&&this.snapshot===snapshot)this.applyAtTime(this.clock.elapsed);}).catch(()=>{
             // Static approved actors remain usable if optional action sheets fail.
-            if(this.activePlay===play)this.elements.announcement.textContent='Animated athletes could not load. The lesson and controls remain available.';
+            if(this.activePlay===play&&this.snapshot===snapshot)this.elements.announcement.textContent='Animated athletes could not load. The lesson and controls remain available.';
         });
         return true;
+    }
+    // Replace derived content without recapturing the planner snapshot or owning a new clock.
+    replaceDefinition(play, seconds = 0, suppliedTimeline = null) {
+        this.validatePlay(play);
+        this.pause();
+        const timeline = suppliedTimeline || compilePlayTimeline(play);
+        this.activePlay = play; this.timeline = timeline;
+        this.chapters = buildShotChapters(timeline);
+        this.session.reset(timeline.duration); this.session.seek(seconds);
+        this.status = 'paused'; this.lastRenderedStep = null;
+        this.applyAtTime(this.clock.elapsed); this.updateUI(true);
+        return timeline;
     }
     validatePlay(play) {
         if (!play.id || !play.name || play.mode !== 'doubles' || !Array.isArray(play.steps) || !play.steps.length) {
@@ -124,10 +139,10 @@ class GuidedPlayEngine {
         this.currentShotPath = null;
     }
 
-    togglePlayPause() { return this.clock.playing ? this.pause() : this.play(); }
+    togglePlayPause() { return this.session.playing ? this.pause() : this.play(); }
     play() {
         if (!this.activePlay) return false;
-        if (this.clock.playing) return true;
+        if (this.session.playing) return true;
         this.cancelScheduledWork({ preserveTransition: true });
         this.session.play(); this.status = 'playing';
         this.updateUI(true); this.startPlaybackLoop(); return true;
@@ -136,15 +151,11 @@ class GuidedPlayEngine {
         if (!this.activePlay) return false;
         this.session.pause(performance.now(), this.timingScale);
         this.cancelScheduledWork({ preserveTransition: true });
+        this.board.threeD?.cancelRenderWork?.();
         this.status = this.session.complete ? 'complete' : 'paused';
         this.updateUI(true); return true;
     }
-    setLoop(enabled) {
-        this.session.setLoop(enabled, performance.now(), this.timingScale);
-        if (!this.clock.playing) this.cancelScheduledWork({ preserveTransition: true });
-        this.status = this.session.complete ? 'complete' : this.clock.playing ? 'playing' : this.activePlay ? 'paused' : 'idle';
-        this.updateUI(true); this.board.threeD?.updateUI?.();
-    }
+    setLoop() { return true; }
     setPlaybackRate(rate) {
         if (this.session.holding && this.clock.playing) this.session.tick(performance.now(), this.timingScale);
         this.clock.setRate(rate); this.clock.lastTimestamp = null;
@@ -168,14 +179,59 @@ class GuidedPlayEngine {
         this.cancelScheduledWork(); this.session.seek(0); this.lastRenderedStep = null;
         this.status = 'paused'; this.applyAtTime(0); this.updateUI(true); return true;
     }
+    stopViewWork() {
+        this.cancelScheduledWork({ preserveTransition: true });
+        this.board.threeD?.cancelRenderWork?.();
+    }
+    renderSessionSample() {
+        this.applyAtTime(this.clock.elapsed);
+        const viewer = this.board.threeD;
+        if (viewer?.scene) viewer.renderSessionSample?.();
+        this.updateUI();
+    }
+    continuePlayback() {
+        if (!this.clock.playing) return;
+        if (this.session.owner === 'replay') this.board.threeD?.startRenderLoop?.();
+        else this.startPlaybackLoop();
+    }
+    timelineAction(action, value = {}) {
+        if (!this.activePlay) return false;
+        if (action === 'scrubBegin') {
+            this.stopViewWork();
+            if (!this.session.beginScrub(value.id, performance.now(), this.timingScale)) return false;
+        } else if (action === 'scrubSeek') {
+            if (this.session.scrubSeek(value.id, value.time) === false) return false;
+            this.renderSessionSample();
+        } else if (action === 'scrubEnd') {
+            if (!this.session.endScrub(value.id) ) return false;
+            this.renderSessionSample(); this.continuePlayback();
+        } else if (action === 'scrubCancel') {
+            if (!this.session.cancelScrub(value.id)) return false;
+            this.renderSessionSample();
+        } else if (action === 'seek') {
+            this.stopViewWork();
+            this.session.seek(Number(value), { preserveIntent: true });
+            this.renderSessionSample(); this.continuePlayback();
+        } else if (action === 'chapter') {
+            const chapter = this.chapters.find(item => item.shotId === value);
+            if (!chapter) return false;
+            this.stopViewWork();
+            this.session.seek(chapter.anchor, { preserveIntent: true });
+            this.renderSessionSample(); this.continuePlayback();
+        } else return false;
+        this.updateUI(true);
+        this.board.threeD?.updateUI?.();
+        return true;
+    }
     exit() {
         if (!this.activePlay) return false;
         this.board.threeD?.cancelLoading?.();
-        if (this.board.threeD?.active) this.board.threeD.exit();
+        if (this.board.threeD?.active || this.board.threeD?.scene) this.board.threeD.exit({ preservePlayback: false });
         this.cancelScheduledWork(); this.session.reset(0); this.session.owner = 'guided';
         this.pixelActors.dispose();
         this.clearShotPath(); const snapshot = this.snapshot;
         this.activePlay = null; this.snapshot = null; this.timeline = null;
+        this.chapters = Object.freeze([]);
         this.status = 'idle'; this.stepIndex = 0; this.lastRenderedStep = null;
         this.elements.controls.hidden = true; document.body.classList.remove('play-mode');
         this.board.playBallHeight = 0;
@@ -198,31 +254,34 @@ class GuidedPlayEngine {
         const runId = this.runId, play = this.activePlay;
         this.advanceTimer = setTimeout(() => {
             this.advanceTimer = null;
-            if (runId !== this.runId || this.activePlay !== play || !this.clock.playing || document.hidden) return;
+            if (runId !== this.runId || this.activePlay !== play || !this.session.playing || !this.clock.playing || document.hidden) return;
             this.session.tick(performance.now(), this.timingScale);
             if (this.session.owner === 'replay') this.board.threeD?.startRenderLoop();
             else this.startPlaybackLoop();
         }, Math.max(1, this.session.remainingHoldMs(this.timingScale)));
     }
     startPlaybackLoop() {
-        if (!this.activePlay || this.session.owner !== 'guided' || !this.clock.playing || document.hidden || this.animationFrame !== null) return;
+        if (!this.activePlay || this.session.owner !== 'guided' || !this.session.playing || !this.clock.playing || document.hidden || this.animationFrame !== null) return;
         const runId = this.runId;
         const frame = timestamp => {
             this.animationFrame = null;
-            if (runId !== this.runId || !this.activePlay || this.session.owner !== 'guided' || !this.clock.playing || document.hidden) return;
+            if (runId !== this.runId || !this.activePlay || this.session.owner !== 'guided' || !this.session.playing || !this.clock.playing || document.hidden) return;
             this.session.tick(timestamp, this.timingScale);
             this.applyAtTime(this.clock.elapsed);
             this.status = this.session.complete ? 'complete' : this.clock.playing ? 'playing' : 'paused';
             this.updateUI();
             if (this.session.holding) this.scheduleHold();
-            else if (this.clock.playing) this.animationFrame = requestAnimationFrame(frame);
+            else if (this.session.playing && this.clock.playing) this.animationFrame = requestAnimationFrame(frame);
         };
         this.animationFrame = requestAnimationFrame(frame);
     }
     applyPositions(positions) { this.board.applyPlayPositions(positions); }
     applyAtTime(seconds) {
         if (!this.activePlay || !this.timeline) return;
-        const segment = seconds > 0 ? this.timeline.segments.find(item => seconds <= item.endTime) || this.timeline.segments.at(-1) : null;
+        // At a shared boundary the destination shot owns the sample. Keep the
+        // same epsilon convention as samplePlayState/samplePlayBall so actors,
+        // ball, cue, path, and chapter identity cannot disagree.
+        const segment = seconds > 0 ? this.timeline.segments.find(item => seconds < item.endTime - 1e-9) || this.timeline.segments.at(-1) : null;
         const local = segment ? Math.max(0, Math.min(segment.duration, seconds - segment.startTime)) : 0;
         const positions = {}, samples = {};
         for (const id of ['player1', 'player2', 'player3', 'player4']) {
@@ -265,15 +324,18 @@ class GuidedPlayEngine {
         updateCoachingUI(this.elements, { playId: this.activePlay?.id, title: this.activePlay?.name,
             stepIndex: this.stepIndex, stepCount: this.activePlay?.steps.length, label: step?.label, description: step?.description,
             shotType: cueStep?.shot?.type || step?.shot?.type, nextShot: Boolean(cueStep && cueStep.id !== step?.id), phase: this.session.holding ? 'complete' : state?.phase || 'ready',
-            elapsed: this.clock.elapsed, eventTime: state?.segment?.startTime || 0, playing: this.clock.playing,
-            loop: this.session.loop, reducedMotion: this.reducedMotion.matches, manual });
-        const text = this.clock.playing ? 'Pause' : this.session.holding ? 'Resume' : this.status === 'complete' || (this.timeline && this.clock.elapsed >= this.timeline.duration) ? 'Replay' : 'Play';
+            elapsed: this.clock.elapsed, eventTime: state?.segment?.startTime || 0, playing: this.session.playing,
+            loop: true, reducedMotion: this.reducedMotion.matches, manual });
+        const text = this.session.playing ? 'Ⅱ' : '▶';
         if (this.elements.playPause.textContent !== text) this.elements.playPause.textContent = text;
-        this.elements.playPause.setAttribute('aria-pressed', String(this.clock.playing));
-        this.elements.previous.disabled = !active || this.stepIndex === 0 || this.clock.playing;
-        this.elements.next.disabled = !active || this.stepIndex === this.activePlay?.steps.length - 1 || this.clock.playing;
-        this.elements.restart.disabled = !active; this.elements.exit.disabled = !active;
+        this.elements.playPause.setAttribute('aria-label', this.session.playing ? 'Pause rally' : 'Play rally');
+        this.elements.playPause.setAttribute('aria-pressed', String(this.session.playing));
+        this.elements.exit.disabled = !active;
         if (this.elements.rate) this.elements.rate.value = String(this.clock.playbackRate);
+        const chapter = chapterAtTime(this.chapters, this.clock.elapsed);
+        this.shotTimeline?.update({ chapters: this.chapters, time: this.clock.elapsed, duration: this.session.duration,
+            playing: this.session.playing, busy: Boolean(this.board.threeD?.loading), currentShotId: chapter?.shotId || null });
+        this.board.onCoachingState?.();
         if (manual && active && this.elements.announcement) this.elements.announcement.textContent = `${this.activePlay.name}. Step ${this.stepIndex + 1}. ${step.label}. ${step.description}`;
     }
 }

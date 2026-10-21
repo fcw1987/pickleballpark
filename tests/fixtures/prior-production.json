@@ -1,137 +1,366 @@
 {
-  "revision": "e67d060ca44a3c27af346007e619927bc6e3c9a1",
+  "revision": "f1308015d9e3848909e35d3919735b265e71fb7f",
+  "cacheName": "pickleboard-static-v15",
   "files": [
     {
-      "file": "assets/players/green-left-handed.png",
-      "sha256": "63b7b7fb8d943bcc4a5e99e4095e6328aeab66887054074ddabbf9fc16f9ecb6",
-      "matchesSource": true,
-      "bytes": 1360405
-    },
-    {
-      "file": "assets/players/green-right-handed.png",
-      "sha256": "a4dd756a180c2d8bb1746a43dbd35299609c42d022af04ee2a0417b84e226b09",
-      "matchesSource": true,
-      "bytes": 1409461
-    },
-    {
-      "file": "assets/players/orange-left-handed.png",
-      "sha256": "1634fd8a0efb88c88df8b67d6b6047eabb0bf626e0d3ad119e231f2df7a1d3fb",
-      "matchesSource": true,
-      "bytes": 717935
-    },
-    {
-      "file": "assets/players/orange-right-handed.png",
-      "sha256": "441d2630b8523cdc995931c0a208a3e6f936467a630208513404a252120d36f9",
-      "matchesSource": true,
-      "bytes": 722033
-    },
-    {
-      "file": "guided-plays.js",
-      "sha256": "63f9dba9f72cdc672030cdb70d56b6f940913c77b6569e649fbbc537a2ecb742",
-      "matchesSource": true,
-      "bytes": 18220
-    },
-    {
-      "file": "icons/apple-icon-180.png",
-      "sha256": "35bcacb5d59a40efeeca9789e5613fefcc23b53984de3d7fe91d330a341c8127",
-      "matchesSource": true,
-      "bytes": 18272
-    },
-    {
-      "file": "icons/icon-128x128.png",
-      "sha256": "e4e895fc5225aa0336f7f2e201dbd8a7a679c5d211b90cc1503214b50ec9a40b",
-      "matchesSource": true,
-      "bytes": 11306
-    },
-    {
-      "file": "icons/icon-144x144.png",
-      "sha256": "3c7d1fe280273cb88b3d47f662a4bfac2703a55541e906251089198b14811cfe",
-      "matchesSource": true,
-      "bytes": 14367
-    },
-    {
-      "file": "icons/icon-152x152.png",
-      "sha256": "741b96879c01041baef36404e216488bb6e502cb4cdf70d62a91a013adb99d09",
-      "matchesSource": true,
-      "bytes": 15537
-    },
-    {
-      "file": "icons/icon-192x192.png",
-      "sha256": "708579c0c1413df3870e1db1096790075ce3cf88b1cf317b10698805d758253b",
-      "matchesSource": true,
-      "bytes": 20781
-    },
-    {
-      "file": "icons/icon-384x384.png",
-      "sha256": "7740923a50f963ada902c5377c90e503adb052b6a68f91669f3e4b267bc8f383",
-      "matchesSource": true,
-      "bytes": 123459
-    },
-    {
-      "file": "icons/icon-512x512.png",
-      "sha256": "b28b432717065e1757adba7fc33ef5afd153595fe9ce4c083f97d00509598401",
-      "matchesSource": true,
-      "bytes": 186550
-    },
-    {
-      "file": "icons/icon-72x72.png",
-      "sha256": "a2c2675ba96e11052e6eaa2345aec2837544240ffb9024783381a9c4a74817f9",
-      "matchesSource": true,
-      "bytes": 4004
-    },
-    {
-      "file": "icons/icon-96x96.png",
-      "sha256": "5facf380488b8afcc9025aaceea2795c285d908498b147e86c2096240cf6527c",
-      "matchesSource": true,
-      "bytes": 5829
-    },
-    {
       "file": "index.html",
-      "sha256": "ff507ccc8d97a9b459433cd0db725ada54fc59a5df49ed2bed1fad28d944371e",
+      "sha256": "0e2a033522a53b70e3e9bf639f929d9d7e2dafa5a1077861f6c6de64ca975abb",
       "matchesSource": true,
-      "bytes": 16456
-    },
-    {
-      "file": "manifest.json",
-      "sha256": "9d80106d591dd41a998d63fe4fd6e4ac73118ec868c370ee97a2ff7fd292a316",
-      "matchesSource": true,
-      "bytes": 1370
+      "bytes": 18619
     },
     {
       "file": "script.js",
-      "sha256": "6c161b703c904fbc426a0e93755a8e0ec4e167da2133eb39177e94fd2f194eef",
+      "sha256": "6a426cc21a2a125c1c29d34f978823f19e00da06562c177838c032f5d2fec6e3",
       "matchesSource": true,
-      "bytes": 39906
+      "bytes": 53794
     },
     {
-      "file": "styles.css",
-      "sha256": "ed7c5dca4f3162dc283b870a7d126aefef826b38bcb9343ce2f093568f4da313",
+      "file": "visual-theme.js",
+      "sha256": "abdaeb7a601974b8e115371ec38f436bea1daf129e3650440c8c5bfdb0448dfc",
       "matchesSource": true,
-      "bytes": 21818
+      "bytes": 1308
     },
     {
-      "file": "three-d-animation.js",
-      "sha256": "fec88ef5a815f11e07ab82d38b0a480e1571bf5818514a15ca09327f885263c3",
+      "file": "board-projection.js",
+      "sha256": "8a85a0ba9a1fd2d32c9b06a9eceb5c3a8664d55e1a82499437994ef2da874563",
       "matchesSource": true,
-      "bytes": 6479
+      "bytes": 1529
+    },
+    {
+      "file": "three-d-loader.js",
+      "sha256": "0e12384e5c30a6b6a84aa329c9b89580f24a99c7408cb7a65681d04ff07eb5d4",
+      "matchesSource": true,
+      "bytes": 3249
+    },
+    {
+      "file": "guided-plays.js",
+      "sha256": "67e897e4679d5da9ddb9245b8fea705e672e548a91cd9a8d7e3c09834f7664d0",
+      "matchesSource": true,
+      "bytes": 16954
+    },
+    {
+      "file": "guided-pixel-actors.js",
+      "sha256": "adb0d4625f1a0433a02901f9208aabcba3fe46bb6a4c9df67a22cef0bdcafb38",
+      "matchesSource": true,
+      "bytes": 9819
+    },
+    {
+      "file": "pixel-actor-assets.js",
+      "sha256": "78b2ca63f5fb0dd44f6fe1ab0a104f3afca6840fa02a8eef85953ed35cd1d8d8",
+      "matchesSource": true,
+      "bytes": 3182
+    },
+    {
+      "file": "play-catalog.js",
+      "sha256": "62e5897fc1652c8dbf76afb17ec434dcf6e3e3ab6aa007f756db185d4a947f98",
+      "matchesSource": true,
+      "bytes": 11399
+    },
+    {
+      "file": "court-geometry.js",
+      "sha256": "b7db55f59459012441a1f30e9a92ee40514b67951ee7f7811ed8eeac2ca28149",
+      "matchesSource": true,
+      "bytes": 2625
+    },
+    {
+      "file": "coaching-session.js",
+      "sha256": "686aad197c76814c64d9857aa235b93711de4c53bb2a03bcf08569eb1b150af7",
+      "matchesSource": true,
+      "bytes": 3182
+    },
+    {
+      "file": "coaching-ui.js",
+      "sha256": "c642d2d31f21c7cfea16acb4c373d781a19993d241151edf385b0fd5f35ee73d",
+      "matchesSource": true,
+      "bytes": 2215
+    },
+    {
+      "file": "park-layout.js",
+      "sha256": "de6e5ed38a81bd80457d00aab77e890cd916bf82a461fcce69f0ed9bd66fec5d",
+      "matchesSource": true,
+      "bytes": 2289
+    },
+    {
+      "file": "park-scene.js",
+      "sha256": "f9c607a09f387d2f982d5d69d457cb88780d7842435985ae2c857d48d7441c10",
+      "matchesSource": true,
+      "bytes": 10497
+    },
+    {
+      "file": "assets/park/quiet-court.png",
+      "sha256": "ef7a3e45335222449dafba0ba5b63c8ccc3733e1035e38338d5e342b5fb57dd9",
+      "matchesSource": true,
+      "bytes": 346
+    },
+    {
+      "file": "assets/park/grass.png",
+      "sha256": "43504f0422c443c2c925086ffd74548813f62d0decf215a25d841b268a0cfc26",
+      "matchesSource": true,
+      "bytes": 481
+    },
+    {
+      "file": "assets/park/path.png",
+      "sha256": "9aea7517ebba2513dd7bf1e8169738b584717cc1913f02cf25b3b79ef9dac851",
+      "matchesSource": true,
+      "bytes": 418
+    },
+    {
+      "file": "assets/park/tree.png",
+      "sha256": "ffd4de7504798bc912de89b0400cb8a457958f14c5f754f7e9ee5a37401c1acb",
+      "matchesSource": true,
+      "bytes": 416
+    },
+    {
+      "file": "assets/park/shrub.png",
+      "sha256": "396b1da0d9fdbb63ccb094eb06b655c0d85e999b6995a2f2c7473c093115d5ce",
+      "matchesSource": true,
+      "bytes": 255
+    },
+    {
+      "file": "assets/park/bench.png",
+      "sha256": "f33274d9d7842bf021ec8b33daa0747bfe01dae0d68aa763ff080d9230d5df7e",
+      "matchesSource": true,
+      "bytes": 200
+    },
+    {
+      "file": "assets/park/sign.png",
+      "sha256": "2c240cb309280fa9dc786cc48f44c40d548cc988558238cd0d0728488fb443b2",
+      "matchesSource": true,
+      "bytes": 306
     },
     {
       "file": "three-d-core.js",
-      "sha256": "20332dd4dc6b00635e187117c5e2a80bac67818e76dcb36b63fb9ad152eb05da",
+      "sha256": "800b76975c4aea6ead331f947bae3cd0113405dda29778a1997b4feebb751144",
       "matchesSource": true,
-      "bytes": 11644
+      "bytes": 20349
+    },
+    {
+      "file": "three-d-animation.js",
+      "sha256": "227e7e437a906a5e9afb5e53c97737888ed783eea66c5c9ad0b664135f3a2f8c",
+      "matchesSource": true,
+      "bytes": 12897
     },
     {
       "file": "three-d-playback.js",
-      "sha256": "4bf5351af577a600f82f791f115aa6c50c94e27970c894f041af3b34a6ed0dce",
+      "sha256": "1563f3ca6c1b251eb0bae8a7ed143c6725a5a1dc0bec56e998a6b296b8b2fe4d",
       "matchesSource": true,
-      "bytes": 32547
+      "bytes": 29729
     },
     {
-      "file": "vendor/three.core.min.js",
-      "sha256": "05b2609338c76cd65daf74f3ac515bc9a5045e1b3b33edc07d8c9bd55250fa90",
+      "file": "three-d-presentation.js",
+      "sha256": "54257f5281c20bc8ce8c8353943f75ea49d79814c3092103d719e9d710ac2ca8",
       "matchesSource": true,
-      "bytes": 385386
+      "bytes": 11429
+    },
+    {
+      "file": "three-d-pixel-actors.js",
+      "sha256": "5efe57c7345d021d33c3283abef057eaed79ff96d0bb35849166793d6cc52e4f",
+      "matchesSource": true,
+      "bytes": 6161
+    },
+    {
+      "file": "three-d-ball.js",
+      "sha256": "641468c5470c0d03edee3f3e4002715f757f8562ffcd286a6c6cd7ea38e6de9a",
+      "matchesSource": true,
+      "bytes": 4919
+    },
+    {
+      "file": "assets/replay/metadata.json",
+      "sha256": "4b080c471c9789b8d84eede57af7f9f66bbcc4c9ba60227553ac108c2ca3b3fe",
+      "matchesSource": true,
+      "bytes": 312149
+    },
+    {
+      "file": "assets/replay/green-left-back-body.png",
+      "sha256": "acda54457de0b79742ce45eaacb42a2338d8cd4336626236609123827d509ab8",
+      "matchesSource": true,
+      "bytes": 2840
+    },
+    {
+      "file": "assets/replay/green-left-back-left-body.png",
+      "sha256": "7d1ac2f6c48401d43e84dde2392126aba2b91cac102ef8afa94abd93c7663129",
+      "matchesSource": true,
+      "bytes": 2839
+    },
+    {
+      "file": "assets/replay/green-left-back-right-action.png",
+      "sha256": "5749e6e202b92bafc5c49efebe12457e8c6fdbbe0295bf6ca53f6783de5d7923",
+      "matchesSource": true,
+      "bytes": 2622
+    },
+    {
+      "file": "assets/replay/green-left-back-right-body.png",
+      "sha256": "a7f20a43583560b15107feb025f194de8476a74e5963277461e835ba30d0cf80",
+      "matchesSource": true,
+      "bytes": 2819
+    },
+    {
+      "file": "assets/replay/green-left-front-action.png",
+      "sha256": "0eb33523147495bb5f258ea9aae3c104416cc8e94f64a31c8320f86dc68ce393",
+      "matchesSource": true,
+      "bytes": 2699
+    },
+    {
+      "file": "assets/replay/green-left-front-body.png",
+      "sha256": "a017acd46eb5f5204d1f07a408ab5f8d4032b0857acedb36a6be5a32c70b54cb",
+      "matchesSource": true,
+      "bytes": 2785
+    },
+    {
+      "file": "assets/replay/green-left-front-right-body.png",
+      "sha256": "5530d1347994fb7fb4f3019aea4ebdbaf77b587647a78dfcf8cd24ee0e790d60",
+      "matchesSource": true,
+      "bytes": 2774
+    },
+    {
+      "file": "assets/replay/green-left-left-body.png",
+      "sha256": "d9ff6fcbbef22c82d5cd55a1320763e23f37e10d86c5de5076bd886833788a32",
+      "matchesSource": true,
+      "bytes": 2777
+    },
+    {
+      "file": "assets/replay/green-right-back-body.png",
+      "sha256": "b97da2bfd731a3a062cf7a2d4365f7405e5339e2353bd8afd8dc776657db30c2",
+      "matchesSource": true,
+      "bytes": 2796
+    },
+    {
+      "file": "assets/replay/green-right-back-left-body.png",
+      "sha256": "99bc935212360183d862402416d47381e13ffa9e65a555eef9604372ba09ef21",
+      "matchesSource": true,
+      "bytes": 2789
+    },
+    {
+      "file": "assets/replay/green-right-back-right-action.png",
+      "sha256": "e1161e3eb1d0fa21714413cd320750188fe4711e23b8c877c0cc96b749040992",
+      "matchesSource": true,
+      "bytes": 2698
+    },
+    {
+      "file": "assets/replay/green-right-back-right-body.png",
+      "sha256": "996415382f9a63965505980a91d52305326518e75a913896c0a9bc9f7f53e385",
+      "matchesSource": true,
+      "bytes": 2790
+    },
+    {
+      "file": "assets/replay/green-right-front-action.png",
+      "sha256": "d6ff50d5b93037c751bdee800ff33ea86620c6e56d3fbe5ebc9e318bd24d5b5d",
+      "matchesSource": true,
+      "bytes": 2623
+    },
+    {
+      "file": "assets/replay/green-right-front-body.png",
+      "sha256": "375d5c826c448ea3d934660ca246774fe396a0ae6e4559767374015106aba850",
+      "matchesSource": true,
+      "bytes": 2824
+    },
+    {
+      "file": "assets/replay/green-right-front-right-body.png",
+      "sha256": "adf2302b62a3727f444bff52f9a6af277db2218cab602c96447c1af925852b39",
+      "matchesSource": true,
+      "bytes": 2805
+    },
+    {
+      "file": "assets/replay/green-right-left-body.png",
+      "sha256": "2c80457fe9db43eb5cdc232c5022c54249f461e8758a5c6ca527b9ce90f1e475",
+      "matchesSource": true,
+      "bytes": 2823
+    },
+    {
+      "file": "assets/replay/orange-left-back-body.png",
+      "sha256": "8c95ea9fd7f4b77b619916a2d9f571cb861f664fd9c4c204cdf738ed3d90639f",
+      "matchesSource": true,
+      "bytes": 2838
+    },
+    {
+      "file": "assets/replay/orange-left-back-left-body.png",
+      "sha256": "cbfb0dbf224039d5a7535041bee90f7c97a38f0bf2ae6b465b021250fcdf1b3e",
+      "matchesSource": true,
+      "bytes": 2838
+    },
+    {
+      "file": "assets/replay/orange-left-back-right-action.png",
+      "sha256": "9d5e6f00574b8d90e2467b1db698a4b59f8f476edcf39b05c3e34f34c0bac6e7",
+      "matchesSource": true,
+      "bytes": 2622
+    },
+    {
+      "file": "assets/replay/orange-left-back-right-body.png",
+      "sha256": "bd833b337d24cb1605a71476210d5489008b47931ff6bacb1f21c97dea607148",
+      "matchesSource": true,
+      "bytes": 2818
+    },
+    {
+      "file": "assets/replay/orange-left-front-action.png",
+      "sha256": "cf0e8c4caa68e0c6f3b4d96799330cb0cdcd5bb848fee8ece89258540d810aa0",
+      "matchesSource": true,
+      "bytes": 2698
+    },
+    {
+      "file": "assets/replay/orange-left-front-body.png",
+      "sha256": "4985c9213e41cb6897ac3e687846eb0edcf41d3a6fe186308a4dcd6d4b021d9f",
+      "matchesSource": true,
+      "bytes": 2784
+    },
+    {
+      "file": "assets/replay/orange-left-front-right-body.png",
+      "sha256": "fd0e8a1fb3d736d430b4c3d0c16e5a9a037b7c6b2fec257ad57a78cef212f0b3",
+      "matchesSource": true,
+      "bytes": 2773
+    },
+    {
+      "file": "assets/replay/orange-left-left-body.png",
+      "sha256": "8a815fe791c5e5e050a1618e6367f376a40777b007e7768ea01e97ad8604c7d7",
+      "matchesSource": true,
+      "bytes": 2777
+    },
+    {
+      "file": "assets/replay/orange-right-back-body.png",
+      "sha256": "80d8cb60e83700e3c8adc05e1da6373066c7cf708e7796adfa7609eab57ce621",
+      "matchesSource": true,
+      "bytes": 2794
+    },
+    {
+      "file": "assets/replay/orange-right-back-left-body.png",
+      "sha256": "a4317d26c468a586c3ada04d7004b00803175f76fbc5dfe906c71085d5372700",
+      "matchesSource": true,
+      "bytes": 2788
+    },
+    {
+      "file": "assets/replay/orange-right-back-right-action.png",
+      "sha256": "d27b851e546b21a2649c27c942fac9d2cee48fe9f7748d73b86b47ecf2d85dbe",
+      "matchesSource": true,
+      "bytes": 2698
+    },
+    {
+      "file": "assets/replay/orange-right-back-right-body.png",
+      "sha256": "9f3d78093fe2187148c65b09f3e1badb15d0378145fe9c8de2bca6ddb8d7b862",
+      "matchesSource": true,
+      "bytes": 2788
+    },
+    {
+      "file": "assets/replay/orange-right-front-action.png",
+      "sha256": "b1612a37764f347ad65d039ad664820d17bc4476c626426d7ba1e5021083d7d6",
+      "matchesSource": true,
+      "bytes": 2623
+    },
+    {
+      "file": "assets/replay/orange-right-front-body.png",
+      "sha256": "1ed63ee9267ad219e6cb637a6c9095b820c4724334c06539e0ad1174576edd12",
+      "matchesSource": true,
+      "bytes": 2823
+    },
+    {
+      "file": "assets/replay/orange-right-front-right-body.png",
+      "sha256": "8bf6ca0c4b2bef4c93156ec47e374106976001e9898546e5f4100f6fd032c51e",
+      "matchesSource": true,
+      "bytes": 2804
+    },
+    {
+      "file": "assets/replay/orange-right-left-body.png",
+      "sha256": "482d4737d79bcb1ba71fd09d092abeaaac3f5cffba648182b04e66db0b9f0d37",
+      "matchesSource": true,
+      "bytes": 2822
     },
     {
       "file": "vendor/three.module.min.js",
@@ -140,10 +369,106 @@
       "bytes": 365552
     },
     {
+      "file": "vendor/three.core.min.js",
+      "sha256": "05b2609338c76cd65daf74f3ac515bc9a5045e1b3b33edc07d8c9bd55250fa90",
+      "matchesSource": true,
+      "bytes": 385386
+    },
+    {
+      "file": "styles.css",
+      "sha256": "c0ea3beb82762ce8c0ed2c757c32662e58bcff8cd45940fc1c7184e757f311d8",
+      "matchesSource": true,
+      "bytes": 24085
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "7bc93c20daeb6807a4b6053b520b0532d179a6a7bf53ddb51536152c52258fdf",
+      "matchesSource": true,
+      "bytes": 1506
+    },
+    {
+      "file": "assets/players/green-left-handed.png",
+      "sha256": "b55ec402d62c3540eaa353a81b3b742f7874d54e1c054e64d506afa5e3c7aec0",
+      "matchesSource": true,
+      "bytes": 467
+    },
+    {
+      "file": "assets/players/green-right-handed.png",
+      "sha256": "d9f99d18ca0f335609aa6a8399fcdf80b6f57058ccebe2e7b9c07526234cbb75",
+      "matchesSource": true,
+      "bytes": 460
+    },
+    {
+      "file": "assets/players/orange-left-handed.png",
+      "sha256": "5b6c139adcb4db2b3a57168176e54cf9478dfe9b6f902164c5aaba573758602d",
+      "matchesSource": true,
+      "bytes": 463
+    },
+    {
+      "file": "assets/players/orange-right-handed.png",
+      "sha256": "450e87c6c4984f062c5b54a649e69523b659a4effde6f975053caaf6089b08d2",
+      "matchesSource": true,
+      "bytes": 463
+    },
+    {
+      "file": "icons/apple-icon-180.png",
+      "sha256": "813e864749bbcacafbd139e0343d0bba06e6607c8ea9f0219be8e5c04aa07c62",
+      "matchesSource": true,
+      "bytes": 1000
+    },
+    {
+      "file": "icons/icon-72x72.png",
+      "sha256": "b9838178493dfe59dea186b31b6e545b25738195f380e8059495b09775d3ec24",
+      "matchesSource": true,
+      "bytes": 422
+    },
+    {
+      "file": "icons/icon-96x96.png",
+      "sha256": "375cb33ca47ffc0f18b0ddf4389959b22e13d68fe12ce543722492b37f1ba6c5",
+      "matchesSource": true,
+      "bytes": 540
+    },
+    {
+      "file": "icons/icon-128x128.png",
+      "sha256": "77034e43830c39d71ea9d274a1c5e58070134a7213751d9fb1dcfff71b6732b8",
+      "matchesSource": true,
+      "bytes": 693
+    },
+    {
+      "file": "icons/icon-144x144.png",
+      "sha256": "3fa21d45700312b81c77c824f318d4a473a69ace62b0d6add812df8eabbd2e6a",
+      "matchesSource": true,
+      "bytes": 764
+    },
+    {
+      "file": "icons/icon-152x152.png",
+      "sha256": "69094e7196f271a628e7b0315a401cace1508d9b756db91530f0217cbd954676",
+      "matchesSource": true,
+      "bytes": 796
+    },
+    {
+      "file": "icons/icon-192x192.png",
+      "sha256": "65ecbeab916f7dc40ef6b71afa2fba1b48c7596b3ad1268817275f3b3c867d51",
+      "matchesSource": true,
+      "bytes": 1069
+    },
+    {
+      "file": "icons/icon-384x384.png",
+      "sha256": "66b65056f341a00de0c042544b0591f983c3010fe8d1f858274fc9f7801508f2",
+      "matchesSource": true,
+      "bytes": 2738
+    },
+    {
+      "file": "icons/icon-512x512.png",
+      "sha256": "e6d77fb7272d18b8624cceedfcc6e2b5d8c4b484feaa0b15087bb0bbb96d46fd",
+      "matchesSource": true,
+      "bytes": 4454
+    },
+    {
       "file": "sw.js",
-      "sha256": "cc76d2bb90aaec6f7641e3200bbf09c0bb4b074f02f0afbba0aaebf50c4df683",
-      "bytes": 3988,
-      "matchesSource": true
+      "sha256": "d68c0a64cf32a691309b5f43e0c277e014176155d37d8d1c9d801e53975046b0",
+      "matchesSource": true,
+      "bytes": 6218
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "source": "4438addfadcd2406b5d9200d356c9c5fa63c4fa3",
+  "manifestSha256": "2d236d5ceb9c4801447b8afe40a531623d03eecd32f4876d62cbcaaa1b7ed865",
+  "runtimeFiles": 110,
+  "runtimeBytes": 1871430,
+  "deltaBytes": -272,
+  "added": [],
+  "removed": [],
+  "note": "Local review package only; owner acceptance and publication are separate."
+}

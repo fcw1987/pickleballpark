@@ -1,0 +1,883 @@
+{
+  "url": "http://127.0.0.1:4184/",
+  "results": [
+    {
+      "browser": "chromium",
+      "hiddenWhileBackgrounded": false,
+      "samples": [
+        {
+          "label": "initial",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            431.15625
+          ],
+          "buffer": [
+            832,
+            431
+          ],
+          "expectedBuffer": [
+            832,
+            431
+          ],
+          "frame": 2,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 107817,
+          "hash": "46f3cd894246"
+        },
+        {
+          "label": "help-0",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 4,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 60971,
+          "hash": "8ee4843d344e"
+        },
+        {
+          "label": "help-1",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.15625
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 29,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 84691,
+          "hash": "19282396785e"
+        },
+        {
+          "label": "help-2",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            1012,
+            599.15625
+          ],
+          "buffer": [
+            1012,
+            599
+          ],
+          "expectedBuffer": [
+            1012,
+            599
+          ],
+          "frame": 31,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 134353,
+          "hash": "d9c1442dbd12"
+        },
+        {
+          "label": "reentry-2",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            1012,
+            599.15625
+          ],
+          "buffer": [
+            1012,
+            599
+          ],
+          "expectedBuffer": [
+            1012,
+            599
+          ],
+          "frame": 32,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 133986,
+          "hash": "227ebd4ce58b"
+        },
+        {
+          "label": "help-3",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            418,
+            721.8125
+          ],
+          "buffer": [
+            418,
+            722
+          ],
+          "expectedBuffer": [
+            418,
+            722
+          ],
+          "frame": 57,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 67585,
+          "hash": "16a8d328d0eb"
+        },
+        {
+          "label": "help-4",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            431.15625
+          ],
+          "buffer": [
+            832,
+            431
+          ],
+          "expectedBuffer": [
+            832,
+            431
+          ],
+          "frame": 59,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 108181,
+          "hash": "d9a6f5a0aa77"
+        },
+        {
+          "label": "help-5",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 85,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 61245,
+          "hash": "e1b396d2b261"
+        },
+        {
+          "label": "reentry-5",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 86,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 61483,
+          "hash": "7b67bbb39045"
+        },
+        {
+          "label": "help-6",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.15625
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 88,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 84815,
+          "hash": "17b6277d0160"
+        },
+        {
+          "label": "help-7",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            1012,
+            599.15625
+          ],
+          "buffer": [
+            1012,
+            599
+          ],
+          "expectedBuffer": [
+            1012,
+            599
+          ],
+          "frame": 113,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 134683,
+          "hash": "464bb8070411"
+        },
+        {
+          "label": "help-8",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            418,
+            721.8125
+          ],
+          "buffer": [
+            418,
+            722
+          ],
+          "expectedBuffer": [
+            418,
+            722
+          ],
+          "frame": 115,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 68106,
+          "hash": "f727d7d3b597"
+        },
+        {
+          "label": "reentry-8",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            418,
+            721.8125
+          ],
+          "buffer": [
+            418,
+            722
+          ],
+          "expectedBuffer": [
+            418,
+            722
+          ],
+          "frame": 116,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 68291,
+          "hash": "cf3cd4746280"
+        },
+        {
+          "label": "help-9",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            431.15625
+          ],
+          "buffer": [
+            832,
+            431
+          ],
+          "expectedBuffer": [
+            832,
+            431
+          ],
+          "frame": 141,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 108437,
+          "hash": "e42d548e4aa7"
+        },
+        {
+          "label": "help-10",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 144,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 62227,
+          "hash": "333031b4acfb"
+        },
+        {
+          "label": "help-11",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.15625
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 158,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 84700,
+          "hash": "d1fdedb1e57d"
+        },
+        {
+          "label": "reentry-11",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.15625
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 159,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 84931,
+          "hash": "83ec665710e3"
+        },
+        {
+          "label": "background-return",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.15625
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 159,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 84931,
+          "hash": "83ec665710e3"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "hiddenWhileBackgrounded": false,
+      "samples": [
+        {
+          "label": "initial",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            431.171875
+          ],
+          "buffer": [
+            832,
+            431
+          ],
+          "expectedBuffer": [
+            832,
+            431
+          ],
+          "frame": 2,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 155872,
+          "hash": "e9c096ebb373"
+        },
+        {
+          "label": "help-0",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 4,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 89308,
+          "hash": "172b03edf7b1"
+        },
+        {
+          "label": "help-1",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.171875
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 19,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 114977,
+          "hash": "769738ffb077"
+        },
+        {
+          "label": "help-2",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            1012,
+            599.171875
+          ],
+          "buffer": [
+            1012,
+            599
+          ],
+          "expectedBuffer": [
+            1012,
+            599
+          ],
+          "frame": 21,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 196742,
+          "hash": "7e782cffc440"
+        },
+        {
+          "label": "reentry-2",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            1012,
+            599.171875
+          ],
+          "buffer": [
+            1012,
+            599
+          ],
+          "expectedBuffer": [
+            1012,
+            599
+          ],
+          "frame": 23,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 196194,
+          "hash": "51e2c041a15e"
+        },
+        {
+          "label": "help-3",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            418,
+            721.8125
+          ],
+          "buffer": [
+            418,
+            722
+          ],
+          "expectedBuffer": [
+            418,
+            722
+          ],
+          "frame": 37,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 101417,
+          "hash": "46f9c406c61b"
+        },
+        {
+          "label": "help-4",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            431.171875
+          ],
+          "buffer": [
+            832,
+            431
+          ],
+          "expectedBuffer": [
+            832,
+            431
+          ],
+          "frame": 39,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 156483,
+          "hash": "c085a7f5be01"
+        },
+        {
+          "label": "help-5",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 54,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 89601,
+          "hash": "64c918d06e17"
+        },
+        {
+          "label": "reentry-5",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 55,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 89921,
+          "hash": "1d7d904aa43a"
+        },
+        {
+          "label": "help-6",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.171875
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 57,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 114720,
+          "hash": "65db5e90fbcf"
+        },
+        {
+          "label": "help-7",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            1012,
+            599.171875
+          ],
+          "buffer": [
+            1012,
+            599
+          ],
+          "expectedBuffer": [
+            1012,
+            599
+          ],
+          "frame": 71,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 197413,
+          "hash": "d3f3c1228b39"
+        },
+        {
+          "label": "help-8",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            418,
+            721.8125
+          ],
+          "buffer": [
+            418,
+            722
+          ],
+          "expectedBuffer": [
+            418,
+            722
+          ],
+          "frame": 74,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 102096,
+          "hash": "41f7b9335a3b"
+        },
+        {
+          "label": "reentry-8",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            418,
+            721.8125
+          ],
+          "buffer": [
+            418,
+            722
+          ],
+          "expectedBuffer": [
+            418,
+            722
+          ],
+          "frame": 75,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 102285,
+          "hash": "4d53b9c704b7"
+        },
+        {
+          "label": "help-9",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            431.171875
+          ],
+          "buffer": [
+            832,
+            431
+          ],
+          "expectedBuffer": [
+            832,
+            431
+          ],
+          "frame": 89,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 156341,
+          "hash": "25c69c3bb4c8"
+        },
+        {
+          "label": "help-10",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            378,
+            633.8125
+          ],
+          "buffer": [
+            378,
+            634
+          ],
+          "expectedBuffer": [
+            378,
+            634
+          ],
+          "frame": 91,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 90442,
+          "hash": "74f526312ce6"
+        },
+        {
+          "label": "help-11",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.171875
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 105,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 114971,
+          "hash": "068e617c9ebc"
+        },
+        {
+          "label": "reentry-11",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.171875
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 106,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 114862,
+          "hash": "e9dca100af70"
+        },
+        {
+          "label": "background-return",
+          "active": true,
+          "lost": false,
+          "canvases": 1,
+          "css": [
+            832,
+            229.171875
+          ],
+          "buffer": [
+            832,
+            229
+          ],
+          "expectedBuffer": [
+            832,
+            229
+          ],
+          "frame": 106,
+          "pending": false,
+          "bodyOverflow": "",
+          "hidden": false,
+          "pngBytes": 114862,
+          "hash": "e9dca100af70"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

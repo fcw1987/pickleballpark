@@ -1,0 +1,32 @@
+{
+  "previewURL": "http://127.0.0.1:4173/index.html",
+  "candidateHead": "c844fce50a6a4d270836c29c7995004e2b5daa7e",
+  "stampedSourceRevision": "39670b72c532b256b96f2554d13065ef783d2223",
+  "runtimeDigest": "5b890e14e1690cdb2c54d69e7f5c8933c71c506c10d4cb76d742446d2d95e129",
+  "results": [
+    {
+      "browser": "chromium",
+      "iterations": 20,
+      "forcedContextLosses": 0,
+      "baseline": { "memory": { "geometries": 41, "textures": 6 }, "loopStarts": 1 },
+      "final": {
+        "active": true,
+        "canvasCount": 1,
+        "contextLost": false,
+        "drawingBuffer": [1424, 744],
+        "memory": { "geometries": 41, "textures": 6 },
+        "programs": 8,
+        "renderFrames": 11,
+        "renderLoopStarts": 87,
+        "rendererScheduler": null,
+        "guidedScheduler": null,
+        "holdTimer": null,
+        "pendingAnimationFrames": 0,
+        "playing": false
+      },
+      "errors": [],
+      "failures": []
+    }
+  ],
+  "method": "20 cycles of play/pause/seek, Help and main-menu toggles, 2D↔3D and camera changes across portrait, landscape and desktop viewports; reduced-motion preference enabled."
+}

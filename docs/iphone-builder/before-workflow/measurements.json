@@ -1,0 +1,642 @@
+[
+  {
+    "state": "browse",
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 63708.16723131269,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      382,
+      477
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 63708.16723131269,
+    "unobscuredCourtSampleFraction": 0.05714285714285714,
+    "buffer": [
+      382,
+      477
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 63708.16723131269,
+    "unobscuredCourtSampleFraction": 0.05714285714285714,
+    "buffer": [
+      382,
+      477
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 53981.005624766985,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      382,
+      439
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 1,
+    "time": 0.6304999999880793,
+    "camera": "overhead",
+    "courtPixels": 58487.588366506476,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      382,
+      457
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 89394.9330899966,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      422,
+      565
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 89394.9330899966,
+    "unobscuredCourtSampleFraction": 0.1523809523809524,
+    "buffer": [
+      422,
+      565
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 89394.9330899966,
+    "unobscuredCourtSampleFraction": 0.1523809523809524,
+    "buffer": [
+      422,
+      565
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 77798.15779129742,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      422,
+      527
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 1,
+    "time": 0.6300000000000003,
+    "camera": "overhead",
+    "courtPixels": 83190.22533612195,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      422,
+      545
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 13948.051592459706,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      312,
+      179
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 13948.051592459706,
+    "unobscuredCourtSampleFraction": 0,
+    "buffer": [
+      312,
+      179
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 13948.051592459706,
+    "unobscuredCourtSampleFraction": 0,
+    "buffer": [
+      312,
+      179
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 12864.343803631673,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      312,
+      141
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 1,
+    "time": 0.6228000000000002,
+    "camera": "overhead",
+    "courtPixels": 13420.211347298173,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      312,
+      159
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      844,
+      390
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 50152.177303352626,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      594,
+      334
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      844,
+      390
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 50152.177303352626,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      594,
+      334
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      844,
+      390
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 50152.177303352626,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      594,
+      334
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      844,
+      390
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 50152.177303352626,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      594,
+      334
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      844,
+      390
+    ],
+    "dpr": 1,
+    "time": 0.6232999999940398,
+    "camera": "overhead",
+    "courtPixels": 50152.177303352626,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      594,
+      334
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 119087.84510932678,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      744,
+      652
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 118989.70441418792,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      474,
+      652
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 118989.70441418792,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      474,
+      652
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 111201.98431052541,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      744,
+      630
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 1,
+    "time": 0.6778000000059604,
+    "camera": "overhead",
+    "courtPixels": 119087.84510932678,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      744,
+      652
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      1024,
+      768
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 125012.1298778155,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1000,
+      396
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      1024,
+      768
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 74777.34989226448,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      730,
+      396
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      1024,
+      768
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 74777.34989226448,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      730,
+      396
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      1024,
+      768
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 122007.86693761387,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1000,
+      374
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      1024,
+      768
+    ],
+    "dpr": 1,
+    "time": 0.6763999999970198,
+    "camera": "overhead",
+    "courtPixels": 125012.1298778155,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1000,
+      396
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      680,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 83605.85462596307,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      672,
+      546
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      680,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 83605.85462596307,
+    "unobscuredCourtSampleFraction": 0.15555555555555556,
+    "buffer": [
+      672,
+      546
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      680,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 83605.85462596307,
+    "unobscuredCourtSampleFraction": 0.15555555555555556,
+    "buffer": [
+      672,
+      546
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      680,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 77756.62113470839,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      672,
+      527
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      680,
+      900
+    ],
+    "dpr": 1,
+    "time": 0.6652000000000003,
+    "camera": "overhead",
+    "courtPixels": 77756.62113470839,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      672,
+      527
+    ]
+  },
+  {
+    "state": "browse",
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 251376.792091408,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1416,
+      563
+    ]
+  },
+  {
+    "state": "edit",
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 178382.06000289108,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1146,
+      563
+    ]
+  },
+  {
+    "state": "details",
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 178382.06000289108,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1146,
+      563
+    ]
+  },
+  {
+    "state": "placement",
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "time": 0,
+    "camera": "overhead",
+    "courtPixels": 251376.792091408,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1416,
+      563
+    ]
+  },
+  {
+    "state": "playback",
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "time": 0.72349999999702,
+    "camera": "overhead",
+    "courtPixels": 251376.792091408,
+    "unobscuredCourtSampleFraction": 1,
+    "buffer": [
+      1416,
+      563
+    ]
+  }
+]

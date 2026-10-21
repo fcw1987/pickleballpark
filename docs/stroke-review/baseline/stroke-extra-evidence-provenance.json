@@ -1,0 +1,5 @@
+{
+  "baselineClipSource": "../baseline-clips/stroke-report.json",
+  "movingReturnSource": "../baseline-return/stroke-report.json",
+  "note": "Copied selected deliverables for canonical comparison paths; immutable baseline runtime digest verified in their source reports."
+}

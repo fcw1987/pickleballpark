@@ -1,0 +1,70 @@
+{
+  "browser": "149.0.7827.55",
+  "environment": "headless Chromium on macOS, desktop emulation, DPR1, 1440x900",
+  "workload": "starter three-shot draft, overhead, Loop, 1x",
+  "warmup": "logical time >2 seconds",
+  "sampleSeconds": 30,
+  "runs": [
+    {
+      "startup": {
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "readyMs": 825.8999999761581,
+        "bytes": 1556483,
+        "buffer": [
+          1416,
+          563
+        ]
+      },
+      "cadence": {
+        "count": 2497,
+        "median": 8.799999999999272,
+        "p95": 16.899999999997817,
+        "p99": 17.5
+      },
+      "missFraction": 0.4425310372446936,
+      "renderWorkMs": {
+        "count": 1785,
+        "median": 0.30000001192092896,
+        "p95": 0.4000000059604645,
+        "p99": 0.5
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "drawCalls": 57,
+      "pausedFramesOverOneSecond": 0
+    },
+    {
+      "startup": {
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "readyMs": 762.5,
+        "bytes": 1556483,
+        "buffer": [
+          1416,
+          563
+        ]
+      },
+      "cadence": {
+        "count": 2477,
+        "median": 8.799999999999272,
+        "p95": 16.899999999997817,
+        "p99": 17.19999999999891
+      },
+      "missFraction": 0.45296729915220024,
+      "renderWorkMs": {
+        "count": 1767,
+        "median": 0.30000001192092896,
+        "p95": 0.4000000059604645,
+        "p99": 0.5
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "drawCalls": 57,
+      "pausedFramesOverOneSecond": 0
+    }
+  ],
+  "limitations": "RAF intervals do not prove presentation; render work includes CPU command submission, not GPU completion. No physical phone or Safari claim."
+}

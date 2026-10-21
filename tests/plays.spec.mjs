@@ -1,9 +1,9 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './helpers/offline-app.mjs';
 
 async function openApp(page) {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/index.html?plays-e2e=1');
+  await page.goto('/index.html?workspace=planner&plays-e2e=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
   return errors;
 }
@@ -42,31 +42,75 @@ test('library exposes the four opening Plays and four shot lessons and each can 
   expect(errors).toEqual([]);
 });
 
-test('manual controls advance, go backward, and restart deterministically', async ({ page }) => {
+test('all lessons and the custom rally agree on the destination segment at exact chapter anchors', async ({ page }) => {
+  await page.goto('/index.html?anchor-review=1');
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  const audit = await page.evaluate(async ids => {
+    const engine = pickleboard.plays;
+    const custom = { play: playBuilder.compiled.play, timeline: playBuilder.compiled.timeline };
+    const definitions = [custom, ...ids.map(id => ({ play: window.PICKLEBOARD_PLAYS.find(item => item.id === id) }))];
+    const records = [];
+    for (const definition of definitions) {
+      engine.loadDefinition(definition.play, definition.timeline);
+      for (const chapter of engine.chapters) {
+        engine.timelineAction('chapter', chapter.shotId);
+        const expected = chapter.anchor === 0 ? null :
+          engine.timeline.segments.find(item => chapter.anchor < item.endTime - 1e-9) || engine.timeline.segments.at(-1);
+        records.push({ playId: definition.play.id, shotId: chapter.shotId, anchor: chapter.anchor,
+          expectedStepId: expected?.step.id || null, actualStepId: engine.lastState.segment?.step.id || null,
+          expectedIndex: expected?.index || 0, actualIndex: engine.stepIndex,
+          markerId: document.querySelector('#playTimelineMount .shot-timeline-marker.is-current')?.dataset.shotId || null });
+      }
+    }
+    engine.load('third-shot-drop');
+    await pickleboard.threeD.enter();
+    const { samplePlayBall } = await import('/three-d-core.js');
+    const replay = [];
+    for (const chapter of engine.chapters) {
+      engine.timelineAction('chapter', chapter.shotId);
+      const expected = chapter.anchor === 0 ? null :
+        engine.timeline.segments.find(item => chapter.anchor < item.endTime - 1e-9) || engine.timeline.segments.at(-1);
+      const expectedBall = samplePlayBall(engine.timeline, chapter.anchor);
+      replay.push({ shotId: chapter.shotId, expectedIndex: expected?.index || 0,
+        actualIndex: pickleboard.threeD.currentStepIndex(),
+        expectedLeg: expectedBall.rallyLeg, actualLeg: pickleboard.threeD.lastState?.rallyLeg || null });
+    }
+    return { records, replay };
+  }, expectedPlays.map(([id]) => id));
+
+  expect(audit.records.length).toBeGreaterThan(16);
+  for (const record of audit.records) {
+    expect(record.actualStepId, `${record.playId}/${record.shotId}@${record.anchor}`).toBe(record.expectedStepId);
+    expect(record.actualIndex, `${record.playId}/${record.shotId}@${record.anchor}`).toBe(record.expectedIndex);
+    expect(record.markerId, `${record.playId}/${record.shotId}@${record.anchor}`).toBe(record.shotId);
+  }
+  for (const record of audit.replay) {
+    expect(record.actualIndex, `3D/${record.shotId}`).toBe(record.expectedIndex);
+    expect(record.actualLeg, `3D/${record.shotId}`).toBe(record.expectedLeg);
+  }
+});
+
+test('one transport seeks chapters and the start deterministically', async ({ page }) => {
   await openApp(page);
   await loadPlay(page, 'third-shot-drop');
   expect(await engineState(page)).toMatchObject({ stepIndex: 0, stepCount: 5, status: 'paused' });
+  await expect(page.locator('#playPrevious,#playNext,#playRestart,#playLoop')).toHaveCount(0);
 
-  await page.locator('#playNext').click();
-  await expect.poll(async () => (await engineState(page)).stepIndex).toBe(1);
-  await expect(page.locator('#playbackProgress')).toHaveText('Step 2 of 5');
-  await page.locator('#playPrevious').click();
-  await expect.poll(async () => (await engineState(page)).stepIndex).toBe(0);
-
-  await page.locator('#playNext').click();
-  await page.locator('#playRestart').click();
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
+  await expect.poll(async () => (await engineState(page)).stepIndex).toBe(2);
+  await expect(page.locator('#playbackProgress')).toHaveText('Step 3 of 5');
+  await page.locator('#playTimelineMount input[type=range]').fill('0');
   expect(await engineState(page)).toMatchObject({ stepIndex: 0, status: 'paused' });
   expect(await page.evaluate(() => window.pickleboard.getTokenPositions().ball)).toEqual({ x: 16.2, y: 0 });
   await expect(page.locator('#playPathLayer')).toBeEmpty();
 });
 
-test('automatic playback pauses cleanly, resumes once, and stops at the final step', async ({ page }) => {
+test('automatic playback pauses cleanly, resumes, and repeats after the final hold', async ({ page }) => {
   await openApp(page);
   await page.evaluate(() => {
     // Keep transitions short while leaving enough time for CI to exercise Pause
     // before the three-step play can race to completion.
-    window.pickleboard.plays.timingScale = 0.5;
-    window.pickleboard.plays.stepHoldMs = 100;
+    window.pickleboard.plays.timingScale = 0.05;
     window.pickleboard.plays.load('serve-and-return');
   });
 
@@ -79,9 +123,11 @@ test('automatic playback pauses cleanly, resumes once, and stops at the final st
   expect(await engineState(page)).toEqual(paused);
 
   await page.locator('#playPlayPause').click();
-  await expect.poll(async () => (await engineState(page)).status).toBe('complete');
-  expect(await engineState(page)).toMatchObject({ stepIndex: 2, stepCount: 3 });
-  await expect(page.locator('#playPlayPause')).toHaveText('Replay');
+  await expect.poll(async () => (await engineState(page)).iteration, {timeout:5000}).toBeGreaterThan(0);
+  expect(await engineState(page)).toMatchObject({ playing:true, loop:true, stepCount:3 });
+  await expect(page.locator('#playPlayPause')).toHaveAttribute('aria-label','Pause rally');
+  await page.locator('#playPlayPause').click();
+  expect(await engineState(page)).toMatchObject({playing:false,status:'paused'});
 });
 
 test('Exit restores custom mode, positions, handedness, drawings, and removes play artifacts', async ({ page }) => {
@@ -107,7 +153,7 @@ test('Exit restores custom mode, positions, handedness, drawings, and removes pl
   }));
   await loadPlay(page, 'fifth-shot-drop');
   expect(await page.evaluate(() => window.pickleboard.currentGameMode)).toBe('doubles');
-  await page.locator('#playNext').click();
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
   await page.locator('#playExit').click();
 
   const after = await page.evaluate(() => ({
@@ -141,14 +187,14 @@ test('play mode locks dragging and handedness changes', async ({ page }) => {
   }))).toEqual(before);
 });
 
-test('reduced motion applies step endpoints without animated delay', async ({ page }) => {
+test('reduced motion keeps exact chapter destinations inspectable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openApp(page);
   await loadPlay(page, 'third-shot-drive');
-  await page.locator('#playNext').click();
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
   const endpoint = await page.evaluate(() => window.pickleboard.getTokenPositions().ball);
   expect(endpoint.x).toBeCloseTo(5.8, 9); expect(endpoint.y).toBeCloseTo(39, 9);
-  expect(await engineState(page)).toMatchObject({ stepIndex: 1, status: 'paused' });
+  expect(await engineState(page)).toMatchObject({ stepIndex: 2, status: 'paused' });
 });
 
 test('play controls remain inside required viewports without document overflow', async ({ page }) => {
@@ -175,14 +221,22 @@ test('play controls remain inside required viewports without document overflow',
   }
 });
 
-test('guided plays start and advance on an offline repeat visit', async ({ page, context }) => {
-  await openApp(page);
+test('guided plays start and advance on an offline repeat visit', async ({ page, offlineApp }) => {
+  await page.goto(`${offlineApp.url}/index.html?workspace=planner&plays-e2e=1`);
+  await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
-  await context.setOffline(true);
+  await offlineApp.stop();
   await page.reload();
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
   await loadPlay(page, 'third-shot-drop');
-  await page.locator('#playNext').click();
-  expect(await engineState(page)).toMatchObject({ playId: 'third-shot-drop', stepIndex: 1 });
-  await context.setOffline(false);
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
+  const returnState = await page.evaluate(() => {
+    const engine = window.pickleboard.plays;
+    const chapter = engine.chapters.find(item => item.shotId === 'return');
+    return { ...engine.getState(), anchor: chapter.anchor,
+      stepId: engine.lastState.segment.step.id,
+      currentShotId: document.querySelector('#playTimelineMount .shot-timeline-marker.is-current')?.dataset.shotId };
+  });
+  expect(returnState).toMatchObject({ playId: 'third-shot-drop', stepIndex: 2, stepId: 'return', currentShotId: 'return' });
+  expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
 });

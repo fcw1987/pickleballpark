@@ -1,6 +1,6 @@
 # Character design contract
 
-Current product: **Pickleball Park**. The permanent name changes lettering only; approved geometry, poses, grips, anchors and palette remain the accepted baseline.
+Current product: **Pickleboard**. The permanent name changes lettering only; approved geometry, poses, grips, anchors and palette remain the accepted baseline.
 
 The four runtime athletes are original repository-authored pixel art. The
 Diamond/Pearl era is an art-direction reference for compact DS proportions and

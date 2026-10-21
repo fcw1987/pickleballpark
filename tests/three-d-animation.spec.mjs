@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 
 async function openPlay(page, playId = 'fifth-shot-drop') {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/index.html?animation-e2e=1');
+  await page.goto('/index.html?workspace=planner&animation-e2e=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(id => window.pickleboard.plays.load(id), playId);
   await page.locator('#play3dView').click();
@@ -59,7 +60,7 @@ test('serve, return, drive, block, and fifth drop resolve actors and synchronize
 });
 
 test('right and left handed forehands animate their dominant physical arm', async ({ page }) => {
-  await page.goto('/index.html?animation-hands=1');
+  await page.goto('/index.html?workspace=planner&animation-hands=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => {
     window.pickleboard.tokens.player1.handedness = 'left';
@@ -70,12 +71,23 @@ test('right and left handed forehands animate their dominant physical arm', asyn
   const result = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
     const segment = viewer.timeline.segments.find(item => item.step.id === 'third-drive');
-    const time = segment.startTime + segment.contactTime;
-    viewer.applyAtTime(time);
     const root = viewer.playerObjects.get('player1');
-    return { handedness: root.userData.handedness, pixelActor: root.userData.pixelActor, frame: root.userData.animation.frame, phase: root.userData.animation.phase };
+    return ['left', 'right'].map(handedness => {
+      root.userData.handedness = handedness;
+      viewer.applyAtTime(segment.startTime + segment.contactTime);
+      const grip = root.getObjectByName('PaddleGrip').getWorldPosition(root.position.clone());
+      const dominant = root.userData.arms[handedness].hand.getWorldPosition(root.position.clone());
+      const support = root.userData.arms[handedness === 'left' ? 'right' : 'left'].hand.getWorldPosition(root.position.clone());
+      return { handedness: root.userData.handedness, volumetricAthlete: root.userData.volumetricAthlete,
+        action: root.userData.animation.action, phase: root.userData.animation.phase,
+        gripDistance: dominant.distanceTo(grip), supportDistance: support.distanceTo(grip) };
+    });
   });
-  expect(result).toMatchObject({ handedness: 'left', pixelActor: true, frame: 'drive-contact', phase: 'contact' });
+  for (const hand of result) {
+    expect(hand).toMatchObject({ volumetricAthlete: true, action: 'drive', phase: 'contact' });
+    expect(hand.gripDistance, `${hand.handedness} physical hand holds paddle grip`).toBeLessThan(0.06);
+    expect(hand.supportDistance, `${hand.handedness} forehand uses dominant arm`).toBeGreaterThan(hand.gripDistance + 0.02);
+  }
 });
 
 test('striker plants both world axes before contact and non-strikers use locomotion or split-step', async ({ page }) => {
@@ -105,8 +117,9 @@ test('striker plants both world axes before contact and non-strikers use locomot
   expect(Object.values(state).slice(1).some(player => player.action === 'shuffle' || player.phase === 'locomotion')).toBe(true);
 });
 
-test('quality guardrails keep sprite anchors finite and contact ball at the visible paddle face', async ({ page }) => {
+test('quality guardrails keep mesh anchors finite and contact ball at the visible paddle face', async ({ page }) => {
   await openPlay(page, 'fifth-shot-drop');
+  await installDimensionalAudit(page);
   const quality = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
     return viewer.timeline.segments.filter(segment => segment.shotSemantics).map(segment => {
@@ -117,7 +130,7 @@ test('quality guardrails keep sprite anchors finite and contact ball at the visi
         const paddle = actor.userData.paddleFaceWorld.toArray();
         const ball = viewer.ballObject.position.toArray();
         const values = [...actor.position.toArray(), ...actor.userData.paddleFaceWorld.toArray(), ...actor.userData.shoulderWorld.toArray()];
-        samples.push({ offset, distance: Math.hypot(ball[0] - paddle[0], ball[1] - paddle[1], ball[2] - paddle[2]), finite: values.every(Number.isFinite) });
+        samples.push({ offset, distance: Math.hypot(ball[0] - paddle[0], ball[1] - paddle[1], ball[2] - paddle[2]), finite: values.every(Number.isFinite), meshDistance: window.__athleteAudit(actor).paddleDistance(viewer.ballObject.position) });
       }
       return { step: segment.step.id, samples };
     });
@@ -125,12 +138,13 @@ test('quality guardrails keep sprite anchors finite and contact ball at the visi
   for (const shot of quality) {
     expect(shot.samples.every(sample => sample.finite)).toBe(true);
     expect(shot.samples.find(sample => sample.offset === 0).distance).toBeLessThan(0.01);
+    expect(shot.samples.find(sample => sample.offset === 0).meshDistance).toBeLessThan(0.02);
   }
 });
 
-test('pause freezes player pose and ball together, rate scales both, and restart restores ready', async ({ page }) => {
+test('pause freezes player pose and ball together, rate scales both, and seeking to start restores ready', async ({ page }) => {
   await openPlay(page, 'third-shot-drop');
-  await page.locator('#threeDRate').selectOption('0.25');
+  await page.locator('#threeDRate').selectOption('0.25',{force:true});
   await page.locator('#threeDPlayPause').click();
   await page.waitForTimeout(250);
   await page.locator('#threeDPlayPause').click();
@@ -144,19 +158,19 @@ test('pause freezes player pose and ball together, rate scales both, and restart
     return { elapsed: viewer.clock.elapsed, ball: viewer.ballObject.position.toArray(), frame: root.userData.animation.frame, paddle: root.userData.paddleFaceWorld.toArray() };
   });
   expect(after).toEqual(before);
-  await page.locator('#threeDRestart').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   const restart = await page.evaluate(() => ({ elapsed: window.pickleboard.threeD.clock.elapsed, animations: [...window.pickleboard.threeD.playerObjects.values()].map(root => root.userData.animation.phase) }));
   expect(restart.elapsed).toBe(0);
   expect(restart.animations).toEqual(['ready', 'ready', 'ready', 'ready']);
 });
 
-test('3D Previous and Next seek logical endpoints and reduced motion remains inspectable', async ({ page }) => {
+test('3D chapter seeking uses canonical anchors and reduced motion remains inspectable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openPlay(page, 'fifth-shot-drop');
-  await expect(page.locator('#threeDPrevious')).toBeDisabled();
-  await page.locator('#threeDNext').click();
-  expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(1);
-  await page.locator('#threeDPrevious').click();
+  await expect(page.locator('#threeDPrevious,#threeDNext,#threeDRestart,#threeDLoop')).toHaveCount(0);
+  await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
+  expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(2);
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => window.pickleboard.threeD.currentStepIndex())).toBe(0);
   expect(await page.evaluate(() => [...window.pickleboard.threeD.playerObjects.values()].every(root => root.userData.animation.phase === 'ready'))).toBe(true);
 });

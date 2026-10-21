@@ -47,19 +47,34 @@ export function populateParkSVG(svg, groundPlane) {
     };
     patternFor('grass', PARK_LAYOUT.assets.grass); patternFor('quiet-court', PARK_LAYOUT.assets.quietCourt); patternFor('path', PARK_LAYOUT.assets.path);
     groundAssets.appendChild(defs);
+    // Continue the park material beneath the playable apron. The apron still
+    // receives its authored tile overlay below, but this keeps the projected
+    // outer edge from meeting a flat CSS-colored void at a hard diagonal.
+    const outsideArea = groundPlane.querySelector?.('.outside-area');
+    if (outsideArea) {
+        // The presentation viewBox includes a little breathing room around
+        // the authored apron. Extend the same material into that margin so
+        // resize and portrait projection never expose a hard empty triangle.
+        outsideArea.setAttribute('x', '-24');
+        outsideArea.setAttribute('y', '-24');
+        outsideArea.setAttribute('width', '68');
+        outsideArea.setAttribute('height', '100');
+        outsideArea.style.fill = `url(#${patterns.get('grass')})`;
+        outsideArea.style.opacity = '1';
+    }
     const fillRect = (name, rect, opacity) => {
         const element = svgElement(document, 'rect', { x: rect.x, y: rect.y, width: rect.width, height: rect.height, opacity, fill: `url(#${patterns.get(name)})` });
         element.setAttribute('shape-rendering', 'crispEdges'); groundAssets.appendChild(element);
     };
-    groundAssets.appendChild(svgElement(document,'path',{d:'M -8 -8 H 28 V 52 H -8 Z M 0 0 V 44 H 20 V 0 Z','fill-rule':'evenodd',fill:`url(#${patterns.get('grass')})`}));
-    fillRect('quiet-court', { x: 0, y: 0, width: 20, height: 44 }, 0.12);
+    groundAssets.appendChild(svgElement(document,'path',{d:'M -8 -8 H 28 V 52 H -8 Z M 0 0 V 44 H 20 V 0 Z','fill-rule':'evenodd',fill:`url(#${patterns.get('grass')})`,opacity:0.96}));
+    fillRect('quiet-court', { x: 0, y: 0, width: 20, height: 44 }, 0.18);
     for (const path of PARK_LAYOUT.paths) fillRect('path', path, 1);
     const courtMarkings = [...(groundPlane.children || [])].find(child => child.id === 'courtMarkings');
     if (courtMarkings) groundPlane.insertBefore(groundAssets, courtMarkings); else groundPlane.appendChild(groundAssets);
 
     const layer = svgElement(document, 'g', { 'data-park-scene': 'true', 'aria-hidden': 'true', 'pointer-events': 'none' });
     const details = svgElement(document, 'g', { 'data-park-details': 'true', 'pointer-events': 'none' });
-    const assetFor = { tree: PARK_LAYOUT.assets.tree, shrub: PARK_LAYOUT.assets.shrub, bench: PARK_LAYOUT.assets.bench, sign: PARK_LAYOUT.assets.sign };
+    const assetFor = { tree: PARK_LAYOUT.assets.tree, shrub: PARK_LAYOUT.assets.shrub, bench: PARK_LAYOUT.assets.bench, banner: PARK_LAYOUT.assets.banner };
     const ordered = [...PARK_LAYOUT.landmarks].sort((a, b) => a.y - b.y || a.x - b.x);
     for (const landmark of ordered) {
         const view = projection(landmark);
@@ -79,13 +94,27 @@ export function populateParkSVG(svg, groundPlane) {
     return layer;
 }
 
+
+/** Reproject upright scenery after a viewport preset change, without reloading art. */
+export function updateParkSVGProjection(svg) {
+    for (const landmark of PARK_LAYOUT.landmarks) {
+        const image = svg.querySelector(`[data-landmark-id="${landmark.id}"]`);
+        if (!image) continue;
+        const view = projection(landmark);
+        image.setAttribute('transform', `translate(${view.x} ${view.y})`);
+    }
+}
+
 const assetURL = asset => new URL(`./${asset}`, import.meta.url).href;
-const configureTexture = (texture, THREE, repeat = [1, 1]) => {
+const configureTexture = (texture, THREE, repeat = [1, 1], tiled = true) => {
     texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
     texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.LinearMipmapNearestFilter || THREE.LinearFilter;
+    // Blend mip levels on the angled ground rather than switching abruptly.
+    // Upright art retains nearest magnification and padded transparent edges.
+    texture.minFilter = THREE.LinearMipmapLinearFilter || THREE.LinearFilter;
     texture.generateMipmaps = true;
-    if (THREE.RepeatWrapping !== undefined) { texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping; }
+    const wrapping=tiled?THREE.RepeatWrapping:THREE.ClampToEdgeWrapping;
+    if (wrapping !== undefined) { texture.wrapS = wrapping; texture.wrapT = wrapping; }
     texture.repeat?.set(repeat[0], repeat[1]);
     texture.needsUpdate = true;
     return texture;
@@ -109,7 +138,7 @@ export async function createPark3D(THREE, { signal } = {}) {
         try{
             const texture=await loader.loadAsync(blobURL);
             if(signal?.aborted){texture.dispose();throw new DOMException('Park loading cancelled','AbortError');}
-            return [name,configureTexture(texture,THREE)];
+            return [name,configureTexture(texture,THREE,[1,1],['grass','path','quietCourt'].includes(name))];
         }finally{URL.revokeObjectURL(blobURL);}
     });
     let loadedTextures;
@@ -134,16 +163,23 @@ export async function createPark3D(THREE, { signal } = {}) {
     };
     const apron = PARK_LAYOUT.apronFeet;
     const apronRect = { x: apron.x[0], y: apron.y[0], width: apron.x[1] - apron.x[0], height: apron.y[1] - apron.y[0] };
+    // Carry the park material beyond the authored apron. The extra layer is
+    // deliberately quiet and sits below the court slab; it removes the hard
+    // diagonal between the playable surround and the renderer clear color.
+    addGround('ParkWorld', { x: -100, y: -100, width: 220, height: 260 }, textures.get('grass'), 1, -0.12);
     addGround('ParkGrass', apronRect, textures.get('grass'), 1, -0.06);
-    addGround('ParkCourtTexture', { x: 0, y: 0, width: 20, height: 44 }, textures.get('quietCourt'), 0.12, 0.006);
+    addGround('ParkCourtTexture', { x: 0, y: 0, width: 20, height: 44 }, textures.get('quietCourt'), 0.24, 0.006);
     for (const path of PARK_LAYOUT.paths) addGround(path.id, path, textures.get('path'), 1, -0.045);
 
-    const detailTextures = { tree: textures.get('tree'), shrub: textures.get('shrub'), bench: textures.get('bench'), sign: textures.get('sign') };
+    const detailTextures = { tree: textures.get('tree'), shrub: textures.get('shrub'), bench: textures.get('bench'), banner: textures.get('banner') };
     for (const landmark of PARK_LAYOUT.landmarks) {
         const world = boardToWorld({ x: landmark.x, y: landmark.y });
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(landmark.size * FEET_TO_METERS, landmark.height * FEET_TO_METERS), material(detailTextures[landmark.type], 1));
         mesh.name = `ParkLandmark-${landmark.id}`;
         mesh.position.set(world.x, landmark.height * FEET_TO_METERS * (58/64-.5), world.z);
+        mesh.userData.foot = new THREE.Vector3(world.x, 0.012, world.z);
+        mesh.userData.anchorOffset = landmark.height * FEET_TO_METERS * (58/64-.5);
+        mesh.userData.offset = new THREE.Vector3();
         mesh.frustumCulled = false;
         mesh.renderOrder = -2;
         group.userData.landmarks.set(landmark.id, mesh); group.add(mesh);
@@ -163,7 +199,14 @@ export async function createPark3D(THREE, { signal } = {}) {
 export function updateParkCamera(group, camera) {
     if (!group || !camera) return group;
     const landmarks = group.userData?.landmarks;
-    if (landmarks) for (const mesh of landmarks.values()) mesh.rotation.y = Math.atan2(camera.position.x - mesh.position.x, camera.position.z - mesh.position.z);
+    if (landmarks) for (const mesh of landmarks.values()) {
+        // Keep original pixel landmarks upright in screen space. Yaw-only
+        // planes collapsed into thin slivers in the normal overhead view.
+        // Reposition around the stored foot so the sprite never floats away.
+        mesh.quaternion.copy(camera.quaternion);
+        mesh.userData.offset.set(0,mesh.userData.anchorOffset,0).applyQuaternion(mesh.quaternion);
+        mesh.position.copy(mesh.userData.foot).add(mesh.userData.offset);
+    }
     group.updateMatrixWorld?.(true);
     return group;
 }

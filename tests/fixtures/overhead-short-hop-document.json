@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 1,
+  "id": "overhead-short-hop-investigation",
+  "title": "Overhead plus short-hop contact investigation",
+  "initialLayout": {
+    "player1": {
+      "x": 7,
+      "y": 14
+    },
+    "player2": {
+      "x": 14,
+      "y": 14
+    },
+    "player3": {
+      "x": 7,
+      "y": 30
+    },
+    "player4": {
+      "x": 14,
+      "y": 31
+    },
+    "ball": {
+      "x": 7,
+      "y": 14
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "right"
+    }
+  },
+  "shots": [
+    {
+      "id": "lob",
+      "family": "lob",
+      "hitter": "player1",
+      "receiver": "player3",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 7,
+        "y": 34
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      }
+    },
+    {
+      "id": "overhead",
+      "family": "overhead",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "short-hop",
+      "target": {
+        "x": 15,
+        "y": 5
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "midrally",
+  "ending": "stop",
+  "intentionalFault": false
+}

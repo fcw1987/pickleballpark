@@ -1,0 +1,7426 @@
+{
+  "base": "http://127.0.0.1:4176",
+  "runtimeRoot": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-perf",
+  "head": "ac7ca5ff3a3022de3cb4ba843f2111b0f53987db",
+  "stampedSourceRevision": "091451b1b547b1271cccb670fd97c0b343d614e8",
+  "runtimeDigest": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+  "runtimeDigestAfter": "a5da7c29811b5a80f0f65ca444601922e71dea282a05545a7874fc9d97e25884",
+  "runtimeUnchanged": true,
+  "viewport": [
+    900,
+    700
+  ],
+  "phoneViewport": [
+    402,
+    874
+  ],
+  "runtimeDefaults": {
+    "clock": {
+      "elapsed": 0,
+      "playbackRate": 1,
+      "playing": false,
+      "lastTimestamp": null
+    },
+    "rateUI": "1",
+    "raf": "browser requestAnimationFrame, actual callback intervals sampled separately; Playwright video capture cadence is not physical display FPS"
+  },
+  "video": {
+    "enabled": true,
+    "rate": 0.25,
+    "cadence": "Playwright recorder default; not a physical FPS measurement"
+  },
+  "camera": "Fixed 3/4 custom inspection camera; ordinary overhead screenshots retained",
+  "cases": [
+    {
+      "case": {
+        "id": "forehand-drive-right",
+        "playId": "third-shot-drive",
+        "stepId": "third-drive",
+        "hand": "right"
+      },
+      "play": {
+        "id": "third-shot-drive",
+        "name": "Third Shot Drive",
+        "description": "Pressure the kitchen team with a low drive and prepare for another ball.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": false
+        },
+        "steps": [
+          {
+            "id": "setup",
+            "label": "Starting Positions",
+            "description": "Green prepares to serve while Orange sets a returner deep and a partner at the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": -1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 42
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 16.2,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "serve",
+            "label": "Diagonal Serve",
+            "description": "Serve deep into the opposite service box. The serve must bounce before the return.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 40
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 5,
+                "y": 38
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 16.2,
+                "y": 0
+              },
+              "to": {
+                "x": 5,
+                "y": 38
+              },
+              "type": "serve",
+              "playerId": "player1",
+              "stroke": "serve",
+              "contact": {
+                "kind": "serve",
+                "heightFeet": 2.8,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 14.8,
+                    "y": -0.8
+                  },
+                  {
+                    "x": 15.6,
+                    "y": -0.8
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "return",
+            "label": "Deep Return and Advance",
+            "description": "Return deep, then move toward the kitchen. Green stays back and lets the return bounce.",
+            "durationMs": 1000,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 4
+              },
+              "player2": {
+                "x": 5,
+                "y": 2
+              },
+              "player3": {
+                "x": 5,
+                "y": 31
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 15,
+                "y": 6
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 5.8,
+                "y": 39
+              },
+              "to": {
+                "x": 15,
+                "y": 6
+              },
+              "type": "return",
+              "playerId": "player3",
+              "stroke": "forehand",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.3,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 4.7,
+                    "y": 40
+                  },
+                  {
+                    "x": 5.5,
+                    "y": 40
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "third-drive",
+            "label": "Third Shot Drive",
+            "description": "Green drives low at the established kitchen team, advancing only into transition.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 14.5,
+                "y": 8.5
+              },
+              "player2": {
+                "x": 5,
+                "y": 8
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 14.4,
+                "y": 29.5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.5,
+                "y": 7
+              },
+              "to": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "type": "drive",
+              "playerId": "player1",
+              "stroke": "drive",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.4,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 13.8,
+                    "y": 6.4
+                  },
+                  {
+                    "x": 14.8,
+                    "y": 6.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0,
+                "apexFeet": 5.5
+              }
+            }
+          },
+          {
+            "id": "fourth-block",
+            "label": "Compact Fourth-Shot Block",
+            "description": "Orange volleys the drive with a compact block. Green remains balanced for the next ball.",
+            "durationMs": 850,
+            "positions": {
+              "player1": {
+                "x": 13.5,
+                "y": 10
+              },
+              "player2": {
+                "x": 5,
+                "y": 9.5
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 13.5,
+                "y": 12
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "to": {
+                "x": 13.5,
+                "y": 12
+              },
+              "type": "block",
+              "playerId": "player4",
+              "stroke": "block",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 2.7,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 14.3,
+                    "y": 29.4
+                  },
+                  {
+                    "x": 15.2,
+                    "y": 29.5
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1,
+                "apexFeet": 5
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 14.5,
+          "y": 7
+        },
+        "to": {
+          "x": 14.4,
+          "y": 29.5
+        },
+        "type": "drive",
+        "playerId": "player1",
+        "stroke": "drive",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 2.4,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0,
+          "apexFeet": 5.5
+        }
+      },
+      "contactTime": 2.7978575295844297,
+      "segmentStart": 2.7978575295844297,
+      "segmentEnd": 3.34785752958443,
+      "duration": 4.09458169903626,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "drive",
+        "shotType": "drive",
+        "strokeSide": "forehand",
+        "artAction": "drive",
+        "visualStroke": "drive",
+        "profile": {
+          "duration": 0.68,
+          "contactRatio": 0.42,
+          "prepareRatio": 0.27,
+          "recoverRatio": 0.76,
+          "intensity": 1.15
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 14.5,
+            "y": 7,
+            "heightFeet": 2.4
+          },
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 14.5,
+          "y": 7,
+          "heightFeet": 2.4
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296
+        }
+      ],
+      "camera": {
+        "position": [
+          -0.9751768220717713,
+          1.72,
+          -0.8023927860602349
+        ],
+        "target": [
+          1.6930190477287854,
+          0.96,
+          -4.890574631377203
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297,
+          "file": "forehand-drive-right-00.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.6307573312554304,
+            0,
+            -5.446897868169683
+          ],
+          "paddle": [
+            1.3539007514406793,
+            1.068151006234308,
+            -5.076559598187659
+          ],
+          "ball": [
+            0.9234064595227032,
+            1.4697855365813957,
+            -2.7224970830705653
+          ],
+          "feet": {
+            "left": [
+              1.8784004664312373,
+              0,
+              -5.526823978660954
+            ],
+            "right": [
+              1.3752436408752178,
+              0.07027984035414911,
+              -5.338022589110482
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443,
+          "file": "forehand-drive-right-01.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.662888614047918,
+            0,
+            -5.159797218558441
+          ],
+          "paddle": [
+            1.3860320342331667,
+            1.0654607728892258,
+            -4.789458948576417
+          ],
+          "ball": [
+            1.4276218069392057,
+            0.3143091869990589,
+            -4.53109561184715
+          ],
+          "feet": {
+            "left": [
+              1.8328921136531486,
+              0.06211306055657826,
+              -4.954152255686673
+            ],
+            "right": [
+              1.4850145592382815,
+              0,
+              -5.336493012862278
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297,
+          "file": "forehand-drive-right-02.png",
+          "phase": "prepare",
+          "action": "drive",
+          "root": [
+            1.6774536186104467,
+            0,
+            -5.029655440575323
+          ],
+          "paddle": [
+            1.3430684084932678,
+            1.1017063268808995,
+            -4.801534356109094
+          ],
+          "ball": [
+            1.4911336046122456,
+            0.47329246228710503,
+            -4.8110672092244915
+          ],
+          "feet": {
+            "left": [
+              1.88524781676026,
+              0,
+              -4.962049440728592
+            ],
+            "right": [
+              1.4623579932091684,
+              0,
+              -5.068163516783217
+            ]
+          },
+          "torsoRotation": [
+            0.07839088752741538,
+            0.07685237277901355,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296,
+          "file": "forehand-drive-right-03.png",
+          "phase": "prepare",
+          "action": "drive",
+          "root": [
+            1.687251894407057,
+            0,
+            -4.942105517204862
+          ],
+          "paddle": [
+            1.204710018928348,
+            0.9834297801651772,
+            -4.941993902222578
+          ],
+          "ball": [
+            1.4443595854161497,
+            0.822535493743463,
+            -4.7175191708323
+          ],
+          "feet": {
+            "left": [
+              1.9014741342337043,
+              0,
+              -4.899002942297388
+            ],
+            "right": [
+              1.469144948471949,
+              0,
+              -4.955460671073682
+            ]
+          },
+          "torsoRotation": [
+            0.08491989870042659,
+            0.3112271328358262,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443,
+          "file": "forehand-drive-right-04.png",
+          "phase": "contact",
+          "action": "drive",
+          "root": [
+            1.6915772593983534,
+            0,
+            -4.903457352834118
+          ],
+          "paddle": [
+            1.3176215164082459,
+            0.7972706370311372,
+            -4.664332759624051
+          ],
+          "ball": [
+            1.4079797927080748,
+            0.8735489864576285,
+            -4.64475958541615
+          ],
+          "feet": {
+            "left": [
+              1.908906017466513,
+              0,
+              -4.880715081255594
+            ],
+            "right": [
+              1.4731817456914813,
+              0,
+              -4.896218596538214
+            ]
+          },
+          "torsoRotation": [
+            0.0882767713775245,
+            0.20989099215233842,
+            -0.00467030026158872
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297,
+          "file": "forehand-drive-right-05.png",
+          "phase": "contact",
+          "action": "drive",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.3716000000000004,
+            0.7315200000000001,
+            -4.572
+          ],
+          "ball": [
+            1.3716000000000002,
+            0.7315200000000001,
+            -4.572
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09575,
+            -0.25,
+            -0.02
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295,
+          "file": "forehand-drive-right-06.png",
+          "phase": "follow-through",
+          "action": "drive",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.4104419001754434,
+            0.7703081254353277,
+            -4.566049642193208
+          ],
+          "ball": [
+            1.3677207272727274,
+            1.1426523768595034,
+            -3.699163636363638
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09289653845215316,
+            -0.2664622781606548,
+            -0.02
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296,
+          "file": "forehand-drive-right-07.png",
+          "phase": "follow-through",
+          "action": "drive",
+          "root": [
+            1.6850827749453587,
+            0,
+            -4.871419702207396
+          ],
+          "paddle": [
+            1.7703911567671227,
+            1.1340792710334981,
+            -4.49980300558897
+          ],
+          "ball": [
+            1.363287272727273,
+            1.4698413223140494,
+            -2.7016363636363647
+          ],
+          "feet": {
+            "left": [
+              1.9030139558825958,
+              0,
+              -4.855450971033592
+            ],
+            "right": [
+              1.4670182619916412,
+              0,
+              -4.857388729673107
+            ]
+          },
+          "torsoRotation": [
+            0.08643425759860077,
+            -0.3037446677003802,
+            -0.02
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297,
+          "file": "forehand-drive-right-08.png",
+          "phase": "recover",
+          "action": "drive",
+          "root": [
+            1.6012757343523716,
+            0,
+            -4.669143650174228
+          ],
+          "paddle": [
+            1.9351729333048668,
+            1.4179173505865483,
+            -4.23765541573072
+          ],
+          "ball": [
+            1.356637090909091,
+            1.6752714842975207,
+            -1.2053454545454545
+          ],
+          "feet": {
+            "left": [
+              1.8192069152896087,
+              0,
+              -4.653174919000424
+            ],
+            "right": [
+              1.383211221398654,
+              0,
+              -4.65511267763994
+            ]
+          },
+          "torsoRotation": [
+            0.08182250076387004,
+            -0.27862503819350204,
+            -0.017146156196523203
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296,
+          "file": "forehand-drive-right-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.4100115602717858,
+            0,
+            -4.2075098571818685
+          ],
+          "paddle": [
+            1.2381021470230382,
+            1.0711932026816122,
+            -3.7782696521259216
+          ],
+          "ball": [
+            1.3472160000000002,
+            1.3801344000000004,
+            0.9143999999999988
+          ],
+          "feet": {
+            "left": [
+              1.6271527952792517,
+              0.07951507956918014,
+              -4.013803291809569
+            ],
+            "right": [
+              1.1927369932478393,
+              0,
+              -4.371216718846075
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "backhand-drive-right",
+        "playId": "third-shot-drive",
+        "stepId": "third-drive",
+        "hand": "right",
+        "authored": "drive-backhand"
+      },
+      "play": {
+        "id": "stroke-review-backhand-drive-right",
+        "name": "Authored backhand drive review",
+        "description": "Pressure the kitchen team with a low drive and prepare for another ball.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": false
+        },
+        "steps": [
+          {
+            "id": "setup",
+            "label": "Starting Positions",
+            "description": "Green prepares to serve while Orange sets a returner deep and a partner at the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": -1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 42
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 16.2,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "serve",
+            "label": "Diagonal Serve",
+            "description": "Serve deep into the opposite service box. The serve must bounce before the return.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 40
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 5,
+                "y": 38
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 16.2,
+                "y": 0
+              },
+              "to": {
+                "x": 5,
+                "y": 38
+              },
+              "type": "serve",
+              "playerId": "player1",
+              "stroke": "serve",
+              "contact": {
+                "kind": "serve",
+                "heightFeet": 2.8,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 14.8,
+                    "y": -0.8
+                  },
+                  {
+                    "x": 15.6,
+                    "y": -0.8
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "return",
+            "label": "Deep Return and Advance",
+            "description": "Return deep, then move toward the kitchen. Green stays back and lets the return bounce.",
+            "durationMs": 1000,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 4
+              },
+              "player2": {
+                "x": 5,
+                "y": 2
+              },
+              "player3": {
+                "x": 5,
+                "y": 31
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 15,
+                "y": 6
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 5.8,
+                "y": 39
+              },
+              "to": {
+                "x": 15,
+                "y": 6
+              },
+              "type": "return",
+              "playerId": "player3",
+              "stroke": "forehand",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.3,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 4.7,
+                    "y": 40
+                  },
+                  {
+                    "x": 5.5,
+                    "y": 40
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "third-drive",
+            "label": "Third Shot Drive",
+            "description": "Green drives low at the established kitchen team, advancing only into transition.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 14.5,
+                "y": 8.5
+              },
+              "player2": {
+                "x": 5,
+                "y": 8
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 14.4,
+                "y": 29.5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.5,
+                "y": 7
+              },
+              "to": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "type": "drive",
+              "playerId": "player1",
+              "stroke": "backhand",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.4,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 13.8,
+                    "y": 6.4
+                  },
+                  {
+                    "x": 14.8,
+                    "y": 6.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0,
+                "apexFeet": 5.5
+              }
+            }
+          },
+          {
+            "id": "fourth-block",
+            "label": "Compact Fourth-Shot Block",
+            "description": "Orange volleys the drive with a compact block. Green remains balanced for the next ball.",
+            "durationMs": 850,
+            "positions": {
+              "player1": {
+                "x": 13.5,
+                "y": 10
+              },
+              "player2": {
+                "x": 5,
+                "y": 9.5
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 13.5,
+                "y": 12
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "to": {
+                "x": 13.5,
+                "y": 12
+              },
+              "type": "block",
+              "playerId": "player4",
+              "stroke": "block",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 2.7,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 14.3,
+                    "y": 29.4
+                  },
+                  {
+                    "x": 15.2,
+                    "y": 29.5
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1,
+                "apexFeet": 5
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 14.5,
+          "y": 7
+        },
+        "to": {
+          "x": 14.4,
+          "y": 29.5
+        },
+        "type": "drive",
+        "playerId": "player1",
+        "stroke": "backhand",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 2.4,
+          "strokeSide": "backhand",
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0,
+          "apexFeet": 5.5
+        }
+      },
+      "contactTime": 2.7978575295844297,
+      "segmentStart": 2.7978575295844297,
+      "segmentEnd": 3.34785752958443,
+      "duration": 4.09458169903626,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "backhand",
+        "shotType": "drive",
+        "strokeSide": "backhand",
+        "artAction": "backhand",
+        "visualStroke": "backhand",
+        "profile": {
+          "duration": 0.76,
+          "contactRatio": 0.46,
+          "prepareRatio": 0.3,
+          "recoverRatio": 0.8,
+          "intensity": 0.9
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "backhand",
+          "point": {
+            "x": 14.5,
+            "y": 7,
+            "heightFeet": 2.4
+          },
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 14.5,
+          "y": 7,
+          "heightFeet": 2.4
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296
+        }
+      ],
+      "camera": {
+        "position": [
+          -0.9751768220717713,
+          1.72,
+          -0.8023927860602349
+        ],
+        "target": [
+          1.6930190477287854,
+          0.96,
+          -4.890574631377203
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297,
+          "file": "backhand-drive-right-00.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.6307573312554304,
+            0,
+            -5.446897868169683
+          ],
+          "paddle": [
+            1.3539007514406793,
+            1.068151006234308,
+            -5.076559598187659
+          ],
+          "ball": [
+            0.9234064595227032,
+            1.4697855365813957,
+            -2.7224970830705653
+          ],
+          "feet": {
+            "left": [
+              1.8784004664312373,
+              0,
+              -5.526823978660954
+            ],
+            "right": [
+              1.3752436408752178,
+              0.07027984035414911,
+              -5.338022589110482
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443,
+          "file": "backhand-drive-right-01.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            1.662888614047918,
+            0,
+            -5.159797218558441
+          ],
+          "paddle": [
+            1.4152014049769928,
+            1.101997843978984,
+            -4.7958127280897145
+          ],
+          "ball": [
+            1.4276218069392057,
+            0.3143091869990589,
+            -4.53109561184715
+          ],
+          "feet": {
+            "left": [
+              1.8695811705292154,
+              0,
+              -5.088894559262575
+            ],
+            "right": [
+              1.4484327171536615,
+              0,
+              -5.2017217732642465
+            ]
+          },
+          "torsoRotation": [
+            0.07685043120420318,
+            -0.021938832461270392,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297,
+          "file": "backhand-drive-right-02.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            1.6774536186104467,
+            0,
+            -5.029655440575323
+          ],
+          "paddle": [
+            1.7412642573543131,
+            1.0701071893646088,
+            -4.747205767713522
+          ],
+          "ball": [
+            1.4911336046122456,
+            0.47329246228710503,
+            -4.8110672092244915
+          ],
+          "feet": {
+            "left": [
+              1.8878562893611788,
+              0,
+              -4.970666321740075
+            ],
+            "right": [
+              1.4609543252007124,
+              0,
+              -5.059270571050906
+            ]
+          },
+          "torsoRotation": [
+            0.08322856212707824,
+            -0.2549859238740127,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296,
+          "file": "backhand-drive-right-03.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            1.687251894407057,
+            0,
+            -4.942105517204862
+          ],
+          "paddle": [
+            1.8355171513459798,
+            0.9481342967521573,
+            -4.721159793298616
+          ],
+          "ball": [
+            1.4443595854161497,
+            0.822535493743463,
+            -4.7175191708323
+          ],
+          "feet": {
+            "left": [
+              1.9030925206518226,
+              0,
+              -4.9080199768355595
+            ],
+            "right": [
+              1.4687768433114023,
+              0,
+              -4.946306951335145
+            ]
+          },
+          "torsoRotation": [
+            0.08900966724444227,
+            -0.4662186108546218,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443,
+          "file": "backhand-drive-right-04.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            1.6915772593983534,
+            0,
+            -4.903457352834118
+          ],
+          "paddle": [
+            1.4722878307791867,
+            0.7767420301844264,
+            -4.601638277149471
+          ],
+          "ball": [
+            1.4079797927080748,
+            0.8735489864576285,
+            -4.64475958541615
+          ],
+          "feet": {
+            "left": [
+              1.9091302906141452,
+              0,
+              -4.882971293944699
+            ],
+            "right": [
+              1.4732686110787543,
+              0,
+              -4.893952929186698
+            ]
+          },
+          "torsoRotation": [
+            0.09176796549669003,
+            -0.1554120715739567,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297,
+          "file": "backhand-drive-right-05.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.3716000000000004,
+            0.7315200000000001,
+            -4.572
+          ],
+          "ball": [
+            1.3716000000000002,
+            0.7315200000000001,
+            -4.572
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09575,
+            0.35000000000000003,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295,
+          "file": "backhand-drive-right-06.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.3659671308018722,
+            0.763398594144782,
+            -4.567276524534813
+          ],
+          "ball": [
+            1.3677207272727274,
+            1.1426523768595034,
+            -3.699163636363638
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09399113034136147,
+            0.36803968880654897,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296,
+          "file": "backhand-drive-right-07.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            1.6850827749453587,
+            0,
+            -4.871419702207396
+          ],
+          "paddle": [
+            1.3063456610343174,
+            1.079646542232513,
+            -4.51138800928285
+          ],
+          "ball": [
+            1.363287272727273,
+            1.4698413223140494,
+            -2.7016363636363647
+          ],
+          "feet": {
+            "left": [
+              1.9030139558825958,
+              0,
+              -4.855450971033592
+            ],
+            "right": [
+              1.4670182619916412,
+              0,
+              -4.857388729673107
+            ]
+          },
+          "torsoRotation": [
+            0.08970792602999436,
+            0.4119699894359552,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297,
+          "file": "backhand-drive-right-08.png",
+          "phase": "recover",
+          "action": "backhand",
+          "root": [
+            1.6012757343523716,
+            0,
+            -4.669143650174228
+          ],
+          "paddle": [
+            1.1540123807723304,
+            1.4639470744642076,
+            -4.241127240408643
+          ],
+          "ball": [
+            1.356637090909091,
+            1.6752714842975207,
+            -1.2053454545454545
+          ],
+          "feet": {
+            "left": [
+              1.8192069152896087,
+              0,
+              -4.653174919000424
+            ],
+            "right": [
+              1.383211221398654,
+              0,
+              -4.65511267763994
+            ]
+          },
+          "torsoRotation": [
+            0.085838312263085,
+            0.4425374890654614,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296,
+          "file": "backhand-drive-right-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.4100115602717858,
+            0,
+            -4.2075098571818685
+          ],
+          "paddle": [
+            1.2381021470230382,
+            1.0711932026816122,
+            -3.7782696521259216
+          ],
+          "ball": [
+            1.3472160000000002,
+            1.3801344000000004,
+            0.9143999999999988
+          ],
+          "feet": {
+            "left": [
+              1.6271527952792517,
+              0.07951507956918014,
+              -4.013803291809569
+            ],
+            "right": [
+              1.1927369932478393,
+              0,
+              -4.371216718846075
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "lob-right",
+        "playId": "lob-overhead",
+        "stepId": "lob",
+        "hand": "right"
+      },
+      "play": {
+        "id": "lob-overhead",
+        "name": "Lob & Overhead",
+        "description": "Lift a defensive lob, then see the overhead reply before a bounce.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": true
+        },
+        "steps": [
+          {
+            "id": "lob-setup",
+            "label": "Draw Them Forward",
+            "description": "Serve and return have already bounced. Green is ready to lift over an Orange player leaning toward the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 7,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 7,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 31
+              },
+              "ball": {
+                "x": 7,
+                "y": 14
+              }
+            }
+          },
+          {
+            "id": "lob",
+            "label": "Forehand Lob",
+            "description": "Green sends a high forehand lob over the kitchen player.",
+            "durationMs": 950,
+            "positions": {
+              "player1": {
+                "x": 7,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 7,
+                "y": 34
+              },
+              "player4": {
+                "x": 14,
+                "y": 31
+              },
+              "ball": {
+                "x": 7,
+                "y": 34
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 7,
+                "y": 14
+              },
+              "to": {
+                "x": 7,
+                "y": 34
+              },
+              "type": "lob",
+              "stroke": "lob",
+              "playerId": "player1",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.3,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 6.6,
+                    "y": 13.8
+                  },
+                  {
+                    "x": 7.4,
+                    "y": 13.8
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0,
+                "apexFeet": 13
+              }
+            }
+          },
+          {
+            "id": "overhead",
+            "label": "Overhead Reply",
+            "description": "Orange turns, gets behind the ball, and strikes an overhead before it bounces.",
+            "durationMs": 750,
+            "positions": {
+              "player1": {
+                "x": 7,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 7,
+                "y": 34
+              },
+              "player4": {
+                "x": 14,
+                "y": 31
+              },
+              "ball": {
+                "x": 15,
+                "y": 5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 7,
+                "y": 34
+              },
+              "to": {
+                "x": 15,
+                "y": 5
+              },
+              "type": "overhead",
+              "stroke": "overhead",
+              "playerId": "player3",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 7.2,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 6.5,
+                    "y": 33.2
+                  },
+                  {
+                    "x": 7.4,
+                    "y": 33.2
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1,
+                "apexFeet": 8.5
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 7,
+          "y": 14
+        },
+        "to": {
+          "x": 7,
+          "y": 34
+        },
+        "type": "lob",
+        "stroke": "lob",
+        "playerId": "player1",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 2.3,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 6.6,
+              "y": 13.8
+            },
+            {
+              "x": 7.4,
+              "y": 13.8
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0,
+          "apexFeet": 13
+        }
+      },
+      "contactTime": 0.3784,
+      "segmentStart": 0,
+      "segmentEnd": 1.0602181663223145,
+      "duration": 1.629976068391882,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "lob",
+        "shotType": "lob",
+        "strokeSide": "forehand",
+        "artAction": "lob",
+        "visualStroke": "lob",
+        "profile": {
+          "duration": 0.86,
+          "contactRatio": 0.44,
+          "prepareRatio": 0.27,
+          "recoverRatio": 0.8,
+          "intensity": 0.78
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 7,
+            "y": 14,
+            "heightFeet": 2.3
+          },
+          "feet": [
+            {
+              "x": 6.6,
+              "y": 13.8
+            },
+            {
+              "x": 7.4,
+              "y": 13.8
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 7,
+          "y": 14,
+          "heightFeet": 2.3
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 0
+        },
+        {
+          "offset": -0.32,
+          "time": 0.05840000000000001
+        },
+        {
+          "offset": -0.23,
+          "time": 0.1484
+        },
+        {
+          "offset": -0.14,
+          "time": 0.2384
+        },
+        {
+          "offset": -0.07,
+          "time": 0.3084
+        },
+        {
+          "offset": 0,
+          "time": 0.3784
+        },
+        {
+          "offset": 0.07,
+          "time": 0.4484
+        },
+        {
+          "offset": 0.15,
+          "time": 0.5284
+        },
+        {
+          "offset": 0.27,
+          "time": 0.6484000000000001
+        },
+        {
+          "offset": 0.44,
+          "time": 0.8184
+        }
+      ],
+      "camera": {
+        "position": [
+          -3.2443999999999997,
+          1.72,
+          1.3415999999999997
+        ],
+        "target": [
+          -0.5944,
+          0.96,
+          -2.7584
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 0,
+          "file": "lob-right-00.png",
+          "phase": "ready",
+          "action": "ready",
+          "root": [
+            -0.9144000000000001,
+            0,
+            -2.4384
+          ],
+          "paddle": [
+            -1.0844,
+            1.045,
+            -2.0084
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.6964000000000001,
+              0,
+              -2.4234
+            ],
+            "right": [
+              -1.1324,
+              0,
+              -2.4234
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 0.05840000000000001,
+          "file": "lob-right-01.png",
+          "phase": "prepare",
+          "action": "lob",
+          "root": [
+            -0.881709568768032,
+            0,
+            -2.471090431231968
+          ],
+          "paddle": [
+            -1.1227866806929487,
+            1.102630762935836,
+            -2.132700931046305
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.663709568768032,
+              0,
+              -2.456090431231968
+            ],
+            "right": [
+              -1.099709568768032,
+              0,
+              -2.456090431231968
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 0.1484,
+          "file": "lob-right-02.png",
+          "phase": "prepare",
+          "action": "lob",
+          "root": [
+            -0.7103792579244506,
+            0,
+            -2.6424207420755494
+          ],
+          "paddle": [
+            -1.1968521087446304,
+            1.0944509049726607,
+            -2.62031908313267
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.4923792579244506,
+              0,
+              -2.6274207420755493
+            ],
+            "right": [
+              -0.9283792579244505,
+              0,
+              -2.6274207420755493
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 0.2384,
+          "file": "lob-right-03.png",
+          "phase": "contact",
+          "action": "lob",
+          "root": [
+            -0.5982340250553537,
+            0,
+            -2.7545659749446463
+          ],
+          "paddle": [
+            -1.1784982038171912,
+            1.0391312896046454,
+            -2.8436001636128196
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.38023402505535375,
+              0,
+              -2.739565974944646
+            ],
+            "right": [
+              -0.8162340250553537,
+              0,
+              -2.739565974944646
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 0.3084,
+          "file": "lob-right-04.png",
+          "phase": "contact",
+          "action": "lob",
+          "root": [
+            -0.5944,
+            0,
+            -2.7584
+          ],
+          "paddle": [
+            -0.9616066928613477,
+            0.7622450508511659,
+            -2.5123571521494448
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.37640000000000007,
+              0,
+              -2.7434
+            ],
+            "right": [
+              -0.8124,
+              0,
+              -2.7434
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 0.3784,
+          "file": "lob-right-05.png",
+          "phase": "contact",
+          "action": "lob",
+          "root": [
+            -0.5944,
+            0,
+            -2.7584
+          ],
+          "paddle": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.37640000000000007,
+              0,
+              -2.7434
+            ],
+            "right": [
+              -0.8124,
+              0,
+              -2.7434
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 0.4484,
+          "file": "lob-right-06.png",
+          "phase": "follow-through",
+          "action": "lob",
+          "root": [
+            -0.5944,
+            0,
+            -2.7584
+          ],
+          "paddle": [
+            -0.9006866303233625,
+            0.7387193531915179,
+            -2.43465999008819
+          ],
+          "ball": [
+            -0.9144000000000001,
+            1.781017135735389,
+            -1.8125439857760002
+          ],
+          "feet": {
+            "left": [
+              -0.37640000000000007,
+              0,
+              -2.7434
+            ],
+            "right": [
+              -0.8124,
+              0,
+              -2.7434
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 0.5284,
+          "file": "lob-right-07.png",
+          "phase": "follow-through",
+          "action": "lob",
+          "root": [
+            -0.59912656275177,
+            0,
+            -2.75367343724823
+          ],
+          "paddle": [
+            -0.7565402769731405,
+            1.1394910388620736,
+            -2.3931656737921774
+          ],
+          "ball": [
+            -0.9144000000000001,
+            2.7556358756311194,
+            -1.0972799695200004
+          ],
+          "feet": {
+            "left": [
+              -0.38112656275177004,
+              0,
+              -2.73867343724823
+            ],
+            "right": [
+              -0.81712656275177,
+              0,
+              -2.73867343724823
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 0.6484000000000001,
+          "file": "lob-right-08.png",
+          "phase": "follow-through",
+          "action": "lob",
+          "root": [
+            -0.6490390654104615,
+            0,
+            -2.7037609345895386
+          ],
+          "paddle": [
+            -0.546340005654935,
+            1.855723235438389,
+            -2.27160142843263
+          ],
+          "ball": [
+            -0.9144000000000001,
+            3.6982822978710046,
+            -0.024383945135999507
+          ],
+          "feet": {
+            "left": [
+              -0.43103906541046155,
+              0,
+              -2.6887609345895385
+            ],
+            "right": [
+              -0.8670390654104615,
+              0,
+              -2.6887609345895385
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 0.8184,
+          "file": "lob-right-09.png",
+          "phase": "recover",
+          "action": "lob",
+          "root": [
+            -0.8038437582800293,
+            0,
+            -2.5489562417199707
+          ],
+          "paddle": [
+            -0.9311576491324072,
+            1.223490751254606,
+            -2.117484306921777
+          ],
+          "ball": [
+            -0.9144000000000001,
+            3.967006929424881,
+            1.4955520894079997
+          ],
+          "feet": {
+            "left": [
+              -0.5858437582800293,
+              0,
+              -2.5339562417199706
+            ],
+            "right": [
+              -1.0218437582800293,
+              0,
+              -2.5339562417199706
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "forehand-drive-left",
+        "playId": "third-shot-drive",
+        "stepId": "third-drive",
+        "hand": "left"
+      },
+      "play": {
+        "id": "third-shot-drive",
+        "name": "Third Shot Drive",
+        "description": "Pressure the kitchen team with a low drive and prepare for another ball.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": false
+        },
+        "steps": [
+          {
+            "id": "setup",
+            "label": "Starting Positions",
+            "description": "Green prepares to serve while Orange sets a returner deep and a partner at the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": -1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 42
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 16.2,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "serve",
+            "label": "Diagonal Serve",
+            "description": "Serve deep into the opposite service box. The serve must bounce before the return.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 40
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 5,
+                "y": 38
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 16.2,
+                "y": 0
+              },
+              "to": {
+                "x": 5,
+                "y": 38
+              },
+              "type": "serve",
+              "playerId": "player1",
+              "stroke": "serve",
+              "contact": {
+                "kind": "serve",
+                "heightFeet": 2.8,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 14.8,
+                    "y": -0.8
+                  },
+                  {
+                    "x": 15.6,
+                    "y": -0.8
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "return",
+            "label": "Deep Return and Advance",
+            "description": "Return deep, then move toward the kitchen. Green stays back and lets the return bounce.",
+            "durationMs": 1000,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 4
+              },
+              "player2": {
+                "x": 5,
+                "y": 2
+              },
+              "player3": {
+                "x": 5,
+                "y": 31
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 15,
+                "y": 6
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 5.8,
+                "y": 39
+              },
+              "to": {
+                "x": 15,
+                "y": 6
+              },
+              "type": "return",
+              "playerId": "player3",
+              "stroke": "forehand",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.3,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 4.7,
+                    "y": 40
+                  },
+                  {
+                    "x": 5.5,
+                    "y": 40
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "third-drive",
+            "label": "Third Shot Drive",
+            "description": "Green drives low at the established kitchen team, advancing only into transition.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 14.5,
+                "y": 8.5
+              },
+              "player2": {
+                "x": 5,
+                "y": 8
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 14.4,
+                "y": 29.5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.5,
+                "y": 7
+              },
+              "to": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "type": "drive",
+              "playerId": "player1",
+              "stroke": "drive",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.4,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 13.8,
+                    "y": 6.4
+                  },
+                  {
+                    "x": 14.8,
+                    "y": 6.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0,
+                "apexFeet": 5.5
+              }
+            }
+          },
+          {
+            "id": "fourth-block",
+            "label": "Compact Fourth-Shot Block",
+            "description": "Orange volleys the drive with a compact block. Green remains balanced for the next ball.",
+            "durationMs": 850,
+            "positions": {
+              "player1": {
+                "x": 13.5,
+                "y": 10
+              },
+              "player2": {
+                "x": 5,
+                "y": 9.5
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 13.5,
+                "y": 12
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "to": {
+                "x": 13.5,
+                "y": 12
+              },
+              "type": "block",
+              "playerId": "player4",
+              "stroke": "block",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 2.7,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 14.3,
+                    "y": 29.4
+                  },
+                  {
+                    "x": 15.2,
+                    "y": 29.5
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1,
+                "apexFeet": 5
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 14.5,
+          "y": 7
+        },
+        "to": {
+          "x": 14.4,
+          "y": 29.5
+        },
+        "type": "drive",
+        "playerId": "player1",
+        "stroke": "drive",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 2.4,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0,
+          "apexFeet": 5.5
+        }
+      },
+      "contactTime": 2.7978575295844297,
+      "segmentStart": 2.7978575295844297,
+      "segmentEnd": 3.34785752958443,
+      "duration": 4.09458169903626,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "drive",
+        "shotType": "drive",
+        "strokeSide": "forehand",
+        "artAction": "drive",
+        "visualStroke": "drive",
+        "profile": {
+          "duration": 0.68,
+          "contactRatio": 0.42,
+          "prepareRatio": 0.27,
+          "recoverRatio": 0.76,
+          "intensity": 1.15
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 14.5,
+            "y": 7,
+            "heightFeet": 2.4
+          },
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 14.5,
+          "y": 7,
+          "heightFeet": 2.4
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296
+        }
+      ],
+      "camera": {
+        "position": [
+          4.3247708330246954,
+          1.72,
+          -0.7788374631486956
+        ],
+        "target": [
+          1.6930190477287854,
+          0.96,
+          -4.890574631377203
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297,
+          "file": "forehand-drive-left-00.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.6307573312554304,
+            0,
+            -5.446897868169683
+          ],
+          "paddle": [
+            1.3539007514406793,
+            1.068151006234308,
+            -5.076559598187659
+          ],
+          "ball": [
+            0.9234064595227032,
+            1.4697855365813957,
+            -2.7224970830705653
+          ],
+          "feet": {
+            "left": [
+              1.8784004664312373,
+              0,
+              -5.526823978660954
+            ],
+            "right": [
+              1.3752436408752178,
+              0.07027984035414911,
+              -5.338022589110482
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443,
+          "file": "forehand-drive-left-01.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.662888614047918,
+            0,
+            -5.159797218558441
+          ],
+          "paddle": [
+            1.3860320342331667,
+            1.0654607728892258,
+            -4.789458948576417
+          ],
+          "ball": [
+            1.4276218069392057,
+            0.3143091869990589,
+            -4.53109561184715
+          ],
+          "feet": {
+            "left": [
+              1.8328921136531486,
+              0.06211306055657826,
+              -4.954152255686673
+            ],
+            "right": [
+              1.4850145592382815,
+              0,
+              -5.336493012862278
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297,
+          "file": "forehand-drive-left-02.png",
+          "phase": "prepare",
+          "action": "drive",
+          "root": [
+            1.6774536186104467,
+            0,
+            -5.029655440575323
+          ],
+          "paddle": [
+            1.3430684084932678,
+            1.1017063268808995,
+            -4.801534356109094
+          ],
+          "ball": [
+            1.4911336046122456,
+            0.47329246228710503,
+            -4.8110672092244915
+          ],
+          "feet": {
+            "left": [
+              1.88524781676026,
+              0,
+              -4.962049440728592
+            ],
+            "right": [
+              1.4623579932091684,
+              0,
+              -5.068163516783217
+            ]
+          },
+          "torsoRotation": [
+            0.07839088752741538,
+            0.07685237277901355,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296,
+          "file": "forehand-drive-left-03.png",
+          "phase": "prepare",
+          "action": "drive",
+          "root": [
+            1.687251894407057,
+            0,
+            -4.942105517204862
+          ],
+          "paddle": [
+            1.204710018928348,
+            0.9834297801651772,
+            -4.941993902222578
+          ],
+          "ball": [
+            1.4443595854161497,
+            0.822535493743463,
+            -4.7175191708323
+          ],
+          "feet": {
+            "left": [
+              1.9014741342337043,
+              0,
+              -4.899002942297388
+            ],
+            "right": [
+              1.469144948471949,
+              0,
+              -4.955460671073682
+            ]
+          },
+          "torsoRotation": [
+            0.08491989870042659,
+            0.3112271328358262,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443,
+          "file": "forehand-drive-left-04.png",
+          "phase": "contact",
+          "action": "drive",
+          "root": [
+            1.6915772593983534,
+            0,
+            -4.903457352834118
+          ],
+          "paddle": [
+            1.3176215164082459,
+            0.7972706370311372,
+            -4.664332759624051
+          ],
+          "ball": [
+            1.4079797927080748,
+            0.8735489864576285,
+            -4.64475958541615
+          ],
+          "feet": {
+            "left": [
+              1.908906017466513,
+              0,
+              -4.880715081255594
+            ],
+            "right": [
+              1.4731817456914813,
+              0,
+              -4.896218596538214
+            ]
+          },
+          "torsoRotation": [
+            0.0882767713775245,
+            0.20989099215233842,
+            -0.00467030026158872
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297,
+          "file": "forehand-drive-left-05.png",
+          "phase": "contact",
+          "action": "drive",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.3716000000000004,
+            0.7315200000000001,
+            -4.572
+          ],
+          "ball": [
+            1.3716000000000002,
+            0.7315200000000001,
+            -4.572
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09575,
+            -0.25,
+            -0.02
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295,
+          "file": "forehand-drive-left-06.png",
+          "phase": "follow-through",
+          "action": "drive",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.4104419001754434,
+            0.7703081254353277,
+            -4.566049642193208
+          ],
+          "ball": [
+            1.3677207272727274,
+            1.1426523768595034,
+            -3.699163636363638
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09289653845215316,
+            -0.2664622781606548,
+            -0.02
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296,
+          "file": "forehand-drive-left-07.png",
+          "phase": "follow-through",
+          "action": "drive",
+          "root": [
+            1.6850827749453587,
+            0,
+            -4.871419702207396
+          ],
+          "paddle": [
+            1.7703911567671227,
+            1.1340792710334981,
+            -4.49980300558897
+          ],
+          "ball": [
+            1.363287272727273,
+            1.4698413223140494,
+            -2.7016363636363647
+          ],
+          "feet": {
+            "left": [
+              1.9030139558825958,
+              0,
+              -4.855450971033592
+            ],
+            "right": [
+              1.4670182619916412,
+              0,
+              -4.857388729673107
+            ]
+          },
+          "torsoRotation": [
+            0.08643425759860077,
+            -0.3037446677003802,
+            -0.02
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297,
+          "file": "forehand-drive-left-08.png",
+          "phase": "recover",
+          "action": "drive",
+          "root": [
+            1.6012757343523716,
+            0,
+            -4.669143650174228
+          ],
+          "paddle": [
+            1.9351729333048668,
+            1.4179173505865483,
+            -4.23765541573072
+          ],
+          "ball": [
+            1.356637090909091,
+            1.6752714842975207,
+            -1.2053454545454545
+          ],
+          "feet": {
+            "left": [
+              1.8192069152896087,
+              0,
+              -4.653174919000424
+            ],
+            "right": [
+              1.383211221398654,
+              0,
+              -4.65511267763994
+            ]
+          },
+          "torsoRotation": [
+            0.08182250076387004,
+            -0.27862503819350204,
+            -0.017146156196523203
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296,
+          "file": "forehand-drive-left-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.4100115602717858,
+            0,
+            -4.2075098571818685
+          ],
+          "paddle": [
+            1.2381021470230382,
+            1.0711932026816122,
+            -3.7782696521259216
+          ],
+          "ball": [
+            1.3472160000000002,
+            1.3801344000000004,
+            0.9143999999999988
+          ],
+          "feet": {
+            "left": [
+              1.6271527952792517,
+              0.07951507956918014,
+              -4.013803291809569
+            ],
+            "right": [
+              1.1927369932478393,
+              0,
+              -4.371216718846075
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "backhand-drive-left",
+        "playId": "third-shot-drive",
+        "stepId": "third-drive",
+        "hand": "left",
+        "authored": "drive-backhand"
+      },
+      "play": {
+        "id": "stroke-review-backhand-drive-left",
+        "name": "Authored backhand drive review",
+        "description": "Pressure the kitchen team with a low drive and prepare for another ball.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": false
+        },
+        "steps": [
+          {
+            "id": "setup",
+            "label": "Starting Positions",
+            "description": "Green prepares to serve while Orange sets a returner deep and a partner at the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": -1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 42
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 16.2,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "serve",
+            "label": "Diagonal Serve",
+            "description": "Serve deep into the opposite service box. The serve must bounce before the return.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 1
+              },
+              "player2": {
+                "x": 5,
+                "y": -1
+              },
+              "player3": {
+                "x": 5,
+                "y": 40
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 5,
+                "y": 38
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 16.2,
+                "y": 0
+              },
+              "to": {
+                "x": 5,
+                "y": 38
+              },
+              "type": "serve",
+              "playerId": "player1",
+              "stroke": "serve",
+              "contact": {
+                "kind": "serve",
+                "heightFeet": 2.8,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 14.8,
+                    "y": -0.8
+                  },
+                  {
+                    "x": 15.6,
+                    "y": -0.8
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "return",
+            "label": "Deep Return and Advance",
+            "description": "Return deep, then move toward the kitchen. Green stays back and lets the return bounce.",
+            "durationMs": 1000,
+            "positions": {
+              "player1": {
+                "x": 15,
+                "y": 4
+              },
+              "player2": {
+                "x": 5,
+                "y": 2
+              },
+              "player3": {
+                "x": 5,
+                "y": 31
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 15,
+                "y": 6
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 5.8,
+                "y": 39
+              },
+              "to": {
+                "x": 15,
+                "y": 6
+              },
+              "type": "return",
+              "playerId": "player3",
+              "stroke": "forehand",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.3,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 4.7,
+                    "y": 40
+                  },
+                  {
+                    "x": 5.5,
+                    "y": 40
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "third-drive",
+            "label": "Third Shot Drive",
+            "description": "Green drives low at the established kitchen team, advancing only into transition.",
+            "durationMs": 900,
+            "positions": {
+              "player1": {
+                "x": 14.5,
+                "y": 8.5
+              },
+              "player2": {
+                "x": 5,
+                "y": 8
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 14.4,
+                "y": 29.5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.5,
+                "y": 7
+              },
+              "to": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "type": "drive",
+              "playerId": "player1",
+              "stroke": "backhand",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.4,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 13.8,
+                    "y": 6.4
+                  },
+                  {
+                    "x": 14.8,
+                    "y": 6.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0,
+                "apexFeet": 5.5
+              }
+            }
+          },
+          {
+            "id": "fourth-block",
+            "label": "Compact Fourth-Shot Block",
+            "description": "Orange volleys the drive with a compact block. Green remains balanced for the next ball.",
+            "durationMs": 850,
+            "positions": {
+              "player1": {
+                "x": 13.5,
+                "y": 10
+              },
+              "player2": {
+                "x": 5,
+                "y": 9.5
+              },
+              "player3": {
+                "x": 5,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 13.5,
+                "y": 12
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 14.4,
+                "y": 29.5
+              },
+              "to": {
+                "x": 13.5,
+                "y": 12
+              },
+              "type": "block",
+              "playerId": "player4",
+              "stroke": "block",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 2.7,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 14.3,
+                    "y": 29.4
+                  },
+                  {
+                    "x": 15.2,
+                    "y": 29.5
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1,
+                "apexFeet": 5
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 14.5,
+          "y": 7
+        },
+        "to": {
+          "x": 14.4,
+          "y": 29.5
+        },
+        "type": "drive",
+        "playerId": "player1",
+        "stroke": "backhand",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 2.4,
+          "strokeSide": "backhand",
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0,
+          "apexFeet": 5.5
+        }
+      },
+      "contactTime": 2.7978575295844297,
+      "segmentStart": 2.7978575295844297,
+      "segmentEnd": 3.34785752958443,
+      "duration": 4.09458169903626,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "backhand",
+        "shotType": "drive",
+        "strokeSide": "backhand",
+        "artAction": "backhand",
+        "visualStroke": "backhand",
+        "profile": {
+          "duration": 0.76,
+          "contactRatio": 0.46,
+          "prepareRatio": 0.3,
+          "recoverRatio": 0.8,
+          "intensity": 0.9
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "backhand",
+          "point": {
+            "x": 14.5,
+            "y": 7,
+            "heightFeet": 2.4
+          },
+          "feet": [
+            {
+              "x": 13.8,
+              "y": 6.4
+            },
+            {
+              "x": 14.8,
+              "y": 6.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 14.5,
+          "y": 7,
+          "heightFeet": 2.4
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296
+        }
+      ],
+      "camera": {
+        "position": [
+          4.3247708330246954,
+          1.72,
+          -0.7788374631486956
+        ],
+        "target": [
+          1.6930190477287854,
+          0.96,
+          -4.890574631377203
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 2.3378575295844297,
+          "file": "backhand-drive-left-00.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.6307573312554304,
+            0,
+            -5.446897868169683
+          ],
+          "paddle": [
+            1.3539007514406793,
+            1.068151006234308,
+            -5.076559598187659
+          ],
+          "ball": [
+            0.9234064595227032,
+            1.4697855365813957,
+            -2.7224970830705653
+          ],
+          "feet": {
+            "left": [
+              1.8784004664312373,
+              0,
+              -5.526823978660954
+            ],
+            "right": [
+              1.3752436408752178,
+              0.07027984035414911,
+              -5.338022589110482
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 2.47785752958443,
+          "file": "backhand-drive-left-01.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            1.662888614047918,
+            0,
+            -5.159797218558441
+          ],
+          "paddle": [
+            1.4152014049769928,
+            1.101997843978984,
+            -4.7958127280897145
+          ],
+          "ball": [
+            1.4276218069392057,
+            0.3143091869990589,
+            -4.53109561184715
+          ],
+          "feet": {
+            "left": [
+              1.8695811705292154,
+              0,
+              -5.088894559262575
+            ],
+            "right": [
+              1.4484327171536615,
+              0,
+              -5.2017217732642465
+            ]
+          },
+          "torsoRotation": [
+            0.07685043120420318,
+            -0.021938832461270392,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 2.5678575295844297,
+          "file": "backhand-drive-left-02.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            1.6774536186104467,
+            0,
+            -5.029655440575323
+          ],
+          "paddle": [
+            1.7412642573543131,
+            1.0701071893646088,
+            -4.747205767713522
+          ],
+          "ball": [
+            1.4911336046122456,
+            0.47329246228710503,
+            -4.8110672092244915
+          ],
+          "feet": {
+            "left": [
+              1.8878562893611788,
+              0,
+              -4.970666321740075
+            ],
+            "right": [
+              1.4609543252007124,
+              0,
+              -5.059270571050906
+            ]
+          },
+          "torsoRotation": [
+            0.08322856212707824,
+            -0.2549859238740127,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 2.6578575295844296,
+          "file": "backhand-drive-left-03.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            1.687251894407057,
+            0,
+            -4.942105517204862
+          ],
+          "paddle": [
+            1.8355171513459798,
+            0.9481342967521573,
+            -4.721159793298616
+          ],
+          "ball": [
+            1.4443595854161497,
+            0.822535493743463,
+            -4.7175191708323
+          ],
+          "feet": {
+            "left": [
+              1.9030925206518226,
+              0,
+              -4.9080199768355595
+            ],
+            "right": [
+              1.4687768433114023,
+              0,
+              -4.946306951335145
+            ]
+          },
+          "torsoRotation": [
+            0.08900966724444227,
+            -0.4662186108546218,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 2.72785752958443,
+          "file": "backhand-drive-left-04.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            1.6915772593983534,
+            0,
+            -4.903457352834118
+          ],
+          "paddle": [
+            1.4722878307791867,
+            0.7767420301844264,
+            -4.601638277149471
+          ],
+          "ball": [
+            1.4079797927080748,
+            0.8735489864576285,
+            -4.64475958541615
+          ],
+          "feet": {
+            "left": [
+              1.9091302906141452,
+              0,
+              -4.882971293944699
+            ],
+            "right": [
+              1.4732686110787543,
+              0,
+              -4.893952929186698
+            ]
+          },
+          "torsoRotation": [
+            0.09176796549669003,
+            -0.1554120715739567,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 2.7978575295844297,
+          "file": "backhand-drive-left-05.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.3716000000000004,
+            0.7315200000000001,
+            -4.572
+          ],
+          "ball": [
+            1.3716000000000002,
+            0.7315200000000001,
+            -4.572
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09575,
+            0.35000000000000003,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 2.8678575295844295,
+          "file": "backhand-drive-left-06.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            1.6930190477287854,
+            0,
+            -4.890574631377203
+          ],
+          "paddle": [
+            1.3659671308018722,
+            0.763398594144782,
+            -4.567276524534813
+          ],
+          "ball": [
+            1.3677207272727274,
+            1.1426523768595034,
+            -3.699163636363638
+          ],
+          "feet": {
+            "left": [
+              1.9109502286660225,
+              0,
+              -4.874605900203399
+            ],
+            "right": [
+              1.4749545347750679,
+              0,
+              -4.876543658842914
+            ]
+          },
+          "torsoRotation": [
+            0.09399113034136147,
+            0.36803968880654897,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 2.9478575295844296,
+          "file": "backhand-drive-left-07.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            1.6850827749453587,
+            0,
+            -4.871419702207396
+          ],
+          "paddle": [
+            1.3063456610343174,
+            1.079646542232513,
+            -4.51138800928285
+          ],
+          "ball": [
+            1.363287272727273,
+            1.4698413223140494,
+            -2.7016363636363647
+          ],
+          "feet": {
+            "left": [
+              1.9030139558825958,
+              0,
+              -4.855450971033592
+            ],
+            "right": [
+              1.4670182619916412,
+              0,
+              -4.857388729673107
+            ]
+          },
+          "torsoRotation": [
+            0.08970792602999436,
+            0.4119699894359552,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 3.0678575295844297,
+          "file": "backhand-drive-left-08.png",
+          "phase": "recover",
+          "action": "backhand",
+          "root": [
+            1.6012757343523716,
+            0,
+            -4.669143650174228
+          ],
+          "paddle": [
+            1.1540123807723304,
+            1.4639470744642076,
+            -4.241127240408643
+          ],
+          "ball": [
+            1.356637090909091,
+            1.6752714842975207,
+            -1.2053454545454545
+          ],
+          "feet": {
+            "left": [
+              1.8192069152896087,
+              0,
+              -4.653174919000424
+            ],
+            "right": [
+              1.383211221398654,
+              0,
+              -4.65511267763994
+            ]
+          },
+          "torsoRotation": [
+            0.085838312263085,
+            0.4425374890654614,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 3.2378575295844296,
+          "file": "backhand-drive-left-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            1.4100115602717858,
+            0,
+            -4.2075098571818685
+          ],
+          "paddle": [
+            1.2381021470230382,
+            1.0711932026816122,
+            -3.7782696521259216
+          ],
+          "ball": [
+            1.3472160000000002,
+            1.3801344000000004,
+            0.9143999999999988
+          ],
+          "feet": {
+            "left": [
+              1.6271527952792517,
+              0.07951507956918014,
+              -4.013803291809569
+            ],
+            "right": [
+              1.1927369932478393,
+              0,
+              -4.371216718846075
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "lob-left",
+        "playId": "lob-overhead",
+        "stepId": "lob",
+        "hand": "left"
+      },
+      "play": {
+        "id": "lob-overhead",
+        "name": "Lob & Overhead",
+        "description": "Lift a defensive lob, then see the overhead reply before a bounce.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": true
+        },
+        "steps": [
+          {
+            "id": "lob-setup",
+            "label": "Draw Them Forward",
+            "description": "Serve and return have already bounced. Green is ready to lift over an Orange player leaning toward the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 7,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 7,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 31
+              },
+              "ball": {
+                "x": 7,
+                "y": 14
+              }
+            }
+          },
+          {
+            "id": "lob",
+            "label": "Forehand Lob",
+            "description": "Green sends a high forehand lob over the kitchen player.",
+            "durationMs": 950,
+            "positions": {
+              "player1": {
+                "x": 7,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 7,
+                "y": 34
+              },
+              "player4": {
+                "x": 14,
+                "y": 31
+              },
+              "ball": {
+                "x": 7,
+                "y": 34
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 7,
+                "y": 14
+              },
+              "to": {
+                "x": 7,
+                "y": 34
+              },
+              "type": "lob",
+              "stroke": "lob",
+              "playerId": "player1",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 2.3,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 6.6,
+                    "y": 13.8
+                  },
+                  {
+                    "x": 7.4,
+                    "y": 13.8
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0,
+                "apexFeet": 13
+              }
+            }
+          },
+          {
+            "id": "overhead",
+            "label": "Overhead Reply",
+            "description": "Orange turns, gets behind the ball, and strikes an overhead before it bounces.",
+            "durationMs": 750,
+            "positions": {
+              "player1": {
+                "x": 7,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 7,
+                "y": 34
+              },
+              "player4": {
+                "x": 14,
+                "y": 31
+              },
+              "ball": {
+                "x": 15,
+                "y": 5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 7,
+                "y": 34
+              },
+              "to": {
+                "x": 15,
+                "y": 5
+              },
+              "type": "overhead",
+              "stroke": "overhead",
+              "playerId": "player3",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 7.2,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 6.5,
+                    "y": 33.2
+                  },
+                  {
+                    "x": 7.4,
+                    "y": 33.2
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1,
+                "apexFeet": 8.5
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 7,
+          "y": 14
+        },
+        "to": {
+          "x": 7,
+          "y": 34
+        },
+        "type": "lob",
+        "stroke": "lob",
+        "playerId": "player1",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 2.3,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 6.6,
+              "y": 13.8
+            },
+            {
+              "x": 7.4,
+              "y": 13.8
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0,
+          "apexFeet": 13
+        }
+      },
+      "contactTime": 0.3784,
+      "segmentStart": 0,
+      "segmentEnd": 1.0602181663223145,
+      "duration": 1.629976068391882,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "lob",
+        "shotType": "lob",
+        "strokeSide": "forehand",
+        "artAction": "lob",
+        "visualStroke": "lob",
+        "profile": {
+          "duration": 0.86,
+          "contactRatio": 0.44,
+          "prepareRatio": 0.27,
+          "recoverRatio": 0.8,
+          "intensity": 0.78
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 7,
+            "y": 14,
+            "heightFeet": 2.3
+          },
+          "feet": [
+            {
+              "x": 6.6,
+              "y": 13.8
+            },
+            {
+              "x": 7.4,
+              "y": 13.8
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 7,
+          "y": 14,
+          "heightFeet": 2.3
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 0
+        },
+        {
+          "offset": -0.32,
+          "time": 0.05840000000000001
+        },
+        {
+          "offset": -0.23,
+          "time": 0.1484
+        },
+        {
+          "offset": -0.14,
+          "time": 0.2384
+        },
+        {
+          "offset": -0.07,
+          "time": 0.3084
+        },
+        {
+          "offset": 0,
+          "time": 0.3784
+        },
+        {
+          "offset": 0.07,
+          "time": 0.4484
+        },
+        {
+          "offset": 0.15,
+          "time": 0.5284
+        },
+        {
+          "offset": 0.27,
+          "time": 0.6484000000000001
+        },
+        {
+          "offset": 0.44,
+          "time": 0.8184
+        }
+      ],
+      "camera": {
+        "position": [
+          2.0556,
+          1.72,
+          1.3415999999999997
+        ],
+        "target": [
+          -0.5944,
+          0.96,
+          -2.7584
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 0,
+          "file": "lob-left-00.png",
+          "phase": "ready",
+          "action": "ready",
+          "root": [
+            -0.9144000000000001,
+            0,
+            -2.4384
+          ],
+          "paddle": [
+            -1.0844,
+            1.045,
+            -2.0084
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.6964000000000001,
+              0,
+              -2.4234
+            ],
+            "right": [
+              -1.1324,
+              0,
+              -2.4234
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 0.05840000000000001,
+          "file": "lob-left-01.png",
+          "phase": "prepare",
+          "action": "lob",
+          "root": [
+            -0.881709568768032,
+            0,
+            -2.471090431231968
+          ],
+          "paddle": [
+            -1.1227866806929487,
+            1.102630762935836,
+            -2.132700931046305
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.663709568768032,
+              0,
+              -2.456090431231968
+            ],
+            "right": [
+              -1.099709568768032,
+              0,
+              -2.456090431231968
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 0.1484,
+          "file": "lob-left-02.png",
+          "phase": "prepare",
+          "action": "lob",
+          "root": [
+            -0.7103792579244506,
+            0,
+            -2.6424207420755494
+          ],
+          "paddle": [
+            -1.1968521087446304,
+            1.0944509049726607,
+            -2.62031908313267
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.4923792579244506,
+              0,
+              -2.6274207420755493
+            ],
+            "right": [
+              -0.9283792579244505,
+              0,
+              -2.6274207420755493
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 0.2384,
+          "file": "lob-left-03.png",
+          "phase": "contact",
+          "action": "lob",
+          "root": [
+            -0.5982340250553537,
+            0,
+            -2.7545659749446463
+          ],
+          "paddle": [
+            -1.1784982038171912,
+            1.0391312896046454,
+            -2.8436001636128196
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.38023402505535375,
+              0,
+              -2.739565974944646
+            ],
+            "right": [
+              -0.8162340250553537,
+              0,
+              -2.739565974944646
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 0.3084,
+          "file": "lob-left-04.png",
+          "phase": "contact",
+          "action": "lob",
+          "root": [
+            -0.5944,
+            0,
+            -2.7584
+          ],
+          "paddle": [
+            -0.9616066928613477,
+            0.7622450508511659,
+            -2.5123571521494448
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.37640000000000007,
+              0,
+              -2.7434
+            ],
+            "right": [
+              -0.8124,
+              0,
+              -2.7434
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 0.3784,
+          "file": "lob-left-05.png",
+          "phase": "contact",
+          "action": "lob",
+          "root": [
+            -0.5944,
+            0,
+            -2.7584
+          ],
+          "paddle": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "ball": [
+            -0.9144000000000001,
+            0.70104,
+            -2.4384
+          ],
+          "feet": {
+            "left": [
+              -0.37640000000000007,
+              0,
+              -2.7434
+            ],
+            "right": [
+              -0.8124,
+              0,
+              -2.7434
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 0.4484,
+          "file": "lob-left-06.png",
+          "phase": "follow-through",
+          "action": "lob",
+          "root": [
+            -0.5944,
+            0,
+            -2.7584
+          ],
+          "paddle": [
+            -0.9006866303233625,
+            0.7387193531915179,
+            -2.43465999008819
+          ],
+          "ball": [
+            -0.9144000000000001,
+            1.781017135735389,
+            -1.8125439857760002
+          ],
+          "feet": {
+            "left": [
+              -0.37640000000000007,
+              0,
+              -2.7434
+            ],
+            "right": [
+              -0.8124,
+              0,
+              -2.7434
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 0.5284,
+          "file": "lob-left-07.png",
+          "phase": "follow-through",
+          "action": "lob",
+          "root": [
+            -0.59912656275177,
+            0,
+            -2.75367343724823
+          ],
+          "paddle": [
+            -0.7565402769731405,
+            1.1394910388620736,
+            -2.3931656737921774
+          ],
+          "ball": [
+            -0.9144000000000001,
+            2.7556358756311194,
+            -1.0972799695200004
+          ],
+          "feet": {
+            "left": [
+              -0.38112656275177004,
+              0,
+              -2.73867343724823
+            ],
+            "right": [
+              -0.81712656275177,
+              0,
+              -2.73867343724823
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 0.6484000000000001,
+          "file": "lob-left-08.png",
+          "phase": "follow-through",
+          "action": "lob",
+          "root": [
+            -0.6490390654104615,
+            0,
+            -2.7037609345895386
+          ],
+          "paddle": [
+            -0.546340005654935,
+            1.855723235438389,
+            -2.27160142843263
+          ],
+          "ball": [
+            -0.9144000000000001,
+            3.6982822978710046,
+            -0.024383945135999507
+          ],
+          "feet": {
+            "left": [
+              -0.43103906541046155,
+              0,
+              -2.6887609345895385
+            ],
+            "right": [
+              -0.8670390654104615,
+              0,
+              -2.6887609345895385
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 0.8184,
+          "file": "lob-left-09.png",
+          "phase": "recover",
+          "action": "lob",
+          "root": [
+            -0.8038437582800293,
+            0,
+            -2.5489562417199707
+          ],
+          "paddle": [
+            -0.9311576491324072,
+            1.223490751254606,
+            -2.117484306921777
+          ],
+          "ball": [
+            -0.9144000000000001,
+            3.967006929424881,
+            1.4955520894079997
+          ],
+          "feet": {
+            "left": [
+              -0.5858437582800293,
+              0,
+              -2.5339562417199706
+            ],
+            "right": [
+              -1.0218437582800293,
+              0,
+              -2.5339562417199706
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "dink-right",
+        "playId": "dink-exchange",
+        "stepId": "forehand-dink",
+        "hand": "right"
+      },
+      "play": {
+        "id": "dink-exchange",
+        "name": "Dink Exchange",
+        "description": "Compare compact forehand and backhand dinks after the opening bounces.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": true
+        },
+        "steps": [
+          {
+            "id": "dink-setup",
+            "label": "Both Teams at the Line",
+            "description": "Serve and return have already bounced. Both teams are established just outside the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 8,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 6.2,
+                "y": 14.2
+              }
+            }
+          },
+          {
+            "id": "forehand-dink",
+            "label": "Soft Forehand Dink",
+            "description": "Green lifts a compact forehand dink into the opposite kitchen.",
+            "durationMs": 700,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 8,
+                "y": 29.5
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 8,
+                "y": 27
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 6.2,
+                "y": 14.2
+              },
+              "to": {
+                "x": 8,
+                "y": 27
+              },
+              "type": "dink",
+              "stroke": "dink",
+              "playerId": "player1",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 1.7,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 5.7,
+                    "y": 14.3
+                  },
+                  {
+                    "x": 6.5,
+                    "y": 14.4
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "backhand-dink",
+            "label": "Backhand Dink Reply",
+            "description": "Orange waits for the bounce and answers with a compact backhand.",
+            "durationMs": 700,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 8,
+                "y": 29.5
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 13,
+                "y": 17
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 8.3,
+                "y": 27.7
+              },
+              "to": {
+                "x": 13,
+                "y": 17
+              },
+              "type": "dink",
+              "stroke": "dink",
+              "playerId": "player3",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 1.55,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 7.6,
+                    "y": 29.3
+                  },
+                  {
+                    "x": 8.5,
+                    "y": 29.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 6.2,
+          "y": 14.2
+        },
+        "to": {
+          "x": 8,
+          "y": 27
+        },
+        "type": "dink",
+        "stroke": "dink",
+        "playerId": "player1",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 1.7,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 5.7,
+              "y": 14.3
+            },
+            {
+              "x": 6.5,
+              "y": 14.4
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1
+        }
+      },
+      "contactTime": 0.34,
+      "segmentStart": 0,
+      "segmentEnd": 1.4050925230388285,
+      "duration": 2.069112089083627,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "dink",
+        "shotType": "dink",
+        "strokeSide": "forehand",
+        "artAction": "drop",
+        "visualStroke": "drop",
+        "profile": {
+          "duration": 0.68,
+          "contactRatio": 0.5,
+          "prepareRatio": 0.34,
+          "recoverRatio": 0.82,
+          "intensity": 0.38
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 6.2,
+            "y": 14.2,
+            "heightFeet": 1.7
+          },
+          "feet": [
+            {
+              "x": 5.7,
+              "y": 14.3
+            },
+            {
+              "x": 6.5,
+              "y": 14.4
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 6.2,
+          "y": 14.2,
+          "heightFeet": 1.7
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 0
+        },
+        {
+          "offset": -0.32,
+          "time": 0.020000000000000018
+        },
+        {
+          "offset": -0.23,
+          "time": 0.11000000000000001
+        },
+        {
+          "offset": -0.14,
+          "time": 0.2
+        },
+        {
+          "offset": -0.07,
+          "time": 0.27
+        },
+        {
+          "offset": 0,
+          "time": 0.34
+        },
+        {
+          "offset": 0.07,
+          "time": 0.41000000000000003
+        },
+        {
+          "offset": 0.15,
+          "time": 0.49
+        },
+        {
+          "offset": 0.27,
+          "time": 0.6100000000000001
+        },
+        {
+          "offset": 0.44,
+          "time": 0.78
+        }
+      ],
+      "camera": {
+        "position": [
+          -2.939154566004028,
+          1.72,
+          1.6901936251676695
+        ],
+        "target": [
+          -0.8859194408195404,
+          0.96,
+          -2.738883651275883
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 0,
+          "file": "dink-right-00.png",
+          "phase": "ready",
+          "action": "ready",
+          "root": [
+            -1.2192,
+            0,
+            -2.4384
+          ],
+          "paddle": [
+            -1.3892,
+            1.045,
+            -2.0084
+          ],
+          "ball": [
+            -1.15824,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "feet": {
+            "left": [
+              -1.0012,
+              0,
+              -2.4234
+            ],
+            "right": [
+              -1.4372,
+              0,
+              -2.4234
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 0.020000000000000018,
+          "file": "dink-right-01.png",
+          "phase": "prepare",
+          "action": "drop",
+          "root": [
+            -1.2136912304267693,
+            0,
+            -2.4433666719219156
+          ],
+          "paddle": [
+            -1.3303579816474018,
+            1.0957976700139107,
+            -2.0051200147115678
+          ],
+          "ball": [
+            -1.15824,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "feet": {
+            "left": [
+              -0.9957264737690913,
+              0,
+              -2.4588703764843487
+            ],
+            "right": [
+              -1.4274783421424744,
+              0,
+              -2.3981552699943416
+            ]
+          },
+          "torsoRotation": [
+            0.07652501216050382,
+            0.010048521249178008,
+            0.0004230956315443372
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 0.11000000000000001,
+          "file": "dink-right-02.png",
+          "phase": "prepare",
+          "action": "drop",
+          "root": [
+            -1.0525597204097703,
+            0,
+            -2.5886418256379415
+          ],
+          "paddle": [
+            -1.3408207458964292,
+            0.9032921353844706,
+            -2.3854642600298557
+          ],
+          "ball": [
+            -1.15824,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "feet": {
+            "left": [
+              -0.8345949637520923,
+              0,
+              -2.6041455302003746
+            ],
+            "right": [
+              -1.2663468321254754,
+              0,
+              -2.5434304237103675
+            ]
+          },
+          "torsoRotation": [
+            0.08227805112644111,
+            0.22025571423534823,
+            0.0092739248099094
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 0.2,
+          "file": "dink-right-03.png",
+          "phase": "prepare",
+          "action": "drop",
+          "root": [
+            -0.8914282103927712,
+            0,
+            -2.7339169793539675
+          ],
+          "paddle": [
+            -1.3418442080300679,
+            0.6697356635457478,
+            -2.7372392766608247
+          ],
+          "ball": [
+            -1.15824,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "feet": {
+            "left": [
+              -0.6734634537350932,
+              0,
+              -2.7494206839164006
+            ],
+            "right": [
+              -1.1052153221084762,
+              0,
+              -2.6887055774263935
+            ]
+          },
+          "torsoRotation": [
+            0.0886036674302205,
+            0.4513840022580567,
+            0.019005642200339228
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 0.27,
+          "file": "dink-right-04.png",
+          "phase": "contact",
+          "action": "drop",
+          "root": [
+            -0.8859194408195404,
+            0,
+            -2.738883651275883
+          ],
+          "paddle": [
+            -1.211601760769798,
+            0.5543492891958147,
+            -2.483057196160817
+          ],
+          "ball": [
+            -1.15824,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "feet": {
+            "left": [
+              -0.6679546841618624,
+              0,
+              -2.754387355838316
+            ],
+            "right": [
+              -1.0997065525352454,
+              0,
+              -2.693672249348309
+            ]
+          },
+          "torsoRotation": [
+            0.10153722622757065,
+            0.31504794259967206,
+            0.014183561549078983
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 0.34,
+          "file": "dink-right-05.png",
+          "phase": "contact",
+          "action": "drop",
+          "root": [
+            -0.8859194408195404,
+            0,
+            -2.738883651275883
+          ],
+          "paddle": [
+            -1.1582400000000002,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "ball": [
+            -1.15824,
+            0.5181600000000001,
+            -2.3774400000000004
+          ],
+          "feet": {
+            "left": [
+              -0.6679546841618624,
+              0,
+              -2.754387355838316
+            ],
+            "right": [
+              -1.0997065525352454,
+              0,
+              -2.693672249348309
+            ]
+          },
+          "torsoRotation": [
+            0.1315,
+            -0.075,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 0.41000000000000003,
+          "file": "dink-right-06.png",
+          "phase": "follow-through",
+          "action": "drop",
+          "root": [
+            -0.8859194408195404,
+            0,
+            -2.738883651275883
+          ],
+          "paddle": [
+            -1.1145820795248256,
+            0.5550327832985434,
+            -2.3770968767367
+          ],
+          "ball": [
+            -1.105947915755475,
+            0.9127166063730174,
+            -2.0055851787056005
+          ],
+          "feet": {
+            "left": [
+              -0.6679546841618624,
+              0,
+              -2.754387355838316
+            ],
+            "right": [
+              -1.0997065525352454,
+              0,
+              -2.693672249348309
+            ]
+          },
+          "torsoRotation": [
+            0.12674443595539936,
+            -0.08719375396051451,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 0.49,
+          "file": "dink-right-07.png",
+          "phase": "follow-through",
+          "action": "drop",
+          "root": [
+            -0.8877085715843535,
+            0,
+            -2.7372705822563668
+          ],
+          "paddle": [
+            -0.7208430386130646,
+            0.8884640946460451,
+            -2.373048723800142
+          ],
+          "ball": [
+            -1.046185533761732,
+            1.2500068706754637,
+            -1.5806082400834294
+          ],
+          "feet": {
+            "left": [
+              -0.6697438149266755,
+              0,
+              -2.7527742868188
+            ],
+            "right": [
+              -1.1014956833000584,
+              0,
+              -2.6920591803287928
+            ]
+          },
+          "torsoRotation": [
+            0.11647657224599636,
+            -0.11352160962565036,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 0.6100000000000001,
+          "file": "dink-right-08.png",
+          "phase": "recover",
+          "action": "drop",
+          "root": [
+            -0.9066017924607794,
+            0,
+            -2.7202365734102756
+          ],
+          "paddle": [
+            -0.6603668843566386,
+            1.132319495015743,
+            -2.3206324628759014
+          ],
+          "ball": [
+            -0.9565419607711179,
+            1.528679124024272,
+            -0.9431428321501718
+          ],
+          "feet": {
+            "left": [
+              -0.6886370358031014,
+              0,
+              -2.7357402779727087
+            ],
+            "right": [
+              -1.1203889041764845,
+              0,
+              -2.6750251714827016
+            ]
+          },
+          "torsoRotation": [
+            0.09795382104028474,
+            -0.07588748615484178,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 0.78,
+          "file": "dink-right-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -0.9686488473844964,
+            0,
+            -2.664295339813453
+          ],
+          "paddle": [
+            -1.0771128882853498,
+            1.0497386063797112,
+            -2.214811689575251
+          ],
+          "ball": [
+            -0.8295468990344144,
+            1.4566284431405152,
+            -0.0400668375780584
+          ],
+          "feet": {
+            "left": [
+              -0.755161806018602,
+              0,
+              -2.711640575339681
+            ],
+            "right": [
+              -1.1779582438084177,
+              0.014385055081266244,
+              -2.5872424069220843
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "backhand-dink-right",
+        "playId": "dink-exchange",
+        "stepId": "backhand-dink",
+        "hand": "right"
+      },
+      "play": {
+        "id": "dink-exchange",
+        "name": "Dink Exchange",
+        "description": "Compare compact forehand and backhand dinks after the opening bounces.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": true
+        },
+        "steps": [
+          {
+            "id": "dink-setup",
+            "label": "Both Teams at the Line",
+            "description": "Serve and return have already bounced. Both teams are established just outside the kitchen.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 8,
+                "y": 30
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 6.2,
+                "y": 14.2
+              }
+            }
+          },
+          {
+            "id": "forehand-dink",
+            "label": "Soft Forehand Dink",
+            "description": "Green lifts a compact forehand dink into the opposite kitchen.",
+            "durationMs": 700,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 8,
+                "y": 29.5
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 8,
+                "y": 27
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 6.2,
+                "y": 14.2
+              },
+              "to": {
+                "x": 8,
+                "y": 27
+              },
+              "type": "dink",
+              "stroke": "dink",
+              "playerId": "player1",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 1.7,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 5.7,
+                    "y": 14.3
+                  },
+                  {
+                    "x": 6.5,
+                    "y": 14.4
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          },
+          {
+            "id": "backhand-dink",
+            "label": "Backhand Dink Reply",
+            "description": "Orange waits for the bounce and answers with a compact backhand.",
+            "durationMs": 700,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 8,
+                "y": 29.5
+              },
+              "player4": {
+                "x": 15,
+                "y": 30
+              },
+              "ball": {
+                "x": 13,
+                "y": 17
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 8.3,
+                "y": 27.7
+              },
+              "to": {
+                "x": 13,
+                "y": 17
+              },
+              "type": "dink",
+              "stroke": "dink",
+              "playerId": "player3",
+              "contact": {
+                "kind": "groundstroke",
+                "heightFeet": 1.55,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 7.6,
+                    "y": 29.3
+                  },
+                  {
+                    "x": 8.5,
+                    "y": 29.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 8.3,
+          "y": 27.7
+        },
+        "to": {
+          "x": 13,
+          "y": 17
+        },
+        "type": "dink",
+        "stroke": "dink",
+        "playerId": "player3",
+        "contact": {
+          "kind": "groundstroke",
+          "heightFeet": 1.55,
+          "strokeSide": "backhand",
+          "feet": [
+            {
+              "x": 7.6,
+              "y": 29.3
+            },
+            {
+              "x": 8.5,
+              "y": 29.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1
+        }
+      },
+      "contactTime": 1.4050925230388285,
+      "segmentStart": 1.4050925230388285,
+      "segmentEnd": 2.069112089083627,
+      "duration": 2.069112089083627,
+      "semantics": {
+        "playerId": "player3",
+        "stroke": "dink",
+        "shotType": "dink",
+        "strokeSide": "backhand",
+        "artAction": "backhand",
+        "visualStroke": "backhand",
+        "profile": {
+          "duration": 0.68,
+          "contactRatio": 0.5,
+          "prepareRatio": 0.34,
+          "recoverRatio": 0.82,
+          "intensity": 0.38
+        },
+        "contact": {
+          "kind": "groundstroke",
+          "strokeSide": "backhand",
+          "point": {
+            "x": 8.3,
+            "y": 27.7,
+            "heightFeet": 1.55
+          },
+          "feet": [
+            {
+              "x": 7.6,
+              "y": 29.3
+            },
+            {
+              "x": 8.5,
+              "y": 29.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 8.3,
+          "y": 27.7,
+          "heightFeet": 1.55
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 0.9450925230388285
+        },
+        {
+          "offset": -0.32,
+          "time": 1.0850925230388284
+        },
+        {
+          "offset": -0.23,
+          "time": 1.1750925230388285
+        },
+        {
+          "offset": -0.14,
+          "time": 1.2650925230388284
+        },
+        {
+          "offset": -0.07,
+          "time": 1.3350925230388284
+        },
+        {
+          "offset": 0,
+          "time": 1.4050925230388285
+        },
+        {
+          "offset": 0.07,
+          "time": 1.4750925230388285
+        },
+        {
+          "offset": 0.15,
+          "time": 1.5550925230388284
+        },
+        {
+          "offset": 0.27,
+          "time": 1.6750925230388285
+        },
+        {
+          "offset": 0.44,
+          "time": 1.8450925230388284
+        }
+      ],
+      "camera": {
+        "position": [
+          3.135295376933353,
+          1.72,
+          -0.7864394787139433
+        ],
+        "target": [
+          -0.9398343119546468,
+          0.96,
+          1.9016486929693426
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 0.9450925230388285,
+          "file": "backhand-dink-right-00.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -0.8690465781980856,
+            0,
+            2.016704600971993
+          ],
+          "paddle": [
+            -0.7671607911769599,
+            1.0518840325451837,
+            1.5656843282534756
+          ],
+          "ball": [
+            -0.7062178687074487,
+            0.8628041144968227,
+            0.8369396003025869
+          ],
+          "feet": {
+            "left": [
+              -1.0795814461531652,
+              0,
+              2.0815489429798424
+            ],
+            "right": [
+              -0.663122920431462,
+              0.020897955940736075,
+              1.9222167648954969
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 1.0850925230388284,
+          "file": "backhand-dink-right-01.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            -0.9055778661291654,
+            0,
+            1.9573279225509657
+          ],
+          "paddle": [
+            -0.8123218342838122,
+            1.1036249391974808,
+            1.5148881693449618
+          ],
+          "ball": [
+            -0.6066510454384831,
+            0.0877360838095965,
+            1.5308808939768728
+          ],
+          "feet": {
+            "left": [
+              -1.123361011502439,
+              0,
+              1.975202529996266
+            ],
+            "right": [
+              -0.6922953877459908,
+              0,
+              1.909792836406827
+            ]
+          },
+          "torsoRotation": [
+            0.07652501216050382,
+            -0.010048521249177954,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 1.1750925230388285,
+          "file": "backhand-dink-right-02.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            -0.9221373785155065,
+            0,
+            1.9304126699700053
+          ],
+          "paddle": [
+            -1.0134520662199638,
+            1.0748597443677945,
+            1.6474522716528566
+          ],
+          "ball": [
+            -0.5817629389089097,
+            0.4185138542519123,
+            1.5889531425458772
+          ],
+          "feet": {
+            "left": [
+              -1.1405522610682988,
+              0,
+              1.9237840140391262
+            ],
+            "right": [
+              -0.7048729972791985,
+              0,
+              1.9070633949062215
+            ]
+          },
+          "torsoRotation": [
+            0.08227805112644111,
+            -0.22025571423534834,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 1.2650925230388284,
+          "file": "backhand-dink-right-03.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            -0.9332774141208633,
+            0,
+            1.9123060455064502
+          ],
+          "paddle": [
+            -1.0215907547551386,
+            0.871693973037058,
+            1.7141744576760243
+          ],
+          "ball": [
+            -0.5568748323793363,
+            0.5750987424225857,
+            1.6470253911148816
+          ],
+          "feet": {
+            "left": [
+              -1.1425324465189786,
+              0,
+              1.84936693671022
+            ],
+            "right": [
+              -0.7173739282064817,
+              0,
+              1.9459911278132884
+            ]
+          },
+          "torsoRotation": [
+            0.0886036674302205,
+            -0.4513840022580565,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 1.3350925230388284,
+          "file": "backhand-dink-right-04.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            -0.938195087496201,
+            0,
+            1.9043130311036194
+          ],
+          "paddle": [
+            -0.6407139300804869,
+            0.5687560055749549,
+            1.7241193087892843
+          ],
+          "ball": [
+            -0.5375174161896681,
+            0.5764573417749377,
+            1.6921926955574407
+          ],
+          "feet": {
+            "left": [
+              -1.1362331502498173,
+              0,
+              1.8119554342271593
+            ],
+            "right": [
+              -0.7293735202643143,
+              0,
+              1.9686756993113521
+            ]
+          },
+          "torsoRotation": [
+            0.09114034249654933,
+            -0.23507191389950838,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 1.4050925230388285,
+          "file": "backhand-dink-right-05.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            -0.9398343119546468,
+            0,
+            1.9016486929693426
+          ],
+          "paddle": [
+            -0.5181599999999998,
+            0.47244,
+            1.7373599999999998
+          ],
+          "ball": [
+            -0.5181599999999998,
+            0.47244,
+            1.7373599999999998
+          ],
+          "feet": {
+            "left": [
+              -1.133395485061913,
+              0,
+              1.8002432085745674
+            ],
+            "right": [
+              -0.7342081879574447,
+              0,
+              1.9755871615083058
+            ]
+          },
+          "torsoRotation": [
+            0.09575,
+            0.35000000000000003,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 1.4750925230388285,
+          "file": "backhand-dink-right-06.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            -0.9398343119546468,
+            0,
+            1.9016486929693426
+          ],
+          "paddle": [
+            -0.5086323976945579,
+            0.5306553926742451,
+            1.7345336777228089
+          ],
+          "ball": [
+            -0.36714155848432517,
+            0.9168346172042794,
+            1.3935520586770809
+          ],
+          "feet": {
+            "left": [
+              -1.133395485061913,
+              0,
+              1.8002432085745674
+            ],
+            "right": [
+              -0.7342081879574447,
+              0,
+              1.9755871615083058
+            ]
+          },
+          "torsoRotation": [
+            0.09337221797769966,
+            0.37438750792102904,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 1.5550925230388284,
+          "file": "backhand-dink-right-07.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            -0.9346438757269954,
+            0,
+            1.9076897095322463
+          ],
+          "paddle": [
+            -0.4194347125055361,
+            1.0570825561140615,
+            1.7125164298916107
+          ],
+          "ball": [
+            -0.19454905389498323,
+            1.283218672012005,
+            1.0006286971651748
+          ],
+          "feet": {
+            "left": [
+              -1.1282050488342614,
+              0,
+              1.8062842251374711
+            ],
+            "right": [
+              -0.7290177517297931,
+              0,
+              1.9816281780712095
+            ]
+          },
+          "torsoRotation": [
+            0.08823828612299818,
+            0.42704321925130073,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 1.6750925230388285,
+          "file": "backhand-dink-right-08.png",
+          "phase": "recover",
+          "action": "backhand",
+          "root": [
+            -0.8798328691629955,
+            0,
+            1.9714828444365093
+          ],
+          "paddle": [
+            -0.39562007524234377,
+            1.326591459572138,
+            1.7145202221363842
+          ],
+          "ball": [
+            0.06433970298903047,
+            1.549803738800695,
+            0.41124365489731396
+          ],
+          "feet": {
+            "left": [
+              -1.0733940422702615,
+              0,
+              1.8700773600417342
+            ],
+            "right": [
+              -0.6742067451657934,
+              0,
+              2.0454213129754724
+            ]
+          },
+          "torsoRotation": [
+            0.08216922392007767,
+            0.2731949501574304,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 1.8450925230388284,
+          "file": "backhand-dink-right-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -0.7137923309486285,
+            0,
+            2.164733199025739
+          ],
+          "paddle": [
+            -0.38521494500994247,
+            1.0657623257378206,
+            1.8394073601354046
+          ],
+          "ball": [
+            0.43109877524138274,
+            1.3461552059034665,
+            -0.4237184883154881
+          ],
+          "feet": {
+            "left": [
+              -0.8506935949205897,
+              0.06302848884695562,
+              1.9343360065995252
+            ],
+            "right": [
+              -0.5648261160867311,
+              0,
+              2.3676633755961407
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "volley-right",
+        "playId": "volley-block",
+        "stepId": "forehand-volley",
+        "hand": "right"
+      },
+      "play": {
+        "id": "volley-block",
+        "name": "Volley & Block",
+        "description": "Meet an airborne ball with a compact volley and controlled backhand block.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": true
+        },
+        "steps": [
+          {
+            "id": "volley-setup",
+            "label": "Paddles Up",
+            "description": "Serve and return have already bounced. Both teams protect the kitchen line.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 6,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 30
+              },
+              "ball": {
+                "x": 6.2,
+                "y": 14.4
+              }
+            }
+          },
+          {
+            "id": "forehand-volley",
+            "label": "Forehand Volley",
+            "description": "Green meets the ball in the air with a short punch.",
+            "durationMs": 600,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 6,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 30
+              },
+              "ball": {
+                "x": 6.1,
+                "y": 29.5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 6.2,
+                "y": 14.4
+              },
+              "to": {
+                "x": 6.1,
+                "y": 29.5
+              },
+              "type": "volley",
+              "stroke": "volley",
+              "playerId": "player1",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 3.1,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 5.7,
+                    "y": 14.2
+                  },
+                  {
+                    "x": 6.5,
+                    "y": 14.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0
+              }
+            }
+          },
+          {
+            "id": "backhand-block",
+            "label": "Backhand Block",
+            "description": "Orange absorbs the volley with a compact backhand block.",
+            "durationMs": 600,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 6,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 30
+              },
+              "ball": {
+                "x": 8,
+                "y": 17
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 6.1,
+                "y": 29.5
+              },
+              "to": {
+                "x": 8,
+                "y": 17
+              },
+              "type": "block",
+              "stroke": "volley",
+              "playerId": "player3",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 3,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 5.6,
+                    "y": 29.6
+                  },
+                  {
+                    "x": 6.5,
+                    "y": 29.5
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 6.2,
+          "y": 14.4
+        },
+        "to": {
+          "x": 6.1,
+          "y": 29.5
+        },
+        "type": "volley",
+        "stroke": "volley",
+        "playerId": "player1",
+        "contact": {
+          "kind": "volley",
+          "heightFeet": 3.1,
+          "strokeSide": "forehand",
+          "feet": [
+            {
+              "x": 5.7,
+              "y": 14.2
+            },
+            {
+              "x": 6.5,
+              "y": 14.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 0
+        }
+      },
+      "contactTime": 0.192,
+      "segmentStart": 0,
+      "segmentEnd": 0.742,
+      "duration": 1.292,
+      "semantics": {
+        "playerId": "player1",
+        "stroke": "volley",
+        "shotType": "volley",
+        "strokeSide": "forehand",
+        "artAction": "block",
+        "visualStroke": "block",
+        "profile": {
+          "duration": 0.48,
+          "contactRatio": 0.4,
+          "prepareRatio": 0.24,
+          "recoverRatio": 0.72,
+          "intensity": 0.62
+        },
+        "contact": {
+          "kind": "volley",
+          "strokeSide": "forehand",
+          "point": {
+            "x": 6.2,
+            "y": 14.4,
+            "heightFeet": 3.1
+          },
+          "feet": [
+            {
+              "x": 5.7,
+              "y": 14.2
+            },
+            {
+              "x": 6.5,
+              "y": 14.3
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 6.2,
+          "y": 14.4,
+          "heightFeet": 3.1
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 0
+        },
+        {
+          "offset": -0.32,
+          "time": 0
+        },
+        {
+          "offset": -0.23,
+          "time": 0
+        },
+        {
+          "offset": -0.14,
+          "time": 0.05199999999999999
+        },
+        {
+          "offset": -0.07,
+          "time": 0.122
+        },
+        {
+          "offset": 0,
+          "time": 0.192
+        },
+        {
+          "offset": 0.07,
+          "time": 0.262
+        },
+        {
+          "offset": 0.15,
+          "time": 0.34199999999999997
+        },
+        {
+          "offset": 0.27,
+          "time": 0.462
+        },
+        {
+          "offset": 0.44,
+          "time": 0.632
+        }
+      ],
+      "camera": {
+        "position": [
+          -3.5132214710834915,
+          1.72,
+          1.448006986410424
+        ],
+        "target": [
+          -0.8361278581774949,
+          0.96,
+          -2.6343538241669453
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 0,
+          "file": "volley-right-00.png",
+          "phase": "ready",
+          "action": "ready",
+          "root": [
+            -1.2192,
+            0,
+            -2.4384
+          ],
+          "paddle": [
+            -1.3892,
+            1.045,
+            -2.0084
+          ],
+          "ball": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "feet": {
+            "left": [
+              -1.0012,
+              0,
+              -2.4234
+            ],
+            "right": [
+              -1.4372,
+              0,
+              -2.4234
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 0,
+          "file": "volley-right-01.png",
+          "phase": "ready",
+          "action": "ready",
+          "root": [
+            -1.2192,
+            0,
+            -2.4384
+          ],
+          "paddle": [
+            -1.3892,
+            1.045,
+            -2.0084
+          ],
+          "ball": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "feet": {
+            "left": [
+              -1.0012,
+              0,
+              -2.4234
+            ],
+            "right": [
+              -1.4372,
+              0,
+              -2.4234
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 0,
+          "file": "volley-right-02.png",
+          "phase": "ready",
+          "action": "ready",
+          "root": [
+            -1.2192,
+            0,
+            -2.4384
+          ],
+          "paddle": [
+            -1.3892,
+            1.045,
+            -2.0084
+          ],
+          "ball": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "feet": {
+            "left": [
+              -1.0012,
+              0,
+              -2.4234
+            ],
+            "right": [
+              -1.4372,
+              0,
+              -2.4234
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 0.05199999999999999,
+          "file": "volley-right-03.png",
+          "phase": "prepare",
+          "action": "block",
+          "root": [
+            -0.8952439294464001,
+            0,
+            -2.604114036486861
+          ],
+          "paddle": [
+            -1.0718244047721237,
+            1.120264486465697,
+            -2.2191596218301624
+          ],
+          "ball": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "feet": {
+            "left": [
+              -0.6773480453512956,
+              0,
+              -2.5876706884575587
+            ],
+            "right": [
+              -1.113338484681609,
+              0,
+              -2.590558042360408
+            ]
+          },
+          "torsoRotation": [
+            0.08041630246511702,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 0.122,
+          "file": "volley-right-04.png",
+          "phase": "contact",
+          "action": "block",
+          "root": [
+            -0.8361278581774949,
+            0,
+            -2.6343538241669453
+          ],
+          "paddle": [
+            -1.102459610568675,
+            1.0287224407605482,
+            -2.3029647359200727
+          ],
+          "ball": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "feet": {
+            "left": [
+              -0.6182319740823904,
+              0,
+              -2.617910476137643
+            ],
+            "right": [
+              -1.0542224134127038,
+              0,
+              -2.6207978300404924
+            ]
+          },
+          "torsoRotation": [
+            0.0860719244921649,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 0.192,
+          "file": "volley-right-05.png",
+          "phase": "contact",
+          "action": "block",
+          "root": [
+            -0.8361278581774949,
+            0,
+            -2.6343538241669453
+          ],
+          "paddle": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "ball": [
+            -1.15824,
+            0.94488,
+            -2.31648
+          ],
+          "feet": {
+            "left": [
+              -0.6182319740823904,
+              0,
+              -2.617910476137643
+            ],
+            "right": [
+              -1.0542224134127038,
+              0,
+              -2.6207978300404924
+            ]
+          },
+          "torsoRotation": [
+            0.08925,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 0.262,
+          "file": "volley-right-06.png",
+          "phase": "follow-through",
+          "action": "block",
+          "root": [
+            -0.8361278581774949,
+            0,
+            -2.6343538241669453
+          ],
+          "paddle": [
+            -1.1520603853396196,
+            0.9511078683590207,
+            -2.30917306965074
+          ],
+          "ball": [
+            -1.1621192727272727,
+            1.1779890247933886,
+            -1.730709818181818
+          ],
+          "feet": {
+            "left": [
+              -0.6182319740823904,
+              0,
+              -2.617910476137643
+            ],
+            "right": [
+              -1.0542224134127038,
+              0,
+              -2.6207978300404924
+            ]
+          },
+          "torsoRotation": [
+            0.08643051265787195,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 0.34199999999999997,
+          "file": "volley-right-07.png",
+          "phase": "follow-through",
+          "action": "block",
+          "root": [
+            -0.8455864295805197,
+            0,
+            -2.629515458138132
+          ],
+          "paddle": [
+            -1.1130247316274413,
+            0.9904483330948598,
+            -2.2630163400667076
+          ],
+          "ball": [
+            -1.1665527272727272,
+            1.3597606611570248,
+            -1.061258181818182
+          ],
+          "feet": {
+            "left": [
+              -0.6276905454854151,
+              0,
+              -2.6130721101088294
+            ],
+            "right": [
+              -1.0636809848157285,
+              0,
+              -2.615959464011679
+            ]
+          },
+          "torsoRotation": [
+            0.08276054430007934,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 0.462,
+          "file": "volley-right-08.png",
+          "phase": "recover",
+          "action": "block",
+          "root": [
+            -0.9454689435964618,
+            0,
+            -2.5784223128738617
+          ],
+          "paddle": [
+            -1.1173519267292908,
+            1.1000935122653972,
+            -2.1542879367564876
+          ],
+          "ball": [
+            -1.173202909090909,
+            1.4631407603305786,
+            -0.057080727272727394
+          ],
+          "feet": {
+            "left": [
+              -0.7275730595013573,
+              0,
+              -2.5619789648445592
+            ],
+            "right": [
+              -1.1635634988316708,
+              0,
+              -2.564866318747409
+            ]
+          },
+          "torsoRotation": [
+            0.07656853945540269,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 0.632,
+          "file": "volley-right-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -1.17342051440936,
+            0,
+            -2.461817691579457
+          ],
+          "paddle": [
+            -1.3462644063001368,
+            1.0522842014816645,
+            -2.032952923807553
+          ],
+          "ball": [
+            -1.1826240000000001,
+            1.2618720000000003,
+            1.3655039999999996
+          ],
+          "feet": {
+            "left": [
+              -0.9558519642624592,
+              0.022112754497909923,
+              -2.3959469173713646
+            ],
+            "right": [
+              -1.391187735696365,
+              0,
+              -2.497689123631794
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "backhand-block-right",
+        "playId": "volley-block",
+        "stepId": "backhand-block",
+        "hand": "right"
+      },
+      "play": {
+        "id": "volley-block",
+        "name": "Volley & Block",
+        "description": "Meet an airborne ball with a compact volley and controlled backhand block.",
+        "mode": "doubles",
+        "rally": {
+          "openingBouncesSatisfied": true
+        },
+        "steps": [
+          {
+            "id": "volley-setup",
+            "label": "Paddles Up",
+            "description": "Serve and return have already bounced. Both teams protect the kitchen line.",
+            "durationMs": 0,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 6,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 30
+              },
+              "ball": {
+                "x": 6.2,
+                "y": 14.4
+              }
+            }
+          },
+          {
+            "id": "forehand-volley",
+            "label": "Forehand Volley",
+            "description": "Green meets the ball in the air with a short punch.",
+            "durationMs": 600,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 6,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 30
+              },
+              "ball": {
+                "x": 6.1,
+                "y": 29.5
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 6.2,
+                "y": 14.4
+              },
+              "to": {
+                "x": 6.1,
+                "y": 29.5
+              },
+              "type": "volley",
+              "stroke": "volley",
+              "playerId": "player1",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 3.1,
+                "strokeSide": "forehand",
+                "feet": [
+                  {
+                    "x": 5.7,
+                    "y": 14.2
+                  },
+                  {
+                    "x": 6.5,
+                    "y": 14.3
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 0
+              }
+            }
+          },
+          {
+            "id": "backhand-block",
+            "label": "Backhand Block",
+            "description": "Orange absorbs the volley with a compact backhand block.",
+            "durationMs": 600,
+            "positions": {
+              "player1": {
+                "x": 6,
+                "y": 14
+              },
+              "player2": {
+                "x": 14,
+                "y": 14
+              },
+              "player3": {
+                "x": 6,
+                "y": 30
+              },
+              "player4": {
+                "x": 14,
+                "y": 30
+              },
+              "ball": {
+                "x": 8,
+                "y": 17
+              }
+            },
+            "shot": {
+              "from": {
+                "x": 6.1,
+                "y": 29.5
+              },
+              "to": {
+                "x": 8,
+                "y": 17
+              },
+              "type": "block",
+              "stroke": "volley",
+              "playerId": "player3",
+              "contact": {
+                "kind": "volley",
+                "heightFeet": 3,
+                "strokeSide": "backhand",
+                "feet": [
+                  {
+                    "x": 5.6,
+                    "y": 29.6
+                  },
+                  {
+                    "x": 6.5,
+                    "y": 29.5
+                  }
+                ],
+                "momentumEntersNonVolleyZone": false
+              },
+              "flight": {
+                "bounces": 1
+              }
+            }
+          }
+        ]
+      },
+      "shot": {
+        "from": {
+          "x": 6.1,
+          "y": 29.5
+        },
+        "to": {
+          "x": 8,
+          "y": 17
+        },
+        "type": "block",
+        "stroke": "volley",
+        "playerId": "player3",
+        "contact": {
+          "kind": "volley",
+          "heightFeet": 3,
+          "strokeSide": "backhand",
+          "feet": [
+            {
+              "x": 5.6,
+              "y": 29.6
+            },
+            {
+              "x": 6.5,
+              "y": 29.5
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "flight": {
+          "bounces": 1
+        }
+      },
+      "contactTime": 0.742,
+      "segmentStart": 0.742,
+      "segmentEnd": 1.292,
+      "duration": 1.292,
+      "semantics": {
+        "playerId": "player3",
+        "stroke": "volley",
+        "shotType": "block",
+        "strokeSide": "backhand",
+        "artAction": "backhand",
+        "visualStroke": "backhand",
+        "profile": {
+          "duration": 0.48,
+          "contactRatio": 0.4,
+          "prepareRatio": 0.24,
+          "recoverRatio": 0.72,
+          "intensity": 0.62
+        },
+        "contact": {
+          "kind": "volley",
+          "strokeSide": "backhand",
+          "point": {
+            "x": 6.1,
+            "y": 29.5,
+            "heightFeet": 3
+          },
+          "feet": [
+            {
+              "x": 5.6,
+              "y": 29.6
+            },
+            {
+              "x": 6.5,
+              "y": 29.5
+            }
+          ],
+          "momentumEntersNonVolleyZone": false
+        },
+        "contact3d": {
+          "x": 6.1,
+          "y": 29.5,
+          "heightFeet": 3
+        }
+      },
+      "offsets": [
+        {
+          "offset": -0.46,
+          "time": 0.282
+        },
+        {
+          "offset": -0.32,
+          "time": 0.422
+        },
+        {
+          "offset": -0.23,
+          "time": 0.512
+        },
+        {
+          "offset": -0.14,
+          "time": 0.602
+        },
+        {
+          "offset": -0.07,
+          "time": 0.6719999999999999
+        },
+        {
+          "offset": 0,
+          "time": 0.742
+        },
+        {
+          "offset": 0.07,
+          "time": 0.812
+        },
+        {
+          "offset": 0.15,
+          "time": 0.892
+        },
+        {
+          "offset": 0.27,
+          "time": 1.012
+        },
+        {
+          "offset": 0.44,
+          "time": 1.182
+        }
+      ],
+      "camera": {
+        "position": [
+          1.6828569650547338,
+          1.72,
+          -1.1009375154801777
+        ],
+        "target": [
+          -1.5531738699141273,
+          0.96,
+          2.5542785431312325
+        ]
+      },
+      "frames": [
+        {
+          "offset": -0.46,
+          "time": 0.282,
+          "file": "backhand-block-right-00.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -1.3156790216252827,
+            0,
+            2.4718752190988447
+          ],
+          "paddle": [
+            -1.1428351297345059,
+            1.0545424651416095,
+            2.0430104513269405
+          ],
+          "ball": [
+            -1.1632276363636362,
+            1.2318958016528927,
+            -1.5633469090909093
+          ],
+          "feet": {
+            "left": [
+              -1.5331460910042836,
+              0.028968197751314876,
+              2.3906808489379014
+            ],
+            "right": [
+              -1.0980132811061774,
+              0,
+              2.5230702471040325
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.32,
+          "time": 0.422,
+          "file": "backhand-block-right-01.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -1.428941539870003,
+            0,
+            2.5111737894000106
+          ],
+          "paddle": [
+            -1.256097647979226,
+            1.0531359478362303,
+            2.0823090216281064
+          ],
+          "ball": [
+            -1.170986181818182,
+            1.451251041322314,
+            -0.39180654545454585
+          ],
+          "feet": {
+            "left": [
+              -1.646471814648243,
+              0.02469841307427077,
+              2.4395234345241765
+            ],
+            "right": [
+              -1.2112125939516585,
+              0,
+              2.5528248021200888
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.23,
+          "time": 0.512,
+          "file": "backhand-block-right-02.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -1.488995254100317,
+            0,
+            2.532010560002506
+          ],
+          "paddle": [
+            -1.3161513622095402,
+            1.0454172476973072,
+            2.1031457922306016
+          ],
+          "ball": [
+            -1.1759738181818182,
+            1.4462634049586778,
+            0.36132654545454557
+          ],
+          "feet": {
+            "left": [
+              -1.7068723881187684,
+              0.0012666447953965127,
+              2.5127359503985707
+            ],
+            "right": [
+              -1.2709194489417615,
+              0,
+              2.521285827450685
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        },
+        {
+          "offset": -0.14,
+          "time": 0.602,
+          "file": "backhand-block-right-03.png",
+          "phase": "prepare",
+          "action": "backhand",
+          "root": [
+            -1.529395025491619,
+            0,
+            2.5460280238623656
+          ],
+          "paddle": [
+            -1.4637178430311637,
+            1.0282916223640173,
+            2.2586679102115097
+          ],
+          "ball": [
+            -1.1809614545454548,
+            1.3270135537190084,
+            1.114459636363636
+          ],
+          "feet": {
+            "left": [
+              -1.7468951946237372,
+              0,
+              2.5249881467833513
+            ],
+            "right": [
+              -1.3110628866850094,
+              0,
+              2.537079439385963
+            ]
+          },
+          "torsoRotation": [
+            0.08180506995348936,
+            -0.20297370983903457,
+            0
+          ]
+        },
+        {
+          "offset": -0.07,
+          "time": 0.6719999999999999,
+          "file": "backhand-block-right-04.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            -1.5472291588085003,
+            0,
+            2.552215913314016
+          ],
+          "paddle": [
+            -1.3554881946514055,
+            0.943790154628731,
+            2.3106679127624665
+          ],
+          "ball": [
+            -1.1848407272727275,
+            1.1552675702479343,
+            1.7002298181818172
+          ],
+          "feet": {
+            "left": [
+              -1.7621651461410757,
+              0,
+              2.512826557526303
+            ],
+            "right": [
+              -1.3289237775084706,
+              0,
+              2.5617950831866416
+            ]
+          },
+          "torsoRotation": [
+            0.08939384898432978,
+            -0.45674224429660404,
+            0
+          ]
+        },
+        {
+          "offset": 0,
+          "time": 0.742,
+          "file": "backhand-block-right-05.png",
+          "phase": "contact",
+          "action": "backhand",
+          "root": [
+            -1.5531738699141273,
+            0,
+            2.5542785431312325
+          ],
+          "paddle": [
+            -1.18872,
+            0.9144000000000001,
+            2.2859999999999996
+          ],
+          "ball": [
+            -1.1887200000000002,
+            0.9144000000000001,
+            2.286
+          ],
+          "feet": {
+            "left": [
+              -1.766444238886229,
+              0,
+              2.5066891565150584
+            ],
+            "right": [
+              -1.3353952824990776,
+              0,
+              2.5722085978859055
+            ]
+          },
+          "torsoRotation": [
+            0.09575,
+            0.35000000000000003,
+            0
+          ]
+        },
+        {
+          "offset": 0.07,
+          "time": 0.812,
+          "file": "backhand-block-right-06.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            -1.5531738699141273,
+            0,
+            2.5542785431312325
+          ],
+          "paddle": [
+            -1.1736637228399474,
+            0.9720700610045313,
+            2.27673965068891
+          ],
+          "ball": [
+            -1.1150138181818183,
+            1.2346325289256201,
+            1.8010909090909086
+          ],
+          "feet": {
+            "left": [
+              -1.766444238886229,
+              0,
+              2.5066891565150584
+            ],
+            "right": [
+              -1.3353952824990776,
+              0,
+              2.5722085978859055
+            ]
+          },
+          "torsoRotation": [
+            0.09152076898680792,
+            0.3933767283404316,
+            0
+          ]
+        },
+        {
+          "offset": 0.15,
+          "time": 0.892,
+          "file": "backhand-block-right-07.png",
+          "phase": "follow-through",
+          "action": "backhand",
+          "root": [
+            -1.544927601521186,
+            0,
+            2.5514173445353996
+          ],
+          "paddle": [
+            -1.072292776730983,
+            1.3363627644584022,
+            2.216070479965297
+          ],
+          "ball": [
+            -1.030778181818182,
+            1.4463619834710746,
+            1.2469090909090907
+          ],
+          "feet": {
+            "left": [
+              -1.7581979704932875,
+              0,
+              2.5038279579192255
+            ],
+            "right": [
+              -1.3271490141061362,
+              0,
+              2.5693473992900726
+            ]
+          },
+          "torsoRotation": [
+            0.08601581645011902,
+            0.4498377799987793,
+            0
+          ]
+        },
+        {
+          "offset": 0.27,
+          "time": 1.012,
+          "file": "backhand-block-right-08.png",
+          "phase": "recover",
+          "action": "backhand",
+          "root": [
+            -1.4578470072917247,
+            0,
+            2.5212030873634044
+          ],
+          "paddle": [
+            -1.2115937809724695,
+            1.1228872155726128,
+            2.1236945825013773
+          ],
+          "ball": [
+            -0.9044247272727274,
+            1.4554550082644626,
+            0.4156363636363636
+          ],
+          "feet": {
+            "left": [
+              -1.6711173762638263,
+              0,
+              2.4736137007472303
+            ],
+            "right": [
+              -1.240068419876675,
+              0,
+              2.5391331421180774
+            ]
+          },
+          "torsoRotation": [
+            0.07672780918310404,
+            0.022052731527878854,
+            0
+          ]
+        },
+        {
+          "offset": 0.44,
+          "time": 1.182,
+          "file": "backhand-block-right-09.png",
+          "phase": "locomotion",
+          "action": "shuffle",
+          "root": [
+            -1.2591119390218366,
+            0,
+            2.4522482012038314
+          ],
+          "paddle": [
+            -1.0264245941244057,
+            1.0500014947320528,
+            2.0526776823656867
+          ],
+          "ball": [
+            -0.7254240000000002,
+            0.8346240000000007,
+            -0.7619999999999991
+          ],
+          "feet": {
+            "left": [
+              -1.4672822034097281,
+              0.015183109008017868,
+              2.371105494954697
+            ],
+            "right": [
+              -1.046433456190997,
+              0,
+              2.5037315755914644
+            ]
+          },
+          "torsoRotation": [
+            0.07625,
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

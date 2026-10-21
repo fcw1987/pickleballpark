@@ -1,0 +1,193 @@
+{
+  "aggregation": "Median of three per-run statistics; not pooled percentiles. Browser callback cadence and CPU time, not physical device FPS/GPU completion.",
+  "rows": [
+    {
+      "surface": "desktop",
+      "label": "baseline",
+      "runs": 3,
+      "rafIntervalsMs": {
+        "medianMs": 16.600000000000364,
+        "p95Ms": 16.800000000000182,
+        "meanMs": 14.271577197149659
+      },
+      "appRenderIntervalsMs": {
+        "medianMs": 14.200000047683716,
+        "p95Ms": 14.899999976158142,
+        "meanMs": 14.275534441805226
+      },
+      "applyAtTimeCPUms": {
+        "medianMs": 0.3999999761581421,
+        "p95Ms": 0.5,
+        "meanMs": 0.3878859853517981
+      },
+      "renderCPUms": {
+        "medianMs": 0.20000004768371582,
+        "p95Ms": 0.30000007152557373,
+        "meanMs": 0.24133016434531313
+      },
+      "applyCPUmsPerSecond": 27.190835345596987,
+      "renderCPUmsPerSecond": 16.917261799721405,
+      "cacheBuildDeltas": [
+        0,
+        0,
+        0
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "drawCalls": [
+        17,
+        17,
+        17
+      ],
+      "errors": [
+        [],
+        [],
+        []
+      ],
+      "verified": true
+    },
+    {
+      "surface": "desktop",
+      "label": "candidate",
+      "runs": 3,
+      "rafIntervalsMs": {
+        "medianMs": 16.600000000000364,
+        "p95Ms": 16.800000000000182,
+        "meanMs": 14.237914691943152
+      },
+      "appRenderIntervalsMs": {
+        "medianMs": 14.200000047683716,
+        "p95Ms": 14.800000071525574,
+        "meanMs": 14.24454976314617
+      },
+      "applyAtTimeCPUms": {
+        "medianMs": 0.3999999761581421,
+        "p95Ms": 0.5,
+        "meanMs": 0.4040094352555725
+      },
+      "renderCPUms": {
+        "medianMs": 0.20000004768371582,
+        "p95Ms": 0.30000007152557373,
+        "meanMs": 0.2405213287091368
+      },
+      "applyCPUmsPerSecond": 28.415500057337407,
+      "renderCPUmsPerSecond": 16.88177777853407,
+      "cacheBuildDeltas": [
+        0,
+        0,
+        0
+      ],
+      "pixels": [
+        1440,
+        900
+      ],
+      "drawCalls": [
+        17,
+        17,
+        17
+      ],
+      "errors": [
+        [],
+        [],
+        []
+      ],
+      "verified": true
+    },
+    {
+      "surface": "phone",
+      "label": "baseline",
+      "runs": 3,
+      "rafIntervalsMs": {
+        "medianMs": 25,
+        "p95Ms": 33.400000000000546,
+        "meanMs": 27.10585585585584
+      },
+      "appRenderIntervalsMs": {
+        "medianMs": 27.199999928474426,
+        "p95Ms": 27.899999976158142,
+        "meanMs": 27.109909909802514
+      },
+      "applyAtTimeCPUms": {
+        "medianMs": 0.3999999761581421,
+        "p95Ms": 0.5,
+        "meanMs": 0.4080357163080147
+      },
+      "renderCPUms": {
+        "medianMs": 0.2999999523162842,
+        "p95Ms": 0.3999999761581421,
+        "meanMs": 0.291071426655565
+      },
+      "applyCPUmsPerSecond": 15.141976815260143,
+      "renderCPUmsPerSecond": 10.781447248437074,
+      "cacheBuildDeltas": [
+        0,
+        0,
+        0
+      ],
+      "pixels": [
+        1170,
+        2532
+      ],
+      "drawCalls": [
+        17,
+        17,
+        17
+      ],
+      "errors": [
+        [],
+        [],
+        []
+      ],
+      "verified": true
+    },
+    {
+      "surface": "phone",
+      "label": "candidate",
+      "runs": 3,
+      "rafIntervalsMs": {
+        "medianMs": 25,
+        "p95Ms": 33.399999999999636,
+        "meanMs": 27.101801801801795
+      },
+      "appRenderIntervalsMs": {
+        "medianMs": 27.199999928474426,
+        "p95Ms": 27.899999976158142,
+        "meanMs": 27.11396396374917
+      },
+      "applyAtTimeCPUms": {
+        "medianMs": 0.40000009536743164,
+        "p95Ms": 0.5,
+        "meanMs": 0.44349775880976106
+      },
+      "renderCPUms": {
+        "medianMs": 0.2999999523162842,
+        "p95Ms": 0.3999999761581421,
+        "meanMs": 0.2892376697651474
+      },
+      "applyCPUmsPerSecond": 16.42229716476426,
+      "renderCPUmsPerSecond": 10.729435308596502,
+      "cacheBuildDeltas": [
+        0,
+        0,
+        0
+      ],
+      "pixels": [
+        1170,
+        2532
+      ],
+      "drawCalls": [
+        17,
+        17,
+        17
+      ],
+      "errors": [
+        [],
+        [],
+        []
+      ],
+      "verified": true
+    }
+  ]
+}

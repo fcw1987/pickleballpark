@@ -1,0 +1,515 @@
+{
+  "evidenceNote": "Visible text, dimensions, actions and errors retained. Exhaustive accessibility inventories omitted; screenshots and review record the observed interface.",
+  "records": [
+    {
+      "name": "phone390x844",
+      "s": {
+        "title": "Pickleball Park - Build a Play",
+        "url": "http://127.0.0.1:4184/",
+        "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+        "dims": {
+          "scrollWidth": 390,
+          "scrollHeight": 844,
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "dpr": 1
+        }
+      },
+      "labels": [
+        {
+          "i": 2,
+          "text": "3D",
+          "title": null
+        },
+        {
+          "i": 3,
+          "text": "2D",
+          "title": null
+        },
+        {
+          "i": 4,
+          "text": "▶\nPlay",
+          "title": null
+        }
+      ],
+      "actions": [
+        {
+          "control": {
+            "i": 2,
+            "text": "3D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 390,
+              "scrollHeight": 844,
+              "innerWidth": 390,
+              "innerHeight": 844,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 3,
+            "text": "2D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "MENU\n?\nHELP\nStarter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 390,
+              "scrollHeight": 844,
+              "innerWidth": 390,
+              "innerHeight": 844,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 4,
+            "text": "▶\nPlay",
+            "title": null
+          },
+          "error": "locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible,[role=\"button\"]:visible,a:visible').nth(4)\u001b[22m\n\u001b[2m    - locator resolved to <circle r=\"2\" cx=\"5\" cy=\"42\" tabindex=\"0\" role=\"button\" id=\"player3-touch\" data-type=\"player\" class=\"touch-target\" aria-disabled=\"true\" data-target=\"player3\" aria-roledescription=\"movable court token\" transform=\"translate(-0.7999999999999998 -4.199999999999996)\" aria-keyshortcuts=\"ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space\" aria-label=\"Player 3, orange team, right-handed, at 5, 42 feet. Arrow keys move; Enter or Space switches handedness.\"></circle>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "errors": [
+        "console:Service Worker registration failed: TypeError: Cannot read properties of undefined (reading 'scope')\n    at http://127.0.0.1:4184/script.js:12:83"
+      ]
+    },
+    {
+      "name": "phone320x568",
+      "s": {
+        "title": "Pickleball Park - Build a Play",
+        "url": "http://127.0.0.1:4184/",
+        "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+        "dims": {
+          "scrollWidth": 320,
+          "scrollHeight": 568,
+          "innerWidth": 320,
+          "innerHeight": 568,
+          "dpr": 1
+        }
+      },
+      "labels": [
+        {
+          "i": 2,
+          "text": "3D",
+          "title": null
+        },
+        {
+          "i": 3,
+          "text": "2D",
+          "title": null
+        },
+        {
+          "i": 4,
+          "text": "▶\nPlay",
+          "title": null
+        }
+      ],
+      "actions": [
+        {
+          "control": {
+            "i": 2,
+            "text": "3D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 320,
+              "scrollHeight": 568,
+              "innerWidth": 320,
+              "innerHeight": 568,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 3,
+            "text": "2D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "MENU\n?\nHELP\nStarter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 320,
+              "scrollHeight": 568,
+              "innerWidth": 320,
+              "innerHeight": 568,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 4,
+            "text": "▶\nPlay",
+            "title": null
+          },
+          "error": "locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible,[role=\"button\"]:visible,a:visible').nth(4)\u001b[22m\n\u001b[2m    - locator resolved to <circle cx=\"5\" cy=\"42\" r=\"2.733\" tabindex=\"0\" role=\"button\" id=\"player3-touch\" data-type=\"player\" class=\"touch-target\" aria-disabled=\"true\" data-target=\"player3\" aria-roledescription=\"movable court token\" transform=\"translate(-0.7999999999999998 -4.199999999999996)\" aria-keyshortcuts=\"ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space\" aria-label=\"Player 3, orange team, right-handed, at 5, 42 feet. Arrow keys move; Enter or Space switches handedness.\"></circle>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "errors": [
+        "console:Service Worker registration failed: TypeError: Cannot read properties of undefined (reading 'scope')\n    at http://127.0.0.1:4184/script.js:12:83"
+      ]
+    },
+    {
+      "name": "landscape844x390",
+      "s": {
+        "title": "Pickleball Park - Build a Play",
+        "url": "http://127.0.0.1:4184/",
+        "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+        "dims": {
+          "scrollWidth": 844,
+          "scrollHeight": 390,
+          "innerWidth": 844,
+          "innerHeight": 390,
+          "dpr": 1
+        }
+      },
+      "labels": [
+        {
+          "i": 2,
+          "text": "3D",
+          "title": null
+        },
+        {
+          "i": 3,
+          "text": "2D",
+          "title": null
+        },
+        {
+          "i": 4,
+          "text": "▶\nPlay",
+          "title": null
+        }
+      ],
+      "actions": [
+        {
+          "control": {
+            "i": 2,
+            "text": "3D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 844,
+              "scrollHeight": 390,
+              "innerWidth": 844,
+              "innerHeight": 390,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 3,
+            "text": "2D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "MENU\n?\nHELP\nStarter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 844,
+              "scrollHeight": 390,
+              "innerWidth": 844,
+              "innerHeight": 390,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 4,
+            "text": "▶\nPlay",
+            "title": null
+          },
+          "error": "locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible,[role=\"button\"]:visible,a:visible').nth(4)\u001b[22m\n\u001b[2m    - locator resolved to <circle cx=\"5\" cy=\"42\" r=\"3.313\" tabindex=\"0\" role=\"button\" id=\"player3-touch\" data-type=\"player\" class=\"touch-target\" aria-disabled=\"true\" data-target=\"player3\" aria-roledescription=\"movable court token\" transform=\"translate(-1.7999999999999998 -14.7)\" aria-keyshortcuts=\"ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space\" aria-label=\"Player 3, orange team, right-handed, at 5, 42 feet. Arrow keys move; Enter or Space switches handedness.\"></circle>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "errors": [
+        "console:Service Worker registration failed: TypeError: Cannot read properties of undefined (reading 'scope')\n    at http://127.0.0.1:4184/script.js:12:83"
+      ]
+    },
+    {
+      "name": "desktop1440x900",
+      "s": {
+        "title": "Pickleball Park - Build a Play",
+        "url": "http://127.0.0.1:4184/",
+        "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+        "dims": {
+          "scrollWidth": 1440,
+          "scrollHeight": 900,
+          "innerWidth": 1440,
+          "innerHeight": 900,
+          "dpr": 1
+        }
+      },
+      "labels": [
+        {
+          "i": 2,
+          "text": "3D",
+          "title": null
+        },
+        {
+          "i": 3,
+          "text": "2D",
+          "title": null
+        },
+        {
+          "i": 4,
+          "text": "▶\nPlay",
+          "title": null
+        }
+      ],
+      "actions": [
+        {
+          "control": {
+            "i": 2,
+            "text": "3D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 3,
+            "text": "2D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "MENU\n?\nHELP\nStarter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "dpr": 1
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 4,
+            "text": "▶\nPlay",
+            "title": null
+          },
+          "error": "locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible,[role=\"button\"]:visible,a:visible').nth(4)\u001b[22m\n\u001b[2m    - locator resolved to <circle r=\"2\" cx=\"5\" cy=\"42\" tabindex=\"0\" role=\"button\" id=\"player3-touch\" data-type=\"player\" class=\"touch-target\" aria-disabled=\"true\" data-target=\"player3\" aria-roledescription=\"movable court token\" transform=\"translate(-1.7999999999999998 -14.7)\" aria-keyshortcuts=\"ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space\" aria-label=\"Player 3, orange team, right-handed, at 5, 42 feet. Arrow keys move; Enter or Space switches handedness.\"></circle>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "errors": [
+        "console:Service Worker registration failed: TypeError: Cannot read properties of undefined (reading 'scope')\n    at http://127.0.0.1:4184/script.js:12:83"
+      ]
+    },
+    {
+      "name": "phone390x844-hidpi",
+      "s": {
+        "title": "Pickleball Park - Build a Play",
+        "url": "http://127.0.0.1:4184/",
+        "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+        "dims": {
+          "scrollWidth": 390,
+          "scrollHeight": 844,
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "dpr": 2
+        }
+      },
+      "labels": [
+        {
+          "i": 2,
+          "text": "3D",
+          "title": null
+        },
+        {
+          "i": 3,
+          "text": "2D",
+          "title": null
+        },
+        {
+          "i": 4,
+          "text": "▶\nPlay",
+          "title": null
+        }
+      ],
+      "actions": [
+        {
+          "control": {
+            "i": 2,
+            "text": "3D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 390,
+              "scrollHeight": 844,
+              "innerWidth": 390,
+              "innerHeight": 844,
+              "dpr": 2
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 3,
+            "text": "2D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "MENU\n?\nHELP\nStarter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 390,
+              "scrollHeight": 844,
+              "innerWidth": 390,
+              "innerHeight": 844,
+              "dpr": 2
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 4,
+            "text": "▶\nPlay",
+            "title": null
+          },
+          "error": "locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible,[role=\"button\"]:visible,a:visible').nth(4)\u001b[22m\n\u001b[2m    - locator resolved to <circle r=\"2\" cx=\"5\" cy=\"42\" tabindex=\"0\" role=\"button\" id=\"player3-touch\" data-type=\"player\" class=\"touch-target\" aria-disabled=\"true\" data-target=\"player3\" aria-roledescription=\"movable court token\" transform=\"translate(-0.7999999999999998 -4.199999999999996)\" aria-keyshortcuts=\"ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space\" aria-label=\"Player 3, orange team, right-handed, at 5, 42 feet. Arrow keys move; Enter or Space switches handedness.\"></circle>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "errors": [
+        "console:Service Worker registration failed: TypeError: Cannot read properties of undefined (reading 'scope')\n    at http://127.0.0.1:4184/script.js:12:83"
+      ]
+    },
+    {
+      "name": "desktop1440x900-hidpi",
+      "s": {
+        "title": "Pickleball Park - Build a Play",
+        "url": "http://127.0.0.1:4184/",
+        "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+        "dims": {
+          "scrollWidth": 1440,
+          "scrollHeight": 900,
+          "innerWidth": 1440,
+          "innerHeight": 900,
+          "dpr": 2
+        }
+      },
+      "labels": [
+        {
+          "i": 2,
+          "text": "3D",
+          "title": null
+        },
+        {
+          "i": 3,
+          "text": "2D",
+          "title": null
+        },
+        {
+          "i": 4,
+          "text": "▶\nPlay",
+          "title": null
+        }
+      ],
+      "actions": [
+        {
+          "control": {
+            "i": 2,
+            "text": "3D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "Starter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "dpr": 2
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 3,
+            "text": "2D",
+            "title": null
+          },
+          "after": {
+            "title": "Pickleball Park - Build a Play",
+            "url": "http://127.0.0.1:4184/",
+            "bodyText": "MENU\n?\nHELP\nStarter Serve, Return & Third. Step 1. Starting Positions. Ready to begin the authored serve.\n☰\nMenu\n1. Serve\nEdit\n+ Add\n3D\n2D\n▶\nPlay\nShot 1, Serve\n0:00.0 / 0:03.7\n⋮\nPlayback options\nTarget",
+            "dims": {
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "dpr": 2
+            }
+          },
+          "url": "http://127.0.0.1:4184/"
+        },
+        {
+          "control": {
+            "i": 4,
+            "text": "▶\nPlay",
+            "title": null
+          },
+          "error": "locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible,[role=\"button\"]:visible,a:visible').nth(4)\u001b[22m\n\u001b[2m    - locator resolved to <circle r=\"2\" cx=\"5\" cy=\"42\" tabindex=\"0\" role=\"button\" id=\"player3-touch\" data-type=\"player\" class=\"touch-target\" aria-disabled=\"true\" data-target=\"player3\" aria-roledescription=\"movable court token\" transform=\"translate(-1.7999999999999998 -14.7)\" aria-keyshortcuts=\"ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space\" aria-label=\"Player 3, orange team, right-handed, at 5, 42 feet. Arrow keys move; Enter or Space switches handedness.\"></circle>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "errors": [
+        "console:Service Worker registration failed: TypeError: Cannot read properties of undefined (reading 'scope')\n    at http://127.0.0.1:4184/script.js:12:83"
+      ]
+    }
+  ]
+}

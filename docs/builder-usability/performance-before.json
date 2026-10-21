@@ -1,0 +1,73 @@
+{
+  "browser": "149.0.7827.55",
+  "environment": "headless Chromium on macOS, desktop emulation, DPR1, 1440x900",
+  "workload": "starter three-shot draft, overhead, Loop, 1x",
+  "warmup": "logical time >2 seconds",
+  "sampleSeconds": 30,
+  "runs": [
+    {
+      "startup": {
+        "readyMs": 800.2999999970198,
+        "bytes": 1530793,
+        "buffer": [
+          1070,
+          509
+        ]
+      },
+      "cadence": {
+        "count": 3528,
+        "median": 8.300000000000182,
+        "p95": 10.099999999998545,
+        "p99": 16.69999999999891
+      },
+      "missFraction": 0.020691609977324263,
+      "renderWorkMs": {
+        "count": 2812,
+        "median": 0.20000000298023224,
+        "p95": 0.3999999910593033,
+        "p99": 0.5
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "drawCalls": 57,
+      "pausedFramesOverOneSecond": 0
+    },
+    {
+      "startup": {
+        "readyMs": 745.2999999970198,
+        "bytes": 1530793,
+        "buffer": [
+          1070,
+          509
+        ]
+      },
+      "cadence": {
+        "count": 3539,
+        "median": 8.300000000000182,
+        "p95": 9.899999999997817,
+        "p99": 16.69999999999891
+      },
+      "missFraction": 0.0175190731845154,
+      "renderWorkMs": {
+        "count": 2823,
+        "median": 0.29999999701976776,
+        "p95": 0.3999999910593033,
+        "p99": 0.5
+      },
+      "memory": {
+        "geometries": 43,
+        "textures": 17
+      },
+      "drawCalls": 57,
+      "pausedFramesOverOneSecond": 0
+    }
+  ],
+  "limitations": "RAF intervals do not prove presentation; render work includes CPU command submission, not GPU completion. No physical phone or Safari claim.",
+  "revision": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+  "hardware": "Apple M3 Max",
+  "os": "macOS 27.0",
+  "renderer": "ANGLE Vulkan SwiftShader software renderer",
+  "rendererVerification": "Queried WebGL debug renderer; baseline confirmed in a separate same-configuration context."
+}

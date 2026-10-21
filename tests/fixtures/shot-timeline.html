@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shot timeline fixture</title>
+  <link rel="stylesheet" href="/shot-timeline.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #75a65f; }
+    main { width: min(46rem, calc(100vw - 24px)); padding: 12px; border: 4px solid #183348; background: #fff4c9; }
+  </style>
+</head>
+<body>
+  <main id="fixture"></main>
+  <script type="module">
+    if (new URL(location.href).searchParams.has('visual')) {
+      const { mountShotTimeline } = await import('/shot-timeline.js');
+      const timeline = mountShotTimeline();
+      document.querySelector('#fixture').append(timeline.element);
+      timeline.update({
+        time: 7.4,
+        duration: 10,
+        playing: false,
+        busy: false,
+        chapters: [
+          { shotId: 'serve', number: 1, label: 'Serve', anchor: 0 },
+          { shotId: 'return', number: 2, label: 'Return', anchor: 2.2 },
+          { shotId: 'drop', number: 3, label: 'Drop', anchor: 7.4 },
+          { shotId: 'volley', number: 4, label: 'Volley', anchor: 8.3 }
+        ]
+      });
+    }
+  </script>
+</body>
+</html>

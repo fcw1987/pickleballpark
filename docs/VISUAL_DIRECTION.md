@@ -39,3 +39,11 @@ The ball is citron/cream with a navy edge and 10 CSS pixel minimum visible diame
 The liked replay actors are now the source for editor and guided artwork. `tools/generate-replay-art.mjs` followed by `tools/generate-art.mjs` reproduces that relationship; the obsolete centered free hand is not reused. `park-layout.js` shares landmark coordinates across projections. `court-geometry.js` shares exact service-line endpoints. Quiet teal court clusters, sage kitchens, ivory lines, layered green grass and terracotta paths keep the outlined ball and tactical drawings prominent. Tree, shrub, bench and sign pixels are original local artwork.
 
 Ground projection remains unchanged; physical height uses `sqrt(1 - .9²)` for the elevated SVG view. Loop and shot cues share authoritative playback time. No decorative motion or wall-clock cue animation is used. See [current verification](PARK_COACHING_VERIFICATION.md).
+
+## Court-first responsive composition (2026-09-07 local candidate)
+
+The painted court and complete existing editable apron determine the responsive fit. Wide layouts use a 0.65 longitudinal affine depth scale and 0.09 shear; portrait uses 0.90 and 0.04. These are presentation transforms only. The inverse keeps exact canonical positions and drawings. Upright actor/ball height retains its approved calibration independently of ground fitting, preventing stretched overhead equipment.
+
+The compact two-line navy-on-ivory pixel banner replaces the detached header and upper tree. Existing native MENU and HELP buttons occupy the left and right park paths, with screen positions derived from the actual SVG CTM, including guided-mode letterboxing. MENU stacks its icon and label to protect court clearance at enlarged text. The banner scales with the rendered scene and remains inside the viewport when shot cues expand the HUD. Spatial replay shares the banner and HELP artwork as world scenery; its transport and camera identities are unchanged. Behind-player occlusion of world signage remains intentional.
+
+Keep the static bench, two remaining trees, shrubs and quiet paving. Omit spectators, dense planting and decorative motion so the playing surface remains dominant.

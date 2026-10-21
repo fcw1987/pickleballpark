@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 test('publishes Pickleball Park metadata and visible identity', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveTitle('Pickleball Park - Pickleball Court Planner');
+  await page.goto('/?workspace=planner');
+  await expect(page).toHaveTitle('Pickleball Park - Build a Play');
 
   const manifest = await page.evaluate(async () => (await fetch('manifest.json')).json());
   expect(manifest).toMatchObject({
@@ -12,14 +12,17 @@ test('publishes Pickleball Park metadata and visible identity', async ({ page })
   });
   expect(manifest).not.toHaveProperty('id');
 
+  const banner = page.locator('h1.park-banner img');
+  await expect(banner).toHaveAttribute('alt', 'Pickleball Park');
+  await expect(page.locator('h1.park-banner')).toHaveAccessibleName('Pickleball Park');
+  await expect.poll(() => banner.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
   const visibleText = await page.locator('body').innerText();
-  expect(visibleText).toContain('Pickleball Park');
-  expect(visibleText).not.toMatch(/\bPickleboard\b/);
+  expect(visibleText).not.toMatch(/\b(?:Pickleboard|Paddle Park)\b/i);
 });
 
 test('keeps the legacy theme and public API compatible across the rebrand', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('pickleboard-theme', 'dark'));
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => Boolean(window.pickleboard));
 
   const before = await page.evaluate(() => window.pickleboard.captureBoardState());
@@ -41,27 +44,22 @@ for (const width of [320, 390, 768]) {
       await page.route('**/styles.css', route => route.fulfill({ contentType: 'text/css', body: oldCSS }));
     }
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('/');
+    await page.goto('/?workspace=planner');
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
-    const brand = page.locator('.world-label strong');
-    await expect(brand).toHaveText('Pickleball Park');
-    const rects = await brand.evaluate(element => {
-      const range = document.createRange(); range.selectNodeContents(element);
-      return [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }));
-    });
-    for (const rect of rects) {
-      expect(rect.left).toBeGreaterThanOrEqual(0);
-      expect(rect.right).toBeLessThanOrEqual(width);
-      expect(rect.top).toBeGreaterThanOrEqual(0);
-      expect(rect.bottom).toBeLessThanOrEqual(844);
-    }
-    if (width <= 420) {
-      const labelBox = await page.locator('.world-label').boundingBox();
-      const courtBox = await page.locator('.court-container-fullscreen').boundingBox();
-      expect(labelBox.y + labelBox.height).toBeLessThanOrEqual(courtBox.y);
-    }
+    const brand = page.locator('h1.park-banner');
+    await expect(brand).toHaveAccessibleName('Pickleball Park');
+    await expect.poll(() => brand.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+    const brandBox = await brand.boundingBox();
+    expect(brandBox.x).toBeGreaterThanOrEqual(0);
+    expect(brandBox.x + brandBox.width).toBeLessThanOrEqual(width);
+    expect(brandBox.y).toBeGreaterThanOrEqual(0);
+    expect(brandBox.y + brandBox.height).toBeLessThanOrEqual(844);
     const menu = await page.locator('#menuToggle').boundingBox();
-    expect(rects[0].left).toBeGreaterThan(menu.x + menu.width);
+    const player = await page.locator('#player1').boundingBox();
+    const overlaps = (a,b) => a.x < b.x+b.width && a.x+a.width > b.x && a.y < b.y+b.height && a.y+a.height > b.y;
+    expect(overlaps(brandBox, menu)).toBe(false);
+    expect(overlaps(brandBox, player)).toBe(false);
+    expect(overlaps(menu, player)).toBe(false);
     await page.locator('#menuToggle').click();
     const heading = page.locator('.menu-header h2');
     await expect(heading).toHaveText('Pickleball Park');

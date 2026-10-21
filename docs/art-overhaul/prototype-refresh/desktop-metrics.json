@@ -1,0 +1,86 @@
+{
+  "bootMs": 57.659374999999955,
+  "navigation": {
+    "domContentLoaded": 38.800000071525574,
+    "loadEvent": 43.700000047683716,
+    "transferBytes": 21452
+  },
+  "rendererMetrics": {
+    "state": {
+      "active": true,
+      "loop": true,
+      "holding": false,
+      "iteration": 0,
+      "playing": false,
+      "elapsed": 0,
+      "playbackRate": 1,
+      "camera": "sideline",
+      "playId": "third-shot-drop",
+      "playerCount": 4,
+      "hasBall": true,
+      "artStyle": "dimensional-court-garden",
+      "renderLoopCount": 2,
+      "pixelScale": 1,
+      "framing": {
+        "aspect": 1.6,
+        "usableAspect": 2.1546806321892826,
+        "reservedPixels": 231.6875,
+        "distanceScale": 1.0704966795732644,
+        "position": [
+          11.77546347530591,
+          7.444129081311566,
+          0
+        ],
+        "target": [
+          0,
+          0.7,
+          0
+        ]
+      },
+      "lastState": {
+        "x": 1.8897599999999999,
+        "y": 0.85344,
+        "z": -6.7056000000000004,
+        "board": {
+          "x": 16.2,
+          "y": 0
+        },
+        "phase": "ready",
+        "launched": false,
+        "rallyLeg": 1,
+        "time": 0,
+        "elapsed": 0,
+        "stepIndex": 0
+      }
+    },
+    "viewport": {
+      "w": 1440,
+      "h": 900
+    },
+    "canvas": {
+      "w": 1440,
+      "h": 900
+    },
+    "renderer": {
+      "calls": 566,
+      "triangles": 22152,
+      "geometries": 286,
+      "textures": 8,
+      "programs": 7
+    },
+    "webgl": {
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "vendor": "WebKit",
+      "renderer": "WebKit WebGL"
+    },
+    "diag": null
+  },
+  "frameMetrics": {
+    "rafSamples": 148,
+    "medianIntervalMs": 49.899999999999636,
+    "p95IntervalMs": 50.100000000000364,
+    "over25ms": 91,
+    "renderFrames": 93
+  },
+  "errors": []
+}

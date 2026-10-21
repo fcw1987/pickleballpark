@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const APP_PATH = '/index.html?e2e=1';
+const APP_PATH = '/index.html?workspace=planner&e2e=1';
 
 async function openApp(page) {
   const errors = [];

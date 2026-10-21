@@ -1,0 +1,14 @@
+
+[WebServer] (node:82192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 7 tests using 1 worker
+
+[1/7] [chromium] › tests/build-diagnostics.spec.mjs:5:1 › Help diagnostics preserve the loaded snapshot when the server changes or disappears
+[2/7] [chromium] › tests/build-diagnostics.spec.mjs:26:1 › the source version endpoint exists and Help remains available in Planner
+[3/7] [chromium] › tests/service-worker.spec.mjs:27:3 › service worker lifecycle › installs the versioned shell and serves a repeat visit offline
+[4/7] [chromium] › tests/service-worker.spec.mjs:68:3 › service worker lifecycle › upgrades old Pickleboard caches without deleting unrelated origin caches
+[5/7] [chromium] › tests/service-worker.spec.mjs:98:3 › service worker lifecycle › offline navigation uses only the owned shell cache and does not cache unknown pages as the shell
+[6/7] [chromium] › tests/service-worker.spec.mjs:116:3 › service worker lifecycle › refreshes a stale cached application asset from the current release
+[7/7] [chromium] › tests/service-worker.spec.mjs:139:3 › service worker lifecycle › returns a successful network asset even when refreshing its cache fails
+  7 passed (5.8s)

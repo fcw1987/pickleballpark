@@ -1,0 +1,33 @@
+{
+  "source": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+  "browser": "149.0.7827.55",
+  "method": "fresh isolated Chromium contexts; service workers blocked; default source draft",
+  "captures": [
+    {
+      "label": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dpr": 2,
+      "files": [
+        "phone-court.png",
+        "phone-menu.png",
+        "phone-editor.png"
+      ]
+    },
+    {
+      "label": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "dpr": 1,
+      "files": [
+        "desktop-court.png",
+        "desktop-menu.png",
+        "desktop-editor.png"
+      ]
+    }
+  ]
+}

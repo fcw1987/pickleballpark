@@ -1,0 +1,132 @@
+{
+  "sourceRevision": "ac7ca5ff3a3022de3cb4ba843f2111b0f53987db",
+  "note": "Frozen default presentation signatures from original implementation; numeric values rounded to 11 decimals.",
+  "keys": [
+    "worldPosition",
+    "bodyFacing",
+    "viewDirection",
+    "action",
+    "phase",
+    "frameIndex",
+    "locomotionFrame",
+    "planted",
+    "strokePose",
+    "strokeTime",
+    "travelDistance",
+    "travelPhase",
+    "travelSpeed",
+    "paddle"
+  ],
+  "fractions": [
+    0,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    1
+  ],
+  "cameraPosition": {
+    "x": 9,
+    "y": 6,
+    "z": 4
+  },
+  "signatures": [
+    {
+      "playId": "serve-and-return",
+      "handedness": "left",
+      "count": 56,
+      "sha256": "27c58cc9e6c693aed63974ab368850bd661eb59300cc8d7c00dcd7c32596c2a9"
+    },
+    {
+      "playId": "serve-and-return",
+      "handedness": "right",
+      "count": 56,
+      "sha256": "e7ce3103f1ca66d2b8c85fd2127152eb282498cdd769d9e5986e7ed86e24e503"
+    },
+    {
+      "playId": "third-shot-drop",
+      "handedness": "left",
+      "count": 112,
+      "sha256": "7764dd306f434194b1ff73d45d1374ac8462dc54ba31565708ec94197770f029"
+    },
+    {
+      "playId": "third-shot-drop",
+      "handedness": "right",
+      "count": 112,
+      "sha256": "c31ccf6cfff269efac8c0f7d71428f69f8128d73ae4c6776570d19ad749fea88"
+    },
+    {
+      "playId": "third-shot-drive",
+      "handedness": "left",
+      "count": 112,
+      "sha256": "8bba04cba33e17787db9822ca9f8c8872de773c2e00694c41aba46442116149c"
+    },
+    {
+      "playId": "third-shot-drive",
+      "handedness": "right",
+      "count": 112,
+      "sha256": "84ef66ccd79fd4740c0746a2d9a401f040b83615e36814c21f88b119839b8306"
+    },
+    {
+      "playId": "fifth-shot-drop",
+      "handedness": "left",
+      "count": 168,
+      "sha256": "43d46715497cecd81fcc01304397a7638d79c1548356ef67b00e28b30e3134ac"
+    },
+    {
+      "playId": "fifth-shot-drop",
+      "handedness": "right",
+      "count": 168,
+      "sha256": "594e63b3d49ba9970f48012a0b2afd217f17b1674fd723365f7061ac2f6b15e6"
+    },
+    {
+      "playId": "dink-exchange",
+      "handedness": "left",
+      "count": 56,
+      "sha256": "96538b12d7233793f04298ec8ed7b3257267aad16fc245c1d2c2a585aaa74a97"
+    },
+    {
+      "playId": "dink-exchange",
+      "handedness": "right",
+      "count": 56,
+      "sha256": "b1cedf6d28a83145e884ec4c29d216b667e17aaabf95ce161d2364471de75dbc"
+    },
+    {
+      "playId": "volley-block",
+      "handedness": "left",
+      "count": 56,
+      "sha256": "253f3e4f39d426530c60ef015dacfd5073d7230b0f08757cb6164f0f11500000"
+    },
+    {
+      "playId": "volley-block",
+      "handedness": "right",
+      "count": 56,
+      "sha256": "45795d763fc88e871ba61375bee4ade00c0d41ad7407932e041268ded0387e23"
+    },
+    {
+      "playId": "short-hop-reset",
+      "handedness": "left",
+      "count": 84,
+      "sha256": "b17c3d9c28176fd5af3b22a01ee76f52807e4bae840e0541732d7491be28981a"
+    },
+    {
+      "playId": "short-hop-reset",
+      "handedness": "right",
+      "count": 84,
+      "sha256": "c6314d76c7e260ff48db94a57ff0195865b422fdab5aa520b4de1a9c5176a103"
+    },
+    {
+      "playId": "lob-overhead",
+      "handedness": "left",
+      "count": 56,
+      "sha256": "11ef2107363947d0651ffa5fc96d6167c3236717ac2416d72c7d3045dc012fc8"
+    },
+    {
+      "playId": "lob-overhead",
+      "handedness": "right",
+      "count": 56,
+      "sha256": "27740f041d76799af72bd349e6ff1f13a25761802756314653963dbc6fe6e467"
+    }
+  ]
+}

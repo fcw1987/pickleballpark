@@ -1,0 +1,53 @@
+/* The visible viewport and court projection are owned by PlayBuilder. */
+body.builder-workspace { --builder-visible-height: 100dvh; }
+body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { display: none; }
+.builder-ui { height: var(--builder-visible-height,100dvh); top: var(--builder-visible-top,0px); box-sizing: border-box; overflow: hidden; }
+.builder-ui.builder-busy { cursor: progress; }
+.builder-large-text .builder-ui { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+.builder-large-text .builder-ui > * { flex-shrink: 0; }
+.builder-large-text .builder-meta { flex-wrap: wrap; }
+.builder-large-text .builder-cue { flex: 1 1 8rem; }
+.builder-large-text .builder-context-actions { flex-wrap: wrap; margin-left: 0; }
+.builder-large-text .builder-main-menu > summary { width: auto; min-width: 5.3rem; }
+.builder-large-text .builder-context-actions .builder-button { width: auto; min-width: 44px; padding-inline: 8px; }
+.builder-large-text .builder-layout { flex: 1 0 65dvh; min-height: 24rem; }
+.builder-large-text .builder-transport-top { display: flex; flex-wrap: wrap; }
+.builder-large-text .builder-transport-timeline { flex: 1 1 12rem; }
+.builder-large-text .builder-context-menu { margin-left: auto; }
+.builder-large-text .builder-button { white-space: normal; }
+.builder-large-text .builder-chapter-list, .builder-large-text .builder-menu-panel { max-width: calc(100vw - 32px); }
+.builder-large-text .builder-inspector:not(.builder-inspector-collapsed) {
+  position: fixed;
+  left: auto;
+  right: 8px;
+  top: calc(var(--builder-visible-top,0px) + 8px);
+  bottom: auto;
+  width: min(24rem,calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  max-height: calc(var(--builder-visible-height,100dvh) - 16px);
+  /* At enlarged text sizes this fixed editor covers part of the header.
+     Keep its focused Close control above the chrome that it overlaps. */
+  z-index: 70;
+}
+
+/* Keep a short landscape viewport useful while the non-modal editor is open. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .builder-ui { grid-template-rows: auto minmax(0, 1fr) auto; gap: 3px; }
+  .builder-meta { min-height: 44px; }
+  .builder-transport { padding-block: 2px; }
+}
+
+/* Enlarged labels determine their control width; the wrapping header keeps
+   those readable controls inside phone and short landscape viewports. */
+@media (max-width: 700px), (max-height: 500px) and (orientation: landscape) {
+  .builder-large-text .builder-main-menu > summary { width: max-content; min-width: 54px; flex: 0 0 auto; padding-inline: 8px; }
+  .builder-large-text .builder-shot-card-player { display: none; }
+  .builder-large-text .builder-meta { z-index: 60; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .builder-large-text .builder-chapter-list,
+  .builder-large-text .builder-menu-panel { max-height: calc(100dvh - 120px); }
+  .builder-large-text .builder-context-menu > .builder-menu-panel { right: 0; max-width: calc(100vw - 16px); }
+  .builder-large-text .builder-transport { z-index: 60; }
+}

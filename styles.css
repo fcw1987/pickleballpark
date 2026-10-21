@@ -1,4 +1,4 @@
-/* Pickleball Park's compact handheld-adventure visual system.
+/* Pickleboard's compact handheld-adventure visual system.
    visual-theme.js owns the shared palette; this file maps it to UI surfaces. */
 :root {
   color-scheme: light;
@@ -71,10 +71,6 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focu
   overflow: hidden;
   isolation: isolate;
 }
-.world-label { position: absolute; z-index: 10; top: 1rem; left: calc(max(0.8rem, env(safe-area-inset-left)) + 52px + 0.9rem); max-width: calc(100% - max(0.8rem, env(safe-area-inset-left)) - 52px - 1.7rem); display: grid; color: var(--text-primary); pointer-events: none; }
-.world-label strong { font-family: ui-rounded, "Arial Rounded MT Bold", ui-sans-serif, sans-serif; font-size: 1.1rem; letter-spacing: 0.04em; white-space: normal; }
-.world-label span { font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; }
-body.play-mode .world-label, body.three-d-active .world-label { display: none; }
 .court-container-fullscreen {
   display: flex;
   align-items: center;
@@ -85,12 +81,19 @@ body.play-mode .world-label, body.three-d-active .world-label { display: none; }
   padding: max(0.7rem, env(safe-area-inset-top)) max(0.7rem, env(safe-area-inset-right)) max(0.7rem, env(safe-area-inset-bottom)) max(0.7rem, env(safe-area-inset-left));
   background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--bg-primary) 78%, var(--pb-green-light)), var(--bg-primary) 75%);
 }
+/* Continue the authored park through the 2D letterbox space. Keep the full
+   court and off-court recovery envelope instead of stretching or cropping it. */
+body.builder-workspace .court-container-fullscreen {
+  background: #739b70 url('assets/park/grass.png') repeat;
+  background-size: 128px 128px;
+  image-rendering: pixelated;
+}
+.park-stage { --stage-ratio: 41.2 / 59; position:relative; width:min(1050px,100%,calc((100dvh - 1.4rem) * var(--stage-ratio))); max-height:100%; aspect-ratio:var(--stage-ratio); }
+.park-stage[data-projection="wide"] { --stage-ratio:44 / 43.8; }
 .court-svg {
   display: block;
-  width: min(1050px, 100%, calc((100dvh - 1.4rem) * 47 / 60));
-  height: auto;
-  max-height: 100%;
-  aspect-ratio: 47 / 60;
+  width: 100%;
+  height: 100%;
   border: 0;
   outline: none;
   border-radius: 0;
@@ -128,34 +131,43 @@ body.play-mode .world-label, body.three-d-active .world-label { display: none; }
 .tracer-dot.ball-token { fill: var(--ball-color); }
 @keyframes tracerFadeOut { 0% { opacity: 0.55; } 50% { opacity: 0.35; } 100% { opacity: 0; } }
 
-/* Small square controls sit above the board like a handheld HUD. */
-.fab {
-  position: fixed;
+/* Native controls occupy useful fixtures on the park border. */
+.park-control {
+  position: absolute;
   z-index: 1000;
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: .35rem .5rem;
   color: var(--pb-line);
   background: var(--pb-navy);
   border: 3px double var(--pb-line);
   border-radius: var(--corner);
   box-shadow: 4px 4px 0 var(--shadow);
   font-weight: 800;
-  font-size: 1.15rem;
+  font-size: .72rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
   line-height: 1;
+  transform:translate(-50%,-50%);
   transition: transform 120ms ease, background-color 120ms ease;
 }
-.fab:hover { background: var(--button-hover); transform: translate(-1px, -1px); }
-.fab:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow); }
-.fab-menu { top: max(0.8rem, env(safe-area-inset-top)); left: max(0.8rem, env(safe-area-inset-left)); }
-.fab-info { right: max(0.8rem, env(safe-area-inset-right)); bottom: max(0.8rem, env(safe-area-inset-bottom)); }
+.park-control:hover { background:var(--button-hover); }
+.park-control:active { box-shadow:2px 2px 0 var(--shadow); }
+.park-menu { flex-direction:column; gap:3px; }
+.park-menu .control-label { line-height:1; }
+.park-help { flex-direction:column; gap:2px; }
+.park-help .control-label, .park-help .help-icon { line-height:1; }
+.park-banner { position:absolute; z-index:5; width:clamp(132px,38%,280px); margin:0; transform:translate(-50%,calc(-100% - 4px)); pointer-events:none; }
+.park-banner img { display:block; width:100%; height:auto; image-rendering:pixelated; }
 .hamburger-icon { display: grid; gap: 4px; }
 .hamburger-icon span { display: block; width: 20px; height: 2px; background: currentColor; }
-.fab-menu.active .hamburger-icon span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-.fab-menu.active .hamburger-icon span:nth-child(2) { opacity: 0; }
-.fab-menu.active .hamburger-icon span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.park-menu.active .hamburger-icon span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.park-menu.active .hamburger-icon span:nth-child(2) { opacity: 0; }
+.park-menu.active .hamburger-icon span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
 /* Shared overlay frame */
 .overlay, .modal { position: fixed; inset: 0; opacity: 0; visibility: hidden; background: rgba(28, 43, 64, 0.7); transition: opacity 160ms ease, visibility 160ms ease; }
@@ -244,14 +256,20 @@ body[data-theme="dark"] .playback-step-label { color: var(--pb-orange-light); }
 .shot-cue { display: inline-block; margin-top: .25rem; padding: .18rem .45rem; color: var(--button-ink); background: var(--button-bg); border: 2px solid var(--pb-shot); border-radius: var(--corner); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; opacity: var(--cue-opacity, 1); transform: translateY(var(--cue-y, 0px)); transition: none; }
 .shot-cue[hidden] { display: none; }
 .transport-primary { display: flex; gap: .4rem; }
+.transport-primary .shot-timeline-mount { flex: 1 1 auto; min-width: 0; }
 .playback-buttons { display: flex; flex-direction: column; gap: .45rem; }
-.transport-primary button { flex: 1; }
+.transport-primary button { flex: 0 0 48px; }
 .transport-play { min-width: 5.2rem; color: var(--button-ink) !important; background: var(--button-hover) !important; border-color: var(--pb-shot) !important; }
 .transport-secondary { display: flex; align-items: end; gap: .4rem; flex-wrap: wrap; }
 .transport-secondary > button, .transport-secondary > .play-rate { flex: 0 1 auto; }
 .transport-secondary button, .transport-secondary select { min-height: 40px; }
 .transport-secondary button { font-size: .76rem; opacity: .92; }
 .transport-secondary button[aria-pressed="true"] { color: var(--button-ink); background: var(--pb-green-dark); border-color: var(--pb-green-light); }
+.playback-options { position: relative; align-self: center; }
+.playback-options summary { min-height: 40px; display: grid; place-items: center; padding: .35rem .6rem; border: 2px solid var(--border-color); background: var(--bg-primary); cursor: pointer; font-size: .76rem; font-weight: 800; list-style: none; }
+.playback-options summary::-webkit-details-marker { display: none; }
+.playback-options[open] { display: flex; align-items: end; gap: .5rem; flex-wrap: wrap; }
+.playback-options[open] summary { color: var(--button-ink); background: var(--button-bg); }
 .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
 /* The optional 3D viewer has the same paper HUD over a deep court surround. */
@@ -275,10 +293,10 @@ body[data-theme="dark"] .playback-step-label { color: var(--pb-orange-light); }
 
 /* Reserve a readable strip for guided play copy and controls. */
 body.play-mode .court-container-fullscreen { padding-bottom: max(13rem, calc(0.7rem + env(safe-area-inset-bottom))); }
-body.three-d-active .fab, body.three-d-active .court-container-fullscreen, body.three-d-active .playback-controls { visibility: hidden; }
+body.three-d-active .park-control, body.three-d-active .court-container-fullscreen, body.three-d-active .playback-controls { visibility: hidden; }
 
 @media (max-width: 700px) {
-  .fab { width: 48px; height: 48px; }
+  .park-control { min-width:44px; min-height:44px; }
   .menu-panel { width: min(360px, 100vw); }
   .playback-controls { width: calc(100vw - 1rem); padding: 0.65rem; }
   .playback-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -292,11 +310,8 @@ body.three-d-active .fab, body.three-d-active .court-container-fullscreen, body.
   .three-d-controls label, .three-d-controls button, .three-d-controls select { width: 100%; min-width: 0; }
 }
 @media (max-width: 420px) {
+  .park-menu, .park-help { padding-inline:4px; }
   /* Let enlarged brand text reserve real space instead of covering court action. */
-  body:not(.play-mode):not(.three-d-active) .app { display: flex; flex-direction: column; }
-  body:not(.play-mode):not(.three-d-active) .world-label { position: relative; top: auto; flex-shrink: 0; margin-top: 1rem; margin-bottom: 0.5rem; }
-  body:not(.play-mode):not(.three-d-active) .court-container-fullscreen { flex: 1; height: auto; }
-
   .court-container-fullscreen { padding: 0.45rem; }
   .court-svg { box-shadow: none; }
   .menu-content { padding-inline: 0.9rem; }
@@ -314,9 +329,9 @@ body.three-d-active .fab, body.three-d-active .court-container-fullscreen, body.
   .playback-controls { padding: 0.55rem; }
   .playback-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .playback-buttons button { min-height: 40px; padding: 0.25rem 0.15rem; font-size: 0.7rem; }
-  .three-d-hud { flex-direction: row; padding: 0.45rem; }
+  .three-d-hud { flex-direction: column; align-items: stretch; padding: 0.45rem; }
   .three-d-copy { display: grid; }
-  .three-d-controls { display: flex; }
+  .three-d-controls { display: grid; width: 100%; min-width: 0; }
   .three-d-controls button, .three-d-controls select { min-height: 40px; padding: 0.25rem 0.4rem; font-size: 0.73rem; }
 }
 @media (min-width: 700px) and (max-height: 500px) and (orientation: landscape) {
@@ -324,13 +339,23 @@ body.three-d-active .fab, body.three-d-active .court-container-fullscreen, body.
   body.play-mode .playback-controls { top: .5rem; right: .5rem; bottom: .5rem; left: auto; width: min(320px, calc(100vw - 1rem)); max-height: calc(100dvh - 1rem); overflow-y: auto; transform: none; }
   body.play-mode .playback-copy p { max-width: 28ch; }
   body.play-mode .playback-buttons { gap: .3rem; }
-  body.play-mode .transport-primary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body.play-mode .transport-primary { display: grid; grid-template-columns: 48px minmax(0, 1fr); }
+  body.play-mode:not(.builder-workspace) .shot-timeline { grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; }
+  body.play-mode:not(.builder-workspace) .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; }
+  body.play-mode:not(.builder-workspace) .shot-timeline-identity { grid-column: 1; grid-row: 1; }
+  body.play-mode:not(.builder-workspace) .shot-timeline-time { grid-column: 2; grid-row: 1; }
+  body.play-mode .shot-timeline-mount,
+  body.play-mode .shot-timeline,
+  body.play-mode .shot-timeline-target,
+  body.play-mode .shot-timeline-range { min-width: 0; }
   body.play-mode .transport-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   body.play-mode .transport-secondary .play-rate { grid-column: span 2; }
 }
 @media (hover: none) { .ball-token:hover { r: inherit; stroke-width: inherit; } }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  /* A positive duration with the default property "all" accidentally creates
+     height transitions on the renderer host. Geometry must settle immediately. */
+  *, *::before, *::after { transition: none !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   .play-shot-path { transition: none; }
   .shot-cue { animation: none !important; transition: none; opacity: 1; transform: none; }
 }
@@ -342,7 +367,6 @@ body.three-d-active .court-container-fullscreen {
   padding-right: max(0.7rem, env(safe-area-inset-right));
   padding-bottom: calc(var(--coaching-hud-height, 0px) + max(0.7rem, env(safe-area-inset-bottom)));
 }
-body.play-mode #menuOverlay { display: none; }
 body.play-mode .playback-controls { top: auto; right: auto; bottom: max(.7rem, env(safe-area-inset-bottom)); left: 50%; width: min(700px, calc(100vw - 2rem)); transform: translateX(-50%); }
 /* Scene geometry supplies depth; canvas resolution is independent of sprite pixels. */
 .three-d-canvas canvas { image-rendering: auto; }
@@ -357,4 +381,90 @@ body.play-mode .playback-controls { top: auto; right: auto; bottom: max(.7rem, e
 @media (min-width: 700px) and (max-height: 500px) and (orientation: landscape) {
   body.play-mode .court-container-fullscreen { padding-right: calc(var(--coaching-hud-width, 320px) + 1rem); padding-bottom: .4rem; }
   body.play-mode .playback-controls { top: .5rem; right: .5rem; bottom: .5rem; left: auto; width: min(320px, calc(100vw - 1rem)); max-height: calc(100dvh - 1rem); overflow-y: auto; transform: none; }
+}
+
+.build-diagnostics pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .85em; user-select: text; }
+.build-diagnostic-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.build-diagnostic-actions button { min-height: 44px; padding: .5rem .75rem; font: inherit; }
+.build-diagnostics summary { min-height: 44px; cursor: pointer; padding-block: .6rem; }
+
+/* Guided replay shares the builder's compact field-note treatment. The
+   disclosure keeps complete lesson text available without covering the court. */
+.three-d-hud {
+  --replay-paper: var(--pb-panel, #fffbea);
+  --replay-ink: var(--pb-ink, #263449);
+  --replay-muted: #57686d;
+  --replay-action: #356b5b;
+  --replay-edge: #465a68;
+  gap: 12px;
+  padding: 8px;
+  color: var(--replay-ink);
+  background: var(--replay-paper);
+  border: 1px solid var(--replay-edge);
+  border-top: 3px solid var(--replay-action);
+  border-radius: 3px;
+  box-shadow: 0 3px 0 rgba(28,43,64,.25);
+}
+body[data-theme="dark"] .three-d-hud {
+  --replay-paper: #243846;
+  --replay-ink: #efe9d4;
+  --replay-muted: #bdcdc7;
+  --replay-action: #89bc9e;
+  --replay-edge: #8ba6a6;
+}
+.three-d-copy { position: relative; flex: 1 1 16rem; min-width: 0; max-width: 30rem; }
+.three-d-lesson-summary { display: grid; align-content: center; gap: 3px; min-height: 44px; padding: 4px 8px; list-style: none; cursor: pointer; border: 1px solid transparent; border-radius: 2px; }
+.three-d-lesson-summary::-webkit-details-marker { display: none; }
+.three-d-lesson-summary:hover, .three-d-copy[open] .three-d-lesson-summary { border-color: var(--replay-edge); background: color-mix(in srgb,var(--replay-action) 9%,var(--replay-paper)); }
+.three-d-lesson-summary:focus-visible { outline: 3px solid var(--pb-orange-dark); outline-offset: 2px; }
+.three-d-copy strong { color: var(--replay-ink); font-size: .875rem; line-height: 1.25; }
+.three-d-copy .three-d-step-label { color: var(--replay-action) !important; font-size: .8125rem !important; }
+.three-d-copy span { color: var(--replay-muted); }
+.three-d-notes-hint { font-size: .6875rem !important; }
+.three-d-notes-hint::after { content: ' ▾'; }
+.three-d-copy[open] .three-d-notes-hint::after { content: ' ▴'; }
+.three-d-lesson-notes { position: absolute; left: 0; bottom: calc(100% + 14px); z-index: 2; display: grid; gap: 8px; width: min(28rem,calc(100vw - 40px)); max-height: min(55dvh,24rem); padding: 14px; overflow-y: auto; overscroll-behavior: contain; background: var(--replay-paper); border: 1px solid var(--replay-edge); border-top: 3px solid var(--replay-action); border-radius: 3px; box-shadow: 0 4px 0 rgba(28,43,64,.25); }
+.three-d-description { max-width: none; font-size: .875rem !important; line-height: 1.5; }
+.three-d-copy .three-d-progress { color: var(--replay-action) !important; }
+.three-d-controls { min-width: min(42rem,62vw); gap: 6px; }
+.three-d-controls .transport-primary { align-items: center; gap: 10px; }
+.three-d-controls .transport-secondary { align-items: center; gap: 6px; }
+.three-d-controls button, .three-d-controls select, .three-d-controls .playback-options summary { min-width: 44px; min-height: 44px; padding: 8px 10px; border: 1px solid var(--replay-edge); border-radius: 2px; color: var(--replay-ink); background: var(--replay-paper); font-size: .8125rem; font-weight: 700; touch-action: manipulation; }
+.three-d-controls .transport-play { min-width: 56px; color: var(--replay-paper) !important; background: var(--replay-action) !important; border-color: var(--replay-action) !important; }
+.three-d-controls .playback-options { position: relative; }
+.three-d-controls .playback-options[open] { display: block; }
+.three-d-controls .playback-options label { position: absolute; right: 0; bottom: calc(100% + 12px); z-index: 3; width: min(16rem,calc(100vw - 40px)); padding: 12px; color: var(--replay-muted); background: var(--replay-paper); border: 1px solid var(--replay-edge); font-size: .75rem; }
+.three-d-controls .playback-options label:first-of-type { bottom: calc(100% + 98px); border-bottom: 0; }
+.three-d-controls select { width: 100%; margin-top: 4px; font-size: 16px; }
+.three-d-controls .shot-timeline { --game-ink: var(--replay-ink); --game-paper: var(--replay-paper); --game-paper-deep: color-mix(in srgb,var(--replay-ink) 12%,var(--replay-paper)); --game-green: var(--replay-action); --game-muted: var(--replay-muted); --game-edge: var(--replay-edge); --game-highlight: var(--replay-paper); --game-accent: var(--pb-orange-dark); }
+.three-d-controls .shot-timeline-identity { font: 650 .75rem/1.2 ui-sans-serif,system-ui,sans-serif; }
+.three-d-controls .shot-timeline-rail { height: 8px; border-width: 1px; box-shadow: none; }
+.three-d-controls .shot-timeline-thumb { border-width: 1px; background: var(--replay-action); box-shadow: 1px 1px 0 var(--replay-edge); }
+.three-d-controls .shot-timeline-marker { top: -4px; height: 14px; box-shadow: none; }
+
+@media (max-width: 700px), (max-height: 500px) and (orientation: landscape) {
+  .three-d-hud { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 4px 6px; left: max(6px,env(safe-area-inset-left)); right: max(6px,env(safe-area-inset-right)); bottom: max(6px,env(safe-area-inset-bottom)); padding: 6px; }
+  .three-d-copy { grid-column: 1; grid-row: 1; width: auto; max-width: none; }
+  .three-d-lesson-summary { gap: 1px; padding: 2px 5px; }
+  #threeDTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8125rem; }
+  .three-d-copy .three-d-step-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem !important; }
+  .three-d-notes-hint { font-size: .625rem !important; }
+  .three-d-controls, .three-d-controls .transport-primary, .three-d-controls .transport-secondary { display: contents; min-width: 0; }
+  .three-d-controls .transport-play { grid-column: 1; grid-row: 2; justify-self: start; width: 56px; }
+  .three-d-controls .shot-timeline-mount { grid-column: 1 / -1; grid-row: 2; margin-left: 66px; min-width: 0; }
+  .three-d-controls .shot-timeline { grid-template-columns: minmax(0,1fr) auto; gap: 0 8px; }
+  .three-d-controls .shot-timeline-identity { display: none; }
+  .three-d-controls .shot-timeline-target { grid-column: 1; grid-row: 1; height: 44px; }
+  .three-d-controls .shot-timeline-range { height: 44px; }
+  .three-d-controls .shot-timeline-time { grid-column: 2; grid-row: 1; font-size: .625rem; overflow: visible; max-width: none; }
+  .three-d-controls .playback-options { grid-column: 2; grid-row: 1; }
+  .three-d-controls #threeDExit { grid-column: 3; grid-row: 1; width: auto; }
+  .three-d-controls .playback-options label { right: -70px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .three-d-hud { grid-template-columns: minmax(12rem,.8fr) minmax(15rem,1fr) auto auto; }
+  .three-d-controls .transport-play { grid-column: 2; grid-row: 1; }
+  .three-d-controls .shot-timeline-mount { grid-column: 2; grid-row: 1; }
+  .three-d-controls .playback-options { grid-column: 3; }
+  .three-d-controls #threeDExit { grid-column: 4; }
 }

@@ -1,0 +1,213 @@
+{
+  "fixture": "synthetic four-shot authored rally",
+  "viewport": {
+    "width": 402,
+    "height": 874
+  },
+  "deviceScaleFactor": 3,
+  "browser": "Playwright Chromium phone emulation",
+  "physicalDevice": false,
+  "url": "http://127.0.0.1:4184/",
+  "video": "phone-authoring.webm",
+  "screenshot": "phone-authoring-final.png",
+  "events": [
+    {
+      "atMs": 962,
+      "name": "fresh synthetic draft opens paused",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 0,
+        "shot": 1,
+        "shots": 3
+      }
+    },
+    {
+      "atMs": 1690,
+      "name": "serve target placed directly",
+      "target": {
+        "x": 4.25,
+        "y": 38.25
+      },
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 0,
+        "shot": 1,
+        "shots": 3
+      }
+    },
+    {
+      "atMs": 2431,
+      "name": "return target adjusted exactly",
+      "depth": 6.8,
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 1.709,
+        "shot": 2,
+        "shots": 3
+      }
+    },
+    {
+      "atMs": 3139,
+      "name": "third shot selected and flight changed",
+      "flight": "high/soft",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 3,
+        "shots": 3
+      }
+    },
+    {
+      "atMs": 3820,
+      "name": "response appended",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 4,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 4569,
+      "name": "partner destination pinned in details",
+      "player": "Green 2",
+      "target": {
+        "x": 7.4,
+        "y": 13.2
+      },
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 3,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 5276,
+      "name": "coverage guides enabled independently",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 3,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 5318,
+      "name": "auto shading enabled without changing guides",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 3,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 6006,
+      "name": "undo",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 3,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 6050,
+      "name": "redo",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 2.756,
+        "shot": 3,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 6768,
+      "name": "named copy saved",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 0,
+        "shot": 1,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 8221,
+      "name": "saved draft reloaded paused",
+      "state": {
+        "view": "3d",
+        "playing": false,
+        "time": 0,
+        "shot": 1,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 8246,
+      "name": "continued saved work in 2D",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 0,
+        "shot": 1,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 8613,
+      "name": "play started from current position",
+      "state": {
+        "view": "2d",
+        "playing": true,
+        "time": 0.348,
+        "shot": 1,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 9843,
+      "name": "switched to 3D with playback intent preserved",
+      "state": {
+        "view": "3d",
+        "playing": true,
+        "time": 1.557,
+        "shot": 1,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 10743,
+      "name": "returned to 2D and continued",
+      "state": {
+        "view": "2d",
+        "playing": true,
+        "time": 2.485,
+        "shot": 1,
+        "shots": 4
+      }
+    },
+    {
+      "atMs": 11463,
+      "name": "paused after continuing saved work",
+      "state": {
+        "view": "2d",
+        "playing": false,
+        "time": 3.202,
+        "shot": 3,
+        "shots": 4
+      }
+    }
+  ]
+}

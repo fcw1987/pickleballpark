@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 async function openApp(page) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/index.html?accessibility=1');
+  await page.goto('/index.html?workspace=planner&accessibility=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.plays))).toBe(true);
 }
 
@@ -30,9 +30,40 @@ test('menu and help expose modal state, contain focus, and restore their trigger
   await expect(page.locator('#infoModal')).toHaveAttribute('role', 'dialog');
   await expect(page.locator('#infoModal')).toHaveAttribute('aria-modal', 'true');
   await expect(page.locator('#infoClose')).toBeFocused();
+  const infoFocusables = page.locator('#infoModal button:visible, #infoModal summary:visible, #infoModal [tabindex="0"]:visible');
+  const infoFocusableCount = await infoFocusables.count();
+  expect(infoFocusableCount).toBeGreaterThanOrEqual(4);
+  const infoFocusLabels = [];
+  for (let index = 0; index < infoFocusableCount * 2; index += 1) {
+    await page.keyboard.press('Tab');
+    const focus = await page.evaluate(() => ({ inside: Boolean(document.activeElement?.closest('#infoModal')), label: document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent?.trim(), tag: document.activeElement?.tagName }));
+    infoFocusLabels.push(focus.label);
+    expect(focus.inside).toBe(true);
+  }
+  expect(infoFocusLabels).toContain('Check server build');
+  expect(infoFocusLabels).toContain('Copy diagnostics');
+  expect(infoFocusLabels).not.toContain('Build diagnostic text');
+
+  // A collapsed details body must not become a phantom last tab stop. Verify
+  // both directions, then include its diagnostic text after it is expanded.
+  const diagnosticDetails = page.locator('#buildDiagnostics details');
+  const diagnosticSummary = diagnosticDetails.locator('summary');
+  const diagnosticText = diagnosticDetails.locator('pre');
+  await page.locator('#infoClose').focus();
+  await page.keyboard.press('Shift+Tab');
+  await expect(diagnosticSummary).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.locator('#infoClose')).toBeFocused();
+  await diagnosticSummary.click();
+  await expect(diagnosticDetails).toHaveAttribute('open', '');
+  await page.locator('#infoClose').focus();
   await page.keyboard.press('Shift+Tab');
+  await expect(diagnosticText).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(diagnosticSummary).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(diagnosticText).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(page.locator('#infoClose')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.locator('#infoModal')).toBeHidden();
@@ -139,7 +170,7 @@ for (const viewport of [
 test('DPR2 touch dragging retains exact SVG coordinates and replay restoration', async ({ browser, baseURL }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true });
   const page = await context.newPage();
-  await page.goto(baseURL);
+  await page.goto(`${baseURL}/?workspace=planner`);
   await page.waitForFunction(() => window.pickleboard?.plays);
   const target = page.locator('#player1-touch');
   const box = await target.boundingBox();

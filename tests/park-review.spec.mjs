@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 async function loadPlay(page, playId = 'third-shot-drop') {
-  await page.goto('/index.html?park-independent-review=1');
+  await page.goto('/index.html?workspace=planner&park-independent-review=1');
   await page.waitForFunction(() => Boolean(window.pickleboard?.plays && window.pickleboard?.threeD));
   await page.evaluate(id => pickleboard.plays.load(id), playId);
 }
@@ -27,56 +27,84 @@ test('WebGL allocation failure returns session ownership to resumable guided pla
   expect(await page.evaluate(() => pickleboard.plays.clock.elapsed)).toBeGreaterThan(0.1);
 });
 
-test('failed park texture leaves the board resumable and a retry can enter 3D', async ({ browser }) => {
+test('failed 3D module leaves the board resumable and a retry can enter 3D', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   let requests = 0;
-  await loadPlay(page);
-  await page.route('**/assets/park/grass.png', route => ++requests === 1 ? route.abort() : route.continue());
+  try {
+    await loadPlay(page);
+    // The dimensional world is geometry, so no park texture fetch is required.
+    // Fail the actual lazy entry; retries use a new URL after module failures.
+    await page.route('**/three-d-playback.js*', route => ++requests === 1 ? route.abort() : route.continue());
 
-  await page.locator('#play3dView').click();
-  await expect(page.locator('#threeDLoadStatus')).toContainText('Your board is safe');
-  await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);
-  expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
-    active: pickleboard.threeD.active, loading: Boolean(pickleboard.threeD.loading) })))
-    .toEqual({ owner: 'guided', active: false, loading: false });
+    await page.locator('#play3dView').click();
+    await expect(page.locator('#threeDLoadStatus')).toContainText('Your board is safe');
+    await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);
+    await expect(page.locator('#play3dView')).toBeEnabled();
+    await expect(page.locator('#play3dView')).not.toHaveAttribute('aria-busy', 'true');
+    expect(requests).toBe(1);
+    expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
+      active: pickleboard.threeD.active })))
+      .toEqual({ owner: 'guided', active: false });
 
-  await page.locator('#play3dView').click();
-  await expect.poll(() => page.evaluate(() => pickleboard.threeD.active)).toBe(true);
-  await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
-  await context.close();
+    // Guided playback really resumes after the failed handoff.
+    await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
+    await page.locator('#playPlayPause').click();
+    await page.clock.runFor(250);
+    expect(await page.evaluate(() => pickleboard.plays.clock.elapsed)).toBeGreaterThan(0.1);
+    await page.locator('#playPlayPause').click();
+
+    await page.locator('#play3dView').click();
+    await expect.poll(() => page.evaluate(() => pickleboard.threeD.active)).toBe(true);
+    expect(requests).toBe(2);
+    await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+    expect(await page.evaluate(() => pickleboard.plays.session.owner)).toBe('replay');
+  } finally { await context.close(); }
 });
 
-test('leaving a Play cancels a pending park texture load instead of blocking the next Play', async ({ browser }) => {
+test('leaving a Play cancels a pending 3D handoff instead of opening the stale Play', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   await loadPlay(page);
   let release;
   const gate = new Promise(resolve => { release = resolve; });
-  const failedParkRequests = [];
-  let parkRequestStarted = false;
-  page.on('requestfailed', request => {
-    if (request.url().endsWith('/assets/park/grass.png')) failedParkRequests.push(request.failure()?.errorText || 'failed');
-  });
-  await page.route('**/assets/park/grass.png', async route => {
-    parkRequestStarted = true;
+  let moduleRequestStarted = false;
+  await page.route('**/three-d-playback.js', async route => {
+    moduleRequestStarted = true;
     await gate;
-    await route.abort();
+    await route.continue();
   });
 
   try {
     await page.locator('#play3dView').click();
     await expect(page.locator('#play3dView')).toHaveAttribute('aria-busy', 'true');
-    // Busy begins at module loading; this case specifically interrupts an in-flight park fetch.
-    await expect.poll(() => parkRequestStarted).toBe(true);
+    await expect.poll(() => moduleRequestStarted).toBe(true);
     await page.locator('#playExit').click();
     await page.evaluate(() => pickleboard.plays.load('dink-exchange'));
-    await expect.poll(() => page.evaluate(() => Boolean(pickleboard.threeD.loading)), { timeout: 500 }).toBe(false);
-    await expect(page.locator('#play3dView')).toBeEnabled();
-    await expect.poll(() => failedParkRequests.length).toBe(1);
+    const nextSnapshot = await page.evaluate(() => pickleboard.plays.snapshot);
+    // Cancellation must release the entry immediately, before the old download
+    // finishes. ES module downloads cannot be aborted, so stale intent is fenced.
+    await expect(page.locator('#play3dView')).toBeEnabled({ timeout: 500 });
+    await expect(page.locator('#play3dView')).not.toHaveAttribute('aria-busy', 'true');
+    release();
+    await page.evaluate(async () => { await import('./three-d-playback.js'); });
+    expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
+      active: pickleboard.threeD.active, play: pickleboard.plays.activePlay.id })))
+      .toEqual({ owner: 'guided', active: false, play: 'dink-exchange' });
+    expect(await page.evaluate(() => pickleboard.plays.snapshot)).toEqual(nextSnapshot);
+    await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);
+    await expect(page.locator('#threeDViewer')).toBeHidden();
+    await expect(page.locator('#threeDLoadStatus')).toBeHidden();
+
+    await page.locator('#play3dView').click();
+    await expect.poll(() => page.evaluate(() => pickleboard.threeD.active)).toBe(true);
+    expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
+      play: pickleboard.threeD.currentPlay.id })))
+      .toEqual({ owner: 'replay', play: 'dink-exchange' });
+    await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   } finally {
     release();
-    await expect.poll(() => page.evaluate(() => Boolean(pickleboard.threeD.loading))).toBe(false);
     await context.close();
   }
 });
@@ -113,7 +141,7 @@ test('camera changes and a 3D exit-restart keep one timeline and the original bo
   expect(Math.max(...audit.map(item => item.paddleError))).toBeLessThan(0.01);
 
   await page.locator('#threeDExit').click();
-  await page.locator('#playRestart').click();
+  await page.locator('#playTimelineMount input[type=range]').fill('0');
   expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
     elapsed: pickleboard.plays.clock.elapsed, playing: pickleboard.plays.clock.playing })))
     .toEqual({ owner: 'guided', elapsed: 0, playing: false });

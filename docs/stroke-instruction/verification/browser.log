@@ -1,0 +1,197 @@
+
+Running 45 tests using 1 worker
+
+[1/45] [chromium] › tests/build-diagnostics.spec.mjs:5:1 › Help diagnostics preserve the loaded snapshot when the server changes or disappears
+  1) [chromium] › tests/build-diagnostics.spec.mjs:5:1 › Help diagnostics preserve the loaded snapshot when the server changes or disappears 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Build diagnostic text')
+    - Expected substring  -  1
+    + Received string     + 14
+
+    - Server build: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    + Pickleboard build diagnostics
+    + Running build: Running build · source 041f2856b038
+    + Running status: local (stamped local build)
+    + Source revision: 041f2856b0384c09a23e6c3fbca15c1f405431ea
+    + Source branch: feature/stroke-instruction
+    + Source state: clean
+    + Package revision: unavailable
+    + Evidence revision: unavailable
+    + Runtime fileset digest: 1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6
+    + Runtime fileset: static application runtime files; excludes version.json, build-metadata.js, build-info.json, runtime-manifest.json
+    + Cache version: pickleboard-static-v29
+    + Build time: 2026-10-18T23:36:06.074Z
+    + Environment: not checked
+    + Server build: not queried
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for getByLabel('Build diagnostic text')
+        - locator resolved to <pre tabindex="0" aria-label="Build diagnostic text">Pickleboard build diagnostics↵Running build: Runn…</pre>
+        - unexpected value "Pickleboard build diagnostics
+    Running build: Running build · source 041f2856b038
+    Running status: local (stamped local build)
+    Source revision: 041f2856b0384c09a23e6c3fbca15c1f405431ea
+    Source branch: feature/stroke-instruction
+    Source state: clean
+    Package revision: unavailable
+    Evidence revision: unavailable
+    Runtime fileset digest: 1342f7a03c16736fa9eba5509d244fd166697bcedf43401872aa1436bb24f2b6
+    Runtime fileset: static application runtime files; excludes version.json, build-metadata.js, build-info.json, runtime-manifest.json
+    Cache version: pickleboard-static-v29
+    Build time: 2026-10-18T23:36:06.074Z
+    Environment: not checked
+    Server build: not queried"
+
+
+      11 |   await page.getByRole('button',{name:'Check server build',exact:true}).click();
+      12 |   const text=page.getByLabel('Build diagnostic text');
+    > 13 |   await expect(text).toContainText(`Server build: ${'a'.repeat(40)}`);
+         |                      ^
+      14 |   expect(await page.evaluate(()=>pickleboard.buildDiagnostics.controller.running)).toEqual(before.running);
+      15 |   await page.unroute('**/version.json?diagnostic=*');
+      16 |   await page.route('**/version.json?diagnostic=*',route=>route.abort('internetdisconnected'));
+        at /Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tests/build-diagnostics.spec.mjs:13:22
+
+    Error Context: test-results/build-diagnostics-Help-dia-0820f-erver-changes-or-disappears-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/build-diagnostics-Help-dia-0820f-erver-changes-or-disappears-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/build-diagnostics-Help-dia-0820f-erver-changes-or-disappears-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[2/45] [chromium] › tests/build-diagnostics.spec.mjs:26:1 › the source version endpoint exists and Help remains available in Planner
+[3/45] [chromium] › tests/builder-smart-interface.spec.mjs:19:3 › smart rally builder interface › keeps the title clean and puts routine file work under Manage plays
+[4/45] [chromium] › tests/builder-smart-interface.spec.mjs:30:3 › smart rally builder interface › uses a semantic shot family picker and does not open it with Customize
+[5/45] [chromium] › tests/builder-smart-interface.spec.mjs:42:3 › smart rally builder interface › exposes structural shot actions beside the selected shot
+[6/45] [chromium] › tests/builder-smart-interface.spec.mjs:52:3 › smart rally builder interface › keeps Chrome playback options open while a native select changes
+[7/45] [chromium] › tests/pixel-game-world.spec.mjs:3:1 › modeled garden remains fixed when cameras switch, reuses resources, and disposes every owned asset
+[8/45] [chromium] › tests/rebrand.spec.mjs:3:1 › publishes Pickleboard metadata and visible identity
+[9/45] [chromium] › tests/rebrand.spec.mjs:23:1 › keeps the legacy theme and public API compatible across the rebrand
+[10/45] [chromium] › tests/rebrand.spec.mjs:40:3 › full brand remains readable at 200% text size in 320px viewport
+[11/45] [chromium] › tests/rebrand.spec.mjs:40:3 › full brand remains readable at 200% text size in 390px viewport
+[12/45] [chromium] › tests/rebrand.spec.mjs:40:3 › full brand remains readable at 200% text size in 768px viewport
+[13/45] [chromium] › tests/renderer-buffer.spec.mjs:4:3 › 3D buffer follows the actual court after layout changes (reduce)
+[14/45] [chromium] › tests/renderer-buffer.spec.mjs:4:3 › 3D buffer follows the actual court after layout changes (no-preference)
+[15/45] [chromium] › tests/service-worker.spec.mjs:27:3 › service worker lifecycle › installs the versioned shell and serves a repeat visit offline
+  2) [chromium] › tests/service-worker.spec.mjs:27:3 › service worker lifecycle › installs the versioned shell and serves a repeat visit offline 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      47 |     });
+      48 |     expect(cacheState.names).toContain('pickleboard-static-v25');
+    > 49 |     expect(cacheState.hasShell).toBe(true);
+         |                                 ^
+      50 |     expect(cacheState.hasScript).toBe(true);
+      51 |     expect(cacheState.hasPlayerAssets).toBe(true);
+      52 |
+        at /Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tests/service-worker.spec.mjs:49:33
+
+    Error Context: test-results/service-worker-service-wor-94dff-rves-a-repeat-visit-offline-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/service-worker-service-wor-94dff-rves-a-repeat-visit-offline-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/service-worker-service-wor-94dff-rves-a-repeat-visit-offline-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[16/45] [chromium] › tests/service-worker.spec.mjs:68:3 › service worker lifecycle › upgrades old Pickleboard caches without deleting unrelated origin caches
+  3) [chromium] › tests/service-worker.spec.mjs:68:3 › service worker lifecycle › upgrades old Pickleboard caches without deleting unrelated origin caches 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    Expected: ArrayContaining ["pickleboard-static-v25", "unrelated-application-cache"]
+    Received: ["unrelated-application-cache", "pickleboard-static-v29"]
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      80 |     await page.goto('/index.html?workspace=planner&upgrade=1');
+      81 |     await waitForWorker(page);
+    > 82 |     await expect.poll(() => page.evaluate(() => caches.keys())).toEqual(expect.arrayContaining([
+         |                                                                 ^
+      83 |       'pickleboard-static-v25',
+      84 |       'unrelated-application-cache'
+      85 |     ]));
+        at /Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tests/service-worker.spec.mjs:82:65
+
+    Error Context: test-results/service-worker-service-wor-f1307-ing-unrelated-origin-caches-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/service-worker-service-wor-f1307-ing-unrelated-origin-caches-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/service-worker-service-wor-f1307-ing-unrelated-origin-caches-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[17/45] [chromium] › tests/service-worker.spec.mjs:98:3 › service worker lifecycle › offline navigation uses only the owned shell cache and does not cache unknown pages as the shell
+[18/45] [chromium] › tests/service-worker.spec.mjs:116:3 › service worker lifecycle › refreshes a stale cached application asset from the current release
+  4) [chromium] › tests/service-worker.spec.mjs:116:3 › service worker lifecycle › refreshes a stale cached application asset from the current release 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "class Pickleboard"
+    Received string:    "window.__STALE_PICKLEBOARD_ASSET__ = true;"
+
+      133 |       return (await cache.match('./script.js')).text();
+      134 |     });
+    > 135 |     expect(cachedScript).toContain('class Pickleboard');
+          |                          ^
+      136 |     expect(cachedScript).not.toContain('__STALE_PICKLEBOARD_ASSET__');
+      137 |   });
+      138 |
+        at /Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes/tests/service-worker.spec.mjs:135:26
+
+    Error Context: test-results/service-worker-service-wor-b9b81-et-from-the-current-release-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/service-worker-service-wor-b9b81-et-from-the-current-release-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/service-worker-service-wor-b9b81-et-from-the-current-release-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[19/45] [chromium] › tests/service-worker.spec.mjs:139:3 › service worker lifecycle › returns a successful network asset even when refreshing its cache fails
+[20/45] [chromium] › tests/static-world-cache.spec.mjs:51:1 › static scene cache reuses artwork and invalidates for camera, light and world changes
+[21/45] [chromium] › tests/static-world-cache.spec.mjs:76:1 › cached color and depth preserve moving ball, players and net across cameras
+[22/45] [chromium] › tests/static-world-cache.spec.mjs:83:1 › cache follows backing-buffer resize and disposes its owned resources once
+[23/45] [chromium] › tests/static-world-cache.spec.mjs:118:1 › oversized high-DPR surfaces retain direct rendering and cache again after shrinking
+[24/45] [chromium] › tests/static-world-cache.spec.mjs:146:1 › native DPR3 phones retain MSAA quality with bounded resolved-cache memory
+[25/45] [chromium] › tests/three-d-animation.spec.mjs:35:1 › serve, return, drive, block, and fifth drop resolve actors and synchronize ball launch to contact
+[26/45] [chromium] › tests/three-d-animation.spec.mjs:62:1 › right and left handed forehands animate their dominant physical arm
+[27/45] [chromium] › tests/three-d-animation.spec.mjs:93:1 › striker plants both world axes before contact and non-strikers use locomotion or split-step
+[28/45] [chromium] › tests/three-d-animation.spec.mjs:120:1 › quality guardrails keep mesh anchors finite and contact ball at the visible paddle face
+[29/45] [chromium] › tests/three-d-animation.spec.mjs:145:1 › pause freezes player pose and ball together, rate scales both, and seeking to start restores ready
+[30/45] [chromium] › tests/three-d-animation.spec.mjs:167:1 › 3D chapter seeking uses canonical anchors and reduced motion remains inspectable
+[31/45] [chromium] › tests/three-d-visual.spec.mjs:12:1 › visible athletes have articulated solid anatomy and physical handedness
+[32/45] [chromium] › tests/three-d-visual.spec.mjs:44:1 › court, sagging net, surround, and camera framing preserve authoritative dimensions
+[33/45] [chromium] › tests/three-d-visual.spec.mjs:102:1 › ball keeps its physical radius while enforcing a readable projected diameter
+[34/45] [chromium] › tests/three-d.spec.mjs:18:1 › 3D View initializes regulation scene with players, ball, and handed paddles
+[35/45] [chromium] › tests/three-d.spec.mjs:33:1 › named cameras switch without resetting the Play
+[36/45] [chromium] › tests/three-d.spec.mjs:43:1 › play, pause, playback rate, timeline seek, and proof bounce share one clock
+[37/45] [chromium] › tests/three-d.spec.mjs:70:1 › exit stops render loop, re-entry creates one new loop, and 2D Play remains intact
+[38/45] [chromium] › tests/three-d.spec.mjs:92:1 › 3D viewer fits portrait, landscape, and desktop controls
+[39/45] [chromium] › tests/three-d.spec.mjs:112:1 › reduced motion retains 3D endpoints and camera controls
+[40/45] [chromium] › tests/three-d.spec.mjs:122:1 › offline repeat visit can open the locally cached Three.js viewer
+[41/45] [chromium] › tests/visual-world.spec.mjs:6:1 › camera fitting expands narrow views without changing preset sight lines
+[42/45] [chromium] › tests/visual-world.spec.mjs:88:1 › 3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources
+[43/45] [chromium] › tests/visual-world.spec.mjs:128:1 › camera presets reframe after portrait resize without resetting playback
+[44/45] [chromium] › tests/visual-world.spec.mjs:171:1 › all Plays keep complete actors and trajectories above the HUD at every target viewport

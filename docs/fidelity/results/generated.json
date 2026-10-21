@@ -1,0 +1,33 @@
+{
+  "seeds": [
+    12648430,
+    20260145,
+    1592598566
+  ],
+  "lengths": [
+    1,
+    3,
+    8,
+    30,
+    64
+  ],
+  "validDocuments": 87,
+  "generatedDocuments": 15,
+  "pairwiseDocuments": 72,
+  "validShots": 390,
+  "invalidDocuments": 9,
+  "sampledBoundaryPoints": 4386,
+  "shrink": {
+    "strategy": "shortest-failing-prefix",
+    "originalLength": 8,
+    "shrunkLength": 2,
+    "removedShotIds": [
+      "generated-3",
+      "generated-4",
+      "generated-5",
+      "generated-6",
+      "generated-7",
+      "generated-8"
+    ]
+  }
+}

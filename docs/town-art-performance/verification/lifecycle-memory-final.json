@@ -1,0 +1,46 @@
+{
+  "previewURL": "http://127.0.0.1:4176/index.html",
+  "results": [
+    {
+      "browser": "chromium",
+      "iterations": 30,
+      "forcedContextLosses": 1,
+      "baseline": {
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "loopStarts": 1
+      },
+      "final": {
+        "active": true,
+        "canvasCount": 1,
+        "contextLost": false,
+        "drawingBuffer": [
+          1424,
+          744
+        ],
+        "memory": {
+          "geometries": 39,
+          "textures": 8
+        },
+        "programs": 12,
+        "renderFrames": 4,
+        "renderLoopStarts": 125,
+        "rendererScheduler": null,
+        "guidedScheduler": null,
+        "holdTimer": null,
+        "pendingAnimationFrames": 0,
+        "playing": false
+      },
+      "errors": [],
+      "failures": []
+    }
+  ],
+  "sourceHashes": {
+    "three-d-playback.js": "a9cdf06ec6147428bc87e4792910023f97b5b81ec96b55c6d0af5328b57512bc",
+    "tests/static-world-cache.spec.mjs": "d985202da2b848e6b5d27abf05dbcafb6f0977190dd8b40e22103cd092e68efa",
+    "tools/qa-lifecycle-soak.mjs": "1ff814c20603cc72e1e566d08fe31ec56afe172920c98957acd932552cbe7c1b"
+  },
+  "note": "Tested runtime fix before the root-owned restamp/package. Source hashes identify the implementation; previous version.json runtime digest does not identify this fix."
+}

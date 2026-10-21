@@ -1,0 +1,75 @@
+{
+  "previewURL": "http://127.0.0.1:4184/",
+  "results": [
+    {
+      "browser": "chromium",
+      "iterations": 200,
+      "forcedContextLosses": 8,
+      "baseline": {
+        "memory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "loopStarts": 1
+      },
+      "final": {
+        "active": true,
+        "canvasCount": 1,
+        "contextLost": false,
+        "drawingBuffer": [
+          1428,
+          731
+        ],
+        "memory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "programs": 10,
+        "renderFrames": 2,
+        "renderLoopStarts": 809,
+        "rendererScheduler": null,
+        "guidedScheduler": null,
+        "holdTimer": null,
+        "pendingAnimationFrames": 0,
+        "playing": false
+      },
+      "errors": [],
+      "failures": []
+    },
+    {
+      "browser": "webkit",
+      "iterations": 200,
+      "forcedContextLosses": 8,
+      "baseline": {
+        "memory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "loopStarts": 1
+      },
+      "final": {
+        "active": true,
+        "canvasCount": 1,
+        "contextLost": false,
+        "drawingBuffer": [
+          1428,
+          731
+        ],
+        "memory": {
+          "geometries": 44,
+          "textures": 17
+        },
+        "programs": 10,
+        "renderFrames": 2,
+        "renderLoopStarts": 806,
+        "rendererScheduler": null,
+        "guidedScheduler": null,
+        "holdTimer": null,
+        "pendingAnimationFrames": 0,
+        "playing": false
+      },
+      "errors": [],
+      "failures": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "qa-lifecycle-soak",
+    "code": 0,
+    "seconds": 16.171,
+    "output": "/private/tmp/fidelity-qa-lifecycle-soak.json",
+    "errors": "/private/tmp/fidelity-qa-lifecycle-soak.stderr"
+  },
+  {
+    "name": "qa-transport-soak",
+    "code": 0,
+    "seconds": 21.699,
+    "output": "/private/tmp/fidelity-qa-transport-soak.json",
+    "errors": "/private/tmp/fidelity-qa-transport-soak.stderr"
+  },
+  {
+    "name": "qa-safari-acceptance",
+    "code": 0,
+    "seconds": 11.219,
+    "output": "/private/tmp/fidelity-qa-safari-acceptance.json",
+    "errors": "/private/tmp/fidelity-qa-safari-acceptance.stderr"
+  }
+]

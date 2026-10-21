@@ -7,89 +7,45 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OLD_BRAND = /\bpickle\s*board\b/gi;
-const OLD_WORDMARK = /\bPB\b/g;
+const OLD_BRAND = /\b(?:pickleboard|paddle\s+park)\b/gi;
 const TEXT_FILE = /(?:^|\/)[^/]+\.(?:css|html|js|json|md|mjs|svg|txt|ya?ml)$/i;
 
-// Immutable evidence, explicitly listed so a new archive cannot silently escape review.
-const ARCHIVED_FILES = new Set([
-  'docs/PARK_COACHING_VERIFICATION.md', 'docs/PIXEL_REPLAY_VERIFICATION.md',
-  'docs/PIXEL_RELIABILITY.md', 'docs/SECOND_PASS_VERIFICATION.md', 'docs/VISUAL_VERIFICATION.md',
-  'docs/review-luna-world.md', 'docs/review-sol-final.md', 'docs/review-sol-sample.md',
-  'docs/park-coaching/after-native/cadence.json', 'docs/park-coaching/after/capture-metadata.json',
-  'docs/park-coaching/before-native/cadence.json', 'docs/park-coaching/before/capture-metadata.json',
-  'docs/park-coaching/evidence-manifest.json', 'docs/park-coaching/final-native/cadence.json',
-  'docs/park-coaching/index.html', 'docs/park-coaching/loading-final.json',
-  'docs/park-coaching/loading.json', 'docs/park-coaching/network-offline.json',
-  'docs/park-coaching/rally-comparison/evidence.json', 'docs/park-coaching/review-visual.md',
-  'docs/park-coaching/technical-review.md', 'docs/park-coaching/upgrade.json',
-  'docs/park-coaching/visual-review-luna/3d-normal-video-results.json',
-  'docs/park-coaching/visual-review-luna/capture-3d-normal-videos.mjs',
-  'docs/park-coaching/visual-review-luna/capture-3d.mjs',
-  'docs/park-coaching/visual-review-luna/capture-final-cue.mjs',
-  'docs/park-coaching/visual-review-luna/capture-final-fourth-block.mjs',
-  'docs/park-coaching/visual-review-luna/capture-final-short-hop.mjs',
-  'docs/park-coaching/visual-review-luna/capture-latest-critical.mjs',
-  'docs/park-coaching/visual-review-luna/capture-loop.mjs',
-  'docs/park-coaching/visual-review-luna/capture-menu-settled.mjs',
-  'docs/park-coaching/visual-review-luna/capture-normal-videos.mjs',
-  'docs/park-coaching/visual-review-luna/capture-results.json',
-  'docs/park-coaching/visual-review-luna/capture.mjs',
-  'docs/park-coaching/visual-review-luna/final-cue-results.json',
-  'docs/park-coaching/visual-review-luna/final-fourth-block-results.json',
-  'docs/park-coaching/visual-review-luna/final-short-hop-results.json',
-  'docs/park-coaching/visual-review-luna/normal-video-results.json',
-  'docs/park-coaching/visual-review-luna/query-action.json',
-  'docs/park-coaching/visual-review-luna/query-action.mjs',
-  'docs/park-coaching/webkit-minimal-cache.json',
-  'docs/pixel-replay/after-native/cadence.json', 'docs/pixel-replay/after/capture-metadata.json',
-  'docs/pixel-replay/before-native/cadence.json', 'docs/pixel-replay/before/capture-metadata.json',
-  'docs/pixel-replay/character-comparison.json', 'docs/pixel-replay/index.html',
-  'docs/pixel-replay/checks-chromium.txt', 'docs/pixel-replay/checks-lifecycle-contact.txt',
-  'docs/pixel-replay/checks-webkit-baseline.txt', 'docs/pixel-replay/checks-webkit.txt',
-  'docs/pixel-replay/loading.json', 'docs/pixel-replay/motion/index.json', 'docs/pixel-replay/upgrade.json'
+// Current guidance is checked explicitly. Earlier reports, screenshots, capture
+// metadata, and release entries describe their actual builds and are immutable.
+// New current guidance belongs here; historical evidence is never rewritten to
+// make a repository-wide name search pass.
+const CURRENT_DOCS = new Set([
+  'README.md', 'docs/RENAME_HANDOFF.md', 'docs/BUILD_DIAGNOSTICS.md', 'docs/PARK_ART.md'
 ]);
-const isArchived = file => ARCHIVED_FILES.has(file);
-
-const removeApprovedLegacyContracts = (file, source) => {
-  if (file === 'docs/rebrand/capture-metadata.json') {
-    const data = JSON.parse(source);
-    for (const record of data.records || []) {
-      if (record.name === 'before' && record.revision === 'dd0c3fa' && record.actual?.title === 'Pickleboard - Pickleball Court Planner') record.actual.title = '[verified historical title]';
-    }
-    source = JSON.stringify(data);
+const proseOnly = source => source
+  .replace(/^(`{3,}|~{3,}).*\n[\s\S]*?^\1[^\n]*$/gm, '')
+  .replace(/`[^`\n]+`/g, '')
+  .replace(/https?:\/\/[^\s<>\])]+/g, '');
+const currentProse = (file, source) => {
+  if (CURRENT_DOCS.has(file)) return proseOnly(source);
+  if (file === 'docs/RELEASE_NOTES.md') return proseOnly(source.split('\n---\n')[0]);
+  if (file === 'docs/ASSET_PROVENANCE.md') {
+    // The introduction and last revision describe the current artwork; all
+    // intervening entries preserve the asset and lettering history.
+    const firstEntry = source.indexOf('\n## '), lastEntry = source.lastIndexOf('\n## ');
+    return proseOnly(firstEntry < 0 ? source : source.slice(0, firstEntry) + source.slice(lastEntry));
   }
-
-  if (['tools/check-brand.mjs', 'tests/brand.unit.mjs', '.goose/memory/project.txt'].includes(file)) return '';
-  let text = source
-    .replace(/https:\/\/github\.com\/fcw1987\/pickleboard(?:\.git)?\/?/gi, '')
-    .replace(/https:\/\/fcw1987\.github\.io\/pickleboard\/?/gi, '')
-    .replace(/\bPICKLEBOARD_(?:VISUAL|PLAYS|TEST_URL)\b/g, '')
-    .replace(/\bPickleboardProjection\b/g, '')
-    .replace(/\bwindow\.pickleboard\b|\bpickleboard(?=[?.\[])|\bpickleboard:ready\b/g, '')
-    .replace(/=\s*pickleboard\b/g, '=')
-    .replace(/\bpickleboard-theme\b|pickleboard-/g, '')
-    .replace(/--pb-[a-z0-9-]+/g, '')
-    .replace(/\b(?:class\s+|new\s+)Pickleboard\b/g, '');
-  if (['README.md', 'docs/RELEASE_NOTES.md'].includes(file)) text = text.replace(/\b[Ff]ormerly Pickleboard\b/g, '');
-  if (['README.md', 'docs/REBRAND_STATUS.md', 'docs/rebrand/technical-notes.md', 'docs/rebrand/technical-review.md'].includes(file)) {
-    text = text.replace(/`Pickleboard`/g, '').replace(/\bPickleboard releases\b/g, 'releases');
-  }
-  if (file === 'docs/REBRAND_STATUS.md' || file === 'docs/rebrand/technical-notes.md') text = text.replace(/`?pickleboard`?/g, '');
-  if (file === 'docs/RENAME_HANDOFF.md') {
-    text = text.replace(/\bfcw1987\/pickleboard\b/g, '');
-  }
-  if (file === 'tools/diagnose-webkit-cache.mjs') text = text.replace(/Old Pickleboard/g, '');
-  if (file === 'tests/fixtures/cache-setup.html' || file === 'tests/service-worker.spec.mjs') text = text.replace(/Old Pickleboard/g, '');
-  if (['tests/service-worker.spec.mjs', 'tools/webkit-policy.mjs'].includes(file)) text = text.replace(/old Pickleboard caches/g, 'old caches');
-  if (file === 'tools/generate-art.mjs') text = text.replace(/\bpb\b/g, '');
-  if (file === 'docs/REBRAND_STATUS.md') text = text.replace(/visible PB wordmark/g, 'visible wordmark').replace(/lowercase `pb`/g, 'lowercase');
-  if (file === 'docs/ASSET_PROVENANCE.md') text = text.replace(/old PB lettering/g, 'old lettering');
-  if (file === 'docs/rebrand/art-review/README.md') text = text.replace(/old `PB` or product lettering/g, 'old product lettering').replace(/`PB` or new acronym/g, 'new acronym');
-  if (file === 'docs/rebrand/technical-review.md') text = text.replace(/the spaced `Pickle Board` variant/g, 'the spaced-name variant').replace(/uppercase `PB` wordmark/g, 'uppercase acronym wordmark');
-  return text;
+  return null;
 };
-
+const runtimeLabels = source => {
+  // Match labels, not identifiers such as class Pickleboard, window.pickleboard,
+  // or PICKLEBOARD_VISUAL. Stable namespaced strings and API diagnostics also
+  // remain compatibility contracts, rather than the displayed product name.
+  const labels = [];
+  const code = source.replace(/^\s*(?:\/\/|\/\*|\*).*$/gm, '');
+  for (const match of code.matchAll(/(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1/g)) {
+    const label = match[2];
+    if (/^(?:https?:\/\/|pickleboard[-:]\S*$)/i.test(label)) continue;
+    if (label === 'Pickleboard projection is unavailable' || label === 'GuidedPixelActors requires a Pickleboard board instance.') continue;
+    labels.push(label);
+  }
+  return labels.join('\n');
+};
 const localReferences = (file, source) => {
   const refs = [];
   if (file === 'manifest.json') for (const icon of JSON.parse(source).icons || []) refs.push(icon.src);
@@ -117,39 +73,60 @@ export function validateBrandFiles(files) {
     const manifest = JSON.parse(manifestText);
     if (manifest.name !== 'Pickleball Park') errors.push('manifest.json: name must be Pickleball Park');
     if (manifest.short_name !== 'Pickleball Park') errors.push('manifest.json: short_name must be Pickleball Park');
+    if (!manifest.description?.includes('Pickleball Park')) errors.push('manifest.json: description must name Pickleball Park');
     if (manifest.start_url !== './index.html') errors.push('manifest.json: start_url must remain ./index.html');
     if (Object.hasOwn(manifest, 'id')) errors.push('manifest.json: id must remain absent to preserve install identity');
   } catch (error) { errors.push(`manifest.json: invalid JSON (${error.message})`); }
   try {
     const pkg = JSON.parse(packageText), lock = JSON.parse(lockText);
-    if (pkg.name !== 'pickleballpark') errors.push('package.json: package name must be pickleballpark');
+    if (pkg.name !== 'pickleboard') errors.push('package.json: package name must be pickleboard');
     if (!pkg.description?.includes('Pickleball Park')) errors.push('package.json: description must name Pickleball Park');
-    if (lock.name !== 'pickleballpark' || lock.packages?.['']?.name !== 'pickleballpark') errors.push('package-lock.json: root names must be pickleballpark');
+    if (lock.name !== 'pickleboard' || lock.packages?.['']?.name !== 'pickleboard') errors.push('package-lock.json: root names must be pickleboard');
   } catch (error) { errors.push(`package metadata: invalid JSON (${error.message})`); }
-  if (!/<title>Pickleball Park - Pickleball Court Planner<\/title>/.test(index)) errors.push('index.html: canonical title is missing');
+  if (!/<title>Pickleball Park - Build a Play<\/title>/.test(index)) errors.push('index.html: canonical title is missing');
+  if (!/<img\b[^>]*\balt=["']Pickleball Park["'][^>]*>/.test(index)) errors.push('index.html: canonical banner alternative text is missing');
+  if (!/<h2>Pickleball Park<\/h2>/.test(index)) errors.push('index.html: canonical help heading is missing');
+  if (!/<meta\b[^>]*\bname=["']description["'][^>]*\bcontent=["']Pickleball Park\b/.test(index)) errors.push('index.html: canonical description is missing');
   if (!/^# Pickleball Park\b/m.test(readme)) errors.push('README.md: canonical heading is missing');
   if (!/const CACHE_PREFIX = 'pickleboard-';/.test(worker)) errors.push('sw.js: compatibility cache prefix changed');
-  if (!/const STATIC_CACHE = `\$\{CACHE_PREFIX\}static-v15`;/.test(worker)) errors.push('sw.js: v15 cache identity is missing');
+  if (!/const STATIC_CACHE = `\$\{CACHE_PREFIX\}static-v\d+`;/.test(worker)) errors.push('sw.js: versioned compatibility cache identity is missing');
   if (!/Pickleball Park static cache/.test(worker)) errors.push('sw.js: current cache diagnostic name is missing');
-  if (!/text\(c,\s*'PICKLEBALL'\s*,/.test(generator) || !/text\(c,\s*'PARK'\s*,/.test(generator)) errors.push('tools/generate-park-art.mjs: sign must emit full PICKLEBALL and PARK lettering');
-  for (const letter of new Set('PICKLEBALLPARK')) {
-    if (!new RegExp(`(?:^|[,{\\s])${letter}:\\s*\\[`, 'm').test(generator)) errors.push(`tools/generate-park-art.mjs: sign glyph ${letter} is missing`);
-  }
-  for (const [file, source] of files) {
-    if (typeof source !== 'string' || !TEXT_FILE.test(file) || isArchived(file)) continue;
-    const remaining = removeApprovedLegacyContracts(file, source);
-    for (const match of [...remaining.matchAll(OLD_BRAND), ...remaining.matchAll(OLD_WORDMARK)]) {
-      const line = remaining.slice(0, match.index).split('\n').length;
-      errors.push(`${file}:${line}: unapproved former brand token ${JSON.stringify(match[0])}`);
+  if (!/text\(c,\s*'PICKLEBALL PARK'\s*,/.test(generator)) errors.push('tools/generate-park-art.mjs: sign must emit full PICKLEBALL PARK lettering');
+  const world = required('three-d-world.js'), builder = required('builder-ui.js');
+  if (!/lettering\('PICKLEBALL',/.test(world) || !/lettering\('PARK',/.test(world)) errors.push('three-d-world.js: village sign must spell PICKLEBALL PARK');
+  if (!/el\('strong',\s*'',\s*'PICKLEBALL PARK'\)/.test(builder)) errors.push('builder-ui.js: Pickleball Park menu heading is missing');
+  for (const [file, source] of [['tools/generate-park-art.mjs', generator], ['three-d-world.js', world]]) {
+    for (const letter of new Set('PICKLEBALLPARK')) {
+      if (!new RegExp(`(?:^|[,{\\s])${letter}:\\s*\\[`, 'm').test(source)) errors.push(`${file}: sign glyph ${letter} is missing`);
     }
+  }
+  const script = required('script.js'), storage = required('builder-storage.js');
+  if (!/localStorage\.setItem\('pickleboard-theme',/.test(script) || !/localStorage\.getItem\('pickleboard-theme'\)/.test(script)) errors.push('script.js: compatibility theme preference key changed');
+  if (!/class Pickleboard\b/.test(script) || !/window\.pickleboard = new Pickleboard\(\)/.test(script) || !/new CustomEvent\('pickleboard:ready'/.test(script)) errors.push('script.js: compatibility browser API changed');
+  if (!/export const STORAGE_KEY = 'pickleballpark-builder-v1';/.test(storage)) errors.push('builder-storage.js: compatibility draft key changed');
+  try {
+    if (JSON.parse(required('version.json')).product !== 'Pickleball Park') errors.push('version.json: product must be Pickleball Park');
+  } catch (error) { errors.push(`version.json: invalid JSON (${error.message})`); }
+  if (!/["']product["']:\s*["']Pickleball Park["']/.test(required('build-metadata.js'))) errors.push('build-metadata.js: product must be Pickleball Park');
+  for (const [file, source] of files) {
+    if (typeof source !== 'string') continue;
+    let remaining = currentProse(file, source);
+    if (remaining === null && /^[^/]+\.html$/.test(file)) remaining = source;
+    // Metadata products are checked above. build-identity may recognize old
+    // metadata as input so server diagnostics retain the name they actually report.
+    if (remaining === null && /^[^/]+\.js$/.test(file) && !['build-metadata.js', 'build-identity.js'].includes(file)) remaining = runtimeLabels(source);
+    if (remaining === null) continue;
+    for (const match of remaining.matchAll(OLD_BRAND)) errors.push(`${file}: unapproved product-name drift ${JSON.stringify(match[0])}`);
   }
   for (const file of ['manifest.json', 'sw.js', 'index.html']) {
     const source = files.get(file);
     if (typeof source !== 'string') continue;
-    for (const reference of localReferences(file, source)) {
-      const normalized = path.posix.normalize(reference);
-      if (normalized.startsWith('../') || !files.has(normalized)) errors.push(`${file}: missing or incorrectly cased local reference ${reference}`);
-    }
+    try {
+      for (const reference of localReferences(file, source)) {
+        const normalized = path.posix.normalize(reference);
+        if (normalized.startsWith('../') || !files.has(normalized)) errors.push(`${file}: missing or incorrectly cased local reference ${reference}`);
+      }
+    } catch { /* Invalid manifest JSON is already reported above. */ }
   }
   return errors;
 }

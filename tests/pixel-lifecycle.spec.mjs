@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
     };
     window.__pixelLifecycleListeners = counts;
   });
-  await page.goto('/index.html?pixel-lifecycle=1');
+  await page.goto('/index.html?workspace=planner&pixel-lifecycle=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
 });
 
@@ -73,16 +73,16 @@ test('paused replay renders only on demand and playback owns one scheduler', asy
     scheduler: pickleboard.threeD.renderLoopId
   }))).toEqual({ calls: pausedCalls, scheduler: null });
 
-  await page.locator('#threeDCamera').selectOption('sideline');
+  await page.locator('#threeDCamera').selectOption('sideline',{force:true});
   await settleAnimationFrames(page);
   let demandCalls = await page.evaluate(() => pickleboard.threeD.__testRenderCount);
   expect(demandCalls).toBeGreaterThan(pausedCalls);
 
-  await page.locator('#threeDNext').click();
+  await page.evaluate(() => pickleboard.plays.timelineAction('chapter','return'));
   await settleAnimationFrames(page);
   expect(await page.evaluate(() => pickleboard.threeD.__testRenderCount)).toBeGreaterThan(demandCalls);
   demandCalls = await page.evaluate(() => pickleboard.threeD.__testRenderCount);
-  await page.locator('#threeDPrevious').click();
+  await page.locator('#threeDTimelineMount input[type=range]').fill('0');
   await settleAnimationFrames(page);
   expect(await page.evaluate(() => pickleboard.threeD.__testRenderCount)).toBeGreaterThan(demandCalls);
   demandCalls = await page.evaluate(() => pickleboard.threeD.__testRenderCount);
@@ -167,8 +167,11 @@ test('30 editor to replay cycles preserve state and release owned lifecycle reso
   }));
   expect(final.snapshot).toEqual(baseline.snapshot);
   expect(final.canvases).toBe(0);
+  // The lazily-created 3D timeline remains mounted for the app lifetime so a
+  // later replay can reuse it. Its one resize/visibility listener is stable
+  // across all 30 entries; the renderer-owned listeners are still released.
   expect(final.listeners.resizeAdded - final.listeners.resizeRemoved)
-    .toBe(baseline.listeners.resizeAdded - baseline.listeners.resizeRemoved);
+    .toBe(baseline.listeners.resizeAdded - baseline.listeners.resizeRemoved + 1);
   expect(final.listeners.visibilityAdded - final.listeners.visibilityRemoved)
-    .toBe(baseline.listeners.visibilityAdded - baseline.listeners.visibilityRemoved);
+    .toBe(baseline.listeners.visibilityAdded - baseline.listeners.visibilityRemoved + 1);
 });

@@ -1,15 +1,15 @@
-import { populateParkSVG } from './park-scene.js';
+import { populateParkSVG, updateParkSVGProjection } from './park-scene.js';
+import { PARK_LAYOUT } from './park-layout.js';
 import './guided-plays.js';
 import { COURT_LINES } from './court-geometry.js';
+import { mountBuildDiagnostics } from './build-diagnostics-ui.js';
+import { playerLabel } from './player-labels.js';
 // Pickleball Park - Interactive Pickleball Coaching and Strategy
 
 // Register Service Worker for PWA support
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-                console.log('Service Worker registered with scope:', registration.scope);
-            })
             .catch(error => {
                 console.error('Service Worker registration failed:', error);
             });
@@ -19,7 +19,7 @@ class Pickleboard {
     constructor() {
         this.court = document.getElementById('court');
         this.projection = window.PickleboardProjection;
-        if (!this.projection) throw new Error('Pickleball Park projection is unavailable');
+        if (!this.projection) throw new Error('Pickleboard projection is unavailable');
         this.actorLayer = document.getElementById('actorLayer');
         this.tracerLayer = document.getElementById('tracerLayer');
         const touchLayer = document.getElementById('touchLayer');
@@ -84,7 +84,8 @@ class Pickleboard {
             elementStartY: 0,
             touchStartClientX: 0,
             touchStartClientY: 0,
-            touchMoved: false
+            touchMoved: false,
+            touchIdentifier: null
         };
         this.touchTapState = {
             lastTokenId: null,
@@ -110,6 +111,7 @@ class Pickleboard {
         this.drawingMode = false;
         this.isDrawing = false;
         this.currentPath = null;
+        this.drawingTouchIdentifier = null;
         this.drawingPaths = [];
         this.drawingState = {
             startX: 0,
@@ -121,6 +123,7 @@ class Pickleboard {
     }
     
     init() {
+        this.projection.configureViewport(innerWidth, innerHeight);
         this.setupProjectedScene();
         this.setupEventListeners();
         this.setupAdaptiveTouchTargets();
@@ -128,10 +131,11 @@ class Pickleboard {
         this.loadTheme();
         this.setGameMode('doubles'); // Start with doubles
         this.initializeGuidedPlays();
+        this.setupResponsiveProjection();
     }
 
     setupProjectedScene() {
-        const viewBox = this.projection.COURT_VIEWBOX;
+        const viewBox = this.presentationViewBox || this.projection.COURT_VIEWBOX;
         this.court.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
         const groundPlane = document.getElementById('groundPlane');
         if (groundPlane) groundPlane.setAttribute('transform', this.projection.svgMatrix());
@@ -166,6 +170,60 @@ class Pickleboard {
             net.setAttribute('transform', `translate(0 ${netGround.y})`);
             net.dataset.depth = String(netGround.y);
         }
+        this.court.closest('.park-stage')?.setAttribute('data-projection', this.projection.name);
+        this.updateParkControls();
+    }
+
+    applyProjection() {
+        const viewBox = this.presentationViewBox || this.projection.COURT_VIEWBOX;
+        this.court.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+        document.getElementById('groundPlane')?.setAttribute('transform', this.projection.svgMatrix());
+        updateParkSVGProjection(this.court);
+        const corners=[[-8,-8],[28,-8],[28,52],[-8,52]].map(([x,y])=>this.projection.courtToView(x,y));
+        const points=values=>values.map(point=>`${point.x},${point.y}`).join(' ');
+        document.getElementById('courtCastShadow')?.setAttribute('points',points(corners.map(point=>({x:point.x+1,y:point.y+1.1}))));
+        document.getElementById('courtSlabEdge')?.setAttribute('points',points([corners[3],corners[2],{x:corners[2].x,y:corners[2].y+1.1},{x:corners[3].x,y:corners[3].y+1.1}]));
+        const net=document.getElementById('netActor'), netGround=this.projection.courtToView(0,22);
+        if(net){net.setAttribute('transform',`translate(0 ${netGround.y})`);net.dataset.depth=String(netGround.y);}
+        Object.values(this.tokens).forEach(token=>this.renderTokenPosition(token));
+        this.court.closest('.park-stage')?.setAttribute('data-projection',this.projection.name);
+        requestAnimationFrame(()=>{this.updateParkControls();this.updateTouchTargetSizes();});
+    }
+
+    updateParkControls() {
+        const stage=this.court.closest('.park-stage'); if(!stage)return;
+        const rect=stage.getBoundingClientRect(), matrix=this.court.getScreenCTM();
+        if(!matrix)return;
+        const courtCorners=[[0,0],[20,0],[20,44],[0,44]].map(([x,y])=>{const view=this.projection.courtToView(x,y);return new DOMPoint(view.x,view.y).matrixTransform(matrix);});
+        const edgeX=(from,to,y)=>from.x+(to.x-from.x)*(y-from.y)/(to.y-from.y);
+        const place=(element,anchor,padding=4,side=null)=>{if(!element||!anchor)return;const view=this.projection.courtToView(anchor);
+            const screen=new DOMPoint(view.x,view.y).matrixTransform(matrix);
+            const halfWidth=element.offsetWidth/2,halfHeight=element.offsetHeight/2;
+            let x=screen.x,y=screen.y;
+            if(side==='left')x=Math.min(x,Math.min(edgeX(courtCorners[0],courtCorners[3],y-halfHeight),edgeX(courtCorners[0],courtCorners[3],y+halfHeight))-halfWidth-padding);
+            if(side==='right')x=Math.max(x,Math.max(edgeX(courtCorners[1],courtCorners[2],y-halfHeight),edgeX(courtCorners[1],courtCorners[2],y+halfHeight))+halfWidth+padding);
+            const localX=Math.max(halfWidth+padding-rect.left,Math.min(innerWidth-rect.left-halfWidth-padding,x-rect.left));
+            const localY=Math.max(halfHeight+padding-rect.top,Math.min(innerHeight-rect.top-halfHeight-padding,y-rect.top));
+            element.style.left=`${localX}px`; element.style.top=`${localY}px`;};
+        place(this.menuToggle,PARK_LAYOUT.controls.menu,4,'left'); place(this.infoToggle,PARK_LAYOUT.controls.help,4,'right');
+        const banner=stage.querySelector('.park-banner'),bannerAnchor=PARK_LAYOUT.controls.banner;
+        if(banner&&bannerAnchor){const view=this.projection.courtToView(bannerAnchor),screen=new DOMPoint(view.x,view.y).matrixTransform(matrix),scale=Math.hypot(matrix.a,matrix.b);
+            banner.style.width=`${Math.max(112,Math.min(280,14*scale))}px`;
+            const halfWidth=banner.offsetWidth/2,height=banner.offsetHeight;
+            banner.style.left=`${Math.max(halfWidth+4-rect.left,Math.min(innerWidth-rect.left-halfWidth-4,screen.x-rect.left))}px`;
+            banner.style.top=`${Math.max(height+8-rect.top,Math.min(innerHeight-rect.top-4,screen.y-rect.top))}px`;}
+        this.court.querySelector('[data-landmark-id="park-banner"]')?.setAttribute('visibility','hidden');
+    }
+
+    setupResponsiveProjection() {
+        let frame=null; const update=()=>{frame=null;if(this.dragState.isDragging||this.isDrawing){this.projectionResizePending=true;return;}
+            const viewport=this.presentationViewBox?this.court.getBoundingClientRect():{width:innerWidth,height:innerHeight};const changed=this.projection.configureViewport(viewport.width,viewport.height);if(changed)this.applyProjection();else this.updateParkControls();};
+        this.scheduleProjectionUpdate=()=>{if(frame===null)frame=requestAnimationFrame(update);};
+        window.addEventListener('resize',this.scheduleProjectionUpdate);
+        window.addEventListener('load',this.scheduleProjectionUpdate,{once:true});
+        const observer=new ResizeObserver(this.scheduleProjectionUpdate);
+        for(const element of [this.court.closest('.park-stage'),this.menuToggle,this.infoToggle,this.court.closest('.park-stage')?.querySelector('.park-banner')]) if(element)observer.observe(element);
+        this.projectionResizeObserver=observer;
     }
 
     initializeGuidedPlays() {
@@ -394,7 +452,8 @@ class Pickleboard {
         const position = `${Number(token.x.toFixed(1))}, ${Number(token.y.toFixed(1))} feet`;
         if (token.type === 'player') {
             const teamColor = this.getPlayerTeamColor(token);
-            const playerName = token.id.replace('player', 'Player ');
+            const authored = window.playBuilder?.workspace === 'builder' ? window.playBuilder.document : null;
+            const playerName = authored ? playerLabel(token.id, authored) : token.id.replace('player', 'Player ');
             token.touchElement.setAttribute(
                 'aria-label',
                 `${playerName}, ${teamColor} team, ${token.handedness}-handed, at ${position}. Arrow keys move; Enter or Space switches handedness.`
@@ -450,6 +509,27 @@ class Pickleboard {
     startDrag(event, token) {
         // Don't start dragging in drawing or guided play mode.
         if (this.drawingMode || this.playInteractionLocked) return;
+
+        if (!event.touches && event.button !== undefined && event.button !== 0) {
+            if (this.dragState.isDragging) this.endDrag();
+            event.preventDefault();
+            return;
+        }
+        if (this.dragState.isDragging) {
+            this.cancelPlayerTouch();
+            this.endDrag();
+            event.preventDefault();
+            return;
+        }
+
+        // One touch owns a Planner drag. A second contact cancels the current
+        // operation instead of silently transferring authority to another token.
+        if (event.touches?.length > 1) {
+            this.cancelPlayerTouch();
+            this.endDrag();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         
@@ -466,8 +546,11 @@ class Pickleboard {
         this.dragState.elementStartY = token.y;
         this.dragState.touchMoved = false;
         if (event.touches) {
+            this.dragState.touchIdentifier = event.changedTouches?.[0]?.identifier ?? event.touches[0]?.identifier ?? null;
             this.dragState.touchStartClientX = coords.x;
             this.dragState.touchStartClientY = coords.y;
+        } else {
+            this.dragState.touchIdentifier = null;
         }
         
         // Add visual feedback
@@ -479,6 +562,13 @@ class Pickleboard {
     
     drag(event) {
         if (!this.dragState.isDragging || !this.dragState.dragElement) return;
+
+        if (event.touches?.length > 1) {
+            this.cancelPlayerTouch();
+            this.endDrag();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         
@@ -524,9 +614,11 @@ class Pickleboard {
         // Reset drag state
         this.dragState.isDragging = false;
         this.dragState.dragElement = null;
+        this.dragState.touchIdentifier = null;
         
         // Restore text selection
         document.body.style.userSelect = '';
+        if(this.projectionResizePending){this.projectionResizePending=false;this.scheduleProjectionUpdate?.();}
     }
 
     handlePlayerTouchEnd(event, token) {
@@ -563,7 +655,12 @@ class Pickleboard {
     
     getEventCoords(event) {
         if (event.touches && event.touches[0]) {
-            return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+            const touchIdentifier = this.dragState.touchIdentifier ?? this.drawingTouchIdentifier;
+            const ownedTouch = touchIdentifier == null
+                ? event.touches[0]
+                : [...event.touches].find(touch => touch.identifier === touchIdentifier);
+            const touch = ownedTouch || event.changedTouches?.[0] || event.touches[0];
+            return { x: touch.clientX, y: touch.clientY };
         } else {
             return { x: event.clientX, y: event.clientY };
         }
@@ -717,7 +814,6 @@ class Pickleboard {
             }
         }
         
-        console.log(`Game mode set to: ${mode}`);
         return true;
     }
     
@@ -768,7 +864,6 @@ class Pickleboard {
     resetPositions() {
         if (this.playInteractionLocked) return false;
         this.setGameMode(this.currentGameMode);
-        console.log('Positions reset');
     }
     
     captureBoardState() {
@@ -866,7 +961,6 @@ class Pickleboard {
         // Save theme preference
         localStorage.setItem('pickleboard-theme', newTheme);
         
-        console.log(`Theme switched to: ${newTheme}`);
     }
     
     loadTheme() {
@@ -877,7 +971,6 @@ class Pickleboard {
         document.body.setAttribute('data-theme', theme);
         this.updateThemeControl(theme);
         
-        console.log(`Theme loaded: ${theme}`);
     }
     
     // Public API for external interaction
@@ -907,7 +1000,6 @@ class Pickleboard {
     shouldCreateTracer(token, newX, newY) {
         // Don't create tracers during initialization or reset
         if (!this.dragState.isDragging) {
-            console.log('No tracer: not dragging');
             return false;
         }
         
@@ -916,12 +1008,10 @@ class Pickleboard {
         const dy = newY - token.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        console.log(`Distance moved: ${distance}, min required: ${this.tracerSettings.minDistance}`);
         return distance >= this.tracerSettings.minDistance;
     }
     
     createTracerDot(token, x, y) {
-        console.log('Creating tracer dot at:', x, y, 'for token:', token.type);
         
         // Limit number of tracer dots for performance
         if (this.tracerDots.length >= this.tracerSettings.maxTracers) {
@@ -959,12 +1049,10 @@ class Pickleboard {
             }
         }
         
-        console.log('Tracer element classes:', tracerElement.classList.toString());
         
         // Ground marks share the same projection as lines, drawings, and Play paths.
         (this.tracerLayer || this.court).appendChild(tracerElement);
         
-        console.log('Tracer element added to DOM');
         
         // Create tracer object
         const tracer = {
@@ -1014,7 +1102,6 @@ class Pickleboard {
         // Clear the array
         this.tracerDots = [];
         
-        console.log('All tracer dots cleared');
     }
     
     // Drawing mode methods
@@ -1069,9 +1156,16 @@ class Pickleboard {
     
     startDrawing(event) {
         if (!this.drawingMode || this.playInteractionLocked) return;
+
+        if (this.isDrawing || event.touches?.length > 1) {
+            if (this.isDrawing) this.endDrawing();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         this.isDrawing = true;
+        this.drawingTouchIdentifier = event.changedTouches?.[0]?.identifier ?? event.touches?.[0]?.identifier ?? null;
         
         const coords = this.getEventCoords(event);
         const svgCoords = this.screenToSVG(coords.x, coords.y);
@@ -1090,6 +1184,12 @@ class Pickleboard {
     
     draw(event) {
         if (!this.isDrawing || !this.drawingMode || !this.currentPath) return;
+
+        if (event.touches?.length > 1) {
+            this.endDrawing();
+            event.preventDefault();
+            return;
+        }
         
         event.preventDefault();
         
@@ -1103,6 +1203,12 @@ class Pickleboard {
     
     endDrawing(event) {
         if (!this.isDrawing) return;
+
+        if (event?.touches && this.drawingTouchIdentifier != null) {
+            const ownerEnded=[...(event.changedTouches || [])].some(touch=>touch.identifier===this.drawingTouchIdentifier);
+            const ownerRemains=[...event.touches].some(touch=>touch.identifier===this.drawingTouchIdentifier);
+            if (!ownerEnded && ownerRemains) return;
+        }
         
         this.isDrawing = false;
         
@@ -1115,14 +1221,15 @@ class Pickleboard {
         }
         
         this.currentPath = null;
+        this.drawingTouchIdentifier = null;
         this.drawingState.pathData = [];
+        if(this.projectionResizePending){this.projectionResizePending=false;this.scheduleProjectionUpdate?.();}
     }
     
     undoLastStroke() {
         if (this.drawingPaths.length > 0) {
             const lastPath = this.drawingPaths.pop();
             lastPath.remove();
-            console.log('Undid last drawing stroke');
         }
     }
     
@@ -1136,7 +1243,6 @@ class Pickleboard {
             this.drawingLayer.removeChild(this.drawingLayer.firstChild);
         }
         
-        console.log('All drawings cleared');
     }
     
     // New UI methods
@@ -1189,8 +1295,9 @@ class Pickleboard {
 
     getDialogFocusables(dialog) {
         return [...dialog.querySelectorAll(
-            'button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
-        )].filter(element => !element.hidden && getComputedStyle(element).visibility !== 'hidden' && element.getClientRects().length > 0);
+            'button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, a[href], [tabindex]:not([tabindex="-1"])'
+        )].filter(element => !element.hidden && getComputedStyle(element).visibility !== 'hidden' &&
+            element.getClientRects().length > 0 && element.checkVisibility?.() !== false);
     }
 
     focusDialogWhenVisible(dialog, preferredElement) {
@@ -1225,16 +1332,14 @@ class Pickleboard {
             event.preventDefault();
             return;
         }
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        const focusIsInside = dialog.contains(document.activeElement);
-        if (event.shiftKey && (!focusIsInside || document.activeElement === first)) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && (!focusIsInside || document.activeElement === last)) {
-            event.preventDefault();
-            first.focus();
-        }
+        // Own the complete modal Tab order: Safari may skip buttons in its native
+        // keyboard navigation, and collapsed details can still report rectangles.
+        const currentIndex = focusables.indexOf(document.activeElement);
+        const nextIndex = currentIndex < 0
+            ? (event.shiftKey ? focusables.length - 1 : 0)
+            : (currentIndex + (event.shiftKey ? -1 : 1) + focusables.length) % focusables.length;
+        event.preventDefault();
+        focusables[nextIndex].focus();
     }
     
     toggleMenu() {
@@ -1264,12 +1369,13 @@ class Pickleboard {
         if (wasActive && restoreFocus) this.menuToggle.focus({ preventScroll: true });
     }
     
-    openInfoModal() {
+    openInfoModal({ returnFocus = this.infoToggle, initialFocus = this.infoClose } = {}) {
+        this.infoReturnFocus = returnFocus;
         if (this.menuOverlay.classList.contains('active')) this.closeMenu({ restoreFocus: false });
         this.infoModal.classList.add('active');
         this.infoToggle.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        this.focusDialogWhenVisible(this.infoModal, this.infoClose);
+        this.focusDialogWhenVisible(this.infoModal, initialFocus);
     }
     
     closeInfoModal({ restoreFocus = true } = {}) {
@@ -1277,7 +1383,10 @@ class Pickleboard {
         this.infoModal.classList.remove('active');
         this.infoToggle.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = ''; // Restore scrolling
-        if (wasActive && restoreFocus) this.infoToggle.focus({ preventScroll: true });
+        if (wasActive && restoreFocus) {
+            const target = this.infoReturnFocus?.isConnected && this.infoReturnFocus !== document.body && this.infoReturnFocus !== document.documentElement && !this.infoModal.contains(this.infoReturnFocus) && this.infoReturnFocus.getClientRects().length ? this.infoReturnFocus : this.infoToggle;
+            target.focus({ preventScroll: true });
+        }
     }
 }
 
@@ -1285,9 +1394,9 @@ class Pickleboard {
 document.addEventListener('DOMContentLoaded', () => {
     // Create global instance
     window.pickleboard = new Pickleboard();
+    window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
     window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
     
-    console.log('Pickleball Park initialized successfully');
 });
 
 // Handle browser back/forward navigation
@@ -1300,10 +1409,10 @@ window.addEventListener('popstate', () => {
 // Handle page visibility changes (pause/resume)
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        // Page is hidden - could pause animations if any
-        console.log('Page hidden');
-    } else {
-        // Page is visible - could resume animations if any
-        console.log('Page visible');
+        // A hidden page cannot keep an input gesture owner. Finish the last
+        // coherent Planner position/stroke before browser events are suspended.
+        window.pickleboard?.endDrag();
+        if (window.pickleboard?.isDrawing) window.pickleboard.endDrawing();
+        window.pickleboard?.clearPendingTouchTap();
     }
 });

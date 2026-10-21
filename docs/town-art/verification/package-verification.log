@@ -1,0 +1,2202 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": null,
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "c5a685e3-a625-4a0c-8954-1caea5fdbf57",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "4816210",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "beta-starting-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "beta-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "stabilized-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "13758356d65f154b19ca631e6ecb9bdb8afd875b",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "fidelity-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "1d2e4cd67330d2efc444fd99868c22442222465c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "chromium",
+    "mode": "public-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "45faaf2c-6186-4b6a-8428-edb59a9e771a",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "smart-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "564c613b-772a-44f2-9bbd-d82ae9d9069a",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "mode": "art-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "a0375d1c-a8de-4c65-8292-5a2294ae9e26",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "fresh",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": null,
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "25dbb7b2-3d4d-426d-b9de-38ab7122b6ae",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "f1308015d9e3848909e35d3919735b265e71fb7f",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "builder-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "d9b75d71b3836613acfd5d5c33e2d228b789ec4c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "usability-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "4816210",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "iphone-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "d0d5376a4a76e44a3ce381c83f61e3354bcc2241",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "beta-starting-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "d66934838a742f126cf9650b2459a5420ea917b8",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "beta-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "fe7a9abc4aefb3aa1abc87cb98fcd61f5ad9e048",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "stabilized-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "13758356d65f154b19ca631e6ecb9bdb8afd875b",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "fidelity-interim-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "1d2e4cd67330d2efc444fd99868c22442222465c",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": null
+  },
+  {
+    "browser": "webkit",
+    "mode": "public-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "3f17ad15-96f6-4db4-a008-00fb38b69817",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "smart-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "fc46c60f83ed8b1a2bd4ee186e05f7ab55e3a717",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "da9f5a36-cef9-49dc-b331-52715c6387ca",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "mode": "art-upgrade",
+    "status": "PASS",
+    "runtimeHashes": 110,
+    "cacheEntries": 108,
+    "offlineCustomReload": true,
+    "offlineLessons": 8,
+    "offlineMethod": "owned server stopped",
+    "source": "4810efd0559a6a0ad5e000def6a4ebc6a4a28d90",
+    "previousPublicSource": "08401fca5150f1ccfcb482a50953b5bbd340fe6a",
+    "identity": {
+      "loaded": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "server": {
+        "schemaVersion": 1,
+        "product": "Pickleball Park",
+        "status": "local",
+        "developmentStatus": "stamped local build",
+        "sourceRevision": "b65504187f8e9e741908dd07690db0b79158a960",
+        "sourceBranch": "feature/town-court-art",
+        "sourceState": "clean",
+        "sourceRevisionVerified": true,
+        "runtimeMatchesSource": true,
+        "packageRevision": null,
+        "evidenceRevision": null,
+        "packageVerified": false,
+        "runtimeSha256": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeDigest": "88a8f82f42eb98c0fbd4e7ef3b6bd7c97790d13091ca04d3c76168b9a552a748",
+        "runtimeFileset": {
+          "algorithm": "sha256",
+          "include": "static application runtime files",
+          "exclusions": [
+            "version.json",
+            "build-metadata.js",
+            "build-info.json",
+            "runtime-manifest.json"
+          ]
+        },
+        "cacheVersion": "pickleboard-static-v26",
+        "buildTime": "2026-10-18T00:57:03.955Z"
+      },
+      "queried": {
+        "status": "complete",
+        "cache": "no-store",
+        "path": "./version.json"
+      }
+    },
+    "offlineIdentity": {
+      "status": "unavailable",
+      "loadedRetained": true
+    },
+    "smartRally": {
+      "adds": {
+        "shots": 5,
+        "valid": 5,
+        "ids": [
+          "smart-shot-1",
+          "smart-shot-2",
+          "smart-shot-3",
+          "smart-shot-4",
+          "smart-shot-5"
+        ],
+        "playing": false
+      },
+      "random": {
+        "id": "c7bca7e2-7dea-4048-b484-b342392208b3",
+        "shots": 99,
+        "valid": 99,
+        "chapters": 99,
+        "generation": {
+          "mode": "random",
+          "generatorVersion": "smart-rally-v1",
+          "seed": 12648430,
+          "requestedHits": 99
+        },
+        "retainedOldDraft": true,
+        "oldBeforeSmart": true,
+        "playing": false
+      },
+      "coach": {
+        "protectedKept": true,
+        "optionsShown": true,
+        "fixed": true,
+        "undoRestored": true
+      },
+      "restoredSavedLibrary": true
+    }
+  }
+]

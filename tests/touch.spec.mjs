@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
 
 async function openApp(page) {
-  await page.goto('/index.html?touch-e2e=1');
+  await page.goto('/index.html?workspace=planner&touch-e2e=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard))).toBe(true);
 }
 

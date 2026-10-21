@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('editor does not execute Three.js until 3D is requested', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   expect(await page.evaluate(() => performance.getEntriesByType('resource').some(entry => /vendor\/three/.test(entry.name)))).toBe(false);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
@@ -14,7 +14,7 @@ test('failed 3D module loading leaves the original board recoverable', async ({ 
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   await page.route('**/three-d-playback.js', route => route.abort());
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.setTokenPosition('ball', 7, 12));
   const before = await page.evaluate(() => pickleboard.captureBoardState());
@@ -34,7 +34,7 @@ test('leaving a Play while 3D loads cannot open a stale viewer', async ({ browse
   let release;
   const gate = new Promise(resolve => { release = resolve; });
   await page.route('**/three-d-playback.js', async route => { await gate; await route.continue(); });
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
   await page.locator('#play3dView').click();
@@ -50,7 +50,7 @@ test('leaving a Play while 3D loads cannot open a stale viewer', async ({ browse
 for (const size of [{width:320,height:568},{width:390,height:844},{width:844,height:390},{width:1440,height:900}]) {
   test(`court action stays clear of replay controls at ${size.width}x${size.height}`, async ({ page }) => {
     await page.setViewportSize(size);
-    await page.goto('/');
+    await page.goto('/?workspace=planner');
     await page.waitForFunction(() => window.pickleboard?.plays);
     await page.evaluate(() => pickleboard.plays.load('fifth-shot-drop'));
     const layout = await page.evaluate(() => {
@@ -72,7 +72,7 @@ test('WebGL allocation failure cleans up the viewer and preserves coaching state
       return getContext.call(this, type, ...args);
     };
   });
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   const before = await page.evaluate(() => pickleboard.captureBoardState());
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
@@ -92,7 +92,7 @@ test('a failed module request can be retried without reloading the board', async
   const page = await context.newPage();
   let requests = 0;
   await page.route('**/three-d-playback.js*', route => ++requests === 1 ? route.abort() : route.continue());
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
   await page.locator('#play3dView').click();
@@ -109,7 +109,7 @@ test('reselecting the same Play cannot revive a cancelled 3D request', async ({ 
   let release;
   const gate = new Promise(resolve => { release = resolve; });
   await page.route('**/three-d-playback.js', async route => { await gate; await route.continue(); });
-  await page.goto('/');
+  await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
   await page.locator('#play3dView').click();

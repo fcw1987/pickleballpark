@@ -46,7 +46,7 @@ function frameName(sample, metadata) {
 
 export class GuidedPixelActors {
     constructor(board) {
-        if (!board?.tokens) throw new TypeError('GuidedPixelActors requires a Pickleball Park board instance.');
+        if (!board?.tokens) throw new TypeError('GuidedPixelActors requires a Pickleboard board instance.');
         this.board = board;
         this.assets = null;
         this.loaded = false;

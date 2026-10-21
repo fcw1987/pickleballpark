@@ -1,0 +1,8 @@
+{
+  "durationSeconds": 19.48,
+  "captureFramesPerSecond": 25,
+  "sampledEverySeconds": 0.5,
+  "frames": 39,
+  "sheets": 7,
+  "method": "Installed Playwright FFmpeg decoding; capture rate is not runtime FPS."
+}

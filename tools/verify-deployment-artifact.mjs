@@ -1,63 +1,25 @@
-import { createHash } from 'node:crypto';
-import { lstatSync, readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRuntimePackage, PUBLICATION_METADATA, regularFilePaths, sha256, validateRuntimeDigest } from './runtime-package.mjs';
 
-const APPROVED_SOURCE = 'f89cdfd6b7a0a9cbf4e1662c192634d6b794460f';
-const APPROVED_MANIFEST_SHA256 = '07d70d8216a078b8c83b2d0f03810f76b76a95b9ea2d8b68a94c3fd02e284cc5';
-const METADATA_FILES = ['build-info.json', 'runtime-manifest.json'];
-const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
-const safePath = (file) => typeof file === 'string' && file.length > 0 && !path.posix.isAbsolute(file) && !file.split('/').includes('..') && !file.includes('\\');
-
-const walkRegularFiles = (root, relative = '') => {
-  const directory = path.join(root, relative);
-  return readdirSync(directory).flatMap((name) => {
-    const file = relative ? `${relative}/${name}` : name;
-    const status = lstatSync(path.join(root, file));
-    if (status.isSymbolicLink()) throw new Error(`Artifact contains a symbolic link: ${file}`);
-    if (status.isDirectory()) return walkRegularFiles(root, file);
-    if (!status.isFile()) throw new Error(`Artifact contains a non-regular file: ${file}`);
-    return file;
-  });
-};
-
-export function validateDeploymentArtifact(root, expectedRevision) {
-  if (!/^[0-9a-f]{40}$/.test(expectedRevision ?? '')) throw new Error('Expected revision must be a full lowercase commit SHA');
-  const status = lstatSync(root);
-  if (status.isSymbolicLink() || !status.isDirectory()) throw new Error('Artifact root must be a real directory');
-  const actualPaths = walkRegularFiles(root).sort();
-
+// Derive expected bytes from trusted source, not artifact-provided hashes.
+export function validateDeploymentArtifact(root, expectedRevision, { sourceRoot = '.', requireCommittedSource = false } = {}) {
+  const expected = createRuntimePackage({ sourceRoot, revision: expectedRevision, requireCommittedSource, verifyVendor: false });
+  const actualPaths = regularFilePaths(root).sort();
+  const expectedPaths = [...expected.files.keys(), ...PUBLICATION_METADATA].sort();
+  if (JSON.stringify(actualPaths) !== JSON.stringify(expectedPaths)) throw Error('Artifact path set mismatch');
   const manifestBytes = readFileSync(path.join(root, 'runtime-manifest.json'));
-  if (sha256(manifestBytes) !== APPROVED_MANIFEST_SHA256) throw new Error('Unapproved runtime manifest digest');
-  const manifest = JSON.parse(manifestBytes);
-  const info = JSON.parse(readFileSync(path.join(root, 'build-info.json')));
-  if (manifest.approvedSource !== APPROVED_SOURCE || info.approvedSource !== APPROVED_SOURCE) throw new Error('Approved source mismatch');
-  if (info.product !== 'Pickleball Park') throw new Error('Artifact product mismatch');
-  if (info.revision !== expectedRevision) throw new Error('Artifact revision mismatch');
-  if (info.runtimeManifestSha256 !== APPROVED_MANIFEST_SHA256) throw new Error('Build metadata manifest digest mismatch');
-  if (JSON.stringify(info.publicationMetadata) !== JSON.stringify(METADATA_FILES)) throw new Error('Publication metadata set mismatch');
-  if (!Array.isArray(manifest.files) || manifest.files.length !== 81) throw new Error('Runtime manifest must contain exactly 81 files');
-
-  const runtimePaths = manifest.files.map((file) => file.path);
-  if (runtimePaths.some((file) => !safePath(file))) throw new Error('Runtime manifest contains an unsafe path');
-  if (new Set(runtimePaths).size !== runtimePaths.length) throw new Error('Runtime manifest contains duplicate paths');
-  const expectedPaths = [...runtimePaths, ...METADATA_FILES].sort();
-  if (JSON.stringify(actualPaths) !== JSON.stringify(expectedPaths)) throw new Error('Artifact path set mismatch');
-
-  let runtimeBytes = 0;
-  for (const file of manifest.files) {
-    if (!Number.isSafeInteger(file.bytes) || file.bytes < 0 || !/^[0-9a-f]{64}$/.test(file.sha256 ?? '')) throw new Error(`Invalid runtime metadata: ${file.path}`);
-    const bytes = readFileSync(path.join(root, file.path));
-    if (bytes.length !== file.bytes || sha256(bytes) !== file.sha256) throw new Error(`Runtime file mismatch: ${file.path}`);
-    runtimeBytes += bytes.length;
-  }
-  if (info.runtimeFiles !== manifest.files.length) throw new Error('Runtime file count mismatch');
-  if (info.runtimeBytes !== runtimeBytes) throw new Error('Runtime byte count mismatch');
-  return { revision: expectedRevision, runtimeFiles: manifest.files.length, runtimeBytes, manifestSha256: APPROVED_MANIFEST_SHA256 };
+  if (!manifestBytes.equals(expected.manifestBytes)) throw Error('Runtime manifest differs from trusted source commit');
+  const infoBytes = readFileSync(path.join(root, 'build-info.json'));
+  if (!infoBytes.equals(expected.infoBytes)) throw Error('Build metadata differs from trusted source commit');
+  for (const [file, bytes] of expected.files) if (!readFileSync(path.join(root, file)).equals(bytes)) throw Error(`Runtime file mismatch: ${file}`);
+  const version = JSON.parse(readFileSync(path.join(root, 'version.json')));
+  if (!validateRuntimeDigest(expected.manifest, version)) throw Error('Version metadata runtime digest mismatch');
+  return { revision: expectedRevision, runtimeFiles: expected.info.runtimeFiles, runtimeBytes: expected.info.runtimeBytes, manifestSha256: sha256(manifestBytes) };
 }
-
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const [, , root, revision] = process.argv;
-  if (!root || !revision) throw new Error('Usage: node tools/verify-deployment-artifact.mjs <artifact-root> <commit-sha>');
-  console.log(JSON.stringify(validateDeploymentArtifact(root, revision)));
+  if (!root || !revision) throw Error('Usage: node tools/verify-deployment-artifact.mjs <artifact-root> <commit-sha> [--require-clean]');
+  console.log(JSON.stringify(validateDeploymentArtifact(root, revision, { requireCommittedSource: process.argv.includes('--require-clean') })));
 }

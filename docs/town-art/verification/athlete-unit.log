@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: original athletes have court-scale shaped depth, clothing, exposed legs and individuality
+ok 1 - original athletes have court-scale shaped depth, clothing, exposed legs and individuality
+  ---
+  duration_ms: 26.05175
+  ...
+# Subtest: every built-in shot meets its authoritative contact with either physical hand and grounded feet
+ok 2 - every built-in shot meets its authoritative contact with either physical hand and grounded feet
+  ---
+  duration_ms: 20.117083
+  ...
+# Subtest: authored poses sample continuously and deterministically through contact and recovery
+ok 3 - authored poses sample continuously and deterministically through contact and recovery
+  ---
+  duration_ms: 92.491416
+  ...
+# Subtest: travel gait lifts the swinging shoe while preserving a planted shoe and authored player root
+ok 4 - travel gait lifts the swinging shoe while preserving a planted shoe and authored player root
+  ---
+  duration_ms: 9.258708
+  ...
+# Subtest: resources release every owned geometry and material once, including the contact shadow
+ok 5 - resources release every owned geometry and material once, including the contact shadow
+  ---
+  duration_ms: 4.244959
+  ...
+# Subtest: visible dynamic body triangles match the articulated sources without allocating GPU resources each frame
+ok 6 - visible dynamic body triangles match the articulated sources without allocating GPU resources each frame
+  ---
+  duration_ms: 5.319917
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 234.54825

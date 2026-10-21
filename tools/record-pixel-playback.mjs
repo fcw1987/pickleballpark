@@ -1,0 +1,36 @@
+// App-only, normal-speed evidence in an isolated synthetic browser profile.
+import {chromium} from '@playwright/test';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {copyScenarioDocument} from '../tests/fixtures/qa-scenarios.mjs';
+const out=process.argv[2],url=process.argv[3]||'http://127.0.0.1:4173/';
+if(!out)throw Error('Provide evidence output directory');
+await mkdir(out,{recursive:true});
+const browser=await chromium.launch();
+const context=await browser.newContext({viewport:{width:402,height:874},deviceScaleFactor:3,hasTouch:true,serviceWorkers:'block',recordVideo:{dir:out,size:{width:402,height:874}}});
+const page=await context.newPage(),events=[],errors=[];
+page.on('pageerror',error=>errors.push(error.message));
+const started=Date.now();
+const mark=async action=>events.push({wallSeconds:(Date.now()-started)/1000,action,...await page.evaluate(()=>({time:playBuilder.session.clock.elapsed,iteration:playBuilder.session.iteration,playing:playBuilder.session.playing,view:playBuilder.view}))});
+await page.goto(url);await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.courtTools.THREE);
+const scenario=process.env.QA_RECORD_SCENARIO || null;
+if(scenario){const source=copyScenarioDocument(scenario);if(source.shots.length<2)throw Error('Recording transport route requires at least two chapters');await page.evaluate(source=>playBuilder.loadDocument(source),source);}
+await mark('Fresh launch paused');await page.waitForTimeout(1200);
+await page.locator('[data-action="play-pause"]').click();await mark('Play at 1×');
+await page.waitForFunction(()=>playBuilder.session.iteration>=2,{},{timeout:90000});
+await mark('Two complete normal-speed repetitions, including final holds');
+await page.waitForTimeout(600);await page.locator('[data-action="play-pause"]').click();await mark('Pause in flight');
+const paused=await page.evaluate(()=>playBuilder.session.clock.elapsed);await page.waitForTimeout(1000);
+if(await page.evaluate(()=>playBuilder.session.clock.elapsed)!==paused)throw Error('Paused clock advanced');
+await page.locator('[data-action="play-pause"]').click();await mark('Resume from paused sample');await page.waitForTimeout(500);
+const range=page.locator('.builder-transport input[type="range"]');const box=await range.boundingBox();
+await page.mouse.move(box.x+box.width*.35,box.y+box.height/2);await page.mouse.down();
+await page.mouse.move(box.x+box.width*.68,box.y+box.height/2,{steps:18});await page.waitForTimeout(500);await mark('Scrub freezes poses while Pause remains available');
+await page.mouse.up();await mark('Release resumes at chosen position');await page.waitForTimeout(600);
+await page.getByLabel('Choose shot chapter',{exact:true}).click();await page.locator('[data-action="chapter"]').nth(1).click();await mark('Select exact second shot chapter while playing');await page.waitForTimeout(600);
+await page.locator('[data-action="view"][data-view="2d"]').click();await mark('Switch to 2D with shared active session');await page.waitForTimeout(1800);
+await page.locator('[data-action="view"][data-view="3d"]').click();await mark('Return to 3D with shared active session');await page.waitForTimeout(1800);
+await page.locator('[data-action="play-pause"]').click();await mark('Final explicit Pause');await page.waitForTimeout(1000);
+const video=page.video();await context.close();await video.saveAs(join(out,'normal-speed-playback.webm'));await video.delete();await browser.close();
+await writeFile(join(out,'normal-speed-playback.json'),JSON.stringify({viewport:[402,874],dpr:3,scenario,environment:'Playwright Chromium viewport emulation; normal 1× clock; pointer scrub, not physical iPhone touch. Named scenarios load controlled catalog fixtures; starter uses normal startup.',events,errors},null,2)+'\n');
+if(errors.length)throw Error(errors.join('\n'));console.log(JSON.stringify({recording:'normal-speed-playback.webm',events:events.length,errors}));

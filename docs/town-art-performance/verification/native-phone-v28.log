@@ -1,0 +1,36 @@
+{
+  "out": "docs/town-art-performance/final/native-phone",
+  "errors": [],
+  "summary": [
+    {
+      "screen": [
+        390,
+        844
+      ],
+      "memory": {
+        "geometries": 39,
+        "textures": 8
+      },
+      "drawCalls": 44,
+      "triangles": 25663
+    },
+    {
+      "screen": [
+        390,
+        844
+      ]
+    },
+    {
+      "screen": [
+        844,
+        390
+      ],
+      "memory": {
+        "geometries": 39,
+        "textures": 8
+      },
+      "drawCalls": 44,
+      "triangles": 25663
+    }
+  ]
+}

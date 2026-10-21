@@ -1,0 +1,996 @@
+[
+  {
+    "viewport": [
+      402,
+      874
+    ],
+    "dpr": 3,
+    "theme": "light",
+    "readyMs": 906,
+    "courtPixels": 61690.911436389906,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 61690.911436389906,
+    "corners": [
+      {
+        "x": 150.8480364897121,
+        "y": 360.25613127408394
+      },
+      {
+        "x": 297.72209456592094,
+        "y": 374.86282523090244
+      },
+      {
+        "x": 276.1744755139493,
+        "y": 718.9187499999997
+      },
+      {
+        "x": 63.02583652070915,
+        "y": 687.6862698476359
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 263.625,
+      "width": 394,
+      "height": 469.375
+    },
+    "buffer": [
+      788,
+      938
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      402,
+      874
+    ],
+    "dpr": 3,
+    "theme": "dark",
+    "readyMs": 906,
+    "courtPixels": 61690.911436389906,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 61690.911436389906,
+    "corners": [
+      {
+        "x": 150.8480364897121,
+        "y": 360.25613127408394
+      },
+      {
+        "x": 297.72209456592094,
+        "y": 374.86282523090244
+      },
+      {
+        "x": 276.1744755139493,
+        "y": 718.9187499999997
+      },
+      {
+        "x": 63.02583652070915,
+        "y": 687.6862698476359
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 263.625,
+      "width": 394,
+      "height": 469.375
+    },
+    "buffer": [
+      788,
+      938
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 3,
+    "theme": "light",
+    "readyMs": 737,
+    "courtPixels": 54054.05164049739,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 54054.05164049739,
+    "corners": [
+      {
+        "x": 148.05605121318467,
+        "y": 354.0799737492423
+      },
+      {
+        "x": 285.5351802013632,
+        "y": 367.75308407100454
+      },
+      {
+        "x": 265.36587366870737,
+        "y": 689.8187499999997
+      },
+      {
+        "x": 65.85147597567445,
+        "y": 660.5824869545779
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 263.625,
+      "width": 382,
+      "height": 439.375
+    },
+    "buffer": [
+      764,
+      878
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 3,
+    "theme": "dark",
+    "readyMs": 737,
+    "courtPixels": 54054.05164049739,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 54054.05164049739,
+    "corners": [
+      {
+        "x": 148.05605121318467,
+        "y": 354.0799737492423
+      },
+      {
+        "x": 285.5351802013632,
+        "y": 367.75308407100454
+      },
+      {
+        "x": 265.36587366870737,
+        "y": 689.8187499999997
+      },
+      {
+        "x": 65.85147597567445,
+        "y": 660.5824869545779
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 263.625,
+      "width": 382,
+      "height": 439.375
+    },
+    "buffer": [
+      764,
+      878
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 3,
+    "theme": "light",
+    "readyMs": 748,
+    "courtPixels": 77885.84628854095,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 77885.84628854095,
+    "corners": [
+      {
+        "x": 158.64587469099845,
+        "y": 372.19670248877765
+      },
+      {
+        "x": 323.6834623373995,
+        "y": 388.608324806705
+      },
+      {
+        "x": 299.47110574808374,
+        "y": 775.1787499999997
+      },
+      {
+        "x": 59.96293357444289,
+        "y": 740.0869167742146
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 263.625,
+      "width": 422,
+      "height": 527.375
+    },
+    "buffer": [
+      844,
+      1054
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "dpr": 3,
+    "theme": "dark",
+    "readyMs": 748,
+    "courtPixels": 77885.84628854095,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 77885.84628854095,
+    "corners": [
+      {
+        "x": 158.64587469099845,
+        "y": 372.19670248877765
+      },
+      {
+        "x": 323.6834623373995,
+        "y": 388.608324806705
+      },
+      {
+        "x": 299.47110574808374,
+        "y": 775.1787499999997
+      },
+      {
+        "x": 59.96293357444289,
+        "y": 740.0869167742146
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 263.625,
+      "width": 422,
+      "height": 527.375
+    },
+    "buffer": [
+      844,
+      1054
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 2,
+    "theme": "light",
+    "readyMs": 734,
+    "courtPixels": 13998.120675360013,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 13998.120675360013,
+    "corners": [
+      {
+        "x": 224.74379076464763,
+        "y": 281.3710500546999
+      },
+      {
+        "x": 269.64001569026897,
+        "y": 338.0297851278492
+      },
+      {
+        "x": 56.25864425440886,
+        "y": 396.28437499999995
+      },
+      {
+        "x": 60.9056050846874,
+        "y": 314.23020231244976
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 243.8125,
+      "width": 312,
+      "height": 157.1875
+    },
+    "buffer": [
+      624,
+      314
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      320,
+      568
+    ],
+    "dpr": 2,
+    "theme": "dark",
+    "readyMs": 734,
+    "courtPixels": 13998.120675360013,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 13998.120675360013,
+    "corners": [
+      {
+        "x": 224.74379076464763,
+        "y": 281.3710500546999
+      },
+      {
+        "x": 269.64001569026897,
+        "y": 338.0297851278492
+      },
+      {
+        "x": 56.25864425440886,
+        "y": 396.28437499999995
+      },
+      {
+        "x": 60.9056050846874,
+        "y": 314.23020231244976
+      }
+    ],
+    "canvas": {
+      "x": 4,
+      "y": 243.8125,
+      "width": 312,
+      "height": 157.1875
+    },
+    "buffer": [
+      624,
+      314
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      874,
+      402
+    ],
+    "dpr": 2,
+    "theme": "light",
+    "readyMs": 749,
+    "courtPixels": 60603.71499550001,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 60603.71499550001,
+    "corners": [
+      {
+        "x": 451.58398157343015,
+        "y": 89.53509982332075
+      },
+      {
+        "x": 543.3975949160287,
+        "y": 208.50748652777156
+      },
+      {
+        "x": 101.64050087191514,
+        "y": 327.760089575757
+      },
+      {
+        "x": 107.47775254399298,
+        "y": 158.8982468464476
+      }
+    ],
+    "canvas": {
+      "x": 3,
+      "y": 3,
+      "width": 624,
+      "height": 346
+    },
+    "buffer": [
+      1248,
+      692
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      874,
+      402
+    ],
+    "dpr": 2,
+    "theme": "dark",
+    "readyMs": 749,
+    "courtPixels": 60603.71499550001,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 60603.71499550001,
+    "corners": [
+      {
+        "x": 451.58398157343015,
+        "y": 89.53509982332075
+      },
+      {
+        "x": 543.3975949160287,
+        "y": 208.50748652777156
+      },
+      {
+        "x": 101.64050087191514,
+        "y": 327.760089575757
+      },
+      {
+        "x": 107.47775254399298,
+        "y": 158.8982468464476
+      }
+    ],
+    "canvas": {
+      "x": 3,
+      "y": 3,
+      "width": 624,
+      "height": 346
+    },
+    "buffer": [
+      1248,
+      692
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 2,
+    "theme": "light",
+    "readyMs": 803,
+    "courtPixels": 119087.84510932678,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 119087.84510932678,
+    "corners": [
+      {
+        "x": 314.27914667652936,
+        "y": 349.6333639758942
+      },
+      {
+        "x": 518.4622721897239,
+        "y": 369.9159546889691
+      },
+      {
+        "x": 488.50694676992526,
+        "y": 847.6657812499997
+      },
+      {
+        "x": 192.1894358454208,
+        "y": 804.2969249052742
+      }
+    ],
+    "canvas": {
+      "x": 12,
+      "y": 215.453125,
+      "width": 744,
+      "height": 651.765625
+    },
+    "buffer": [
+      1488,
+      1304
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "dpr": 2,
+    "theme": "dark",
+    "readyMs": 803,
+    "courtPixels": 119087.84510932678,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 119087.84510932678,
+    "corners": [
+      {
+        "x": 314.27914667652936,
+        "y": 349.6333639758942
+      },
+      {
+        "x": 518.4622721897239,
+        "y": 369.9159546889691
+      },
+      {
+        "x": 488.50694676992526,
+        "y": 847.6657812499997
+      },
+      {
+        "x": 192.1894358454208,
+        "y": 804.2969249052742
+      }
+    ],
+    "canvas": {
+      "x": 12,
+      "y": 215.453125,
+      "width": 744,
+      "height": 651.765625
+    },
+    "buffer": [
+      1488,
+      1304
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "theme": "light",
+    "readyMs": 778,
+    "courtPixels": 179906.14380906234,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 179906.14380906234,
+    "corners": [
+      {
+        "x": 952.1704089203606,
+        "y": 314.46906905787307
+      },
+      {
+        "x": 1113.1676995772066,
+        "y": 517.5337502767994
+      },
+      {
+        "x": 347.98481984224316,
+        "y": 726.3179687499999
+      },
+      {
+        "x": 364.64876218266886,
+        "y": 432.236140096956
+      }
+    ],
+    "canvas": {
+      "x": 12,
+      "y": 179.859375,
+      "width": 1416,
+      "height": 563.359375
+    },
+    "buffer": [
+      1416,
+      563
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "theme": "dark",
+    "readyMs": 778,
+    "courtPixels": 179906.14380906234,
+    "unoccludedSampleFraction": 1,
+    "unoccludedCourtEstimate": 179906.14380906234,
+    "corners": [
+      {
+        "x": 952.1704089203606,
+        "y": 314.46906905787307
+      },
+      {
+        "x": 1113.1676995772066,
+        "y": 517.5337502767994
+      },
+      {
+        "x": 347.98481984224316,
+        "y": 726.3179687499999
+      },
+      {
+        "x": 364.64876218266886,
+        "y": 432.236140096956
+      }
+    ],
+    "canvas": {
+      "x": 12,
+      "y": 179.859375,
+      "width": 1416,
+      "height": 563.359375
+    },
+    "buffer": [
+      1416,
+      563
+    ],
+    "resources": {
+      "geometries": 43,
+      "textures": 17
+    },
+    "time": 0,
+    "playing": false,
+    "horizontalOverflow": false,
+    "visibleButtons": [
+      "New Play",
+      "Learn",
+      "Planner",
+      "Help",
+      "Open",
+      "Save As",
+      "Import / Export",
+      "1. Serve",
+      "2. Return",
+      "3. Drop",
+      "+ Add shot",
+      "3D",
+      "2D",
+      "Edit shot",
+      "Previous",
+      "Play",
+      "Next",
+      "Restart",
+      "Loop",
+      "Undo authored edit",
+      "Redo authored edit"
+    ],
+    "errors": []
+  }
+]

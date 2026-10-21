@@ -1,0 +1,10 @@
+{
+  "viewport": [
+    1024,
+    768
+  ],
+  "dpr": 1,
+  "browser": "Playwright Chromium",
+  "content": "Mouse drag, menu, help, normal 1x guided shot, paused help, exit to editing",
+  "note": "Browser recording; capture frame rate is not runtime presentation evidence."
+}

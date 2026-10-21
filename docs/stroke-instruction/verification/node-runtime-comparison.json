@@ -1,0 +1,371 @@
+{
+  "createdAt": "2026-10-19T00:53:29.926Z",
+  "gitHead": "2b4559abe460681e166d2d1a883119c0504b841d",
+  "scope": "Read-only diagnostic. No runtime or test source edits. Existing CLI runtimes; no downloaded or installed runtime.",
+  "sourceDigestAlgorithm": "sha256(JSON.stringify(sourceFiles)) in listed order",
+  "sourceDigestSha256": "662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e",
+  "sourceFiles": [
+    {
+      "path": "three-d-athletes.js",
+      "sha256": "b2a0b199c2475ebbb5e15abff0c2ee2b655428bbc955f303a8235337e0593e0f"
+    },
+    {
+      "path": "three-d-presentation.js",
+      "sha256": "151c5d8993db6a3ea63ab92241b38d205f86e38763961154762d6f42fe867d72"
+    },
+    {
+      "path": "three-d-animation.js",
+      "sha256": "eda72a24ee5f9abcdb2265f5a984471d1e731f6fda3d88c9ec9b2049378902ae"
+    },
+    {
+      "path": "three-d-core.js",
+      "sha256": "354ecea77f5e06b0204bdf92a29f0cfd2192c8a531eb9a8f362f55a659b20527"
+    },
+    {
+      "path": "rally-proposals.js",
+      "sha256": "6e084c15790f0e8327db59fbf3dc6c90f1177caba5fa61098b1263d09b361f8b"
+    },
+    {
+      "path": "play-document.js",
+      "sha256": "e82930383864d2dccd7a53e36e4c1f54de7026a8f23646cda94f9be8b237d5b4"
+    },
+    {
+      "path": "builder-storage.js",
+      "sha256": "1c29dc00fcd5e7b2546adf29eaad8a65dfbbdd962275a74f0149004bd2485b9e"
+    },
+    {
+      "path": "tests/stroke-instruction.unit.mjs",
+      "sha256": "47f72d10bcfe998e90a6848b8727d25f05f81ca81b96238e890aea8e73183d76"
+    },
+    {
+      "path": "tests/overhead-contact-compatibility.unit.mjs",
+      "sha256": "e8d29cd0d2ea54c4c580bf7e130ba182b22d1b9461ab33e6cbd521980d9c7e7a"
+    },
+    {
+      "path": "tests/fixtures/overhead-short-hop-document.json",
+      "sha256": "393f3fbb1c4e5758b816dad653ddd2043bc65d3dc3522205247785602f6e9c93"
+    }
+  ],
+  "probe": {
+    "path": "node-route-history-probe.mjs",
+    "sha256": "5ef84ea69fcdbb07613dc7c09a7968b07b42aed6cbf516ee64fb34e3a4ea50b5",
+    "description": "810 exact forward/contact/reverse updates, actors reused across automatic/forehand/backhand styles. Stops after two bad legs on a failing sample. Source root is the fixed local candidate path; module imports are absolute."
+  },
+  "records": [
+    {
+      "id": "node22.4-default",
+      "binary": "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+      "flags": [],
+      "node": "v22.4.0",
+      "v8": "12.4.254.21-node.15",
+      "arch": "arm64",
+      "platform": "darwin",
+      "binarySha256": "617a9b803db0a617af138cf91147bba6082acf7d39e835f09b7e06d339ea6aaf",
+      "sourceDigestSha256": "662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e",
+      "runs": [
+        {
+          "kind": "tests",
+          "command": [
+            "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+            "--test",
+            "tests/overhead-contact-compatibility.unit.mjs",
+            "tests/stroke-instruction.unit.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 1,
+          "log": "node22.4-default-tests.log",
+          "status": "fail",
+          "tests": 13,
+          "passed": 12,
+          "failed": 1,
+          "summary": [
+            "# pass 12",
+            "# fail 1",
+            "# duration_ms 1484.709791"
+          ]
+        },
+        {
+          "kind": "810-probe",
+          "command": [
+            "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+            "/tmp/pickleboard-independent-route-probe.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 1,
+          "log": "node22.4-default-810-probe.log",
+          "status": "fail",
+          "summary": {
+            "firstFailureSample": 271,
+            "failedLegs": 2,
+            "style": "forehand",
+            "hand": "left",
+            "localTime": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "node22.4-no-maglev",
+      "binary": "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+      "flags": [
+        "--no-maglev"
+      ],
+      "node": "v22.4.0",
+      "v8": "12.4.254.21-node.15",
+      "arch": "arm64",
+      "platform": "darwin",
+      "binarySha256": "617a9b803db0a617af138cf91147bba6082acf7d39e835f09b7e06d339ea6aaf",
+      "sourceDigestSha256": "662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e",
+      "runs": [
+        {
+          "kind": "tests",
+          "command": [
+            "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+            "--no-maglev",
+            "--test",
+            "tests/overhead-contact-compatibility.unit.mjs",
+            "tests/stroke-instruction.unit.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 0,
+          "log": "node22.4-no-maglev-tests.log",
+          "status": "pass",
+          "tests": 13,
+          "passed": 13,
+          "failed": 0,
+          "summary": [
+            "# pass 13",
+            "# fail 0",
+            "# duration_ms 1552.186792"
+          ]
+        },
+        {
+          "kind": "810-probe",
+          "command": [
+            "/opt/homebrew/Cellar/node/22.4.0/bin/node",
+            "--no-maglev",
+            "/tmp/pickleboard-independent-route-probe.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 0,
+          "log": "node22.4-no-maglev-810-probe.log",
+          "status": "pass",
+          "summary": {
+            "samplesCompleted": 810,
+            "failures": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "node24.11-default",
+      "binary": "/Users/fdub/Library/Application Support/xyz.block.berd/packages/node/v24.11.0/darwin-arm64/bin/node",
+      "flags": [],
+      "node": "v24.11.0",
+      "v8": "13.6.233.10-node.28",
+      "arch": "arm64",
+      "platform": "darwin",
+      "binarySha256": "8d66cad090d087ed8fac66d8f7248c8a9a55454680232a6d109f609aa2decf89",
+      "sourceDigestSha256": "662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e",
+      "runs": [
+        {
+          "kind": "tests",
+          "command": [
+            "/Users/fdub/Library/Application Support/xyz.block.berd/packages/node/v24.11.0/darwin-arm64/bin/node",
+            "--test",
+            "tests/overhead-contact-compatibility.unit.mjs",
+            "tests/stroke-instruction.unit.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 0,
+          "log": "node24.11-default-tests.log",
+          "status": "pass",
+          "tests": 13,
+          "passed": 13,
+          "failed": 0,
+          "summary": [
+            "ℹ pass 13",
+            "ℹ fail 0",
+            "ℹ duration_ms 1359.7065"
+          ]
+        },
+        {
+          "kind": "810-probe",
+          "command": [
+            "/Users/fdub/Library/Application Support/xyz.block.berd/packages/node/v24.11.0/darwin-arm64/bin/node",
+            "/tmp/pickleboard-independent-route-probe.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 0,
+          "log": "node24.11-default-810-probe.log",
+          "status": "pass",
+          "summary": {
+            "samplesCompleted": 810,
+            "failures": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "node24.19-bundled-default",
+      "binary": "/Users/fdub/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-aHh3VZ/runtime/bin/node",
+      "flags": [],
+      "node": "v24.19.0",
+      "v8": "13.6.233.17-node.51",
+      "arch": "arm64",
+      "platform": "darwin",
+      "binarySha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+      "sourceDigestSha256": "662af6d711c7301a79c46aac6206ad2876651bba38f5a0695117c9f112143a1e",
+      "runs": [
+        {
+          "kind": "tests",
+          "command": [
+            "/Users/fdub/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-aHh3VZ/runtime/bin/node",
+            "--test",
+            "tests/overhead-contact-compatibility.unit.mjs",
+            "tests/stroke-instruction.unit.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 0,
+          "log": "node24.19-bundled-default-tests.log",
+          "status": "pass",
+          "tests": 13,
+          "passed": 13,
+          "failed": 0,
+          "summary": [
+            "ℹ pass 13",
+            "ℹ fail 0",
+            "ℹ duration_ms 1359.513375"
+          ]
+        },
+        {
+          "kind": "810-probe",
+          "command": [
+            "/Users/fdub/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-aHh3VZ/runtime/bin/node",
+            "/tmp/pickleboard-independent-route-probe.mjs"
+          ],
+          "cwd": "/Users/fdub/Documents/Codex/2026-10-17/task-5/pickleboard-strokes",
+          "exitCode": 0,
+          "log": "node24.19-bundled-default-810-probe.log",
+          "status": "pass",
+          "summary": {
+            "samplesCompleted": 810,
+            "failures": 0
+          }
+        }
+      ]
+    }
+  ],
+  "observedFailure": {
+    "sampleCall": 271,
+    "style": "forehand",
+    "hand": "left",
+    "localTime": 0,
+    "expectedShinMeters": 0.425,
+    "observedLeftShinMeters": 0.4817126750734307,
+    "returnedWorldPosition": {
+      "x": -0.6845109177518689,
+      "z": 2.443818171272844
+    },
+    "returnedFootTargetCenter": {
+      "x": -0.9144,
+      "z": 2.3014800000000006
+    },
+    "expectedFootTargetCenterZ": 2.428818171272844,
+    "note": "Foot target center includes the authored −0.015m court-forward shoe offset. The incorrect center corresponds to tactical from, while world position corresponds to contact plant. The sample discrepancy precedes updateAthlete."
+  },
+  "interpretation": "Evidence supports a host Node22.4.0 compiler-tier-specific discrepancy: normal fails; same binary with per-process --no-maglev passes; existing Node24.11 and bundled Node24.19 pass unchanged tests and full-history probe. This does not prove a precise V8 root cause. Matrix-only correction is unsupported because disagreement is already in returned sampling data. Sampler-only 32,400-call heat probe did not reproduce; full workload history remains necessary in this diagnostic.",
+  "remaining": "Browser confirmation completed separately: Chromium and WebKit each passed one strict810-sample original-order run and two instrumented810-sample runs; all endpoint errors below1e-15, sampled fresh/reused vertices identical. See browser-history-diagnostic.json. Exact compiler mechanism remains unproven; no production workaround is warranted by these results.",
+  "discoveryNote": "The existing Goose bin/node path was a setup shim, not a runtime. Its setup banner was interrupted immediately (exit130), before any later setup stages; the only observed log was the starting banner. Actual binaries used for evidence are recorded below. No package/runtime install or global configuration change was performed.",
+  "browserConfirmation": {
+    "report": "browser-history-diagnostic.json",
+    "runtimeDigest": "667bb8a0dd3d0d84fbf638be3b89f612f4f9a08d141df2308ed7b69fe4ad2998",
+    "runtimeUnchanged": true,
+    "results": [
+      {
+        "engine": "chromium",
+        "version": "149.0.7827.55",
+        "runs": [
+          {
+            "mode": "strict-original-sampler-call-order",
+            "samples": 810,
+            "failures": 0,
+            "maxThighError": 6.661338147750939e-16,
+            "maxShinError": 6.106226635438361e-16,
+            "maxKneeGap": 9.155133597044475e-16,
+            "maxAnkleGap": 7.301351988545593e-16,
+            "maxFreshVertexError": 0,
+            "maxFreshEndpointError": 0,
+            "maxRepeatedSamplerError": 0
+          },
+          {
+            "mode": "instrumented-fresh-and-repeat-comparison",
+            "samples": 810,
+            "failures": 0,
+            "maxThighError": 6.661338147750939e-16,
+            "maxShinError": 6.106226635438361e-16,
+            "maxKneeGap": 9.155133597044475e-16,
+            "maxAnkleGap": 7.301351988545593e-16,
+            "maxFreshVertexError": 0,
+            "maxFreshEndpointError": 0,
+            "maxRepeatedSamplerError": 0
+          },
+          {
+            "mode": "instrumented-fresh-and-repeat-comparison",
+            "samples": 810,
+            "failures": 0,
+            "maxThighError": 6.661338147750939e-16,
+            "maxShinError": 6.106226635438361e-16,
+            "maxKneeGap": 9.155133597044475e-16,
+            "maxAnkleGap": 7.301351988545593e-16,
+            "maxFreshVertexError": 0,
+            "maxFreshEndpointError": 0,
+            "maxRepeatedSamplerError": 0
+          }
+        ]
+      },
+      {
+        "engine": "webkit",
+        "version": "26.5",
+        "runs": [
+          {
+            "mode": "strict-original-sampler-call-order",
+            "samples": 810,
+            "failures": 0,
+            "maxThighError": 7.216449660063518e-16,
+            "maxShinError": 6.106226635438361e-16,
+            "maxKneeGap": 9.155133597044475e-16,
+            "maxAnkleGap": 7.301351988545593e-16,
+            "maxFreshVertexError": 0,
+            "maxFreshEndpointError": 0,
+            "maxRepeatedSamplerError": 0
+          },
+          {
+            "mode": "instrumented-fresh-and-repeat-comparison",
+            "samples": 810,
+            "failures": 0,
+            "maxThighError": 7.216449660063518e-16,
+            "maxShinError": 6.106226635438361e-16,
+            "maxKneeGap": 9.155133597044475e-16,
+            "maxAnkleGap": 7.301351988545593e-16,
+            "maxFreshVertexError": 0,
+            "maxFreshEndpointError": 0,
+            "maxRepeatedSamplerError": 0
+          },
+          {
+            "mode": "instrumented-fresh-and-repeat-comparison",
+            "samples": 810,
+            "failures": 0,
+            "maxThighError": 7.216449660063518e-16,
+            "maxShinError": 6.106226635438361e-16,
+            "maxKneeGap": 9.155133597044475e-16,
+            "maxAnkleGap": 7.301351988545593e-16,
+            "maxFreshVertexError": 0,
+            "maxFreshEndpointError": 0,
+            "maxRepeatedSamplerError": 0
+          }
+        ]
+      }
+    ]
+  }
+}

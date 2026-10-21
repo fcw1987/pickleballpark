@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 async function openApp(page, suffix='session') {
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
-  await page.goto(`/index.html?park-${suffix}=1`);
+  await page.goto(`/index.html?workspace=planner&park-${suffix}=1`);
   await page.waitForFunction(()=>Boolean(window.pickleboard?.plays&&window.pickleboard?.threeD));
   return errors;
 }
@@ -17,7 +17,7 @@ test('editor and 3D share elapsed time, rate, pause state, and final recovery',a
   const errors=await openApp(page,'handoff');
   await installClock(page);
   await page.evaluate(()=>window.pickleboard.plays.load('third-shot-drive'));
-  await page.locator('#playRate').selectOption('0.5');
+  await page.locator('#playRate').selectOption('0.5',{force:true});
   await page.locator('#playPlayPause').click();
   await page.clock.runFor(600);
   await page.locator('#playPlayPause').click();
@@ -59,13 +59,12 @@ test('editor and 3D share elapsed time, rate, pause state, and final recovery',a
   expect(errors).toEqual([]);
 });
 
-test('loop hold freezes the final frame, disabling loop completes, and replacement cancels stale wakeups',async({page})=>{
+test('final hold freezes, Pause wins, repeat wraps, and replacement cancels stale wakeups',async({page})=>{
   const errors=await openApp(page,'hold');
   await installClock(page);
   const duration=await page.evaluate(()=>{
     pickleboard.plays.load('lob-overhead');
     pickleboard.plays.timingScale=.05;
-    pickleboard.plays.setLoop(true);
     return pickleboard.plays.timeline.duration;
   });
   await page.locator('#playPlayPause').click();
@@ -73,22 +72,24 @@ test('loop hold freezes the final frame, disabling loop completes, and replaceme
   await expect.poll(()=>page.evaluate(()=>pickleboard.plays.session.holding)).toBe(true);
   const held=await page.evaluate(()=>({elapsed:pickleboard.plays.clock.elapsed,duration:pickleboard.plays.timeline.duration,
     playing:pickleboard.plays.clock.playing,holding:pickleboard.plays.session.holding,
-    ball:{...pickleboard.getTokenPositions().ball},height:pickleboard.playBallHeight,nextDisabled:document.querySelector('#playNext').disabled}));
-  expect(held).toMatchObject({playing:true,holding:true,nextDisabled:true});
+    ball:{...pickleboard.getTokenPositions().ball},height:pickleboard.playBallHeight}));
+  expect(held).toMatchObject({playing:true,holding:true});
   expect(held.elapsed).toBeCloseTo(held.duration,8);
   await page.clock.runFor(20);
   const frozen=await page.evaluate(()=>({elapsed:pickleboard.plays.clock.elapsed,ball:{...pickleboard.getTokenPositions().ball},height:pickleboard.playBallHeight}));
   expect(frozen).toEqual({elapsed:held.elapsed,ball:held.ball,height:held.height});
 
-  await page.locator('#playLoop').click();
-  expect(await page.evaluate(()=>({loop:pickleboard.plays.session.loop,holding:pickleboard.plays.session.holding,
-    complete:pickleboard.plays.session.complete,playing:pickleboard.plays.clock.playing})))
-    .toEqual({loop:false,holding:false,complete:true,playing:false});
-  await page.locator('#playPrevious').click();
-  expect(await page.evaluate(()=>pickleboard.plays.stepIndex)).toBeGreaterThanOrEqual(0);
+  await page.locator('#playPlayPause').click();
+  expect(await page.evaluate(()=>({holding:pickleboard.plays.session.holding,playing:pickleboard.plays.session.playing,
+    elapsed:pickleboard.plays.clock.elapsed}))).toMatchObject({holding:true,playing:false,elapsed:duration});
+  await page.clock.runFor(100);
+  expect(await page.evaluate(()=>pickleboard.plays.clock.elapsed)).toBeCloseTo(duration,8);
+  await page.locator('#playPlayPause').click();
+  await page.clock.runFor(60);
+  await expect.poll(()=>page.evaluate(()=>pickleboard.plays.session.iteration)).toBeGreaterThan(0);
 
   await page.evaluate(()=>{
-    pickleboard.plays.setLoop(true); pickleboard.plays.session.seek(pickleboard.plays.timeline.duration-.01);
+    pickleboard.plays.pause();pickleboard.plays.session.seek(pickleboard.plays.timeline.duration-.01);
     pickleboard.plays.play();
   });
   await page.clock.runFor(20);
@@ -122,7 +123,7 @@ test('thirty editor to 3D cycles restore the exact board and release replay reso
       if(!board.plays.load(i%2?'dink-exchange':'third-shot-drive'))throw new Error('play did not load');
       if(!await board.threeD.enter())throw new Error('3D did not enter');
       const live={canvas:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size,
-        sceneChildren:board.threeD.scene.children.length,textures:board.threeD.actorResources.textures.size};
+        sceneChildren:board.threeD.scene.children.length,geometries:board.threeD.actorResources.geometries.size,materials:board.threeD.actorResources.materials.size};
       board.threeD.exit(); board.plays.exit();
       return {live,after:{canvas:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size,
         active:board.threeD.active,hasRenderer:Boolean(board.threeD.renderer)},snapshot:board.captureBoardState()};
@@ -133,7 +134,10 @@ test('thirty editor to 3D cycles restore the exact board and release replay reso
     bounds.push(sample.live);
   }
   expect(new Set(bounds.map(item=>item.sceneChildren)).size).toBe(1);
-  expect(Math.max(...bounds.map(item=>item.textures))).toBeLessThanOrEqual(64);
+  expect(new Set(bounds.map(item=>item.geometries)).size).toBe(1);
+  expect(new Set(bounds.map(item=>item.materials)).size).toBe(1);
+  expect(bounds[0].geometries).toBeGreaterThan(0);
+  expect(bounds[0].materials).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
 

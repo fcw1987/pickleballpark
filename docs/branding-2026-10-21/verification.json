@@ -1,0 +1,857 @@
+{
+  "baseRevision": "359d4b48b89c218e7f42f53817239ff7aeb0c931",
+  "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+  "metadataRevision": "cd4d148a3ad3ac609a8f0bce37c4429d02997337",
+  "packageRevision": "e84e5211ff3ed1937b389814d23c00aa17682665",
+  "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+  "cache": "pickleboard-static-v31",
+  "node": "24.11.0",
+  "unit": {
+    "pass": 251,
+    "fail": 0,
+    "skip": 0
+  },
+  "staticAssets": 107,
+  "chromium": {
+    "startTime": "2026-10-21T14:48:20.379Z",
+    "duration": 19285.21,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "webkit": {
+    "startTime": "2026-10-21T14:49:37.529Z",
+    "duration": 14191.786,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  },
+  "webkitInfrastructure": {
+    "playwright": "1.61.0",
+    "platform": "darwin",
+    "browserVersion": "26.5",
+    "appCodeServed": false,
+    "cacheDeletionCodeServed": false,
+    "cacheSeed": "keep me",
+    "cacheAfterNavigation": null,
+    "offlineSignature": "page.reload: WebKit encountered an internal error",
+    "realOfflineWithoutEmulation": true,
+    "result": "confirmed"
+  },
+  "generatedAssets": {
+    "semanticMatches": 65,
+    "compressionOnlyDifferences": 43
+  },
+  "preservedModules": [
+    {
+      "path": "smart-rally-generator.js",
+      "sha256": "808ebbe37385e1c4666307f7637ac7994ad0c6dbe66c23e91868fd1f8e2ed65e"
+    },
+    {
+      "path": "rally-coach.js",
+      "sha256": "0e84921af19cbd041ff3e37e4e03ed7d0ff7989de61e73aafc8d19d0d49909ac"
+    },
+    {
+      "path": "rally-proposals.js",
+      "sha256": "6e084c15790f0e8327db59fbf3dc6c90f1177caba5fa61098b1263d09b361f8b"
+    },
+    {
+      "path": "rally-rules.js",
+      "sha256": "e774a8c691e626767f0e0cb9261d8e51ccf80e18ef657eebd8a7a7c168f80036"
+    },
+    {
+      "path": "play-document.js",
+      "sha256": "e82930383864d2dccd7a53e36e4c1f54de7026a8f23646cda94f9be8b237d5b4"
+    },
+    {
+      "path": "play-compiler.js",
+      "sha256": "0a691e9bd5baf219bd819ebeac02f819ba06a202c3af698057cad41affd3fbb2"
+    },
+    {
+      "path": "builder-storage.js",
+      "sha256": "1c29dc00fcd5e7b2546adf29eaad8a65dfbbdd962275a74f0149004bd2485b9e"
+    },
+    {
+      "path": "coaching-session.js",
+      "sha256": "7f8afd72689345ba2488a2511d714cad54299dbffd047c834bb038b8d03069f2"
+    },
+    {
+      "path": "guided-plays.js",
+      "sha256": "3c0026759323efa725ef4307f1ab6bcd476a3122ec4a39f0d2bc145f4d102210"
+    },
+    {
+      "path": "shot-timeline.js",
+      "sha256": "9896d04fba7dc60bf132a34f6c23bef5a01b1e36adcde74684fcdde1297a6c1b"
+    },
+    {
+      "path": "keyboard-shortcuts.js",
+      "sha256": "a65f39ee3a9bd6533c70079680a330fe810cdbd7bc247096a0f852aa14dfc565"
+    },
+    {
+      "path": "builder-court-tools.js",
+      "sha256": "3e42238824acc81dbfd9d0163195b3a5c321bc3a29783e1a9059957b51caf1ce"
+    },
+    {
+      "path": "three-d-animation.js",
+      "sha256": "eda72a24ee5f9abcdb2265f5a984471d1e731f6fda3d88c9ec9b2049378902ae"
+    },
+    {
+      "path": "three-d-athletes.js",
+      "sha256": "b2a0b199c2475ebbb5e15abff0c2ee2b655428bbc955f303a8235337e0593e0f"
+    },
+    {
+      "path": "three-d-playback.js",
+      "sha256": "4ecbbc83e1cdbe48779db7ae5a2fb7d356671c0d8ee9ab2a59dccd687b914f9b"
+    },
+    {
+      "path": "three-d-presentation.js",
+      "sha256": "151c5d8993db6a3ea63ab92241b38d205f86e38763961154762d6f42fe867d72"
+    },
+    {
+      "path": "three-d-core.js",
+      "sha256": "354ecea77f5e06b0204bdf92a29f0cfd2192c8a531eb9a8f362f55a659b20527"
+    },
+    {
+      "path": "three-d-ball.js",
+      "sha256": "77e3047135c2b4093da60260aa85f462890b2decd7da8ca1c39d443050bee4e3"
+    }
+  ],
+  "packageVerification": {
+    "scenarios": 6,
+    "passed": 6,
+    "engines": [
+      "chromium",
+      "webkit"
+    ],
+    "modes": [
+      "branding-upgrade",
+      "fresh",
+      "public-upgrade"
+    ],
+    "results": [
+      {
+        "browser": "chromium",
+        "mode": "branding-upgrade",
+        "status": "PASS",
+        "runtimeHashes": 110,
+        "cacheEntries": 108,
+        "offlineCustomReload": true,
+        "offlineLessons": 8,
+        "offlineMethod": "owned server stopped",
+        "source": "e84e5211ff3ed1937b389814d23c00aa17682665",
+        "previousPublicSource": "2b4559abe460681e166d2d1a883119c0504b841d",
+        "identity": {
+          "loaded": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "server": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "queried": {
+            "status": "complete",
+            "cache": "no-store",
+            "path": "./version.json"
+          }
+        },
+        "offlineIdentity": {
+          "status": "unavailable",
+          "loadedRetained": true
+        },
+        "smartRally": {
+          "adds": {
+            "shots": 5,
+            "valid": 5,
+            "ids": [
+              "smart-shot-1",
+              "smart-shot-2",
+              "smart-shot-3",
+              "smart-shot-4",
+              "smart-shot-5"
+            ],
+            "playing": false
+          },
+          "random": {
+            "id": "ff199df6-bf8e-4d7c-97e8-999aab482f53",
+            "shots": 99,
+            "valid": 99,
+            "chapters": 99,
+            "generation": {
+              "mode": "random",
+              "generatorVersion": "smart-rally-v1",
+              "seed": 12648430,
+              "requestedHits": 99
+            },
+            "retainedOldDraft": true,
+            "oldBeforeSmart": true,
+            "playing": false
+          },
+          "coach": {
+            "protectedKept": true,
+            "optionsShown": true,
+            "fixed": true,
+            "undoRestored": true
+          },
+          "restoredSavedLibrary": true
+        }
+      },
+      {
+        "browser": "webkit",
+        "mode": "branding-upgrade",
+        "status": "PASS",
+        "runtimeHashes": 110,
+        "cacheEntries": 108,
+        "offlineCustomReload": true,
+        "offlineLessons": 8,
+        "offlineMethod": "owned server stopped",
+        "source": "e84e5211ff3ed1937b389814d23c00aa17682665",
+        "previousPublicSource": "2b4559abe460681e166d2d1a883119c0504b841d",
+        "identity": {
+          "loaded": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "server": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "queried": {
+            "status": "complete",
+            "cache": "no-store",
+            "path": "./version.json"
+          }
+        },
+        "offlineIdentity": {
+          "status": "unavailable",
+          "loadedRetained": true
+        },
+        "smartRally": {
+          "adds": {
+            "shots": 5,
+            "valid": 5,
+            "ids": [
+              "smart-shot-1",
+              "smart-shot-2",
+              "smart-shot-3",
+              "smart-shot-4",
+              "smart-shot-5"
+            ],
+            "playing": false
+          },
+          "random": {
+            "id": "8140f5ca-d6ba-4dcb-8779-a969838b1d44",
+            "shots": 99,
+            "valid": 99,
+            "chapters": 99,
+            "generation": {
+              "mode": "random",
+              "generatorVersion": "smart-rally-v1",
+              "seed": 12648430,
+              "requestedHits": 99
+            },
+            "retainedOldDraft": true,
+            "oldBeforeSmart": true,
+            "playing": false
+          },
+          "coach": {
+            "protectedKept": true,
+            "optionsShown": true,
+            "fixed": true,
+            "undoRestored": true
+          },
+          "restoredSavedLibrary": true
+        }
+      },
+      {
+        "browser": "chromium",
+        "mode": "fresh",
+        "status": "PASS",
+        "runtimeHashes": 110,
+        "cacheEntries": 108,
+        "offlineCustomReload": true,
+        "offlineLessons": 8,
+        "offlineMethod": "owned server stopped",
+        "source": "e84e5211ff3ed1937b389814d23c00aa17682665",
+        "previousPublicSource": null,
+        "identity": {
+          "loaded": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "server": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "queried": {
+            "status": "complete",
+            "cache": "no-store",
+            "path": "./version.json"
+          }
+        },
+        "offlineIdentity": {
+          "status": "unavailable",
+          "loadedRetained": true
+        },
+        "smartRally": {
+          "adds": {
+            "shots": 5,
+            "valid": 5,
+            "ids": [
+              "smart-shot-1",
+              "smart-shot-2",
+              "smart-shot-3",
+              "smart-shot-4",
+              "smart-shot-5"
+            ],
+            "playing": false
+          },
+          "random": {
+            "id": "5ded4389-a48e-4d9e-a029-d61b7679baff",
+            "shots": 99,
+            "valid": 99,
+            "chapters": 99,
+            "generation": {
+              "mode": "random",
+              "generatorVersion": "smart-rally-v1",
+              "seed": 12648430,
+              "requestedHits": 99
+            },
+            "retainedOldDraft": true,
+            "oldBeforeSmart": true,
+            "playing": false
+          },
+          "coach": {
+            "protectedKept": true,
+            "optionsShown": true,
+            "fixed": true,
+            "undoRestored": true
+          },
+          "restoredSavedLibrary": true
+        }
+      },
+      {
+        "browser": "webkit",
+        "mode": "fresh",
+        "status": "PASS",
+        "runtimeHashes": 110,
+        "cacheEntries": 108,
+        "offlineCustomReload": true,
+        "offlineLessons": 8,
+        "offlineMethod": "owned server stopped",
+        "source": "e84e5211ff3ed1937b389814d23c00aa17682665",
+        "previousPublicSource": null,
+        "identity": {
+          "loaded": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "server": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "queried": {
+            "status": "complete",
+            "cache": "no-store",
+            "path": "./version.json"
+          }
+        },
+        "offlineIdentity": {
+          "status": "unavailable",
+          "loadedRetained": true
+        },
+        "smartRally": {
+          "adds": {
+            "shots": 5,
+            "valid": 5,
+            "ids": [
+              "smart-shot-1",
+              "smart-shot-2",
+              "smart-shot-3",
+              "smart-shot-4",
+              "smart-shot-5"
+            ],
+            "playing": false
+          },
+          "random": {
+            "id": "e968a8f0-842f-49fa-a43a-56ff9f3b43e4",
+            "shots": 99,
+            "valid": 99,
+            "chapters": 99,
+            "generation": {
+              "mode": "random",
+              "generatorVersion": "smart-rally-v1",
+              "seed": 12648430,
+              "requestedHits": 99
+            },
+            "retainedOldDraft": true,
+            "oldBeforeSmart": true,
+            "playing": false
+          },
+          "coach": {
+            "protectedKept": true,
+            "optionsShown": true,
+            "fixed": true,
+            "undoRestored": true
+          },
+          "restoredSavedLibrary": true
+        }
+      },
+      {
+        "browser": "chromium",
+        "mode": "public-upgrade",
+        "status": "PASS",
+        "runtimeHashes": 110,
+        "cacheEntries": 108,
+        "offlineCustomReload": true,
+        "offlineLessons": 8,
+        "offlineMethod": "owned server stopped",
+        "source": "e84e5211ff3ed1937b389814d23c00aa17682665",
+        "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+        "identity": {
+          "loaded": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "server": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "queried": {
+            "status": "complete",
+            "cache": "no-store",
+            "path": "./version.json"
+          }
+        },
+        "offlineIdentity": {
+          "status": "unavailable",
+          "loadedRetained": true
+        },
+        "smartRally": {
+          "adds": {
+            "shots": 5,
+            "valid": 5,
+            "ids": [
+              "smart-shot-1",
+              "smart-shot-2",
+              "smart-shot-3",
+              "smart-shot-4",
+              "smart-shot-5"
+            ],
+            "playing": false
+          },
+          "random": {
+            "id": "2d4f06ca-08ef-4765-ac7a-2f26f2ae4b50",
+            "shots": 99,
+            "valid": 99,
+            "chapters": 99,
+            "generation": {
+              "mode": "random",
+              "generatorVersion": "smart-rally-v1",
+              "seed": 12648430,
+              "requestedHits": 99
+            },
+            "retainedOldDraft": true,
+            "oldBeforeSmart": true,
+            "playing": false
+          },
+          "coach": {
+            "protectedKept": true,
+            "optionsShown": true,
+            "fixed": true,
+            "undoRestored": true
+          },
+          "restoredSavedLibrary": true
+        }
+      },
+      {
+        "browser": "webkit",
+        "mode": "public-upgrade",
+        "status": "PASS",
+        "runtimeHashes": 110,
+        "cacheEntries": 108,
+        "offlineCustomReload": true,
+        "offlineLessons": 8,
+        "offlineMethod": "owned server stopped",
+        "source": "e84e5211ff3ed1937b389814d23c00aa17682665",
+        "previousPublicSource": "b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585",
+        "identity": {
+          "loaded": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "server": {
+            "schemaVersion": 1,
+            "product": "Pickleball Park",
+            "status": "local",
+            "developmentStatus": "stamped local build",
+            "sourceRevision": "23d2b7975291ff5ffbc1c1e89cd6afac76d8af8c",
+            "sourceBranch": "branding/pickleball-park-strokes",
+            "sourceState": "clean",
+            "sourceRevisionVerified": true,
+            "runtimeMatchesSource": true,
+            "packageRevision": null,
+            "evidenceRevision": null,
+            "packageVerified": false,
+            "runtimeSha256": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeDigest": "ea8bc461b7b44f9109999ada9a2ba4bf282dc4d250df27491fc596f1d485eff9",
+            "runtimeFileset": {
+              "algorithm": "sha256",
+              "include": "static application runtime files",
+              "exclusions": [
+                "version.json",
+                "build-metadata.js",
+                "build-info.json",
+                "runtime-manifest.json"
+              ]
+            },
+            "cacheVersion": "pickleboard-static-v31",
+            "buildTime": "2026-10-21T14:53:23.632Z"
+          },
+          "queried": {
+            "status": "complete",
+            "cache": "no-store",
+            "path": "./version.json"
+          }
+        },
+        "offlineIdentity": {
+          "status": "unavailable",
+          "loadedRetained": true
+        },
+        "smartRally": {
+          "adds": {
+            "shots": 5,
+            "valid": 5,
+            "ids": [
+              "smart-shot-1",
+              "smart-shot-2",
+              "smart-shot-3",
+              "smart-shot-4",
+              "smart-shot-5"
+            ],
+            "playing": false
+          },
+          "random": {
+            "id": "fe23ca32-f2c4-41b5-8114-ac5cbec0baca",
+            "shots": 99,
+            "valid": 99,
+            "chapters": 99,
+            "generation": {
+              "mode": "random",
+              "generatorVersion": "smart-rally-v1",
+              "seed": 12648430,
+              "requestedHits": 99
+            },
+            "retainedOldDraft": true,
+            "oldBeforeSmart": true,
+            "playing": false
+          },
+          "coach": {
+            "protectedKept": true,
+            "optionsShown": true,
+            "fixed": true,
+            "undoRestored": true
+          },
+          "restoredSavedLibrary": true
+        }
+      }
+    ]
+  },
+  "visual": [
+    {
+      "name": "phone",
+      "width": 390,
+      "height": 844,
+      "enlarged": false,
+      "title": "Pickleball Park - Build a Play",
+      "menu": "\u25c6\nPICKLEBALL PARK",
+      "errors": []
+    },
+    {
+      "name": "small-phone",
+      "width": 320,
+      "height": 568,
+      "enlarged": true,
+      "title": "Pickleball Park - Build a Play",
+      "menu": "\u25c6\nPICKLEBALL PARK",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "enlarged": false,
+      "title": "Pickleball Park - Build a Play",
+      "menu": "\u25c6\nPICKLEBALL PARK",
+      "errors": []
+    }
+  ],
+  "physicalDeviceTesting": false,
+  "remoteMutations": false
+}

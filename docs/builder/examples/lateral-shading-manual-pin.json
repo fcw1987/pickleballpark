@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 1,
+  "id": "lateral-shading-manual-pin",
+  "title": "Lateral Shading with Manual Pin",
+  "initialLayout": {
+    "player1": { "x": 14, "y": 14 },
+    "player2": { "x": 5, "y": 14 },
+    "player3": { "x": 6, "y": 30 },
+    "player4": { "x": 15, "y": 30 },
+    "ball": { "x": 5, "y": 14 }
+  },
+  "players": {
+    "player1": { "team": "green", "handedness": "right" },
+    "player2": { "team": "green", "handedness": "right" },
+    "player3": { "team": "orange", "handedness": "right" },
+    "player4": { "team": "orange", "handedness": "left" }
+  },
+  "shots": [
+    { "id": "pinned-dink-1", "family": "dink", "hitter": "player2", "receiver": "player3", "contactStyle": "forehand", "target": { "x": 6, "y": 28 }, "arc": "medium", "pace": "soft", "movement": { "intent": "manual", "pinned": true, "target": { "x": 4, "y": 14 } } },
+    { "id": "orange-dink-2", "family": "dink", "hitter": "player3", "receiver": "player1", "contactStyle": "forehand", "target": { "x": 14, "y": 16 }, "arc": "medium", "pace": "soft", "movement": { "intent": "hold", "pinned": false } },
+    { "id": "green-volley-3", "family": "volley", "hitter": "player1", "receiver": "player4", "contactStyle": "forehand", "target": { "x": 15, "y": 34 }, "arc": "low", "pace": "medium", "movement": { "intent": "hold", "pinned": false } },
+    { "id": "orange-drop-4", "family": "drop", "hitter": "player4", "receiver": "auto", "contactStyle": "backhand", "target": { "x": 7, "y": 13 }, "arc": "high", "pace": "soft", "movement": { "intent": "hold", "pinned": false } }
+  ],
+  "annotations": [],
+  "assistance": { "autoShading": true, "showGuides": true, "team": "both" },
+  "opening": "midrally",
+  "ending": "stop",
+  "intentionalFault": false
+}

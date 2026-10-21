@@ -1,0 +1,17 @@
+# Browser interface guidance and verification
+
+Sources accessed 2026-09-08. This is an Apple-informed browser tool, not a native app, certified HIG implementation, or complete accessibility conformance claim. Local system fonts and existing original icons are retained; no Apple fonts, symbols, frameworks or new services are distributed.
+
+| Authority / section | Observed issue | Application | Evidence |
+|---|---|---|---|
+| [Apple: handheld game interfaces](https://developer.apple.com/videos/play/meet-with-apple/243/), flexible layouts, legibility and input | Scaled phone form and small completion controls | Shallow selected-shot card; explicit taller details; 44 CSS-pixel project target rather than equating native points with CSS pixels | Portrait workflow and size matrix |
+| [Apple: sheets](https://developer.apple.com/videos/play/wwdc2021/10063/), nonmodal interaction | Editor must permit court use, without pretending to have native sheet behavior | Single nonmodal region, Done; placement exposes court; no focus trap on inspector | Tap/manual pin and modality tests |
+| [Apple HIG accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility), Vision (official documentation JSON retrieved) | Precision fields, noncolor meaning and enlarged text | Native labelled fields, exact coordinates, labelled team/player identity, explicit invalid state, 200% reflow | Keyboard, invalid-field and appearance checks |
+| [Apple HIG modality](https://developer.apple.com/design/human-interface-guidelines/modality), official documentation JSON retrieved | Confirmation differs from an inspector | Keep native dialogs for import/library and established planner confirmation; inline retry for save errors | Focus entry, Escape, background and return |
+| [WCAG 2.2](https://www.w3.org/TR/WCAG22/), contrast, reflow and focus | Small screens and text enlargement | Shared calm opaque panels, system text, visible selected/focus states | Browser checks, visual review; not a complete audit |
+| [WCAG dragging movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements) | Target dragging cannot be the only input | Explicit tap placement, numerical alternative, one command per completed gesture | Mouse/emulated touch/keyboard regression |
+| [WebKit safe areas](https://webkit.org/blog/7929/designing-websites-for-iphone-x/) | Browser chrome/keyboard can reduce usable height | viewport-fit=cover, safe-area padding and visualViewport height; browser pinch zoom remains enabled | Reduced-height simulation and orientation tests |
+
+Apple's Designing for games page returned only a JavaScript shell through the available retrieval tool; its body was not verified. The official handheld-game transcript supplies the applicable game guidance. Native Dynamic Type, automatic UIKit keyboard avoidance and native material accessibility are not inherited by this web page. Software-keyboard height simulation is not a physical iPhone keyboard test. VoiceOver, physical iPhone/iPad and actual Safari acceptance remain explicitly pending where unavailable.
+
+Controls are shared across widths, not duplicated mobile forms. Flight presets change arc/pace only; exact targets/pins remain untouched. Precision values that do not match a flight preset display Custom. A Done label closes immediate, undoable edits; it is not a promise to cancel them. Escape on a pending numeric field restores its authored value. Save status distinguishes pending field editing, successful local writes and recoverable failures.

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 async function openBoard(page) {
-  await page.goto('/index.html?projection=1');
+  await page.goto('/index.html?workspace=planner&projection=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.projection))).toBe(true);
 }
 
@@ -21,10 +21,8 @@ test('projection is affine, invertible, and spans the complete editable bounds',
     };
   });
 
-  expect(result.viewBox).toEqual({ x: -13, y: -11, width: 47, height: 60 });
-  const expectedCorners = [
-    [-4.4, -7.2], [31.6, -7.2], [-11.6, 46.8], [24.4, 46.8]
-  ];
+  expect(result.viewBox).toEqual({ x: -12, y: -9.2, width: 44, height: 43.8 });
+  const expectedCorners = [[-5.3,-5.2],[30.7,-5.2],[-10.7,33.8],[25.3,33.8]];
   result.projected.slice(0, 4).forEach((point, index) => {
     expect(point.x).toBeCloseTo(expectedCorners[index][0], 10);
     expect(point.y).toBeCloseTo(expectedCorners[index][1], 10);
@@ -60,9 +58,9 @@ test('ground content projects while editable state and numeric attributes stay c
   expect(state.position).toEqual({ x: 8.5, y: 31.25 });
   expect(state.attrs).toEqual({ dataX: 8.5, dataY: 31.25, targetX: 8.5, targetY: 31.25 });
   const actorOffset = state.actorTransform.match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
-  expect(actorOffset[0]).toBeCloseTo(-1.11, 10);
-  expect(actorOffset[1]).toBeCloseTo(-4.958333333333333, 10);
-  expect(state.groundTransform).toBe('matrix(1 0 -0.12 0.9 2.64 0)');
+  expect(actorOffset[0]).toBeCloseTo(-0.8325, 10);
+  expect(actorOffset[1]).toBeCloseTo(-12.770833333333332, 10);
+  expect(state.groundTransform).toBe('matrix(1 0 -0.09 0.65 1.98 0)');
   expect(state.order.map(item => item.depth)).toEqual([...state.order.map(item => item.depth)].sort((a, b) => a - b));
 });
 
@@ -73,7 +71,7 @@ test('pointer dragging uses inverse projection and preserves grab offset', async
   const box = await target.boundingBox();
   expect(box).not.toBeNull();
   const start = { x: box.x + box.width * 0.7, y: box.y + box.height * 0.35 };
-  const intendedCourtDelta = { x: 3.25, y: 4.5 };
+  const intendedCourtDelta = { x: 3, y: 4 };
   const screenDelta = await page.evaluate(delta => {
     const svg = document.getElementById('court');
     const matrix = svg.getScreenCTM();
@@ -86,10 +84,13 @@ test('pointer dragging uses inverse projection and preserves grab offset', async
     };
   }, intendedCourtDelta);
 
-  await page.mouse.move(start.x, start.y);
-  await page.mouse.down();
-  await page.mouse.move(start.x + screenDelta.x, start.y + screenDelta.y, { steps: 5 });
-  await page.mouse.up();
+  // Synthetic mouse coordinates retain the subpixel delta needed to isolate
+  // projection accuracy from native pointer coordinates' integer quantization.
+  await target.dispatchEvent('mousedown', { clientX:start.x, clientY:start.y, button:0 });
+  await page.evaluate(({x,y})=>document.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,clientX:x,clientY:y,buttons:1})),
+    {x:start.x+screenDelta.x,y:start.y+screenDelta.y});
+  await page.evaluate(({x,y})=>document.dispatchEvent(new MouseEvent('mouseup',{bubbles:true,clientX:x,clientY:y,button:0})),
+    {x:start.x+screenDelta.x,y:start.y+screenDelta.y});
   const after = await page.evaluate(() => window.pickleboard.getTokenPositions().player2);
   expect(after.x).toBeCloseTo(before.x + intendedCourtDelta.x, 1);
   expect(after.y).toBeCloseTo(before.y + intendedCourtDelta.y, 1);
