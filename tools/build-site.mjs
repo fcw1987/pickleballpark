@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 // Frozen release contract, independently compared with the locally retained approved source.
-const approvedManifestSha256 = '5c677edd11817fa552c0e4c0c6262cd14b676c78bafeaa6a841edd61d7d7282f';
+const approvedManifestSha256 = 'bb70c6bc4afe302f8afc42c726c06ce5afab6531eb27988dad3c864b9901f839';
 const approved = JSON.parse(await readFile('tests/fixtures/approved-runtime.json'));
 const version = JSON.parse(await readFile('version.json'));
 if (version.product !== 'Pickleball Park' || !Number.isInteger(version.schemaVersion)) throw Error('Invalid version.json metadata');
