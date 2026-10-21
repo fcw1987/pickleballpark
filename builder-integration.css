@@ -37,10 +37,10 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
   .builder-transport { padding-block: 2px; }
 }
 
-/* These bounds follow the integration large-text rules above so browser zoom
-   cannot restore the rem-sized menu after the phone/landscape overrides. */
+/* Enlarged labels determine their control width; the wrapping header keeps
+   those readable controls inside phone and short landscape viewports. */
 @media (max-width: 700px), (max-height: 500px) and (orientation: landscape) {
-  .builder-large-text .builder-main-menu > summary { width: 54px; min-width: 54px; flex: 0 0 54px; padding-inline: 5px; }
+  .builder-large-text .builder-main-menu > summary { width: max-content; min-width: 54px; flex: 0 0 auto; padding-inline: 8px; }
   .builder-large-text .builder-shot-card-player { display: none; }
   .builder-large-text .builder-meta { z-index: 60; }
 }

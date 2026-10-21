@@ -587,7 +587,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 .builder-choice-field { padding: 0; border: 0; background: transparent; box-shadow: none; }
 .builder-choice-field::before, .builder-choice-field::after { display: none; }
 .builder-choice-field .builder-field-label { margin-bottom: 7px; font: 700 .6875rem/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing: .06em; }
-.builder-choice-field select { appearance: auto; padding: 9px 5px; border: 1px solid var(--game-edge); background: var(--game-paper-deep); font-size: 1rem; }
+.builder-choice-field select { appearance: auto; height: max(44px,2.75em); padding: 9px 5px; border: 1px solid var(--game-edge); background: var(--game-paper-deep); font-size: 1rem; }
 .builder-choice-field:focus-within { box-shadow: none; }
 .builder-family-summary { min-height: 44px; padding: 9px; border: 1px solid var(--game-edge); border-radius: 2px; font-family: ui-sans-serif,system-ui,sans-serif; font-size: 1rem; }
 .builder-family-summary-glyph { font-size: 1rem; }
@@ -640,7 +640,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
   .builder-play-button { min-height: 44px; min-width: 78px; padding-inline: 9px; font-size: .9375rem; }
   .builder-transport .shot-timeline { grid-template-columns: minmax(0,1fr) auto; gap: 0 8px; }
   .builder-transport .shot-timeline-identity { display: none; }
-  .builder-transport .shot-timeline-target { grid-column: 1; grid-row: 1; height: 44px; }
+  .builder-transport .shot-timeline-target { grid-column: 1 / -1; grid-row: 2; height: 44px; }
   .builder-transport .shot-timeline-range { height: 44px; }
   .builder-transport .shot-timeline-time { grid-column: 2; grid-row: 1; font-size: .6875rem; }
 }

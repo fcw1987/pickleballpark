@@ -1311,7 +1311,8 @@ class Pickleboard {
     getDialogFocusables(dialog) {
         return [...dialog.querySelectorAll(
             'button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, a[href], [tabindex]:not([tabindex="-1"])'
-        )].filter(element => !element.hidden && getComputedStyle(element).visibility !== 'hidden' && element.getClientRects().length > 0);
+        )].filter(element => !element.hidden && getComputedStyle(element).visibility !== 'hidden' &&
+            element.getClientRects().length > 0 && element.checkVisibility?.() !== false);
     }
 
     focusDialogWhenVisible(dialog, preferredElement) {
@@ -1346,16 +1347,14 @@ class Pickleboard {
             event.preventDefault();
             return;
         }
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        const focusIsInside = dialog.contains(document.activeElement);
-        if (event.shiftKey && (!focusIsInside || document.activeElement === first)) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && (!focusIsInside || document.activeElement === last)) {
-            event.preventDefault();
-            first.focus();
-        }
+        // Own the complete modal Tab order: Safari may skip buttons in its native
+        // keyboard navigation, and collapsed details can still report rectangles.
+        const currentIndex = focusables.indexOf(document.activeElement);
+        const nextIndex = currentIndex < 0
+            ? (event.shiftKey ? focusables.length - 1 : 0)
+            : (currentIndex + (event.shiftKey ? -1 : 1) + focusables.length) % focusables.length;
+        event.preventDefault();
+        focusables[nextIndex].focus();
     }
     
     toggleMenu() {

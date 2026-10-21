@@ -42,6 +42,29 @@ test('menu and help expose modal state, contain focus, and restore their trigger
   }
   expect(infoFocusLabels).toContain('Check server build');
   expect(infoFocusLabels).toContain('Copy diagnostics');
+  expect(infoFocusLabels).not.toContain('Build diagnostic text');
+
+  // A collapsed details body must not become a phantom last tab stop. Verify
+  // both directions, then include its diagnostic text after it is expanded.
+  const diagnosticDetails = page.locator('#buildDiagnostics details');
+  const diagnosticSummary = diagnosticDetails.locator('summary');
+  const diagnosticText = diagnosticDetails.locator('pre');
+  await page.locator('#infoClose').focus();
+  await page.keyboard.press('Shift+Tab');
+  await expect(diagnosticSummary).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#infoClose')).toBeFocused();
+  await diagnosticSummary.click();
+  await expect(diagnosticDetails).toHaveAttribute('open', '');
+  await page.locator('#infoClose').focus();
+  await page.keyboard.press('Shift+Tab');
+  await expect(diagnosticText).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(diagnosticSummary).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(diagnosticText).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#infoClose')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.locator('#infoModal')).toBeHidden();
   await expect(page.locator('#infoToggle')).toHaveAttribute('aria-expanded', 'false');
