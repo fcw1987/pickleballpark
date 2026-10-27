@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -93,6 +94,20 @@ export function compareGeneratedTrees(expected, generated) {
   return { files: expectedPaths.length, encodedOnlyPngs };
 }
 
+// Imagegen proofs are reviewed source assets, not outputs of the pixel generators.
+// Exact hashes keep this exception narrow and detect altered or missing art.
+export function excludePreservedArt(expected, generated, inventory) {
+  const remaining = new Map(expected);
+  for (const [file, hash] of Object.entries(inventory)) {
+    if (!/^assets\/reference-(?:athletes|depth)\/[^/]+$/.test(file) || !/^[0-9a-f]{64}$/.test(hash)) throw new Error(`Invalid preserved art entry: ${file}`);
+    if (generated.has(file)) throw new Error(`Preserved art unexpectedly generated: ${file}`);
+    const bytes = expected.get(file);
+    if (!bytes || createHash('sha256').update(bytes).digest('hex') !== hash) throw new Error(`Preserved art bytes changed or missing: ${file}`);
+    remaining.delete(file);
+  }
+  return remaining;
+}
+
 async function main() {
   const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'pickleballpark-generated-'));
@@ -104,7 +119,9 @@ async function main() {
     for (const script of GENERATORS) await cp(path.join(projectRoot, 'tools', script), path.join(temporaryRoot, 'tools', script));
     const expected = await snapshot(projectRoot);
     for (const script of GENERATORS) execFileSync(process.execPath, [path.join(temporaryRoot, 'tools', script)], { cwd: temporaryRoot, stdio: 'pipe' });
-    const result = compareGeneratedTrees(expected, await snapshot(temporaryRoot));
+    const generated = await snapshot(temporaryRoot);
+    const preservedArt = JSON.parse(await readFile(path.join(projectRoot, 'tools/preserved-art.json'), 'utf8'));
+    const result = compareGeneratedTrees(excludePreservedArt(expected, generated, preservedArt), generated);
     console.log(`Node ${process.version}, zlib ${process.versions.zlib}: validated ${result.files} generated asset paths without modifying the checkout; ${result.encodedOnlyPngs} PNGs differed only in lossless compression bytes.`);
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });

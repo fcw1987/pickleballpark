@@ -198,8 +198,8 @@ test('reduced motion and enlarged text simulation preserve the visible controls'
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(32, 47, 60)');
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
   await expect(page.getByRole('region', { name: 'Build a Play' })).toBeVisible();
-  await expect(page.locator('.pixel-court-canvas')).toBeVisible();
-  expect(await page.evaluate(() => playBuilder.view)).toBe('2d');
+  await expect(page.locator('#threeDViewer canvas')).toBeVisible();
+  expect(await page.evaluate(() => playBuilder.view)).toBe('3d');
   await expect(page.getByRole('button', { name: 'Switch to 3D court view', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: /^Play$/ }).first().click();
   await expect(page.getByRole('button', { name: /^Pause$/ }).first()).toBeVisible();

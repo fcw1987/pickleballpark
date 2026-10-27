@@ -262,7 +262,7 @@ export function sampleActorPresentation({
         locomotionFrame: state.locomotionFrame, planted: state.planted, handedness,
         artFamily, artAction: state.action,
         shotType: activeSemantics?.shotType || null, strokeSide: activeSemantics?.strokeSide || null,
-        ...(instructionalMovement && activeShot?.authoring?.family === 'overhead' ? {instructionalFamily:'overhead'} : {}),
+        ...(instructionalMovement && activeShot?.authoring?.family ? {instructionalFamily:activeShot.authoring.family} : {}),
         strokeIntensity: activeSemantics?.profile.intensity || 0,
         strokePose, strokeTime, profile, timeSeconds: seconds ?? segment.startTime + localTime,
         travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,

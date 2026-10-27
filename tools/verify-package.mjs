@@ -102,13 +102,10 @@ for (const f of fidelityFixture.files) {
 // does not describe the exact v23 source, so derive the old server from the
 // checked-in service-worker asset list and verify it against the full source
 // inventory before hashing every byte.
-const publicBranch = 'integration/robustness-visual-fidelity';
+// Historical branch aliases may be removed or move. The immutable commit and
+// the complete source inventory/hash checks below establish this fixture.
 const publicRevision = 'b2b36e2f5c4ad542cdf43a2a03cf1a1f7db27585';
 expect(execFileSync('git', ['rev-parse', `${publicRevision}^{commit}`], { encoding: 'utf8' }).trim(), 'frozen public commit must exist').toBe(publicRevision);
-let publicRef = publicBranch;
-try { execFileSync('git', ['rev-parse', '--verify', publicRef], { stdio: 'ignore' }); }
-catch { publicRef = `origin/${publicBranch}`; }
-expect(execFileSync('git', ['rev-parse', publicRef], { encoding: 'utf8' }).trim(), `public source ref ${publicRef}`).toBe(publicRevision);
 const publicServiceWorker = gitText(publicRevision, 'sw.js');
 const publicSwPaths = [...new Set(serviceWorkerAssets(publicServiceWorker))];
 const publicInventory = runtimeInventory(publicRevision);
@@ -430,8 +427,13 @@ async function verifyPathMigration(browserName, browserType, mode) {
   }
 }
 
+// Exact reviewed local depth checkpoint; this is an upgrade fixture, not a release stamp.
+const depthRevision = 'e8f870a50a36325f3bcc946a412899c5e8197be4';
+const depthFiles = new Map(runtimeInventory(depthRevision).map(file => [file, gitBytes(depthRevision, file)]));
+const depthCache = `pickleboard-static-${serviceWorkerCache(depthFiles.get('sw.js').toString('utf8'))}`;
+
 const results = [];
-const allModes = ['fresh', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration'];
+const allModes = ['fresh', 'depth-upgrade', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration'];
 const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allModes;
 if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
@@ -446,9 +448,9 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
       continue;
     }
     const upgrading = mode !== 'fresh';
-    const previousFiles = mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
-    const priorCache = mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
-    const previousRevision = mode === 'branding-upgrade' ? brandingRevision : mode === 'stroke-contact-upgrade' ? strokeContactRevision : mode === 'stroke-upgrade' ? strokeRevision : mode === 'cache-upgrade' ? cacheRevision : mode === 'town-upgrade' ? townRevision : mode === 'art-upgrade' ? artRevision : mode === 'smart-upgrade' ? smartRevision : mode === 'public-upgrade' ? publicRevision : mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
+    const previousFiles = mode === 'depth-upgrade' ? depthFiles : mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
+    const priorCache = mode === 'depth-upgrade' ? depthCache : mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
+    const previousRevision = mode === 'depth-upgrade' ? depthRevision : mode === 'branding-upgrade' ? brandingRevision : mode === 'stroke-contact-upgrade' ? strokeContactRevision : mode === 'stroke-upgrade' ? strokeRevision : mode === 'cache-upgrade' ? cacheRevision : mode === 'town-upgrade' ? townRevision : mode === 'art-upgrade' ? artRevision : mode === 'smart-upgrade' ? smartRevision : mode === 'public-upgrade' ? publicRevision : mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
     let phase = upgrading ? 'old' : 'new', stopped = false;
     const server = createServer((req, res) => {
       const pathname = decodeURIComponent(new URL(req.url, 'http://local').pathname);
@@ -484,7 +486,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
+        if (mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');
@@ -590,7 +592,7 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
       }));
       expect(cacheProof.caches).toContain(candidateCache);
       if (upgrading) expect(cacheProof).toMatchObject({ caches: expect.arrayContaining(['unrelated-application-cache']), unrelated: 'preserve' });
-      const smartProof = (mode === 'fresh' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') ? await verifySmartRallyOffline(page) : null;
+      const smartProof = (mode === 'fresh' || mode === 'depth-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') ? await verifySmartRallyOffline(page) : null;
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
       for (const id of ids) {
         const lesson = await page.evaluate(async id => {

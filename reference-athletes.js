@@ -28,12 +28,13 @@ function strokePhase(s){if(!s.profile)return 3;const t=s.strokeTime/s.profile.du
 export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  const d=root.userData;root.position.set(sample.worldPosition.x,sample.worldPosition.y||0,sample.worldPosition.z);d.visual.quaternion.copy(camera.quaternion);
  const [frame,mirror]=directionFrame(sample.viewDirection),meta=d.resources.assets.metadata.frames[d.player][frame],h=meta.heightMeters,w=h*meta.rect[2]/meta.rect[3];d.body.material.map=d.resources.texture(d.player,frame);d.body.scale.set(w*mirror,h,1);
- const moving=(sample.travelSpeed||0)>.05,phase=strokePhase(sample),family=['ready','shuffle'].includes(sample.action)?'ready':sample.instructionalFamily||(sample.action==='short-hop'?'short-hop':sample.shotType)||sample.action||'ready',pose=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase,facing:sample.viewDirection,moving,time:sample.timeSeconds||0,planted:sample.planted});
+ const moving=(sample.travelSpeed||0)>.05,phase=strokePhase(sample),family=['ready','shuffle'].includes(sample.action)?'ready':((sample.action==='short-hop'||sample.shotType==='short-hop')&&!['serve','overhead'].includes(sample.instructionalFamily)?'short-hop':sample.instructionalFamily||sample.shotType)||sample.action||'ready',pose=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase,facing:sample.viewDirection,moving,time:sample.timeSeconds||0,planted:sample.planted});
  const gait=moving&&!sample.planted?Math.sin(sample.travelPhase??(sample.timeSeconds||0)*12):0,load=['dink','reset','short-hop'].includes(family)?.07:0;
  d.body.position.set(pose.torsoOffset.x*.018,h/2-load+Math.abs(gait)*.018,0);d.body.rotation.z=(pose.torsoOffset.x*.006);
  // Deform the existing richly drawn legs around their hips; shoes keep their artwork.
  const pos=d.body.geometry.attributes.position,base=d.baseVertices;for(let i=0;i<pos.count;i++){const x=base[i*3],y=base[i*3+1],leg=Math.max(0,Math.min(1,(-y-.19)/.31)),side=x<0?-1:1;pos.setXYZ(i,x+leg*gait*.025*side,y+leg*Math.max(0,gait*side)*.045,base[i*3+2]);}pos.needsUpdate=true;
  root.updateMatrixWorld(true);
+ if(family==='short-hop'&&phase>1&&phase<3)pose.paddle.y-=Math.sin((phase-1)*Math.PI/2);
  const scale=.063,fromPose=p=>v(p.x*scale,-p.y*scale-load,.09),paddle=fromPose(pose.paddle),target=sample.paddle?.worldContactTarget;
  // Contact target is the authored ball location; preserve the swing arc around it.
  if(target&&contactWeight>0){const local=d.visual.worldToLocal(v(target.x,target.y,target.z)),contact=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase:1,facing:sample.viewDirection});local.add(paddle.clone().sub(fromPose(contact.paddle)));paddle.lerp(local,Math.min(1,contactWeight));}

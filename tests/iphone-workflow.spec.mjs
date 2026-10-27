@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 import {mkdir} from 'node:fs/promises';
 import {openCoachTools,openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
 test.use({launchOptions:process.env.IPHONE_RECORD?{slowMo:120}:{}});
-const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.view==='2d');};
+const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.view==='3d');};
 const edit=async page=>{const inspector=page.locator('.builder-inspector:not(.builder-inspector-collapsed)');if(!await inspector.isVisible())await page.getByRole('button',{name:'Edit shot',exact:true}).click();};
 const details=async(page,group='Precision')=>{await edit(page);return openIntentTab(page,group);};
 const finish=async page=>{await page.locator('.builder-inspector [data-action=collapse-inspector]').click();};
