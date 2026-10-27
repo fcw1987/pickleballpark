@@ -1,4 +1,5 @@
-import { createDimensionalWorld } from './three-d-world.js';
+import { createReferenceWorld } from './reference-world.js';
+import { DepthCameraControls } from './depth-camera.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import * as THREE from './vendor/three.module.min.js';
 import {
@@ -11,7 +12,7 @@ import {
     fitCameraPreset
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
-import { AthleteResources, createAthlete, updateAthlete } from './three-d-athletes.js';
+import { loadReferenceAthleteAssets, ReferenceAthleteResources as AthleteResources, createReferenceAthlete as createAthlete, updateReferenceAthlete as updateAthlete } from './reference-athletes.js';
 import { ReadableBall } from './three-d-ball.js';
 import { chapterAtTime } from './shot-chapters.js';
 import { mountShotTimeline } from './shot-timeline.js';
@@ -319,7 +320,7 @@ class ThreeDPlaybackViewer {
             // Keep asynchronous intent cancellation at the renderer boundary.
             // The dimensional scene uses locally authored geometry and needs no
             // raster actor download; the existing 2D artwork remains unchanged.
-            await Promise.resolve();
+            this.actorAssets = await loadReferenceAthleteAssets({signal:controller.signal});
             if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
         } catch(error) {
             if(generation!==this.loadGeneration)return false;
@@ -403,13 +404,17 @@ class ThreeDPlaybackViewer {
         this.gradientMap.magFilter = THREE.NearestFilter;
         this.gradientMap.generateMipmaps = false;
         this.gradientMap.needsUpdate = true;
-        this.world = createDimensionalWorld(THREE, { palette: PALETTE, gradientMap: this.gradientMap });
+        this.world = createReferenceWorld(THREE, { palette: PALETTE });
+        const loadedWorld=this.world;
+        this.world.ready?.then(()=>{if(this.world===loadedWorld&&this.renderer){this.worldAssetsReady=true;this.startRenderLoop();}},()=>{if(this.world===loadedWorld)this.worldAssetsReady=false;});
         this.scene.add(this.world.group);
         this.courtObject = this.world.court;
         this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
-        this.staticWorldCache=createStaticWorldCache(this.renderer,this.scene,this.world);
+        // Orbit changes the whole world view. Render at native resolution;
+        // detailed artwork supplies its own pixel edges, without a screen filter.
+        this.cameraControls = new DepthCameraControls(this);
 
         this.resize();
     }
@@ -424,7 +429,7 @@ class ThreeDPlaybackViewer {
 
     renderPixelRatio() {
         const cap = Number(VISUAL.render?.maxPixelRatio) || 2;
-        return Math.max(0.5, Math.min(window.devicePixelRatio || 1, cap) / this.pixelScale);
+        return Math.max(1, Math.min(window.devicePixelRatio || 1, cap));
     }
 
     setPixelScale(scale) {
@@ -439,7 +444,7 @@ class ThreeDPlaybackViewer {
 
 
     buildPlayers() {
-        this.actorResources=new AthleteResources();
+        this.actorResources=new AthleteResources(this.actorAssets);
         for(let index=1;index<=4;index++) {
             const token=this.board.tokens[`player${index}`];
             const team=token.element.classList.contains('team2-player')?'team2':'team1';
@@ -508,6 +513,7 @@ class ThreeDPlaybackViewer {
         if (!CAMERA_PRESETS[name] || !this.camera) return false;
         this.cameraPreset = name;
         this.elements.camera.value = name;
+        if(this.cameraControls)this.cameraControls.reset(name);
         this.applyCameraFraming();
         if(this.currentPlay&&this.ballObject)this.applyAtTime(this.clock.elapsed);
         this.startRenderLoop();
@@ -515,6 +521,7 @@ class ThreeDPlaybackViewer {
     }
 
     applyCameraFraming() {
+        if (this.cameraControls) {this.cameraControls.apply();return;}
         if (!this.camera || !this.cameraPreset) return;
         const width = Math.max(1, this.elements.canvas.clientWidth);
         const height = Math.max(1, this.elements.canvas.clientHeight);
@@ -614,6 +621,7 @@ class ThreeDPlaybackViewer {
     applyAtTime(seconds) {
         const segment=seconds>0?(this.timeline.segments.find(item=>seconds<item.endTime-1e-9)||this.timeline.segments.at(-1)):null;
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
+        this.world?.updateCamera?.(this.camera);
         this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
@@ -663,7 +671,8 @@ class ThreeDPlaybackViewer {
             playId: this.currentPlay?.id || null,
             playerCount: this.playerObjects.size,
             hasBall: Boolean(this.ballObject),
-            artStyle: 'dimensional-court-garden',
+            artStyle: 'reference-pixel-depth',
+            cameraControls: this.cameraControls?.getState(),
             renderLoopCount: this.renderLoopCount,
             pixelScale: this.pixelScale,
             framing: this.cameraFraming ? { ...this.cameraFraming } : null,
@@ -672,6 +681,7 @@ class ThreeDPlaybackViewer {
     }
 
     disposeScene() {
+        this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;
         if (this.world) { this.scene?.remove(this.world.group); this.world.dispose(); this.world=null; }

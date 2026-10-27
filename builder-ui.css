@@ -784,3 +784,113 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 
 .builder-app-title { color: var(--game-ink); white-space: nowrap; font: 1.125rem/1.2 'Park Labels',ui-monospace,monospace; }
 @media (max-width: 1050px) { .builder-app-title { display: none; } }
+
+/* Reference review: one substantial stepped frame carries the live controls. */
+.builder-ui { grid-template-rows: minmax(0,1fr) auto; gap: 8px; padding: 12px; }
+.builder-layout { grid-row: 1; min-height: 0; }
+.builder-reference-dock { grid-row: 2; position: relative; z-index: 30; min-width: 0; padding: 4px 12px 2px; color: #24335c; background: #fffbed; background-clip: padding-box; border: 16px solid transparent; border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20d%3D%22M12%200H36V4H40V8H44V12H48V36H44V40H40V44H36V48H12V44H8V40H4V36H0V12H4V8H8V4H12Z%22%20fill%3D%22%23202f58%22/%3E%3Cpath%20d%3D%22M12%204H36V8H40V12H44V36H40V40H36V44H12V40H8V36H4V12H8V8H12Z%22%20fill%3D%22%23e8e8d5%22/%3E%3Cpath%20d%3D%22M12%208H36V12H40V36H36V40H12V36H8V12H12Z%22%20fill%3D%22%23657797%22/%3E%3Cpath%20d%3D%22M16%2012H32V16H36V32H32V36H16V32H12V16H16Z%22%20fill%3D%22%2326385e%22/%3E%3Cpath%20d%3D%22M16%2016H32V32H16Z%22%20fill%3D%22%23fffbed%22/%3E%3C/svg%3E") 16 fill / 16px stretch; }
+.builder-reference-dock .builder-meta, .builder-reference-dock .builder-transport { border: 0; border-image: none; border-radius: 0; background: transparent; box-shadow: none; padding: 0; }
+.builder-reference-dock .builder-meta { display: flex; flex-wrap: nowrap; align-items: center; gap: 16px; min-height: 64px; z-index: 35; }
+.builder-reference-dock .builder-app-title { display: block; flex: 1 1 auto; min-width: 0; order: 0; color: #1e2c56; font: 2.6rem/1 'Park Labels',ui-monospace,monospace; letter-spacing: -.025em; white-space: nowrap; }
+.builder-reference-dock .builder-context-actions { order: 1; gap: 12px; }
+.builder-reference-dock .builder-main-menu { order: 2; }
+.builder-reference-dock .builder-main-menu > summary,
+.builder-reference-dock .builder-context-actions .builder-button { min-height: 56px; min-width: 96px; padding: 4px 12px; border: 0; background: transparent; color: #30364e; box-shadow: none; font: 1.7rem/1 'Park Labels',ui-monospace,monospace; text-transform: uppercase; }
+.builder-reference-dock .builder-context-actions .builder-play-button { color: #1e2c56; gap: 8px; min-width: 140px; font-size: 1.9rem; }
+.builder-reference-dock .builder-context-actions .builder-play-button .pixel-play-icon { font: 1.5rem/1 ui-monospace,monospace; }
+.builder-reference-dock .builder-context-actions .builder-button:hover,
+.builder-reference-dock .builder-main-menu > summary:hover { color: #1e2c56; background: #e8edcf; }
+.builder-reference-dock .builder-context-actions [aria-expanded="true"] { background: #e8edcf; box-shadow: inset 0 -3px 0 #657797; }
+.builder-reference-dock .builder-menu-icon { display: none; }
+.builder-reference-dock .builder-save-pill { display: none; }
+.builder-reference-dock .builder-message:empty { display: none; }
+.builder-reference-dock .builder-transport { position: static; padding-top: 2px; }
+.builder-reference-dock .builder-transport-top { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; }
+.builder-reference-dock .builder-transport-timeline { flex: 1 1 0; min-width: 0; }
+.builder-reference-dock .builder-cue { flex: 0 1 240px; min-width: 0; }
+.builder-reference-dock .builder-shot-card { display: block; padding: 0; border: 0; background: transparent; }
+.builder-reference-dock .builder-shot-card-kicker,.builder-reference-dock .builder-shot-card-description,.builder-reference-dock .builder-shot-card-flight,.builder-reference-dock .builder-shot-card-player { display: none; }
+.builder-reference-dock .builder-shot-card .builder-chapter-menu > summary { min-height: 44px; padding: 10px 4px; font-size: .875rem; }
+.builder-reference-dock .builder-history-controls { flex: 0 0 auto; }
+.builder-reference-dock .builder-history-controls .builder-button { min-width: 44px; min-height: 44px; }
+.builder-reference-dock [data-action="add-shot"] { min-height: 44px; min-width: 64px; background: transparent; color: #24335c; border: 1px solid #c3c6ba; box-shadow: none; }
+.builder-reference-dock .builder-context-menu { grid-column: auto; grid-row: auto; }
+.builder-reference-dock .builder-context-menu > summary { border: 0; min-width: 44px; min-height: 44px; background: transparent; box-shadow: none; }
+.builder-reference-dock .builder-view-toggle { display: none; }
+.builder-reference-dock .shot-timeline-identity { display: none; }
+.builder-reference-dock .shot-timeline { grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+.builder-reference-dock .shot-timeline-target { grid-column: 1; grid-row: 1; height: 44px; }
+.builder-reference-dock .shot-timeline-range { height: 44px; }
+.builder-reference-dock .shot-timeline-time { grid-column: 2; grid-row: 1; font-size: .7rem; }
+.builder-reference-dock .builder-main-menu > .builder-menu-panel { left: auto; right: 0; top: auto; bottom: calc(100% + 16px); max-height: min(65dvh,calc(100dvh - 230px)); }
+.builder-reference-dock .builder-shot-card .builder-chapter-list { left: 0; right: auto; top: auto; bottom: calc(100% + 12px); }
+.builder-reference-dock .builder-menu-panel,.builder-reference-dock .builder-chapter-list { border: 12px solid transparent; border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20d%3D%22M12%200H36V4H40V8H44V12H48V36H44V40H40V44H36V48H12V44H8V40H4V36H0V12H4V8H8V4H12Z%22%20fill%3D%22%23202f58%22/%3E%3Cpath%20d%3D%22M12%204H36V8H40V12H44V36H40V40H36V44H12V40H8V36H4V12H8V8H12Z%22%20fill%3D%22%23e8e8d5%22/%3E%3Cpath%20d%3D%22M12%208H36V12H40V36H36V40H12V36H8V12H12Z%22%20fill%3D%22%23657797%22/%3E%3Cpath%20d%3D%22M16%2012H32V16H36V32H32V36H16V32H12V16H16Z%22%20fill%3D%22%2326385e%22/%3E%3Cpath%20d%3D%22M16%2016H32V32H16Z%22%20fill%3D%22%23fffbed%22/%3E%3C/svg%3E") 16 fill / 12px stretch; background-clip: padding-box; box-shadow: none; }
+.builder-camera-bar { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-height: 44px; border-top: 1px solid #dedfcc; }
+.builder-camera-modes { display: flex; gap: 4px; }
+.builder-camera-bar .builder-camera-button { min-height: 44px; padding: 4px 10px; color: #344465; background: transparent; border: 0; box-shadow: none; font-size: .8125rem; }
+.builder-camera-bar .builder-camera-button[aria-pressed="true"] { background: #e5e8d3; box-shadow: inset 0 -3px 0 #657797; }
+.builder-camera-bar .builder-camera-zoom { min-width: 44px; padding-inline: 7px; font-size: 1.3rem; }
+.builder-camera-help { position: relative; }
+.builder-camera-help > summary { display: grid; place-items: center; min-height: 44px; padding: 4px 8px; cursor: pointer; font-size: .8125rem; list-style: none; }
+.builder-camera-help > summary::after { content: ' ?'; }
+.builder-camera-help > p { position: absolute; z-index: 100; right: 0; bottom: calc(100% + 8px); width: min(300px,calc(100vw - 48px)); padding: 12px; border: 3px solid #26385e; background: #fffbed; color: #344465; box-shadow: 3px 3px 0 #657797; font-size: .875rem; line-height: 1.4; }
+@media (max-width: 1050px) {
+ .builder-reference-dock .builder-app-title { font-size: 2rem; }
+ .builder-reference-dock .builder-context-actions .builder-button,.builder-reference-dock .builder-main-menu > summary { min-width: 76px; font-size: 1.4rem; }
+ .builder-reference-dock .builder-context-actions .builder-play-button { min-width: 110px; }
+ .builder-reference-dock .builder-cue { flex-basis: 160px; }
+}
+@media (max-width: 700px) {
+ .builder-ui { padding: 8px; gap: 6px; }
+ .builder-reference-dock { padding: 2px 4px 0; border-width: 12px; border-image-width: 12px; }
+ .builder-reference-dock .builder-meta { flex-wrap: wrap; justify-content: space-between; gap: 0 8px; min-height: 0; }
+ .builder-reference-dock .builder-app-title { flex: 1 1 100%; width: 100%; font-size: 1.6rem; text-align: center; line-height: 1.2; padding-bottom: 2px; }
+ .builder-reference-dock .builder-context-actions { flex: 1 1 auto; justify-content: space-around; gap: 0; }
+ .builder-reference-dock .builder-context-actions .builder-button,.builder-reference-dock .builder-main-menu > summary { width: auto; min-width: 72px; min-height: 44px; padding: 4px 6px; font-size: 1.25rem; }
+ .builder-reference-dock .builder-context-actions .builder-play-button { min-width: 100px; font-size: 1.4rem; }
+ .builder-reference-dock .builder-main-menu { margin-left: auto; }
+ .builder-reference-dock .builder-transport-top { flex-wrap: wrap; gap: 0 4px; }
+ .builder-reference-dock .builder-cue { order: 0; flex: 1 1 100px; }
+ .builder-reference-dock [data-action="add-shot"] { order: 1; min-width: 50px; padding-inline: 7px; }
+ .builder-reference-dock .builder-history-controls { order: 2; }
+ .builder-reference-dock .builder-history-controls .builder-button { min-width: 44px; width: 44px; }
+ .builder-reference-dock .builder-context-menu { order: 3; }
+ .builder-reference-dock .builder-transport-timeline { order: 4; flex-basis: 100%; }
+ .builder-reference-dock .shot-timeline { gap: 6px; }
+ .builder-reference-dock .shot-timeline-time { font-size: .625rem; }
+ .builder-camera-bar { justify-content: space-between; gap: 0; }
+ .builder-camera-bar .builder-camera-button { padding-inline: 7px; font-size: .75rem; }
+ .builder-camera-bar .builder-camera-zoom { min-width: 44px; width: 44px; font-size: 1.25rem; }
+ .builder-camera-help > summary { font-size: 0; min-width: 44px; padding-inline: 4px; }
+ .builder-camera-help > summary::after { font-size: 1rem; }
+ .builder-reference-dock .builder-main-menu > .builder-menu-panel { position: fixed; left: 8px; right: 8px; width: auto; bottom: 245px; max-height: calc(100dvh - 265px); }
+ .builder-reference-dock .builder-shot-card .builder-chapter-list { position: fixed; left: 8px; right: 8px; width: auto; top: auto; bottom: 245px; max-height: calc(100dvh - 265px); }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+ .builder-reference-dock .builder-meta { min-height: 44px; }
+ .builder-reference-dock .builder-app-title { font-size: 1.6rem; }
+ .builder-reference-dock .builder-context-actions .builder-button,.builder-reference-dock .builder-main-menu > summary { min-height: 44px; font-size: 1.25rem; }
+ .builder-reference-dock .builder-camera-bar { position: absolute; right: 12px; bottom: 6px; border: 0; }
+ .builder-reference-dock .builder-camera-help { display: none; }
+ .builder-reference-dock .builder-transport-top { padding-right: 300px; }
+}
+
+@media (max-width:700px) { .builder-camera-modes { gap:0; } .builder-camera-bar .builder-camera-button { padding-inline:4px; } }
+/* Status messages get their own line so a save or rendering notice cannot
+   compress the primary authoring controls into the park title. */
+.builder-reference-dock .builder-meta { flex-wrap: wrap; }
+.builder-reference-dock .builder-message:not(:empty),
+.builder-reference-dock .builder-save-error { order: 4; flex: 1 0 100%; min-width: 0; padding: 4px 0; white-space: normal; }
+.builder-reference-dock .builder-context-menu > .builder-menu-panel { top: auto; bottom: calc(100% + 12px); right: 0; }
+@media (min-width: 701px) {
+ .builder-reference-dock .builder-app-title { flex-basis: 40%; }
+}
+@media (max-width: 700px) {
+ .builder-reference-dock .builder-cue { flex: 1 1 60px; }
+ .builder-reference-dock .builder-history-controls { gap: 2px; }
+ .builder-reference-dock .builder-transport-top { column-gap: 2px; }
+}
+/* Short landscape uses the same two-row workspace as the framed dock. */
+@media (max-height: 500px) and (orientation: landscape) {
+ .builder-ui { grid-template-rows: minmax(0,1fr) auto; }
+}

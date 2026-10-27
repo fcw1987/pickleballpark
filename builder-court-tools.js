@@ -60,10 +60,16 @@ export class BuilderCourtTools {
         if(this.builder.session.playing&&!this.placing)return;
         const shot=this.builder.selectedShot;if(!shot)return;const source=this.placement?.start||shot.target,target=this.project(source);
         const near=target&&Math.hypot(event.clientX-target.x,event.clientY-target.y)<25;
-        if(!this.placing&&!near)return;
+        let player=null,playerSource=null;
+        if(!this.placing&&!near&&this.builder.view==='3d'){
+            let hit=this.builder.board.threeD?.cameraControls?.actorHit(event);
+            while(hit&&!hit.userData?.id)hit=hit.parent;
+            if(hit?.userData?.id){player=hit.userData.id;playerSource=worldToBoard(hit.position);}
+        }
+        if(!this.placing&&!near&&!player)return;
         const point=this.unproject(event);if(!point)return;
         this.builder.pause();event.preventDefault();event.stopPropagation();this.surface.setPointerCapture(event.pointerId);
-        this.drag={shotId:this.placement?.shotId || shot.id,pointer:event.pointerId,pointerType:event.pointerType,field:this.placement?.field||'target',player:this.placement?.player||null,offset:near&&!this.placing?{x:point.x-source.x,y:point.y-source.y}:{x:0,y:0},target:{...source}};
+        this.drag={shotId:this.placement?.shotId || shot.id,pointer:event.pointerId,pointerType:event.pointerType,field:this.placement?.field||'target',player:player||this.placement?.player||null,offset:player?{x:point.x-playerSource.x,y:point.y-playerSource.y}:near&&!this.placing?{x:point.x-source.x,y:point.y-source.y}:{x:0,y:0},target:{...(playerSource||source)}};
         this.move(event);
     }
     move(event){if(!this.drag||event.pointerId!==this.drag.pointer)return;const p=this.unproject(event);if(!p)return;const margin=this.drag.player?8:0;this.drag.target={x:Math.max(-margin,Math.min(20+margin,p.x-this.drag.offset.x)),y:Math.max(-margin,Math.min(44+margin,p.y-this.drag.offset.y))};this.render();}

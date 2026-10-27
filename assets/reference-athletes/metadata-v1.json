@@ -1,0 +1,221 @@
+{
+  "image": "athletes-atlas-v1.png",
+  "frames": [
+    [
+      {
+        "rect": [
+          74,
+          36,
+          169,
+          277
+        ],
+        "solePivot": [
+          84.5,
+          277
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          386,
+          36,
+          183,
+          277
+        ],
+        "solePivot": [
+          91.5,
+          277
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          698,
+          36,
+          185,
+          278
+        ],
+        "solePivot": [
+          92.5,
+          278
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          1012,
+          36,
+          166,
+          277
+        ],
+        "solePivot": [
+          83.0,
+          277
+        ],
+        "heightMeters": 1.82
+      }
+    ],
+    [
+      {
+        "rect": [
+          70,
+          337,
+          176,
+          281
+        ],
+        "solePivot": [
+          88.0,
+          281
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          384,
+          338,
+          192,
+          282
+        ],
+        "solePivot": [
+          96.0,
+          282
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          694,
+          339,
+          190,
+          282
+        ],
+        "solePivot": [
+          95.0,
+          282
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          1007,
+          334,
+          175,
+          284
+        ],
+        "solePivot": [
+          87.5,
+          284
+        ],
+        "heightMeters": 1.82
+      }
+    ],
+    [
+      {
+        "rect": [
+          43,
+          644,
+          202,
+          276
+        ],
+        "solePivot": [
+          101.0,
+          276
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          356,
+          644,
+          221,
+          278
+        ],
+        "solePivot": [
+          110.5,
+          278
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          665,
+          647,
+          227,
+          275
+        ],
+        "solePivot": [
+          113.5,
+          275
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          1015,
+          644,
+          195,
+          276
+        ],
+        "solePivot": [
+          97.5,
+          276
+        ],
+        "heightMeters": 1.82
+      }
+    ],
+    [
+      {
+        "rect": [
+          69,
+          937,
+          178,
+          285
+        ],
+        "solePivot": [
+          89.0,
+          285
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          384,
+          936,
+          189,
+          286
+        ],
+        "solePivot": [
+          94.5,
+          286
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          694,
+          936,
+          180,
+          288
+        ],
+        "solePivot": [
+          90.0,
+          288
+        ],
+        "heightMeters": 1.82
+      },
+      {
+        "rect": [
+          1006,
+          936,
+          176,
+          286
+        ],
+        "solePivot": [
+          88.0,
+          286
+        ],
+        "heightMeters": 1.82
+      }
+    ]
+  ]
+}

@@ -25,6 +25,7 @@ export class PixelCourtRenderer {
         this.frame = requestAnimationFrame(this.tick);
     }
     render(time = 0) {
+        if(document.body.classList.contains('three-d-active'))return;
         const { board, canvas, ctx } = this;
         const svg = board.court;
         const sourceBox = svg.viewBox.baseVal;

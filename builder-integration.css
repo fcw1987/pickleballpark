@@ -32,7 +32,7 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
 
 /* Keep a short landscape viewport useful while the non-modal editor is open. */
 @media (max-height: 500px) and (orientation: landscape) {
-  .builder-ui { grid-template-rows: auto minmax(0, 1fr) auto; gap: 3px; }
+  .builder-ui { grid-template-rows: minmax(0, 1fr) auto; gap: 3px; }
   .builder-meta { min-height: 44px; }
   .builder-transport { padding-block: 2px; }
 }

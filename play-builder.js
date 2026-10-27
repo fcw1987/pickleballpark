@@ -89,8 +89,8 @@ export class PlayBuilder {
         document = null;
         globalThis.document.body.classList.add('builder-workspace');
         this.installPlay(true); this.render();this.viewportChanged();
-        // The primary court is the original top-down Canvas2D pixel scene.
-        this.board.pixelRenderer?.render();
+        // Detailed artwork lives in a dimensional court with a freely movable camera.
+        this.switchView('3d');
     }
     get session() { return this.board.plays.session; }
     get waypointPolicy() {

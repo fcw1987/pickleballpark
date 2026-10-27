@@ -1,0 +1,23 @@
+{
+  "name": "Reference Depth Park",
+  "reference": "User-approved Pickleball Park LeafGreen Pixel Concept composition",
+  "originalGeneratedFoliage": {
+    "runtimeAsset": "assets/reference-depth/park-tree-v1.png",
+    "method": "Built-in image_gen tool, transparent RGBA; no API fallback, third-party game assets or paid asset packs",
+    "prompt": "ONE original lush park tree sprite, transparent background; orthographic 45-degree-above three-quarter view; broad rounded layered scalloped crown, interlocking leaf bough clusters, dark teal ink shadow edges, forest and emerald midtones, chartreuse lime highlights upper-left, substantial short warm brown trunk; fine purposeful stepped pixel clusters; no gradients, blur, smooth vector circles, cone silhouette, clay style, ground, detached shadow, text or multiple trees.",
+    "generatedOriginal": "exec-cc28c64d-ab88-4b70-a7fd-e6f092c18996.png",
+    "editing": "No image editing or background conversion; generated alpha preserved",
+    "dimensions": [
+      1283,
+      1226
+    ],
+    "alpha": "RGBA alpha range0\u2013255"
+  },
+  "geometrySource": "depth-park-environment.js",
+  "textureSources": "Deterministic editable RGBA DataTexture constructions in depth-park-environment.js: grass, sand, terracotta roof courses, clapboard siding, water ripples",
+  "worldUnits": "Feet authored locally; root scale .3048 maps to metres",
+  "camera": "True geometry for clubhouse, roof, rail fence, benches, petal flowers and pond banks; grounded camera-facing detailed foliage sprites support all azimuths and tilt",
+  "externalGameAssets": [],
+  "geometryNotes": "Closed extruded triangular terracotta roof body with tile slopes and ridge/eave trim sharing exact endpoints; repeating original grass backdrop continues beneath the compact park at every camera azimuth.",
+  "runtimeReadiness": "Environment ready promise resolves the original foliage TextureLoader; viewer redraws the paused scene once assets are loaded."
+}
