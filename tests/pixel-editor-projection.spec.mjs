@@ -10,8 +10,9 @@ for(const view of ['3d','2d'])test(`inspector target marker aligns with the visi
  await page.getByRole('button',{name:'Edit shot',exact:true}).click();
  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  const state=await page.evaluate(async()=>{
-  const b=playBuilder,r=b.board.pixelRenderer,c=r.canvas.getBoundingClientRect(),d=r.getDiagnostics(),target=b.selectedShot.target;
-  let painted={x:c.x+(d.court.x+target.x*4)*c.width/r.canvas.width,y:c.y+(d.court.y+target.y*4)*c.height/r.canvas.height};
+  const b=playBuilder,target=b.selectedShot.target;
+  let painted;
+  if(b.view==='2d'){const r=b.board.pixelRenderer,c=r.canvas.getBoundingClientRect(),d=r.getDiagnostics();painted={x:c.x+(d.court.x+target.x*4)*c.width/r.canvas.width,y:c.y+(d.court.y+target.y*4)*c.height/r.canvas.height};}
   if(b.view==='3d'){const {Vector3}=await import('/vendor/three.module.min.js'),v=new Vector3((target.x-10)*.3048,0,(target.y-22)*.3048).project(b.board.threeD.camera),box=b.board.threeD.renderer.domElement.getBoundingClientRect();painted={x:box.x+(v.x+1)*box.width/2,y:box.y+(1-v.y)*box.height/2};}
   const marker=b.courtTools.layer.querySelector('circle');
   const projected=b.courtTools.project(target);

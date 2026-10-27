@@ -167,6 +167,12 @@ jobs:
         run: |
           npm run verify:package
           cp release-results/package-verification.json release-results/package-preview-depth-upgrade.json
+      - name: Verify exact live-version upgrade and saved work in both engines
+        env:
+          QA_PACKAGE_MODE: live-upgrade
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-live-upgrade.json
       - name: Check affected authoring, depth matrix and mobile workflow
         run: |
           npx playwright test tests/reference-athletes-depth-matrix.spec.mjs tests/overhead-short-hop-preview.spec.mjs tests/pixel-editor-projection.spec.mjs tests/iphone-workflow.spec.mjs --workers=1 --retries=0

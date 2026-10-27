@@ -842,7 +842,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 }
 @media (max-width: 700px) {
  .builder-ui { padding: 8px; gap: 6px; }
- .builder-reference-dock { padding: 2px 4px 0; border-width: 12px; border-image-width: 12px; }
+ .builder-reference-dock { padding: 2px 2px 0; border-width: 12px; border-image-width: 12px; }
  .builder-reference-dock .builder-meta { flex-wrap: wrap; justify-content: space-between; gap: 0 8px; min-height: 0; }
  .builder-reference-dock .builder-app-title { flex: 1 1 100%; width: 100%; font-size: 1.6rem; text-align: center; line-height: 1.2; padding-bottom: 2px; }
  .builder-reference-dock .builder-context-actions { flex: 1 1 auto; justify-content: space-around; gap: 0; }
@@ -856,14 +856,15 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
  .builder-reference-dock .builder-history-controls .builder-button { min-width: 44px; width: 44px; }
  .builder-reference-dock .builder-context-menu { order: 3; }
  .builder-reference-dock .builder-transport-timeline { order: 4; flex-basis: 100%; }
- .builder-reference-dock .shot-timeline { gap: 6px; }
- .builder-reference-dock .shot-timeline-time { font-size: .625rem; }
+ .builder-reference-dock .shot-timeline { grid-template-columns: minmax(0,1fr); gap: 0; }
+ .builder-reference-dock .shot-timeline-target { grid-column: 1; grid-row: 2; }
+ .builder-reference-dock .shot-timeline-time { grid-column: 1; grid-row: 1; justify-self: end; font-size: .625rem; }
  .builder-camera-bar { justify-content: space-between; gap: 0; }
  .builder-camera-bar .builder-camera-button { padding-inline: 7px; font-size: .75rem; }
  .builder-camera-bar .builder-camera-zoom { min-width: 44px; width: 44px; font-size: 1.25rem; }
  .builder-camera-help > summary { font-size: 0; min-width: 44px; padding-inline: 4px; }
  .builder-camera-help > summary::after { font-size: 1rem; }
- .builder-reference-dock .builder-main-menu > .builder-menu-panel { position: fixed; left: 8px; right: 8px; width: auto; bottom: 245px; max-height: calc(100dvh - 265px); }
+ .builder-reference-dock .builder-main-menu > .builder-menu-panel { position: fixed; left: 8px; right: 8px; width: auto; bottom: 260px; max-height: calc(100dvh - 280px); }
  .builder-reference-dock .builder-shot-card .builder-chapter-list { position: fixed; left: 8px; right: 8px; width: auto; top: auto; bottom: 245px; max-height: calc(100dvh - 265px); }
 }
 @media (max-height: 500px) and (orientation: landscape) {

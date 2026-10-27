@@ -38,26 +38,27 @@ export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  const scale=.063,fromPose=p=>v(p.x*scale,-p.y*scale-load,.09),paddle=fromPose(pose.paddle),target=sample.paddle?.worldContactTarget;
  // Contact target is the authored ball location; preserve the swing arc around it.
  if(target&&contactWeight>0){const local=d.visual.worldToLocal(v(target.x,target.y,target.z)),contact=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase:1,facing:sample.viewDirection});local.add(paddle.clone().sub(fromPose(contact.paddle)));paddle.lerp(local,Math.min(1,contactWeight));}
- // The artwork is a camera-facing card. Put the articulated shoulders on
- // the paddle's depth plane along the exact camera-to-sleeve rays: this keeps
+ // The artwork is a camera-facing card. Put the articulated shoulders at
+ // the nearest point along the exact camera-to-sleeve rays: this keeps
  // their visible attachments on the drawn sleeves without stretching the shirt
  // when a high contact is far in front of that card at an elevated camera angle.
  const handSide=(d.handedness==='left'?-1:1)*(frame===3?1:-1)*mirror;
  const cameraLocal=d.visual.worldToLocal(camera.getWorldPosition(v()));
- const sleeve=(side)=>{
-  const anchor=v(side*.26/(w*mirror),(1.05-load-d.body.position.y)/h,0);
+ const sleeve=(side,height=1.05)=>{
+  const anchor=v(side*.26/(w*mirror),(height-load-d.body.position.y)/h,0);
   d.body.localToWorld(anchor);return d.visual.worldToLocal(anchor);
  };
- const sleeveAnchor=sleeve(handSide),offSleeveAnchor=sleeve(-handSide);
- const atDepth=(anchor,depth)=>{
-  const ray=anchor.clone().sub(cameraLocal),denominator=ray.z;
-  return Math.abs(denominator)>1e-6?cameraLocal.clone().addScaledVector(ray,(depth-cameraLocal.z)/denominator):anchor.clone();
- };
- const shoulder=atDepth(sleeveAnchor,paddle.z),radial=paddle.clone().sub(shoulder).normalize(),wrist=paddle.clone().addScaledVector(radial,-.235);
- const delta=wrist.clone().sub(shoulder),len=delta.length(),mid=shoulder.clone().add(wrist).multiplyScalar(.5),bone=.47,bend=Math.sqrt(Math.max(0,bone*bone-Math.min(len,2*bone)**2/4)),elbowDirection=v(handSide*.25,-.35,.9).addScaledVector(delta,-v(handSide*.25,-.35,.9).dot(delta)/Math.max(1e-9,len*len)).normalize(),elbow=mid.add(elbowDirection.multiplyScalar(bend));
+ // The rounded sleeve cuff spans a small, fixed part of the original art.
+ // Roll the working attachment along that cuff for low/high strokes, never
+ // move or deform the artwork itself. Both interpolation and depth are smooth.
+ let cuff=Math.max(0,Math.min(1,(paddle.y-.5)/.8));cuff=cuff*cuff*(3-2*cuff);
+ const sleeveHeight=.90+.15*cuff,sleeveAnchor=sleeve(handSide,sleeveHeight),offSleeveAnchor=sleeve(-handSide);
+ const ray=sleeveAnchor.clone().sub(cameraLocal),shoulder=cameraLocal.clone().addScaledVector(ray,paddle.clone().sub(cameraLocal).dot(ray)/Math.max(1e-9,ray.lengthSq()));
+ const radial=paddle.clone().sub(shoulder).normalize(),wrist=paddle.clone().addScaledVector(radial,-.235);
+ const delta=wrist.clone().sub(shoulder),len=delta.length(),mid=shoulder.clone().add(wrist).multiplyScalar(.5),bone=.49,bend=Math.sqrt(Math.max(0,bone*bone-Math.min(len,2*bone)**2/4)),elbowDirection=v(handSide*.25,-.35,.9).addScaledVector(delta,-v(handSide*.25,-.35,.9).dot(delta)/Math.max(1e-18,len*len)).normalize(),elbow=mid.add(elbowDirection.multiplyScalar(bend));
  segment(d.arms[0].parts[0],shoulder,elbow);segment(d.arms[0].parts[1],elbow,wrist);d.arms[0].hand.position.copy(wrist);
  const off=offSleeveAnchor,offElbow=off.clone().add(v(-handSide*.09,-.20,0)),offHand=off.clone().add(v(handSide*.02,-.27,.07));segment(d.arms[1].parts[0],off,offElbow);segment(d.arms[1].parts[1],offElbow,offHand);d.arms[1].hand.position.copy(offHand);
- d.rigPose={sleeveAnchor:sleeveAnchor.clone(),shoulder:shoulder.clone(),offSleeveAnchor:offSleeveAnchor.clone(),upperArmLength:bone,forearmLength:bone,wristReach:len};
+ d.rigPose={sleeveAnchor:sleeveAnchor.clone(),shoulder:shoulder.clone(),offSleeveAnchor:offSleeveAnchor.clone(),upperArmLength:bone,forearmLength:bone,wristReach:len,sleeveHeight};
  d.paddle.position.copy(paddle);d.paddle.rotation.z=Math.atan2(-radial.x,radial.y);d.paddle.rotation.y=sample.strokeSide==='backhand'?-.22:.22;root.updateMatrixWorld(true);d.paddle.getWorldPosition(d.paddleFaceWorld);d.animation={phase:sample.phase,action:sample.action,source:'original-imagegen-articulated-v2',frame,mirror,contactWeight,backhand:pose.backhand,planted:pose.planted,family:pose.family};
 }
 export const loadDetailedAthleteAssets=loadReferenceAthleteAssets;

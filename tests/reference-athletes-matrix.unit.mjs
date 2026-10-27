@@ -22,12 +22,12 @@ function assertRig(actor,label,camera){
  for(const [index,arm] of actor.userData.arms.entries()){
   const [a,b]=arm.parts.map(endpoints);
   for(const part of arm.parts)assert.ok(part.inner.position.z-part.outer.position.z>.014,`${label}: skin must project in front of enclosing ink cylinder`);
-  assert.ok(Math.abs(a[0].distanceTo(a[1])-(index?Math.hypot(.09,.20):.47))<1e-8,`${label}: upper arm length`);
-  assert.ok(Math.abs(b[0].distanceTo(b[1])-(index?Math.hypot(.11,.07,.07):.47))<1e-8,`${label}: forearm length`);
+  assert.ok(Math.abs(a[0].distanceTo(a[1])-(index?Math.hypot(.09,.20):.49))<1e-8,`${label}: upper arm length`);
+  assert.ok(Math.abs(b[0].distanceTo(b[1])-(index?Math.hypot(.11,.07,.07):.49))<1e-8,`${label}: forearm length`);
   assert.ok(a[1].distanceTo(b[0])<1e-8,`${label}: elbow connection`);
   assert.ok(b[1].distanceTo(arm.hand.getWorldPosition(new THREE.Vector3()))<1e-8,`${label}: hand connection`);
  }
- assert.ok(actor.userData.rigPose.wristReach<=.940001,`${label}: bounded natural arm reach`);
+ assert.ok(actor.userData.rigPose.wristReach<=.980001,`${label}: bounded natural arm reach`);
  const position=actor.userData.body.geometry.attributes.position,base=actor.userData.baseVertices;
  for(let n=0;n<position.count;n++)if(base[n*3+1]>-.19){for(let k=0;k<3;k++)assert.ok(position.array[n*3+k]===base[n*3+k],`${label}: original upper-body shape must not stretch`);}
  assert.ok(actor.userData.body.geometry.attributes.position.array.every(Number.isFinite),`${label}: finite artwork vertices`);

@@ -4,6 +4,8 @@ import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-a
 test('80 authoring combinations and 18 tactical boundaries compile into explicit anchored pixel strokes',async({page})=>{
  await page.goto('/?pixel-authoring-matrix=1');
  await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&pickleboard.pixelRenderer);
+ await page.evaluate(()=>playBuilder.switchView('2d'));
+ await expect(page.locator('.pixel-court-canvas')).toBeVisible();
  const combinations=pixelAuthoringCases(),boundaries=pixelTacticalBoundaryCases();expect(combinations).toHaveLength(80);expect(boundaries).toHaveLength(18);
  const cases=[...combinations,...boundaries];
  const result=await page.evaluate(cases=>{
