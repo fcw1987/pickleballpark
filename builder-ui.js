@@ -148,7 +148,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   root.setAttribute('aria-label', 'Build a Play');
   document.body.appendChild(root);
   document.body.classList.add('builder-workspace');
-  let current = { document: null, selectedShotId: null, selectedChapterId: null, currentShotId: null, chapters: [], findings: [], playing: false, time: 0, duration: 8.5, view: '3d', workspace: 'builder', saveStatus: 'Saved locally', library: [], templates: [], loop: false, rate: 1, busy: false, message: '', canUndo: false, canRedo: false, camera: 'overhead' };
+  let current = { document: null, selectedShotId: null, selectedChapterId: null, currentShotId: null, chapters: [], findings: [], playing: false, time: 0, duration: 8.5, view: '2d', workspace: 'builder', saveStatus: 'Saved locally', library: [], templates: [], loop: false, rate: 1, busy: false, message: '', canUndo: false, canRedo: false, camera: 'overhead' };
   let destroyed = false;
   let renderedDocument = null;
   let renderedSelectedShotId = null;
@@ -363,6 +363,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const meta = el('div', 'builder-meta');
     status.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft'; status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); status.className = 'builder-save-status'; playGroup.append(status); mainMenu.appendChild(menuPanel);
     meta.appendChild(mainMenu);
+    meta.appendChild(el('span', 'builder-app-title', 'PICKLEBALL PARK'));
     const needsStatus = pendingField || current.saveError || (current.saveStatus && !/^saved(?: locally| on this device)?$/i.test(current.saveStatus));
     if (needsStatus) {
       const compactStatus = el('span', 'builder-save-pill', pendingField ? 'Editing' : (current.saveStatus || 'Draft'));

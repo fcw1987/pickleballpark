@@ -13,7 +13,7 @@ async function installClock(page) {
   await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
 }
 
-test('editor and 3D share elapsed time, rate, pause state, and final recovery',async({page})=>{
+test('retained 3D compatibility API: editor and 3D share elapsed time, rate, pause state, and final recovery',async({page})=>{
   const errors=await openApp(page,'handoff');
   await installClock(page);
   await page.evaluate(()=>window.pickleboard.plays.load('third-shot-drive'));
@@ -28,7 +28,7 @@ test('editor and 3D share elapsed time, rate, pause state, and final recovery',a
   expect(editor.elapsed).toBeGreaterThan(.25);
   expect(editor).toMatchObject({rate:.5,playing:false});
 
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDViewer')).toBeVisible();
   const entered=await page.evaluate(()=>({
     sameSession:pickleboard.plays.session===pickleboard.threeD.session,
@@ -59,7 +59,7 @@ test('editor and 3D share elapsed time, rate, pause state, and final recovery',a
   expect(errors).toEqual([]);
 });
 
-test('final hold freezes, Pause wins, repeat wraps, and replacement cancels stale wakeups',async({page})=>{
+test('retained 3D compatibility API: final hold freezes, Pause wins, repeat wraps, and replacement cancels stale wakeups',async({page})=>{
   const errors=await openApp(page,'hold');
   await installClock(page);
   const duration=await page.evaluate(()=>{
@@ -103,7 +103,7 @@ test('final hold freezes, Pause wins, repeat wraps, and replacement cancels stal
   expect(errors).toEqual([]);
 });
 
-test('thirty editor to 3D cycles restore the exact board and release replay resources',async({page})=>{
+test('retained 3D compatibility API: thirty editor to 3D cycles restore the exact board and release replay resources',async({page})=>{
   test.setTimeout(120000);
   const errors=await openApp(page,'cycles');
   const before=await page.evaluate(()=>{
@@ -141,7 +141,7 @@ test('thirty editor to 3D cycles restore the exact board and release replay reso
   expect(errors).toEqual([]);
 });
 
-test('fifty accelerated loop repetitions keep deterministic session time and bounded render work',async({page})=>{
+test('retained 3D compatibility API: fifty accelerated loop repetitions keep deterministic session time and bounded render work',async({page})=>{
   const errors=await openApp(page,'loops');
   const result=await page.evaluate(()=>{
     const engine=pickleboard.plays;

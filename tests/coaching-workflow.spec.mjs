@@ -26,7 +26,7 @@ for (const [name, viewport, touch] of [
       }
     });
 
-    test('arranged annotated board survives repeated 2D and 3D round trips', async ({ page, browserName }) => {
+    test('arranged annotated pixel board survives retained 3D API round trips', async ({ page, browserName }) => {
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto('/?workspace=planner');
@@ -79,7 +79,8 @@ for (const [name, viewport, touch] of [
         await activate('[data-play-id="serve-and-return"]');
         await activate('#playPlayPause');
         await page.clock.runFor(300);
-        await activate('#play3dView');
+        // Retained 3D compatibility API; primary playback uses the pixel court.
+        await page.evaluate(() => pickleboard.threeD.enter());
         const entered = await page.evaluate(() => ({state: pickleboard.plays.getState(), positions: pickleboard.getTokenPositions()}));
         await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
         expect(entered.state.playing).toBe(true);

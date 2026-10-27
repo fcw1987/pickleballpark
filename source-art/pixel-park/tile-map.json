@@ -1,0 +1,33 @@
+{
+  "tileSize": 16,
+  "world": "Adaptive to viewport",
+  "court": {
+    "width": 80,
+    "height": 176,
+    "feetPerPixel": 0.25
+  },
+  "layers": [
+    "grass tile grid",
+    "path verge and sand",
+    "green runoff",
+    "fence rails",
+    "border trees",
+    "clubhouse pond benches flowers"
+  ],
+  "desktopReview": {
+    "width": 320,
+    "height": 272,
+    "courtOrigin": [
+      120,
+      28
+    ]
+  },
+  "phoneReview": {
+    "width": 144,
+    "height": 256,
+    "courtOrigin": [
+      32,
+      28
+    ]
+  }
+}

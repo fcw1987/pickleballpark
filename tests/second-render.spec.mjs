@@ -1,3 +1,4 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 
@@ -5,11 +6,11 @@ async function openViewer(page) {
   await page.goto('/index.html?workspace=planner&second-render=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
 }
 
-test('3D renderer uses antialiasing and native DPR up to the quality cap', async ({ browser }) => {
+test('legacy 3D compatibility: 3D renderer uses antialiasing and native DPR up to the quality cap', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 800, height: 600 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
   await openViewer(page);
@@ -32,7 +33,7 @@ test('3D renderer uses antialiasing and native DPR up to the quality cap', async
   await context.close();
 });
 
-test('solid athlete meshes own lit materials and release every resource on exit', async ({ page }) => {
+test('legacy 3D compatibility: solid athlete meshes own lit materials and release every resource on exit', async ({ page }) => {
   await openViewer(page);
   const result = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, resources = viewer.actorResources;
@@ -52,7 +53,7 @@ test('solid athlete meshes own lit materials and release every resource on exit'
   expect(result.counts.every(count => count === 1)).toBe(true);
 });
 
-test('articulated strokes remain upright, continuously positioned, grounded, and contact calibrated', async ({ page }) => {
+test('legacy 3D compatibility: articulated strokes remain upright, continuously positioned, grounded, and contact calibrated', async ({ page }) => {
   await openViewer(page);
   await installDimensionalAudit(page);
   const audit = await page.evaluate(() => {
@@ -92,7 +93,7 @@ test('articulated strokes remain upright, continuously positioned, grounded, and
   }
 });
 
-test('tab visibility gaps preserve elapsed time and the playing state', async ({ page }) => {
+test('legacy 3D compatibility: tab visibility gaps preserve elapsed time and the playing state', async ({ page }) => {
   await openViewer(page);
   const active = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;

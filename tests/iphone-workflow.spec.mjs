@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 import {mkdir} from 'node:fs/promises';
 import {openCoachTools,openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
 test.use({launchOptions:process.env.IPHONE_RECORD?{slowMo:120}:{}});
-const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.courtTools.THREE);};
+const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.view==='2d');};
 const edit=async page=>{const inspector=page.locator('.builder-inspector:not(.builder-inspector-collapsed)');if(!await inspector.isVisible())await page.getByRole('button',{name:'Edit shot',exact:true}).click();};
 const details=async(page,group='Precision')=>{await edit(page);return openIntentTab(page,group);};
 const finish=async page=>{await page.locator('.builder-inspector [data-action=collapse-inspector]').click();};
@@ -11,7 +11,7 @@ const field=async(page,name,value)=>{const control=page.getByLabel(name,{exact:t
 const menu=async page=>page.locator('.builder-main-menu > summary').click();
 const chapter=async(page,number,label)=>{const picker=page.locator('.builder-chapter-menu');if(!await picker.locator('.builder-chapter-list').isVisible())await picker.locator(':scope > summary').click();await picker.getByRole('button',{name:new RegExp(`Shot ${number} · ${label}`)}).click();};
 
-test('complete portrait custom rally and detailed movement survive views, reload, lessons and planner',async({browser})=>{
+test('complete portrait custom rally and detailed movement survive retained view APIs, reload, lessons and planner',async({browser})=>{
  const record=process.env.IPHONE_RECORD; if(record)await mkdir(record,{recursive:true});
  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,deviceScaleFactor:2,...(record?{recordVideo:{dir:record,size:{width:390,height:844}}}:{})});
  const page=await context.newPage();await open(page);await field(page,'Play title','Phone custom rally');

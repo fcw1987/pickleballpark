@@ -78,6 +78,7 @@ test.describe('Park Desk interface layer', () => {
       await expect(page.locator('#infoToggle')).toBeHidden();
       await expect(ui.locator('.builder-shot-card .builder-chapter-menu > summary')).toBeVisible();
       await expect(ui.locator('.builder-context-actions [data-action="view"]')).toHaveCount(1);
+      await expect(ui.locator('.builder-context-actions [data-action="view"]')).toBeHidden();
       const boxes = await ui.evaluate(root => [...root.querySelectorAll('.builder-meta > *')].filter(node => node.getBoundingClientRect().width > 0).map(node => { const r = node.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }; }));
       for (let i = 0; i < boxes.length; i += 1) for (let j = i + 1; j < boxes.length; j += 1) {
         const overlapX = boxes[i].left < boxes[j].right - 1 && boxes[j].left < boxes[i].right - 1;

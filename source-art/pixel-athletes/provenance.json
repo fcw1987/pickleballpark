@@ -1,0 +1,36 @@
+{
+  "title": "Pickleball Park original trainer athletes",
+  "source": [
+    "pixel-athletes.js",
+    "pixel-strokes.js",
+    "tools/source-art/pixel-athlete-proof.mjs"
+  ],
+  "externalAssets": [],
+  "nativeCell": {
+    "width": 32,
+    "height": 32
+  },
+  "rows": [
+    "serve",
+    "return",
+    "forehand",
+    "backhand",
+    "drive",
+    "drop",
+    "dink",
+    "volley",
+    "block",
+    "reset",
+    "short-hop",
+    "lob",
+    "overhead"
+  ],
+  "columns": "RH-FH4,RH-BH4,LH-FH4,LH-BH4",
+  "states": [
+    "prepare",
+    "contact",
+    "follow",
+    "recover"
+  ],
+  "license": "Project-owned original pixel art"
+}

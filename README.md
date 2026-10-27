@@ -1,12 +1,12 @@
 # Pickleball Park 🏓
 
-Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline in 3D or 2D. Eight instructional templates and the original Court Planner remain available in the same application.
+Pickleball Park opens into Build a Play: a paused, editable top-down pixel court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline with original tile art and animated athletes. Eight instructional templates and the original Court Planner remain available in the same application.
 
-**Publication branch:** `main` preserves the completed `feature/stroke-instruction` candidate, its rounded 3D town court, articulated athletes and instructional strokes, with consistent Pickleball Park branding. The site address is <https://fcw1987.github.io/pickleballpark/>; see [Pages publication and migration](docs/PAGES_PUBLICATION.md). The [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md), [October 19 strokes handoff](docs/STROKE_HANDOFF.md), and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence.
+**Local pixel review:** this feature branch introduces the original GBA-style pixel court described in [the review guide](docs/PIXEL_REVIEW.md) and [shot coverage](docs/PIXEL_SHOT_COVERAGE.md). It has not been published. The prior 3D work and historical publication evidence remain preserved. **Publication branch:** `main` remains the existing published baseline. The site address is <https://fcw1987.github.io/pickleballpark/>; see [Pages publication and migration](docs/PAGES_PUBLICATION.md). The [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md), [October 19 strokes handoff](docs/STROKE_HANDOFF.md), and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence.
 
 Smart Rally adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the requirements and verification ledger](docs/SMART_RALLY_STATUS.md).
 
-Pickleball Park remains a lightweight static application built with HTML, CSS, vanilla browser JavaScript, inline SVG, and a service worker. Three.js loads for the default 3D builder, with a working 2D fallback and an explicit lightweight planner entry; development tooling uses Node.js and Playwright for reproducible tests.
+Pickleball Park remains a static application built with HTML, CSS, vanilla browser JavaScript, Canvas2D, inline SVG interaction targets, and a service worker. The public editor and planner use the pixel renderer. Historical Three.js playback remains behind explicit compatibility APIs and is not started by the public UI. Development tooling uses Node 24 and Playwright for reproducible tests.
 
 The product name is **Pickleball Park**. The current title, menus, install label and both park signs use that name. Earlier review evidence retains the names it actually captured. See [release notes](docs/RELEASE_NOTES.md) and [identity continuity](docs/RENAME_HANDOFF.md).
 
@@ -108,23 +108,19 @@ Fresh launch, draft restoration, import and lesson selection stay paused. Choosi
 
 The builder rests on the court, with a compact main menu and contextual editor. Speed, camera and Undo/Redo live in Playback options. The chapter picker keeps every shot reachable without a permanent sequence toolbar. Ordinary guided lessons retain their compact instruction context. Shot cues and chapter marks derive from the compiled timeline, with no independent animation timer.
 
-## 2D actors and 3D town court
+## Pixel athletes and park
 
-The retained 2D presentation uses compact 64px composites of the replay body/action artwork, with a stable `(32,54)` foot pivot and a 16/3-foot presentation box. Its directional artwork and default shared sampler remain compatible with the accepted baseline.
+`pixel-court-renderer.js` paints original art at four logical pixels per foot with nearest-neighbor enlargement. The blue court is exactly 80 × 176 logical pixels: 20 × 44 feet, with seven-foot kitchens and 10 × 15 foot service boxes. `pixel-environment.js` composes the adaptive tile park around it. SVG remains responsible for accessible hit targets and editable annotations.
 
-The current 3D view uses articulated solid athletes in the accepted town-court environment. It explicitly opts into instructional choreography: distinct forehand, backhand and lob arcs, world-space planted feet, fixed-length limb IK, and continuous contact/recovery. Physical handedness is preserved. These are stylized teaching illustrations; the phone view shows broad stroke identity rather than fine wrist technique.
+`pixel-athletes.js` and `pixel-strokes.js` own original athlete drawing and distinct stroke curves. Fixed-length arm IK meets the authoritative ball contact, with identical raster snapping for paddle and ball. Canonical player positions stay unchanged; contact-window feet stay planted. Direction, physical handedness, crouch, overhead reach, preparation, follow-through and recovery retain their own motion. Gait uses the shared playhead, so pause and repeated seeks are deterministic.
 
-`three-d-presentation.js` separates world facing, travel and stroke phase, retaining camera-relative artwork selection for 2D. Incoming players prepare before contact; both views use the authoritative timeline and ball contacts. The elevated SVG projection includes physical ball height. The ball retains its high-contrast outlined treatment, short past-position trail in replay and projected ground cue.
-
-`court-geometry.js` defines regulation dimensions and two centerline segments, baseline to kitchen only. `park-layout.js` retains the 2D park layout; `three-d-world.js` builds the accepted rounded town scenery outside the 3D court. Teal, sage, layered greens and terracotta remain coordinated across the views; geometry and annotations retain exact court coordinates.
+Editable park and athlete assets, provenance and regeneration instructions live under `source-art/`. The pose atlas is an inspection export; runtime athlete edits belong in the JavaScript drawing and choreography sources.
 
 ## Rendering and lifecycle
 
-Three.js **0.185.1** remains the only production dependency and loads when 3D is requested, including default builder startup. Local vendor modules and all runtime art are cached for offline use. The editor does not import Three.js. Its ground projection and inverse stay in `board-projection.js`; physical feet map to world meters at 0.3048 m/ft.
+`board-projection.js` uses equal ground scales and an exact inverse. Height remains a separate ball/sprite offset; physical feet map to world meters at 0.3048 m/ft in the shared rally sampler. One session clock owns playback; no second Play catalog is introduced.
 
-Replay uses CSS size × DPR (capped at 3), antialiasing, and the existing Overhead, Sideline, Behind Green and Behind Orange cameras. A static color/depth cache reuses the town scenery while players and ball remain live. Unchanged paused scenes and end holds do not continuously render. One session clock owns playback; hidden-tab return resets its timestamp baseline. Owned render resources and pending park fetches are released on exit, failure or replacement. Recoverable errors leave the board intact.
-
-The original standalone trajectory/rig utilities remain for compatibility and tests. Both views use the shared compiled rally sampler; instructional 3D pose selection does not change ball paths or default 2D samples. No second Play catalog or clock is introduced. See the [current stroke handoff](docs/STROKE_HANDOFF.md), retained [2D asset contract](docs/PIXEL_ACTOR_ASSETS.md), and historical [park art](docs/PARK_ART.md) and [mission evidence](docs/PARK_COACHING_VERIFICATION.md).
+The original Three.js **0.185.1** runtime, camera controls, static cache, geometry and resource lifecycle are retained for compatibility tests through explicit APIs. Those historical internals have no public view toggle in this pixel branch. Local vendor modules and runtime art remain cached for offline compatibility. See [pixel review](docs/PIXEL_REVIEW.md) for the current surface and [the historical stroke handoff](docs/STROKE_HANDOFF.md) for prior 3D evidence.
 
 ## Court coordinate model
 
@@ -165,10 +161,10 @@ These starting positions and team assignments are intentional game behavior.
 
 ## Court appearance
 
-- Muted jade court and sage kitchen, cream lines, navy net
-- Solid 3D athletes in green and orange sportswear; retained pixel artwork in 2D
+- Regulation blue pixel court, cream lines and navy net
+- Original directional pixel athletes in green and orange sportswear
 - Yellow-green ball, orange user annotations, golden Play paths
-- Rounded 3D town scenery, original 2D pixel sprites, and readable controls
+- Tile trees, paths, pond, clubhouse and ivory/navy menu frames
 - Coordinated cream/day and navy/night panels
 
 ## Public API
@@ -217,15 +213,9 @@ This repository does not currently include a formal software license. The owner 
 
 ## Visual assets and verification
 
-The default visual language uses original compact game-inspired artwork across the editor, guided Plays and 3D. Run `node tools/generate-art.mjs` to regenerate sprites, icons and density comparisons without external tools or dependencies. The default builder requests Three.js; the explicit planner entry defers it until 3D is requested, and the service worker still caches its local modules in the background for offline replay.
+The current pixel art is original project work. Run `node tools/generate-pixel-park.mjs` for the runtime park atlas and `node tools/source-art/pixel-athlete-proof.mjs` for editable athlete pose exports. The full generated-assets gate also reproduces retained compatibility assets. See [pixel direction](docs/PIXEL_ART_DIRECTION.md), [park sources](source-art/pixel-park/README.md), and [athlete sources](source-art/pixel-athletes/README.md).
 
-See [visual direction](docs/VISUAL_DIRECTION.md), [asset provenance](docs/ASSET_PROVENANCE.md), [historical verification](docs/REBRAND_VERIFICATION.md), and [public release snapshot](docs/RELEASE_PUBLICATION_SUMMARY.md). Reproducible generators and local review tools remain available in the source tree; their historical capture outputs are not part of the public evidence set.
-
-## Replay implementation
-
-The current 3D replay uses articulated volumetric athletes and distinct instructional strokes in the rounded village court. The original directional pixel athletes remain available to the 2D presentation, with animated paddle contact, a high-contrast ball and stable court framing. The editable SVG board retains precise dragging/drawing and snapshot restoration. Replay runs one timeline and renders unchanged paused views only when needed.
-
-See [historical rebrand verification](docs/REBRAND_VERIFICATION.md) and [reproducible actor asset contract](docs/PIXEL_ACTOR_ASSETS.md). Run `node tools/generate-replay-art.mjs` to regenerate replay art; no additional dependency is needed.
+Actual-app capture and local MP4 conversion tools are in `tools/source-art/`. Their output belongs in ignored `release-results/`; historical captures are not evidence for the current candidate. [Shot coverage](docs/PIXEL_SHOT_COVERAGE.md) separates the representative review reel from the complete schema-derived combination matrix and final browser checks.
 
 ## Product name maintenance
 

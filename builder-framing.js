@@ -5,6 +5,10 @@ import { worldToBoard, FEET_TO_METERS } from './three-d-core.js';
 // Park decorations deliberately do not set the scale of the editing surface.
 export function builderViewBox(play, timeline, projection) {
     const points=[];
+    const frame=projection.COURT_VIEWBOX;
+    // Park margins are part of the pixel composition, while distant authored
+    // movement and ball flights may still expand the frame without clipping.
+    points.push({x:frame.x,y:frame.y},{x:frame.x+frame.width,y:frame.y+frame.height});
     const ground=(x,y)=>projection.courtToView({x,y});
     for(const x of [-2,22])for(const y of [-4,48])points.push(ground(x,y));
     for(const step of play.steps)for(const[id,p]of Object.entries(step.positions)) {

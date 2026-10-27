@@ -1,3 +1,4 @@
+import { PixelCourtRenderer } from './pixel-court-renderer.js';
 import { populateParkSVG, updateParkSVGProjection } from './park-scene.js';
 import { PARK_LAYOUT } from './park-layout.js';
 import './guided-plays.js';
@@ -104,7 +105,9 @@ class Pickleboard {
         };
         
         // Numeric image attributes remain canonical; the render transform anchors the visible soles.
-        this.playerArtworkSize = { width: PICKLEBOARD_VISUAL.sprite.worldWidth, height: PICKLEBOARD_VISUAL.sprite.worldHeight };
+        // Invisible SVG artwork also supplies pointer hit geometry for the native
+        // 24-pixel (six-foot) athlete above its canonical sole anchor.
+        this.playerArtworkSize = { width: 6, height: 7.5 };
         this.playerArtworkColors = { team1: 'green', team2: 'orange' };
 
         // Drawing system
@@ -120,6 +123,7 @@ class Pickleboard {
         };
         
         this.init();
+        this.pixelRenderer = new PixelCourtRenderer(this);
     }
     
     init() {

@@ -61,8 +61,8 @@ test('all four players initialize right handed with expected team artwork', asyn
     await expect(player).toHaveAttribute('href', expected.href);
     await expect(player).toHaveAttribute('data-handedness', expected.handedness);
     await expect(player).toHaveAttribute('preserveAspectRatio', 'xMidYMid meet');
-    await expect(player).toHaveAttribute('width', String(16 / 3));
-    await expect(player).toHaveAttribute('height', String(16 / 3));
+    await expect(player).toHaveAttribute('width', '6');
+    await expect(player).toHaveAttribute('height', '7.5');
   }
 
   const assetResponses = await page.evaluate(async paths => Promise.all(paths.map(async path => {
@@ -197,8 +197,8 @@ test('drag keeps the visible token, hit target, and public state synchronized', 
 
   expect(synchronized.visualAnchor).toEqual(synchronized.state);
   expect(synchronized.imageOrigin).toEqual({
-    x: synchronized.state.x - 8 / 3,
-    y: synchronized.state.y - 8 / 3
+    x: synchronized.state.x - 3,
+    y: synchronized.state.y - 3.75
   });
   expect(synchronized.hitTarget).toEqual(synchronized.state);
   expect(synchronized.tracerCount).toBeGreaterThan(0);
@@ -261,7 +261,7 @@ test('programmatic mode changes synchronize controls and reset uses authoritativ
     checkedMode: 'singles',
     player1: { x: 5, y: -1 },
     player1VisualAnchor: { x: 5, y: -1 },
-    player1ImageOrigin: { x: 5 - 8 / 3, y: -1 - 8 / 3 },
+    player1ImageOrigin: { x: 5 - 3, y: -1 - 3.75 },
     player3Display: 'none'
   });
   await expect(page.evaluate(() => window.pickleboard.setGameMode('invalid'))).resolves.toBe(false);

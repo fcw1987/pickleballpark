@@ -1,9 +1,10 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 import { fitCameraPreset } from '../three-d-core.js';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 
-test('camera fitting expands narrow views without changing preset sight lines', () => {
+test('legacy 3D compatibility: camera fitting expands narrow views without changing preset sight lines', () => {
   const desktop = fitCameraPreset('sideline', 16 / 9, 0.12);
   const portrait = fitCameraPreset('sideline', 390 / 1060, 0.22);
   expect(desktop.position.every(Number.isFinite)).toBe(true);
@@ -21,7 +22,7 @@ async function openWorld(page, viewport) {
   await page.goto('/index.html?workspace=planner&visual-world=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   await installDimensionalAudit(page);
   await page.evaluate(() => {
@@ -85,7 +86,7 @@ async function openWorld(page, viewport) {
   });
 }
 
-test('3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
+test('legacy 3D compatibility: 3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
   await openWorld(page, { width: 1280, height: 800 });
   const world = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, garden = viewer.world;
@@ -125,7 +126,7 @@ test('3D world has original lit solid geometry, deterministic acrylic surfaces, 
   expect(await page.evaluate(() => window.pickleboard.threeD.setPixelScale(1))).toBe(1);
 });
 
-test('camera presets reframe after portrait resize without resetting playback', async ({ page }) => {
+test('legacy 3D compatibility: camera presets reframe after portrait resize without resetting playback', async ({ page }) => {
   await openWorld(page, { width: 1280, height: 800 });
   await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
@@ -168,7 +169,7 @@ test('camera presets reframe after portrait resize without resetting playback', 
   }
 });
 
-test('all Plays keep complete actors and trajectories above the HUD at every target viewport', async ({ page }) => {
+test('legacy 3D compatibility: all Plays keep complete actors and trajectories above the HUD at every target viewport', async ({ page }) => {
   test.setTimeout(90000);
   await openWorld(page, { width: 390, height: 844 });
   const playIds = PICKLEBOARD_PLAYS.map(play => play.id);
@@ -233,7 +234,7 @@ test('all Plays keep complete actors and trajectories above the HUD at every tar
 });
 
 
-test('phone cameras retain a visible ball without changing its trajectory or physical radius', async ({ page }) => {
+test('legacy 3D compatibility: phone cameras retain a visible ball without changing its trajectory or physical radius', async ({ page }) => {
   await openWorld(page, {width:320, height:568});
   for (const name of ['overhead','sideline','behind-green','behind-orange']) {
     await page.locator('#threeDCamera').selectOption(name,{force:true});

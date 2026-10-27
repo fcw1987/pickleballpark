@@ -193,7 +193,7 @@ test('DPR2 touch dragging retains exact SVG coordinates and replay restoration',
   expect(arranged.player1.x).toBeCloseTo(before.position.x + before.expectedDelta.x, 5);
   expect(arranged.player1.y).toBeCloseTo(before.position.y + before.expectedDelta.y, 5);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').tap();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await page.locator('#threeDCanvas canvas').waitFor();
   await page.locator('#threeDExit').tap();
   await page.locator('#playExit').tap();
@@ -207,7 +207,7 @@ test('200 percent text sizing keeps instructions and Exit reachable', async ({ p
   await page.addStyleTag({content: 'html { font-size: 200%; } body { font-size: 32px; }'});
   await page.evaluate(() => pickleboard.plays.load('fifth-shot-drop'));
   await expect(page.locator('#playbackDescription')).toBeVisible();
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await page.locator('#threeDCanvas canvas').waitFor();
   await page.locator('#threeDExit').click();
   await page.locator('#playExit').click();

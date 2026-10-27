@@ -1,9 +1,10 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import {test,expect} from './helpers/offline-app.mjs';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
-async function open(page){await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);}
+async function open(page){await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);}
 
-test('actual opaque paddle triangles meet the unchanged ball for both hands in every Play and camera',async({page})=>{
+test('legacy 3D compatibility: actual opaque paddle triangles meet the unchanged ball for both hands in every Play and camera',async({page})=>{
  await open(page);
  await installDimensionalAudit(page);
  const result=await page.evaluate(async playIds=>{
@@ -29,7 +30,7 @@ test('actual opaque paddle triangles meet the unchanged ball for both hands in e
  expect(result.samples).toBe(PICKLEBOARD_PLAYS.reduce((sum,play)=>sum+play.steps.filter(step=>step.shot).length,0)*8);expect(result.opaque).toBe(true);expect(result.maxError).toBeLessThan(0.02);
 });
 
-test('ball stays at least twelve CSS pixels and its surface keeps the logical projected center',async({page})=>{
+test('legacy 3D compatibility: ball stays at least twelve CSS pixels and its surface keeps the logical projected center',async({page})=>{
  await open(page);
  const sizes=await page.evaluate(()=>{
   const v=pickleboard.threeD,result=[];
@@ -48,7 +49,7 @@ test('ball stays at least twelve CSS pixels and its surface keeps the logical pr
  for(const s of sizes){expect(s.diameter).toBeGreaterThanOrEqual(11.99);expect(s.drift).toBeLessThan(1e-9);expect(Math.abs(s.x)).toBeLessThan(1);expect(Math.abs(s.y)).toBeLessThan(1);/* Depth changes on the same ray; x/y remain fixed. */}
 });
 
-test('dimensional replay opens when raster replay assets are unavailable',async({browser})=>{
+test('legacy 3D compatibility: dimensional replay opens when raster replay assets are unavailable',async({browser})=>{
  const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage();
  await page.route('**/assets/replay/**',route=>route.abort());
  await open(page);await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
@@ -57,16 +58,16 @@ test('dimensional replay opens when raster replay assets are unavailable',async(
  await context.close();
 });
 
-test('context loss exits safely and replay can be opened again',async({page})=>{
+test('legacy 3D compatibility: context loss exits safely and replay can be opened again',async({page})=>{
  await open(page);await page.evaluate(()=>pickleboard.threeD.renderer.domElement.dispatchEvent(new Event('webglcontextlost',{cancelable:true})));
  await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);await expect(page.locator('#threeDLoadStatus')).toContainText('Graphics were interrupted');
- await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+ await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
 });
 
-test('fresh cached installation opens all four solid athletes fully offline',async({browser,offlineApp})=>{
+test('legacy 3D compatibility: fresh cached installation opens all four solid athletes fully offline',async({browser,offlineApp})=>{
  const context=await browser.newContext({serviceWorkers:'allow'}),page=await context.newPage();
  await page.goto(`${offlineApp.url}/?workspace=planner`);await page.waitForFunction(()=>navigator.serviceWorker.controller);await offlineApp.stop();await page.reload();
- await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.locator('#play3dView').click();await page.waitForFunction(()=>pickleboard.threeD.active);
+ await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);
  expect(await page.evaluate(()=>[...pickleboard.threeD.playerObjects.values()].filter(a=>a.userData.volumetricAthlete&&a.getObjectByName('PaddleFace')?.geometry.attributes.position.count>0).length)).toBe(4);
  await page.locator('#threeDExit').click();await page.locator('#playExit').click();await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);await context.close();
 });

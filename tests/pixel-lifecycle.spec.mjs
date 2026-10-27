@@ -1,3 +1,4 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
@@ -33,9 +34,9 @@ async function settleAnimationFrames(page, count = 4) {
   }), count);
 }
 
-test('paused replay renders only on demand and playback owns one scheduler', async ({ page }) => {
+test('legacy 3D compatibility: paused replay renders only on demand and playback owns one scheduler', async ({ page }) => {
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
 
   await page.evaluate(() => {
@@ -91,9 +92,9 @@ test('paused replay renders only on demand and playback owns one scheduler', asy
   expect(await page.evaluate(() => pickleboard.threeD.__testRenderCount)).toBeGreaterThan(demandCalls);
 });
 
-test('playing replay resumes its single scheduler after visibility returns', async ({ page }) => {
+test('legacy 3D compatibility: playing replay resumes its single scheduler after visibility returns', async ({ page }) => {
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   await page.locator('#threeDPlayPause').click();
   await settleAnimationFrames(page, 2);
@@ -113,7 +114,7 @@ test('playing replay resumes its single scheduler after visibility returns', asy
   }))).toMatchObject({ playing: true, scheduler: expect.any(Number) });
 });
 
-test('30 editor to replay cycles preserve state and release owned lifecycle resources', async ({ page }) => {
+test('legacy 3D compatibility: 30 editor to replay cycles preserve state and release owned lifecycle resources', async ({ page }) => {
   const baseline = await page.evaluate(() => {
     const board = pickleboard;
     board.setTokenPosition('player1', 8.25, 30.5);

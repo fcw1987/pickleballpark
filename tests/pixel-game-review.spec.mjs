@@ -179,6 +179,8 @@ test('validation, save failure, and delayed 3D completion leave an honest paused
   const asyncResult = await page.evaluate(async () => {
     window.__restoreReviewStorage();
     await playBuilder.action('acknowledgeWaypoints');
+    // Initialize the retained legacy viewer explicitly; primary startup is Canvas2D.
+    await playBuilder.switchView('3d');
     const viewer = playBuilder.board.threeD;
     viewer.exit({ preservePlayback: true });
     playBuilder.view = '2d';

@@ -1,10 +1,11 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { test, expect } from '@playwright/test';
 
 const openScene = async page => {
   await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.plays);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await page.waitForFunction(() => pickleboard.threeD?.active && pickleboard.threeD.staticWorldCache);
 };
 
@@ -48,7 +49,7 @@ const expectPixelEquivalence = evidence => {
   }
 };
 
-test('static scene cache reuses artwork and invalidates for camera, light and world changes', async ({ page }) => {
+test('legacy 3D compatibility: static scene cache reuses artwork and invalidates for camera, light and world changes', async ({ page }) => {
   await openScene(page);
   const evidence = await page.evaluate(() => {
     const v = pickleboard.threeD, cache = v.staticWorldCache;
@@ -73,14 +74,14 @@ test('static scene cache reuses artwork and invalidates for camera, light and wo
   }
 });
 
-test('cached color and depth preserve moving ball, players and net across cameras', async ({ page }) => {
+test('legacy 3D compatibility: cached color and depth preserve moving ball, players and net across cameras', async ({ page }) => {
   await openScene(page);
   const evidence = await page.evaluate(compareCachedPixels);
   await test.info().attach('cached-vs-direct-pixels', { body: JSON.stringify(evidence, null, 2), contentType: 'application/json' });
   expectPixelEquivalence(evidence);
 });
 
-test('cache follows backing-buffer resize and disposes its owned resources once', async ({ page }) => {
+test('legacy 3D compatibility: cache follows backing-buffer resize and disposes its owned resources once', async ({ page }) => {
   await openScene(page);
   await page.evaluate(() => {
     const v = pickleboard.threeD, cache = v.staticWorldCache;
@@ -115,7 +116,7 @@ test('cache follows backing-buffer resize and disposes its owned resources once'
   expect(evidence.disposed).toBe(true);
 });
 
-test('oversized high-DPR surfaces retain direct rendering and cache again after shrinking', async ({ browser }) => {
+test('legacy 3D compatibility: oversized high-DPR surfaces retain direct rendering and cache again after shrinking', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, serviceWorkers: 'block' });
   const page = await context.newPage();
   await openScene(page);
@@ -143,7 +144,7 @@ test('oversized high-DPR surfaces retain direct rendering and cache again after 
 });
 
 
-test('native DPR3 phones retain MSAA quality with bounded resolved-cache memory', async ({ browser }) => {
+test('legacy 3D compatibility: native DPR3 phones retain MSAA quality with bounded resolved-cache memory', async ({ browser }) => {
   test.setTimeout(60000);
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, serviceWorkers: 'block' });
   const page = await context.newPage(), errors = [];

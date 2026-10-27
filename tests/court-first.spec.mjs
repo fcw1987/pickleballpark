@@ -9,12 +9,23 @@ async function audit(page){return page.evaluate(()=>{
  const court=[[0,0],[20,0],[20,44],[0,44]].map(([x,y])=>screen({x,y}));
  const apron=[[-8,-8],[28,-8],[28,52],[-8,52]].map(([x,y])=>screen({x,y}));
  const box=id=>{const r=document.getElementById(id).getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
- return {name:p.name,court,apron,menu:box('menuToggle'),help:box('infoToggle'),svg:box('court')};
+ return {name:p.name,court,apron,viewBox:{width:svg.viewBox.baseVal.width,height:svg.viewBox.baseVal.height},menu:box('menuToggle'),help:box('infoToggle'),svg:box('court')};
 });}
 
 for(const [width,height] of viewports)test(`court-first layout ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width,height});await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);
- const a=await audit(page);expect(polygonArea(a.court)).toBeGreaterThan(width===1440?200000:1000);
+ const a=await audit(page);
+ // The visible top-down court uses the largest uniform scale that fits the
+ // complete park viewBox, with the regulation 20:44 proportion intact.
+ const courtWidth=Math.hypot(a.court[1].x-a.court[0].x,a.court[1].y-a.court[0].y);
+ const courtHeight=Math.hypot(a.court[3].x-a.court[0].x,a.court[3].y-a.court[0].y);
+ const fittedScale=Math.min(a.svg.width/a.viewBox.width,a.svg.height/a.viewBox.height);
+ expect(courtWidth/20).toBeCloseTo(courtHeight/44,6);
+ expect(courtWidth).toBeCloseTo(20*fittedScale,5);
+ expect(courtHeight).toBeCloseTo(44*fittedScale,5);
+ expect(polygonArea(a.court)).toBeCloseTo(20*44*fittedScale**2,3);
+ expect(a.court[1].y).toBeCloseTo(a.court[0].y,6);
+ expect(a.court[3].x).toBeCloseTo(a.court[0].x,6);
  for(const point of a.apron){expect(point.x).toBeGreaterThanOrEqual(a.svg.x-1);expect(point.x).toBeLessThanOrEqual(a.svg.right+1);expect(point.y).toBeGreaterThanOrEqual(a.svg.y-1);expect(point.y).toBeLessThanOrEqual(a.svg.bottom+1);}
  for(const control of[a.menu,a.help]){expect(control.width).toBeGreaterThanOrEqual(44);expect(control.height).toBeGreaterThanOrEqual(44);expect(control.x).toBeGreaterThanOrEqual(0);expect(control.right).toBeLessThanOrEqual(width);expect(control.y).toBeGreaterThanOrEqual(0);expect(control.bottom).toBeLessThanOrEqual(height);}
 });
@@ -45,11 +56,11 @@ test('guided layout keeps border controls on their projected park anchors',async
  expect(positions.menu.box.right).toBeLessThan(courtLeft);expect(positions.help.box.left).toBeGreaterThan(courtRight);
 });
 
-test('active shot cue keeps the banner inside a 1024x768 viewport',async({page})=>{
+test('active shot cue stays readable inside a 1024x768 viewport',async({page})=>{
  await page.setViewportSize({width:1024,height:768});await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);
  await page.evaluate(()=>{pickleboard.plays.load('lob-overhead');pickleboard.plays.timelineAction('chapter','overhead');});
  await expect(page.locator('#playShotCue')).toBeVisible();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
- const banner=await page.locator('.park-banner').boundingBox();expect(banner.y).toBeGreaterThanOrEqual(0);expect(banner.y+banner.height).toBeLessThanOrEqual(768);
+ const cue=await page.locator('#playShotCue').boundingBox();expect(cue.width).toBeGreaterThan(0);expect(cue.height).toBeGreaterThan(0);expect(cue.x).toBeGreaterThanOrEqual(0);expect(cue.x+cue.width).toBeLessThanOrEqual(1024);expect(cue.y).toBeGreaterThanOrEqual(0);expect(cue.y+cue.height).toBeLessThanOrEqual(768);
 });
 
 for(const [width,height] of [[390,844],[844,390]])test(`200 percent text keeps border controls clear at ${width}x${height}`,async({page})=>{

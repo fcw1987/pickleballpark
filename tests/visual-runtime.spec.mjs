@@ -1,16 +1,17 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 
-test('editor does not execute Three.js until 3D is requested', async ({ page }) => {
+test('legacy 3D compatibility: editor does not execute Three.js until 3D is requested', async ({ page }) => {
   await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   expect(await page.evaluate(() => performance.getEntriesByType('resource').some(entry => /vendor\/three/.test(entry.name)))).toBe(false);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   expect(await page.evaluate(() => performance.getEntriesByType('resource').some(entry => /vendor\/three/.test(entry.name)))).toBe(true);
 });
 
-test('failed 3D module loading leaves the original board recoverable', async ({ browser }) => {
+test('legacy 3D compatibility: failed 3D module loading leaves the original board recoverable', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   await page.route('**/three-d-playback.js', route => route.abort());
@@ -19,7 +20,7 @@ test('failed 3D module loading leaves the original board recoverable', async ({ 
   await page.evaluate(() => pickleboard.setTokenPosition('ball', 7, 12));
   const before = await page.evaluate(() => pickleboard.captureBoardState());
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDLoadStatus')).toContainText('could not open');
   await expect(page.locator('#threeDViewer')).toBeHidden();
   await expect(page.locator('#play3dView')).toBeEnabled();
@@ -28,7 +29,7 @@ test('failed 3D module loading leaves the original board recoverable', async ({ 
   await context.close();
 });
 
-test('leaving a Play while 3D loads cannot open a stale viewer', async ({ browser }) => {
+test('legacy 3D compatibility: leaving a Play while 3D loads cannot open a stale viewer', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   let release;
@@ -37,7 +38,7 @@ test('leaving a Play while 3D loads cannot open a stale viewer', async ({ browse
   await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#play3dView')).toHaveAttribute('aria-busy', 'true');
   await page.locator('#playExit').click();
   release();
@@ -64,7 +65,7 @@ for (const size of [{width:320,height:568},{width:390,height:844},{width:844,hei
   });
 }
 
-test('WebGL allocation failure cleans up the viewer and preserves coaching state', async ({ page }) => {
+test('legacy 3D compatibility: WebGL allocation failure cleans up the viewer and preserves coaching state', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -76,7 +77,7 @@ test('WebGL allocation failure cleans up the viewer and preserves coaching state
   await page.waitForFunction(() => window.pickleboard?.threeD);
   const before = await page.evaluate(() => pickleboard.captureBoardState());
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDLoadStatus')).toBeVisible();
   await expect(page.locator('#threeDLoadStatus')).not.toHaveText('Opening 3D court…');
   await expect(page.locator('#threeDViewer')).toBeHidden();
@@ -87,7 +88,7 @@ test('WebGL allocation failure cleans up the viewer and preserves coaching state
 });
 
 
-test('a failed module request can be retried without reloading the board', async ({ browser }) => {
+test('legacy 3D compatibility: a failed module request can be retried without reloading the board', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   let requests = 0;
@@ -95,15 +96,15 @@ test('a failed module request can be retried without reloading the board', async
   await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDLoadStatus')).toContainText('could not open');
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   await expect(page.locator('#threeDLoadStatus')).toBeHidden();
   await context.close();
 });
 
-test('reselecting the same Play cannot revive a cancelled 3D request', async ({ browser }) => {
+test('legacy 3D compatibility: reselecting the same Play cannot revive a cancelled 3D request', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   let release;
@@ -112,7 +113,7 @@ test('reselecting the same Play cannot revive a cancelled 3D request', async ({ 
   await page.goto('/?workspace=planner');
   await page.waitForFunction(() => window.pickleboard?.threeD);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#play3dView')).toHaveAttribute('aria-busy', 'true');
   await page.locator('#playExit').click();
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));

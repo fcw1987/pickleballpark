@@ -1,19 +1,20 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 
 async function open3d(page) {
   await page.goto('/index.html?workspace=planner&three-d-visual=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   await expect(page.locator('#threeDViewer')).toBeVisible();
 }
 
-test('visible athletes have articulated solid anatomy and physical handedness', async ({ page }) => {
+test('legacy 3D compatibility: visible athletes have articulated solid anatomy and physical handedness', async ({ page }) => {
   await page.goto('/index.html?workspace=planner&three-d-visual-hands=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => { window.pickleboard.tokens.player2.handedness = 'left'; window.pickleboard.plays.load('third-shot-drop'); });
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   const players = await page.evaluate(() => Object.fromEntries([...window.pickleboard.threeD.playerObjects].map(([id, root]) => {
     const meshes = [];
@@ -41,7 +42,7 @@ test('visible athletes have articulated solid anatomy and physical handedness', 
   expect(players.player3.team).toBe('team2');
 });
 
-test('court, sagging net, surround, and camera framing preserve authoritative dimensions', async ({ page }) => {
+test('legacy 3D compatibility: court, sagging net, surround, and camera framing preserve authoritative dimensions', async ({ page }) => {
   await open3d(page);
   const scene = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
@@ -99,7 +100,7 @@ test('court, sagging net, surround, and camera framing preserve authoritative di
   expect(Object.values(scene.cameraStates).map(camera => camera.fov)).toEqual([46, 50, 52, 52]);
 });
 
-test('ball keeps its physical radius while enforcing a readable projected diameter', async ({ page }) => {
+test('legacy 3D compatibility: ball keeps its physical radius while enforcing a readable projected diameter', async ({ page }) => {
   await open3d(page);
   const ball = await page.evaluate(() => ({
     ...window.pickleboard.threeD.ballObject.userData,

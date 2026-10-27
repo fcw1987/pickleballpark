@@ -1,3 +1,4 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 
 const plays = [
@@ -16,10 +17,10 @@ async function openApp(page) {
 }
 
 for (const expected of plays) {
-  test(`${expected.id} reaches its endpoint, seeks, exits, and re-enters 3D`, async ({ page }) => {
+  test(`legacy 3D compatibility: ${expected.id} reaches its endpoint, seeks, exits, and re-enters 3D`, async ({ page }) => {
     const errors = await openApp(page);
     await page.evaluate(id => window.pickleboard.plays.load(id), expected.id);
-    await page.locator('#play3dView').click();
+    await page.evaluate(() => { void pickleboard.threeD.enter(); });
     await expect(page.locator('#threeDViewer')).toBeVisible();
 
     const initialized = await page.evaluate(() => ({
@@ -65,7 +66,7 @@ for (const expected of plays) {
     expect(await page.evaluate(() => window.pickleboard.plays.getState().playId)).toBe(expected.id);
     await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter',window.pickleboard.plays.chapters[1].shotId));
     expect((await page.evaluate(() => window.pickleboard.plays.getState().stepIndex))).toBeGreaterThan(0);
-    await page.locator('#play3dView').click();
+    await page.evaluate(() => { void pickleboard.threeD.enter(); });
     await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
     expect(errors).toEqual([]);
   });

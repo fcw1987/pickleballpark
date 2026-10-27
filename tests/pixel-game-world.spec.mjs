@@ -1,7 +1,8 @@
 import {test,expect} from '@playwright/test';
 
-test('modeled garden remains fixed when cameras switch, reuses resources, and disposes every owned asset',async({page})=>{
- await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.board.threeD?.world);
+test('legacy 3D compatibility: modeled garden remains fixed when cameras switch, reuses resources, and disposes every owned asset',async({page})=>{
+ await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);
+ await page.evaluate(()=>playBuilder.switchView('3d'));await page.waitForFunction(()=>playBuilder.board.threeD?.world);
  const evidence=await page.evaluate(()=>{
   const viewer=playBuilder.board.threeD,world=viewer.world,group=world.group;
   const snapshot=()=>{

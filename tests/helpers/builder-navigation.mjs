@@ -38,10 +38,9 @@ export async function openCoachTools(page) {
   return tools;
 }
 
+// Explicit compatibility API: the primary pixel court has no public 3D toggle.
 export async function switchCourtView(page, view) {
-  const label = `Switch to ${view.toUpperCase()} court view`;
-  const button = page.getByRole('button', { name: label, exact: true });
-  await button.click();
+  await page.evaluate(view => playBuilder.switchView(view), view);
   await page.waitForFunction(expected => !playBuilder.busy && playBuilder.view === expected, view);
 }
 

@@ -2,14 +2,14 @@
     'use strict';
 
     const COURT_MIDLINE = 22;
-    // Ground fitting is an affine 2.5D layout, not a camera tilt. Keep upright
-    // actor and ball height calibrated together across responsive presets.
-    const UPRIGHT_HEIGHT_SCALE = Math.sqrt(1 - 0.9 * 0.9);
+    // Top-down pixels use one uniform feet-to-screen scale in both axes.
+    // Height is only a small vertical sprite offset above its ground anchor.
+    const UPRIGHT_HEIGHT_SCALE = 1;
     const PRESETS = Object.freeze({
-        portrait: Object.freeze({ shear: 0.04, depthScale: 0.9,
-            viewBox: Object.freeze({ x: -10.6, y: -11, width: 41.2, height: 59 }) }),
-        wide: Object.freeze({ shear: 0.09, depthScale: 0.65,
-            viewBox: Object.freeze({ x: -12, y: -9.2, width: 44, height: 43.8 }) })
+        portrait: Object.freeze({ shear: 0, depthScale: 1,
+            viewBox: Object.freeze({ x: -8, y: -8, width: 36, height: 60 }) }),
+        wide: Object.freeze({ shear: 0, depthScale: 1,
+            viewBox: Object.freeze({ x: -22, y: -8, width: 64, height: 60 }) })
     });
     let activeName = 'portrait';
     let active = PRESETS[activeName];

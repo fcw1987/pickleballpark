@@ -174,9 +174,10 @@ test.describe('court first builder UI harness', () => {
     await expect(page.getByRole('button', { name: 'Court Planner', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
     await page.getByRole('button', { name: 'Place target on court' }).click();
-    await page.getByRole('button', { name: 'Switch to 2D court view', exact: true }).click();
+    await expect(page.getByLabel('2D rally court host region', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Switch to 3D court view', exact: true })).toBeHidden();
     const actions = await page.evaluate(() => window.__builderActions);
-    expect(actions.map(action => action.type)).toEqual(['pauseForEditing', 'addShot', 'pauseForEditing', 'pauseForEditing', 'placeTarget', 'view']);
+    expect(actions.map(action => action.type)).toEqual(['pauseForEditing', 'addShot', 'pauseForEditing', 'pauseForEditing', 'placeTarget']);
     expect(actions[4].payload).toEqual({ shotId: 'shot-serve' });
   });
 

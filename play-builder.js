@@ -89,7 +89,8 @@ export class PlayBuilder {
         document = null;
         globalThis.document.body.classList.add('builder-workspace');
         this.installPlay(true); this.render();this.viewportChanged();
-        this.switchView('3d');
+        // The primary court is the original top-down Canvas2D pixel scene.
+        this.board.pixelRenderer?.render();
     }
     get session() { return this.board.plays.session; }
     get waypointPolicy() {

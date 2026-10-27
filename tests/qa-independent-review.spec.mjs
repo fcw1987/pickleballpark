@@ -161,11 +161,12 @@ test('64-shot visible workflow keeps early, middle, and last edits through delet
   await expect(page.getByLabel('Add shot')).toBeEnabled();
 });
 
-test('hundreds of long-rally boundary seeks keep chapters, 2D, 3D, and resources equivalent', async ({ page }) => {
+test('legacy 3D compatibility: hundreds of long-rally boundary seeks keep chapters, 2D, 3D, and resources equivalent', async ({ page }) => {
   test.setTimeout(90_000);
   const source = longDocument();
   await openCleanBuilder(page);
   await importThroughDialog(page, source);
+  await switchCourtView(page, '3d');
   await expect.poll(() => page.evaluate(() => !playBuilder.busy && playBuilder.view)).toBe('3d');
 
   const result = await page.evaluate(() => {
@@ -231,11 +232,12 @@ test('hundreds of long-rally boundary seeks keep chapters, 2D, 3D, and resources
   expect(result.holdTimerScheduled).toBe(false);
 });
 
-test('parked WebGL loss during active 2D playback preserves source, rate, intent, and advancing time', async ({ page }) => {
+test('legacy 3D compatibility: parked WebGL loss during active 2D playback preserves source, rate, intent, and advancing time', async ({ page }) => {
   test.setTimeout(60_000);
   const source = longDocument();
   await openCleanBuilder(page);
   await importThroughDialog(page, source);
+  await switchCourtView(page, '3d');
   await page.getByLabel('Playback options').click();
   await page.getByLabel('Playback speed').selectOption('0.5');
   await page.getByLabel('Playback options').click();
