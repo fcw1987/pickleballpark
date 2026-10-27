@@ -65,14 +65,14 @@ function createStaticWorldCache(renderer, scene, world) {
         key.push(background?.isColor?background.getHex():background?.uuid,background?.version,scene.backgroundIntensity,scene.backgroundBlurriness,scene.backgroundRotation?.x,scene.backgroundRotation?.y,scene.backgroundRotation?.z,
             scene.fog?.color?.getHex(),scene.fog?.near,scene.fog?.far,scene.fog?.density);
         world.group.traverse(object=>{
-            key.push(object.uuid,object.visible,object.layers.mask,object.renderOrder,...object.matrixWorld.elements);
+            key.push(object.uuid,object.visible,object.layers.mask,object.renderOrder,object.center?.x,object.center?.y,...object.matrixWorld.elements);
             if(object.geometry){key.push(object.geometry.uuid,object.geometry.index?.version,object.geometry.drawRange.start,object.geometry.drawRange.count);
                 for(const [name,attribute]of Object.entries(object.geometry.attributes))key.push(name,attribute.version);}
             for(const material of object.material?(Array.isArray(object.material)?object.material:[object.material]):[]){
                 key.push(material.uuid,material.version,material.visible,material.opacity,material.transparent,material.side,material.depthWrite,material.depthTest,material.depthFunc,material.alphaTest,material.polygonOffset,material.polygonOffsetFactor,material.polygonOffsetUnits,
-                    material.color?.r,material.color?.g,material.color?.b,material.emissive?.r,material.emissive?.g,material.emissive?.b,material.emissiveIntensity);
+                    material.color?.r,material.color?.g,material.color?.b,material.emissive?.r,material.emissive?.g,material.emissive?.b,material.emissiveIntensity,material.rotation,material.linewidth,material.vertexColors,material.blending,material.blendSrc,material.blendDst,material.blendEquation,material.premultipliedAlpha,material.colorWrite,material.toneMapped,material.roughness,material.metalness,material.normalScale?.x,material.normalScale?.y);
                 for(const name of ['map','alphaMap','lightMap','aoMap','emissiveMap','normalMap']){const map=material[name];
-                    if(map)key.push(name,map.uuid,map.version,map.colorSpace,map.rotation,map.offset.x,map.offset.y,map.repeat.x,map.repeat.y,map.center.x,map.center.y);}
+                    if(map)key.push(name,map.uuid,map.version,map.colorSpace,map.rotation,map.offset.x,map.offset.y,map.repeat.x,map.repeat.y,map.center.x,map.center.y,map.wrapS,map.wrapT,map.magFilter,map.minFilter,map.flipY,map.premultiplyAlpha,map.matrixAutoUpdate,...map.matrix.elements);}
             }
         });
         scene.traverseVisible(light=>{if(!light.isLight)return;light.target?.updateMatrixWorld();
@@ -404,10 +404,12 @@ class ThreeDPlaybackViewer {
         this.gradientMap.magFilter = THREE.NearestFilter;
         this.gradientMap.generateMipmaps = false;
         this.gradientMap.needsUpdate = true;
+        this.worldAssetsReady = false;
         this.world = createReferenceWorld(THREE, { palette: PALETTE });
         const loadedWorld=this.world;
         this.world.ready?.then(()=>{if(this.world===loadedWorld&&this.renderer){this.worldAssetsReady=true;this.startRenderLoop();}},()=>{if(this.world===loadedWorld)this.worldAssetsReady=false;});
         this.scene.add(this.world.group);
+        this.staticWorldCache = createStaticWorldCache(this.renderer, this.scene, this.world);
         this.courtObject = this.world.court;
         this.netObject = this.world.net;
         this.buildPlayers();

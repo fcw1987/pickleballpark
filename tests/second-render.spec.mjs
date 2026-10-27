@@ -33,23 +33,25 @@ test('legacy 3D compatibility: 3D renderer uses antialiasing and native DPR up t
   await context.close();
 });
 
-test('legacy 3D compatibility: solid athlete meshes own lit materials and release every resource on exit', async ({ page }) => {
+test('legacy 3D compatibility: directional artwork and solid athlete meshes own and release every resource on exit', async ({ page }) => {
   await openViewer(page);
   const result = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, resources = viewer.actorResources;
     const meshes = [];
     for (const root of viewer.playerObjects.values()) root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
     const ownedGeometry = meshes.every(mesh => resources.geometries.has(mesh.geometry));
-    const ownedMaterial = meshes.every(mesh => [...resources.materials.values(), ...resources.extraMaterials].includes(mesh.material));
-    const lit = meshes.every(mesh => mesh.material.type === 'MeshStandardMaterial' && mesh.material.depthTest && mesh.material.depthWrite && !mesh.material.map);
-    const tracked = [...resources.geometries, ...resources.materials.values(), ...resources.extraMaterials];
+    const ownedMaterial = meshes.every(mesh => [...resources.materials].includes(mesh.material));
+    const materials = meshes.every(mesh => mesh.material.type === 'MeshBasicMaterial' && mesh.material.depthTest && mesh.material.depthWrite);
+    const artwork = [...viewer.playerObjects.values()].every(root => root.userData.body.material.map === resources.textures.get(`${root.userData.player}/${root.userData.animation.frame}`));
+    const tracked = [...resources.geometries, ...resources.materials, ...resources.textures.values()];
     const counts = tracked.map(() => 0);
     tracked.forEach((resource, i) => resource.addEventListener('dispose', () => counts[i]++));
     viewer.exit();
-    return { ownedGeometry, ownedMaterial, lit, meshCount: meshes.length, counts, remaining: resources.geometries.size + resources.materials.size + resources.extraMaterials.size };
+    resources.dispose(); // A second lifecycle cleanup must not redispose released GPU resources.
+    return { ownedGeometry, ownedMaterial, materials, artwork, meshCount: meshes.length, counts, remaining: resources.geometries.size + resources.materials.size + resources.textures.size };
   });
-  expect(result).toMatchObject({ ownedGeometry: true, ownedMaterial: true, lit: true, remaining: 0 });
-  expect(result.meshCount).toBe(8);
+  expect(result).toMatchObject({ ownedGeometry: true, ownedMaterial: true, materials: true, artwork: true, remaining: 0 });
+  expect(result.meshCount).toBe(56);
   expect(result.counts.every(count => count === 1)).toBe(true);
 });
 
@@ -67,21 +69,21 @@ test('legacy 3D compatibility: articulated strokes remain upright, continuously 
           position: actor.position.toArray(),
           paddle: actor.userData.paddleFaceWorld.toArray(),
           ball: viewer.ballObject.position.toArray(),
-          frame: actor.userData.animation.frame,
+          frame: actor.userData.animation.phase,
           groundY: actor.position.y,
-          visualPitch: actor.userData.visual.rotation.x,
+          cameraAlignment: actor.userData.visual.quaternion.angleTo(viewer.camera.quaternion),
           shoeBottoms: window.__athleteAudit(actor).shoeBottoms,
-          batchError: window.__athleteAudit(actor).batchError()
+          artworkError: window.__athleteAudit(actor).artworkError()
         });
       }
       return { samples };
     });
   });
   for (const shot of audit) {
-    expect(shot.samples.every(sample => sample.groundY === 0 && Math.abs(sample.visualPitch) < 0.001)).toBe(true);
+    expect(shot.samples.every(sample => sample.groundY === 0 && sample.cameraAlignment < 1e-6)).toBe(true);
     expect(new Set(shot.samples.map(sample => sample.frame)).size).toBeGreaterThan(1);
     for (const sample of shot.samples) {
-      expect(sample.batchError).toBeLessThan(2e-6);
+      expect(sample.artworkError).toBeLessThan(2e-6);
       expect(Math.min(...sample.shoeBottoms)).toBeGreaterThanOrEqual(-0.005);
       expect(Math.min(...sample.shoeBottoms)).toBeLessThanOrEqual(0.01);
     }

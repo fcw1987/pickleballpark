@@ -95,8 +95,8 @@ test.describe('BETA009 visible pause input', () => {
       await switchCourtView(page, view);
       const counterpart = view === '2d' ? '3D' : '2D';
       const returnControl=page.getByRole('button', { name: `Switch to ${counterpart} court view`, exact: true });
-      if(view==='2d')await expect(returnControl).toHaveCount(0);
-      else await expect(returnControl).toBeVisible();
+      await expect(returnControl).toHaveCount(0);
+      await expect(page.locator(view==='3d'?'#threeDViewer canvas':'.pixel-court-canvas')).toBeVisible();
       expect(await page.evaluate(() => playBuilder.view)).toBe(view);
       const result = await playAndHoldPause(page, 3, 'mouse');
       expect(result.label, `${view.toUpperCase()} visible transport`).toBe('Play');

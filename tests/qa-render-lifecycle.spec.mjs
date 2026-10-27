@@ -175,8 +175,8 @@ test('legacy 3D compatibility: a real delayed 3D module cancelled by 2D cannot a
   let markRequested;
   const moduleGate = new Promise(resolve => { releaseModule = resolve; });
   const moduleRequested = new Promise(resolve => { markRequested = resolve; });
-  // The procedural world has no actor downloads. Hold the real lazy entry
-  // without allowing service-worker precaching to impersonate a blocked load.
+  // Hold the default depth view's real lazy entry without allowing service-
+  // worker precaching to impersonate a blocked load.
   await page.route('**/three-d-playback.js', async route => {
     markRequested();
     await moduleGate;
@@ -184,8 +184,7 @@ test('legacy 3D compatibility: a real delayed 3D module cancelled by 2D cannot a
   });
   try {
     await page.goto('/index.html?qa-delayed-renderer=1', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
-    await page.evaluate(() => { void playBuilder.switchView('3d'); });
+    await page.waitForFunction(() => window.playBuilder);
     await moduleRequested;
     await expect.poll(() => page.evaluate(() => Boolean(window.playBuilder?.busy))).toBe(true);
     const draft = await page.evaluate(() => JSON.stringify(playBuilder.document));

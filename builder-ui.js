@@ -336,6 +336,9 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const chaptersOpen=Boolean(root.querySelector('.builder-chapter-menu')?.open);
     const focused=document.activeElement;const focusIdentity=root.contains(focused)?{action:focused.dataset.action,shotId:focused.dataset.shotId,label:focused.getAttribute('aria-label')}:null;
     const oldInspectorScroll=root.querySelector('.builder-inspector')?.scrollTop || 0;
+    // Enlarged controls scroll this root. Removing its children temporarily
+    // collapses scrollHeight; preserve the user's viewport through a rebuild.
+    const oldRootScroll=root.scrollTop;
     // Keep modal dialogs connected through save/field/viewport updates.
     for(const child of [...root.children])if(child.tagName!=='DIALOG')child.remove();
     root.classList.toggle('builder-planner', current.workspace === 'planner');
@@ -576,6 +579,8 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const create = randomDialog.querySelector('[data-action="random-rally"]'); if (create) create.disabled = Boolean(current.proposalBusy);
     }
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
+    root.scrollTop=oldRootScroll;
+    if(optionsMenuOpen&&document.body.classList.contains('builder-large-text'))optionsPanel.scrollIntoView({block:'nearest'});
     if(placementJustFinished){
       root.querySelector('.builder-inspector [data-action="collapse-inspector"]')?.focus({preventScroll:true});
     } else if(focusIdentity && document.activeElement===document.body){
@@ -792,10 +797,12 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   });
   root.addEventListener('toggle', event => {
     const opened = event.target;
-    if (!(opened instanceof HTMLDetailsElement) || !opened.open) return;
+    const transientSelector = '.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-actions-menu';
+    if (!(opened instanceof HTMLDetailsElement) || !opened.open || !opened.matches(transientSelector)) return;
+    if(opened.matches('.builder-context-menu')&&document.body.classList.contains('builder-large-text'))opened.querySelector('.builder-menu-panel')?.scrollIntoView({block:'nearest'});
     // Keep one unrelated transient surface visible. Nested pickers and action
     // menus belong to their parent and are therefore exempt from dismissal.
-    const transient = root.querySelectorAll('.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-actions-menu');
+    const transient = root.querySelectorAll(transientSelector);
     transient.forEach(other => {
       if (other === opened || other.contains(opened) || opened.contains(other)) return;
       other.open = false;

@@ -6,10 +6,13 @@ export async function loadReferenceAthleteAssets({signal}={}){
  const response=await fetch(new URL('./assets/reference-athletes/metadata-v2.json',import.meta.url),{signal});if(!response.ok)throw new Error('Missing athlete atlas metadata');return {image,source:SOURCE,metadata:await response.json()};
 }
 export class ReferenceAthleteResources{
- constructor(assets){this.assets=assets;this.textures=new Map();this.materials=new Set();this.geometries=new Set();}
- texture(player,direction){const key=`${player}/${direction}`;if(!this.textures.has(key)){const image=this.assets.image,texture=new THREE.Texture(image);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;const [x,y,w,h]=this.assets.metadata.frames[player][direction].rect;texture.repeat.set(w/image.width,h/image.height);texture.offset.set(x/image.width,1-(y+h)/image.height);texture.needsUpdate=true;this.textures.set(key,texture);}return this.textures.get(key);}
- dispose(){for(const t of this.textures.values())t.dispose();for(const m of this.materials)m.dispose();for(const g of this.geometries)g.dispose();}
+ constructor(assets){this.assets=assets;this.source=new THREE.Source(assets.image);this.disposed=false;this.textures=new Map();this.materials=new Set();this.geometries=new Set();}
+ texture(player,direction){if(this.disposed)throw new Error('Reference athlete resources are disposed');const key=`${player}/${direction}`;if(!this.textures.has(key)){const image=this.assets.image,texture=new THREE.Texture();texture.source=this.source;texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;const [x,y,w,h]=this.assets.metadata.frames[player][direction].rect;texture.repeat.set(w/image.width,h/image.height);texture.offset.set(x/image.width,1-(y+h)/image.height);texture.needsUpdate=true;this.textures.set(key,texture);}return this.textures.get(key);}
+ dispose(){if(this.disposed)return;this.disposed=true;for(const t of this.textures.values())t.dispose();for(const m of this.materials)m.dispose();for(const g of this.geometries)g.dispose();this.textures.clear();this.materials.clear();this.geometries.clear();}
 }
+// Transparent source rows beneath each painted shoe, measured at alphaTest .08.
+// Register the stance sole without changing the approved atlas or its UVs.
+const SOLE_ROWS=[[[0,0],[0,0],[0,0],[0,0]],[[0,0],[0,1],[0,2],[0,0]],[[0,0],[0,0],[0,2],[0,0]],[[0,0],[0,1],[0,3],[0,0]]];
 const v=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function material(r,color){const m=new THREE.MeshBasicMaterial({color,toneMapped:false});r.materials.add(m);return m;}
 function mesh(r,g,m){r.geometries.add(g);return new THREE.Mesh(g,m);}
@@ -29,13 +32,16 @@ export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  const d=root.userData;root.position.set(sample.worldPosition.x,sample.worldPosition.y||0,sample.worldPosition.z);d.visual.quaternion.copy(camera.quaternion);
  const [frame,mirror]=directionFrame(sample.viewDirection),meta=d.resources.assets.metadata.frames[d.player][frame],h=meta.heightMeters,w=h*meta.rect[2]/meta.rect[3];d.body.material.map=d.resources.texture(d.player,frame);d.body.scale.set(w*mirror,h,1);
  const moving=(sample.travelSpeed||0)>.05,phase=strokePhase(sample),family=['ready','shuffle'].includes(sample.action)?'ready':((sample.action==='short-hop'||sample.shotType==='short-hop')&&!['serve','overhead'].includes(sample.instructionalFamily)?'short-hop':sample.instructionalFamily||sample.shotType)||sample.action||'ready',pose=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase,facing:sample.viewDirection,moving,time:sample.timeSeconds||0,planted:sample.planted});
- const gait=moving&&!sample.planted?Math.sin(sample.travelPhase??(sample.timeSeconds||0)*12):0,load=['dink','reset','short-hop'].includes(family)?.07:0;
- d.body.position.set(pose.torsoOffset.x*.018,h/2-load+Math.abs(gait)*.018,0);d.body.rotation.z=(pose.torsoOffset.x*.006);
+ const gait=moving&&!sample.planted?Math.sin(sample.travelPhase??(sample.timeSeconds||0)*12):0;
+ const soleOffsets=SOLE_ROWS[d.player][frame].map((rows,i)=>{const gap=rows/meta.rect[3],leg=Math.max(0,Math.min(1,(.31-gap)/.31)),side=i===0?-1:1;return gap+leg*Math.max(0,gait*side)*.045;});
+ d.body.position.set(pose.torsoOffset.x*.018,h/2-Math.min(...soleOffsets)*h,0);d.body.rotation.z=(pose.torsoOffset.x*.006);
+ // Low-shot posture comes from its distinct arm profile. Keep the original
+ // card soles on the ground instead of translating the whole athlete downward.
  // Deform the existing richly drawn legs around their hips; shoes keep their artwork.
  const pos=d.body.geometry.attributes.position,base=d.baseVertices;for(let i=0;i<pos.count;i++){const x=base[i*3],y=base[i*3+1],leg=Math.max(0,Math.min(1,(-y-.19)/.31)),side=x<0?-1:1;pos.setXYZ(i,x+leg*gait*.025*side,y+leg*Math.max(0,gait*side)*.045,base[i*3+2]);}pos.needsUpdate=true;
  root.updateMatrixWorld(true);
  if(family==='short-hop'&&phase>1&&phase<3)pose.paddle.y-=Math.sin((phase-1)*Math.PI/2);
- const scale=.063,fromPose=p=>v(p.x*scale,-p.y*scale-load,.09),paddle=fromPose(pose.paddle),target=sample.paddle?.worldContactTarget;
+ const scale=.063,fromPose=p=>v(p.x*scale,-p.y*scale,.09),paddle=fromPose(pose.paddle),target=sample.paddle?.worldContactTarget;
  // Contact target is the authored ball location; preserve the swing arc around it.
  if(target&&contactWeight>0){const local=d.visual.worldToLocal(v(target.x,target.y,target.z)),contact=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase:1,facing:sample.viewDirection});local.add(paddle.clone().sub(fromPose(contact.paddle)));paddle.lerp(local,Math.min(1,contactWeight));}
  // The artwork is a camera-facing card. Put the articulated shoulders at
@@ -45,21 +51,21 @@ export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  const handSide=(d.handedness==='left'?-1:1)*(frame===3?1:-1)*mirror;
  const cameraLocal=d.visual.worldToLocal(camera.getWorldPosition(v()));
  const sleeve=(side,height=1.05)=>{
-  const anchor=v(side*.26/(w*mirror),(height-load-d.body.position.y)/h,0);
+  const anchor=v(side*.26/(w*mirror),(height-d.body.position.y)/h,0);
   d.body.localToWorld(anchor);return d.visual.worldToLocal(anchor);
  };
  // The rounded sleeve cuff spans a small, fixed part of the original art.
  // Roll the working attachment along that cuff for low/high strokes, never
  // move or deform the artwork itself. Both interpolation and depth are smooth.
  let cuff=Math.max(0,Math.min(1,(paddle.y-.5)/.8));cuff=cuff*cuff*(3-2*cuff);
- const sleeveHeight=.90+.15*cuff,sleeveAnchor=sleeve(handSide,sleeveHeight),offSleeveAnchor=sleeve(-handSide);
+ const sleeveHeight=.83+.22*cuff,sleeveAnchor=sleeve(handSide,sleeveHeight),offSleeveAnchor=sleeve(-handSide);
  const ray=sleeveAnchor.clone().sub(cameraLocal),shoulder=cameraLocal.clone().addScaledVector(ray,paddle.clone().sub(cameraLocal).dot(ray)/Math.max(1e-9,ray.lengthSq()));
  const radial=paddle.clone().sub(shoulder).normalize(),wrist=paddle.clone().addScaledVector(radial,-.235);
  const delta=wrist.clone().sub(shoulder),len=delta.length(),mid=shoulder.clone().add(wrist).multiplyScalar(.5),bone=.49,bend=Math.sqrt(Math.max(0,bone*bone-Math.min(len,2*bone)**2/4)),elbowDirection=v(handSide*.25,-.35,.9).addScaledVector(delta,-v(handSide*.25,-.35,.9).dot(delta)/Math.max(1e-18,len*len)).normalize(),elbow=mid.add(elbowDirection.multiplyScalar(bend));
  segment(d.arms[0].parts[0],shoulder,elbow);segment(d.arms[0].parts[1],elbow,wrist);d.arms[0].hand.position.copy(wrist);
  const off=offSleeveAnchor,offElbow=off.clone().add(v(-handSide*.09,-.20,0)),offHand=off.clone().add(v(handSide*.02,-.27,.07));segment(d.arms[1].parts[0],off,offElbow);segment(d.arms[1].parts[1],offElbow,offHand);d.arms[1].hand.position.copy(offHand);
  d.rigPose={sleeveAnchor:sleeveAnchor.clone(),shoulder:shoulder.clone(),offSleeveAnchor:offSleeveAnchor.clone(),upperArmLength:bone,forearmLength:bone,wristReach:len,sleeveHeight};
- d.paddle.position.copy(paddle);d.paddle.rotation.z=Math.atan2(-radial.x,radial.y);d.paddle.rotation.y=sample.strokeSide==='backhand'?-.22:.22;root.updateMatrixWorld(true);d.paddle.getWorldPosition(d.paddleFaceWorld);d.animation={phase:sample.phase,action:sample.action,source:'original-imagegen-articulated-v2',frame,mirror,contactWeight,backhand:pose.backhand,planted:pose.planted,family:pose.family};
+ d.paddle.position.copy(paddle);d.paddle.quaternion.setFromUnitVectors(v(0,1),radial);d.paddle.rotateY(sample.strokeSide==='backhand'?-.22:.22);root.updateMatrixWorld(true);d.paddle.getWorldPosition(d.paddleFaceWorld);d.animation={phase:sample.phase,action:sample.action,bodyFacing:sample.bodyFacing?{...sample.bodyFacing}:null,viewDirection:sample.viewDirection,source:'original-imagegen-articulated-v2',frame,mirror,contactWeight,backhand:pose.backhand,planted:pose.planted,family:pose.family};
 }
 export const loadDetailedAthleteAssets=loadReferenceAthleteAssets;
 export const DetailedAthleteResources=ReferenceAthleteResources;

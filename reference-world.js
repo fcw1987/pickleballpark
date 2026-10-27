@@ -21,15 +21,17 @@ export function createReferenceWorld(THREE,{palette={}}={}){
  for(const line of COURT_LINES){const a=boardToWorld(line.from),b=boardToWorld(line.to),thickness=line.lineWidthFeet*FEET_TO_METERS;
   const n=mesh(line.name,new THREE.BoxGeometry(Math.abs(b.x-a.x)||thickness,.007,Math.abs(b.z-a.z)||thickness),cream,[(a.x+b.x)/2,.017,(a.z+b.z)/2]);n.userData.courtLine=line.name;
  }
- const sideHeight=36/12*FEET_TO_METERS,centerHeight=34/12*FEET_TO_METERS,half=w/2+.23;
- const points=[];for(let i=0;i<=44;i++){const x=-half+i*half*2/44,h=centerHeight+(sideHeight-centerHeight)*(Math.abs(x)/half)**2;points.push(x,.035,0,x,h,0);}
- for(let j=0;j<=12;j++){const y=.035+j*(centerHeight-.035)/12;points.push(-half,y,0,half,y,0);}
+ const sideHeight=36/12*FEET_TO_METERS,centerHeight=34/12*FEET_TO_METERS,half=w/2+FEET_TO_METERS,tapeRadius=.018;
+ const topHeight=x=>centerHeight+(sideHeight-centerHeight)*Math.min(1,Math.abs(x)/(w/2))**2;
+ const points=[];for(let i=0;i<=44;i++){const x=-half+i*half*2/44,h=topHeight(x)-2*tapeRadius;points.push(x,.035,0,x,h,0);}
+ for(let j=0;j<=12;j++){const y=.035+j*(centerHeight-2*tapeRadius-.035)/12;points.push(-half,y,0,half,y,0);}
  const grid=new THREE.BufferGeometry();grid.setAttribute('position',new THREE.Float32BufferAttribute(points,3));geometries.add(grid);
  const gridMaterial=new THREE.LineBasicMaterial({color:'#243c4d',transparent:true,opacity:.9});materials.add(gridMaterial);
  const netMesh=new THREE.LineSegments(grid,gridMaterial);netMesh.name='NetMesh';net.add(netMesh);
  for(const x of[-half,half]){mesh('NetPost',new THREE.BoxGeometry(.09,sideHeight+.07,.09),ink,[x,(sideHeight+.07)/2,0],net);mesh('NetPostCap',new THREE.BoxGeometry(.12,.05,.12),steel,[x,sideHeight+.06,0],net);}
- const tapePoints=[];for(let i=0;i<=32;i++){const x=-half+2*half*i/32;tapePoints.push(new THREE.Vector3(x,centerHeight+(sideHeight-centerHeight)*(Math.abs(x)/half)**2,0));}
- const tape=new THREE.CatmullRomCurve3(tapePoints);mesh('NetTopTape',new THREE.TubeGeometry(tape,32,.018,4,false),cream,[0,0,0],net);
+ // Parameterize the physical tape directly, avoiding spline overshoot at sidelines.
+ const tape=new THREE.Curve();tape.getPoint=(t,target=new THREE.Vector3())=>{const x=-half+2*half*t;return target.set(x,topHeight(x)-tapeRadius,0);};tape.getPointAt=tape.getPoint;
+ mesh('NetTopTape',new THREE.TubeGeometry(tape,176,tapeRadius,8,false),cream,[0,0,0],net);
  const environment=createDepthParkEnvironment(THREE,{palette});group.add(environment);
  let disposed=false;const dispose=()=>{if(disposed)return;disposed=true;environment.userData.dispose?.();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();group.clear();group.userData.disposed=true;};
  group.userData={referenceWorld:true,courtFeet:[20,44],kitchensFeet:7,netFeet:22,dispose,provenance:'Original detailed pixel surfaces and dimensional park with exact regulation geometry'};

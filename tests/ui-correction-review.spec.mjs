@@ -48,3 +48,20 @@ test.describe('fresh visible builder correction review', () => {
     await expect.poll(() => page.evaluate(() => playBuilder.message)).toContain('Cancelled');
   });
 });
+
+test('playback options leave Edit reachable across compact and enlarged viewports without authoring changes',async({page},testInfo)=>{
+ for(const [width,height]of[[1440,900],[800,450],[390,844],[844,390]])for(const enlarged of[false,true]){
+  await page.setViewportSize({width,height});await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);
+  if(enlarged)await page.evaluate(()=>{document.documentElement.style.fontSize='200%';playBuilder.render();});
+  const before=await page.evaluate(()=>({document:JSON.stringify(playBuilder.document),history:playBuilder.history.snapshots.length}));
+  await page.getByLabel('Playback options',{exact:true}).click();
+  await page.getByLabel('Playback speed',{exact:true}).selectOption('0.5');
+  const menu=page.locator('.builder-context-menu');await expect(menu).toHaveJSProperty('open',true);
+  const panel=await menu.locator('.builder-menu-panel').boundingBox();
+  expect(panel.x).toBeGreaterThanOrEqual(0);expect(panel.y).toBeGreaterThanOrEqual(0);expect(panel.x+panel.width).toBeLessThanOrEqual(width);expect(panel.y+panel.height).toBeLessThanOrEqual(height);
+  await page.screenshot({path:testInfo.outputPath(`options-${width}x${height}-${enlarged?'200':'100'}.png`)});
+  await page.getByRole('button',{name:'Edit shot',exact:true}).click();
+  await expect(menu).toHaveJSProperty('open',false);await expect(page.getByRole('button',{name:'Close editor',exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>({document:JSON.stringify(playBuilder.document),history:playBuilder.history.snapshots.length}))).toEqual(before);
+ }
+});

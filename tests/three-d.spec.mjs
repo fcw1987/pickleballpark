@@ -23,11 +23,12 @@ test('legacy 3D compatibility: 3D View initializes regulation scene with players
   const scene = await page.evaluate(() => ({
     state: window.pickleboard.threeD.getState(),
     paddles: Object.fromEntries([...window.pickleboard.threeD.playerObjects]
-      .map(([id, object]) => [id, { handedness: object.userData.handedness, side: object.userData.animation.handedness, physicalArm: object.userData.arms[object.userData.handedness].hand.name }]))
+      .map(([id, object]) => [id, { handedness: object.userData.handedness, gripDistance: object.userData.arms[0].hand.getWorldPosition(object.position.clone()).distanceTo(object.userData.paddle.children[2].getWorldPosition(object.position.clone())) }]))
   }));
   expect(scene.state).toMatchObject({ active: true, playerCount: 4, hasBall: true, playId: 'third-shot-drop' });
-  expect(scene.paddles.player1).toMatchObject({ handedness: 'right', side: 'right', physicalArm: 'RightHand' });
-  expect(scene.paddles.player2).toMatchObject({ handedness: 'left', side: 'left', physicalArm: 'LeftHand' });
+  expect(scene.paddles.player1).toMatchObject({ handedness: 'right' });
+  expect(scene.paddles.player2).toMatchObject({ handedness: 'left' });
+  for (const paddle of Object.values(scene.paddles)) expect(paddle.gripDistance).toBeLessThan(0.006);
   expect(errors).toEqual([]);
 });
 
@@ -68,13 +69,26 @@ test('legacy 3D compatibility: play, pause, playback rate, timeline seek, and pr
   expect(await page.evaluate(() => window.pickleboard.threeD.getState())).toMatchObject({ elapsed: 0, playing: false });
 });
 
-test('legacy 3D compatibility: exit stops render loop, re-entry creates one new loop, and 2D Play remains intact', async ({ page }) => {
+test('legacy 3D compatibility: exit cancels owned frames, re-entry schedules one frame, and 2D Play remains intact', async ({ page }) => {
+  await page.addInitScript(() => {
+    const request = window.requestAnimationFrame.bind(window), cancel = window.cancelAnimationFrame.bind(window);
+    const pending = new Set();
+    window.__replayFrames = { pending, maximum: 0 };
+    window.requestAnimationFrame = callback => {
+      const replay = callback.toString().includes('this.renderer.render(this.scene, this.camera)');
+      let id; id = request(time => { pending.delete(id); callback(time); });
+      if (replay) { pending.add(id); window.__replayFrames.maximum = Math.max(window.__replayFrames.maximum, pending.size); }
+      return id;
+    };
+    window.cancelAnimationFrame = id => { pending.delete(id); cancel(id); };
+  });
   await openApp(page);
   await openDrop3d(page);
-  const firstLoopCount = await page.evaluate(() => window.pickleboard.threeD.getState().renderLoopCount);
+  expect(await page.evaluate(() => window.__replayFrames.maximum)).toBe(1);
   await page.locator('#threeDExit').click();
   await expect(page.locator('#threeDViewer')).toBeHidden();
   expect(await page.evaluate(() => window.pickleboard.threeD.getState().active)).toBe(false);
+  expect(await page.evaluate(() => window.__replayFrames.pending.size)).toBe(0);
   expect(await page.evaluate(() => window.pickleboard.plays.getState().playId)).toBe('third-shot-drop');
   await page.evaluate(() => window.pickleboard.plays.timelineAction('chapter','return'));
   const returnState = await page.evaluate(() => {
@@ -87,7 +101,17 @@ test('legacy 3D compatibility: exit stops render loop, re-entry creates one new 
   expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
   await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
-  expect(await page.evaluate(() => window.pickleboard.threeD.getState().renderLoopCount)).toBe(firstLoopCount + 1);
+  const frames = await page.evaluate(() => {
+    const viewer = window.pickleboard.threeD;
+    viewer.startRenderLoop(); viewer.startRenderLoop(); viewer.startRenderLoop();
+    return { maximum: window.__replayFrames.maximum, pending: window.__replayFrames.pending.size, owned: window.__replayFrames.pending.has(viewer.renderLoopId) };
+  });
+  expect(frames).toEqual({ maximum: 1, pending: 1, owned: true });
+  await page.locator('#threeDPlayPause').click();
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => ({maximum:window.__replayFrames.maximum, pending:window.__replayFrames.pending.size, playing:window.pickleboard.threeD.session.playing}))).toEqual({maximum:1,pending:1,playing:true});
+  await page.locator('#threeDExit').click();
+  expect(await page.evaluate(() => ({pending: window.__replayFrames.pending.size, id: window.pickleboard.threeD.renderLoopId}))).toEqual({pending: 0, id: null});
 });
 
 test('legacy 3D compatibility: 3D viewer fits portrait, landscape, and desktop controls', async ({ page }) => {

@@ -6,7 +6,7 @@ const openScene = async page => {
   await page.waitForFunction(() => window.pickleboard?.plays);
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
   await page.evaluate(() => { void pickleboard.threeD.enter(); });
-  await page.waitForFunction(() => pickleboard.threeD?.active && pickleboard.threeD.staticWorldCache);
+  await page.waitForFunction(() => pickleboard.threeD?.active && pickleboard.threeD.staticWorldCache && pickleboard.threeD.worldAssetsReady);
 };
 
 const compareCachedPixels = () => {
@@ -19,9 +19,12 @@ const compareCachedPixels = () => {
       gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     };
     const times = [0, ...v.timeline.segments.slice(0, 4).flatMap(s => [s.startTime + s.contactTime, s.startTime + s.duration * .67])];
-    for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
-      v.setCamera(camera);
-      for (const seconds of times) {
+    const views = ['overhead', 'sideline', 'behind-green', 'behind-orange',
+      ...Array.from({ length: 8 }, (_, i) => ({ azimuth: i * Math.PI / 4, elevation: i % 2 ? 20 : 75, distance: 29, target: { x: i % 2 ? 2 : -2, y: .3, z: i % 2 ? -3 : 3 } }))];
+    for (const camera of views) {
+      if (typeof camera === 'string') v.setCamera(camera);
+      else v.cameraControls.setState(camera);
+      for (const seconds of typeof camera === 'string' ? times : [times[3]]) {
         v.session.seek(seconds); v.applyAtTime(seconds);
         sample(false, raw); sample(true, cached);
         let error = 0, changed = 0, severe = 0, maximum = 0;
@@ -41,7 +44,7 @@ const compareCachedPixels = () => {
 
 const expectPixelEquivalence = evidence => {
   // Allow edge-level resolved-depth/8-bit rounding, never broad color or occlusion loss.
-  expect(evidence.cases).toHaveLength(36);
+  expect(evidence.cases).toHaveLength(44);
   for (const item of evidence.cases) {
     expect(item.mean, JSON.stringify(item)).toBeLessThan(0.6);
     expect(item.changedFraction, JSON.stringify(item)).toBeLessThan(0.012);
@@ -55,21 +58,26 @@ test('legacy 3D compatibility: static scene cache reuses artwork and invalidates
     const v = pickleboard.threeD, cache = v.staticWorldCache;
     v.cancelRenderWork();
     const render = () => v.renderer.render(v.scene, v.camera);
-    render(); const first = { ...cache.stats };
+    cache.enabled = false; render(); const directCalls = v.renderer.info.render.calls;
+    cache.enabled = true; render(); const first = { ...cache.stats };
     for (const time of [0.2, 0.5, 1.2, 2.6]) { v.applyAtTime(time); render(); }
-    const reuse = { ...cache.stats };
+    const reuse = { ...cache.stats }, cachedCalls = v.renderer.info.render.calls;
     v.setCamera('sideline'); render(); const camera = { ...cache.stats };
     const light = v.scene.children.find(o => o.isDirectionalLight);
     light.intensity += 0.17; render(); const lit = { ...cache.stats };
-    const ground = v.world.group.getObjectByName('GardenGround');
+    const ground = v.world.group.getObjectByName('Moss park ground');
     ground.material.color.multiplyScalar(0.95); render(); const paint = { ...cache.stats };
+    const foliage = v.world.group.getObjectByName('Detailed scalloped tree');
+    foliage.material.map.offset.x += .01; render(); const texture = { ...cache.stats };
     cache.invalidate('test-explicit'); render(); const explicit = { ...cache.stats };
-    return { enabled: cache.enabled, first, reuse, camera, lit, paint, explicit };
+    return { enabled: cache.enabled, directCalls, cachedCalls, first, reuse, camera, lit, paint, texture, explicit };
   });
+  await test.info().attach('cache-reuse-and-invalidation', { body: JSON.stringify(evidence, null, 2), contentType: 'application/json' });
   expect(evidence.enabled).toBe(true);
+  expect(evidence.cachedCalls).toBeLessThan(evidence.directCalls * .5);
   expect(evidence.reuse.builds).toBe(evidence.first.builds);
   expect(evidence.reuse.reuses).toBeGreaterThanOrEqual(evidence.first.reuses + 4);
-  for (const [before, after] of [['reuse', 'camera'], ['camera', 'lit'], ['lit', 'paint'], ['paint', 'explicit']]) {
+  for (const [before, after] of [['reuse', 'camera'], ['camera', 'lit'], ['lit', 'paint'], ['paint', 'texture'], ['texture', 'explicit']]) {
     expect(evidence[after].builds, after).toBeGreaterThan(evidence[before].builds);
   }
 });

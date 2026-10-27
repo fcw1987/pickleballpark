@@ -18,16 +18,16 @@ test('legacy 3D compatibility: actual opaque paddle triangles meet the unchanged
      for(const segment of v.timeline.segments.filter(s=>s.trajectory)){
       const time=segment.startTime+segment.contactTime;v.clock.elapsed=time;v.applyAtTime(time);
       const actor=v.playerObjects.get(segment.shotSemantics.playerId);
-      errors.push(window.__athleteAudit(actor).paddleDistance(v.ballObject.position));
-      const face=actor.getObjectByName('PaddleFace');
+      errors.push(window.__athleteAudit(actor).paddleDistance(v.ballObject.position)-v.ballObject.userData.physicalRadius);
+      const face=(actor.userData.referenceAthlete?actor.userData.paddle.children[1]:actor.getObjectByName('PaddleFace'));
       opaque.push(face.visible&&face.material.opacity===1&&!face.material.transparent&&face.material.depthTest&&face.material.depthWrite);
      }
     }
    }
   }
-  return {maxError:Math.max(...errors),opaque:opaque.every(Boolean),samples:errors.length};
+  return {physicalRadius:v.ballObject.userData.physicalRadius,maxError:Math.max(...errors),opaque:opaque.every(Boolean),samples:errors.length};
  }, PICKLEBOARD_PLAYS.map(play=>play.id));
- expect(result.samples).toBe(PICKLEBOARD_PLAYS.reduce((sum,play)=>sum+play.steps.filter(step=>step.shot).length,0)*8);expect(result.opaque).toBe(true);expect(result.maxError).toBeLessThan(0.02);
+ expect(result.physicalRadius).toBe(.037);expect(result.samples).toBe(PICKLEBOARD_PLAYS.reduce((sum,play)=>sum+play.steps.filter(step=>step.shot).length,0)*8);expect(result.opaque).toBe(true);expect(result.maxError).toBeLessThanOrEqual(1e-6);
 });
 
 test('legacy 3D compatibility: ball stays at least twelve CSS pixels and its surface keeps the logical projected center',async({page})=>{
@@ -54,7 +54,7 @@ test('legacy 3D compatibility: dimensional replay opens when raster replay asset
  await page.route('**/assets/replay/**',route=>route.abort());
  await open(page);await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
  expect(await page.evaluate(()=>Boolean(pickleboard.threeD.pixelAssets))).toBe(false);
- expect(await page.evaluate(()=>[...pickleboard.threeD.playerObjects.values()].every(actor=>actor.userData.volumetricAthlete))).toBe(true);
+ expect(await page.evaluate(()=>[...pickleboard.threeD.playerObjects.values()].every(actor=>actor.userData.referenceAthlete&&actor.userData.body.material.map?.image?.naturalWidth>0))).toBe(true);
  await context.close();
 });
 
@@ -68,6 +68,6 @@ test('legacy 3D compatibility: fresh cached installation opens all four solid at
  const context=await browser.newContext({serviceWorkers:'allow'}),page=await context.newPage();
  await page.goto(`${offlineApp.url}/?workspace=planner`);await page.waitForFunction(()=>navigator.serviceWorker.controller);await offlineApp.stop();await page.reload();
  await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);
- expect(await page.evaluate(()=>[...pickleboard.threeD.playerObjects.values()].filter(a=>a.userData.volumetricAthlete&&a.getObjectByName('PaddleFace')?.geometry.attributes.position.count>0).length)).toBe(4);
+ expect(await page.evaluate(()=>[...pickleboard.threeD.playerObjects.values()].filter(a=>a.userData.referenceAthlete&&a.userData.body.material.map?.image?.naturalWidth>0&&a.userData.paddle.children[1].geometry.attributes.position.count>0).length)).toBe(4);
  await page.locator('#threeDExit').click();await page.locator('#playExit').click();await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);await context.close();
 });
