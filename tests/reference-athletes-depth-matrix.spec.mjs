@@ -2,7 +2,8 @@ import {test,expect} from '@playwright/test';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 
 test('default depth app renders every supported authoring combination and tactical boundary at exact visible contacts across full orbit',async({page})=>{
- test.setTimeout(120000);
+ // Software rendering on hosted CI must finish all 784 contacts and 3136 poses.
+ test.setTimeout(process.env.CI ? 600000 : 120000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');
  await page.waitForFunction(()=>window.playBuilder?.view==='3d'&&pickleboard.threeD?.worldAssetsReady);
