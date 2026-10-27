@@ -147,6 +147,21 @@ jobs:
         run: |
           npm run check
           npm run check:generated
+      - name: Use official Ubuntu archive for preview browser dependencies
+        run: |
+          sudo python3 - <<'PYTHON'
+          from pathlib import Path
+          # GitHub Ubuntu 24 runners may use either deb822 sources or a mirror file.
+          # Change only the download hostname; preserve suites, signed-by and keys.
+          for filename in ['/etc/apt/sources.list', '/etc/apt/sources.list.d/ubuntu.sources', '/etc/apt/apt-mirrors.txt']:
+              path = Path(filename)
+              if path.is_file():
+                  original = path.read_text()
+                  updated = original.replace('://azure.archive.ubuntu.com/', '://archive.ubuntu.com/')
+                  if updated != original:
+                      path.write_text(updated)
+                      print(f'Using official Ubuntu archive in {filename}')
+          PYTHON
       - name: Install package-test browsers
         run: npx playwright install --with-deps chromium webkit
       - name: Build and verify runtime-only feature artifact
