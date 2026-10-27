@@ -18,6 +18,10 @@ test('default depth app renders every supported authoring combination and tactic
     const actor=view.playerObjects.get(segment.shotSemantics.playerId),d=actor.userData;
     const error=d.paddleFaceWorld.distanceTo(view.ballObject.position),family=item.contactStyle==='short-hop'&&!['serve','overhead'].includes(item.family)?'short-hop':item.family;
     if(!d.referenceAthlete||!actor.visible||!view.renderer.domElement.isConnected||view.renderer.domElement.width<1||error>1e-7||d.animation.family!==family||d.animation.backhand!==(segment.shotSemantics.strokeSide==='backhand'))failures.push({id:item.id,orientation,error,animation:d.animation,reason:'actual depth renderer mismatch'});
+    const pos=d.body.geometry.attributes.position,base=d.baseVertices;
+    const stretched=Array.from({length:pos.count},(_,n)=>n).some(n=>base[n*3+1]>-.19&&[0,1,2].some(k=>pos.array[n*3+k]!==base[n*3+k]));
+    const project=point=>d.visual.localToWorld(point.clone()).project(view.camera),sleeve=project(d.rigPose.sleeveAnchor),shoulder=project(d.rigPose.shoulder);
+    if(stretched||d.rigPose.wristReach>.940001||Math.hypot(sleeve.x-shoulder.x,sleeve.y-shoulder.y)>1e-8)failures.push({id:item.id,orientation,reason:'shirt stretch or detached visible shoulder',stretched,reach:d.rigPose.wristReach});
     contacts++;
     for(const offset of [-.03,.03,.12,.25]){
      playBuilder.seek(segment.startTime+Math.max(0,Math.min(segment.duration,segment.contactTime+offset)));poses++;

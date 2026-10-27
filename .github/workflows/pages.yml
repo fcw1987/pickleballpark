@@ -152,8 +152,25 @@ jobs:
       - name: Build and verify runtime-only feature artifact
         run: |
           npm run build:site -- --require-clean
-          npm run verify:package
           node tools/verify-deployment-artifact.mjs dist "$GITHUB_SHA" --require-clean
+      # Preview checks cover current install/upgrade and affected authoring flows.
+      # The complete historical package matrix remains in the main Quality job.
+      - name: Verify fresh install and offline runtime in both engines
+        env:
+          QA_PACKAGE_MODE: fresh
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-fresh.json
+      - name: Verify depth checkpoint upgrade and saved work in both engines
+        env:
+          QA_PACKAGE_MODE: depth-upgrade
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-depth-upgrade.json
+      - name: Check affected authoring, depth matrix and mobile workflow
+        run: |
+          npx playwright test tests/reference-athletes-depth-matrix.spec.mjs tests/overhead-short-hop-preview.spec.mjs tests/pixel-editor-projection.spec.mjs tests/iphone-workflow.spec.mjs --workers=1 --retries=0
+          npx playwright test tests/reference-athletes-depth-matrix.spec.mjs tests/overhead-short-hop-preview.spec.mjs tests/pixel-editor-projection.spec.mjs tests/iphone-workflow.spec.mjs --config=playwright.webkit.config.mjs --workers=1 --retries=0
       - name: Upload verified runtime artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

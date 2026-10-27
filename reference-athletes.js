@@ -14,7 +14,7 @@ const v=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function material(r,color){const m=new THREE.MeshBasicMaterial({color,toneMapped:false});r.materials.add(m);return m;}
 function mesh(r,g,m){r.geometries.add(g);return new THREE.Mesh(g,m);}
 function arm(r,skin){const group=new THREE.Group(),parts=[];for(let i=0;i<2;i++){const outer=mesh(r,new THREE.CylinderGeometry(.058,.054,1,10),material(r,'#2b2631')),inner=mesh(r,new THREE.CylinderGeometry(.044,.041,1,10),material(r,skin));group.add(outer,inner);parts.push({outer,inner});}const hand=mesh(r,new THREE.SphereGeometry(.065,12,8),material(r,skin));group.add(hand);return {group,parts,hand};}
-function segment(part,a,b){const delta=b.clone().sub(a),length=delta.length(),direction=delta.clone().normalize();for(const [key,z] of [['outer',0],['inner',.008]]){const m=part[key];m.position.copy(a).add(b).multiplyScalar(.5);m.position.z+=z;m.scale.y=length;m.quaternion.setFromUnitVectors(v(0,1),direction);}}
+function segment(part,a,b){const delta=b.clone().sub(a),length=delta.length(),direction=delta.clone().normalize();for(const [key,z] of [['outer',0],['inner',.035]]){const m=part[key];m.position.copy(a).add(b).multiplyScalar(.5);m.position.z+=z;m.scale.y=length;m.quaternion.setFromUnitVectors(v(0,1),direction);}}
 export function createReferenceAthlete(resources,team,handedness,index=0){
  const root=new THREE.Group(),visual=new THREE.Group(),geometry=new THREE.PlaneGeometry(1,1,12,28),mat=new THREE.MeshBasicMaterial({transparent:true,alphaTest:.08,depthWrite:true,side:THREE.DoubleSide,toneMapped:false});resources.materials.add(mat);resources.geometries.add(geometry);
  const body=new THREE.Mesh(geometry,mat);body.name='OriginalDetailedAthlete';visual.add(body);root.add(visual);
@@ -38,13 +38,26 @@ export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  const scale=.063,fromPose=p=>v(p.x*scale,-p.y*scale-load,.09),paddle=fromPose(pose.paddle),target=sample.paddle?.worldContactTarget;
  // Contact target is the authored ball location; preserve the swing arc around it.
  if(target&&contactWeight>0){const local=d.visual.worldToLocal(v(target.x,target.y,target.z)),contact=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase:1,facing:sample.viewDirection});local.add(paddle.clone().sub(fromPose(contact.paddle)));paddle.lerp(local,Math.min(1,contactWeight));}
- const handSide=(d.handedness==='left'?-1:1)*(frame===3?1:-1)*mirror,shoulder=v(handSide*.26,.78-load,.07),radial=paddle.clone().sub(shoulder).normalize(),wrist=paddle.clone().addScaledVector(radial,-.235),reachVector=wrist.clone().sub(shoulder),lean=reachVector.clone().normalize().multiplyScalar(Math.max(0,reachVector.length()-.559));
- // Keep fixed length arm bones. Upper-body mesh follows the shoulder lean, with
- // a smooth hip pivot so sleeve/arm attachment remains continuous and feet stay planted.
- shoulder.add(lean);for(let i=0;i<pos.count;i++){const upper=Math.max(0,Math.min(1,(base[i*3+1]+.18)/.22));pos.setXYZ(i,pos.getX(i)+lean.x/(w*mirror)*upper,pos.getY(i)+lean.y/h*upper,pos.getZ(i)+lean.z*upper);}pos.needsUpdate=true;
- const delta=wrist.clone().sub(shoulder),len=delta.length(),mid=shoulder.clone().add(wrist).multiplyScalar(.5),bend=Math.sqrt(Math.max(0,.28*.28-Math.min(len,.56)**2/4)),elbow=mid.add(v(0,0,1).cross(delta).normalize().multiplyScalar(bend*handSide));
+ // The artwork is a camera-facing card. Put the articulated shoulders on
+ // the paddle's depth plane along the exact camera-to-sleeve rays: this keeps
+ // their visible attachments on the drawn sleeves without stretching the shirt
+ // when a high contact is far in front of that card at an elevated camera angle.
+ const handSide=(d.handedness==='left'?-1:1)*(frame===3?1:-1)*mirror;
+ const cameraLocal=d.visual.worldToLocal(camera.getWorldPosition(v()));
+ const sleeve=(side)=>{
+  const anchor=v(side*.26/(w*mirror),(1.05-load-d.body.position.y)/h,0);
+  d.body.localToWorld(anchor);return d.visual.worldToLocal(anchor);
+ };
+ const sleeveAnchor=sleeve(handSide),offSleeveAnchor=sleeve(-handSide);
+ const atDepth=(anchor,depth)=>{
+  const ray=anchor.clone().sub(cameraLocal),denominator=ray.z;
+  return Math.abs(denominator)>1e-6?cameraLocal.clone().addScaledVector(ray,(depth-cameraLocal.z)/denominator):anchor.clone();
+ };
+ const shoulder=atDepth(sleeveAnchor,paddle.z),radial=paddle.clone().sub(shoulder).normalize(),wrist=paddle.clone().addScaledVector(radial,-.235);
+ const delta=wrist.clone().sub(shoulder),len=delta.length(),mid=shoulder.clone().add(wrist).multiplyScalar(.5),bone=.47,bend=Math.sqrt(Math.max(0,bone*bone-Math.min(len,2*bone)**2/4)),elbowDirection=v(handSide*.25,-.35,.9).addScaledVector(delta,-v(handSide*.25,-.35,.9).dot(delta)/Math.max(1e-9,len*len)).normalize(),elbow=mid.add(elbowDirection.multiplyScalar(bend));
  segment(d.arms[0].parts[0],shoulder,elbow);segment(d.arms[0].parts[1],elbow,wrist);d.arms[0].hand.position.copy(wrist);
- const off=v(-handSide*.27,.78-load,.04),offElbow=v(-handSide*.36,.58-load,.04),offHand=v(-handSide*.25,.51-load,.11);off.add(lean);offElbow.add(lean);offHand.add(lean);segment(d.arms[1].parts[0],off,offElbow);segment(d.arms[1].parts[1],offElbow,offHand);d.arms[1].hand.position.copy(offHand);
+ const off=offSleeveAnchor,offElbow=off.clone().add(v(-handSide*.09,-.20,0)),offHand=off.clone().add(v(handSide*.02,-.27,.07));segment(d.arms[1].parts[0],off,offElbow);segment(d.arms[1].parts[1],offElbow,offHand);d.arms[1].hand.position.copy(offHand);
+ d.rigPose={sleeveAnchor:sleeveAnchor.clone(),shoulder:shoulder.clone(),offSleeveAnchor:offSleeveAnchor.clone(),upperArmLength:bone,forearmLength:bone,wristReach:len};
  d.paddle.position.copy(paddle);d.paddle.rotation.z=Math.atan2(-radial.x,radial.y);d.paddle.rotation.y=sample.strokeSide==='backhand'?-.22:.22;root.updateMatrixWorld(true);d.paddle.getWorldPosition(d.paddleFaceWorld);d.animation={phase:sample.phase,action:sample.action,source:'original-imagegen-articulated-v2',frame,mirror,contactWeight,backhand:pose.backhand,planted:pose.planted,family:pose.family};
 }
 export const loadDetailedAthleteAssets=loadReferenceAthleteAssets;
