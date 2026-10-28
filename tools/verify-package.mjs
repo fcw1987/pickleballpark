@@ -689,11 +689,16 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       // Full offline authoring/99-shot generation is independent of the prior
       // cache version once exact current bytes and migrated saves are proven.
       // Cover it once per engine; keep a representative Add/Undo on each
-      // migrated document plus every hash, storage, planner, renderer, lesson
-      // and real-offline assertion in every historical case.
+      // migrated document plus every hash, storage, planner, renderer and
+      // real-offline assertion in every historical case.
       const smartProof = mode === 'fresh' ? await verifySmartRallyOffline(page) : await verifyMigratedAuthoringOffline(page);
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
-      for (const id of ids) {
+      // Lesson definitions and runtime bytes are identical after each verified
+      // migration. Sweep all eight offline once per engine, then retain one
+      // real lesson/view/planner round trip after every historical upgrade.
+      // Rotate the representative so upgrades collectively exercise all eight.
+      const lessonIds = mode === 'fresh' ? ids : [ids[(allModes.indexOf(mode) - 1) % ids.length]];
+      for (const id of lessonIds) {
         const lesson = await page.evaluate(async id => {
           const b = playBuilder;
           await b.setWorkspace('planner');
@@ -712,7 +717,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         expect(lesson.valid).toBe(lesson.shots);expect(lesson.chapters).toBe(lesson.shots);
       }
       await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0); expect(errors).toEqual([]);
-      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: ids.length, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof });
+      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: lessonIds.length, offlineLessonIds: lessonIds, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof });
     } catch (e) { results.push({ browser: browserName, mode, status: 'FAIL', error: e.message }); throw e; }
     finally { results.at(-1).durationMs = performance.now() - caseStarted; await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
   }
