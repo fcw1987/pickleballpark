@@ -379,7 +379,7 @@ class ThreeDPlaybackViewer {
 
     initializeScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color('#c3dcde');
+        this.scene.background = new THREE.Color('#79ba69');
         this.camera = new THREE.PerspectiveCamera(48, 1, 0.05, 100);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
         // Ground contact ellipses anchor athletes without a second scene pass.
@@ -409,6 +409,7 @@ class ThreeDPlaybackViewer {
         const loadedWorld=this.world;
         this.world.ready?.then(()=>{if(this.world===loadedWorld&&this.renderer){this.worldAssetsReady=true;this.startRenderLoop();}},()=>{if(this.world===loadedWorld)this.worldAssetsReady=false;});
         this.scene.add(this.world.group);
+        if (this.world.dynamicGroup) this.scene.add(this.world.dynamicGroup);
         this.staticWorldCache = createStaticWorldCache(this.renderer, this.scene, this.world);
         this.courtObject = this.world.court;
         this.netObject = this.world.net;
@@ -624,6 +625,7 @@ class ThreeDPlaybackViewer {
         const segment=seconds>0?(this.timeline.segments.find(item=>seconds<item.endTime-1e-9)||this.timeline.segments.at(-1)):null;
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
         this.world?.updateCamera?.(this.camera);
+        this.world?.updateAtTime?.(seconds);
         this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
@@ -686,7 +688,11 @@ class ThreeDPlaybackViewer {
         this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;
-        if (this.world) { this.scene?.remove(this.world.group); this.world.dispose(); this.world=null; }
+        if (this.world) {
+            this.scene?.remove(this.world.group);
+            if (this.world.dynamicGroup) this.scene?.remove(this.world.dynamicGroup);
+            this.world.dispose(); this.world=null;
+        }
         this.readableBall?.dispose();this.readableBall=null;
         for (const actor of this.playerObjects.values()) this.scene?.remove(actor);
         this.actorResources?.dispose();this.actorResources=null;

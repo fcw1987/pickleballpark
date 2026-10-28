@@ -2,6 +2,8 @@
 import { chromium } from '@playwright/test';
 import {mkdir,writeFile} from 'node:fs/promises';
 const out=process.env.PROOF_OUT||'release-results/depth-proof';
+const proofScene=process.env.PROOF_SCENE||'dink';
+if(!['dink','doubles'].includes(proofScene))throw new Error('Unsupported proof scene');
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch();const evidence=[];
 try {for(const [name,viewport] of [['desktop',{width:1440,height:900}],['phone',{width:390,height:844}]]){
@@ -10,7 +12,14 @@ try {for(const [name,viewport] of [['desktop',{width:1440,height:900}],['phone',
  await page.goto(process.env.PREVIEW_URL||'http://127.0.0.1:4182');
  await page.waitForFunction(()=>window.playBuilder?.view==='3d'&&pickleboard.threeD?.cameraControls);
  await page.evaluate(()=>document.fonts.ready);await page.waitForFunction(()=>pickleboard.threeD.worldAssetsReady===true);
- await page.evaluate(async()=>{await playBuilder.action('template','dink-exchange');const segment=playBuilder.compiled.timeline.segments.find(s=>s.shotSemantics);playBuilder.seek(segment.startTime+segment.contactTime);playBuilder.play();});
+ await page.evaluate(async scene=>{
+  if(scene==='doubles'){
+   const result=await playBuilder.action('randomRally',{count:30,seed:42});
+   if(result?.ok===false||playBuilder.document.shots.length!==30)throw new Error('Representative doubles rally did not generate');
+  }else await playBuilder.action('template','dink-exchange');
+  const segments=playBuilder.compiled.timeline.segments.filter(s=>s.shotSemantics),segment=segments[scene==='doubles'?Math.min(6,segments.length-1):0];
+  playBuilder.seek(segment.startTime+segment.contactTime);playBuilder.play();
+ },proofScene);
  await page.waitForTimeout(150);
  const before=await page.evaluate(()=>({camera:pickleboard.threeD.cameraControls.getState(),document:JSON.stringify(playBuilder.document),canvas:{width:pickleboard.threeD.renderer.domElement.width,cssWidth:pickleboard.threeD.renderer.domElement.clientWidth}}));
  await page.screenshot({path:`${out}/${name}-start.png`});
@@ -34,7 +43,7 @@ try {for(const [name,viewport] of [['desktop',{width:1440,height:900}],['phone',
  await page.screenshot({path:`${out}/${name}-editor.png`});
  const after=await page.evaluate(()=>({unchanged:JSON.stringify(playBuilder.document),state:pickleboard.threeD.getState(),overflow:document.documentElement.scrollWidth>innerWidth}));
  const video=page.video();await context.close();await video.saveAs(`${out}/${name}-camera-menu-motion.webm`);
- evidence.push({name,viewport,before:{...before,document:undefined},orbit,pan,reset,authoredDocumentUnchanged:before.document===after.unchanged,state:after.state,overflow:after.overflow,errors});
+ evidence.push({name,proofScene,...(proofScene==='doubles'?{seed:42,hits:30,startShot:7}:{}),viewport,before:{...before,document:undefined},orbit,pan,reset,authoredDocumentUnchanged:before.document===after.unchanged,state:after.state,overflow:after.overflow,errors});
 }}
 finally{await browser.close();await writeFile(`${out}/evidence.json`,JSON.stringify(evidence,null,2)+'\n');}
 console.log(JSON.stringify(evidence,null,2));

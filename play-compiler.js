@@ -1,12 +1,12 @@
 // Compile authored intent into the existing production Play and event timeline.
-import { compilePlayTimeline } from './three-d-core.js';
+import { compilePlayTimeline, FEET_TO_METERS } from './three-d-core.js';
 import { isInServiceBox, serviceBoxForServer, isInNonVolleyZone } from './court-geometry.js';
 import { validateRallyRules } from './rally-rules.js';
 import { documentCompatibilitySignature, validateDocument, movementProtection } from './play-document.js';
+import { sampleActorWorldPosition } from './three-d-presentation.js';
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const PLAYER_IDS = ['player1', 'player2', 'player3', 'player4'];
-const TEAMMATE = { player1: 'player2', player2: 'player1', player3: 'player4', player4: 'player3' };
 const FAMILY_LABEL = { serve: 'Serve', return: 'Return', drive: 'Drive', drop: 'Drop', dink: 'Dink', volley: 'Volley', reset: 'Reset', lob: 'Lob', overhead: 'Overhead' };
 const FLIGHT = {
   serve: { soft: 22, medium: 28, firm: 34, low: 6.5, mediumArc: 8, high: 11 },
@@ -92,10 +92,61 @@ function movementTarget(recipe, atContact) {
   return { x: clamp(atContact.x + (10 - atContact.x) * .25, .5, 19.5), y: green ? Math.max(3, atContact.y - 3) : Math.min(41, atContact.y + 3) };
 }
 
+// Automatic continuations recover as a doubles pair. Explicit movement and
+// active pins remain authoritative; this never rewrites the source document.
+export function doublesRecovery(positions, { players, hitter, family, target, seconds, index, opening = 'serve', servingTeam = 'green', protectedIds = new Set() }) {
+  const result = copy(positions);
+  const hittingTeam = players[hitter].team;
+  const centralThreat = Math.abs(target.x - 10) < 3;
+  for (const id of PLAYER_IDS) {
+    if (protectedIds.has(id)) continue;
+    const team = players[id].team;
+    const green = team === 'green';
+    const partner = PLAYER_IDS.find(other => other !== id && players[other].team === team);
+    if (!partner) continue;
+    const left = positions[id].x < positions[partner].x || (positions[id].x === positions[partner].x && id < partner);
+    const defending = team !== hittingTeam;
+    const shift = clamp((target.x - 10) * (defending ? .28 : .18), -2, 2);
+    const halfWidth = centralThreat ? 4 : 5;
+    const desiredX = clamp(10 + (left ? -halfWidth : halfWidth) + shift, 2, 18);
+    // Both servers stay back for the return bounce. The returning pair can
+    // approach together, then advance behind a soft third/fifth shot.
+    const servingWait = opening === 'serve' && index < 2 && team === servingTeam;
+    const attack = team === hittingTeam && ['return', 'drop', 'dink', 'reset', 'volley'].includes(family);
+    const netDepth = green ? 14 : 30;
+    const defendLob = defending && family === 'lob';
+    const supportDepth = green ? clamp(target.y + 4, 5, 12) : clamp(target.y - 4, 32, 39);
+    const desiredY = servingWait ? positions[id].y : defendLob ? supportDepth : attack ? netDepth : positions[id].y;
+    const from = positions[id], dx = desiredX - from.x, dy = desiredY - from.y;
+    const length = Math.hypot(dx, dy);
+    // Recovery uses a controlled shuffle/approach, not contact sprint speed.
+    const fraction = length ? Math.min(1, Math.max(0, seconds) * 9 / length) : 0;
+    result[id] = { x: from.x + dx * fraction, y: from.y + dy * fraction };
+  }
+  return result;
+}
+
+function automaticTactics(recipe) {
+  return recipe?.generation?.generatorVersion === 'smart-rally-v2' && recipe.movement.intent === 'advance' && !recipe.movement.pinned &&
+    recipe.authoring?.ownership === 'automatic' && recipe.authoring.fields?.includes('movement');
+}
+
+function interceptContact(recipe, previousRecipe, origin, target, team) {
+  if (automaticTactics(recipe) && recipe.authoring.fields.includes('family') && recipe.family === 'overhead' && previousRecipe.family === 'lob') {
+    // Meet a descending lob in the back court instead of assigning every
+    // overhead to the kitchen line. The existing reach check decides whether
+    // this player can get there; a bounced reply remains a separate choice.
+    const y = team === 'green' ? clamp(target.y + 3, 3, 13) : clamp(target.y - 3, 31, 41);
+    const progress = clamp((y - origin.y) / (target.y - origin.y), 0, 1);
+    return { x: origin.x + (target.x - origin.x) * progress, y };
+  }
+  return volleyContact(origin, target, team);
+}
+
 function shotContact(recipe, previousRecipe, previousOrigin, previousTarget, layout, players) {
   if (!previousRecipe) return copy(layout.ball);
   const team = players[recipe.hitter].team;
-  return isVolley(recipe) ? volleyContact(previousOrigin, previousTarget, team) : groundedContact(previousTarget, team, recipe.contactStyle === 'short-hop');
+  return isVolley(recipe) ? interceptContact(recipe, previousRecipe, previousOrigin, previousTarget, team) : groundedContact(previousTarget, team, recipe.contactStyle === 'short-hop');
 }
 
 function trajectoryMetadata(recipe) {
@@ -155,6 +206,7 @@ function makePlay(document) {
   const accepted = [];
   const contacts = [];
   const locks = new Map();
+  const protectedMovement = movementProtection(document);
   let terminalFault = false;
 
   for (let index = 0; index < document.shots.length; index++) {
@@ -186,8 +238,18 @@ function makePlay(document) {
     }
     // The receiver reaches contact during the incoming leg, preserving continuous positions.
     if (index > 0 && !locked) previousPositions[recipe.hitter] = copy(contact);
-    const endPositions = copy(previousPositions);
-    endPositions[recipe.hitter] = movementTarget(recipe, contact);
+    const automaticRecovery = automaticTactics(recipe);
+    const nextRecipe = document.shots[index + 1];
+    const nextKind = nextRecipe ? contactKind(nextRecipe) : null;
+    const actualTarget = nextKind === 'volley' ? interceptContact(nextRecipe, recipe, contact, recipe.target, document.players[nextRecipe.hitter].team) : copy(recipe.target);
+    // An early volley shortens this flight. Recover only during that incoming
+    // contact window, rather than the unused journey to the landing target.
+    const recoverySeconds = .4 * distance(contact, actualTarget) / ((FLIGHT[recipe.family][recipe.pace] || 20) * 1.4667);
+    const protectedIds = new Set([document.shots[index + 1]?.hitter, ...(protectedMovement.get(recipe.id) || []), ...Object.keys(recipe.playerMovement || {})]);
+    const endPositions = automaticRecovery
+      ? doublesRecovery(previousPositions, { players: document.players, hitter: recipe.hitter, family: recipe.family, target: recipe.target, seconds: recoverySeconds, index, opening: document.opening, servingTeam: document.players[document.shots[0].hitter].team, protectedIds })
+      : copy(previousPositions);
+    if (!automaticRecovery) endPositions[recipe.hitter] = movementTarget(recipe, contact);
     let movementImpossible = false;
     for (const [player, movement] of Object.entries(recipe.playerMovement || {})) {
       const target = movementTarget({movement}, previousPositions[player]);
@@ -199,10 +261,7 @@ function makePlay(document) {
       endPositions[player] = target;
     }
     if (movementImpossible) { finalizeLastAcceptedStep(steps, accepted); break; }
-    const nextRecipe = document.shots[index + 1];
-    const nextKind = nextRecipe ? contactKind(nextRecipe) : null;
     const bounces = document.opening === 'serve' && index < 2 ? 1 : nextKind === 'volley' ? 0 : 1;
-    const actualTarget = nextKind === 'volley' ? volleyContact(contact, recipe.target, document.players[nextRecipe.hitter].team) : copy(recipe.target);
     const metadata = trajectoryMetadata(recipe);
     const kind = contactKind(recipe);
     const strokeSide = autoStrokeSide(recipe, contact, document.players, actorStance);
@@ -268,6 +327,54 @@ function semanticsWithoutPositions(play) {
   return play.steps.map(step => ({ ...step, positions: undefined }));
 }
 
+function minimumPairSpacing(segment, pair) {
+  const [a, b] = pair.map(id => segment.previous.positions[id]);
+  const [c, d] = pair.map(id => segment.step.positions[id]);
+  const x = a.x - b.x, y = a.y - b.y;
+  const dx = c.x - d.x - x, dy = c.y - d.y - y;
+  // Logical board positions share one easing progress. The 3D actor route has
+  // separate contact holds and is checked independently below.
+  const progress = clamp(-(x * dx + y * dy) / (dx * dx + dy * dy || 1), 0, 1);
+  return Math.hypot(x + dx * progress, y + dy * progress);
+}
+
+// New automatic tactics must fit the production actor route, including its
+// contact plant and preparation/release holds. The route is piecewise eased
+// linear movement, so its exact peak speed is twice each window's average.
+export function automaticActorPeakSpeed(segment, playerId, handedness = 'right') {
+  let windows;
+  if (segment.shotSemantics?.playerId === playerId && segment.trajectory) {
+    const release = segment.contactTime + Math.min(.18, segment.shotSemantics.profile.duration * .25);
+    windows = segment.contactTime > 1e-9 ? [[0, Math.max(.001, segment.contactTime - .13)]] : [];
+    if (segment.duration > release) windows.push([release, segment.duration]);
+  } else if (segment.nextShotSemantics?.playerId === playerId && segment.nextStep?.shot) {
+    windows = [[0, Math.max(.001, segment.duration - .13)]];
+  } else windows = [[0, segment.duration]];
+  return Math.max(0, ...windows.map(([start, end]) => {
+    const a = sampleActorWorldPosition(segment, playerId, start, handedness, true);
+    const b = sampleActorWorldPosition(segment, playerId, end, handedness, true);
+    return 2 * Math.hypot(b.x - a.x, b.z - a.z) / ((end - start) * FEET_TO_METERS);
+  }));
+}
+
+// Sample the actual 3D routes, including their different arrival/release holds.
+// This is a bounded sampled minimum, not an exact continuous-distance claim.
+export function automaticActorPairSpacing(segment, pair, players) {
+  const times = new Set(Array.from({length:33}, (_, index) => segment.duration * index / 32));
+  if (segment.shotSemantics) {
+    times.add(Math.max(0, segment.contactTime - .13));
+    times.add(segment.contactTime);
+    times.add(Math.min(segment.duration, segment.contactTime + Math.min(.18, segment.shotSemantics.profile.duration * .25)));
+  }
+  if (segment.nextShotSemantics) times.add(Math.max(0, segment.duration - .13));
+  let minimum = Infinity;
+  for (const time of times) {
+    const [a, b] = pair.map(id => sampleActorWorldPosition(segment, id, time, players[id].handedness, true));
+    minimum = Math.min(minimum, Math.hypot(a.x - b.x, a.z - b.z) / FEET_TO_METERS);
+  }
+  return minimum;
+}
+
 // Compiler boundary for the separately derived coverage heuristic. It prevents
 // assistance from changing ball intent, contacts, pins, or stable event ids.
 export function recompileAssistedDocument(document, compiled, assistedPlay, coverage = []) {
@@ -301,6 +408,30 @@ export function recompileAssistedDocument(document, compiled, assistedPlay, cove
         const shotId = segment.step.shot?.authoring?.recipeId ?? null;
         findings.push(finding('feasibility', 'warning', shotId, `Suggested coverage was not applied because ${id} could not reach the derived position in the available time.`));
         return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because the assisted plan is infeasible.'}))) });
+      }
+    }
+    const recipe = document.shots.find(shot => shot.id === segment.step.id);
+    if (automaticTactics(recipe)) {
+      const original = compiled.timeline.segments.find(item => item.step.id === segment.step.id);
+      for (const id of PLAYER_IDS) {
+        const peak = automaticActorPeakSpeed(segment, id, document.players[id].handedness);
+        const originalPeak = automaticActorPeakSpeed(original, id, document.players[id].handedness);
+        if (peak > 18 + 1e-8 && peak > originalPeak + 1e-9) {
+          findings.push(finding('feasibility', 'warning', recipe.id, 'Suggested coverage was not applied because it would exceed the automatic footwork limit of 18 ft/s during eased playback.'));
+          return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because it would exceed the automatic footwork limit of 18 ft/s during eased playback.'}))) });
+        }
+      }
+      for (const team of ['green', 'orange']) {
+        const pair = PLAYER_IDS.filter(id => document.players[id].team === team);
+        const spacing = minimumPairSpacing(segment, pair);
+        const bodySpacing = automaticActorPairSpacing(segment, pair, document.players);
+        // Automatic recovery already owns pair lanes. An extra lateral hint
+        // must not collapse those lanes or worsen intentionally close setup.
+        if ((spacing < 2.5 - 1e-9 && spacing < minimumPairSpacing(original, pair) - 1e-9) ||
+          (bodySpacing < 2.5 - 1e-9 && bodySpacing < automaticActorPairSpacing(original, pair, document.players) - 1e-9)) {
+          findings.push(finding('feasibility', 'warning', recipe.id, 'Suggested coverage was not applied because it would reduce doubles partner spacing below 2.5 ft.'));
+          return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because it would reduce doubles partner spacing below 2.5 ft.'}))) });
+        }
       }
     }
   }

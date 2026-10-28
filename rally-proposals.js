@@ -7,7 +7,7 @@ import { validateRallyRules } from './rally-rules.js';
 import { applyCoverageAssistance } from './coverage-assistance.js';
 
 export const PROPOSAL_VERSION = 1;
-export const SMART_GENERATOR_VERSION = 'smart-rally-v1';
+export const SMART_GENERATOR_VERSION = 'smart-rally-v2';
 
 const clone = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 

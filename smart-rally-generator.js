@@ -3,7 +3,7 @@
 // Every candidate is checked by the production document validator, compiler,
 // and rule checker before it is returned. This module never applies a result
 // to a live builder; the caller owns revision checks and Undo history.
-import { compileDocument } from './play-compiler.js';
+import { compileDocument, automaticActorPeakSpeed, automaticActorPairSpacing } from './play-compiler.js';
 import { createStarterDocument, MAX_SHOTS, validateDocument } from './play-document.js';
 import { validateRallyRules } from './rally-rules.js';
 import {
@@ -13,8 +13,6 @@ import {
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
-const TEAM_PLAYERS = Object.freeze({ green: Object.freeze(['player1', 'player2']), orange: Object.freeze(['player3', 'player4']) });
-const FAMILIES = Object.freeze(['drive', 'drop', 'dink', 'volley', 'reset', 'lob', 'overhead']);
 const ARCS = Object.freeze(['low', 'medium', 'high']);
 const PACES = Object.freeze(['soft', 'medium', 'firm']);
 const OPENING_FAMILIES = Object.freeze(['drive', 'drop', 'dink', 'reset', 'lob']);
@@ -74,11 +72,18 @@ function baseDocument(seed, length) {
   return starter;
 }
 
-function familyChoices(index, opening, previous, next, { allowVolley = true } = {}) {
+function familyChoices(index, opening, previous, next, { allowVolley = true, netPosition = false } = {}) {
   if (index === 0 && opening === 'serve') return ['serve'];
   if (opening === 'serve' && index === 1) return ['return'];
   const previousFamily = previous?.family;
-  let choices = index < 3 && opening === 'serve' ? OPENING_FAMILIES : FAMILIES;
+  const contactDepth = previous ? Math.min(previous.target.y, 44 - previous.target.y) : 0;
+  let choices = index < 3 && opening === 'serve' ? OPENING_FAMILIES
+    : previousFamily === 'lob' ? ['overhead', 'drive', 'drop', 'lob']
+    : contactDepth >= 14 ? ['dink', 'dink', 'volley', 'reset', 'drive', 'lob']
+    : ['drive', 'drop', 'drop', 'reset', 'lob'];
+  // A deep intended landing can still be intercepted by an established net
+  // defender. Offer that contact instead of forcing a back-court chase.
+  if (allowVolley && netPosition && previousFamily !== 'lob' && (opening !== 'serve' || index >= 3) && !choices.includes('volley')) choices = ['volley', ...choices];
   // Keep the first transition conservative and make repeated Adds feel less
   // mechanical without imposing artificial equal turns or family quotas.
   if (previousFamily && choices.length > 2 && next() < .68) choices = choices.filter(family => family !== previousFamily);
@@ -94,25 +99,28 @@ function targetFor(team, family, next, openingPoint) {
     // from the ball's opening contact, including a left-box custom setup.
     return { x: openingPoint?.x < 10 ? 20 - x : x, y: choose([33, 35, 37, 39, 41], next) };
   }
-  const y = team === 'green'
-    ? choose(family === 'lob' ? [31, 35, 39, 41] : [26, 28, 31, 34, 37, 40], next)
-    : choose(family === 'return' ? [4, 6, 8, 10] : [4, 7, 10, 13], next);
+  const soft = ['drop', 'dink', 'reset'].includes(family);
+  const depth = choose(soft ? [23.5, 25, 27, 28] : ['lob', 'return'].includes(family) ? [36, 39, 41] : [30, 34, 38, 40], next);
+  const y = team === 'green' ? depth : 44 - depth;
   return { x, y };
 }
 
-function hittersFor(document, index, previous, next) {
+function hittersFor(document, index, previous, next, positions) {
   const priorTeam = previous ? document.players[previous.hitter].team : null;
+  const teamPlayers = team => PLAYER_IDS.filter(id => document.players[id].team === team);
   const team = priorTeam ? opposite(priorTeam) : document.players.player1.team;
   if (index === 0 && document.opening === 'serve') {
     const ball = document.initialLayout.ball;
-    const nearest = [...TEAM_PLAYERS[team]].sort((a,b) => {
+    const nearest = [...teamPlayers(team)].sort((a,b) => {
       const distance = id => Math.hypot(document.initialLayout[id].x-ball.x, document.initialLayout[id].y-ball.y);
       return distance(a)-distance(b) || a.localeCompare(b);
     });
     return nearest.slice(0,1);
   }
-  const required = previous?.receiver && previous.receiver !== 'auto' ? [previous.receiver] : TEAM_PLAYERS[team];
-  return shuffled(required.filter(id => PLAYER_IDS.includes(id)), next);
+  const required = previous?.receiver && previous.receiver !== 'auto' ? [previous.receiver] : teamPlayers(team);
+  const eligible = shuffled(required.filter(id => PLAYER_IDS.includes(id)), next);
+  if (!previous) return eligible;
+  return eligible.sort((a, b) => Math.hypot(positions[a].x - previous.target.x, positions[a].y - previous.target.y) - Math.hypot(positions[b].x - previous.target.x, positions[b].y - previous.target.y));
 }
 
 function nextShotId(document, index) {
@@ -138,17 +146,41 @@ function shotCandidate(document, index, family, hitter, next, { smartAdd = false
     target: targetFor(team, family, next, document.initialLayout.ball),
     arc: family === 'lob' ? 'high' : choose(ARCS, next),
     pace: family === 'dink' || family === 'drop' || family === 'reset' ? choose(['soft', 'soft', 'medium'], next) : choose(PACES, next),
-    movement: { intent: smartAdd ? 'advance' : 'hold', pinned: false },
+    movement: { intent: 'advance', pinned: false },
     authoring: automaticOwnership(['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'serveMethod'])
   };
   if (family === 'serve') shot.serveMethod = next() < .78 ? 'volley' : 'drop';
-  if (smartAdd && generationSeed !== undefined) shot.generation = { seed: generationSeed >>> 0, generatorVersion: SMART_GENERATOR_VERSION };
+  shot.generation = { seed: (generationSeed ?? document.generation?.seed ?? DEFAULT_SEED) >>> 0, generatorVersion: SMART_GENERATOR_VERSION };
   return shot;
+}
+
+function tacticalContinuity(compiled, document) {
+  for (const segment of compiled.timeline.segments) {
+    const recipe = document.shots.find(shot => shot.id === segment.step.id);
+    if (recipe?.generation?.generatorVersion !== SMART_GENERATOR_VERSION) continue;
+    const automaticMovement = recipe.movement.intent === 'advance' && !recipe.movement.pinned &&
+      recipe.authoring?.ownership === 'automatic' && recipe.authoring.fields?.includes('movement');
+    for (const id of PLAYER_IDS) {
+      const from = segment.previous.positions[id], to = segment.step.positions[id];
+      // Bound the production actor route, including its preparation and plant
+      // holds. Legacy/manual movement retains its existing acceptance boundary.
+      if (automaticMovement ? automaticActorPeakSpeed(segment, id, document.players[id].handedness) > 18 + 1e-8
+        : Math.hypot(to.x - from.x, to.y - from.y) > segment.duration * 18 + .01) return false;
+    }
+    for (const team of ['green', 'orange']) {
+      const ids = PLAYER_IDS.filter(id => document.players[id].team === team);
+      const [a,b] = ids.map(id => segment.step.positions[id]);
+      if (a && b && Math.hypot(a.x - b.x, a.y - b.y) < 2.5) return false;
+      if (automaticMovement && automaticActorPairSpacing(segment, ids, document.players) < 2.5) return false;
+    }
+  }
+  return true;
 }
 
 function completeEvaluation(document, { allowOpeningPrefix = true } = {}) {
   const evaluation = evaluateCandidate(document, { allowOpeningPrefix });
   if (!evaluation.ok) return evaluation;
+  if (!tacticalContinuity(evaluation.compiled, document)) return { ...evaluation, ok: false, reason: 'The automatic continuation needs more recovery time or doubles spacing.' };
   // Keep the check explicit here: evaluateCandidate already calls the same
   // rule boundary, but this makes the generator's acceptance condition clear
   // and protects it if the shared evaluator gains a warning-only mode later.
@@ -161,17 +193,23 @@ function completeEvaluation(document, { allowOpeningPrefix = true } = {}) {
   return rules.valid || shortOpening ? { ...evaluation, ok: true, rules } : { ...evaluation, ok: false, rules, reason: rules.violations[0]?.message || 'The candidate violated rally rules.' };
 }
 
-async function appendNext(document, index, random, { signal, maxAttempts = MAX_ATTEMPTS_PER_SHOT, allowVolley = true, generationSeed } = {}) {
+async function appendNext(document, index, random, { signal, maxAttempts = MAX_ATTEMPTS_PER_SHOT, allowVolley = true, generationSeed, lookahead = true, continuationDepth = generationSeed === undefined ? 0 : 2 } = {}) {
   const previous = document.shots.at(-1);
-  const families = familyChoices(index, document.opening, previous, random, { allowVolley });
+  const positions = previous ? compileDocument(document).play.steps.at(-1).positions : document.initialLayout;
+  const netPosition = previous && PLAYER_IDS.some(id => document.players[id].team !== document.players[previous.hitter].team && Math.min(positions[id].y, 44 - positions[id].y) >= 11);
+  const families = familyChoices(index, document.opening, previous, random, { allowVolley, netPosition });
   const attempted = new Set();
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     checkCancelled(signal);
     if (attempt && attempt % 4 === 0) await waitTurn();
     const family = families[attempt % families.length];
-    const hitters = hittersFor(document, index, previous, random);
+    const hitters = hittersFor(document, index, previous, random, positions);
     for (const hitter of hitters) {
       const candidateShot = shotCandidate(document, index, family, hitter, random, { smartAdd: generationSeed !== undefined, generationSeed });
+      // Retain a cross-court option late in the bounded search. The outgoing
+      // lane also determines a receiver's contact stance; random corner picks
+      // alone can miss the reachable stance in a tight incoming flight.
+      if (attempt >= Math.floor(maxAttempts * 2 / 3) && family !== 'serve') candidateShot.target.x = positions[hitter].x < 10 ? 15.5 : 4.5;
       const key = `${family}/${hitter}/${JSON.stringify(candidateShot.target)}/${candidateShot.arc}/${candidateShot.pace}`;
       if (attempted.has(key)) continue;
       attempted.add(key);
@@ -179,16 +217,18 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
       candidate.shots.push(candidateShot);
       const result = completeEvaluation(candidate);
       if (result.ok && result.validShotCount === candidate.shots.length) {
-        // Smart Add is itself the next user-visible step. Keep a candidate
-        // only when the resulting state has at least one bounded continuation
-        // available, otherwise a valid Add can immediately strand the next
-        // Add. The lookahead uses an independent deterministic stream and is
-        // not exposed as a mutation or progress event.
-        const needsLookahead = generationSeed !== undefined && candidate.shots.length < MAX_SHOTS;
+        // Check deep/transition states before committing to them. Near-net
+        // exchanges use the direct bounded path. Smart Add needs two future
+        // hits: its next Add must itself retain a continuation. Lookahead never
+        // mutates the prefix or changes the per-shot attempt bound.
+        const endPositions = result.compiled.play.steps.at(-1).positions;
+        const defenders = PLAYER_IDS.filter(id => candidate.players[id].team !== candidate.players[hitter].team);
+        const distantLanding = defenders.every(id => Math.hypot(endPositions[id].x - candidateShot.target.x, endPositions[id].y - candidateShot.target.y) > 5);
+        const needsLookahead = lookahead && (continuationDepth > 0 || distantLanding) && candidate.shots.length < MAX_SHOTS;
         if (needsLookahead) {
-          const lookaheadSeed = (generationSeed + Math.imul(index + 1, 0x45d9f3b)) >>> 0;
+          const lookaheadSeed = ((generationSeed ?? document.generation?.seed ?? DEFAULT_SEED) + Math.imul(index + 1, 0x45d9f3b)) >>> 0;
           const continuation = await appendNext(candidate, index + 1, seededRandom(lookaheadSeed), {
-            signal, maxAttempts, allowVolley
+            signal, maxAttempts, allowVolley, lookahead: continuationDepth > 1, continuationDepth: Math.max(0, continuationDepth - 1)
           });
           if (!continuation.document) continue;
         }

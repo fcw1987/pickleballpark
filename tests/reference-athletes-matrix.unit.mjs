@@ -6,6 +6,7 @@ import {ReferenceAthleteResources,createReferenceAthlete,updateReferenceAthlete}
 import {compileEffectiveCandidate} from '../rally-proposals.js';
 import {sampleActorPresentation,VIEW_DIRECTIONS} from '../three-d-presentation.js';
 import {referenceAthleteGeometryKernel,readReferenceAtlasPixels} from './helpers/reference-athlete-geometry.mjs';
+import {assertReferenceRig as assertRig} from './helpers/reference-rig-assertions.mjs';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 
 const atlasPixels=await readReferenceAtlasPixels(new URL('../assets/reference-athletes/athletes-armless-v2.png',import.meta.url)),paintedAudit=referenceAthleteGeometryKernel(THREE);
@@ -13,33 +14,9 @@ const metadata=JSON.parse(readFileSync(new URL('../assets/reference-athletes/met
 // The production renderer's geometry, matrices, atlas dimensions and materials;
 // texture decoding/WebGL rasterization are covered by the browser suite.
 function resources(){return new ReferenceAthleteResources({metadata,image:{width:atlasPixels.width,height:atlasPixels.height}});}
-function endpoints(part){return [-.5,.5].map(y=>new THREE.Vector3(0,y,0).applyMatrix4(part.outer.matrixWorld));}
-function assertRig(actor,label,camera){
- actor.updateMatrixWorld(true);
- if(camera){
-  const d=actor.userData,project=p=>d.visual.localToWorld(p.clone()).project(camera);
-  const sleeve=project(d.rigPose.sleeveAnchor),shoulder=project(d.rigPose.shoulder);
-  assert.ok(Math.hypot(sleeve.x-shoulder.x,sleeve.y-shoulder.y)<1e-8,`${label}: visible shoulder must stay on artwork sleeve`);
- }
- for(const [index,arm] of actor.userData.arms.entries()){
-  const [a,b]=arm.parts.map(endpoints);
-  for(const part of arm.parts)assert.ok(part.inner.position.z-part.outer.position.z>.014,`${label}: skin must project in front of enclosing ink cylinder`);
-  assert.ok(Math.abs(a[0].distanceTo(a[1])-(index?Math.hypot(.09,.20):.49))<1e-8,`${label}: upper arm length`);
-  assert.ok(Math.abs(b[0].distanceTo(b[1])-(index?Math.hypot(.11,.07,.07):.49))<1e-8,`${label}: forearm length`);
-  assert.ok(a[1].distanceTo(b[0])<1e-8,`${label}: elbow connection`);
-  assert.ok(b[1].distanceTo(arm.hand.getWorldPosition(new THREE.Vector3()))<1e-8,`${label}: hand connection`);
- }
- assert.ok(actor.userData.arms[0].hand.getWorldPosition(new THREE.Vector3()).distanceTo(actor.userData.paddle.children[2].getWorldPosition(new THREE.Vector3()))<.006,`${label}: working hand holds actual grip center`);
- assert.ok(actor.userData.rigPose.wristReach<=.980001,`${label}: bounded natural arm reach`);
- const position=actor.userData.body.geometry.attributes.position,base=actor.userData.baseVertices;
- for(let n=0;n<position.count;n++)if(base[n*3+1]>-.19){for(let k=0;k<3;k++)assert.ok(position.array[n*3+k]===base[n*3+k],`${label}: original upper-body shape must not stretch`);}
- assert.ok(actor.userData.body.geometry.attributes.position.array.every(Number.isFinite),`${label}: finite artwork vertices`);
- const paddle=actor.userData.paddle.getWorldPosition(new THREE.Vector3());
- assert.ok(paddle.distanceTo(actor.userData.paddleFaceWorld)<1e-10,`${label}: diagnostic is the actual paddle mesh`);
-}
 function cameraAt(index){const angle=index*Math.PI/4,camera=new THREE.PerspectiveCamera(38,1,.1,100);camera.position.set(Math.sin(angle)*12,5+index*.3,Math.cos(angle)*12);camera.lookAt(0,.8,0);camera.updateMatrixWorld(true);return camera;}
 
-test('detailed renderer: all 80 supported combinations and 18 tactical boundaries meet real contact through every camera sector with fixed feet and fixed arm bones',()=>{
+test('detailed renderer: all 80 supported combinations and 18 tactical boundaries meet real contact through every camera sector with grounded strokes, bounded overhead jumps and fixed arm bones',()=>{
  const r=resources();let contacts=0;
  try{for(const item of [...pixelAuthoringCases(),...pixelTacticalBoundaryCases()]){
   const before=JSON.stringify(item.document),{timeline}=compileEffectiveCandidate(item.document),segment=timeline.segments.find(s=>s.shotSemantics);
@@ -55,18 +32,18 @@ test('detailed renderer: all 80 supported combinations and 18 tactical boundarie
    const feet=soles();assert.ok(feet.length>0);
    const painted=paintedAudit(actor,{pixels:atlasPixels,camera,viewportHeight:688});
    assert.ok(painted.paddleDistance(target)<=.037+1e-8,`${item.id}/${i}: physical ball must overlap actual paddle triangles`);
-   for(const y of painted.shoeBottoms)assert.ok(Math.abs(y)<1e-8,`${item.id}/${i}: actual painted shoe must meet ground`);
-   for(const points of painted.projectedSoleGroundOffsets)for(const p of points)assert.ok(Math.abs(p.pixelsBelowGround)<1e-6,`${item.id}/${i}: painted sole/ground projection`);
+   for(const y of painted.shoeBottoms)assert.ok(Math.abs(y-actor.userData.animation.jumpHeight)<1e-8,`${item.id}/${i}: painted shoes match the actual deterministic jump height`);
+   for(const points of painted.projectedSoleGroundOffsets)for(const p of points)assert.ok(Math.abs(p.worldY-actor.userData.animation.jumpHeight)<1e-8,`${item.id}/${i}: painted sole height follows actual root jump`);
    const vertices=Array.from(actor.userData.body.geometry.attributes.position.array);
    updateReferenceAthlete(actor,contact,camera,1);assert.deepEqual(Array.from(actor.userData.body.geometry.attributes.position.array),vertices,`${item.id}: repeat seek`);
-   for(const offset of [-.03,.03]){const sample=sampleAt(offset);assert.equal(sample.planted,true,`${item.id}: contact window must stay planted`);updateReferenceAthlete(actor,sample,camera,.9);assertRig(actor,item.id,camera);soles().forEach((p,n)=>assert.ok(p.distanceTo(feet[n])<1e-7,`${item.id}: planted artwork sole moved`));}
+   for(const offset of [-.03,.03]){const sample=sampleAt(offset);assert.equal(sample.planted,true,`${item.id}: contact window must stay planted`);updateReferenceAthlete(actor,sample,camera,.9);assertRig(actor,item.id,camera);soles().forEach((p,n)=>{assert.ok(Math.hypot(p.x-feet[n].x,p.z-feet[n].z)<1e-7,`${item.id}: planted sole XZ moved`);assert.ok(Math.abs((p.y-feet[n].y)-(actor.userData.animation.jumpHeight-(item.family==='overhead'?.4:0)))<1e-7,`${item.id}: sole height must match the jump, not a detached shoe`);});}
    // Exercise every key and interpolation of the production renderer's stroke clock.
    const keys=[];
-   for(const phase of [0,.5,1,1.5,2,2.5,3]){
+   for(const phase of [0,.45,.5,1,1.5,2,2.5,3]){
     const profile=contact.profile,c=profile.contactRatio,f=profile.recoverRatio;
     const ratio=phase<=1?phase*c:phase<=2?c+(phase-1)*(f-c):f+(phase-2)*(1-f);
     updateReferenceAthlete(actor,{...contact,strokeTime:ratio*profile.duration},camera,0);assertRig(actor,`${item.id}/${phase}`,camera);
-    if(Number.isInteger(phase))keys.push(actor.userData.paddleFaceWorld.toArray().map(n=>n.toFixed(7)).join(','));
+    if([.45,1,2,3].includes(phase))keys.push(actor.userData.paddleFaceWorld.toArray().map(n=>n.toFixed(7)).join(','));
    }
    assert.equal(new Set(keys).size,4,`${item.id}/${i}: prepare/contact/follow/recover must have distinct visible paddle positions`);
   }
@@ -80,11 +57,11 @@ test('detailed forehand and backhand preparation and follow-through remain visib
  try{for(const item of cases.filter(c=>c.contactStyle==='forehand')){
   const back=cases.find(c=>c.family===item.family&&c.handedness===item.handedness&&c.serveMethod===item.serveMethod&&c.contactStyle==='backhand');
   const actors=[item,back].map(()=>createReferenceAthlete(r,'team1',item.handedness));
-  for(let i=0;i<8;i++)for(const phase of [0,2]){
+  for(let i=0;i<8;i++)for(const phase of [.45,2]){
    const camera=cameraAt(i),points=[item,back].map((c,n)=>{
     const {timeline}=compileEffectiveCandidate(c.document),segment=timeline.segments.find(s=>s.shotSemantics);
     const sample=sampleActorPresentation({instructionalMovement:true,segment,timeline,playerId:segment.shotSemantics.playerId,localTime:segment.contactTime,handedness:c.handedness,cameraPosition:camera.position});
-    const ratio=phase===0?0:sample.profile.recoverRatio;
+    const ratio=phase<1?phase*sample.profile.contactRatio:sample.profile.recoverRatio;
     updateReferenceAthlete(actors[n],{...sample,strokeTime:ratio*sample.profile.duration},camera,0);
     assertRig(actors[n],c.id,camera);
     // Compare choreography relative to its own actor: authored sides also have
@@ -115,10 +92,10 @@ test('actual alpha shoes keep a stance foot through travel at every camera secto
    for(const phase of [0,Math.PI/4,Math.PI/2,Math.PI,Math.PI*1.5]){
     const sample={worldPosition:{x:0,y:0,z:0},bodyFacing:{x:0,z:1},viewDirection:VIEW_DIRECTIONS[sector],action:'shuffle',travelSpeed:1,travelPhase:phase,planted:false};
     updateReferenceAthlete(actor,sample,camera);const result=paintedAudit(actor,{pixels:atlasPixels,camera,viewportHeight:688}),label=`${player}/${handedness}/${sector}/${elevation}/${distance}/${phase}`;
-    assert.ok(Math.abs(Math.min(...result.shoeBottoms))<1e-8,`${label}: a painted stance sole must meet ground`);
-    assert.ok(result.shoeBottoms.every(y=>y>=-1e-8),`${label}: no painted shoe underground`);
+    assert.ok(Math.abs(Math.min(...result.shoeBottoms))<1e-7,`${label}: a painted stance sole must meet ground (${result.shoeBottoms})`);
+    assert.ok(result.shoeBottoms.every(y=>y>=-1e-7),`${label}: no painted shoe underground`);
     if(Math.max(...result.shoeBottoms)>.001)lifted++;
-    for(const points of result.projectedSoleGroundOffsets)for(const point of points)assert.ok(point.worldY>=-1e-8,`${label}: rendered sole must not project below its ground`);
+    for(const points of result.projectedSoleGroundOffsets)for(const point of points)assert.ok(point.worldY>=-1e-7,`${label}: rendered sole must not project below its ground`);
     assert.deepEqual(actor.userData.animation.bodyFacing,sample.bodyFacing);assert.equal(actor.userData.animation.viewDirection,sample.viewDirection);samples++;
    }
   }

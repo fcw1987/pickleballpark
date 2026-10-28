@@ -18,6 +18,29 @@
   "worldUnits": "Feet authored locally; root scale .3048 maps to metres",
   "camera": "True geometry for clubhouse, roof, rail fence, benches, petal flowers and pond banks; grounded camera-facing detailed foliage sprites support all azimuths and tilt",
   "externalGameAssets": [],
-  "geometryNotes": "Closed extruded triangular terracotta roof body with tile slopes and ridge/eave trim sharing exact endpoints; repeating original grass backdrop continues beneath the compact park at every camera azimuth.",
-  "runtimeReadiness": "Environment ready promise resolves the original foliage TextureLoader; viewer redraws the paused scene once assets are loaded."
+  "geometryNotes": "Closed extruded triangular terracotta roof body with tile slopes and ridge/eave trim sharing exact endpoints; repeating original grass backdrop continues beneath the compact park at every camera azimuth. Seven separated detailed foliage trees replace eighteen; secondary original bordered CLUBHOUSE plaque sits clear of the roof eave; a grand pixel-lettered PICKLEBALL PARK landmark stands behind the far fence; Portland flag pole is separated from the sign.",
+  "runtimeReadiness": "Environment ready promise resolves the original foliage TextureLoader; viewer redraws the paused scene once assets are loaded.",
+  "parkLayout": {
+    "treeCount": 7,
+    "backdropFeet": [
+      104,
+      108
+    ],
+    "clearance": "Explicit separated tree placements keep trunks and conservative crown footprints outside pond bank and bench footprints.",
+    "underlay": "Unpopulated repeating original grass plane beyond the 104 by 108 foot compact park, with a quiet darker perimeter strip. No added remote scenery.",
+    "landmark": "Original double-sided pixel-lettered 28 by 4.5 foot dark forest sign on timber posts, 8.14 feet overall, 10 feet behind the far fence; rear trees flank the landmark."
+  },
+  "portlandFlag": {
+    "design": "City of Portland official flag; Douglas Lynch city insignia",
+    "primarySpecification": "https://www.portland.gov/code/1/06/010",
+    "referenceDiagram": "https://commons.wikimedia.org/wiki/File:Flag_of_Portland,_Oregon.svg",
+    "construction": "Editable original Canvas2D redraw from inch-based city specification, visually compared with the public reference diagram. 3:5 proportions, counterchanged four-direction river arms, white central concave star, yellow esquarres with white fimbriations. No third-party runtime flag file.",
+    "colors": {
+      "bluePMS279": "#418fde",
+      "greenPMS349": "#046a38",
+      "yellowPMS1235": "#ffb81c",
+      "white": "#ffffff"
+    },
+    "presentation": "World-oriented subdivided 5 by 3 foot mesh with deterministic rally-clock billow on a 14 foot pole. Cloth is in an independently returned dynamicGroup outside the cached static world. No independent animation loop; repeated time samples do not update geometry."
+  }
 }

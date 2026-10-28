@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {installDimensionalAudit} from './helpers/dimensional-audit.mjs';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 
 test('default depth app renders every supported authoring combination and tactical boundary at exact visible contacts across full orbit',async({page})=>{
@@ -7,7 +8,9 @@ test('default depth app renders every supported authoring combination and tactic
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');
  await page.waitForFunction(()=>window.playBuilder?.view==='3d'&&pickleboard.threeD?.worldAssetsReady);
- const result=await page.evaluate(cases=>{
+ await installDimensionalAudit(page);
+ const result=await page.evaluate(async cases=>{
+  const THREE=await import('/vendor/three.module.min.js'),paintedAudit=actor=>window.__athleteAudit(actor);
   const failures=[];let contacts=0,poses=0;
   for(const item of cases){
    playBuilder.pause();playBuilder.loadDocument(item.document,{persist:false});
@@ -21,8 +24,9 @@ test('default depth app renders every supported authoring combination and tactic
     if(!d.referenceAthlete||!actor.visible||!view.renderer.domElement.isConnected||view.renderer.domElement.width<1||error>1e-7||d.animation.family!==family||d.animation.backhand!==(segment.shotSemantics.strokeSide==='backhand'))failures.push({id:item.id,orientation,error,animation:d.animation,reason:'actual depth renderer mismatch'});
     const pos=d.body.geometry.attributes.position,base=d.baseVertices;
     const stretched=Array.from({length:pos.count},(_,n)=>n).some(n=>base[n*3+1]>-.19&&[0,1,2].some(k=>pos.array[n*3+k]!==base[n*3+k]));
-    const project=point=>d.visual.localToWorld(point.clone()).project(view.camera),sleeve=project(d.rigPose.sleeveAnchor),shoulder=project(d.rigPose.shoulder);
-    if(stretched||d.rigPose.wristReach>.980001||Math.hypot(sleeve.x-shoulder.x,sleeve.y-shoulder.y)>1e-8)failures.push({id:item.id,orientation,reason:'shirt stretch or detached visible shoulder',stretched,reach:d.rigPose.wristReach});
+    const project=point=>d.visual.localToWorld(point.clone()).project(view.camera),sleeve=project(d.rigPose.sleeveAnchor),shoulder=project(d.rigPose.shoulder),ends=part=>[-.5,.5].map(y=>new THREE.Vector3(0,y,0).applyMatrix4(part.outer.matrixWorld)),upper=ends(d.arms[0].parts[0]),fore=ends(d.arms[0].parts[1]),worldShoulder=d.visual.localToWorld(d.rigPose.shoulder.clone()),hand=d.arms[0].hand.getWorldPosition(new THREE.Vector3()),grip=d.paddle.children[2].getWorldPosition(new THREE.Vector3());
+    const expectedSide=(((item.handedness==='left'?-1:1)*(d.animation.frame===3?1:-1)*d.animation.mirror)<0)?0:1,expectedJump=item.family==='overhead'?.4:0,painted=paintedAudit(actor,{camera:view.camera,viewportHeight:view.renderer.domElement.height});
+    if(stretched||d.rigPose.wristReach>.8400001||Math.hypot(sleeve.x-shoulder.x,sleeve.y-shoulder.y)>1e-8||Math.abs(worldShoulder.distanceTo(upper[1])-.42)>1e-8||Math.abs(fore[0].distanceTo(fore[1])-.42)>1e-8||upper[1].distanceTo(fore[0])>1e-8||hand.distanceTo(grip)>.006||d.rigPose.workingSide!==expectedSide||Math.abs(d.animation.jumpHeight-expectedJump)>1e-8||painted.shoeBottoms.some(y=>Math.abs(y-expectedJump)>1e-7))failures.push({id:item.id,orientation,reason:'actual sleeve/bone/grip/grounding mismatch',stretched,reach:d.rigPose.wristReach,side:d.rigPose.workingSide,expectedSide,shoeBottoms:painted.shoeBottoms,jump:d.animation.jumpHeight});
     contacts++;
     for(const offset of [-.03,.03,.12,.25]){
      playBuilder.seek(segment.startTime+Math.max(0,Math.min(segment.duration,segment.contactTime+offset)));poses++;

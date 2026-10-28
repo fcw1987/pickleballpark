@@ -15,7 +15,8 @@ export class DepthCameraControls{
   this.apply();window.dispatchEvent(new CustomEvent('pickleboard:camera-ready',{detail:this}));
  }
  getState(){return{...this.state,target:{...this.state.target},mode:this.mode,pointerCount:this.pointers.size,autoFit:this.autoFit};}
- setState(next={}){this.autoFit=false;this.state={...this.state,...next,target:{...this.state.target,...next.target}};this.state.elevation=clamp(this.state.elevation,20,75);this.state.distance=clamp(this.state.distance,7,55);this.apply();return this.getState();}
+ // Preserve a necessary narrow-screen preset fit; manual zoom-out cannot enlarge it.
+ setState(next={}){const distanceLimit=Math.max(40,this.state.distance);this.autoFit=false;this.state={...this.state,...next,target:{...this.state.target,...next.target}};this.state.elevation=clamp(this.state.elevation,20,75);this.state.distance=clamp(this.state.distance,7,distanceLimit);this.apply();return this.getState();}
  setMode(mode){if(!['orbit','pan'].includes(mode))throw new TypeError('Camera mode must be orbit or pan');this.mode=mode;return this.getState();}
  defaultDistance(){return this.surface.clientWidth<600?27:29;}
  reset(preset='overhead'){const azimuth=preset==='sideline'?Math.PI/2:preset==='behind-green'?Math.PI:0;this.autoFit=true;this.state={azimuth,elevation:preset==='overhead'?50:38,distance:this.defaultDistance(),target:{x:0,y:.3,z:0}};this.apply();return this.getState();}

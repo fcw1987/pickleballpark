@@ -35,5 +35,5 @@ export function createReferenceWorld(THREE,{palette={}}={}){
  const environment=createDepthParkEnvironment(THREE,{palette});group.add(environment);
  let disposed=false;const dispose=()=>{if(disposed)return;disposed=true;environment.userData.dispose?.();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();group.clear();group.userData.disposed=true;};
  group.userData={referenceWorld:true,courtFeet:[20,44],kitchensFeet:7,netFeet:22,dispose,provenance:'Original detailed pixel surfaces and dimensional park with exact regulation geometry'};
- return{group,court,net,ready:environment.userData.ready,resources:{geometries,materials,textures},dispose,updateCamera:camera=>environment.userData.updateCamera?.(camera)};
+ return{group,court,net,dynamicGroup:environment.userData.dynamicGroup,updateAtTime:seconds=>environment.userData.updateAtTime?.(seconds),ready:environment.userData.ready,resources:{geometries,materials,textures},dispose,updateCamera:camera=>environment.userData.updateCamera?.(camera)};
 }

@@ -182,7 +182,13 @@ jobs:
         run: |
           npm run verify:package
           cp release-results/package-verification.json release-results/package-preview-depth-upgrade.json
-      - name: Verify exact live-version upgrade and saved work in both engines
+      - name: Verify current public feature-preview upgrade and saved work in both engines
+        env:
+          QA_PACKAGE_MODE: preview-upgrade
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-current-upgrade.json
+      - name: Verify historical main-version upgrade and saved work in both engines
         env:
           QA_PACKAGE_MODE: live-upgrade
         run: |

@@ -36,7 +36,7 @@ test('Smart Add records bounded seed metadata, keeps all source fields, and avoi
   assert.deepEqual(generated.document, before);
   assert.deepEqual(proposal.document.shots.slice(0, before.shots.length), before.shots);
   assert.equal(proposal.document.shots.at(-1).id, 'smart-shot-5-2');
-  assert.deepEqual(proposal.document.shots.at(-1).generation, { seed: 0xdeadbeef, generatorVersion: 'smart-rally-v1' });
+  assert.deepEqual(proposal.document.shots.at(-1).generation, { seed: 0xdeadbeef, generatorVersion: 'smart-rally-v2' });
   validateDocument(proposal.document);
 });
 

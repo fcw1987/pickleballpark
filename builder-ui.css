@@ -24,7 +24,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
   --game-green: #75ad79;
   --game-accent: #f0b257;
   --game-muted: #c5d3c3;
-  --game-danger: #ffaaa0;
+  --game-danger: #ffc4ba;
   --game-edge: #9cc1a0;
   --game-highlight: #48634e;
   --game-frame: url('assets/park/menu-frame-dark.png');
@@ -82,7 +82,8 @@ body.builder-workspace #infoToggle { display: none !important; pointer-events: n
 }
 .builder-button:hover, .builder-view-button:hover, .builder-menu > summary:hover, .builder-chip:hover { background: var(--game-highlight); }
 .builder-button:active, .builder-view-button:active, .builder-menu[open] > summary { transform: translate(1px,1px); box-shadow: inset 2px 2px 0 var(--game-edge); }
-.builder-ui :is(button,input,select,textarea,summary):focus-visible { outline: 3px solid var(--game-accent); outline-offset: 2px; }
+.builder-ui :is(button,input,select,textarea,summary):focus-visible,
+#infoModal :is(button,input,select,textarea,summary,a,[tabindex]):focus-visible { outline: 3px solid var(--game-accent); outline-offset: 2px; }
 .builder-button-primary, .builder-view-button.is-selected { color: var(--game-filled-ink); background: var(--game-green); }
 .builder-button-accent { background: var(--game-accent); color: #142b45; }
 .builder-button-primary:hover, .builder-button-accent:hover, .builder-view-button.is-selected:hover { color: var(--game-ink); background: var(--game-highlight); }
@@ -687,7 +688,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
   --game-paper: #fffbed;
   --game-paper-deep: #eee8ce;
   --game-green: #28664d;
-  --game-accent: #b65e36;
+  --game-accent: #994824;
   --game-muted: #536078;
   --game-edge: #273b69;
   --game-highlight: #e1edbd;
@@ -755,7 +756,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 .builder-save-pill::before { border-radius: 0; }
 .builder-ui :is(select,input[type=number],input[type=text],input[type=file],textarea) { border: 2px solid var(--game-edge); border-radius: 0; background-color: var(--game-paper); }
 .builder-choice-field select, .builder-family-summary { background: var(--game-paper-deep); }
-.builder-detail-tab[aria-selected="true"] { border: 2px solid var(--game-edge); background: var(--game-highlight); box-shadow: inset 0 -3px 0 var(--game-green); }
+.builder-detail-tab[aria-selected="true"] { border: 2px solid var(--game-edge); color: var(--game-ink); background: var(--game-highlight); box-shadow: inset 0 -3px 0 var(--game-green); }
 .builder-detail-tab::before { color: var(--game-green); }
 .builder-family-options { border: 2px solid var(--game-edge); }
 .builder-family-option[aria-selected="true"] { background: var(--game-highlight); border-color: var(--game-green); }
@@ -790,6 +791,30 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 .builder-layout { grid-row: 1; min-height: 0; }
 .builder-reference-dock { grid-row: 2; position: relative; z-index: 30; min-width: 0; padding: 4px 12px 2px; color: #24335c; background: #fffbed; background-clip: padding-box; border: 16px solid transparent; border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20d%3D%22M12%200H36V4H40V8H44V12H48V36H44V40H40V44H36V48H12V44H8V40H4V36H0V12H4V8H8V4H12Z%22%20fill%3D%22%23202f58%22/%3E%3Cpath%20d%3D%22M12%204H36V8H40V12H44V36H40V40H36V44H12V40H8V36H4V12H8V8H12Z%22%20fill%3D%22%23e8e8d5%22/%3E%3Cpath%20d%3D%22M12%208H36V12H40V36H36V40H12V36H8V12H12Z%22%20fill%3D%22%23657797%22/%3E%3Cpath%20d%3D%22M16%2012H32V16H36V32H32V36H16V32H12V16H16Z%22%20fill%3D%22%2326385e%22/%3E%3Cpath%20d%3D%22M16%2016H32V32H16Z%22%20fill%3D%22%23fffbed%22/%3E%3C/svg%3E") 16 fill / 16px stretch; }
 .builder-reference-dock .builder-meta, .builder-reference-dock .builder-transport { border: 0; border-image: none; border-radius: 0; background: transparent; box-shadow: none; padding: 0; }
+/* The reference frame has a permanently ivory interior, including its menus.
+   Resolve the whole palette here and on the self-themed timeline so dark
+   workspace colors cannot leak onto either ivory surface. */
+.builder-reference-dock, .builder-ui .builder-reference-dock .shot-timeline {
+  --game-ink: #202e55;
+  --game-paper: #fffbed;
+  --game-paper-deep: #eee8ce;
+  --game-green: #28664d;
+  --game-accent: #994824;
+  --game-muted: #536078;
+  --game-danger: #a13b36;
+  --game-edge: #273b69;
+  --game-highlight: #e1edbd;
+  --game-filled-ink: #fffbed;
+}
+/* Disabled controls remain legible; the muted palette and missing shadow
+   communicate their state without fading the entire foreground/background pair. */
+.builder-ui :is(.builder-button,.builder-view-button):disabled {
+  opacity: 1;
+  color: var(--game-muted);
+  background: var(--game-paper-deep);
+  border-color: var(--game-muted);
+  box-shadow: none;
+}
 .builder-reference-dock .builder-meta { display: flex; flex-wrap: nowrap; align-items: center; gap: 16px; min-height: 64px; z-index: 35; }
 .builder-reference-dock .builder-app-title { display: block; flex: 1 1 auto; min-width: 0; order: 0; color: #1e2c56; font: 2.6rem/1 'Park Labels',ui-monospace,monospace; letter-spacing: -.025em; white-space: nowrap; }
 .builder-reference-dock .builder-context-actions { order: 1; gap: 12px; }
@@ -813,7 +838,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
 .builder-reference-dock .builder-shot-card .builder-chapter-menu > summary { min-height: 44px; padding: 10px 4px; font-size: .875rem; }
 .builder-reference-dock .builder-history-controls { flex: 0 0 auto; }
 .builder-reference-dock .builder-history-controls .builder-button { min-width: 44px; min-height: 44px; }
-.builder-reference-dock [data-action="add-shot"] { min-height: 44px; min-width: 64px; background: transparent; color: #24335c; border: 1px solid #c3c6ba; box-shadow: none; }
+.builder-reference-dock [data-action="add-shot"] { min-height: 44px; min-width: 64px; background: transparent; color: #24335c; border: 1px solid #657797; box-shadow: none; }
 .builder-reference-dock .builder-context-menu { grid-column: auto; grid-row: auto; }
 .builder-reference-dock .builder-context-menu > summary { border: 0; min-width: 44px; min-height: 44px; background: transparent; box-shadow: none; }
 .builder-reference-dock .builder-view-toggle { display: none; }
