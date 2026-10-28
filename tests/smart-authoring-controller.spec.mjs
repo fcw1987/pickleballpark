@@ -5,6 +5,20 @@ import {automaticRepairScenario,protectedPinScenario} from './fixtures/smart-coa
 test.use({serviceWorkers:'block'});
 test.beforeEach(async({page})=>{await page.goto('/');await settleBuilderStartup(page);});
 
+test('an Add pressed during an earlier commit keeps its native click',async({page})=>{
+  const before=await page.evaluate(()=>playBuilder.document.shots.length);
+  const add=page.getByRole('button',{name:'Add shot',exact:true});
+  const box=await add.boundingBox();
+  await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+  await page.mouse.down();
+  // Complete real queued work between native press and release. Rebuilding
+  // the pressed button here used to discard the next user click.
+  const previous=await page.evaluate(()=>playBuilder.action('addShot',{seed:256}));
+  expect(previous.ok).toBe(true);
+  await page.mouse.up();
+  await expectBuilderAddComplete(page,before+2);
+});
+
 test('a delayed Add commits and selects the new shot before its next edit',async({page})=>{
   const before=await page.evaluate(()=>{
     const source=structuredClone(playBuilder.document);

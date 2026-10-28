@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "f979c8fc3abb1955f21e44df3bf2221a2a2a2a2f8f",
+  "sourceRevision": "f979c8fc3abb1955f21e44df3bf2221a2a2a2f8f",
   "method": "Hosted Chromium reporter-start intervals from the interrupted 434/438-case run on 2026-10-28. Intervals include setup/teardown; these are balancing estimates, not exact test durations. Incomplete files scale by observed per-case cost. New files use the median measured per-case cost. Refresh from complete hosted reports after benchmarking.",
   "files": {
     "accessibility.spec.mjs": {

@@ -8,13 +8,22 @@ test('short-screen menu actions scroll clear of playback and remain operable', a
     if (enlarged) await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; playBuilder.render(); });
     const before = await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length, theme: document.body.dataset.theme }));
     await page.locator('.builder-main-menu > summary').click();
-    const panel = await page.locator('.builder-main-menu > .builder-menu-panel').boundingBox();
-    const footer = await page.locator('.builder-transport').boundingBox();
-    expect(panel.y + panel.height).toBeLessThanOrEqual(Math.min(height - 4, footer.y - 4));
+    await expect(page.locator('.builder-main-menu > .builder-menu-panel')).toBeVisible();
+    // Enlarged text can trigger ResizeObserver after the menu click. Compare
+    // both rectangles in one layout, retaining the exact four-pixel clearance.
+    await expect.poll(()=>page.evaluate(height=>{
+      const panel=document.querySelector('.builder-main-menu > .builder-menu-panel').getBoundingClientRect();
+      const footer=document.querySelector('.builder-transport').getBoundingClientRect();
+      return panel.bottom-Math.min(height-4,footer.top-4);
+    },height)).toBeLessThanOrEqual(0);
     const appearance = page.getByRole('button', { name: /Switch to (?:light|dark) appearance/, exact: false });
     await appearance.scrollIntoViewIfNeeded();
-    const box = await appearance.boundingBox();
-    expect(box.y + box.height).toBeLessThanOrEqual(Math.min(height, footer.y));
+    await expect(appearance).toBeVisible();
+    await expect.poll(()=>appearance.evaluate((node,height)=>{
+      const box=node.getBoundingClientRect();
+      const footer=document.querySelector('.builder-transport').getBoundingClientRect();
+      return box.bottom-Math.min(height,footer.top);
+    },height)).toBeLessThanOrEqual(0);
     await appearance.click();
     expect(await page.evaluate(() => document.body.dataset.theme)).not.toBe(before.theme);
     expect(await page.evaluate(() => ({ doc: JSON.stringify(playBuilder.document), history: playBuilder.history.snapshots.length }))).toEqual({ doc: before.doc, history: before.history });
