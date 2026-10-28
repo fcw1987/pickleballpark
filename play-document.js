@@ -1,5 +1,6 @@
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
+import { SERVICE_COURT_CONVENTION } from './rally-state.js';
 export const SCHEMA_VERSION = 1;
 // One shared bound for authored, imported, generated, and compiled rallies.
 // Keep this in the document contract so callers never need to duplicate the
@@ -180,8 +181,9 @@ export function validateDocument(value) {
     choice(value.service.receiver, PLAYER_IDS, 'service.receiver');
     if (value.players[value.service.server].team === value.players[value.service.receiver].team) fail('service.receiver', 'must belong to the receiving team.');
     if (value.service.court !== undefined) choice(value.service.court, ['right', 'left'], 'service.court');
+    if (value.service.courtConvention !== undefined) choice(value.service.courtConvention, [SERVICE_COURT_CONVENTION], 'service.courtConvention');
     if (value.service.correctPositionsAtScoreCall !== undefined && typeof value.service.correctPositionsAtScoreCall !== 'boolean') fail('service.correctPositionsAtScoreCall', 'must be boolean.');
-    for (const key of Object.keys(value.service)) if (!['server', 'receiver', 'court', 'correctPositionsAtScoreCall'].includes(key)) fail(`service.${key}`, 'is not supported by the per-rally service model.');
+    for (const key of Object.keys(value.service)) if (!['server', 'receiver', 'court', 'courtConvention', 'correctPositionsAtScoreCall'].includes(key)) fail(`service.${key}`, 'is not supported by the per-rally service model.');
   }
   choice(value.ending, ['stop', 'winner', 'fault'], 'ending');
   if (typeof value.intentionalFault !== 'boolean') fail('intentionalFault', 'must be boolean.');
@@ -222,7 +224,7 @@ export function createStarterDocument() {
     annotations: [],
     assistance: { autoShading: false, showGuides: false, team: 'both' },
     opening: 'serve', ending: 'stop', intentionalFault: false,
-    service: { server: 'player1', receiver: 'player3', court: 'right' }
+    service: { server: 'player1', receiver: 'player3', court: 'left', courtConvention: SERVICE_COURT_CONVENTION }
   };
   validateDocument(document);
   return document;

@@ -4,13 +4,95 @@ import { createStarterDocument, validateDocument } from '../play-document.js';
 import { compileDocument, automaticActorPeakSpeed, automaticActorPairSpacing } from '../play-compiler.js';
 import { compilePlayTimeline } from '../three-d-core.js';
 import { validateRallyRules } from '../rally-rules.js';
-import { resolveServiceContext, eligibleHitters, updateServiceFromShotEdit } from '../rally-state.js';
+import { resolveServiceContext, receivingServiceBox, effectiveServiceCourt, eligibleHitters, updateServiceFromShotEdit, updateServiceCourt, SERVICE_COURT_CONVENTION } from '../rally-state.js';
 import { proposeRandomRally, proposeSmartAdd } from '../smart-rally-generator.js';
 import { compileEffectiveCandidate, evaluateCandidate } from '../rally-proposals.js';
 import { DraftStore, EditHistory } from '../builder-storage.js';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 
 const clone = value => structuredClone(value);
+
+test('declared right/even and left/odd courts use each server end perspective and diagonal receiver', () => {
+  for (const [team, court, serverX, minX, minY, maxY] of [
+    ['green', 'right', 5, 10, 29, 44],
+    ['green', 'left', 15, 0, 29, 44],
+    ['orange', 'right', 15, 0, 0, 15],
+    ['orange', 'left', 5, 10, 0, 15]
+  ]) {
+    const near = team === 'green', server = near ? 'player1' : 'player3', receiver = near ? 'player3' : 'player1';
+    const service = { server, receiver, servingTeam: team, court, courtConvention: SERVICE_COURT_CONVENTION };
+    const expected = { minX, maxX: minX + 10, minY, maxY };
+    // Declared court wins even when paddle contact crosses the center extension.
+    assert.deepEqual(receivingServiceBox(service, { x: 20 - serverX, y: near ? 0 : 44 }), expected);
+    const doc = createStarterDocument();
+    doc.service = { server, receiver, court, courtConvention: SERVICE_COURT_CONVENTION };
+    doc.initialLayout[server] = { x: serverX, y: near ? -1 : 45 };
+    doc.initialLayout[receiver] = { x: minX + 5, y: near ? 42 : 2 };
+    doc.initialLayout.ball = { x: serverX + (near ? 1.2 : -1.2), y: near ? 0 : 44 };
+    doc.shots = [{ ...doc.shots[0], hitter: server, receiver, target: { x: minX + 5, y: near ? 38 : 6 } }];
+    const before = clone(doc), compiled = compileDocument(doc);
+    assert.equal(compiled.validShotCount, 1, `${team}/${court}`);
+    assert.deepEqual(validateRallyRules(compiled.play, compiled.timeline).violations.filter(v =>
+      ['serve-target', 'serve-foot-position', 'serve-bounce', 'incorrect-server', 'serve-receiver-conflict'].includes(v.code)), [], `${team}/${court}`);
+    assert.deepEqual(doc, before, 'compiling must preserve saved service intent and coordinates');
+    const legacy = clone(doc);
+    legacy.service.court = court === 'right' ? 'left' : 'right';
+    delete legacy.service.courtConvention;
+    const legacyBytes = JSON.stringify(legacy), legacyCompiled = compileDocument(legacy);
+    assert.equal(legacyCompiled.validShotCount, 1, `${team}/${court}: legacy diagonal remains valid`);
+    assert.deepEqual(legacyCompiled.play.steps[1].shot.to, compiled.play.steps[1].shot.to);
+    assert.equal(JSON.stringify(legacy), legacyBytes);
+    const wrongDiagonal = clone(compiled.play);
+    wrongDiagonal.steps[1].shot.to.x = 15 - minX;
+    assert.ok(validateRallyRules(wrongDiagonal).violations.some(v => v.code === 'serve-target'), `${team}/${court}: wrong diagonal`);
+  }
+});
+
+test('undeclared legacy court follows authored geometry and starter retains its existing diagonal', () => {
+  assert.deepEqual(receivingServiceBox({}, { x: 15, y: 0 }), { minX: 0, maxX: 10, minY: 29, maxY: 44 });
+  assert.deepEqual(receivingServiceBox({}, { x: 5, y: 44 }), { minX: 10, maxX: 20, minY: 0, maxY: 15 });
+  const doc = createStarterDocument();
+  assert.equal(doc.service.court, 'left');
+  assert.deepEqual(doc.initialLayout.player1, { x: 15, y: -1 });
+  assert.deepEqual(doc.shots[0].target, { x: 5, y: 38 });
+});
+
+test('unmarked imported service declarations retain legacy diagonals and serialized intent until an explicit undoable edit', () => {
+  for (const [team, court, minX, minY, maxY] of [
+    ['green', 'right', 0, 29, 44], ['green', 'left', 10, 29, 44],
+    ['orange', 'right', 10, 0, 15], ['orange', 'left', 0, 0, 15]
+  ]) {
+    assert.deepEqual(receivingServiceBox({ servingTeam: team, court }, { x: 10, y: 22 }), { minX, maxX: minX + 10, minY, maxY });
+  }
+  const legacy = createStarterDocument();
+  legacy.service.court = 'right'; delete legacy.service.courtConvention;
+  legacy.shots[2].playerMovement = { player4: { intent: 'manual', pinned: true, target: { x: 15, y: 30 } } };
+  const serialized = JSON.stringify(legacy);
+  const store = new DraftStore({ storage: { getItem: () => null, setItem: () => {} }, validate: validateDocument });
+  const imported = store.importJSON(serialized), compiled = compileDocument(imported);
+  assert.equal(compiled.validShotCount, legacy.shots.length);
+  assert.equal(validateRallyRules(compiled.play, compiled.timeline).valid, true);
+  assert.equal(JSON.stringify(imported), serialized);
+  assert.equal(effectiveServiceCourt(imported.service), 'left');
+  const samePhysicalCourt = clone(imported);
+  updateServiceCourt(samePhysicalCourt, effectiveServiceCourt(imported.service));
+  assert.equal(samePhysicalCourt.service.courtConvention, SERVICE_COURT_CONVENTION);
+  assert.equal(compileDocument(samePhysicalCourt).validShotCount, legacy.shots.length);
+  assert.deepEqual(receivingServiceBox(resolveServiceContext(samePhysicalCourt)), receivingServiceBox(resolveServiceContext(imported)));
+  assert.equal(JSON.stringify(imported), serialized);
+  const identityEdit = clone(imported);
+  updateServiceFromShotEdit(identityEdit, identityEdit.shots[0], 'receiver');
+  assert.equal(identityEdit.service.courtConvention, undefined, 'identity-only edits must preserve legacy court meaning');
+  const history = new EditHistory(imported), changed = clone(imported);
+  updateServiceCourt(changed, 'right');
+  assert.equal(changed.service.courtConvention, SERVICE_COURT_CONVENTION);
+  assert.equal(compileDocument(changed).validShotCount, 0);
+  assert.deepEqual(changed.shots, imported.shots);
+  assert.deepEqual(changed.initialLayout, imported.initialLayout);
+  history.commit(changed);
+  assert.equal(JSON.stringify(history.undo()), serialized);
+  assert.deepEqual(history.redo(), changed);
+});
 
 test('seven-hit seed 2 regression: designated receiver returns the serve in every shared engine path', async () => {
   // Before this change seed 2 selected player4 for the serve to (5,33).
@@ -19,6 +101,7 @@ test('seven-hit seed 2 regression: designated receiver returns the serve in ever
   assert.equal(proposal.ok, true, proposal.reason);
   const source = proposal.document;
   assert.equal(source.service.receiver, 'player3');
+  assert.equal(source.service.courtConvention, SERVICE_COURT_CONVENTION);
   assert.equal(source.shots[0].receiver, 'player3');
   assert.equal(source.shots[1].hitter, 'player3');
   const store = new DraftStore({ storage: { getItem: () => null, setItem: () => {} }, validate: validateDocument });
@@ -170,7 +253,7 @@ test('raw replay team/late-serve semantics use the same validation boundary', ()
 });
 
 test('service schema rejects conflicting teams, unknown identity and unsupported match-state guesses', () => {
-  for (const service of [{ server: 'player1', receiver: 'player2' }, { server: 'player1', receiver: 'auto' }, { server: 'player1', receiver: 'player3', score: [0, 0] }]) {
+  for (const service of [{ server: 'player1', receiver: 'player2' }, { server: 'player1', receiver: 'auto' }, { server: 'player1', receiver: 'player3', score: [0, 0] }, { server: 'player1', receiver: 'player3', courtConvention: 'future' }]) {
     const doc = createStarterDocument(); doc.service = service;
     assert.throws(() => validateDocument(doc));
   }

@@ -3,6 +3,7 @@
 import { serviceBoxForServer } from './court-geometry.js';
 export const RALLY_PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 export const RALLY_INTELLIGENCE_VERSION = 'rally-intelligence-v1';
+export const SERVICE_COURT_CONVENTION = 'server-perspective-v1';
 
 export function teamForPlayer(id, players) {
   return players?.[id]?.team ?? (['player1', 'player2'].includes(id) ? 'green' : ['player3', 'player4'].includes(id) ? 'orange' : null);
@@ -29,6 +30,7 @@ export function resolveServiceContext(source) {
     servingTeam: teamForPlayer(server, source?.players),
     source: declared ? 'declared' : receiver ? templateServe && !serve ? 'lesson' : 'serve-recipe' : 'unknown',
     court: declared?.court ?? null,
+    courtConvention: declared?.courtConvention ?? null,
     correctPositionsAtScoreCall: declared?.correctPositionsAtScoreCall ?? null
   });
 }
@@ -36,8 +38,27 @@ export function resolveServiceContext(source) {
 export function receivingServiceBox(service, serverPoint) {
   if (!service?.court) return serviceBoxForServer(serverPoint);
   const near = service.servingTeam === 'green';
-  const right = service.court === 'right';
-  return serviceBoxForServer({ x: near === right ? 15 : 5, y: near ? 0 : 44 });
+  const right = effectiveServiceCourt(service) === 'right';
+  // Court names belong to the server facing the net: near-side right is low X,
+  // far-side right is high X. The receiving box is diagonally opposite.
+  // Unmarked saved declarations retain their original interpretation. Merely
+  // loading/compiling a play must never migrate its authored service intent.
+  return serviceBoxForServer({ x: near === right ? 5 : 15, y: near ? 0 : 44 });
+}
+
+/** Display the physical court without changing an unmarked saved declaration. */
+export function effectiveServiceCourt(service) {
+  if (!service?.court) return null;
+  if (service.courtConvention === SERVICE_COURT_CONVENTION) return service.court;
+  return service.court === 'right' ? 'left' : 'right';
+}
+
+/** Explicit user court edits adopt the current convention in one Undo step. */
+export function updateServiceCourt(document, court) {
+  const context = resolveServiceContext(document);
+  document.service = { ...(document.service || {}), server: context.server, receiver: context.receiver, courtConvention: SERVICE_COURT_CONVENTION };
+  if (court === 'unspecified') delete document.service.court;
+  else document.service.court = court;
 }
 
 /** Contact index is zero based: serve, return, third, then open rally. */
@@ -79,7 +100,7 @@ export function updateServiceFromShotEdit(document, shot, field) {
   if (document.opening !== 'serve' || document.shots[0] !== shot || shot.family !== 'serve') return;
   const context = resolveServiceContext(document);
   if (field === 'receiver' && shot.receiver !== 'auto') document.service = {
-    ...(document.service || {}), server: context.server ?? shot.hitter, receiver: shot.receiver
+    ...(document.service || { courtConvention: SERVICE_COURT_CONVENTION }), server: context.server ?? shot.hitter, receiver: shot.receiver
   };
   if (field === 'hitter' && document.service) document.service.server = shot.hitter;
 }

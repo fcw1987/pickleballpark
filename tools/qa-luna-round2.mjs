@@ -61,7 +61,7 @@ try {
   // Coach controls and a manual movement pin are visible in the expanded editor.
   await page.getByText('Coach tools', { exact: true }).click({ force: true });
   await page.getByLabel('Auto Shading').check({ force: true });
-  await page.getByLabel('Coverage Guides').check({ force: true });
+  await page.getByLabel('Position Guides').check({ force: true });
   const pinLabel = page.locator('label').filter({ hasText: 'Pin movement target' });
   if (await pinLabel.count()) {
     const pin = pinLabel.locator('input[type="checkbox"]');
@@ -89,7 +89,7 @@ try {
     receiverSummary: configuredText.includes('Green 2'),
     numericValues: { width: await width.inputValue(), depth: await depth.inputValue() },
     autoShading: await page.getByLabel('Auto Shading').isChecked(),
-    coverageGuides: await page.getByLabel('Coverage Guides').isChecked(),
+    coverageGuides: await page.getByLabel('Position Guides').isChecked(),
     pinControlFound: (await pinLabel.count()) > 0,
   };
   await shot(page, '02-authored-shot4-block');

@@ -32,19 +32,64 @@ const currentProse = (file, source) => {
   }
   return null;
 };
-const runtimeLabels = source => {
-  // Match labels, not identifiers such as class Pickleboard, window.pickleboard,
-  // or PICKLEBOARD_VISUAL. Stable namespaced strings and API diagnostics also
-  // remain compatibility contracts, rather than the displayed product name.
+// Read JavaScript literals without allowing an apostrophe in a template or a
+// comment to turn later identifiers into apparent display text. Template
+// expressions are scanned as code, so their actual string labels still count.
+const javascriptLabels = source => {
   const labels = [];
-  const code = source.replace(/^\s*(?:\/\/|\/\*|\*).*$/gm, '');
-  for (const match of code.matchAll(/(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1/g)) {
-    const label = match[2];
-    if (/^(?:https?:\/\/|pickleboard[-:]\S*$)/i.test(label)) continue;
-    if (label === 'Pickleboard projection is unavailable' || label === 'GuidedPixelActors requires a Pickleboard board instance.') continue;
-    labels.push(label);
-  }
-  return labels.join('\n');
+  let i = 0;
+  const scan = (inExpression = false) => {
+    let depth = 0;
+    while (i < source.length) {
+      const c = source[i];
+      if (c === '/' && source[i + 1] === '/') {
+        i += 2; while (i < source.length && source[i] !== '\n') i++;
+      } else if (c === '/' && source[i + 1] === '*') {
+        i += 2; while (i < source.length && source.slice(i, i + 2) !== '*/') i++; i += 2;
+      } else if (c === '/' && /(?:^|[=([{,:;!?&|]|=>|\b(?:return|throw|case|typeof|void|delete|yield))\s*$/.test(source.slice(0, i))) {
+        // Regex literals may contain quotes and comment-like characters.
+        let characterClass = false;
+        i++;
+        while (i < source.length) {
+          const token = source[i++];
+          if (token === '\\') i++;
+          else if (token === '[') characterClass = true;
+          else if (token === ']') characterClass = false;
+          else if (token === '/' && !characterClass) break;
+        }
+        while (/[a-z]/i.test(source[i] || '') && i < source.length) i++;
+      } else if (c === "'" || c === '"' || c === '`') {
+        const quote = c;
+        let label = '';
+        i++;
+        while (i < source.length) {
+          if (source[i] === '\\') { label += source.slice(i, i + 2); i += 2; }
+          else if (source[i] === quote) { i++; break; }
+          else if (quote === '`' && source.slice(i, i + 2) === '${') {
+            labels.push(label); label = ''; i += 2; scan(true);
+          } else label += source[i++];
+        }
+        labels.push(label);
+      } else if (inExpression && c === '}' && depth === 0) { i++; return; }
+      else { if (c === '{') depth++; if (c === '}') depth--; i++; }
+    }
+  };
+  scan();
+  return labels;
+};
+const runtimeLabels = source => javascriptLabels(source).filter(label => {
+  // Stable namespaced strings and these two API diagnostics are compatibility
+  // contracts; identifiers are never collected in the first place.
+  if (/^(?:https?:\/\/|pickleboard[-:]\S*$)/i.test(label)) return false;
+  return label !== 'Pickleboard projection is unavailable' && label !== 'GuidedPixelActors requires a Pickleboard board instance.';
+}).join('\n');
+const htmlLabels = source => {
+  const scripts = [];
+  const markup = source.replace(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi, (_, code) => {
+    scripts.push(runtimeLabels(code));
+    return '';
+  });
+  return markup + '\n' + scripts.join('\n');
 };
 const localReferences = (file, source) => {
   const refs = [];
@@ -111,7 +156,7 @@ export function validateBrandFiles(files) {
   for (const [file, source] of files) {
     if (typeof source !== 'string') continue;
     let remaining = currentProse(file, source);
-    if (remaining === null && /^[^/]+\.html$/.test(file)) remaining = source;
+    if (remaining === null && /^[^/]+\.html$/.test(file)) remaining = htmlLabels(source);
     // Metadata products are checked above. build-identity may recognize old
     // metadata as input so server diagnostics retain the name they actually report.
     if (remaining === null && /^[^/]+\.js$/.test(file) && !['build-metadata.js', 'build-identity.js'].includes(file)) remaining = runtimeLabels(source);

@@ -4,11 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#304762">
-    <meta name="description" content="Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and rally replay in an original top-down pixel park.">
+    <meta name="description" content="Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and 3D rally replay with camera controls and illustrative player coverage zones.">
     <title>Pickleball Park - Build a Play</title>
     <script>
         if (new URL(location.href).searchParams.get('workspace') !== 'planner') {
             document.documentElement.setAttribute('data-court-loading', '');
+            // Independent of module loading: only offer a usable board after
+            // core initialization has explicitly succeeded.
+            let timer, notice;
+            const showRecovery=()=>{
+                if(!document.body)return;
+                if(!notice){
+                    notice=document.createElement('div');notice.setAttribute('role','status');
+                    notice.dataset.courtRecovery='';
+                    notice.style.cssText='position:fixed;top:8px;left:8px;right:8px;z-index:10000;padding:12px;background:#fff4dc;color:#243c4d;border:2px solid #304762;border-radius:8px';
+                    document.body.append(notice);
+                }
+                const usable=window.courtStartup.coreReady;
+                notice.replaceChildren(document.createTextNode(usable
+                    ? 'The play builder could not finish opening. Continue on the 2D board, or reload to retry. '
+                    : 'The court could not finish opening. Reload to try again. '));
+                const retry=document.createElement('button');retry.type='button';retry.textContent='Reload court';retry.onclick=()=>location.reload();notice.append(retry);
+                if(usable){
+                    const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='Continue in 2D';dismiss.onclick=()=>notice.remove();notice.append(dismiss);
+                }
+            };
+            window.courtStartup = {
+                expired: false, coreReady: false,
+                complete() { clearTimeout(timer); },
+                boardReady() { this.coreReady=true;if(this.expired)showRecovery(); },
+                coreFailed() { this.coreReady=false;this.fail(); },
+                fail() {
+                    if(this.expired){showRecovery();return;}
+                    this.expired=true;clearTimeout(timer);
+                    window.playBuilder?.cancelPendingView();
+                    window.playBuilder?.render();
+                    window.pickleboard?.threeD?.cancelLoading?.();
+                    document.documentElement.removeAttribute('data-court-loading');
+                    if(document.body)showRecovery();else document.addEventListener('DOMContentLoaded',showRecovery,{once:true});
+                }
+            };
+            timer=setTimeout(()=>window.courtStartup.fail(),15000);
+            window.addEventListener('pickleboard:ready',()=>window.courtStartup.boardReady(),{once:true});
+            window.addEventListener('error',event=>{
+                if(event.target?.tagName!=='SCRIPT')return;
+                const source=new URL(event.target.src,location.href).pathname;
+                if(source.endsWith('/script.js'))window.courtStartup.coreFailed();
+                else if(source.endsWith('/play-builder.js'))window.courtStartup.fail();
+            },true);
         }
     </script>
     <script src="visual-theme.js"></script>
@@ -228,7 +271,7 @@
                     <button id="infoClose" class="close-btn">×</button>
                 </div>
                 <div class="modal-body">
-<section><h2>Build a Play</h2><p>Choose a shot chapter, then Edit to change its hitter, flight or landing target. Drag the paused target, choose Place target for a tap, or open Customize to choose Target, Flight, Players, Movement, Coach tools or Precision. Undo and Redo stay beside Play in the builder footer, with Command/Control-Z available outside text fields. Space toggles Play/Pause when focus is outside other controls. Coach explains rule or movement limits. Fix for me evaluates a repair using automatic settings; Show options lists changes that need your approval. Smart Add creates a compatible continuation without changing earlier shots. Random Rally creates a new saved draft with the requested number of hits, up to 99.</p><p>Play resumes the current position and repeats until you choose Pause. Seek to any moment on the timeline or choose an exact shot chapter. Opening Edit pauses playback. 2D and 3D share one draft and playhead.</p><p>Menu contains saved plays, lessons, import/export and Court Planner. Manage plays contains the play name, My Plays and Save As. Planner keeps a separate arrangement; Use as starting layout explicitly copies it. Completed edits save on this device. If another tab changed the same play, use Save As to keep both versions. Export JSON for a backup: local storage can be cleared by the browser and is not cloud storage.</p><p>Auto Shading adjusts eligible generated movement. Coverage Guides only explain suggested positions. These are coaching approximations, not optimal-strategy predictions.</p></section>
+<section><h2>Build a Play</h2><p>Choose a shot chapter, then Edit to change its hitter, flight or landing target. Drag the paused target, choose Place target for a tap, or open Customize to choose Target, Flight, Players, Movement, Coach tools or Precision. Undo and Redo stay beside Play in the builder footer, with Command/Control-Z available outside text fields. Space toggles Play/Pause when focus is outside other controls. Coach explains rule or movement limits. Fix for me evaluates a repair using automatic settings; Show options lists changes that need your approval. Smart Add creates a compatible continuation without changing earlier shots. Random Rally creates a new saved draft with the requested number of hits, up to 99.</p><p>Play resumes the current position and repeats until you choose Pause. Seek to any moment on the timeline or choose an exact shot chapter. Opening Edit pauses playback. The court opens in 3D. Drag empty space in Rotate mode to rotate and tilt, choose Pan to move the view, and use +/− to zoom or Reset view to restore the camera. On touch screens, use two fingers to pan or pinch to zoom. Camera changes preserve the draft and playhead.</p><p>Menu contains saved plays, lessons, import/export and Court Planner. Manage plays contains the play name, My Plays and Save As. Planner keeps a separate arrangement; Use as starting layout explicitly copies it. Completed edits save on this device. If another tab changed the same play, use Save As to keep both versions. Export JSON for a backup: local storage can be cleared by the browser and is not cloud storage.</p><p>Auto Shading adjusts eligible generated movement. Coverage shows sectors around the current players to illustrate space they might cover, including shared space where partners should call the ball. Position Guides in Coach tools show suggested recovery positions instead. Neither changes authored positions; Auto Shading is the separate movement assistance. These are coaching approximations, not guaranteed reach, legal-shot checks or optimal-strategy predictions.</p></section>
                     <section id="buildDiagnostics" class="info-section build-diagnostics">
                         <h3 tabindex="-1">Build diagnostics</h3>
                         <p data-running-build></p>
@@ -255,15 +298,15 @@
                     <section class="info-section">
                         <h3>Plays</h3>
                         <p>Plays demonstrate common patterns rather than mandatory strategy. Choose one from the menu, then use Play/Pause and the shot-marked timeline to study it. Playback repeats until paused.</p>
-                        <p>While a Play is open, choose 3D View for a spatial replay. Seek or choose shot chapters to inspect contacts, switch cameras, choose a playback speed, and Exit 3D to return to the same shared playhead.</p>
+                        <p>Build a Play opens in 3D. Seek or choose shot chapters to inspect contacts and use Playback options to change speed. Rotate, Pan, zoom and Reset view adjust only the camera. Use Menu to open lessons or Court Planner; camera controls do not exit or replace the current play.</p>
                     </section>
 
                     <!-- Court Information -->
                     <section class="info-section">
                         <h3>Court Layout</h3>
                         <ul>
-                            <li>Pale green area: Non-volley zone (Kitchen)</li>
-                            <li>Teal area: Service boxes</li>
+                            <li>Non-volley zones (Kitchens): the seven-foot areas on either side of the net</li>
+                            <li>Service boxes: the two boxes behind each kitchen line</li>
                             <li>Net runs through the center</li>
                             <li>Court is 44' x 20' regulation size</li>
                             <li>Players/ball can move outside court boundaries</li>
@@ -284,15 +327,15 @@
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot ball"></div>
-                                <span>Ball (pale yellow with a navy outline)</span>
+                                <span>Ball</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot kitchen"></div>
-                                <span>Non-Volley Zone (Pale Green)</span>
+                                <span>Non-volley zone (Kitchen)</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot service-box"></div>
-                                <span>Service Boxes (Teal)</span>
+                                <span>Service boxes</span>
                             </div>
                         </div>
                     </section>

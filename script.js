@@ -1395,13 +1395,22 @@ class Pickleboard {
 }
 
 // Initialize the application when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Create global instance
-    window.pickleboard = new Pickleboard();
-    window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
-    window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
-    
-});
+function initializeBoard() {
+    if(window.pickleboard)return;
+    try {
+        // Do not announce readiness for a partially constructed board.
+        window.pickleboard = new Pickleboard();
+        window.pickleboard.buildDiagnostics = mountBuildDiagnostics(document.getElementById('buildDiagnostics'));
+        window.dispatchEvent(new CustomEvent('pickleboard:ready', { detail: window.pickleboard }));
+    } catch(error) {
+        window.courtStartup?.coreFailed();
+        console.warn('Court initialization failed:',error);
+    }
+}
+// Module scripts run after parsing. Do not wait for unrelated builder imports,
+// which may be stalled while the independent 2D board can already be used.
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeBoard,{once:true});
+else initializeBoard();
 
 // Handle browser back/forward navigation
 window.addEventListener('popstate', () => {

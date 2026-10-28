@@ -4,7 +4,7 @@ import {REFERENCE_SLEEVE_REGIONS,partitionReferenceAtlas,ReferenceAthleteResourc
 import {readReferenceAtlasPixels,referenceAthleteGeometryKernel} from './helpers/reference-athlete-geometry.mjs';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 import {compileEffectiveCandidate} from '../rally-proposals.js';import {sampleActorPresentation} from '../three-d-presentation.js';
-const metadata=JSON.parse(readFileSync(new URL('../assets/reference-athletes/metadata-v2.json',import.meta.url))),measurements=JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-measurements.json',import.meta.url))),pixels=await readReferenceAtlasPixels(new URL('../assets/reference-athletes/athletes-armless-v2.png',import.meta.url));
+const metadata=JSON.parse(readFileSync(new URL('../assets/reference-athletes/metadata-v2.json',import.meta.url))),measurements=JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-measurements.json',import.meta.url))),pixels=await readReferenceAtlasPixels(new URL('../assets/source/reference-athletes/athletes-armless-v2.png',import.meta.url));
 const preservedHair=JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-preserved-hair.json',import.meta.url)));
 const resources=()=>new ReferenceAthleteResources({metadata,image:pixels}),paintedAudit=referenceAthleteGeometryKernel(THREE);
 function cameraAt(sector,elevation){const camera=new THREE.PerspectiveCamera(38,1,.1,100),a=sector*Math.PI/4,e=elevation*Math.PI/180;camera.position.set(Math.sin(a)*Math.cos(e)*7,.6+Math.sin(e)*7,Math.cos(a)*Math.cos(e)*7);camera.lookAt(0,.6,0);camera.updateMatrixWorld(true);return camera;}

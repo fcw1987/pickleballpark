@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { validateDocument } from '../play-document.js';
+import { proposeRandomRally } from '../smart-rally-generator.js';
 import {
   DraftStore,
   DRAFT_CONFLICT_CODE,
+  DRAFT_CAPACITY_CODE,
   EditHistory,
   MAX_DRAFTS,
   MAX_JSON_BYTES,
+  MAX_LIBRARY_BYTES,
   STORAGE_KEY
 } from '../builder-storage.js';
 
@@ -218,4 +222,168 @@ test('edit history isolates snapshots, truncates redo, and honors its limit', ()
   assert.equal(history.undo().shots[0].id, 'd');
   assert.equal(history.undo().shots[0].id, 'c');
   assert.equal(history.canUndo, false);
+});
+
+// Size fixtures use UTF-8 bytes rather than JS string length, matching storage.
+const byteLength = value => new TextEncoder().encode(value).byteLength;
+function libraryAtByteLimit() {
+  const drafts = Array.from({ length: 4 }, (_, index) => document(`large-${index}`, { extension: 'é'.repeat(250_000) }));
+  drafts.push(document('editable'));
+  const envelope = { schemaVersion: 1, drafts, lastId: 'editable' };
+  let spare = MAX_LIBRARY_BYTES - byteLength(JSON.stringify(envelope));
+  for (const draft of drafts.slice(0, 4)) {
+    const added = Math.min(spare, MAX_JSON_BYTES - byteLength(JSON.stringify(draft)));
+    draft.extension += 'x'.repeat(added);
+    spare -= added;
+  }
+  assert.equal(spare, 0);
+  assert(drafts.every(draft => byteLength(JSON.stringify(draft)) <= MAX_JSON_BYTES));
+  assert.equal(byteLength(JSON.stringify(envelope)), MAX_LIBRARY_BYTES);
+  return envelope;
+}
+
+test('multi-play libraries can exceed the old file limit and round trip without migration', () => {
+  const storage = new MemoryStorage(), store = new DraftStore({ storage, validate });
+  const original = document('one', { extension: 'é'.repeat(150_000) });
+  store.save(original);
+  store.save(document('two', { extension: 'x'.repeat(300_000) }));
+  assert(byteLength(storage.getItem(STORAGE_KEY)) > MAX_JSON_BYTES);
+  const reopened = new DraftStore({ storage, validate });
+  assert.deepEqual(reopened.open('one'), original);
+  reopened.save({ ...original, title: 'Renamed' });
+  assert.equal(reopened.list().length, 2);
+  assert.equal(JSON.parse(storage.getItem(STORAGE_KEY)).schemaVersion, 1);
+  assert.equal(reopened.open('two').extension.length, 300_000);
+});
+
+test('byte capacity rejects edits, copies and imported saves atomically and allows recovery', () => {
+  const envelope = libraryAtByteLimit();
+  const storage = new MemoryStorage({ [STORAGE_KEY]: JSON.stringify(envelope) });
+  const store = new DraftStore({ storage, validate });
+  const editing = store.loadLast();
+  assert.deepEqual(store.save(editing), editing); // Exactly at the byte bound is writable.
+  const prior = storage.getItem(STORAGE_KEY);
+  const changed = { ...editing, extension: 'unsaved changes' };
+  const copied = { ...changed, id: 'copy' };
+  const imported = store.importJSON(JSON.stringify(document('imported')));
+  for (const candidate of [changed, copied, imported]) {
+    const before = structuredClone(candidate);
+    assert.throws(() => store.save(candidate), error => error.code === DRAFT_CAPACITY_CODE && /2 MiB/.test(error.message));
+    assert.equal(storage.getItem(STORAGE_KEY), prior);
+    assert.deepEqual(candidate, before);
+  }
+  store.remove('large-0');
+  assert.deepEqual(store.save(changed), changed);
+  assert.deepEqual(store.open('editable'), changed);
+});
+
+test('browser quota below the app byte cap stays distinct and does not advance save observations', () => {
+  const storage = new MemoryStorage(), store = new DraftStore({ storage, validate });
+  const original = document('quota', { extension: 'x'.repeat(300_000) });
+  store.save(original);
+  const prior = storage.getItem(STORAGE_KEY), write = storage.setItem.bind(storage);
+  const cause = new Error('browser storage exhausted');
+  cause.name = 'QuotaExceededError';
+  storage.setItem = () => { throw cause; };
+  const edited = { ...original, title: 'Unsaved quota edit' };
+  assert.throws(() => store.save(edited), error => error.code === DRAFT_CAPACITY_CODE && error.capacityKind === 'quota' && error.cause === cause);
+  assert.equal(storage.getItem(STORAGE_KEY), prior);
+  assert.equal(store.observedDrafts.get('quota'), JSON.stringify(original));
+  storage.setItem = write;
+  assert.deepEqual(store.save(edited), edited);
+});
+
+test('50-play libraries permit updates while conflicts retain precedence over capacity', () => {
+  const storage = new MemoryStorage(), store = new DraftStore({ storage, validate });
+  for (let index = 0; index < MAX_DRAFTS; index++) store.save(document(`full-${index}`));
+  const other = new DraftStore({ storage, validate });
+  const stale = other.open('full-0');
+  store.save({ ...stale, title: 'Newer at capacity' });
+  const prior = storage.getItem(STORAGE_KEY);
+  assert.throws(() => other.save({ ...stale, title: 'Stale local work' }), error => error.code === DRAFT_CONFLICT_CODE);
+  assert.throws(() => other.save({ ...stale, id: 'copy' }), error => error.code === DRAFT_CAPACITY_CODE);
+  assert.equal(storage.getItem(STORAGE_KEY), prior);
+  assert.equal(store.list().length, MAX_DRAFTS);
+});
+
+test('oversized stored libraries stay untouched for recovery', () => {
+  const envelope = libraryAtByteLimit();
+  envelope.drafts.at(-1).extension = 'x';
+  const bytes = JSON.stringify(envelope);
+  const storage = new MemoryStorage({ [STORAGE_KEY]: bytes });
+  const store = new DraftStore({ storage, validate });
+  assert.throws(() => store.loadLast(), /saved library exceeds/);
+  assert.throws(() => store.save(document('replacement')), /saved library exceeds/);
+  assert.equal(storage.getItem(STORAGE_KEY), bytes);
+});
+
+test('50 real 99-hit rallies remain readable and editable beyond the old aggregate node bound', async () => {
+  const proposal = await proposeRandomRally({ length: 99, seed: 7 });
+  assert.equal(proposal.ok, true, proposal.reason);
+  const source = proposal.document;
+  const storage = new MemoryStorage(), store = new DraftStore({ storage, validate: validateDocument });
+  const countNodes = value => 1 + (value && typeof value === 'object' ? Object.values(value).reduce((total, child) => total + countNodes(child), 0) : 0);
+  for (let index = 0; index < MAX_DRAFTS; index++) {
+    store.save({ ...source, id: `rally-${index}`, title: `99-hit rally ${index}` });
+    // Read immediately: every successful write must remain readable.
+    assert.equal(store.loadLast().shots.length, 99);
+  }
+  const bytes = storage.getItem(STORAGE_KEY);
+  assert.throws(() => store.save({ ...source, id: 'rally-51' }), error => error.code === DRAFT_CAPACITY_CODE && error.capacityKind === 'count');
+  assert.equal(storage.getItem(STORAGE_KEY), bytes);
+  assert(byteLength(bytes) < MAX_LIBRARY_BYTES);
+  assert(countNodes(JSON.parse(bytes)) > 100_000);
+  const reopened = new DraftStore({ storage, validate: validateDocument });
+  assert.equal(reopened.list().length, MAX_DRAFTS);
+  for (let index = 0; index < MAX_DRAFTS; index++) {
+    const saved = reopened.open(`rally-${index}`);
+    assert.deepEqual(saved.shots, source.shots);
+  }
+  const edited = { ...reopened.open('rally-0'), title: 'Edited full-library rally' };
+  reopened.save(edited);
+  assert.deepEqual(reopened.open('rally-0'), edited);
+});
+
+test('separate library validation retains per-document and envelope metadata node bounds', () => {
+  const storage = new MemoryStorage(), store = new DraftStore({ storage, validate });
+  store.save(document('safe'));
+  const prior = storage.getItem(STORAGE_KEY);
+  assert.throws(() => store.save(document('too-many-values', { extension: Array(100_000).fill(0) })), /document contains too many values/);
+  assert.equal(storage.getItem(STORAGE_KEY), prior);
+  const envelope = JSON.parse(prior);
+  envelope.extension = Array(100_000).fill(0);
+  const bytes = JSON.stringify(envelope);
+  storage.setItem(STORAGE_KEY, bytes);
+  assert.throws(() => store.loadLast(), /saved library contains too many values/);
+  assert.equal(storage.getItem(STORAGE_KEY), bytes);
+});
+
+test('document byte bounds apply to direct saves and stored documents without rewriting bytes', () => {
+  const storage = new MemoryStorage(), store = new DraftStore({ storage, validate });
+  store.save(document('safe'));
+  const prior = storage.getItem(STORAGE_KEY);
+  const oversized = document('oversized', { extension: 'é'.repeat(MAX_JSON_BYTES / 2) });
+  assert.throws(() => store.save(oversized), /document exceeds the 512 KiB limit/);
+  assert.equal(storage.getItem(STORAGE_KEY), prior);
+  const bytes = JSON.stringify({ schemaVersion: 1, drafts: [oversized], lastId: oversized.id });
+  storage.setItem(STORAGE_KEY, bytes);
+  assert.throws(() => store.open(oversized.id), /document exceeds the 512 KiB limit/);
+  assert.equal(storage.getItem(STORAGE_KEY), bytes);
+});
+
+test('browser quota variants allow deletion and save retry while ordinary errors remain generic', () => {
+  for (const name of ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED', 'SecurityError']) {
+    const storage = new MemoryStorage(), store = new DraftStore({ storage, validate });
+    store.save(document('keep')); store.save(document('delete'));
+    const prior = storage.getItem(STORAGE_KEY), write = storage.setItem.bind(storage);
+    const cause = Object.assign(new Error(name), { name });
+    storage.setItem = () => { throw cause; };
+    assert.throws(() => store.save(document('keep', { title: 'Local edit' })), error => error.cause === cause && (name === 'SecurityError' ? error.code === undefined : error.code === DRAFT_CAPACITY_CODE && error.capacityKind === 'quota'));
+    assert.throws(() => store.remove('delete'));
+    assert.equal(storage.getItem(STORAGE_KEY), prior);
+    storage.setItem = write;
+    store.remove('delete');
+    store.save(document('keep', { title: 'Local edit' }));
+    assert.equal(store.loadLast().title, 'Local edit');
+  }
 });

@@ -1,8 +1,8 @@
 # Pickleball Park 🏓
 
-Pickleball Park opens into Build a Play: a paused, editable top-down pixel court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline with original tile art and animated athletes. Eight instructional templates and the original Court Planner remain available in the same application.
+Pickleball Park opens into Build a Play: a paused, editable 3D court for authoring pickleball rallies. Choose hitters, shot families, targets, arc, pace, and movement; preview one shared timeline with animated athletes and camera controls. Eight instructional templates and the original Court Planner remain available in the same application.
 
-**Local pixel review:** this feature branch introduces the original GBA-style pixel court described in [the review guide](docs/PIXEL_REVIEW.md) and [shot coverage](docs/PIXEL_SHOT_COVERAGE.md). It has not been published. The prior 3D work and historical publication evidence remain preserved. **Publication branch:** `main` remains the existing published baseline. The site address is <https://fcw1987.github.io/pickleballpark/>; see [Pages publication and migration](docs/PAGES_PUBLICATION.md). The [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md), [October 19 strokes handoff](docs/STROKE_HANDOFF.md), and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence.
+**Historical pixel review:** the earlier top-down pixel court is described in [the review guide](docs/PIXEL_REVIEW.md) and [shot coverage](docs/PIXEL_SHOT_COVERAGE.md). Those captures document the earlier pixel review; they are not evidence of the current 3D default. Historical publication evidence remains preserved. **Publication branch:** `main` remains the existing published baseline. The site address is <https://fcw1987.github.io/pickleballpark/>; see [Pages publication and migration](docs/PAGES_PUBLICATION.md). The [branding audit and verification](docs/PICKLEBALL_PARK_BRANDING.md), [October 19 strokes handoff](docs/STROKE_HANDOFF.md), and [visual review](docs/stroke-instruction/review.html) retain their historical names and verification evidence.
 
 Smart Rally adds compatible continuations, exact-count Random Rally, Coach repair, and contextual game menus around one Play/Pause control and a seekable shot timeline. See [the requirements and verification ledger](docs/SMART_RALLY_STATUS.md).
 
@@ -16,7 +16,7 @@ Phone authoring now includes a shallow shot editor, full movement/contact detail
 
 - Custom rallies up to 99 shots, validated targets, valid-prefix preview, movement pins, Undo/Redo, and a shared playhead
 - Validated Smart Add continuations, seeded offline Random Rally, and reversible Coach repairs with explicit permission for protected intent
-- Independent Auto Shading and Suggested Coverage guides; a bounded instructional approximation, not optimal strategy
+- Independent Auto Shading movement assistance and Position Guides for suggested recovery positions; Coverage in the camera bar separately shows illustrative player zones and shared space, not guaranteed reach or legal-shot checks
 - Named local drafts with Open/Delete recovery, Save As, and bounded versioned JSON backups
 
 - Four draggable branded player tokens: Team 1 uses green artwork and Team 2 uses orange artwork
@@ -32,7 +32,7 @@ Phone authoring now includes a shallow shot editor, full movement/contact detail
 - Eight guided Plays with exact shot chapters and playback that repeats until paused
 - No backend, account, analytics, or remote persistence
 
-Edits to builder source documents are autosaved locally, including incomplete drafts. Untouched lessons and New Play stay transient until the first edit; Save As, accepted Random Rally and import are explicit saves. My Plays can open and delete saved entries even when the 50-play library is full. Failed saves keep the current work and existing library. Browser storage is not a backup guarantee: export important plays. Court Planner arrangements remain session-only; explicitly use a planner layout as a draft starting state to save it. Theme preference retains its compatible storage key. See [document and trajectory contract](docs/PLAY_DOCUMENT.md), [storage](docs/BUILDER_STORAGE.md), and [builder verification](docs/BUILDER_VERIFICATION.md).
+Edits to builder source documents are autosaved locally, including incomplete drafts. Untouched lessons and New Play stay transient until the first edit; Save As, accepted Random Rally and import are explicit saves. My Plays can open and delete saved entries even when the 50-play library is full. Failed saves keep the current work and existing library. Browser storage is not a backup guarantee: export important plays. Export downloads `PickleballPark-<play title>.json` with a portable sanitized title and also shows the JSON for copying. The versioned JSON format and existing imports remain compatible. Court Planner arrangements remain session-only; explicitly use a planner layout as a draft starting state to save it. Theme preference retains its compatible storage key. See [document and trajectory contract](docs/PLAY_DOCUMENT.md), [storage](docs/BUILDER_STORAGE.md), and [builder verification](docs/BUILDER_VERIFICATION.md).
 
 ## Run locally
 
@@ -65,9 +65,12 @@ Useful narrower commands:
 
 ```bash
 npm run check
+npm run check:fast
 npm run test:browser
 npm run test:headed
 ```
+
+`check` runs the complete static and unit gate used by Quality CI. `check:fast` keeps the syntax, asset and brand checks and omits six standalone corpus and athlete-rig sweeps listed in `tools/run-fast-unit-checks.mjs`; new unit files are included by default. Use the full gate before publishing a candidate.
 
 The browser suite covers clean initialization, player artwork and handedness, desktop double click and touch double tap behavior, touch/mouse drag synchronization, drawing mode and strokes, singles/doubles behavior, the public mode API and Reset, theme restoration, service-worker installation/offline/upgrade behavior, cache isolation and freshness, and representative portrait, landscape, and desktop viewports.
 
@@ -120,7 +123,7 @@ Editable park and athlete assets, provenance and regeneration instructions live 
 
 `board-projection.js` uses equal ground scales and an exact inverse. Height remains a separate ball/sprite offset; physical feet map to world meters at 0.3048 m/ft in the shared rally sampler. One session clock owns playback; no second Play catalog is introduced.
 
-The original Three.js **0.185.1** runtime, camera controls, static cache, geometry and resource lifecycle are retained for compatibility tests through explicit APIs. Those historical internals have no public view toggle in this pixel branch. Local vendor modules and runtime art remain cached for offline compatibility. See [pixel review](docs/PIXEL_REVIEW.md) for the current surface and [the historical stroke handoff](docs/STROKE_HANDOFF.md) for prior 3D evidence.
+The Three.js **0.185.1** runtime provides the default 3D court. Drag empty space in Rotate mode to rotate and tilt; choose Pan to move the view, use +/− to zoom, and Reset view to restore the camera. Touch supports two-finger pan and pinch zoom. Camera changes preserve authored positions and the shared playhead. Local vendor modules and runtime art remain cached for offline use. See [pixel review](docs/PIXEL_REVIEW.md) for the earlier pixel surface and [the historical stroke handoff](docs/STROKE_HANDOFF.md) for prior 3D evidence.
 
 ## Court coordinate model
 

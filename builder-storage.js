@@ -1,6 +1,9 @@
 export const STORAGE_KEY = 'pickleballpark-builder-v1';
 export const STORAGE_SCHEMA_VERSION = 1;
+// Individual documents and import/export files stay bounded independently of
+// the multi-play library.
 export const MAX_JSON_BYTES = 512 * 1024;
+export const MAX_LIBRARY_BYTES = 2 * 1024 * 1024;
 export const MAX_DRAFTS = 50;
 export const DRAFT_CONFLICT_CODE = 'DRAFT_CONFLICT';
 export const DRAFT_CAPACITY_CODE = 'DRAFT_CAPACITY';
@@ -10,6 +13,13 @@ const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 function fail(message, cause) {
   const error = new Error(`Builder storage: ${message}`);
   if (cause !== undefined) error.cause = cause;
+  return error;
+}
+
+function capacity(message, kind, cause) {
+  const error = fail(message, cause);
+  error.code = DRAFT_CAPACITY_CODE;
+  error.capacityKind = kind;
   return error;
 }
 
@@ -71,9 +81,9 @@ function assertDocumentIdentity(doc) {
   }
 }
 
-function parseJSON(text, label) {
+function parseJSON(text, label, maxBytes = MAX_JSON_BYTES) {
   if (typeof text !== 'string') throw fail(`${label} must be JSON text`);
-  if (jsonByteLength(text) > MAX_JSON_BYTES) throw fail(`${label} exceeds the 512 KiB limit`);
+  if (jsonByteLength(text) > maxBytes) throw fail(`${label} exceeds the ${maxBytes / 1024} KiB limit`);
   try {
     return JSON.parse(text);
   } catch (cause) {
@@ -102,6 +112,7 @@ export class DraftStore {
     assertBoundedPlainJSON(value, 'document');
     this.validate(value);
     assertDocumentIdentity(value);
+    if (jsonByteLength(JSON.stringify(value)) > MAX_JSON_BYTES) throw fail('document exceeds the 512 KiB limit');
     return clone(value);
   }
 
@@ -113,13 +124,16 @@ export class DraftStore {
       throw fail('could not read local drafts', cause);
     }
     if (text === null) return { schemaVersion: STORAGE_SCHEMA_VERSION, drafts: [], lastId: null };
-    const value = parseJSON(text, 'saved library');
-    assertBoundedPlainJSON(value, 'saved library');
+    const value = parseJSON(text, 'saved library', MAX_LIBRARY_BYTES);
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw fail('saved library has an invalid envelope');
     if (value.schemaVersion !== STORAGE_SCHEMA_VERSION) {
       throw fail(`saved library schema version ${String(value.schemaVersion)} is unsupported`);
     }
     if (!Array.isArray(value.drafts) || value.drafts.length > MAX_DRAFTS) throw fail('saved library has an invalid draft list');
+    // Bound envelope metadata separately: each of the at most 50 documents is
+    // checked below using the same per-document bounds enforced on save. An
+    // aggregate document traversal could reject a library we just wrote.
+    assertBoundedPlainJSON({ ...value, drafts: [] }, 'saved library');
     if (value.lastId !== null && typeof value.lastId !== 'string') throw fail('saved library has an invalid last draft id');
     const ids = new Set();
     const drafts = value.drafts.map(document => {
@@ -134,12 +148,17 @@ export class DraftStore {
 
   _writeEnvelope(envelope) {
     const text = JSON.stringify(envelope);
-    if (jsonByteLength(text) > MAX_JSON_BYTES) throw fail('saved library exceeds the 512 KiB limit');
+    if (jsonByteLength(text) > MAX_LIBRARY_BYTES) {
+      throw capacity('saved library exceeds the 2 MiB limit; export a backup or delete a saved play in My Plays to make room', 'bytes');
+    }
     try {
       // The whole library is one value so setItem is the only commit point. If it
       // fails (for example, quota), the browser retains the previous value.
       this.storage.setItem(STORAGE_KEY, text);
     } catch (cause) {
+      if (cause?.name === 'QuotaExceededError' || cause?.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+        throw capacity('browser storage is full; export a backup or delete a saved play in My Plays to make room; the previous saved library was kept', 'quota', cause);
+      }
       throw fail('could not save local drafts; the previous saved library was kept', cause);
     }
   }
@@ -178,9 +197,7 @@ export class DraftStore {
     const index = envelope.drafts.findIndex(saved => saved.id === doc.id);
     if (index < 0) {
       if (envelope.drafts.length >= MAX_DRAFTS) {
-        const error = fail(`library is limited to ${MAX_DRAFTS} drafts; delete a saved play in My Plays to make room`);
-        error.code = DRAFT_CAPACITY_CODE;
-        throw error;
+        throw capacity(`library is limited to ${MAX_DRAFTS} drafts; delete a saved play in My Plays to make room`, 'count');
       }
       envelope.drafts.push(doc);
     } else {

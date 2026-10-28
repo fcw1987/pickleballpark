@@ -132,9 +132,9 @@ test('legacy 3D compatibility: re-entry waits for required scenery before becomi
     // URL forces this second entry to exercise an actual pending image response.
     await page.evaluate(async () => {
       const { DefaultLoadingManager } = await import('/vendor/three.module.min.js');
-      DefaultLoadingManager.setURLModifier(url => url.endsWith('/park-tree-v1.png') ? `${url}?entry-readiness=held` : url);
+      DefaultLoadingManager.setURLModifier(url => url.endsWith('/park-tree-v1.webp') ? `${url}?entry-readiness=held` : url);
     });
-    await page.route('**/park-tree-v1.png*', async route => {
+    await page.route('**/park-tree-v1.webp*', async route => {
       requested(); await held; await route.continue();
     });
     await page.evaluate(() => {

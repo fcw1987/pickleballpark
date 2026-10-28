@@ -129,6 +129,8 @@ test.describe('court first builder UI harness', () => {
       window.__builder.render({ library: [{ id: 'saved-one', title: 'Saved One' }], saveError: { libraryFull: true, message: 'This device already has 50 saved plays.' }, saveStatus: 'Not saved', unsavedChanges: true });
     });
     await expect(page.locator('.builder-save-error')).toContainText('My Plays is full.');
+    await expect(page.locator('.builder-save-error').getByRole('button', { name: 'Retry save', exact: true })).toHaveCount(0);
+    await expect(page.locator('.builder-save-error').getByRole('button', { name: 'Save a copy', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Export this draft', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Manage saved plays', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: 'My Plays', exact: true });

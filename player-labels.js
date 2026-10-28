@@ -19,7 +19,8 @@ function teamLabels(document, team) {
   const points = ids.map(id => ({ id, point: startingPoint(document, id) }));
   const distinctSides = points.every(item => item.point && Math.abs(item.point.x - 10) > 0.001)
     && Math.sign(points[0].point.x - 10) !== Math.sign(points[1].point.x - 10);
-  const leftIsLowX = team === 'green';
+  // Green faces increasing Y toward the net; Orange faces decreasing Y.
+  const leftIsLowX = team === 'orange';
   const ordered = distinctSides
     ? [...points].sort((a, b) => (leftIsLowX ? a.point.x - b.point.x : b.point.x - a.point.x) || a.id.localeCompare(b.id))
     : [...points].sort((a, b) => a.id.localeCompare(b.id));

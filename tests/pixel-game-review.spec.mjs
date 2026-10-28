@@ -177,6 +177,7 @@ test('validation, save failure, and delayed 3D completion leave an honest paused
 
   await page.evaluate(() => {
     const storage = playBuilder.store.storage;
+    window.__reviewSavedBytes = localStorage.getItem('pickleballpark-builder-v1');
     window.__restoreReviewStorage = () => { playBuilder.store.storage = storage; };
     playBuilder.store.storage = {
       getItem: storage.getItem.bind(storage), removeItem: storage.removeItem.bind(storage),
@@ -187,14 +188,20 @@ test('validation, save failure, and delayed 3D completion leave an honest paused
   await page.getByRole('button', { name: 'Rename play', exact: true }).click();
   await page.getByLabel('Play title', { exact: true }).fill('Unsaved review sentinel');
   await page.getByLabel('Play title', { exact: true }).press('Tab');
-  await expect(page.getByText('Could not save this draft.', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Retry save', exact: true })).toBeVisible();
+  const saveError = page.locator('.builder-save-error');
+  await expect(saveError).toContainText('My Plays is full.');
+  await expect(saveError).toContainText('browser storage is full');
+  await expect(saveError.getByRole('button', { name: 'Manage saved plays', exact: true })).toBeVisible();
+  await expect(saveError.getByRole('button', { name: 'Export this draft', exact: true })).toBeVisible();
+  await expect(saveError.getByRole('button', { name: 'Retry save', exact: true })).toHaveCount(0);
+  await expect(saveError.getByRole('button', { name: 'Save a copy', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => playBuilder.document.title)).toBe('Unsaved review sentinel');
+  expect(await page.evaluate(() => localStorage.getItem('pickleballpark-builder-v1'))).toBe(await page.evaluate(() => window.__reviewSavedBytes));
 
   const asyncResult = await page.evaluate(async () => {
     window.__restoreReviewStorage();
     await playBuilder.action('acknowledgeWaypoints');
-    // Initialize the retained legacy viewer explicitly; primary startup is Canvas2D.
+    // Initialize a clean viewer before checking the asynchronous handoff.
     await playBuilder.switchView('3d');
     const viewer = playBuilder.board.threeD;
     viewer.exit({ preservePlayback: true });

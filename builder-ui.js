@@ -11,6 +11,7 @@ import { createPlayerCoverageControl } from './player-coverage-ui.js';
 import { MAX_SHOTS } from './play-document.js';
 import { getPlayerLabels, playerChoices, playerLabel as stablePlayerLabel } from './player-labels.js';
 import { NVZ_MODEL_LIMITS_NOTE } from './rally-rules.js';
+import { effectiveServiceCourt } from './rally-state.js';
 
 const FAMILIES = [
   ['serve', 'Serve'], ['return', 'Return'], ['drive', 'Drive'], ['drop', 'Drop'],
@@ -145,6 +146,26 @@ function findingPinSource(item, shots) {
   return source;
 }
 
+/** Keep filenames portable without changing the versioned JSON document. */
+export function playBackupFilename(title) {
+  let safe = String(title || '').normalize('NFKC')
+    .replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g, '-')
+    .replace(/\s+/g, ' ').replace(/^[. -]+|[. -]+$/g, '')
+    .replace(/[. -]+$/g, '');
+  safe = Array.from(safe).slice(0, 100).join('');
+  while (new TextEncoder().encode(safe).byteLength > 200) safe = Array.from(safe).slice(0, -1).join('');
+  safe = safe.replace(/[. -]+$/g, '');
+  return `PickleballPark-${safe || 'Untitled play'}.json`;
+}
+
+export function downloadPlayBackup(raw, title) {
+  const url = URL.createObjectURL(new Blob([raw], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url; link.download = playBackupFilename(title);
+  document.body.appendChild(link);
+  try { link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+}
+
 export function mountBuilderUI({ onAction = () => {} } = {}) {
   const root = el('section', 'builder-ui');
   root.setAttribute('aria-label', 'Build a Play');
@@ -152,6 +173,13 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   document.body.classList.add('builder-workspace');
   let current = { document: null, selectedShotId: null, selectedChapterId: null, currentShotId: null, chapters: [], findings: [], playing: false, time: 0, duration: 8.5, view: '2d', workspace: 'builder', saveStatus: 'Saved locally', library: [], templates: [], loop: false, rate: 1, busy: false, message: '', canUndo: false, canRedo: false, camera: 'overhead' };
   let destroyed = false;
+  const updateMessage = node => {
+    node.replaceChildren(document.createTextNode(current.message || ''));
+    if(current.retry3D){
+      const retry=button('Retry 3D','view','builder-button');retry.dataset.view='3d';
+      node.append(document.createTextNode(' '),retry);
+    }
+  };
   let renderedDocument = null;
   let renderedSelectedShotId = null;
   let renderedView = null;
@@ -215,7 +243,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   function openImportDialog() {
     timelineControl?.cancel?.();
     importFileGeneration += 1;
-    importDialog.replaceChildren(el('h2', '', 'Import / Export'), el('p', 'builder-dialog-copy', 'Import creates a separate editable copy. Paste a versioned play JSON backup or choose a local file, then select Import JSON.'), labelled('JSON backup', Object.assign(document.createElement('textarea'), { rows: 8, spellcheck: false })));
+    importDialog.replaceChildren(el('h2', '', 'Import / Export'), el('p', 'builder-dialog-copy', 'Import creates a separate editable copy. Paste a versioned play JSON backup or choose a local file, then select Import JSON. Export current play downloads a JSON backup named for this play; the JSON also appears below for copying.'), labelled('JSON backup', Object.assign(document.createElement('textarea'), { rows: 8, spellcheck: false })));
     const file = document.createElement('input'); file.type = 'file'; file.accept = 'application/json,.json'; file.setAttribute('aria-label', 'Choose JSON file'); file.dataset.action = 'import-file'; importDialog.appendChild(labelled('JSON file', file));
     const actions = el('div', 'builder-dialog-actions'); actions.append(button('Import JSON', 'import-json', 'builder-button builder-button-primary')); actions.append(button('Export current play', 'export', 'builder-button')); actions.append(button('Close', 'dialog-close', 'builder-button')); importDialog.appendChild(actions);
     if (!importDialog.open) importDialog.showModal();
@@ -282,7 +310,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     // only when their displayed state changes, preserving focused inputs and
     // avoiding repeated DOM queries and live-region writes during playback.
     timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
-    const controlsState = [current.currentShotId, current.selectedChapterId, current.cue?.title, current.playing, current.busy, current.saveStatus, current.message, current.targetPlacement, current.movementPlacement, inspectorManualCollapsed, pendingField];
+    const controlsState = [current.currentShotId, current.selectedChapterId, current.cue?.title, current.playing, current.busy, current.saveStatus, current.message, current.retry3D, current.targetPlacement, current.movementPlacement, inspectorManualCollapsed, pendingField];
     if (!structureChanged && controlsState.every((value, index) => value === renderedControlsState[index])) return;
     renderedControlsState = controlsState;
     root.classList.toggle('builder-placing', placementActive);
@@ -293,7 +321,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       root.querySelectorAll('[data-action="chapter"]').forEach(chapter => chapter.setAttribute('aria-current', String(Boolean(liveChapterId && chapter.dataset.shotId === liveChapterId))));
       const save = root.querySelector('.builder-save-status'); if (save) save.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft';
       const savePill = root.querySelector('[data-ui="save-pill"]'); if (savePill) { const saveText = pendingField ? 'Editing' : (current.saveStatus || 'Saved'); savePill.textContent = saveText; savePill.setAttribute('aria-label', `Save state: ${saveText}`); }
-      const message = root.querySelector('.builder-message'); if (message) message.textContent = current.message || '';
+      const message = root.querySelector('.builder-message'); if (message) updateMessage(message);
       const cueNode = root.querySelector('.builder-cue'); const fastCue = current.cue; if (cueNode && fastCue) { const summary = cueNode.querySelector('.builder-chapter-menu > summary'); if (summary) updateChapterSummary(summary, fastCue.title || 'Current shot'); }
       const liveShot = shots.find(shot => shot.id === (current.currentShotId || current.selectedShotId));
       const card = root.querySelector('[data-shot-card]');
@@ -375,12 +403,12 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       compactStatus.dataset.ui = 'save-pill'; compactStatus.setAttribute('aria-label', `Save state: ${compactStatus.textContent}`); compactStatus.setAttribute('role', 'status');
       meta.appendChild(compactStatus);
     }
-    const compactMessage = el('span', 'builder-message', current.message || '');
+    const compactMessage = el('span', 'builder-message'); updateMessage(compactMessage);
     meta.appendChild(compactMessage);
     if (current.saveError) {
       const error = el('div', 'builder-save-error');
       error.append(el('strong', '', current.saveError.libraryFull ? 'My Plays is full.' : current.saveError.conflict ? 'This draft changed elsewhere.' : 'Could not save this draft.'), el('span', '', current.saveError.message || 'Your edits are still here. Retry or save a copy.'));
-      if (!current.saveError.conflict) error.append(button('Retry save', 'retry-save', 'builder-button builder-button-accent'));
+      if (!current.saveError.conflict && !current.saveError.libraryFull) error.append(button('Retry save', 'retry-save', 'builder-button builder-button-accent'));
       if (current.saveError.libraryFull) {
         error.append(el('span', '', 'Delete a saved play in My Plays to make room, then retry saving. You can export this draft as a backup.'), button('Manage saved plays', 'open', 'builder-button'), button('Export this draft', 'export', 'builder-button'));
       } else error.append(button('Save a copy', 'save-as', 'builder-button'));
@@ -480,7 +508,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
         const serveMethod = select('Serve method', 'edit-serveMethod', [['drop', 'Drop serve'], ['volley', 'Volley serve']]); serveMethod.querySelector('select').value = selected.serveMethod || 'drop'; playersGroup.append(serveMethod);
         if (shots[0] === selected && doc.opening === 'serve') {
           const court = select('Serving court', 'service-court', [['unspecified', 'Not declared'], ['right', 'Right / even'], ['left', 'Left / odd']]);
-          court.querySelector('select').value = doc.service?.court || 'unspecified'; playersGroup.append(court);
+          court.querySelector('select').value = effectiveServiceCourt(doc.service) || 'unspecified'; playersGroup.append(court);
           const designated = doc.service?.receiver || (selected.receiver !== 'auto' ? selected.receiver : null);
           playersGroup.append(el('p', 'builder-selected-summary', designated ? `Serve returner: ${playerLabel(designated, labels)}. Change Receiver here to declare a different returner; their partner may stand elsewhere.` : 'Choose Receiver to declare the serve returner. Automatic positioning cannot establish service order.'));
         }
@@ -511,7 +539,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const fault = el('label', 'builder-switch'); const faultInput = el('input'); faultInput.type = 'checkbox'; faultInput.checked = Boolean(doc.intentionalFault); faultInput.dataset.action = 'intentionalFault'; fault.append(faultInput, el('span', '', 'Intentional coaching mistake'), el('small', '', 'Keep the rule warning visible at the terminal fault.')); advanced.append(fault);
       const scope = select('Shade team', 'shade-team', [['both', 'Both teams'], ['green', 'Green'], ['orange', 'Orange']]); scope.querySelector('select').value = doc.assistance?.team || 'both'; advanced.append(scope);
       const handed = el('details', 'builder-handedness'); handed.open = handednessOpen; handed.append(el('summary', '', 'Player handedness')); players.forEach(([id, name]) => { const value = doc.players?.[id]?.handedness || 'right'; const field = select(name, 'handedness', [['right', 'Right-handed'], ['left', 'Left-handed']]); const control = field.querySelector('select'); control.value = value; control.dataset.playerId = id; handed.append(field); });
-      const assistance = el('details', 'builder-assistance'); assistance.open=assistanceOpen || detailGroup === 'coach'; assistance.append(el('summary', '', 'Shading & Guides')); [['autoShading', 'Auto Shading', 'Shading changes eligible movement'], ['showGuides', 'Coverage Guides', 'Explain suggested positions only']].forEach(([field, label, description]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; input.setAttribute('aria-label', label); row.append(input, el('span', '', label), el('small', '', description)); assistance.append(row); });
+      const assistance = el('details', 'builder-assistance'); assistance.open=assistanceOpen || detailGroup === 'coach'; assistance.append(el('summary', '', 'Shading & Guides')); [['autoShading', 'Auto Shading', 'Shading changes eligible movement'], ['showGuides', 'Position Guides', 'Suggested recovery positions; separate from Coverage zones']].forEach(([field, label, description]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; input.setAttribute('aria-label', label); row.append(input, el('span', '', label), el('small', '', description)); assistance.append(row); });
       const coachGroup = el('section', 'builder-control-group builder-group-coach'); coachGroup.dataset.detailGroup = 'coach'; coachGroup.setAttribute('role', 'tabpanel'); coachGroup.setAttribute('aria-label', 'Coach tools settings'); coachGroup.classList.toggle('is-active', detailGroup === 'coach'); coachGroup.append(el('h3', '', 'Coach tools'), advanced, handed, assistance); details.appendChild(coachGroup);
       for (const panel of details.querySelectorAll('[role="tabpanel"]')) {
         panel.id = `builder-detail-panel-${panel.dataset.detailGroup}`;
@@ -554,7 +582,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       }
     } else {
       const header=el('div','builder-inspector-header');header.append(el('span','','Play settings'),button(inspectorAutoCollapsed?'Customize play':'Close','collapse-inspector','builder-button builder-collapse'));inspector.append(header,el('p','builder-empty','Add a shot to start authoring.'));
-      const global = el('div', 'builder-global-settings'); global.append(el('h2', '', 'Play settings')); [['autoShading', 'Auto Shading'], ['showGuides', 'Show Coverage Guides']].forEach(([field, label]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; row.append(input, el('span', '', label)); global.append(row); }); global.append(select('Starting condition', 'opening', [['serve', 'Opening serve'], ['midrally', 'Mid-rally']])); global.append(select('Ending intent', 'ending', [['stop', 'Stop at authored end'], ['winner', 'Declared winner'], ['fault', 'Declared fault']])); inspector.append(global);
+      const global = el('div', 'builder-global-settings'); global.append(el('h2', '', 'Play settings')); [['autoShading', 'Auto Shading'], ['showGuides', 'Show Position Guides']].forEach(([field, label]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; row.append(input, el('span', '', label)); global.append(row); }); global.append(select('Starting condition', 'opening', [['serve', 'Opening serve'], ['midrally', 'Mid-rally']])); global.append(select('Ending intent', 'ending', [['stop', 'Stop at authored end'], ['winner', 'Declared winner'], ['fault', 'Declared fault']])); inspector.append(global);
     }
     layout.appendChild(inspector); root.appendChild(layout);
 

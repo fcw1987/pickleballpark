@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v37`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v38`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -14,8 +14,8 @@ const STATIC_ASSETS = [
   './reference-athletes.js',
   './depth-camera.js',
   './depth-park-environment.js',
-  './assets/reference-depth/park-tree-v1.png',
-  './assets/reference-athletes/athletes-armless-v2.png',
+  './assets/reference-depth/park-tree-v1.webp',
+  './assets/reference-athletes/athletes-armless-v2.webp',
   './assets/reference-athletes/metadata-v2.json',
   './assets/pixel-park/atlas.png',
   './build-metadata.js',
