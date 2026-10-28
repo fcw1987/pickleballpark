@@ -110,9 +110,10 @@ test('normal-motion playback, Pause, chapter seek, and ready view switching shar
   const paused = pausedSample.time;
   const step = pausedSample.step === 'any' ? 0 : Number(pausedSample.step || '1');
   const expectedValue = step ? pausedSample.min + Math.round((paused - pausedSample.min) / step) * step : paused;
-  const epsilon = Number.EPSILON * Math.max(1, Math.abs(expectedValue)) * 8;
   expect(pausedSample.playing).toBe(false);
-  expect(Math.abs(pausedSample.value - expectedValue)).toBeLessThanOrEqual(step / 2 + epsilon);
+  // Native range values serialize decimals; use the same eight-decimal stable
+  // clock precision as the freeze and view checks, after step quantization.
+  expect(pausedSample.value).toBeCloseTo(expectedValue, 8);
   await page.waitForTimeout(120);
   expect(await page.evaluate(() => playBuilder.session.clock.elapsed)).toBeCloseTo(paused, 8);
   await page.getByLabel('Choose shot chapter', { exact: true }).click();
