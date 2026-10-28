@@ -179,12 +179,11 @@ test('legacy 3D compatibility: camera presets reframe after portrait resize with
   }
 });
 
-test('legacy 3D compatibility: all Plays keep complete actors and trajectories above the HUD at every target viewport', async ({ page }) => {
-  test.setTimeout(90000);
-  await openWorld(page, { width: 390, height: 844 });
-  const playIds = PICKLEBOARD_PLAYS.map(play => play.id);
-  for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 1164, height: 696 }]) {
-    await page.setViewportSize(viewport);
+for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 1164, height: 696 }]) {
+  test(`legacy 3D compatibility: all Plays keep complete actors and trajectories above the HUD at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    test.setTimeout(90000);
+    await openWorld(page, viewport);
+    const playIds = PICKLEBOARD_PLAYS.map(play => play.id);
     for (const playId of playIds) {
       await page.evaluate(async id => {
         const board = window.pickleboard;
@@ -240,8 +239,8 @@ test('legacy 3D compatibility: all Plays keep complete actors and trajectories a
         expect.soft(audit.smallestActorHeight, `${viewport.width}px ${playId} ${audit.camera} readability`).toBeGreaterThan(8);
       }
     }
-  }
-});
+  });
+}
 
 
 test('legacy 3D compatibility: phone cameras retain a visible ball without changing its trajectory or physical radius', async ({ page }) => {
