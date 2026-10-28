@@ -83,7 +83,7 @@ body.builder-workspace .park-banner { display: none; }
 
 /* Planner keeps identity in its own fixed label, clear of court athletes. */
 .park-banner { display: none; }
-.planner-identity { position: fixed; z-index: 10; top: max(8px,env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); max-width: calc(100vw - 24px); padding: 6px 10px; border: 4px double #273b69; color: #202e55; background: #fffbed; font: 1rem/1.2 'Park Labels',ui-monospace,monospace; white-space: nowrap; pointer-events: none; }
+.planner-identity { position: fixed; z-index: 10; top: max(8px,env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); padding: 6px 10px; border: 4px double #273b69; color: #202e55; background: #fffbed; font: 1rem/1.2 'Park Labels',ui-monospace,monospace; white-space: normal; text-align: center; pointer-events: none; }
 @media (min-width: 701px) {
   .planner-identity { top: auto; bottom: max(8px,env(safe-area-inset-bottom)); }
 }
