@@ -37,7 +37,8 @@ commit. Otherwise use the complete linear integration branch from `170b4ed`.
 This records the two-feature integration stage. The efficiency changes are now
 combined as described in [Combined feature integration](COMBINED_FEATURE_INTEGRATION.md).
 The combined branch uses static cache v37 once, from the tested v36 baseline.
-The pending baseline repair remains a separate dependency.
+The exact repaired baseline is now included; its commit mapping and final
+validation sequence are recorded in that combined integration document.
 
 ## Focused validation
 

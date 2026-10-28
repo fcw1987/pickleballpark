@@ -5,6 +5,28 @@ efficiency on tested base `170b4ed`. The coverage/rally wiring is documented in
 [Coverage and rally integration](COVERAGE_RALLY_INTEGRATION.md). All three
 source branches and their working files are preserved.
 
+## Repaired baseline
+
+The exact repair range `170b4ed..f2d4a0b7b0496958d7bbfb8ce112c6e19dd3d6f3`
+was fetched from the repository and inspected before integration:
+
+| Repair source | Integration copy |
+| --- | --- |
+| `b45d021` | `3f8bb76` |
+| `ff73f26` | `dbdf519` |
+| `f2d4a0b` | `11d2670` |
+
+The narrow planner label now wraps within the viewport. The complete framing
+sweep retains every lesson, camera and viewport assertion in five independent
+viewport cases. Paused timeline sampling respects native range serialization.
+The artwork checks compare exact source RGBA using equivalent canvas backing
+stores, retain all visible source pixels, and independently verify cuff/hair
+ownership and UVs with negative controls. No tolerance or sporting rule was
+relaxed. The range did not modify package helpers, so the reconciled Add/Undo
+completion checks remain intact. The baseline remains v36; the combined runtime
+still uses one increment to v37. Main merging is not needed for local validation
+of these equivalent repair commits.
+
 ## Efficiency composition
 
 All six efficiency commits were inspected and applied in order:
@@ -36,7 +58,7 @@ cases therefore await the actual queued result and verify success, exact shot
 and valid counts, an idle queue, and no save error before Undo. Preservation of
 other saved draft revisions and all cache/hash/path checks remains intact.
 
-## Combined checks and remaining gate
+## Earlier focused evidence
 
 - Routine checks: 352 unit tests, referenced assets and brand checks passed.
 - Chromium: 19 coverage/rally checks and 26 startup/lifecycle/geometry checks
@@ -44,8 +66,8 @@ other saved draft revisions and all cache/hash/path checks remains intact.
 - WebKit: the same 19 and 26 checks passed in separate fresh processes.
 - The two actual WebKit blob reports were merged by Playwright and accepted by
   the unchanged strict policy against their complete 45-test scoped catalog.
-  The same partial report was correctly rejected against the full 409-test
-  catalog. This is not a full-suite pass.
+  The same partial report was correctly rejected against that stage's full
+  409-test catalog. This is not a full-suite pass.
 - Four focused packaged cases passed: preview upgrade and path migration in
   Chromium and WebKit. Each verified all 131 runtime hashes and real offline
   Add completion/Undo; the same-path cases installed 96 cache entries and the
@@ -61,9 +83,11 @@ CI workflow, or protection setting has been relaxed.
 
 ## Exact final validation plan
 
-First integrate the pending baseline repair and commit the complete candidate.
-Use Node 24 and the locked dependencies. Do not certify the final candidate from
-the isolated-branch results or this intermediate focused run.
+The repaired baseline is included. Validate the clean complete candidate with
+Node 24 and locked dependencies. Do not certify it from isolated-branch results
+or the earlier focused run. Final exact-commit evidence belongs under ignored
+`release-results/final-combined/`, with full WebKit process reports in the fresh
+directory reported by its runner.
 
 1. Run `npm ci`, `npm run check`, and `npm run check:generated`.
 2. Build with `node tools/build-site.mjs --require-clean`; validate `dist` with
@@ -71,9 +95,9 @@ the isolated-branch results or this intermediate focused run.
    `--require-clean`.
 3. Discover and run the complete Chromium suite with one worker, no retries and
    `--forbid-only`, retaining its catalog, JSON report, logs and failure traces.
-   The current combined catalog is 409 tests; rediscover after baseline repair.
+   The repaired combined catalog is 414 tests; rediscover for the exact commit.
 4. Run `node tools/run-webkit-file-shards.mjs` to inspect the local full WebKit
-   plan. It currently contains all 409 tests across 75 files, at most 25 cases
+   plan. It currently contains all 414 tests across 76 files, at most 25 cases
    per process. Then run `PORT=4231 node tools/run-webkit-file-shards.mjs --run`.
    Each file runs in a fresh Playwright/browser process with its original test
    timeouts and order, one worker and zero retries. Each process retains raw
@@ -82,8 +106,7 @@ the isolated-branch results or this intermediate focused run.
    merges official reports and applies the existing strict policy against the
    full discovered catalog. Missing/duplicate cases, skips, retries, failures,
    failed subprocesses, missing reports or a changed source revision reject the
-   run. This approach is prepared and scoped-report-tested; the complete
-   75-process run has not yet executed.
+   run. Passing focused evidence never substitutes for this complete run.
 5. With `QA_PACKAGE_MODE` and `QA_PACKAGE_BROWSER` unset, run
    `npm run verify:package` once on that exact built candidate. Require all 44
    cases, including two full fresh authoring scenarios, all 42 migration
