@@ -93,14 +93,15 @@ export class PixelCourtRenderer {
                 if(target&&sample.contactWeight>0){const ground=worldToBoard(target);contact=point(ground.x,ground.y-board.projection.projectHeight(target.y/FEET_TO_METERS));}
                 const supportBoard=sample.pixelSupportPosition?worldToBoard(sample.pixelSupportPosition):null;
                 const support=supportBoard?point(supportBoard.x,supportBoard.y):null;
+                const footPoints=sample.modelVersion===2&&sample.footTargets?Object.values(sample.footTargets).map(target=>{const ground=worldToBoard(target);return point(ground.x,ground.y-board.projection.projectHeight(target.y/FEET_TO_METERS));}):undefined;
                 let phase=3;
                 if(sample.profile&&sample.strokeTime!=null){
                     const {duration,contactRatio,recoverRatio}=sample.profile;
                     const u=Math.max(0,Math.min(1,sample.strokeTime/duration));
                     phase=u<=contactRatio?u/contactRatio:u<=recoverRatio?1+(u-contactRatio)/(recoverRatio-contactRatio):2+(u-recoverRatio)/(1-recoverRatio);
                 }
-                const result=drawPixelAthlete(ctx,{x:p.x,y:p.y,scale:1,playerId:token.id,kit:board.getPlayerTeamColor(token),facing:sample.viewDirection||(token.y<22?'front':'back'),handedness:token.handedness,shot:{type:['ready','shuffle'].includes(sample.action)||!sample.action?'ready':sample.instructionalFamily||sample.pixelStroke||sample.shotType||sample.action,contact:{strokeSide:sample.strokeSide,kind:sample.pixelContactKind}},phase,contact,contactWeight:sample.contactWeight||0,support,supportWeight:sample.contactWeight||0,move,time:animationTime});
-                this.diagnostics.actors[token.id] = {ground:p,target:contact,contactWeight:sample.contactWeight||0,paddle:result.contact,rasterPaddle:result.rasterContact||{x:Math.round(result.sole.x)+Math.round(result.paddle.x),y:Math.round(result.sole.y)+Math.round(result.paddle.y)},renderedFamily:result.family,sole:result.sole,canonicalSole:result.canonicalSole,phase:sample.phase,action:sample.action,contactBounded:result.contactBounded,contactCorrection:result.contactCorrection,torsoOffset:result.torsoOffset,reach:result.reach,shoulder:result.shoulder,wrist:result.wrist,elbow:result.elbow,feet:result.feet,facing:sample.viewDirection,strokeSide:sample.strokeSide,shotType:sample.shotType,pixelStroke:sample.pixelStroke};
+                const result=drawPixelAthlete(ctx,{x:p.x,y:p.y,scale:1,playerId:token.id,kit:board.getPlayerTeamColor(token),facing:sample.viewDirection||(token.y<22?'front':'back'),handedness:token.handedness,shot:{type:['ready','shuffle'].includes(sample.action)||!sample.action?'ready':sample.instructionalFamily||sample.pixelStroke||sample.shotType||sample.action,contact:{strokeSide:sample.strokeSide,kind:sample.pixelContactKind}},phase,contact,contactWeight:sample.contactWeight||0,support,supportWeight:sample.contactWeight||0,modelVersion:sample.modelVersion,footPoints,move,time:animationTime});
+                this.diagnostics.actors[token.id] = {ground:p,target:contact,contactWeight:sample.contactWeight||0,paddle:result.contact,rasterPaddle:result.rasterContact||{x:Math.round(result.sole.x)+Math.round(result.paddle.x),y:Math.round(result.sole.y)+Math.round(result.paddle.y)},...(result.rasterFeet?{rasterFeet:result.rasterFeet}:{}),renderedFamily:result.family,sole:result.sole,canonicalSole:result.canonicalSole,phase:sample.phase,action:sample.action,contactBounded:result.contactBounded,contactCorrection:result.contactCorrection,torsoOffset:result.torsoOffset,reach:result.reach,shoulder:result.shoulder,wrist:result.wrist,elbow:result.elbow,feet:result.feet,facing:sample.viewDirection,strokeSide:sample.strokeSide,shotType:sample.shotType,pixelStroke:sample.pixelStroke};
             }});
         }
         actors.push({depth:22,draw:()=>this.drawNet(ctx,court)});
@@ -111,7 +112,44 @@ export class PixelCourtRenderer {
         ctx.fillStyle='#ffe65c';ctx.fillRect(Math.round(p.x)-2,Math.round(p.y-lift)-2,4,4);
         ctx.fillStyle='#fff7b0';ctx.fillRect(Math.round(p.x)-1,Math.round(p.y-lift)-2,2,1);
         this.diagnostics.ball = {ground:p,display:{x:p.x,y:p.y-lift},rasterCenter:{x:Math.round(p.x),y:Math.round(p.y-lift)},height:board.playBallHeight||0};
+        const markers = board.playTerminalMarkers || [];
+        if (board.plays?.activePlay?.modelVersion === 2) this.diagnostics.terminalMarkers = this.drawTerminalMarkers(ctx, point, markers);
+        const terminalTypes = markers.map(marker => marker.type).join(',');
+        if (terminalTypes) canvas.dataset.terminalEvents = terminalTypes;
+        else if (canvas.dataset.terminalEvents) delete canvas.dataset.terminalEvents;
         canvas.dataset.court = `${court.x},${court.y},80,176`;
+    }
+    drawTerminalMarkers(ctx, point, markers) {
+        return markers.map(marker => {
+            const board = worldToBoard(marker.position);
+            const projected = point(board.x, board.y - this.board.projection.projectHeight(marker.position.y / FEET_TO_METERS));
+            const x = Math.round(projected.x), y = Math.round(projected.y);
+            ctx.save();
+            ctx.lineWidth = 1;
+            if (marker.type === 'net-touch' || marker.type === 'second-bounce') {
+                const radius = marker.type === 'net-touch' ? 3 + marker.progress * 5 : 4 + marker.progress * 3;
+                ctx.globalAlpha = marker.type === 'net-touch' ? .85 * (1 - marker.progress) : .9;
+                ctx.strokeStyle = marker.type === 'net-touch' ? '#fff7cf' : '#ffe65c';
+                ctx.beginPath();
+                ctx.ellipse(x, y, radius, marker.type === 'second-bounce' ? Math.max(2, radius * .45) : radius, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (marker.type === 'out') {
+                ctx.strokeStyle = '#fff7cf'; ctx.lineWidth = 3;
+                for (const color of ['#fff7cf', '#a93d33']) {
+                    ctx.strokeStyle = color;
+                    ctx.beginPath(); ctx.moveTo(x - 3, y - 3); ctx.lineTo(x + 3, y + 3);
+                    ctx.moveTo(x + 3, y - 3); ctx.lineTo(x - 3, y + 3); ctx.stroke();
+                    ctx.lineWidth = 1;
+                }
+            } else if (marker.type === 'fault') {
+                ctx.fillStyle = '#263449'; ctx.fillRect(x - 1, y - 12, 2, 13);
+                ctx.fillRect(x, y - 13, 9, 7);
+                ctx.fillStyle = '#e78b54'; ctx.fillRect(x + 1, y - 12, 7, 5);
+                ctx.fillStyle = '#fff7cf'; ctx.fillRect(x + 2, y - 11, 1, 3);
+            }
+            ctx.restore();
+            return { ...marker, display: { x, y } };
+        });
     }
     drawNet(ctx,court) {
         const x=Math.round(court.x)-3,y=Math.round(court.y)+88;

@@ -6,6 +6,7 @@ import { documentCompatibilitySignature, validateDocument, movementProtection } 
 import { sampleActorWorldPosition } from './three-d-presentation.js';
 import { resolveServiceContext, serviceIdentityIssues, receivingServiceBox } from './rally-state.js';
 import { tacticalRecovery } from './rally-tactics.js';
+import { compileDocumentV2 } from './play-compiler-v2.js';
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const PLAYER_IDS = ['player1', 'player2', 'player3', 'player4'];
@@ -302,6 +303,7 @@ function makePlay(document) {
 
 export function compileDocument(document) {
   validateDocument(document);
+  if (document.modelVersion === 2) return compileDocumentV2(document);
   if (exactTemplate(document)) return templateResult(document);
   const { play, findings, accepted } = makePlay(document);
   let timeline;
@@ -450,6 +452,10 @@ export function recompileAssistedDocument(document, compiled, assistedPlay, cove
     }
   }
   const ids = compiled.play.steps.filter(step => step.shot).map(step => step.shot.authoring?.recipeId ?? step.id);
-  assistedTimeline = relabelTimeline(assistedTimeline, ids);
+  if (document.modelVersion === 2 && !validateRallyRules(assistedPlay, assistedTimeline).valid) {
+    findings.push(finding('feasibility', 'warning', null, 'Suggested coverage was not applied because it changed the physical evidence for the model 2 point.'));
+    return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze([]) });
+  }
+  if (document.modelVersion !== 2) assistedTimeline = relabelTimeline(assistedTimeline, ids);
   return Object.freeze({ ...compiled, play: Object.freeze(assistedPlay), timeline: assistedTimeline, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage)) });
 }

@@ -15,7 +15,8 @@ import {
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
 import { loadReferenceAthleteAssets, ReferenceAthleteResources as AthleteResources, createReferenceAthlete as createAthlete, updateReferenceAthlete as updateAthlete } from './reference-athletes.js';
-import { ReadableBall } from './three-d-ball.js';
+import { ReadableBall, TerminalEventMarkers } from './three-d-ball.js';
+import { terminalCueAtTime, terminalVisualsAtTime } from './terminal-cues.js';
 import { chapterAtTime } from './shot-chapters.js';
 import { mountShotTimeline } from './shot-timeline.js';
 
@@ -308,6 +309,16 @@ class ThreeDPlaybackViewer {
         return true;
     }
     replaceDefinition(play, timeline) {
+        if (play.modelVersion === 2) {
+            let sameSource = timeline?.play === play;
+            if (!sameSource) {
+                try { sameSource = JSON.stringify(timeline?.play) === JSON.stringify(play); }
+                catch { sameSource = false; }
+            }
+            if (!sameSource || play.physicsVersion !== 'play-physics-v2' || timeline?.play?.modelVersion !== 2 || timeline.play.physicsVersion !== play.physicsVersion
+                || timeline.modelVersion !== undefined && timeline.modelVersion !== 2
+                || timeline.physicsVersion !== undefined && timeline.physicsVersion !== play.physicsVersion) throw new Error('Model 2 replay requires the exact play and its matching versioned timeline.');
+        }
         this.currentPlay = play; this.timeline = timeline; this.sceneEnvelope = null;
         for (const [id, actor] of this.playerObjects) actor.userData.handedness = this.board.tokens[id].handedness;
         if (this.renderer) { this.applyAtTime(this.clock.elapsed); this.applyCameraFraming(); this.startRenderLoop(); }
@@ -649,6 +660,9 @@ class ThreeDPlaybackViewer {
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
+        const terminalMarkers = terminalVisualsAtTime(this.timeline, seconds);
+        if (terminalMarkers.length && !this.terminalMarkers) this.terminalMarkers = new TerminalEventMarkers(this.scene);
+        this.terminalMarkers?.update(terminalMarkers);
         this.playerCoverage?.update({ board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment });
         this.updateBallReadability();
         const status=segment?`${segment.step.label} · ${ball.phase}`:'Ready';
@@ -670,7 +684,7 @@ class ThreeDPlaybackViewer {
         const index=this.currentStepIndex(),step=this.currentPlay.steps[index];
         const segment=this.timeline.segments.find(item=>this.clock.elapsed<item.endTime-1e-9)||this.timeline.segments.at(-1);
         const cueStep=this.timeline.segments.find(s=>s.rallyLeg===this.lastState?.rallyLeg)?.step;
-        updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,loop:true,reducedMotion:this.board.plays.reducedMotion.matches});
+        updateCoachingUI(this.elements,{playId:this.currentPlay.id,title:`${this.currentPlay.name} · 3D`,stepIndex:index,stepCount:this.currentPlay.steps.length,label:step.label,description:step.description,shotType:cueStep?.shot?.type||step.shot?.type,nextShot:Boolean(cueStep&&cueStep.id!==step.id),phase:this.session.holding?'complete':this.lastState?.phase,elapsed:this.clock.elapsed,eventTime:segment?.startTime||0,terminalEvent:terminalCueAtTime(this.timeline,this.clock.elapsed),loop:true,reducedMotion:this.board.plays.reducedMotion.matches});
         this.elements.rate.value=String(this.clock.playbackRate);
         const playPauseText = this.session.playing ? 'Ⅱ' : '▶';
         if (this.elements.playPause.textContent !== playPauseText) this.elements.playPause.textContent = playPauseText;
@@ -700,11 +714,13 @@ class ThreeDPlaybackViewer {
             renderLoopCount: this.renderLoopCount,
             pixelScale: this.pixelScale,
             framing: this.cameraFraming ? { ...this.cameraFraming } : null,
+            ...(this.currentPlay?.modelVersion === 2 ? { terminalMarkers: this.terminalMarkers?.diagnostics || [] } : {}),
             lastState: this.lastState
         };
     }
 
     disposeScene() {
+        this.terminalMarkers?.dispose(); this.terminalMarkers = null;
         this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {};
         this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);

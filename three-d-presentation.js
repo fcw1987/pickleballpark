@@ -3,6 +3,7 @@
 
 import { FEET_TO_METERS, boardToWorld } from './three-d-core.js';
 import { sampleStrokePose } from './three-d-animation.js';
+import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
 
 export const VIEW_DIRECTIONS = Object.freeze([
     'front', 'front-right', 'right', 'back-right',
@@ -93,6 +94,7 @@ function legacyContactPlant(semantics, shot, handedness, fallback) {
 
 
 export function sampleActorWorldPosition(segment, playerId, localTime, handedness = 'right', instructionalMovement = false) {
+    if(segment?.modelVersion===2){const at=sampleActorBoardPositionV2(segment,playerId,localTime);return Object.freeze(boardToWorld(at,0));}
     if(instructionalMovement)return Object.freeze(actorRoute(segment,playerId,localTime,handedness).position);
     const fromBoard=segment.previous.positions[playerId],toBoard=segment.step.positions[playerId];
     if(!fromBoard||!toBoard)throw new TypeError(`Missing positions for ${playerId}.`);
@@ -198,7 +200,7 @@ export function sampleActorPresentation({
 }) {
     if (!segment || !Number.isFinite(localTime)) throw new TypeError('A segment and finite localTime are required.');
     if (!['left', 'right'].includes(handedness)) throw new TypeError('Handedness must be left or right.');
-    const route = instructionalMovement?actorRoute(segment,playerId,localTime,handedness):null;
+    const route = instructionalMovement&&segment.modelVersion!==2?actorRoute(segment,playerId,localTime,handedness):null;
     const worldPosition = sampleActorWorldPosition(segment,playerId,localTime,handedness,instructionalMovement);
     const from = segment.previous.positions[playerId];
     const to = segment.step.positions[playerId];
@@ -256,7 +258,10 @@ export function sampleActorPresentation({
     const after = sampleActorWorldPosition(segment, playerId, Math.min(segment.duration, localTime + .015), handedness,instructionalMovement);
     const sampleInterval = Math.min(segment.duration, localTime + .015) - Math.max(0, localTime - .015);
     const travelSpeed = sampleInterval > 0 ? Math.hypot(after.x - before.x, after.z - before.z) / sampleInterval : 0;
+    const model2Feet = segment.modelVersion === 2 ? sampleActorFeetV2(segment, playerId, localTime).sort((a,b)=>a.x-b.x) : null;
+    const near = segment.previous.positions[playerId].y < 22;
     return Object.freeze({
+        ...(segment.modelVersion === 2 ? { modelVersion: 2 } : {}),
         playerId, worldPosition, bodyFacing: Object.freeze(bodyFacing), viewDirection: direction,
         action: state.action, phase: state.phase, frameIndex: state.frameIndex,
         locomotionFrame: state.locomotionFrame, planted: state.planted, handedness,
@@ -267,7 +272,7 @@ export function sampleActorPresentation({
         strokePose, strokeTime, profile, timeSeconds: seconds ?? segment.startTime + localTime,
         travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,
         travelDirection: route?Object.freeze(route.direction):null,
-        footTargets: route?Object.freeze({left:Object.freeze(routeFoot(route,true)),right:Object.freeze(routeFoot(route,false))}):null,
+        footTargets: model2Feet ? Object.freeze({left:Object.freeze(boardToWorld(model2Feet[near?1:0],0)),right:Object.freeze(boardToWorld(model2Feet[near?0:1],0))}) : route?Object.freeze({left:Object.freeze(routeFoot(route,true)),right:Object.freeze(routeFoot(route,false))}):null,
         splitStep: instructionalMovement?Math.max(
             !isStriker&&segment.shotSemantics?Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11):0,
             segment.nextShotSemantics&&segment.nextShotSemantics.playerId!==playerId?Math.max(0,1-(segment.duration-localTime)/.11):0):0,

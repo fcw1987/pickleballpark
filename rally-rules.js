@@ -2,6 +2,7 @@
 import { compilePlayTimeline } from './three-d-core.js';
 import { COURT_DIMENSIONS, isInNonVolleyZone, isInServiceBox, serviceBoxForServer } from './court-geometry.js';
 import { resolveServiceContext, serviceIdentityIssues, receivingServiceBox, teamForPlayer } from './rally-state.js';
+import { validateModel2Rules } from './play-outcome-v2.js';
 
 export const NVZ_MODEL_LIMITS_NOTE = 'Model limits: the preview does not track full foot and equipment contact history, volley momentum, or balance recovery. It cannot certify non-volley-zone legality or that both feet have reset outside the zone.';
 
@@ -20,6 +21,7 @@ export function validateRallyRules(play,timeline=null){
     try{compiled=compiled||compilePlayTimeline(play);}catch(error){
         return Object.freeze({valid:false,violations:Object.freeze([violation(play,'invalid-play',error.message)])});
     }
+    if(play?.modelVersion===2)return validateModel2Rules(play,compiled);
     const shotSegments=compiled.segments.filter(segment=>segment.shotSemantics);
     const bounceCounts=new Map();
     for(const event of compiled.events)if(event.type==='bounce')bounceCounts.set(event.rallyLeg,(bounceCounts.get(event.rallyLeg)||0)+1);

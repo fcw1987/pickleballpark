@@ -78,3 +78,72 @@ export class ReadableBall {
         this.material.dispose();this.texture.dispose();this.cue.material.dispose();this.cueTexture.dispose();
     }
 }
+
+// Dynamic model 2 annotations stay separate from the ball and cached world.
+// Callers supply the shared playhead sample; this object never reads time.
+export class TerminalEventMarkers {
+    constructor(scene) {
+        this.scene = scene;
+        this.group = new THREE.Group();
+        this.group.name = 'Model2TerminalMarkers';
+        this.objects = new Map();
+        this.textures = new Set();
+        this.diagnostics = [];
+        scene.add(this.group);
+    }
+    create(type) {
+        const group = new THREE.Group();
+        group.name = `TerminalMarker:${type}`;
+        const material = color => new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+        if (type === 'net-touch' || type === 'second-bounce') {
+            const ring = new THREE.Mesh(new THREE.RingGeometry(.12, .16, 20), material(type === 'net-touch' ? '#fff7cf' : '#ffe65c'));
+            ring.name = 'TerminalRing';
+            if (type === 'second-bounce') ring.rotation.x = -Math.PI / 2;
+            group.add(ring);
+        } else if (type === 'out') {
+            for (const angle of [-Math.PI / 4, Math.PI / 4]) {
+                const bar = new THREE.Mesh(new THREE.BoxGeometry(.48, .025, .055), material('#b54035'));
+                bar.rotation.y = angle; group.add(bar);
+            }
+        } else if (type === 'fault') {
+            const canvas = document.createElement('canvas'); canvas.width = canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#263449'; ctx.fillRect(5, 2, 3, 29); ctx.fillRect(7, 2, 23, 16);
+            ctx.fillStyle = '#e78b54'; ctx.fillRect(9, 4, 19, 12);
+            ctx.fillStyle = '#fff7cf'; ctx.fillRect(12, 6, 3, 7); ctx.fillRect(12, 14, 3, 1);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.magFilter = texture.minFilter = THREE.NearestFilter; texture.generateMipmaps = false;
+            texture.colorSpace = THREE.SRGBColorSpace; this.textures.add(texture);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: .1, depthWrite: false, toneMapped: false }));
+            sprite.center.set(.2, 0); sprite.scale.set(.6, .6, 1); group.add(sprite);
+        }
+        this.objects.set(type, group); this.group.add(group);
+        return group;
+    }
+    update(markers = []) {
+        for (const object of this.objects.values()) object.visible = false;
+        this.group.visible = Boolean(markers.length);
+        this.diagnostics = markers.map(marker => {
+            const object = this.objects.get(marker.type) || this.create(marker.type);
+            object.visible = true;
+            object.position.set(marker.position.x, marker.type === 'out' || marker.type === 'second-bounce' ? .025 : marker.position.y, marker.position.z);
+            object.userData.event = { ...marker, position: { ...marker.position } };
+            if (marker.type === 'net-touch' || marker.type === 'second-bounce') {
+                object.scale.setScalar(marker.type === 'net-touch' ? .7 + marker.progress * 2 : 1 + marker.progress);
+                object.children[0].material.opacity = marker.type === 'net-touch' ? .85 * (1 - marker.progress) : .95;
+            }
+            return { ...marker, visible: true };
+        });
+        return this.diagnostics;
+    }
+    dispose() {
+        this.scene.remove(this.group);
+        this.group.traverse(object => {
+            // Sprite geometry is Three.js's shared cache, as for ReadableBall.
+            if (!object.isSprite) object.geometry?.dispose();
+            object.material?.dispose();
+        });
+        for (const texture of this.textures) texture.dispose();
+        this.objects.clear(); this.textures.clear(); this.diagnostics = [];
+    }
+}

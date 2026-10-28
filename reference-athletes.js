@@ -69,6 +69,35 @@ export function createReferenceAthlete(resources,team,handedness,index=0){
 }
 const directionFrame=direction=>({front:[0,1],'front-right':[1,1],right:[2,1],'back-right':[3,1],back:[3,1],'back-left':[3,-1],left:[2,-1],'front-left':[1,-1]})[direction]||[0,1];
 function strokePhase(s){if(!s.profile)return 3;const t=s.strokeTime/s.profile.duration,c=s.profile.contactRatio,f=s.profile.recoverRatio||.8;return t<=c?t/c:t<=f?1+(t-c)/(f-c):2+(t-f)/(1-f);}
+const physicalSoleSources=new WeakMap();
+function model2SoleWeights(d,frame){
+ // Each anchor is the mean bottom opaque-pixel edge of one painted shoe.
+ // Cache source UVs, then their actual triangle weights; no root substitute.
+ let frames=physicalSoleSources.get(d.resources.assets);if(!frames){frames=new Map();physicalSoleSources.set(d.resources.assets,frames);}
+ const key=`${d.player}/${frame}`;let source=frames.get(key);
+ if(!source){const [ox,oy,w,h]=d.resources.assets.metadata.frames[d.player][frame].rect,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(d.resources.assets.image,ox,oy,w,h,0,0,w,h);const pixels=ctx.getImageData(0,0,w,h).data,threshold=Math.ceil(d.body.material.alphaTest*255);source=[[],[]];
+  for(let side=0;side<2;side++)for(let y=h-1;y>=h*.7;y--){for(let x=0;x<w;x++)if((x<w/2?0:1)===side&&pixels[(y*w+x)*4+3]>=threshold)source[side].push({u:(x+.5)/w,v:1-(y+1)/h});if(source[side].length)break;}
+  if(source.some(points=>!points.length))throw Error('Model 2 requires two measurable painted shoe anchors.');frames.set(key,source);}
+ d.model2SoleWeights??=new Map();if(d.model2SoleWeights.has(key))return d.model2SoleWeights.get(key);
+ const geometry=d.body.geometry,uv=geometry.attributes.uv,index=geometry.index,triangle=new THREE.Triangle(),p=v(),bary=v(),weights=source.map(points=>{
+  const mean=new Float64Array(geometry.attributes.position.count);
+  for(const point of points){p.set(point.u,point.v,0);let found=false;for(let at=0;at<index.count;at+=3){const ids=[0,1,2].map(c=>index.getX(at+c));for(let c=0;c<3;c++)[triangle.a,triangle.b,triangle.c][c].set(uv.getX(ids[c]),uv.getY(ids[c]),0);triangle.getBarycoord(p,bary);if(bary.x>=-1e-7&&bary.y>=-1e-7&&bary.z>=-1e-7){for(let c=0;c<3;c++)mean[ids[c]]+=bary.getComponent(c)/points.length;found=true;break;}}
+   if(!found)throw Error('Painted shoe anchor must lie on an actual body triangle.');}
+  return mean;
+ });d.model2SoleWeights.set(key,weights);return weights;
+}
+function alignModel2Soles(root,sample,frame){
+ const d=root.userData,targets=Object.values(sample.footTargets||{});if(sample.modelVersion!==2||targets.length!==2)return;
+ const weights=model2SoleWeights(d,frame),pos=d.body.geometry.attributes.position,base=d.baseVertices;
+ const basis=Array.from({length:pos.count},(_,i)=>{const leg=Math.max(0,Math.min(1,(-base[i*3+1]-.19)/.22)),right=Math.max(0,Math.min(1,(base[i*3]+.08)/.16));return[leg*(1-right),leg*right];});
+ const current=weights.map(mean=>{const point=v();for(let i=0;i<pos.count;i++)if(mean[i])point.addScaledVector(v(pos.getX(i),pos.getY(i),pos.getZ(i)),mean[i]);return point;});
+ const world=current.map(point=>d.body.localToWorld(point.clone())),wanted=targets.map(point=>v(point.x,point.y,point.z));
+ if(world[0].distanceToSquared(wanted[1])+world[1].distanceToSquared(wanted[0])<world[0].distanceToSquared(wanted[0])+world[1].distanceToSquared(wanted[1]))wanted.reverse();
+ const delta=wanted.map((point,i)=>d.body.worldToLocal(point.clone()).sub(current[i])),matrix=weights.map(mean=>basis.reduce((sum,b,i)=>[sum[0]+mean[i]*b[0],sum[1]+mean[i]*b[1]],[0,0])),[[a,b],[c,e]]=matrix,det=a*e-b*c;
+ if(Math.abs(det)<1e-8)throw Error('Painted shoes cannot be aligned independently for model 2.');
+ const left=delta[0].clone().multiplyScalar(e).addScaledVector(delta[1],-b).divideScalar(det),right=delta[1].clone().multiplyScalar(a).addScaledVector(delta[0],-c).divideScalar(det);
+ for(let i=0;i<pos.count;i++){const [l,r]=basis[i];if(l||r)pos.setXYZ(i,pos.getX(i)+left.x*l+right.x*r,pos.getY(i)+left.y*l+right.y*r,pos.getZ(i)+left.z*l+right.z*r);}pos.needsUpdate=true;
+}
 export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  const d=root.userData;root.position.set(sample.worldPosition.x,sample.worldPosition.y||0,sample.worldPosition.z);const cameraFacing=new THREE.Euler().setFromQuaternion(camera.quaternion,'YXZ');cameraFacing.x=Math.max(-20*Math.PI/180,Math.min(20*Math.PI/180,cameraFacing.x));d.visual.quaternion.setFromEuler(cameraFacing);
  const [frame,mirror]=directionFrame(sample.viewDirection),meta=d.resources.assets.metadata.frames[d.player][frame],h=meta.heightMeters,w=h*meta.rect[2]/meta.rect[3];d.body.material.map=d.resources.texture(d.player,frame);d.body.scale.set(w*mirror,h,1);
@@ -77,7 +106,8 @@ export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  // strike and follow-through keep the original family-specific choreography.
  const ready=computePixelStroke({type:'ready',strokeSide:'forehand',handedness:d.handedness,phase:3,facing:'front'}),keys=family==='ready'?[ready,ready,ready,ready,ready]:[ready,...[0,1,2].map(key=>computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase:key,facing:'front'})),ready],times=[0,.45,1,2,3],interval=phase<.45?0:phase<1?1:phase<2?2:3,keyT=Math.max(0,Math.min(1,(phase-times[interval])/(times[interval+1]-times[interval]))),keyBlend=keyT*keyT*(3-2*keyT);
  pose.paddle={x:keys[interval].paddle.x+(keys[interval+1].paddle.x-keys[interval].paddle.x)*keyBlend,y:keys[interval].paddle.y+(keys[interval+1].paddle.y-keys[interval].paddle.y)*keyBlend};pose.torsoOffset={x:0,y:0};
- const jump=family==='overhead'&&phase>=0&&phase<=2?.4*Math.sin(Math.PI*phase/2)**2:0;root.position.y=(sample.worldPosition.y||0)+jump;
+ const groundedModel2=sample.modelVersion===2&&sample.footTargets&&Object.values(sample.footTargets).every(point=>Math.abs(point.y)<1e-8);
+ const jump=!groundedModel2&&family==='overhead'&&phase>=0&&phase<=2?.4*Math.sin(Math.PI*phase/2)**2:0;root.position.y=(sample.worldPosition.y||0)+jump;
  const gait=moving&&!sample.planted?Math.sin(sample.travelPhase??(sample.timeSeconds||0)*12):0;
  // Correct each source shoe's transparent bottom rows in the leg deformation.
  // A planted card has two grounded painted soles; gait then lifts one foot.
@@ -88,6 +118,7 @@ export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
  // Deform the existing richly drawn legs around their hips; shoes keep their artwork.
  const pos=d.body.geometry.attributes.position,base=d.baseVertices;for(let i=0;i<pos.count;i++){const x=base[i*3],y=base[i*3+1],leg=Math.max(0,Math.min(1,(-y-.19)/.31)),side=x<0?-1:1,gap=soleGaps[side<0?0:1],registration=gap/Math.max(.01,1-gap/.31);pos.setXYZ(i,x+leg*gait*.025*side,y+leg*(Math.max(0,gait*side)*.045-registration),base[i*3+2]);}pos.needsUpdate=true;
  root.updateMatrixWorld(true);
+ if(sample.modelVersion===2&&sample.footTargets)alignModel2Soles(root,sample,frame);
  const scale=.063,facing=v(sample.bodyFacing?.x||0,0,sample.bodyFacing?.z??1).normalize(),court=v(0,0,sample.worldPosition.z<0?1:-1),fromPose=(p,basis=facing)=>d.visual.worldToLocal(root.position.clone().addScaledVector(v(basis.z,0,-basis.x),p.x*scale).addScaledVector(basis,.09).add(v(0,-p.y*scale,0))),paddle=fromPose(keys[interval].paddle,interval===0?court:facing).lerp(fromPose(keys[interval+1].paddle,interval===3?court:facing),keyBlend),target=sample.paddle?.worldContactTarget;
  if(family==='short-hop'&&phase>1&&phase<3)paddle.add(v(0,.063*Math.sin((phase-1)*Math.PI/2),0).applyQuaternion(d.visual.quaternion.clone().invert()));
  // The free stroke follows continuous world body-facing, independently of the

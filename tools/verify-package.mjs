@@ -10,6 +10,7 @@ import { protectedPinScenario } from '../tests/fixtures/smart-coach-scenarios.mj
 import { validateDeploymentArtifact } from './verify-deployment-artifact.mjs';
 import { createRuntimePackage } from './runtime-package.mjs';
 import { clickAndVerifySmartAdd } from './package-smart-add.mjs';
+import { readModel2Fixture } from '../tests/fixtures/model2/cases.mjs';
 const sha = b => createHash('sha256').update(b).digest('hex');
 const gitBytes = (revision, file) => execFileSync('git', ['show', `${revision}:${file}`], { maxBuffer: 20 * 1024 * 1024 });
 const gitText = (revision, file) => gitBytes(revision, file).toString('utf8');
@@ -335,6 +336,41 @@ async function verifyMigratedAuthoringOffline(page) {
   return { added, completion, undoRestored: true, otherSavedDraftsPreserved: true };
 }
 
+async function verifyModel2Offline(page) {
+  // Called only after this case's owned server is stopped. Fixtures travel
+  // as JSON; no source/test file is added to the runtime package.
+  const fixture = readModel2Fixture('net');
+  const proof = await page.evaluate(async document => {
+    const b = playBuilder;
+    await b.action('import', JSON.stringify(document));
+    const source = JSON.stringify(b.document);
+    const result = () => ({ modelVersion: b.document.modelVersion, physicsVersion: b.document.physicsVersion,
+      valid: b.compiled.validShotCount, shots: b.document.shots.length,
+      errors: b.compiled.findings.filter(item => item.severity === 'error'),
+      terminal: b.compiled.timeline.events.filter(event => event.type === 'fault' || event.type === 'dead').map(event => ({ type: event.type, reason: event.reason })) });
+    const before = result();
+    const exported = b.store.exportJSON(b.document);
+    const exportExact = JSON.stringify(b.store.importJSON(exported)) === source;
+    await b.action('title', 'Temporary model 2 title');
+    await b.action('undo');
+    const undoExact = JSON.stringify(b.document) === source;
+    await b.switchView('2d'); b.seek(b.session.duration);
+    const markers2d = b.board.playTerminalMarkers?.map(marker => marker.type) || [];
+    await b.switchView('3d'); b.seek(b.session.duration);
+    const markers3d = b.board.threeD.terminalMarkers?.diagnostics.map(marker => marker.type) || [];
+    return { before, source, exportExact, undoExact, markers2d, markers3d, canvasCount: window.document.querySelectorAll('#threeDCanvas canvas').length };
+  }, fixture);
+  expect(proof.before).toMatchObject({ modelVersion: 2, physicsVersion: 'play-physics-v2', valid: fixture.shots.length, shots: fixture.shots.length, errors: [] });
+  expect(proof.before.terminal).toEqual(expect.arrayContaining([{ type: 'fault', reason: 'net' }, { type: 'dead', reason: 'net' }]));
+  expect(proof.exportExact).toBe(true); expect(proof.undoExact).toBe(true);
+  expect(proof.markers2d).toContain('fault'); expect(proof.markers3d).toContain('fault');
+  expect(proof.canvasCount).toBe(1);
+  await page.reload(); await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(proof.source);
+  expect(await page.evaluate(() => ({ model: playBuilder.compiled.play.modelVersion, valid: playBuilder.compiled.validShotCount }))).toEqual({ model: 2, valid: fixture.shots.length });
+  return { modelVersion: 2, physicsVersion: 'play-physics-v2', sourceRoundTrip: true, undoRestored: true, realOfflineReload: true, bothTerminalRenderers: true };
+}
+
 // This is a path move on one origin, rather than an in-place worker update.
 // Desktop engines verify registration/manifest identities; they do not install
 // an operating-system home-screen shortcut or claim that its old URL redirects.
@@ -543,8 +579,28 @@ const coverageCache = `pickleboard-static-${serviceWorkerCache(coverageFiles.get
 expect(coverageCache, 'maintenance starting main cache').toBe('pickleboard-static-v37');
 expect(candidateCache, 'candidate must advance the maintenance starting cache').not.toBe(coverageCache);
 
+// M1 must preserve the exact reviewed M0 package, saved source, and v39 cache.
+const model2Revision = '43e2a6819d80eded008c448f09256455783de3c3';
+const model2Root = mkdtempSync(join(tmpdir(), 'pickleballpark-model2-upgrade-'));
+let model2Files;
+try {
+  for (const file of [...runtimeInventory(model2Revision), 'tools/runtime-files.json']) {
+    mkdirSync(dirname(join(model2Root, file)), { recursive: true });
+    writeFileSync(join(model2Root, file), gitBytes(model2Revision, file));
+  }
+  writeFileSync(join(model2Root, '.git'), `gitdir: ${execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim()}\n`);
+  for (const file of ['tools/runtime-package.mjs', 'tools/stamp-build.mjs']) expect(readFileSync(file).equals(gitBytes(model2Revision, file)), `M0 package algorithm ${file}`).toBe(true);
+  const packaged = createRuntimePackage({ sourceRoot: model2Root, revision: model2Revision, requireCommittedSource: true, verifyVendor: false });
+  expect(packaged.info.sourceState).toBe('clean');
+  expect(packaged.metadata.sourceRevision).toBe(model2Revision);
+  model2Files = packaged.files;
+} finally { rmSync(model2Root, { recursive: true, force: true }); }
+const model2Cache = `pickleboard-static-${serviceWorkerCache(model2Files.get('sw.js').toString('utf8'))}`;
+expect(model2Cache, 'reviewed M0 cache').toBe('pickleboard-static-v39');
+expect(candidateCache, 'M1 must replace the M0 cache').not.toBe(model2Cache);
+
 const results = [];
-const allModes = ['fresh', 'coverage-upgrade', 'preview-upgrade', 'live-upgrade', 'depth-upgrade', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration'];
+const allModes = ['fresh', 'model2-upgrade', 'coverage-upgrade', 'preview-upgrade', 'live-upgrade', 'depth-upgrade', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration'];
 const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allModes;
 if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
@@ -562,9 +618,9 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       continue;
     }
     const upgrading = mode !== 'fresh';
-    const previousFiles = mode === 'coverage-upgrade' ? coverageFiles : mode === 'preview-upgrade' ? previewFiles : mode === 'live-upgrade' ? liveFiles : mode === 'depth-upgrade' ? depthFiles : mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
-    const priorCache = mode === 'coverage-upgrade' ? coverageCache : mode === 'preview-upgrade' ? previewCache : mode === 'live-upgrade' ? liveCache : mode === 'depth-upgrade' ? depthCache : mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
-    const previousRevision = mode === 'coverage-upgrade' ? coverageRevision : mode === 'preview-upgrade' ? previewRevision : mode === 'live-upgrade' ? liveRevision : mode === 'depth-upgrade' ? depthRevision : mode === 'branding-upgrade' ? brandingRevision : mode === 'stroke-contact-upgrade' ? strokeContactRevision : mode === 'stroke-upgrade' ? strokeRevision : mode === 'cache-upgrade' ? cacheRevision : mode === 'town-upgrade' ? townRevision : mode === 'art-upgrade' ? artRevision : mode === 'smart-upgrade' ? smartRevision : mode === 'public-upgrade' ? publicRevision : mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
+    const previousFiles = mode === 'model2-upgrade' ? model2Files : mode === 'coverage-upgrade' ? coverageFiles : mode === 'preview-upgrade' ? previewFiles : mode === 'live-upgrade' ? liveFiles : mode === 'depth-upgrade' ? depthFiles : mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
+    const priorCache = mode === 'model2-upgrade' ? model2Cache : mode === 'coverage-upgrade' ? coverageCache : mode === 'preview-upgrade' ? previewCache : mode === 'live-upgrade' ? liveCache : mode === 'depth-upgrade' ? depthCache : mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
+    const previousRevision = mode === 'model2-upgrade' ? model2Revision : mode === 'coverage-upgrade' ? coverageRevision : mode === 'preview-upgrade' ? previewRevision : mode === 'live-upgrade' ? liveRevision : mode === 'depth-upgrade' ? depthRevision : mode === 'branding-upgrade' ? brandingRevision : mode === 'stroke-contact-upgrade' ? strokeContactRevision : mode === 'stroke-upgrade' ? strokeRevision : mode === 'cache-upgrade' ? cacheRevision : mode === 'town-upgrade' ? townRevision : mode === 'art-upgrade' ? artRevision : mode === 'smart-upgrade' ? smartRevision : mode === 'public-upgrade' ? publicRevision : mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
     let phase = upgrading ? 'old' : 'new', stopped = false;
     const server = createServer((req, res) => {
       const pathname = decodeURIComponent(new URL(req.url, 'http://local').pathname);
@@ -600,7 +656,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'coverage-upgrade' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
+        if (mode === 'model2-upgrade' || mode === 'coverage-upgrade' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');
@@ -715,6 +771,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       // migrated document plus every hash, storage, planner, renderer and
       // real-offline assertion in every historical case.
       const smartProof = mode === 'fresh' ? await verifySmartRallyOffline(page) : await verifyMigratedAuthoringOffline(page);
+      const model2Proof = mode === 'fresh' || mode === 'model2-upgrade' ? await verifyModel2Offline(page) : null;
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
       // Lesson definitions and runtime bytes are identical after each verified
       // migration. Sweep all eight offline once per engine, then retain one
@@ -740,7 +797,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         expect(lesson.valid).toBe(lesson.shots);expect(lesson.chapters).toBe(lesson.shots);
       }
       await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0); expect(errors).toEqual([]);
-      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: lessonIds.length, offlineLessonIds: lessonIds, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof });
+      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: lessonIds.length, offlineLessonIds: lessonIds, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof, ...(model2Proof ? { model2: model2Proof } : {}) });
     } catch (e) { results.push({ browser: browserName, mode, status: 'FAIL', error: e.message }); throw e; }
     finally { results.at(-1).durationMs = performance.now() - caseStarted; await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
   }

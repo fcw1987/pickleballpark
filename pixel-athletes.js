@@ -5,7 +5,7 @@ const ink='#1c2940',shoe='#f1edce';
 const kits={green:['#246c58','#48ad72','#92d68c'],orange:['#ad4437','#ed7650','#ffc47a']};
 // Bresenham strokes and solid integer rectangles only: no raster blur or vectors.
 function line(ctx,a,b,color,width=1){let x=Math.round(a.x),y=Math.round(a.y),ex=Math.round(b.x),ey=Math.round(b.y),dx=Math.abs(ex-x),sx=x<ex?1:-1,dy=-Math.abs(ey-y),sy=y<ey?1:-1,e=dx+dy;ctx.fillStyle=color;for(;;){ctx.fillRect(x,y,width,width);if(x===ex&&y===ey)break;let e2=e*2;if(e2>=dy){e+=dy;x+=sx;}if(e2<=dx){e+=dx;y+=sy;}}}
-export function drawPixelAthlete(ctx,{x=0,y=0,scale=1,playerId='player1',kit='green',facing='front',handedness='right',shot,phase=3,contact,contactWeight,support,supportWeight,planted,move=false,time=0}={}) {
+export function drawPixelAthlete(ctx,{x=0,y=0,scale=1,playerId='player1',kit='green',facing='front',handedness='right',shot,phase=3,contact,contactWeight,support,supportWeight,planted,modelVersion,footPoints,move=false,time=0}={}) {
  const type=typeof shot==='string'?shot:shot?.authoring?.family||shot?.family||shot?.type||'ready';
  const style=shot?.contact?.strokeSide||shot?.strokeSide||shot?.contactStyle||shot?.stroke;
  let pose=computePixelStroke({type,style,handedness,phase,facing,moving:move,time,planted:planted??(contactWeight>.5?true:undefined)});
@@ -18,6 +18,8 @@ export function drawPixelAthlete(ctx,{x=0,y=0,scale=1,playerId='player1',kit='gr
  const rawSupportWeight=Math.max(0,Math.min(1,supportWeight??contactWeight??0)),supportRamp=Math.min(1,rawSupportWeight/.5),supportBlend=supportRamp*supportRamp*(3-2*supportRamp);
  const supportOffset=support?{x:(support.x-x)/scale*supportBlend,y:(support.y-y)/scale*supportBlend}:{x:0,y:0};
  pose={...pose,feet:pose.feet.map(foot=>({x:foot.x+supportOffset.x,y:foot.y+supportOffset.y}))};
+ const physicalFeet=modelVersion===2&&Array.isArray(footPoints)&&footPoints.length===2&&footPoints.every(point=>Number.isFinite(point.x)&&Number.isFinite(point.y));
+ if(physicalFeet)pose={...pose,feet:footPoints.map(point=>({x:(point.x-x)/scale,y:(point.y-y)/scale}))};
  const logicalPose=pose;
  const rasterPaddle={x:(Math.round(x+pose.paddle.x*scale)-Math.round(x))/scale,y:(Math.round(y+pose.paddle.y*scale)-Math.round(y))/scale};
  pose=computePixelStroke({type,style,handedness,phase,facing,moving:move,time,paddleTarget:rasterPaddle,targetWeight:1,planted:planted??(contactWeight>.5?true:undefined)});
@@ -33,8 +35,11 @@ export function drawPixelAthlete(ctx,{x=0,y=0,scale=1,playerId='player1',kit='gr
  let bodyShift=false;const r=(a,b,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(a+(bodyShift?pose.torsoOffset.x:0)),Math.round(b),w,h);};
  // Small pixel shadow, separated shoes, socks, shorts, shaded jersey.
  r(-5,0,10,1,'#233c4c66');
- for(const f of pose.feet){r(f.x-2,f.y-4,4,4,ink);r(f.x-1,f.y-4,2,2,skin);r(f.x-2,f.y-1,4,2,ink);r(f.x-1,f.y-1,3,1,shoe);}
- for(const f of pose.feet){line(ctx,{x:f.x,y:f.y-3},{x:f.x+pose.torsoOffset.x,y:-6+pose.torsoOffset.y},ink,3);line(ctx,{x:f.x,y:f.y-3},{x:f.x+pose.torsoOffset.x,y:-6+pose.torsoOffset.y},skin,2);}
+ const shoes=()=>{for(const f of pose.feet){if(physicalFeet){r(f.x-2,f.y-5,4,3,ink);r(f.x-1,f.y-4,2,2,skin);r(f.x-2,f.y-2,4,2,ink);r(f.x-1,f.y-1,2,1,shoe);}else{r(f.x-2,f.y-4,4,4,ink);r(f.x-1,f.y-4,2,2,skin);r(f.x-2,f.y-1,4,2,ink);r(f.x-1,f.y-1,3,1,shoe);}}};
+ const legs=()=>{for(const f of pose.feet){line(ctx,{x:f.x,y:f.y-3},{x:f.x+pose.torsoOffset.x,y:-6+pose.torsoOffset.y},ink,3);line(ctx,{x:f.x,y:f.y-3},{x:f.x+pose.torsoOffset.x,y:-6+pose.torsoOffset.y},skin,2);}};
+ // Model 2 anchors the bottom-center edge of the actual raster shoes. Draw
+ // those shoes after the legs so their measured bottom row stays visible.
+ if(physicalFeet){legs();shoes();}else{shoes();legs();}
  bodyShift=true;r(-4,-8+pose.torsoOffset.y,8,4,ink);r(-3,-8+pose.torsoOffset.y,3,3,'#344863');r(1,-8+pose.torsoOffset.y,2,3,'#4d617b');
  const c=pose.crouch+pose.torsoOffset.y;r(-5,-15+c,10,8-pose.crouch,ink);r(-4,-14+c,8,6-pose.crouch,palette[0]);r(-3,-14+c,6,4,palette[1]);r(-3,-14+c,2,2,palette[2]);r(2,-13+c,2,4,palette[0]);r(-3,-9+pose.torsoOffset.y,6,1,palette[2]);
  // Off hand counterbalances; elbow and wrist remain readable at native size.
@@ -48,6 +53,6 @@ export function drawPixelAthlete(ctx,{x=0,y=0,scale=1,playerId='player1',kit='gr
  // Continuous visible handle terminates in the gripped hand; original paddle.
  line(ctx,pose.wrist,pose.paddle,ink,2);line(ctx,pose.wrist,pose.paddle,'#cc9a61');
  bodyShift=false;const p=pose.paddle;r(p.x-3,p.y-3,6,6,ink);r(p.x-4,p.y-2,8,4,ink);r(p.x-2,p.y-2,4,4,'#547786');r(p.x-3,p.y-1,6,2,'#547786');r(p.x-2,p.y-2,3,1,'#a0b5ad');r(pose.wrist.x,pose.wrist.y,2,2,skin);
- ctx.restore();return {...logicalPose,rasterContact,rasterPose:pose,sole:{x,y},canonicalSole,supportOffset,torsoOffset:logicalPose.torsoOffset,contactCorrection,contactBounded,contact:{x:x+logicalPose.paddle.x*scale,y:y+logicalPose.paddle.y*scale},scale};
+ ctx.restore();return {...logicalPose,rasterContact,rasterPose:pose,...(physicalFeet?{rasterFeet:pose.feet.map(foot=>({x:Math.round(x)+Math.round(foot.x)*scale,y:Math.round(y)+Math.round(foot.y)*scale}))}:{}),sole:{x,y},canonicalSole,supportOffset,torsoOffset:logicalPose.torsoOffset,contactCorrection,contactBounded,contact:{x:x+logicalPose.paddle.x*scale,y:y+logicalPose.paddle.y*scale},scale};
 }
 export function drawPixelActor(ctx,o={}){return drawPixelAthlete(ctx,{...o,playerId:o.id||o.playerId,kit:o.team||o.kit,move:o.moving??o.move,shot:o.swing?.shot||o.shot,phase:o.swing?.phase??o.phase,contact:o.swing?.contact||o.contact});}

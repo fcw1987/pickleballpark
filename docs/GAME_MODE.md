@@ -1,13 +1,56 @@
 # Pickleball Park Game Mode
 
-This is the M0 foundation for the owner brief dated October 28, 2026. M0 adds
-observation tools, compatibility fixtures and tests. It does not add a game,
-change a generator/compiler, change playback, or add a workspace.
+These foundations follow the owner brief dated October 28, 2026. M0 adds
+observation tools, compatibility fixtures and tests. M1 adds an opt-in model 2
+compiler and shared physics path. Neither milestone adds a game, rally policy,
+score engine or workspace.
 
 The starting runtime is main `c0d70093eb2658e09ad23ce14f5a7acebfa0af52`
 (PR23). PR22 already supplied the serving-convention adapter, library-capacity
 recovery, startup fallback, artwork, phone Planner and copy fixes. They are
 preserved. M0 adds no runtime files and needs no cache bump.
+
+M1 starts from verified main `43e2a6819d80eded008c448f09256455783de3c3`
+(M0, PR24). Model 1, all eight lessons and the existing smart-rally-v2/v3 paths
+remain the default compatibility boundary. Existing documents are not migrated.
+
+## M1: versioned physics and completed points
+
+Model 2 requires both `modelVersion: 2` and
+`physicsVersion: 'play-physics-v2'`. Its source and compiled Play retain these
+versions through installation and timeline compilation. The new pure solver
+owns flight geometry and interception; a later rally engine must call it instead
+of maintaining a second approximation. See [the document additions](PLAY_DOCUMENT.md#model-2-source)
+and [physics and terminal evidence](MODEL2_PHYSICS.md).
+
+Incoming contact position, height and time come from that solved flight. Shot
+quality and family select illustrative profiles; they cannot assign an unrelated
+next-contact height. Terminal stages represent net interaction, landings, a
+second bounce or a physical fault without inventing an opposing next contact.
+
+A completed model 2 point carries a winner, reason, responsible/struck actors
+where applicable, an existing recipe ID and geometric/time evidence. The
+declaration must match independent physical/rule evidence. Expected faults keep
+the full accepted point and playable ending with zero unexpected violations;
+they do not use `intentionalFault` to bypass validation. Momentum from an earlier
+volley retains its occurrence time and later observation time separately, so a
+later foot contact does not incorrectly reorder the faulty acts.
+
+M1 retains the existing compiler result interface and the single
+`CoachingSession` clock. Both renderers and cue/chapter labels consume the same
+terminal timeline. There is no Game Mode playback owner, new score state or
+automatic next point in this milestone. Runtime modules belong in the bounded
+runtime artifact and worker cache; M1 is a runtime release and advances the
+static cache once, from `pickleboard-static-v39` to `pickleboard-static-v40`.
+The six new runtime modules are `play-physics-v2.js`, `play-compiler-v2.js`,
+`play-timeline-v2.js`, `play-outcome-v2.js`, `play-actors-v2.js` and
+`terminal-cues.js`. Shared actor/foot sampling keeps logical motion, 3D
+presentation and body collision evidence on the same geometry and clock.
+
+M1 bypasses the legacy position suggestions and Auto Shading for model 2 points,
+returning empty derived coverage and a warning when requested. That preserves
+the feet, interceptions and outcome proof. The separate Coverage view remains
+available; this boundary does not add new positioning policy.
 
 ## Baseline tool
 
@@ -112,7 +155,7 @@ Compare the new result with the approved fixture before any explicit compatibili
 change. Never rewrite saved documents or replace hashes simply to make a test pass.
 
 PR22's service, quota/conflict/capacity and startup tests remain authoritative.
-M0 adds the missing browser case:50real 99-hit plays remain readable, a 51st
+M0 adds the missing browser case: 50 real 99-hit plays remain readable, a 51st
 edited draft shows Manage/Export guidance without changing saved bytes, and deletion
 restores saving. Its source fixture is reused; browsers do not regenerate 99 hits.
 
@@ -129,10 +172,6 @@ These are design contracts, not implemented M0 features:
   stacking off; teams keep fixed ends. Logical service slots are separate from
   tactical coordinates. Rulebook examples must be verified before scoring logic
   is implemented; rally-scoring options do not change this default.
-- Model2 is opt-in beside unchanged model 1 and smart-rally-v2/v3 paths. One
-  shared, versioned physics solver supplies planning, compilation and validation.
-  Expected terminal-fault evidence is valid output with zero **unexpected**
-  violations, rather than a reason to truncate the playable prefix.
 - Game score/server state belongs to the game engine; rally decisions/outcomes
   belong to the rally engine; geometry/timing belongs to the compiler.
   `CoachingSession` remains the only clock. Game playback may hold/advance after
@@ -151,4 +190,5 @@ Milestones remain ordered M0 through M8, one reviewed PR each. Preserve complete
 required CI, the optimized partition/catalog gates and compatibility contracts.
 Only runtime releases bump the static cache. Merge/deploy follows architectural
 review and passing required checks; M3/M5/M6/M7 desktop/phone reviews and final
-M8 owner signoff remain required. No later engine or UI work is folded into M0.
+M8 owner signoff remain required. M2 rally policy and later engine/UI work are
+not folded into the M0/M1 foundations.

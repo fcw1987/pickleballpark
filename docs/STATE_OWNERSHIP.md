@@ -42,3 +42,32 @@ Smart Add, Random Rally and Coach add **proposal work**, not a second document o
 | Family picker | UI presentation state, never a recipe copy | A completed selection closes the picker explicitly. An old native disclosure `open` value cannot reopen it during rerender. |
 
 An independent delayed-renderer test confirmed the existing return-to-Planner source-intent guard: an older saved-play Open cannot overwrite the newer workspace choice. No new controller ownership mechanism was needed.
+
+## Model 2 physics and terminal evidence
+
+M1 extends the synchronous compiler contract without adding another source,
+workspace or clock. The legacy ownership table above remains in force.
+
+| Concern | Authoritative owner | Acceptance rule |
+| --- | --- | --- |
+| Model selection | Document `modelVersion` and model 2 `physicsVersion` | Validation selects the explicit versioned path. Compiled Play definitions and GuidedPlayEngine clones retain both values; a model 2 definition must not silently compile as model 1. |
+| Physical flight and incoming contact | Pure `play-physics-v2.js` | The compiler and a future generator use this same solver. Response contact position, time and height derive from the incoming solved path. Camera, quality labels, cue text and renderer geometry cannot replace those values. |
+| Model 2 actor and foot positions | Shared `play-actors-v2.js` | Logical sampling, 3D presentation and independent body collision checks use the same actor positions. Planned routes retain `originalDuration` when the ball dies early. Momentum interpolates each foot from contact to the globally timed observation, then holds it; its observation time is not automatically the first NVZ entry. Rendered/source foot anchors project these points without certifying whole-shoe edge contact. |
+| Position assistance for model 2 | `compileEffectiveCandidate` version boundary | M1 bypasses legacy position suggestions/Auto Shading, preserves physical geometry and returns empty derived coverage. Requesting assistance produces an explicit warning; the independent Coverage view remains a presentation sampler. |
+| Completed point declaration | Document `outcome`, including actors and point/time evidence | Source claims must agree with independently solved geometry, chronology and rule facts. A declaration cannot make its own fault expected. Ordinary completed points keep `intentionalFault: false`. |
+| Terminal decision | `play-outcome-v2.js`, derived from compiled physical/rule evidence | Resolve the decisive event and compare the declaration. A modelled unreachable result needs reach/time evidence. NVZ momentum retains the earlier volley occurrence and later observation times separately. |
+| Terminal stages and events | The versioned compiled timeline | Contact, net touch/crossing, ground contacts, fault and dead-ball stages are sampled from one deterministic timeline. A terminal leg has no invented opposing paddle contact. Playback includes a relevant later momentum observation. |
+| Terminal cues and markers | Renderer projections of timeline events and `CoachingSession.clock.elapsed` | Scrub, orbit, pause, view switching and replay reproduce the same marker state. Renderers do not resolve outcomes, schedule separate fault timers or alter the document. |
+
+Expected terminal faults preserve a valid completed point and its accepted shot
+count. Invalid actors, geometry or timing produce unexpected violations and
+error findings. Model 1 keeps its existing prefix/intentional-demonstration
+semantics. The supported model 2 evidence window is not a new officiating rule
+or a claim to measure full-body momentum and balance.
+Grounded Erne approach through the kitchen before contact is permitted after
+both modeled feet re-establish outside. A reset flag alone cannot override the
+shared grounded contact feet to manufacture rule 11.A.3 evidence; unsupported
+reset history remains an unexpected finding, with the source retained.
+
+Game scoring, rally policy, asynchronous point generation and hold/advance
+between points are later milestones. M1 adds none of those owners.

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 2,
+  "id": "m1-transition-volley",
+  "title": "Model 2 transition-volley",
+  "initialLayout": {
+    "player1": {
+      "x": 7,
+      "y": 8
+    },
+    "player2": {
+      "x": 16,
+      "y": 5
+    },
+    "player3": {
+      "x": 7,
+      "y": 36
+    },
+    "player4": {
+      "x": 18,
+      "y": 39
+    },
+    "ball": {
+      "x": 7,
+      "y": 8
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "transition-feed",
+      "family": "drive",
+      "intent": "drive",
+      "quality": "neutral",
+      "hitter": "player1",
+      "receiver": "player3",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 7,
+        "y": 41
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "physics": {
+        "apexFeet": 8
+      }
+    },
+    {
+      "id": "transition-volley",
+      "family": "volley",
+      "intent": "counter",
+      "quality": "neutral",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 5,
+        "y": 8
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "contactMode": "volley",
+      "physics": {
+        "apexFeet": 6
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "midrally",
+  "ending": "stop",
+  "intentionalFault": false,
+  "service": {
+    "server": "player1",
+    "receiver": "player3",
+    "court": "left",
+    "courtConvention": "server-perspective-v1"
+  },
+  "physicsVersion": "play-physics-v2"
+}
