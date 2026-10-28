@@ -135,7 +135,18 @@ test('changing shots or starting playback cancels the previous placement owner',
 });
 
 test('adding a shot cancels the earlier placement without another edit on pointer release',async({page})=>{
- await open(page);await page.evaluate(()=>{playBuilder.courtTools.beginPlacement();return playBuilder.action('addShot');});
- expect(await page.evaluate(()=>playBuilder.courtTools.placing)).toBe(false);const source=await page.evaluate(()=>JSON.stringify(playBuilder.document));
- const point=await page.evaluate(()=>playBuilder.courtTools.project({x:10,y:22}));await page.mouse.click(point.x,point.y);expect(await page.evaluate(()=>JSON.stringify(playBuilder.document))).toBe(source);
+ await open(page);const before=await page.evaluate(()=>JSON.stringify(playBuilder.document));
+ await page.evaluate(()=>playBuilder.courtTools.beginPlacement());
+ const point=await page.evaluate(()=>playBuilder.courtTools.project({x:10,y:22}));
+ await page.mouse.move(point.x,point.y);await page.mouse.down();
+ expect(await page.evaluate(()=>Boolean(playBuilder.courtTools.drag))).toBe(true);
+ await page.evaluate(()=>playBuilder.action('addShot'));
+ expect(await page.evaluate(()=>playBuilder.courtTools.placing)).toBe(false);
+ expect(await page.evaluate(()=>playBuilder.courtTools.drag)).toBeNull();
+ const source=await page.evaluate(()=>JSON.stringify(playBuilder.document));
+ // Release the cancelled gesture. A fresh click could intentionally grab the
+ // newly generated target handle and is a different authoring interaction.
+ await page.mouse.up();expect(await page.evaluate(()=>JSON.stringify(playBuilder.document))).toBe(source);
+ await page.evaluate(()=>playBuilder.action('undo'));
+ expect(await page.evaluate(()=>JSON.stringify(playBuilder.document))).toBe(before);
 });
