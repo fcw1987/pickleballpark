@@ -27,11 +27,14 @@ test('cold and reload startup reveal complete 3D without a 2D flash or hidden re
     await expect(page.locator('#courtStartupStatus')).toBeVisible();
     await expect(page.locator('.court-container-fullscreen')).toBeHidden();
     await frames(page);
+    await expect(page.locator('.builder-court-tools')).toHaveCount(1);
+    await expect(page.locator('.builder-court-tools')).toBeHidden();
     expect(await page.evaluate(() => __exposed2D)).toBe(0);
     held.release();
     await ready(page);
     await expect(page.locator('#courtStartupStatus')).toBeHidden();
     await expect(page.locator('#threeDCanvas canvas')).toBeVisible();
+    await expect(page.locator('.builder-court-tools')).toBeVisible();
     await page.reload();
     await ready(page);
     expect(await page.evaluate(() => __exposed2D)).toBe(0);

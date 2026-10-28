@@ -98,7 +98,8 @@ body.builder-workspace .planner-identity { display: none; }
 .builder-large-text .builder-reference-dock .builder-context-menu > .builder-menu-panel { position: relative; top: auto; bottom: auto; right: auto; width: auto; max-width: 100%; scroll-margin-block: 8px; }
 #courtStartupStatus { display: none; }
 html[data-court-loading] .court-container-fullscreen,
-html[data-court-loading] #threeDViewer { visibility: hidden; }
+html[data-court-loading] #threeDViewer,
+html[data-court-loading] .builder-court-tools { visibility: hidden; }
 html[data-court-loading] #courtStartupStatus {
     display: grid;
     position: fixed;
