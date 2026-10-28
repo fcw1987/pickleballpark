@@ -3,6 +3,7 @@ import { compilePlayTimeline, STROKE_PROFILES } from './three-d-core.js';
 import { REACH_MODEL } from './rally-tactics.js';
 import { solveFlightV2, interceptFlightV2, solveServePreparationV2, PHYSICS_VERSION } from './play-physics-v2.js';
 import { validateModel2Rules, analyzeModel2Outcome } from './play-outcome-v2.js';
+import { inspectActorMovementV2 } from './play-actors-v2.js';
 
 const copy=value=>structuredClone(value);
 const IDS=['player1','player2','player3','player4'];
@@ -94,18 +95,15 @@ function constructPlay(document){
       }
     }catch(error){findings.push(finding(recipe.id,error.message,'feasibility'));break;}
   }
-  // The outgoing leg ends at the next contact, or at its own final outcome.
-  for(let i=1;i<steps.length-1;i++){
-    const duration=steps[i].shot.physicsV2.endTimeSeconds;
-    for(const id of IDS){
-      if(distance(steps[i-1].positions[id],steps[i].positions[id])>18*duration+3+.001)findings.push(finding(steps[i].id,`${id} exceeds the bounded movement model during this leg.`,'feasibility'));
-    }
-  }
   return{play,findings,accepted:steps.length-1};
 }
 
 function compile(document,{preview=false}={}){
   const {play,findings,accepted}=constructPlay(document),timeline=compilePlayTimeline(play);
+  for(const id of IDS){
+    const movement=inspectActorMovementV2(timeline,id);
+    if(!movement.valid)findings.push(finding(movement.stepId,`${id}: ${movement.reason}`,'feasibility'));
+  }
   const analysis=analyzeModel2Outcome(play,timeline),rules=validateModel2Rules(play,timeline);
   if(!preview)for(const item of rules.violations)findings.push(finding(item.stepId||item.shotId||null,item.message,item.category==='model'?'feasibility':'rule'));
   return Object.freeze({play:Object.freeze(play),timeline,findings:Object.freeze(findings),validShotCount:!preview&&findings.some(item=>item.severity==='error')?0:accepted,coverage:Object.freeze([]),

@@ -180,7 +180,13 @@ Supported reasons are `net`, `long`, `wide`, `unreachable`, `second-bounce`,
 `body`, `nvz-foot`, `nvz-momentum` and `two-bounce`. An ordinary body outcome names
 the struck player as `faultingActor` and `struckActor`. A serve striking the
 server's partner instead names that partner as `struckActor` and the server as
-`faultingActor` under rule 7.E.4. Other fault actors must agree with the physical
+`faultingActor` under rule 7.E.4. A serve striking either receiving player before
+landing names the actual touched player as `struckActor` and the designated
+receiver as `faultingActor` under rule 7.E.5. After a legal serve bounce, an
+ordinary body contact instead faults the struck player under rule 10.C.3.
+The schema checks the receiver identity and rule-specific exception; the shared
+solver independently proves whether the contact occurred before landing.
+Other fault actors must agree with the physical
 and rule evidence; a label or a rule reference alone is not
 proof. Declared position and time are compared with the independently solved
 decision. They cannot force the flight to pass through a desired result.

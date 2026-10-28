@@ -5,7 +5,7 @@ import { validateDocument } from '../play-document.js';
 import { compilePlayTimeline, samplePlayBall, samplePlayState, worldToBoard, FEET_TO_METERS } from '../three-d-core.js';
 import { sampleActorWorldPosition } from '../three-d-presentation.js';
 import { sampleActorBoardPositionV2, sampleActorFeetV2 } from '../play-actors-v2.js';
-import { localNetHeightFeet, PHYSICS_V2 } from '../play-physics-v2.js';
+import { localNetHeightFeet, PHYSICS_V2, solveFlightV2 } from '../play-physics-v2.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { compileEffectiveCandidate } from '../rally-proposals.js';
 import { MODEL2_CASES, readModel2Fixture } from './fixtures/model2/cases.mjs';
@@ -222,9 +222,73 @@ test('serve-body exceptions keep the struck player separate from the player who 
   assert.equal(ownPartner.outcome.winner, 'orange');
   const receivingPartner = readModel2Fixture('serve-hits-receiver-partner');
   assert.equal(receivingPartner.outcome.struckActor, 'player4');
-  assert.equal(receivingPartner.outcome.faultingActor, 'player4');
+  assert.equal(receivingPartner.outcome.faultingActor, 'player3');
   assert.equal(receivingPartner.outcome.ruleRef, '7.E.5');
   assert.equal(receivingPartner.outcome.winner, 'green');
+});
+
+test('a serve hitting either receiving player before landing faults the designated receiver', () => {
+  const partner = readModel2Fixture('serve-hits-receiver-partner');
+  const receiver = clone(partner);
+  receiver.initialLayout.player3 = { ...partner.initialLayout.player4 };
+  receiver.initialLayout.player4 = { x: 15, y: 41 };
+  receiver.outcome.struckActor = 'player3';
+  for (const document of [partner, receiver]) {
+    const result = compileDocument(document), outcome = result.timeline.outcome;
+    assert.deepEqual(errorFindings(result), []);
+    assert.equal(result.validShotCount, 1);
+    assert.equal(outcome.faultingActor, 'player3');
+    assert.equal(outcome.struckActor, document.outcome.struckActor);
+    assert.equal(outcome.ruleRef, '7.E.5');
+    assert.ok(outcome.afterContactSeconds < solveFlightV2(result.play.steps[1].shot.physicsV2).firstLandingTime);
+  }
+  const oldAttribution = clone(partner); oldAttribution.outcome.faultingActor = 'player4';
+  const rejected = compileDocument(oldAttribution);
+  assert.equal(rejected.validShotCount, 0);
+  assert.ok(errorFindings(rejected).some(item => /faultingActor/.test(item.message)));
+});
+
+test('post-bounce serve contact faults the struck player and cannot borrow the pre-landing receiver exception', () => {
+  const document = readModel2Fixture('serve-hits-receiver-partner');
+  document.initialLayout.player4 = { x: 4.2, y: 40.8 };
+  document.outcome = { ...document.outcome, faultingActor: 'player4', ruleRef: '10.C.3', evidence: {
+    position: { x: 4.380587524324098, y: 40.10157804247181, heightFeet: 1.3035111014204162 },
+    afterContactSeconds: 1.2923270082199503
+  } };
+  const result = compileDocument(document), outcome = result.timeline.outcome;
+  assert.deepEqual(errorFindings(result), []);
+  assert.equal(result.validShotCount, 1);
+  assert.equal(outcome.faultingActor, 'player4');
+  assert.equal(outcome.struckActor, 'player4');
+  assert.equal(outcome.ruleRef, '10.C.3');
+  assert.ok(outcome.afterContactSeconds > solveFlightV2(result.play.steps[1].shot.physicsV2).firstLandingTime);
+  const falseException = clone(document);
+  falseException.outcome.faultingActor = 'player3'; falseException.outcome.ruleRef = '7.E.5';
+  assert.equal(validateDocument(falseException), falseException, 'schema identity is structural; solved timing must still prove the exception');
+  const rejected = compileDocument(falseException);
+  assert.equal(rejected.validShotCount, 0);
+  assert.ok(errorFindings(rejected).some(item => /faultingActor/.test(item.message)));
+  assert.ok(errorFindings(rejected).some(item => /ruleRef/.test(item.message)));
+});
+
+test('an Erne waits for the entire ball to cross the net plane on both ends', () => {
+  for (const team of ['green', 'orange']) {
+    const far = team === 'orange', actor = far ? 'player3' : 'player1';
+    for (const [clearance, valid] of [[.05, false], [PHYSICS_V2.ballRadiusFeet - 1e-6, false], [PHYSICS_V2.ballRadiusFeet + 1e-6, true]]) {
+      const document = readModel2Fixture('erne'), y = 22 + (far ? 1 : -1) * clearance;
+      const shot = document.shots[0];
+      shot.hitter = actor; shot.target = { x: 5, y: far ? 15 : 29 };
+      shot.contactOverride = { x: -1.619117647, y };
+      document.initialLayout.ball = { ...shot.contactOverride };
+      document.initialLayout[actor] = { x: -2, y };
+      shot.contactEvidence.feet = [{ x: -2.42, y }, { x: -1.58, y }];
+      const source = JSON.stringify(document), result = compileDocument(document);
+      assert.equal(result.validShotCount, valid ? 1 : 0, `${team} clearance ${clearance}`);
+      if (valid) assert.deepEqual(errorFindings(result), []);
+      else assert.ok(errorFindings(result).some(item => /entire ball.*13.F.1/.test(item.message)));
+      assert.equal(JSON.stringify(document), source);
+    }
+  }
 });
 
 test('legacy position assistance cannot move model2 feet, body evidence, ball or terminal timing', () => {

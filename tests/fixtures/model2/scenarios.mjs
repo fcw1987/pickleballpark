@@ -42,7 +42,7 @@ export function model2ScenarioDrafts() {
   const serveReceiverPartner = opening();
   serveReceiverPartner.initialLayout.player3 = { x: 5, y: 41 };
   serveReceiverPartner.initialLayout.player4 = { x: 7.1, y: 31 };
-  add('serve-hits-receiver-partner', 'body', serveReceiverPartner, document => { document.outcome.faultingActor = 'player1'; });
+  add('serve-hits-receiver-partner', 'body', serveReceiverPartner, document => { document.outcome.faultingActor = 'player4'; });
   const volleyThird = opening();
   volleyThird.shots[0].movement = { intent: 'manual', pinned: false, target: { x: 15, y: 14 } };
   volleyThird.shots.push(model2Shot({ id: 'return', family: 'return', intent: 'deep-return', hitter: 'player3', receiver: 'player1', contactMode: 'bounced', contactTiming: { afterBounceSeconds: .2 }, target: { x: 15, y: 5 }, physics: { apexFeet: 7 } }));

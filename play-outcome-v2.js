@@ -16,6 +16,7 @@ const footCenter = feet => ({ x: (feet[0].x + feet[1].x) / 2, y: (feet[0].y + fe
 const onCourt = p => p.x >= -EPS && p.x <= 20 + EPS && p.y >= -EPS && p.y <= 44 + EPS;
 const inApron = p => p.x >= -8 - EPS && p.x <= 28 + EPS && p.y >= -8 - EPS && p.y <= 52 + EPS;
 const inOwnEnd = (p, team) => team === 'green' ? p.y < 22 - EPS : p.y > 22 + EPS;
+const ballEntirelyInOwnEnd = (p, team) => team === 'green' ? p.y + R <= 22 + EPS : p.y - R >= 22 - EPS;
 function violation(play, code, message, segment = null, actor = null, category = 'rule') {
   return Object.freeze({ code, classification: 'UNEXPECTED', expected: false, message,
     stepId: segment?.step.id ?? null, playId: play?.id ?? null, ...(actor ? { actor } : {}), category });
@@ -120,8 +121,13 @@ function geometricCandidates(play, segment, solved, isLast) {
     if (time === null) continue;
     const serve = segment.shotSemantics.contact.kind === 'serve';
     const sameTeam = teamForPlayer(struckActor, play.players) === teamForPlayer(actor, play.players);
-    const faultingActor = serve && sameTeam ? actor : struckActor;
-    add('body', time, solved.sampleBoard(time), faultingActor, serve ? (sameTeam ? '7.E.4' : '7.E.5') : '10.C.3', { struckActor });
+    const serveHitsReceiverBeforeLanding = serve && !sameTeam && time < solved.firstLandingTime - EPS;
+    const receiver = serveHitsReceiverBeforeLanding ? resolveServiceContext(play).receiver : null;
+    const receiverKnown = PLAYERS.includes(receiver) && teamForPlayer(receiver, play.players) !== teamForPlayer(actor, play.players);
+    const faultingActor = serve && sameTeam ? actor : serveHitsReceiverBeforeLanding ? receiver : struckActor;
+    add('body', time, solved.sampleBoard(time), faultingActor,
+      serve && sameTeam ? '7.E.4' : serveHitsReceiverBeforeLanding ? '7.E.5' : '10.C.3',
+      { struckActor, ...(serveHitsReceiverBeforeLanding && !receiverKnown ? { unsupportedReason: true } : {}) });
   }
   if (isLast && play.ending !== 'stop' && solved.secondBounceTime !== null && solved.secondBounceTime <= end + EPS) {
     const reach = assessTerminalReach(play, segment, solved);
@@ -172,7 +178,7 @@ function verifySegment(play, segment, solved, prior, index, violations) {
   if (recipe.quality !== shot.physicsV2.quality || recipe.arc !== shot.physicsV2.arc || recipe.pace !== shot.physicsV2.pace) add('profile-source-mismatch', 'Physics profile must preserve source arc, pace and quality.');
   if (JSON.stringify(recipe.physics || {}) !== JSON.stringify(shot.physicsV2.physics || {})) add('physics-source-mismatch', 'Compiled physics must retain the authored apex input.');
   if (!inApron(contact.point)) add('contact-apron', 'The represented contact is outside the supported apron.');
-  if (!inOwnEnd(contact.point, teamForPlayer(actor, play.players))) add('opponent-court-contact', 'A player must strike from their own end after the ball crosses the plane.');
+  if (!ballEntirelyInOwnEnd(contact.point, teamForPlayer(actor, play.players))) add('opponent-court-contact', 'The entire ball, including its radius, must cross the net plane to the hitter’s end before contact (13.F.1).');
   if (index === 0 && !play.rally?.openingBouncesSatisfied && contact.kind !== 'serve') add('opening-serve', 'A full rally begins with a serve.');
   if (index > 0 && contact.kind === 'serve') add('late-serve', 'A serve may only begin a rally.');
   if (prior) {

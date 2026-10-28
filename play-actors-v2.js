@@ -47,3 +47,67 @@ export function sampleActorFeetV2(segment, actor, localTime) {
   const origin = feet?.length === 2 ? center(feet) : at;
   return (feet?.length === 2 ? feet : [{ x: at.x - .42, y: at.y }, { x: at.x + .42, y: at.y }]).map(foot => Object.freeze({ x: at.x + foot.x - origin.x, y: at.y + foot.y - origin.y }));
 }
+
+// The movement allowance is continuous: any sampled interval may cover at most
+// speed * seconds + tolerance feet. The tolerance is never renewed per phase or
+// segment. It is the existing instructional route allowance, not paddle reach.
+export const MOVEMENT_V2 = Object.freeze({ speedFeetPerSecond: 18, toleranceFeet: 3 });
+
+export function inspectActorMovementV2(timeline, actor, model = MOVEMENT_V2) {
+  const speed = model.speedFeetPerSecond, tolerance = model.toleranceFeet;
+  if (!Number.isFinite(speed) || speed <= 0 || !Number.isFinite(tolerance) || tolerance < 0) throw new TypeError('Finite movement speed and tolerance are required.');
+  let path = 0, minimum = null, previous = null, maxExcessFeet = 0;
+  const failure = (segment, reason, details = {}) => Object.freeze({ valid: false, actor, stepId: segment.step.id, reason, ...details });
+  for (const segment of timeline.segments) {
+    const duration = Math.min(segment.duration, timeline.duration - segment.startTime);
+    if (duration <= 0) continue;
+    const original = segment.originalDuration ?? segment.duration;
+    const contact = segment.contactTime, release = Math.min(original, contact + .12);
+    // Between these boundaries the shared sampler follows one monotone straight
+    // route with linear or quadratic progress. Momentum can replace that route
+    // across segment boundaries, so include its absolute activation/hold times.
+    const cuts = [0, duration, original, original / 2, contact, contact / 2,
+      release, release + (original - release) / 2];
+    for (const evidence of segment.model2Momentum || []) if (evidence.actor === actor) {
+      cuts.push(evidence.contactTime - segment.startTime, evidence.time - segment.startTime);
+    }
+    const times = [...new Set(cuts.filter(time => Number.isFinite(time) && time >= 0 && time <= duration))].sort((a, b) => a - b);
+    for (let index = 1; index < times.length; index++) {
+      const start = times[index - 1], end = times[index], seconds = end - start;
+      if (seconds < 1e-12) continue;
+      const at = time => sampleActorBoardPositionV2(segment, actor, time);
+      const from = at(start), to = at(end), middle = at((start + end) / 2);
+      if (previous && Math.hypot(previous.x - from.x, previous.y - from.y) > 1e-5) return failure(segment, 'The sampled actor route jumps between stages.');
+      const length = Math.hypot(to.x - from.x, to.y - from.y);
+      const half = Math.hypot(middle.x - from.x, middle.y - from.y);
+      const quadratic = 2 * length - 4 * half, linear = 4 * half - length;
+      // Verify the actual sampler still has the supported analytic shape. A new
+      // route type must extend this audit rather than silently evade its bound.
+      for (const fraction of [.25, .75]) {
+        const actual = at(start + seconds * fraction);
+        const progress = length > 1e-12 ? (quadratic * fraction * fraction + linear * fraction) / length : 0;
+        if (Math.hypot(actual.x - (from.x + (to.x - from.x) * progress), actual.y - (from.y + (to.y - from.y) * progress)) > 1e-5) {
+          return failure(segment, 'The sampled actor route is discontinuous or has an unsupported movement shape.');
+        }
+      }
+      if (linear < -1e-7 || 2 * quadratic + linear < -1e-7) return failure(segment, 'The sampled actor route reverses inside an unsplit movement phase.');
+      const critical = Math.abs(quadratic) > 1e-12 ? (speed * seconds - linear) / (2 * quadratic) : -1;
+      const fractions = [0, ...(critical > 0 && critical < 1 ? [critical] : []), 1];
+      for (const fraction of fractions) {
+        const time = segment.startTime + start + seconds * fraction;
+        const traveled = path + quadratic * fraction * fraction + linear * fraction;
+        const excess = traveled - speed * time;
+        if (!minimum || excess < minimum.excess) minimum = { excess, time, path: traveled };
+        const rise = excess - minimum.excess;
+        maxExcessFeet = Math.max(maxExcessFeet, rise);
+        if (rise > tolerance + .001) return failure(segment, 'The actual sampled route exceeds the bounded movement allowance.', {
+          fromTime: minimum.time, toTime: time, distanceFeet: traveled - minimum.path,
+          allowedFeet: speed * (time - minimum.time) + tolerance, maxExcessFeet: rise,
+        });
+      }
+      path += length;
+      previous = to;
+    }
+  }
+  return Object.freeze({ valid: true, actor, distanceFeet: path, maxExcessFeet });
+}

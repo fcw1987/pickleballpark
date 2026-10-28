@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createStarterDocument, validateDocument } from '../play-document.js';
 import { model2Document, declaredOutcome, clone } from './fixtures/model2/factories.mjs';
+import { readModel2Fixture } from './fixtures/model2/cases.mjs';
 
 const change = mutate => { const value = model2Document(); mutate(value); return value; };
 const rejects = (mutate, expression) => assert.throws(() => validateDocument(change(mutate)), expression);
@@ -98,4 +99,20 @@ test('completed points require actor and timed geometry evidence rather than an 
   }
   const wrongActor = clone(valid); wrongActor.outcome.struckActor = 'player4';
   assert.throws(() => validateDocument(wrongActor), /struckActor|faultingActor/);
+});
+
+test('the receiving-team serve exception requires the designated receiver and its applicable rule identity', () => {
+  const source = readModel2Fixture('serve-hits-receiver-partner');
+  assert.equal(source.outcome.faultingActor, source.service.receiver);
+  assert.notEqual(source.outcome.struckActor, source.outcome.faultingActor);
+  assert.equal(validateDocument(source), source);
+  for (const [mutate, error] of [
+    [value => { value.outcome.ruleRef = '10.C.3'; }, /struckActor/],
+    [value => { value.service.receiver = 'player4'; }, /struckActor/],
+    [value => { delete value.service; value.shots[0].receiver = 'auto'; }, /struckActor/],
+    [value => { value.service.receiver = 'player1'; value.outcome.faultingActor = 'player1'; }, /service.receiver.*receiving team/]
+  ]) {
+    const invalid = clone(source); mutate(invalid);
+    assert.throws(() => validateDocument(invalid), error);
+  }
 });

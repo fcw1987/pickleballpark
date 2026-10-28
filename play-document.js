@@ -1,6 +1,6 @@
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
-import { SERVICE_COURT_CONVENTION } from './rally-state.js';
+import { SERVICE_COURT_CONVENTION, resolveServiceContext } from './rally-state.js';
 export const SCHEMA_VERSION = 1;
 // One shared bound for authored, imported, generated, and compiled rallies.
 // Keep this in the document contract so callers never need to duplicate the
@@ -148,7 +148,14 @@ function validateModel2Document(value) {
     choice(outcome.struckActor, PLAYER_IDS, 'outcome.struckActor');
     const shot = value.shots.find(shot => shot.id === outcome.shotId);
     const serveHitsServingTeam = shot.family === 'serve' && outcome.faultingActor === shot.hitter && value.players[outcome.struckActor].team === value.players[shot.hitter].team;
-    if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except a serve striking the serving team.');
+    // This is the structural exception only. Independent solved evidence must
+    // establish that the receiving-team contact occurred before landing.
+    const receiver = resolveServiceContext(value).receiver;
+    const serveHitsReceivingTeam = shot === value.shots[0] && shot.family === 'serve' && outcome.ruleRef === '7.E.5'
+      && PLAYER_IDS.includes(receiver) && outcome.faultingActor === receiver
+      && value.players[receiver].team !== value.players[shot.hitter].team
+      && value.players[outcome.struckActor].team === value.players[receiver].team;
+    if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam && !serveHitsReceivingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except the server or designated receiver on an applicable serve contact.');
   } else if (outcome.struckActor !== undefined) fail('outcome.struckActor', 'is only supported for a body contact.');
   keys(outcome.evidence, ['position', 'afterContactSeconds'], 'outcome.evidence');
   model2Point(outcome.evidence.position, 'outcome.evidence.position', true);

@@ -114,7 +114,11 @@ export class TerminalEventMarkers {
             const texture = new THREE.CanvasTexture(canvas);
             texture.magFilter = texture.minFilter = THREE.NearestFilter; texture.generateMipmaps = false;
             texture.colorSpace = THREE.SRGBColorSpace; this.textures.add(texture);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: .1, depthWrite: false, toneMapped: false }));
+            // A fault flag is an instructional annotation, rather than a
+            // physical object. Keep its pole anchored to the evidence point,
+            // but composite it after players so a faulting foot cannot hide it.
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: .1, depthTest: false, depthWrite: false, toneMapped: false }));
+            sprite.renderOrder = 1100;
             sprite.center.set(.2, 0); sprite.scale.set(.6, .6, 1); group.add(sprite);
         }
         this.objects.set(type, group); this.group.add(group);

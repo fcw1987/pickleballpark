@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { readModel2Fixture } from './fixtures/model2/cases.mjs';
 import { openPlayFileMenu, settleBuilderStartup } from './helpers/builder-navigation.mjs';
@@ -173,6 +173,89 @@ test('actual model2 terminal effects follow one playhead in both renderers throu
       expect(digest(afterCanvas), `${id}/${view} rendered pixels after scrub/orbit roundtrip`).toBe(digest(beforeCanvas));
     }
   }
+  expect(errors).toEqual([]);
+});
+
+test('3D NVZ foot and momentum flags paint their full cue across camera angles at the physical fault anchor', async ({ page }, testInfo) => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  const pixelEvidence = [];
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openModel2(page, readModel2Fixture('nvz-foot'));
+  let depthTestedOcclusions = 0;
+  for (const id of ['nvz-foot', 'nvz-momentum-after-dead']) {
+    const fixture = readModel2Fixture(id);
+    expect(await page.evaluate(document => playBuilder.action('import', JSON.stringify(document)), fixture)).toEqual({ ok: true });
+    for (const [label, azimuth] of [['front', 0], ['side', Math.PI / 2], ['back', Math.PI], ['other-side', Math.PI * 1.5]]) {
+      const proof = await page.evaluate(async azimuth => {
+        const THREE = await import('/vendor/three.module.min.js');
+        const b = playBuilder, viewer = pickleboard.threeD;
+        b.seek(b.session.duration);
+        viewer.cameraControls.setState({ azimuth });
+        viewer.renderSessionSample();
+        const marker = viewer.scene.getObjectByName('TerminalMarker:fault');
+        const sprite = marker.children[0], renderer = viewer.renderer, camera = viewer.camera;
+        const gl = renderer.getContext(), width = renderer.domElement.width, height = renderer.domElement.height;
+        const pixels = scene => {
+          renderer.render(scene, camera);
+          const data = new Uint8Array(width * height * 4);
+          gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, data);
+          return data;
+        };
+        const actual = pixels(viewer.scene);
+        marker.visible = false;
+        const absent = pixels(viewer.scene);
+        marker.visible = true;
+        const originalDepthTest = sprite.material.depthTest;
+        sprite.material.depthTest = true;
+        const depthTested = pixels(viewer.scene);
+        sprite.material.depthTest = originalDepthTest;
+        // Render only the same anchored flag into the same camera/buffer. Its
+        // opaque palette texels form an independent expected pixel mask. A
+        // scene object's visible flag cannot establish that it was painted.
+        const isolatedScene = new THREE.Scene();
+        const isolated = marker.clone(true);
+        isolated.traverse(object => { if (object.isSprite) object.material = object.material.clone(); });
+        isolatedScene.add(isolated);
+        const expected = pixels(isolatedScene);
+        const palette = [[38, 52, 73], [231, 139, 84], [255, 247, 207]];
+        const counts = { mask: 0, actualMismatch: 0, absentMismatch: 0, depthTestedMismatch: 0, accent: 0, symbol: 0 };
+        const equals = (data, index, color) => color.every((value, axis) => Math.abs(data[index + axis] - value) <= 1);
+        for (let index = 0; index < expected.length; index += 4) {
+          const colorIndex = palette.findIndex(color => equals(expected, index, color));
+          if (colorIndex < 0) continue;
+          const color = palette[colorIndex];
+          counts.mask++;
+          if (colorIndex === 1) counts.accent++;
+          if (colorIndex === 2) counts.symbol++;
+          if (!equals(actual, index, color)) counts.actualMismatch++;
+          if (!equals(absent, index, color)) counts.absentMismatch++;
+          if (!equals(depthTested, index, color)) counts.depthTestedMismatch++;
+        }
+        isolated.traverse(object => { if (object.isSprite) object.material.dispose(); });
+        pixels(viewer.scene);
+        return { counts, anchor: marker.position.toArray(), evidence: marker.userData.event.position,
+          source: JSON.stringify(b.document), time: b.session.clock.elapsed, duration: b.session.duration };
+      }, azimuth);
+      expect(proof.counts.mask, `${id}/${label} flag mask must be on screen`).toBeGreaterThan(4);
+      expect(proof.counts.accent, `${id}/${label} orange flag paint`).toBeGreaterThan(0);
+      expect(proof.counts.symbol, `${id}/${label} exclamation paint`).toBeGreaterThan(0);
+      expect(proof.counts.actualMismatch, `${id}/${label} every opaque cue pixel must survive actor occlusion`).toBe(0);
+      expect(proof.counts.absentMismatch, `${id}/${label} hiding the cue must remove actual painted pixels`).toBeGreaterThan(0);
+      depthTestedOcclusions += proof.counts.depthTestedMismatch;
+      const at = fixture.outcome.evidence.position;
+      const physicalAnchor = [(at.x - 10) * .3048, at.heightFeet * .3048, (at.y - 22) * .3048];
+      expect(proof.anchor).toEqual(physicalAnchor);
+      expect(proof.evidence).toEqual({ x: physicalAnchor[0], y: physicalAnchor[1], z: physicalAnchor[2] });
+      expect(proof.time).toBe(proof.duration);
+      expect(JSON.parse(proof.source).outcome).toEqual(fixture.outcome);
+      pixelEvidence.push({ id, angle: label, ...proof.counts, anchor: proof.anchor, evidence: proof.evidence });
+      await page.screenshot({ path: testInfo.outputPath(`${id}-visible-flag-${label}.png`) });
+    }
+  }
+  expect(depthTestedOcclusions, 'the former depth-tested setting must reproduce real actor occlusion').toBeGreaterThan(0);
+  const evidencePath = testInfo.outputPath('nvz-cue-pixel-proof.json');
+  await writeFile(evidencePath, JSON.stringify(pixelEvidence, null, 2));
+  await testInfo.attach('nvz-cue-pixel-proof', { path: evidencePath, contentType: 'application/json' });
   expect(errors).toEqual([]);
 });
 

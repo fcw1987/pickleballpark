@@ -94,7 +94,7 @@
     "reason": "body",
     "shotId": "serve",
     "ruleRef": "7.E.5",
-    "faultingActor": "player4",
+    "faultingActor": "player3",
     "struckActor": "player4",
     "evidence": {
       "position": {

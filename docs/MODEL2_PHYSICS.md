@@ -43,6 +43,15 @@ routes use the segment's `originalDuration`, so an earlier dead ball does not
 accelerate an actor's route to its planned endpoint. Momentum uses absolute
 timeline time to interpolate from contact feet to observed feet and holds that
 pose afterward, including across a later ball segment.
+After terminal trimming or extension, every actual sampled actor route is
+checked against an instructional allowance of 18 ft/s plus 3 ft. For any
+continuous time interval, traveled path length may not exceed
+`18 * elapsedSeconds + 3`; phases and segment boundaries do not renew that
+allowance. The analytic audit includes contact planting, release, momentum and
+incomplete stop endings, and does not demand an intended destination that the
+ending never reaches. This route tolerance is separate from the 14 ft/s,
+0.12-second reaction and 3-foot paddle-reach judgment; it is not extra paddle
+reach or a claim of exact biomechanical speed.
 Model 2 presentation aligns its painted/source foot anchors to those sampled
 points in both views. These are point anchors, not full shoe-ground collision
 polygons. The alignment does not establish exact shoe-edge contact timing or
@@ -155,6 +164,13 @@ ball. A modelled unreachable winner needs defender reach and available-time
 evidence, followed by a real decisive stage such as the second bounce. Predicting
 that a ball is unreachable does not itself create an official dead-ball event.
 
+A served ball touching either receiving player before landing faults the
+designated receiver under 7.E.5, while retaining the actual touched actor as
+`struckActor`. The solver checks that the collision precedes its first landing;
+a later body contact instead faults the struck player under 10.C.3. Rule 7.E.4
+separately attributes a served ball touching the serving team to the server and
+does not contain 7.E.5's before-landing qualifier.
+
 For ordinary faults, chronology selects the earliest decisive event. NVZ
 momentum needs a separate pending record: `violationOccurrenceTime` refers to
 the earlier volleying act, while `evidenceObservedTime` records the later zone
@@ -219,6 +235,10 @@ insufficient.
 
 Erne is a shot description, not an exception to NVZ, player/net contact or net
 plane rules. A ball above the NVZ is not a foot contact with its surface. The
+entire ball must cross the net plane to the hitter's end before contact under
+13.F; its center being across while its radius still straddles the plane is
+insufficient. This applies on both ends, including an Erne outside the sideline.
+The
 model represents declared feet and supported momentum evidence, not complete
 equipment contact history or every balance state. Body detection uses a moving
 torso proxy, not anatomical paddle/hand collision geometry. Erne validation uses
