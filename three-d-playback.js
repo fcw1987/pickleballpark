@@ -351,7 +351,10 @@ class ThreeDPlaybackViewer {
             if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
             this.applyAtTime(this.clock.elapsed);
             this.setCamera(this.elements.camera.value);
-            this.renderer.render(this.scene, this.camera);
+            // The initial shield must reveal a submitted frame. Later view
+            // changes keep demand rendering so an immediately cancelled entry
+            // does not force a costly GPU frame before the next animation tick.
+            if (document.documentElement.hasAttribute('data-court-loading')) this.renderer.render(this.scene, this.camera);
         } catch (error) {
             if(generation!==this.loadGeneration)return false;
             this.disposeScene();
