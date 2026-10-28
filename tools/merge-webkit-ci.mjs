@@ -3,6 +3,7 @@
 import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { enforceWebKitPolicy } from './webkit-policy.mjs';
+import { requireSuccessfulShards } from './browser-report-policy.mjs';
 
 mkdirSync('release-results', { recursive: true });
 const reportPath = 'release-results/webkit-raw.json';
@@ -25,7 +26,7 @@ const merged = spawnSync(process.execPath, [cli, 'merge-reports', '--reporter=js
 if (merged.error) throw merged.error;
 if (merged.status !== 0) throw new Error(`WebKit report merge must exit 0; received ${merged.status}`);
 const summary = enforceWebKitPolicy(reportPath, catalogPath, summaryPath);
-if (process.env.WEBKIT_SHARDS_RESULT !== 'success') throw new Error(`Every WebKit shard job must succeed; received ${process.env.WEBKIT_SHARDS_RESULT ?? 'no result'}`);
+requireSuccessfulShards(process.env.WEBKIT_SHARDS_RESULT, 'webkit');
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
   '### WebKit validation', '',
   `- **${summary.counts.passed}/${summary.counts.catalog} passed**, with no failures, retries, skips or flaky results.`,

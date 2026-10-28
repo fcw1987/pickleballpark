@@ -1,0 +1,310 @@
+{
+  "sourceRevision": "f979c8fc3abb1955f21e44df3bf2221a2a2a2f8f",
+  "method": "Hosted Chromium reporter-start intervals from the interrupted 434/438-case run on 2026-10-28. Intervals include setup/teardown; these are balancing estimates, not exact test durations. Incomplete files scale by observed per-case cost. New files use the median measured per-case cost. Refresh from complete hosted reports after benchmarking.",
+  "files": {
+    "accessibility.spec.mjs": {
+      "durationMs": 9021,
+      "tests": 8
+    },
+    "build-diagnostics.spec.mjs": {
+      "durationMs": 4831,
+      "tests": 2
+    },
+    "builder-authoring.spec.mjs": {
+      "durationMs": 51762,
+      "tests": 21
+    },
+    "builder-export.spec.mjs": {
+      "durationMs": 6076,
+      "tests": 2
+    },
+    "builder-integration.spec.mjs": {
+      "durationMs": 8458,
+      "tests": 3
+    },
+    "builder-lifecycle.spec.mjs": {
+      "durationMs": 22204,
+      "tests": 6
+    },
+    "builder-smart-interface.spec.mjs": {
+      "durationMs": 2536,
+      "tests": 4
+    },
+    "builder-ui.spec.mjs": {
+      "durationMs": 8807,
+      "tests": 9
+    },
+    "builder-waypoints.spec.mjs": {
+      "durationMs": 6210,
+      "tests": 1
+    },
+    "coaching-layout.spec.mjs": {
+      "durationMs": 16942,
+      "tests": 7
+    },
+    "coaching-workflow.spec.mjs": {
+      "durationMs": 35953,
+      "tests": 7
+    },
+    "core.spec.mjs": {
+      "durationMs": 6978,
+      "tests": 10
+    },
+    "court-first.spec.mjs": {
+      "durationMs": 4634,
+      "tests": 10
+    },
+    "coverage-rally-integration.spec.mjs": {
+      "durationMs": 11670,
+      "tests": 3
+    },
+    "doubles-strategy.spec.mjs": {
+      "durationMs": 6465,
+      "tests": 1
+    },
+    "fidelity-layout.spec.mjs": {
+      "durationMs": 25511,
+      "tests": 7
+    },
+    "gauntlet-interface.spec.mjs": {
+      "durationMs": 17297,
+      "tests": 6
+    },
+    "gauntlet-review2.spec.mjs": {
+      "durationMs": 7598,
+      "tests": 3
+    },
+    "gauntlet-robustness.spec.mjs": {
+      "durationMs": 18268,
+      "tests": 9
+    },
+    "iphone-input.spec.mjs": {
+      "durationMs": 24081,
+      "tests": 11
+    },
+    "iphone-interface.spec.mjs": {
+      "durationMs": 3872,
+      "tests": 2
+    },
+    "iphone-reliability.spec.mjs": {
+      "durationMs": 14644,
+      "tests": 4
+    },
+    "mobile-planner-layout.spec.mjs": {
+      "durationMs": 19143,
+      "tests": 4
+    },
+    "overhead-short-hop-preview.spec.mjs": {
+      "durationMs": 8644,
+      "tests": 2
+    },
+    "package-smart-add.spec.mjs": {
+      "durationMs": 8381,
+      "tests": 1
+    },
+    "park-presentation.spec.mjs": {
+      "durationMs": 4344,
+      "tests": 4
+    },
+    "park-review.spec.mjs": {
+      "durationMs": 6657,
+      "tests": 4
+    },
+    "park-session.spec.mjs": {
+      "durationMs": 9013,
+      "tests": 4
+    },
+    "pixel-authoring-matrix.spec.mjs": {
+      "durationMs": 3168,
+      "tests": 1
+    },
+    "pixel-editor-projection.spec.mjs": {
+      "durationMs": 5309,
+      "tests": 2
+    },
+    "pixel-game-context.spec.mjs": {
+      "durationMs": 16611,
+      "tests": 6
+    },
+    "pixel-game-input.spec.mjs": {
+      "durationMs": 9804,
+      "tests": 3
+    },
+    "pixel-game-review.spec.mjs": {
+      "durationMs": 23441,
+      "tests": 5
+    },
+    "pixel-game-world.spec.mjs": {
+      "durationMs": 2456,
+      "tests": 1
+    },
+    "pixel-lifecycle.spec.mjs": {
+      "durationMs": 43122,
+      "tests": 3
+    },
+    "pixel-playhead-pose.spec.mjs": {
+      "durationMs": 657,
+      "tests": 1
+    },
+    "pixel-regulation.spec.mjs": {
+      "durationMs": 6143,
+      "tests": 6
+    },
+    "pixel-replay.spec.mjs": {
+      "durationMs": 15057,
+      "tests": 5
+    },
+    "pixel-reticle.spec.mjs": {
+      "durationMs": 10991,
+      "tests": 4
+    },
+    "playback-resume.spec.mjs": {
+      "durationMs": 7514,
+      "tests": 3
+    },
+    "player-coverage-offline.spec.mjs": {
+      "durationMs": 4151,
+      "tests": 1
+    },
+    "player-coverage.spec.mjs": {
+      "durationMs": 31278,
+      "tests": 10
+    },
+    "plays.spec.mjs": {
+      "durationMs": 9625,
+      "tests": 9
+    },
+    "projection.spec.mjs": {
+      "durationMs": 2363,
+      "tests": 5
+    },
+    "qa-coaching-visible.spec.mjs": {
+      "durationMs": 4313,
+      "tests": 2
+    },
+    "qa-exploratory.spec.mjs": {
+      "durationMs": 26746,
+      "tests": 9
+    },
+    "qa-independent-review.spec.mjs": {
+      "durationMs": 44912,
+      "tests": 4
+    },
+    "qa-modal-authority.spec.mjs": {
+      "durationMs": 9681,
+      "tests": 4
+    },
+    "qa-pause-visible.spec.mjs": {
+      "durationMs": 21125,
+      "tests": 6
+    },
+    "qa-persistence.spec.mjs": {
+      "durationMs": 51411,
+      "tests": 11
+    },
+    "qa-render-lifecycle.spec.mjs": {
+      "durationMs": 17541,
+      "tests": 4
+    },
+    "qa-scenario-browser.spec.mjs": {
+      "durationMs": 46897,
+      "tests": 25
+    },
+    "rally-intelligence.spec.mjs": {
+      "durationMs": 16425,
+      "tests": 5
+    },
+    "rebrand.spec.mjs": {
+      "durationMs": 3264,
+      "tests": 5
+    },
+    "reference-artwork-browser-contract.spec.mjs": {
+      "durationMs": 5028,
+      "tests": 1
+    },
+    "reference-athletes-depth-matrix.spec.mjs": {
+      "durationMs": 10218,
+      "tests": 2
+    },
+    "renderer-buffer.spec.mjs": {
+      "durationMs": 23798,
+      "tests": 2
+    },
+    "saved-library.spec.mjs": {
+      "durationMs": 25556,
+      "tests": 8
+    },
+    "second-render.spec.mjs": {
+      "durationMs": 8994,
+      "tests": 4
+    },
+    "service-worker.spec.mjs": {
+      "durationMs": 7587,
+      "tests": 5
+    },
+    "shot-timeline.spec.mjs": {
+      "durationMs": 2793,
+      "tests": 19
+    },
+    "smart-authoring-controller.spec.mjs": {
+      "durationMs": 28879,
+      "tests": 8
+    },
+    "smart-authority-review.spec.mjs": {
+      "durationMs": 7590,
+      "tests": 2
+    },
+    "smart-visible-random.spec.mjs": {
+      "durationMs": 16501,
+      "tests": 2
+    },
+    "smart-visible-review.spec.mjs": {
+      "durationMs": 15548,
+      "tests": 7
+    },
+    "startup-efficiency.spec.mjs": {
+      "durationMs": 42264,
+      "tests": 23
+    },
+    "static-world-cache.spec.mjs": {
+      "durationMs": 88398,
+      "tests": 5
+    },
+    "three-d-all-plays.spec.mjs": {
+      "durationMs": 15603,
+      "tests": 4
+    },
+    "three-d-animation.spec.mjs": {
+      "durationMs": 13471,
+      "tests": 6
+    },
+    "three-d-visual.spec.mjs": {
+      "durationMs": 6131,
+      "tests": 3
+    },
+    "three-d.spec.mjs": {
+      "durationMs": 27314,
+      "tests": 8
+    },
+    "touch.spec.mjs": {
+      "durationMs": 2869,
+      "tests": 3
+    },
+    "ui-correction-review.spec.mjs": {
+      "durationMs": 25361,
+      "tests": 4
+    },
+    "viewport.spec.mjs": {
+      "durationMs": 1137,
+      "tests": 3
+    },
+    "visual-runtime.spec.mjs": {
+      "durationMs": 8047,
+      "tests": 10
+    },
+    "visual-world.spec.mjs": {
+      "durationMs": 114724,
+      "tests": 9
+    }
+  }
+}

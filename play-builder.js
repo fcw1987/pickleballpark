@@ -66,6 +66,28 @@ export class PlayBuilder {
             };
         });
         this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value) });
+        // A queued Add may commit between the next native press and release.
+        // Keep its button attached through click dispatch; replacing it during
+        // that gesture makes the browser drop the click entirely.
+        this.addPressPointer = null; this.addPressFrame = null; this.addPressRenderPending = false;
+        this.ui.element.addEventListener('pointerdown',event=>{
+            if(event.button!==0||!event.target.closest('[data-action="add-shot"]'))return;
+            if(this.addPressFrame!==null)cancelAnimationFrame(this.addPressFrame);
+            this.addPressFrame=null;this.addPressPointer=event.pointerId;
+        },true);
+        const releaseAddPress=event=>{
+            if(this.addPressPointer===null||(event.type!=='blur'&&event.pointerId!==this.addPressPointer))return;
+            if(this.addPressFrame!==null)return;
+            // Native mouseup/click follow pointerup. A frame lets that entire
+            // sequence finish before rendering the latest committed state.
+            this.addPressFrame=requestAnimationFrame(()=>{
+                this.addPressFrame=null;this.addPressPointer=null;
+                if(this.addPressRenderPending){this.addPressRenderPending=false;this.render();}
+            });
+        };
+        window.addEventListener('pointerup',releaseAddPress,true);
+        window.addEventListener('pointercancel',releaseAddPress,true);
+        window.addEventListener('blur',releaseAddPress);
         this.ui.element.addEventListener('scroll',()=>{this.fitCourt();this.courtTools?.render();},{passive:true});
         this.courtTools = new BuilderCourtTools(this);
         this.viewportChanged=()=>{
@@ -131,6 +153,7 @@ export class PlayBuilder {
         this.frame = requestAnimationFrame(() => { this.frame = null; this.render(); });
     }
     render() {
+        if(this.addPressPointer!==null){this.addPressRenderPending=true;return;}
         if(this.libraryDirty){try{this.library=this.store.list({includeRevision:true});}catch{/* Save status retains recovery information. */}this.libraryDirty=false;}const library=this.library;
         const segment=this.compiled?.timeline?.segments.find(s=>this.session.clock.elapsed<=s.endTime)||this.compiled?.timeline?.segments.at(-1);
         const currentChapter=chapterAtTime(this.chapters,this.session.clock.elapsed);
