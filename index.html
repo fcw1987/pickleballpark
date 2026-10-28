@@ -6,8 +6,14 @@
     <meta name="theme-color" content="#304762">
     <meta name="description" content="Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and rally replay in an original top-down pixel park.">
     <title>Pickleball Park - Build a Play</title>
+    <script>
+        if (new URL(location.href).searchParams.get('workspace') !== 'planner') {
+            document.documentElement.setAttribute('data-court-loading', '');
+        }
+    </script>
     <script src="visual-theme.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="player-coverage.css">
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/apple-icon-180.png">
@@ -16,6 +22,7 @@
     <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-152x152.png">
 <link rel="stylesheet" href="builder-ui.css"><link rel="stylesheet" href="builder-integration.css"><link rel="stylesheet" href="shot-timeline.css"></head>
 <body>
+    <div id="courtStartupStatus" role="status" aria-live="polite">Opening court…</div>
     <div class="app">
         <div class="planner-identity">PICKLEBALL PARK</div>
         <main class="court-container-fullscreen">

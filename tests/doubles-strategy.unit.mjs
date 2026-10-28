@@ -82,7 +82,7 @@ test('historical automatic advances and authored movement retain their existing 
 
 test('Auto Shading preserves generated doubles spacing and repeats from the base plan without compounding', async () => {
   let safeShadingApplied = false, fallbackUsed = false;
-  for (const length of [60, 99]) for (const seed of [0, 42, 1234]) {
+  for (const length of [7, 60, 99]) for (const seed of [0, 42, 1234]) {
     const proposal = await proposeRandomRally({length, seed});
     assert.equal(proposal.ok, true, proposal.reason);
     const document = proposal.document, source = structuredClone(document);

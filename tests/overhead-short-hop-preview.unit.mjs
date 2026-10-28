@@ -7,7 +7,7 @@ import { validateDocument } from '../play-document.js';
 
 const source = JSON.parse(readFileSync(new URL('./fixtures/overhead-short-hop-document.json', import.meta.url), 'utf8'));
 
-test('imported overhead/Short hop surfaces the rule warning without rewriting the play or truncating preview', () => {
+test('imported overhead/Short hop surfaces the model warning without rewriting the play or truncating preview', () => {
   const store = new DraftStore({ storage: { getItem: () => null, setItem: () => {} }, validate: validateDocument });
   const imported = store.importJSON(JSON.stringify(source));
   for (const autoShading of [false, true]) {
@@ -15,9 +15,9 @@ test('imported overhead/Short hop surfaces the rule warning without rewriting th
     document.assistance.autoShading = autoShading;
     const before = structuredClone(document);
     const compiled = compileEffectiveCandidate(document);
-    const warning = compiled.findings.find(item => item.shotId === 'overhead' && item.kind === 'rule');
+    const warning = compiled.findings.find(item => item.shotId === 'overhead' && item.kind === 'feasibility');
     assert.equal(warning?.severity, 'warning');
-    assert.match(warning.message, /7 ft contact.*short-hop contact.*low contact height/);
+    assert.match(warning.message, /7 ft contact.*short-hop model.*1.5 feet/);
     assert.match(warning.message, /Choose Automatic, Forehand, or Backhand/);
     assert.equal(compiled.validShotCount, document.shots.length);
     assert.equal(compiled.play.steps.at(-1).shot.contact.heightFeet, 7);
@@ -38,13 +38,13 @@ test('ordinary overhead contact choices clear the warning and remain valid', () 
   }
 });
 
-test('intentional coaching faults retain the overhead rule warning and authored ending', () => {
+test('intentional coaching faults retain the overhead model warning and authored ending', () => {
   const document = structuredClone(source);
   document.intentionalFault = true;
   document.ending = 'fault';
   const before = structuredClone(document);
   const compiled = compileEffectiveCandidate(document);
-  assert.ok(compiled.findings.some(item => item.shotId === 'overhead' && item.kind === 'rule' && item.severity === 'warning'));
+  assert.ok(compiled.findings.some(item => item.shotId === 'overhead' && item.kind === 'feasibility' && item.severity === 'warning'));
   assert.equal(compiled.validShotCount, 2);
   assert.equal(compiled.play.outcome.intentionalFault, true);
   assert.equal(compiled.play.outcome.afterShotId, 'overhead');

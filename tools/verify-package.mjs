@@ -9,6 +9,7 @@ import { chromium, webkit, expect } from '@playwright/test';
 import { protectedPinScenario } from '../tests/fixtures/smart-coach-scenarios.mjs';
 import { validateDeploymentArtifact } from './verify-deployment-artifact.mjs';
 import { createRuntimePackage } from './runtime-package.mjs';
+import { clickAndVerifySmartAdd } from './package-smart-add.mjs';
 const sha = b => createHash('sha256').update(b).digest('hex');
 const gitBytes = (revision, file) => execFileSync('git', ['show', `${revision}:${file}`], { maxBuffer: 20 * 1024 * 1024 });
 const gitText = (revision, file) => gitBytes(revision, file).toString('utf8');
@@ -221,10 +222,34 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   await page.locator('.builder-document-menu > summary').click();
   await page.locator('[data-action="new"]').click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(0);
+  if (process.env.QA_PACKAGE_SMART_DIAGNOSTICS) await page.evaluate(() => {
+    window.__packageAddTrace = [];
+    const builder = playBuilder, add = builder.queueSmartAdd.bind(builder);
+    builder.queueSmartAdd = (options = {}) => {
+      const seed = options.seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
+      const entry = { seed, started: performance.now(), before: structuredClone(builder.document) };
+      window.__packageAddTrace.push(entry);
+      return add({ ...options, seed }).then(result => {
+        Object.assign(entry, { result, milliseconds: performance.now() - entry.started,
+          pending: builder.pendingAddCount, busy: builder.proposalBusy, message: builder.message,
+          shots: builder.document.shots.length, saveError: builder.saveError });
+        return result;
+      });
+    };
+  });
   for (let index = 1; index <= 5; index += 1) {
-    await page.getByRole('button', { name: 'Add shot' }).click();
-    await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(index);
+    try { await clickAndVerifySmartAdd(page, index); }
+    catch (error) {
+      const state = await page.evaluate(key => ({ pending: playBuilder.pendingAddCount,
+        busy: playBuilder.proposalBusy, message: playBuilder.message, sourceIntent: playBuilder.sourceIntent,
+        proposalGeneration: playBuilder.proposalGeneration, source: structuredClone(playBuilder.document),
+        valid: playBuilder.compiled.validShotCount, saveError: playBuilder.saveError,
+        saved: localStorage.getItem(key), trace: window.__packageAddTrace ?? null }), expectedSavedKey);
+      writeFileSync('release-results/package-add-failure.json', JSON.stringify({ expected: index, state }, null, 2));
+      throw error;
+    }
   }
+  if (process.env.QA_PACKAGE_SMART_DIAGNOSTICS) writeFileSync('release-results/package-add-trace.json', JSON.stringify(await page.evaluate(() => window.__packageAddTrace), null, 2));
   const adds = await page.evaluate(() => ({
     shots: playBuilder.document.shots.length,
     valid: playBuilder.compiled.validShotCount,
@@ -258,7 +283,7 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   }, expectedSavedKey);
   expect(random).toMatchObject({ shots: 99, valid: 99, chapters: 99, retainedOldDraft: true, playing: false });
   expect(random.oldBeforeSmart).toBe(true);
-  expect(random.generation).toMatchObject({ seed: 12648430, generatorVersion: 'smart-rally-v2' });
+  expect(random.generation).toMatchObject({ seed: 12648430, generatorVersion: 'smart-rally-v3' });
 
   // A real invalid authored rally is opened through the public Coach controls.
   // The protected pin stays unchanged while visible Fix/Show options and an
@@ -290,6 +315,24 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   return { adds, random, coach: { protectedKept: true, optionsShown: true, fixed: true, undoRestored: true }, restoredSavedLibrary: storageAfter !== storageBefore };
+}
+
+async function verifyMigratedAuthoringOffline(page) {
+  // A migrated saved document can affect authoring. Exercise one real Smart
+  // Add and Undo against that document, preserving all other saved drafts.
+  const before = await page.evaluate(() => ({
+    document: structuredClone(playBuilder.document),
+    otherDrafts: playBuilder.store.list({ includeRevision: true }).filter(draft => draft.id !== playBuilder.document.id)
+  }));
+  // Migration checks need the same completed task, idle queue and successful
+  // save proof as fresh authoring; a visible count can precede completion.
+  const completion = await clickAndVerifySmartAdd(page, before.document.shots.length + 1);
+  const added = await page.evaluate(() => ({ shots: playBuilder.document.shots.length, valid: playBuilder.compiled.validShotCount, playing: playBuilder.session.playing }));
+  expect(added).toEqual({ shots: before.document.shots.length + 1, valid: before.document.shots.length + 1, playing: false });
+  await page.locator('[data-action="undo"]').click();
+  await expect.poll(() => page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(JSON.stringify(before.document));
+  expect(await page.evaluate(() => playBuilder.store.list({ includeRevision: true }).filter(draft => draft.id !== playBuilder.document.id))).toEqual(before.otherDrafts);
+  return { added, completion, undoRestored: true, otherSavedDraftsPreserved: true };
 }
 
 // This is a path move on one origin, rather than an in-place worker update.
@@ -421,8 +464,9 @@ async function verifyPathMigration(browserName, browserType, mode) {
     await oldPage.waitForFunction(() => window.playBuilder && !playBuilder.busy);
     expect(await oldPage.evaluate(() => JSON.stringify(playBuilder.document))).toBe(before.draft);
     expect(await page.evaluate(() => Object.fromEntries(Object.keys(localStorage).sort().map(key => [key, localStorage.getItem(key)])))).toEqual(before.storage);
+    const smartProof = await verifyMigratedAuthoringOffline(page);
     expect(errors).toEqual([]);
-    return { browser: browserName, mode, status: 'PASS', priorSource: baselineRevision, source: info.sourceRevision, oldPath: legacyScopePath, newPath: scopePath, runtimeHashes: hashes.length, preservedOldCacheEntries: before.entries.length, oldCache: baselineCache, newCache: candidateCache, savedDraftAndStoragePreserved: true, theme: after.theme, distinctWorkerScopes: after.registrations, implicitManifestIdentities: { old: oldInstallIdentity, current: newInstallIdentity }, legacyShortcutNetworkStatus: oldShortcut.status(), shortcutLimitation: 'The old hosted path returns 404; users must open the new URL and install a new shortcut. Retained old offline caches do not redirect online HTTP 404 responses.', offlineReloads: ['old path', 'new path'], offlineMethod: 'owned server stopped', identity };
+    return { browser: browserName, mode, status: 'PASS', priorSource: baselineRevision, source: info.sourceRevision, oldPath: legacyScopePath, newPath: scopePath, runtimeHashes: hashes.length, preservedOldCacheEntries: before.entries.length, oldCache: baselineCache, newCache: candidateCache, savedDraftAndStoragePreserved: true, theme: after.theme, distinctWorkerScopes: after.registrations, implicitManifestIdentities: { old: oldInstallIdentity, current: newInstallIdentity }, legacyShortcutNetworkStatus: oldShortcut.status(), shortcutLimitation: 'The old hosted path returns 404; users must open the new URL and install a new shortcut. Retained old offline caches do not redirect online HTTP 404 responses.', offlineReloads: ['old path', 'new path'], offlineMethod: 'owned server stopped', identity, smartRally: smartProof };
   } finally {
     await browser.close();
     if (!stopped) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
@@ -485,12 +529,15 @@ if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package v
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
 const legacyScopePath = '/pickleboard/';
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.ttf': 'font/ttf' };
-for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
+const browsers = [['chromium', chromium], ['webkit', webkit]];
+if (process.env.QA_PACKAGE_BROWSER && !browsers.some(([name]) => name === process.env.QA_PACKAGE_BROWSER)) throw Error('Unknown package verification browser');
+for (const [browserName, browserType] of browsers.filter(([name]) => !process.env.QA_PACKAGE_BROWSER || name === process.env.QA_PACKAGE_BROWSER)) {
   for (const mode of modes) {
+    const caseStarted = performance.now();
     if (mode === 'path-migration' || mode === 'branding-path-migration') {
       try { results.push(await verifyPathMigration(browserName, browserType, mode)); }
       catch (error) { results.push({ browser: browserName, mode, status: 'FAIL', error: error.message }); throw error; }
-      finally { writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
+      finally { results.at(-1).durationMs = performance.now() - caseStarted; writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
       continue;
     }
     const upgrading = mode !== 'fresh';
@@ -565,15 +612,17 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
       const checks = await page.evaluate(async ({ files, scopePath, candidateCache }) => {
         const cache = await caches.open(candidateCache);
         const digest = async r => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await r.arrayBuffer()))).map(v => v.toString(16).padStart(2, '0')).join('');
-        const all = [];
-        for (const f of files) {
-          const r = await fetch(`./${f.path}`); if (!r.ok) throw Error(`HTTP ${r.status}: ${f.path}`);
-          all.push({ path: f.path, sha256: await digest(r), type: r.headers.get('content-type') });
-        }
+        // Inspect installation before the exhaustive HTTP audit can populate
+        // optional on-demand caches. Every installed byte must match the build.
         const cached = [];
         for (const request of await cache.keys()) {
           const path = new URL(request.url).pathname.slice(scopePath.length) || 'index.html';
           cached.push({ path, sha256: await digest(await cache.match(request)) });
+        }
+        const all = [];
+        for (const f of files) {
+          const r = await fetch(`./${f.path}`); if (!r.ok) throw Error(`HTTP ${r.status}: ${f.path}`);
+          all.push({ path: f.path, sha256: await digest(r), type: r.headers.get('content-type') });
         }
         return { all, cached };
       }, { files: manifest.files, scopePath, candidateCache });
@@ -638,9 +687,19 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
       }));
       expect(cacheProof.caches).toContain(candidateCache);
       if (upgrading) expect(cacheProof).toMatchObject({ caches: expect.arrayContaining(['unrelated-application-cache']), unrelated: 'preserve' });
-      const smartProof = (mode === 'fresh' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') ? await verifySmartRallyOffline(page) : null;
+      // Full offline authoring/99-shot generation is independent of the prior
+      // cache version once exact current bytes and migrated saves are proven.
+      // Cover it once per engine; keep a representative Add/Undo on each
+      // migrated document plus every hash, storage, planner, renderer and
+      // real-offline assertion in every historical case.
+      const smartProof = mode === 'fresh' ? await verifySmartRallyOffline(page) : await verifyMigratedAuthoringOffline(page);
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
-      for (const id of ids) {
+      // Lesson definitions and runtime bytes are identical after each verified
+      // migration. Sweep all eight offline once per engine, then retain one
+      // real lesson/view/planner round trip after every historical upgrade.
+      // Rotate the representative so upgrades collectively exercise all eight.
+      const lessonIds = mode === 'fresh' ? ids : [ids[(allModes.indexOf(mode) - 1) % ids.length]];
+      for (const id of lessonIds) {
         const lesson = await page.evaluate(async id => {
           const b = playBuilder;
           await b.setWorkspace('planner');
@@ -659,9 +718,9 @@ for (const [browserName, browserType] of [['chromium', chromium], ['webkit', web
         expect(lesson.valid).toBe(lesson.shots);expect(lesson.chapters).toBe(lesson.shots);
       }
       await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0); expect(errors).toEqual([]);
-      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: ids.length, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof });
+      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: lessonIds.length, offlineLessonIds: lessonIds, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof });
     } catch (e) { results.push({ browser: browserName, mode, status: 'FAIL', error: e.message }); throw e; }
-    finally { await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
+    finally { results.at(-1).durationMs = performance.now() - caseStarted; await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
   }
 }
 console.log(JSON.stringify(results, null, 2));

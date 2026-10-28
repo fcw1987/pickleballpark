@@ -179,7 +179,7 @@ test('desktop keyboard shortcuts skip text fields, trap Help focus, and skip hid
 
   await openMenu(page);
   await page.getByRole('button', { name: 'Help' }).click();
-  await page.waitForTimeout(700);
+  await expect(page.getByRole('dialog', { name: 'Help & Information' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog', { name: 'Help & Information' })).toBeHidden();
 });
@@ -188,10 +188,10 @@ test('reduced motion and enlarged text simulation preserve the visible controls'
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce', colorScheme: 'dark' });
   const page = await context.newPage();
   await page.goto('/');
-  await page.waitForTimeout(700);
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await openMenu(page);
   await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/ }).click();
-  await page.waitForTimeout(350);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('pickleboard-theme'))).toBe('light');
   await openMenu(page);
   await page.getByRole('button', { name: /Switch to (?:light|dark) appearance/ }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('pickleboard-theme'))).toBe('dark');

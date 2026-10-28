@@ -13,7 +13,7 @@ async function openFixture(page, document) {
 
 async function reviewWarning(page) {
   await page.getByRole('button', { name: 'Shot 2 needs attention', exact: true }).click();
-  const warning = page.locator('.builder-finding-row[data-kind="rule"]');
+  const warning = page.locator('.builder-finding-row[data-kind="feasibility"]');
   await expect(warning).toContainText('7 ft contact');
   await expect(warning).toContainText('low contact height');
   await expect(warning).toContainText('Choose Automatic, Forehand, or Backhand');

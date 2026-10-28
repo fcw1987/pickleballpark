@@ -40,5 +40,5 @@ test('ordinary phone workflow records Add, Random, then visible Coach repair', a
   await expect(page.getByRole('button', { name: 'Fix for me', exact: true })).toBeVisible();
   await page.screenshot({ path: 'release-results/smart-visible/phone-390-video-repair-before.png', fullPage: true });
   await page.getByRole('button', { name: 'Fix for me', exact: true }).click();
-  await page.waitForTimeout(500);
+  await expect.poll(() => page.evaluate(() => playBuilder.proposalBusy)).toBe(false);
 });

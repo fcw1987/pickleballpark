@@ -11,6 +11,8 @@ import { proposeSmartAdd, proposeRandomRally } from './smart-rally-generator.js'
 import { authorizeProposal, compileEffectiveCandidate, documentSourceIdentity, evaluateFullCandidate, proposeFamilyChange } from './rally-proposals.js';
 import { proposeCoachFix, proposeCoachOptions } from './rally-coach.js';
 import { playerLabel } from './player-labels.js';
+import { resolveServiceContext, updateServiceFromShotEdit } from './rally-state.js';
+import { createRallyCoverageProvider } from './rally-coverage-provider.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
 function claimShotFields(shot, fields) {
@@ -50,6 +52,19 @@ export class PlayBuilder {
         this.persistedSource=document?this.pristineSource:null;
         this.saveError=null;this.libraryDirty=true;this.library=[];
         this.history = new EditHistory(this.document); this.selectedShotId = this.document.shots[0]?.id || null;
+        // Read the installed source on every sample so edits, imports and Undo
+        // share the renderer's playhead without retaining an obsolete timeline.
+        this.board.coverageSnapshotProvider = createRallyCoverageProvider(() => {
+            if (this.workspace !== 'builder') return null;
+            return {
+                play: this.board.plays.activePlay,
+                timeline: this.board.plays.timeline,
+                document: this.document,
+                positions: Object.fromEntries(Object.keys(this.document.players).map(playerId => [
+                    playerId, { x: this.board.tokens[playerId].x, y: this.board.tokens[playerId].y }
+                ]))
+            };
+        });
         this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value) });
         this.ui.element.addEventListener('scroll',()=>{this.fitCourt();this.courtTools?.render();},{passive:true});
         this.courtTools = new BuilderCourtTools(this);
@@ -146,6 +161,9 @@ export class PlayBuilder {
             const visibleBottom=window.visualViewport?visualViewport.height+visualViewport.offsetTop:innerHeight;
             const menuBottom=Math.min(visibleBottom,transport.getBoundingClientRect().top);
             this.ui.element.style.setProperty('--builder-menu-max-height',`${Math.max(80,menuBottom-menu.getBoundingClientRect().bottom-14)}px`);
+            // The phone popup is fixed to the viewport. Coverage controls and
+            // enlarged text can grow the dock beyond its original fixed offset.
+            this.ui.element.style.setProperty('--builder-menu-bottom-offset',`${Math.max(0,innerHeight-menuBottom+8)}px`);
         }
         this.ui.element.style.setProperty('--builder-sheet-max-height',`${Math.max(100,rect.bottom-58-(window.visualViewport?.offsetTop||0))}px`);
         if(innerWidth>700&&innerHeight<=500){const meta=this.ui.element.querySelector('.builder-meta');if(meta)this.ui.element.style.setProperty('--builder-rail-sequence-top',`${meta.getBoundingClientRect().bottom-this.ui.element.getBoundingClientRect().top+4}px`);}
@@ -370,6 +388,7 @@ export class PlayBuilder {
     cancelPendingView() {
         this.generation++;
         if(this.busy) { this.board.threeD?.cancelLoading?.(); this.busy=false; this.view='2d'; }
+        globalThis.document.documentElement.removeAttribute('data-court-loading');
     }
     async switchView(view) {
         if(this.workspace!=='builder')return;
@@ -384,6 +403,7 @@ export class PlayBuilder {
             const opened=await this.board.threeD.enter();
             if(generation!==this.generation||this.workspace!=='builder')return;
             this.busy=false;
+            globalThis.document.documentElement.removeAttribute('data-court-loading');
             if(!opened){this.view='2d';this.message='3D is unavailable. Your draft is safe and editable in 2D. You can retry the view toggle.';this.render();return;}
             this.view='3d'; this.message='';this.board.threeD.ballObject.userData.minimumCSSDiameter=12;
             this.board.threeD.applyAtTime(this.session.clock.elapsed);
@@ -472,6 +492,16 @@ export class PlayBuilder {
             if(action==='coachApply')return this.applyCoachOption(value?.id||value);
             if(action==='coachKeep'){this.cancelPendingProposals();this.message='Kept as authored. The existing validation issue remains visible.';this.render();return {ok:true};}
             if(action==='editShot'&&value.field==='family')return await this.changeFamily(value.value);
+            if(action==='editServiceCourt'){
+                this.edit(doc=>{
+                    const context=resolveServiceContext(doc);
+                    if(!context.known)throw Error('Choose the designated receiver on the serve before setting its serving court.');
+                    if(!['right','left','unspecified'].includes(value))throw Error('Choose a supported serving court.');
+                    doc.service={...(doc.service||{}),server:context.server,receiver:context.receiver};
+                    if(value==='unspecified')delete doc.service.court;else doc.service.court=value;
+                });
+                return {ok:true};
+            }
             if(action==='acknowledgeWaypoints'){this.waypointAcknowledgement=this.waypointPolicy.key;this.message='Destination-only preview enabled. Original path points remain saved. Press Play when ready.';this.render();return;}
             if(action==='message'){this.message=String(value);this.render();return;}
             if(action==='view')return await this.switchView(value);
@@ -529,7 +559,7 @@ export class PlayBuilder {
             });
             else if(action==='flight')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);claimShotFields(shot,['arc','pace']);shot.arc=value.arc;shot.pace=value.pace;});
             else if(action==='title')this.edit(doc=>{doc.title=String(value).slice(0,120);},{review:false});
-            else if(action==='editShot')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot)return;claimShotFields(shot,[value.field.split('.')[0]]);const parts=value.field.split('.');let cursor=shot;for(const part of parts.slice(0,-1)){if(['__proto__','constructor','prototype'].includes(part))throw Error('Invalid field');cursor=cursor[part]??={};}const key=parts.at(-1);if(value.field==='hitter'&&shot.hitter!==value.value){shot.playerMovement??={};shot.playerMovement[shot.hitter]=copy(shot.movement);shot.movement=shot.playerMovement[value.value]||{intent:'hold',pinned:false};delete shot.playerMovement[value.value];}if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid field');cursor[key]=value.value;if(value.field==='family'){if(shot.family==='serve')shot.serveMethod='volley';else delete shot.serveMethod;}if(value.field==='movement.intent'&&value.value==='manual'&&!shot.movement.target)shot.movement.target=copy(doc.initialLayout[shot.hitter]);});
+            else if(action==='editShot')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot)return;claimShotFields(shot,[value.field.split('.')[0]]);const parts=value.field.split('.');let cursor=shot;for(const part of parts.slice(0,-1)){if(['__proto__','constructor','prototype'].includes(part))throw Error('Invalid field');cursor=cursor[part]??={};}const key=parts.at(-1);if(value.field==='hitter'&&shot.hitter!==value.value){shot.playerMovement??={};shot.playerMovement[shot.hitter]=copy(shot.movement);shot.movement=shot.playerMovement[value.value]||{intent:'hold',pinned:false};delete shot.playerMovement[value.value];}if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid field');cursor[key]=value.value;updateServiceFromShotEdit(doc,shot,value.field);if(value.field==='family'){if(shot.family==='serve')shot.serveMethod='volley';else delete shot.serveMethod;}if(value.field==='movement.intent'&&value.value==='manual'&&!shot.movement.target)shot.movement.target=copy(doc.initialLayout[shot.hitter]);});
             else if(action==='deleteShot')this.edit(doc=>{doc.shots=doc.shots.filter(s=>s.id!==(value||this.selectedShotId));});
             else if(action==='duplicateShot')this.edit(doc=>{if(doc.shots.length>=MAX_SHOTS)throw Error('Shot limit reached.');const i=doc.shots.findIndex(s=>s.id===(value||this.selectedShotId));if(i>=0){const shot=copy(doc.shots[i]);shot.id=id();delete shot.authoring;doc.shots.splice(i+1,0,shot);this.selectedShotId=shot.id;}});
             else if(action==='moveShot')this.edit(doc=>{const from=doc.shots.findIndex(s=>s.id===value.id),to=from+value.delta;if(from<0||to<0||to>=doc.shots.length)return;doc.shots.splice(to,0,doc.shots.splice(from,1)[0]);});

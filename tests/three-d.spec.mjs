@@ -11,7 +11,7 @@ async function openApp(page) {
 
 async function openDrop3d(page) {
   await page.evaluate(() => window.pickleboard.plays.load('third-shot-drop'));
-  await page.evaluate(() => { void pickleboard.threeD.enter(); });
+  expect(await page.evaluate(() => pickleboard.threeD.enter())).toBe(true);
   await expect(page.locator('#threeDViewer')).toBeVisible();
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
 }
@@ -99,7 +99,9 @@ test('legacy 3D compatibility: exit cancels owned frames, re-entry schedules one
   });
   expect(returnState).toMatchObject({ stepIndex: 2, stepId: 'return', currentShotId: 'return' });
   expect(returnState.elapsed).toBeCloseTo(returnState.anchor, 6);
-  await page.evaluate(() => { void pickleboard.threeD.enter(); });
+  // A canvas is attached before required scenery finishes loading. Await the
+  // entry result before asserting that the active viewer owns a render frame.
+  expect(await page.evaluate(() => pickleboard.threeD.enter())).toBe(true);
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   const frames = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
@@ -112,6 +114,46 @@ test('legacy 3D compatibility: exit cancels owned frames, re-entry schedules one
   expect(await page.evaluate(() => ({maximum:window.__replayFrames.maximum, pending:window.__replayFrames.pending.size, playing:window.pickleboard.threeD.session.playing}))).toEqual({maximum:1,pending:1,playing:true});
   await page.locator('#threeDExit').click();
   expect(await page.evaluate(() => ({pending: window.__replayFrames.pending.size, id: window.pickleboard.threeD.renderLoopId}))).toEqual({pending: 0, id: null});
+});
+
+test('legacy 3D compatibility: re-entry waits for required scenery before becoming active', async ({ browser }) => {
+  const context = await browser.newContext({ serviceWorkers: 'block' });
+  const page = await context.newPage();
+  let release, requested;
+  const held = new Promise(resolve => { release = resolve; });
+  const request = new Promise(resolve => { requested = resolve; });
+  try {
+    const errors = await openApp(page);
+    await openDrop3d(page);
+    await page.locator('#threeDExit').click();
+    await page.evaluate(() => pickleboard.plays.timelineAction('chapter', 'return'));
+    const elapsed = await page.evaluate(() => pickleboard.plays.clock.elapsed);
+    // WebKit can reuse a decoded image despite network interception. A test-only
+    // URL forces this second entry to exercise an actual pending image response.
+    await page.evaluate(async () => {
+      const { DefaultLoadingManager } = await import('/vendor/three.module.min.js');
+      DefaultLoadingManager.setURLModifier(url => url.endsWith('/park-tree-v1.png') ? `${url}?entry-readiness=held` : url);
+    });
+    await page.route('**/park-tree-v1.png*', async route => {
+      requested(); await held; await route.continue();
+    });
+    await page.evaluate(() => {
+      window.__entrySettled = false;
+      window.__pendingEntry = pickleboard.threeD.enter().then(result => { __entrySettled = true; return result; });
+    });
+    await request;
+    await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+    await expect(page.locator('#play3dView')).toHaveAttribute('aria-busy', 'true');
+    expect(await page.evaluate(() => ({ settled: __entrySettled, active: pickleboard.threeD.active, frame: pickleboard.threeD.renderLoopId })))
+      .toEqual({ settled: false, active: false, frame: null });
+    release();
+    expect(await page.evaluate(() => __pendingEntry)).toBe(true);
+    await expect(page.locator('#play3dView')).not.toHaveAttribute('aria-busy', 'true');
+    expect(await page.evaluate(() => ({ active: pickleboard.threeD.active, ready: pickleboard.threeD.worldAssetsReady, elapsed: pickleboard.threeD.clock.elapsed })))
+      .toEqual({ active: true, ready: true, elapsed });
+    await expect.poll(() => page.evaluate(() => pickleboard.threeD.renderer.info.render.calls)).toBeGreaterThan(0);
+    expect(errors).toEqual([]);
+  } finally { release(); await context.close(); }
 });
 
 test('legacy 3D compatibility: 3D viewer fits portrait, landscape, and desktop controls', async ({ page }) => {

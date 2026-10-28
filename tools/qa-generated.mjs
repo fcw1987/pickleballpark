@@ -90,7 +90,7 @@ export function invalidGeneratedCases(seed = QA_SEEDS[1]) {
   };
   return [
     mutate('same-team', 'rule', document => { document.shots[1].hitter = 'player2'; }),
-    mutate('receiver-mismatch', 'rule', document => { document.shots[0].receiver = 'player4'; }),
+    mutate('receiver-mismatch', 'continuity', document => { document.shots[0].receiver = 'player4'; }),
     mutate('same-side-target', 'rule', document => { document.shots[1].target.y = 35; }),
     mutate('late-serve', 'rule', document => {
       document.shots[2].family = 'serve';

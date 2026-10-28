@@ -96,3 +96,18 @@ body.builder-workspace .planner-identity { display: none; }
    panel in that flow so short screens have room for both it and the editor. */
 .builder-large-text .builder-reference-dock .builder-context-menu[open] { flex: 1 0 100%; }
 .builder-large-text .builder-reference-dock .builder-context-menu > .builder-menu-panel { position: relative; top: auto; bottom: auto; right: auto; width: auto; max-width: 100%; scroll-margin-block: 8px; }
+#courtStartupStatus { display: none; }
+html[data-court-loading] .court-container-fullscreen,
+html[data-court-loading] #threeDViewer,
+html[data-court-loading] .builder-court-tools { visibility: hidden; }
+html[data-court-loading] #courtStartupStatus {
+    display: grid;
+    position: fixed;
+    inset: 0;
+    place-content: center;
+    pointer-events: none;
+    color: var(--pb-ink, #24384b);
+    background: var(--pb-cream, #f6f2df);
+    font: 600 1rem system-ui, sans-serif;
+    z-index: 2;
+}

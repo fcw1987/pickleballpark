@@ -7,8 +7,10 @@
  */
 
 import { mountShotTimeline } from './shot-timeline.js';
+import { createPlayerCoverageControl } from './player-coverage-ui.js';
 import { MAX_SHOTS } from './play-document.js';
 import { getPlayerLabels, playerChoices, playerLabel as stablePlayerLabel } from './player-labels.js';
+import { NVZ_MODEL_LIMITS_NOTE } from './rally-rules.js';
 
 const FAMILIES = [
   ['serve', 'Serve'], ['return', 'Return'], ['drive', 'Drive'], ['drop', 'Drop'],
@@ -470,7 +472,19 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const playersGroup = el('section', 'builder-control-group builder-group-players'); playersGroup.dataset.detailGroup = 'players'; playersGroup.setAttribute('role', 'tabpanel'); playersGroup.setAttribute('aria-label', 'Players settings'); playersGroup.classList.toggle('is-active', detailGroup === 'players'); playersGroup.append(el('h3', '', 'Players'));
       const receiver = select('Receiver', 'edit-receiver', [['auto', 'Automatic'], ...players]); receiver.querySelector('select').value = selected.receiver || 'auto'; playersGroup.append(receiver);
       const contactStyle = select('Contact style', 'edit-contactStyle', [['auto', 'Automatic'], ['forehand', 'Forehand'], ['backhand', 'Backhand'], ['short-hop', 'Short hop']]); contactStyle.querySelector('select').value = selected.contactStyle || 'auto'; playersGroup.append(contactStyle);
-      if (selected.family === 'serve') { const serveMethod = select('Serve method', 'edit-serveMethod', [['drop', 'Drop serve'], ['volley', 'Volley serve']]); serveMethod.querySelector('select').value = selected.serveMethod || 'drop'; playersGroup.append(serveMethod); } details.appendChild(playersGroup);
+      if (['volley', 'reset', 'overhead'].includes(selected.family) && selected.contactStyle !== 'short-hop') {
+        const limits = el('p', 'builder-selected-summary', NVZ_MODEL_LIMITS_NOTE);
+        limits.id = 'builder-nvz-model-limits'; contactStyle.querySelector('select').setAttribute('aria-describedby', limits.id); playersGroup.append(limits);
+      }
+      if (selected.family === 'serve') {
+        const serveMethod = select('Serve method', 'edit-serveMethod', [['drop', 'Drop serve'], ['volley', 'Volley serve']]); serveMethod.querySelector('select').value = selected.serveMethod || 'drop'; playersGroup.append(serveMethod);
+        if (shots[0] === selected && doc.opening === 'serve') {
+          const court = select('Serving court', 'service-court', [['unspecified', 'Not declared'], ['right', 'Right / even'], ['left', 'Left / odd']]);
+          court.querySelector('select').value = doc.service?.court || 'unspecified'; playersGroup.append(court);
+          const designated = doc.service?.receiver || (selected.receiver !== 'auto' ? selected.receiver : null);
+          playersGroup.append(el('p', 'builder-selected-summary', designated ? `Serve returner: ${playerLabel(designated, labels)}. Change Receiver here to declare a different returner; their partner may stand elsewhere.` : 'Choose Receiver to declare the serve returner. Automatic positioning cannot establish service order.'));
+        }
+      } details.appendChild(playersGroup);
       const precisionGroup = el('section', 'builder-control-group builder-group-precision'); precisionGroup.dataset.detailGroup = 'precision'; precisionGroup.setAttribute('role', 'tabpanel'); precisionGroup.setAttribute('aria-label', 'Precision settings'); precisionGroup.classList.toggle('is-active', detailGroup === 'precision'); precisionGroup.append(el('h3', '', 'Precision'));
       const coords = el('div', 'builder-grid-fields'); coords.appendChild(numberField('Target width', 'edit-target.x', selected.target?.x ?? 10, 0, 20)); coords.appendChild(numberField('Target depth', 'edit-target.y', selected.target?.y ?? 20, 0, 44)); precisionGroup.append(coords); details.appendChild(precisionGroup);
       const movementGroup = el('section', 'builder-control-group builder-group-movement'); movementGroup.dataset.detailGroup = 'movement'; movementGroup.setAttribute('role', 'tabpanel'); movementGroup.setAttribute('aria-label', 'Movement settings'); movementGroup.classList.toggle('is-active', detailGroup === 'movement'); movementGroup.append(el('h3', '', 'Movement'));
@@ -569,7 +583,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const zoomOut=button('−','camera-zoom-out','builder-button builder-camera-button builder-camera-zoom');zoomOut.setAttribute('aria-label','Zoom out');
     const zoomIn=button('+','camera-zoom-in','builder-button builder-camera-button builder-camera-zoom');zoomIn.setAttribute('aria-label','Zoom in');
     const cameraHelp=el('details','builder-camera-help');cameraHelp.append(el('summary','','Camera help'),el('p','','Drag empty space to rotate and tilt. Choose Pan to move the view. On touch screens, use two fingers to pan or pinch to zoom. Drag players and targets directly to edit.'));
-    cameraBar.append(cameraModes,reset,zoomOut,zoomIn,cameraHelp);dock.append(cameraBar);root.append(dock);
+    cameraBar.append(createPlayerCoverageControl(),cameraModes,reset,zoomOut,zoomIn,cameraHelp);dock.append(cameraBar);root.append(dock);
     syncCameraControls();
     for(const dialog of [templateDialog,importDialog,randomDialog])if(dialog.parentElement!==root)root.appendChild(dialog);
     if (randomDialog.open) {
@@ -743,6 +757,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (target.dataset.action === 'title') { if (!target.value.trim()) { markInvalidField(target, 'Enter a play title.'); fire('message', 'Enter a play title before saving.'); return; } clearInvalidField(target); fire('title', target.value); }
     else if (target.dataset.action === 'flight-preset') {const [arc,pace]=target.value.split('/');fire('flight',{arc,pace});}
     else if (target.dataset.action === 'movement-player') { current.movementPlayer = target.value; renderedDocument = null; render({}); }
+    else if (target.dataset.action === 'service-court') fire('editServiceCourt', target.value);
     else if (target.dataset.action.startsWith('edit-')) {
       const field = target.dataset.action.slice(5); if (target.type === 'number' && (target.value === '' || (target.validity.badInput||target.validity.rangeUnderflow||target.validity.rangeOverflow))) { markInvalidField(target, 'Enter a value in range.'); return; } clearInvalidField(target); const value = target.type === 'checkbox' ? target.checked : (target.type === 'number' ? Number(target.value) : target.value);
       if (field.startsWith('movement.')) fire('editMovement', { player: current.movementPlayer || current.document?.shots?.find(shot => shot.id === current.selectedShotId)?.hitter, field: field.slice(9), value });

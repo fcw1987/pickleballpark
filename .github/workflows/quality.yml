@@ -66,11 +66,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  webkit:
-    name: WebKit
+  webkit-shards:
+    name: WebKit shard ${{ matrix.shard }}/2
     needs: checks
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -85,8 +89,45 @@ jobs:
         run: npm ci
       - name: Install WebKit
         run: npx playwright install --with-deps webkit
-      - name: Run full WebKit suite with no failure exceptions
-        run: node tools/run-webkit-ci.mjs
+      - name: Run WebKit partition with no retries or failure exceptions
+        run: npx playwright test --config=playwright.webkit.config.mjs --workers=1 --retries=0 --forbid-only --shard=${{ matrix.shard }}/2 --reporter=line,blob
+      - name: Retain every WebKit partition result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: webkit-shard-${{ matrix.shard }}
+          path: blob-report/
+          if-no-files-found: error
+          retention-days: 7
+
+  webkit:
+    name: WebKit
+    if: always()
+    needs: webkit-shards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Download every WebKit partition report
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: webkit-shard-*
+          merge-multiple: true
+          path: release-results/webkit-blobs
+      - name: Require the full discovered catalog to pass exactly once
+        env:
+          WEBKIT_SHARDS_RESULT: ${{ needs.webkit-shards.result }}
+        run: node tools/merge-webkit-ci.mjs
       - name: Retain full WebKit diagnostic report
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

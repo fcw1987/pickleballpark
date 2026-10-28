@@ -6,6 +6,8 @@
 import { compileDocument, automaticActorPeakSpeed, automaticActorPairSpacing } from './play-compiler.js';
 import { createStarterDocument, MAX_SHOTS, validateDocument } from './play-document.js';
 import { validateRallyRules } from './rally-rules.js';
+import { eligibleHitters, resolveServiceContext, receivingServiceBox } from './rally-state.js';
+import { rankContactCandidates } from './rally-tactics.js';
 import {
   SMART_GENERATOR_VERSION, automaticOwnership, documentSourceIdentity,
   evaluateCandidate, makeProposal, proposalChanges
@@ -15,7 +17,9 @@ const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON
 const PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 const ARCS = Object.freeze(['low', 'medium', 'high']);
 const PACES = Object.freeze(['soft', 'medium', 'firm']);
-const OPENING_FAMILIES = Object.freeze(['drive', 'drop', 'dink', 'reset', 'lob']);
+// Third-shot choices follow the mandatory return bounce. A baseline dink and
+// the model's volley-style reset are not useful defaults for this transition.
+const OPENING_FAMILIES = Object.freeze(['drive', 'drop', 'drop', 'lob']);
 const MAX_ATTEMPTS_PER_SHOT = 48;
 const MAX_BACKTRACKS = 12;
 const DEFAULT_SEED = 0x51a7c0de;
@@ -91,13 +95,15 @@ function familyChoices(index, opening, previous, next, { allowVolley = true, net
   return shuffled(choices, next);
 }
 
-function targetFor(team, family, next, openingPoint) {
+function targetFor(team, family, next, openingPoint, service) {
   const x = choose([4.5, 7, 10, 13, 15.5], next);
   if (family === 'serve') {
     const x = choose([3.5, 5, 6.5, 8], next);
     // Preserve an authored starting side. The serve lands diagonally across
     // from the ball's opening contact, including a left-box custom setup.
-    return { x: openingPoint?.x < 10 ? 20 - x : x, y: choose([33, 35, 37, 39, 41], next) };
+    const box = receivingServiceBox(service, openingPoint);
+    const depth = choose([33, 35, 37, 39, 41], next);
+    return { x: box.minX >= 10 ? 20 - x : x, y: team === 'green' ? depth : 44 - depth };
   }
   const soft = ['drop', 'dink', 'reset'].includes(family);
   const depth = choose(soft ? [23.5, 25, 27, 28] : ['lob', 'return'].includes(family) ? [36, 39, 41] : [30, 34, 38, 40], next);
@@ -105,22 +111,11 @@ function targetFor(team, family, next, openingPoint) {
   return { x, y };
 }
 
-function hittersFor(document, index, previous, next, positions) {
-  const priorTeam = previous ? document.players[previous.hitter].team : null;
-  const teamPlayers = team => PLAYER_IDS.filter(id => document.players[id].team === team);
-  const team = priorTeam ? opposite(priorTeam) : document.players.player1.team;
-  if (index === 0 && document.opening === 'serve') {
-    const ball = document.initialLayout.ball;
-    const nearest = [...teamPlayers(team)].sort((a,b) => {
-      const distance = id => Math.hypot(document.initialLayout[id].x-ball.x, document.initialLayout[id].y-ball.y);
-      return distance(a)-distance(b) || a.localeCompare(b);
-    });
-    return nearest.slice(0,1);
-  }
-  const required = previous?.receiver && previous.receiver !== 'auto' ? [previous.receiver] : teamPlayers(team);
-  const eligible = shuffled(required.filter(id => PLAYER_IDS.includes(id)), next);
+function hittersFor(document, index, previous, next, positions, availableSeconds) {
+  const eligible = [...eligibleHitters({ players: document.players, service: resolveServiceContext(document), contactIndex: index, opening: document.opening, previousHitter: previous?.hitter })]
+    .filter(id => !previous || previous.receiver === 'auto' || previous.receiver === id);
   if (!previous) return eligible;
-  return eligible.sort((a, b) => Math.hypot(positions[a].x - previous.target.x, positions[a].y - previous.target.y) - Math.hypot(positions[b].x - previous.target.x, positions[b].y - previous.target.y));
+  return rankContactCandidates({ eligible, positions, contact: previous.target, players: document.players, availableSeconds }).map(item => item.id);
 }
 
 function nextShotId(document, index) {
@@ -141,9 +136,9 @@ function shotCandidate(document, index, family, hitter, next, { smartAdd = false
     id: nextShotId(document, index),
     family,
     hitter,
-    receiver: 'auto',
+    receiver: family === 'serve' ? resolveServiceContext(document).receiver ?? 'auto' : 'auto',
     contactStyle,
-    target: targetFor(team, family, next, document.initialLayout.ball),
+    target: targetFor(team, family, next, document.initialLayout.ball, resolveServiceContext(document)),
     arc: family === 'lob' ? 'high' : choose(ARCS, next),
     pace: family === 'dink' || family === 'drop' || family === 'reset' ? choose(['soft', 'soft', 'medium'], next) : choose(PACES, next),
     movement: { intent: 'advance', pinned: false },
@@ -195,7 +190,9 @@ function completeEvaluation(document, { allowOpeningPrefix = true } = {}) {
 
 async function appendNext(document, index, random, { signal, maxAttempts = MAX_ATTEMPTS_PER_SHOT, allowVolley = true, generationSeed, lookahead = true, continuationDepth = generationSeed === undefined ? 0 : 2 } = {}) {
   const previous = document.shots.at(-1);
-  const positions = previous ? compileDocument(document).play.steps.at(-1).positions : document.initialLayout;
+  const compiledPrefix = previous ? compileDocument(document) : null;
+  const positions = compiledPrefix ? compiledPrefix.play.steps.at(-1).positions : document.initialLayout;
+  const availableSeconds = compiledPrefix?.timeline.segments.at(-1)?.duration ?? 0;
   const netPosition = previous && PLAYER_IDS.some(id => document.players[id].team !== document.players[previous.hitter].team && Math.min(positions[id].y, 44 - positions[id].y) >= 11);
   const families = familyChoices(index, document.opening, previous, random, { allowVolley, netPosition });
   const attempted = new Set();
@@ -203,7 +200,7 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
     checkCancelled(signal);
     if (attempt && attempt % 4 === 0) await waitTurn();
     const family = families[attempt % families.length];
-    const hitters = hittersFor(document, index, previous, random, positions);
+    const hitters = hittersFor(document, index, previous, random, positions, availableSeconds);
     for (const hitter of hitters) {
       const candidateShot = shotCandidate(document, index, family, hitter, random, { smartAdd: generationSeed !== undefined, generationSeed });
       // Retain a cross-court option late in the bounded search. The outgoing
@@ -292,6 +289,9 @@ export async function proposeSmartAdd(sourceDocument, options = {}) {
   try {
     seed = normalizedSeed(options.seed);
     validateDocument(source);
+    if (source.opening === 'serve' && source.shots.length < 2 && !resolveServiceContext(source).known) {
+      return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: 'Declare the server and designated receiver before Smart Add can generate this opening. Positions alone do not determine service order.' });
+    }
     if (source.ending !== 'stop' || source.intentionalFault) {
       return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: 'A rally with an explicit terminal outcome or intentional fault cannot accept another shot. Reopen it before appending.' });
     }

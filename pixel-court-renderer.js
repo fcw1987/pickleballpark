@@ -1,4 +1,5 @@
 import { drawPixelEnvironment } from './pixel-environment.js';
+import { drawPlayerCoverage } from './player-coverage-canvas.js';
 import { drawPixelAthlete } from './pixel-athletes.js';
 import { COURT_LINES } from './court-geometry.js';
 import { worldToBoard, FEET_TO_METERS } from './three-d-core.js';
@@ -15,17 +16,35 @@ export class PixelCourtRenderer {
         board.court.before(this.canvas);
         this.ctx = this.canvas.getContext('2d', { alpha: false });
         this.previous = new Map();
-        this.frame = 0;
+        this.frame = null;
         board.court.closest('.park-stage').classList.add('pixel-park-stage');
         const style = document.createElement('style');
         style.textContent = `.pixel-court-canvas{position:absolute;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;z-index:0}.pixel-park-stage #court{position:relative;z-index:1;background:transparent!important}.pixel-park-stage [data-park-ground],.pixel-park-stage [data-park-scene],.pixel-park-stage #parkEnvironment,.pixel-park-stage .park-environment,.pixel-park-stage #courtCastShadow,.pixel-park-stage #courtSlabEdge,.pixel-park-stage .outside-area,.pixel-park-stage .court-surface,.pixel-park-stage .kitchen,.pixel-park-stage #courtMarkings,.pixel-park-stage #netActor,.pixel-park-stage .actor-shadow,.pixel-park-stage .ball-shadow,.pixel-park-stage .player-artwork,.pixel-park-stage .guided-pixel-actor,.pixel-park-stage .ball-token{opacity:0!important}`;
         document.head.append(style);
         this.style = style;
-        this.tick = time => { this.render(time); this.frame = requestAnimationFrame(this.tick); };
-        this.frame = requestAnimationFrame(this.tick);
+        this.tick = time => {
+            this.frame = null;
+            if (!this.isVisible()) return;
+            this.render(time);
+            this.frame = requestAnimationFrame(this.tick);
+        };
+        this.updateVisibility = () => {
+            if (!this.isVisible()) {
+                if (this.frame !== null) cancelAnimationFrame(this.frame);
+                this.frame = null;
+            } else if (this.frame === null) this.frame = requestAnimationFrame(this.tick);
+        };
+        this.visibilityObserver = new MutationObserver(this.updateVisibility);
+        this.visibilityObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        this.visibilityObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-court-loading'] });
+        document.addEventListener('visibilitychange', this.updateVisibility);
+        this.updateVisibility();
+    }
+    isVisible() {
+        return !this.disposed && !document.hidden && !document.body.classList.contains('three-d-active') && !document.documentElement.hasAttribute('data-court-loading');
     }
     render(time = 0) {
-        if(document.body.classList.contains('three-d-active'))return;
+        if(!this.isVisible())return;
         const { board, canvas, ctx } = this;
         const svg = board.court;
         const sourceBox = svg.viewBox.baseVal;
@@ -49,6 +68,7 @@ export class PixelCourtRenderer {
         ctx.fillStyle='#4a9b69'; ctx.fillRect(court.x-8,court.y-8,96,192);
         ctx.fillStyle='#347fa4'; ctx.fillRect(court.x,court.y,80,176);
         ctx.fillStyle='#438eae'; ctx.fillRect(court.x,court.y+60,80,56);
+        drawPlayerCoverage(ctx, board, point);
         ctx.fillStyle='#f6f2d7';
         for (const line of COURT_LINES) {
             const a=point(line.from.x,line.from.y),b=point(line.to.x,line.to.y);
@@ -102,5 +122,5 @@ export class PixelCourtRenderer {
         ctx.fillStyle='#cdded7';ctx.fillRect(x-1,y-10,2,10);ctx.fillRect(x+84,y-10,2,10);
     }
     getDiagnostics(){return this.diagnostics;}
-    dispose(){cancelAnimationFrame(this.frame);this.canvas.remove();this.style.remove();}
+    dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.frame=null;this.visibilityObserver.disconnect();document.removeEventListener('visibilitychange',this.updateVisibility);this.canvas.remove();this.style.remove();}
 }

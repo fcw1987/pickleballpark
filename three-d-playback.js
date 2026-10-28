@@ -1,4 +1,6 @@
 import { createReferenceWorld } from './reference-world.js';
+import { createPlayerCoverageOverlay } from './player-coverage-overlay.js';
+import { getCoveragePreference } from './player-coverage.js';
 import { DepthCameraControls } from './depth-camera.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import * as THREE from './vendor/three.module.min.js';
@@ -216,6 +218,10 @@ class ThreeDPlaybackViewer {
         this.currentPlay = null;
         this.timeline = null;
         this.playerObjects = new Map();
+        this.coverageSamples = {};
+        this.coveragePreferenceUnsubscribe = getCoveragePreference().subscribe(() => {
+            if (this.active) this.renderSessionSample();
+        });
         this.ballObject = null;
         this.lastState = null;
         this.pixelScale = DEFAULT_PIXEL_SCALE;
@@ -236,7 +242,8 @@ class ThreeDPlaybackViewer {
             // context can still be reclaimed while that canvas is hidden; do
             // not leave the dead renderer available for the reuse path.
             if (!this.scene || event.currentTarget !== this.renderer?.domElement) return;
-            this.exit();
+            if (this.loading) this.cancelLoading();
+            else this.exit();
             this.elements.loadStatus.textContent='Graphics were interrupted. Your board is safe. Try 3D View again.';
             this.elements.loadStatus.hidden=false;
         };
@@ -262,7 +269,15 @@ class ThreeDPlaybackViewer {
     cancelLoading() {
         this.loadGeneration += 1;
         this.loadAbort?.abort();this.loadAbort=null;
+        const wasLoading = this.loading;
         this.loading=false;
+        if (wasLoading && this.scene && !this.active) {
+            this.disposeScene();
+            this.currentPlay = null; this.timeline = null;
+            this.session.owner = 'guided';
+            this.elements.root.hidden = true;
+            document.body.classList.remove('three-d-active');
+        }
         this.elements.enter.removeAttribute('aria-busy');
         this.updateEntryAvailability();
         const suspension=this.loadSuspension;this.loadSuspension=null;
@@ -315,35 +330,33 @@ class ThreeDPlaybackViewer {
         this.loading=true;
         this.updateEntryAvailability();
         this.elements.enter.setAttribute('aria-busy','true');
-        let loadingSubject='The court';
         try {
-            // Keep asynchronous intent cancellation at the renderer boundary.
-            // The dimensional scene uses locally authored geometry and needs no
-            // raster actor download; the existing 2D artwork remains unchanged.
+            // Required athlete and foliage artwork must be ready before the
+            // startup surface can truthfully reveal a complete court.
             this.actorAssets = await loadReferenceAthleteAssets({signal:controller.signal});
             if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
-        } catch(error) {
-            if(generation!==this.loadGeneration)return false;
-            controller.abort();
-            this.elements.loadStatus.textContent=`${loadingSubject} could not load. Your board is safe. Try 3D View again.`;
-            this.elements.loadStatus.hidden=false;
-            this.loadSuspension=null;
-            if (this.session.resumeSuspension(playbackSuspension)) this.board.plays.startPlaybackLoop();
-            return false;
-        } finally {
-            if(generation===this.loadGeneration){this.loading=false;this.loadAbort=null;
-            this.elements.enter.removeAttribute('aria-busy');this.updateEntryAvailability();}
-        }
-        this.currentPlay = play;
-        this.timeline = this.board.plays.timeline;
-        this.session.owner = 'replay';
-        this.elements.root.hidden = false;
-        document.body.classList.add('three-d-active');
-        try {
+            this.currentPlay = play;
+            this.timeline = this.board.plays.timeline;
+            this.session.owner = 'replay';
+            this.elements.root.hidden = false;
+            document.body.classList.add('three-d-active');
             this.initializeScene();
+            // Cancellation also settles a held image request. The obsolete
+            // world's eventual completion cannot attach or render its scene.
+            await new Promise((resolve, reject) => {
+                const abort = () => reject(controller.signal.reason);
+                controller.signal.addEventListener('abort', abort, { once: true });
+                Promise.resolve(this.world.ready).then(resolve, reject).finally(() => controller.signal.removeEventListener('abort', abort));
+            });
+            if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
             this.applyAtTime(this.clock.elapsed);
             this.setCamera(this.elements.camera.value);
+            // The initial shield must reveal a submitted frame. Later view
+            // changes keep demand rendering so an immediately cancelled entry
+            // does not force a costly GPU frame before the next animation tick.
+            if (document.documentElement.hasAttribute('data-court-loading')) this.renderer.render(this.scene, this.camera);
         } catch (error) {
+            if(generation!==this.loadGeneration)return false;
             this.disposeScene();
             this.session.owner = 'guided';
             this.board.plays.updateUI();
@@ -361,6 +374,9 @@ class ThreeDPlaybackViewer {
             this.elements.enter.disabled = false;
             this.elements.enter.focus?.();
             return false;
+        } finally {
+            if(generation===this.loadGeneration){this.loading=false;this.loadAbort=null;
+            this.elements.enter.removeAttribute('aria-busy');this.updateEntryAvailability();}
         }
         this.active = true;
         if (this.elements.loadStatus) {
@@ -415,6 +431,8 @@ class ThreeDPlaybackViewer {
         this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
+        this.playerCoverage = createPlayerCoverageOverlay(THREE);
+        this.scene.add(this.playerCoverage.mesh);
         // Orbit changes the whole world view. Render at native resolution;
         // detailed artwork supplies its own pixel edges, without a screen filter.
         this.cameraControls = new DepthCameraControls(this);
@@ -471,6 +489,7 @@ class ThreeDPlaybackViewer {
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
             updateAthlete(actor,sample,this.camera,weight);
+            this.coverageSamples[id] = sample;
         }
     }
 
@@ -630,6 +649,7 @@ class ThreeDPlaybackViewer {
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
+        this.playerCoverage?.update({ board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment });
         this.updateBallReadability();
         const status=segment?`${segment.step.label} · ${ball.phase}`:'Ready';
         if(this.elements.status.textContent!==status)this.elements.status.textContent=status;
@@ -685,6 +705,7 @@ class ThreeDPlaybackViewer {
     }
 
     disposeScene() {
+        this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {};
         this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;
