@@ -1,0 +1,77 @@
+name: PR20 focused browser diagnostic
+
+on:
+  push:
+    branches: [ci/pr20-browser-probe]
+  workflow_dispatch:
+
+# This isolated probe collects Linux evidence. It neither replaces the required
+# Quality workflow nor builds, publishes, or deploys an application artifact.
+permissions:
+  contents: read
+
+concurrency:
+  group: pr20-browser-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  webkit-diagnostic:
+    name: Focused Linux WebKit diagnostic
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out exact probe source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Use official Ubuntu archive for browser dependencies
+        run: |
+          sudo python3 - <<'PYTHON'
+          from pathlib import Path
+          # Change only the download hostname. Preserve suites, signed-by,
+          # keys and the normal apt signature checks used by Playwright.
+          for filename in ['/etc/apt/sources.list', '/etc/apt/sources.list.d/ubuntu.sources', '/etc/apt/apt-mirrors.txt']:
+              path = Path(filename)
+              if path.is_file():
+                  original = path.read_text()
+                  updated = original.replace('://azure.archive.ubuntu.com/', '://archive.ubuntu.com/')
+                  if updated != original:
+                      path.write_text(updated)
+                      print(f'Using official Ubuntu archive in {filename}')
+          PYTHON
+      - name: Install focused diagnostic browser
+        run: npx playwright install --with-deps webkit
+      - name: Record probe identity
+        run: |
+          mkdir -p release-results/pr20-browser-probe
+          git rev-parse HEAD | tee release-results/pr20-browser-probe/source-commit.txt
+          git diff b45d021c596158b119f78d11e166b020cf6f3d56 HEAD -- . ':!tests/pr20-browser-probe.spec.mjs' ':!.github/workflows/pr20-browser-probe.yml' > release-results/pr20-browser-probe/non-probe-source.diff
+          node --version | tee release-results/pr20-browser-probe/node-version.txt
+          npx playwright --version | tee release-results/pr20-browser-probe/playwright-version.txt
+      - name: Run focused actual RGBA and context diagnostic
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: release-results/pr20-browser-probe/results.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: release-results/pr20-browser-probe/html
+        run: |
+          set -o pipefail
+          npx playwright test tests/pr20-browser-probe.spec.mjs --config=playwright.webkit.config.mjs --workers=1 --retries=0 --trace=on --reporter=line,json,html 2>&1 | tee release-results/pr20-browser-probe/test.log
+      - name: Retain native report, trace and diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pr20-linux-webkit-diagnostic-${{ github.sha }}
+          path: |
+            release-results/pr20-browser-probe/
+            release-results/artwork-linux-pixels-*.json
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
