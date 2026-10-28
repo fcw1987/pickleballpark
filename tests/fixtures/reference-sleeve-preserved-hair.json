@@ -1,0 +1,53 @@
+[
+  {
+    "player": 2,
+    "frame": 0,
+    "side": 0,
+    "rects": [
+      [
+        26,
+        128,
+        11,
+        1
+      ]
+    ],
+    "detachedVisiblePixels": 11,
+    "restoredVisiblePixels": 0
+  },
+  {
+    "player": 2,
+    "frame": 1,
+    "side": 0,
+    "rects": [
+      [
+        20,
+        123,
+        14,
+        2
+      ],
+      [
+        44,
+        123,
+        14,
+        2
+      ]
+    ],
+    "detachedVisiblePixels": 49,
+    "restoredVisiblePixels": 21
+  },
+  {
+    "player": 2,
+    "frame": 2,
+    "side": 0,
+    "rects": [
+      [
+        4,
+        122,
+        58,
+        22
+      ]
+    ],
+    "detachedVisiblePixels": 885,
+    "restoredVisiblePixels": 832
+  }
+]

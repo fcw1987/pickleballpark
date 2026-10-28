@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { automaticRepairScenario } from './fixtures/smart-coach-scenarios.mjs';
+import { expectBuilderAddComplete } from './helpers/builder-navigation.mjs';
 
 test.use({ video: 'on' });
 
@@ -11,6 +12,7 @@ test('ordinary phone workflow records Add, Random, then visible Coach repair', a
 
   const chaptersBefore = await page.locator('.builder-chapter-list [data-action="chapter"]').count();
   await page.getByRole('button', { name: 'Add shot', exact: true }).click();
+  await expectBuilderAddComplete(page, chaptersBefore + 1);
   await expect(page.locator('.builder-chapter-list [data-action="chapter"]')).toHaveCount(chaptersBefore + 1);
 
   await page.getByLabel('Menu', { exact: true }).click();

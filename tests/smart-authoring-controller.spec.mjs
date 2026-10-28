@@ -1,9 +1,37 @@
 import {test,expect} from '@playwright/test';
-import {settleBuilderStartup} from './helpers/builder-navigation.mjs';
+import {expectBuilderAddComplete,settleBuilderStartup} from './helpers/builder-navigation.mjs';
 import {automaticRepairScenario,protectedPinScenario} from './fixtures/smart-coach-scenarios.mjs';
 
 test.use({serviceWorkers:'block'});
 test.beforeEach(async({page})=>{await page.goto('/');await settleBuilderStartup(page);});
+
+test('a delayed Add commits and selects the new shot before its next edit',async({page})=>{
+  const before=await page.evaluate(()=>{
+    const source=structuredClone(playBuilder.document);
+    const cancel=playBuilder.cancelPendingProposals;
+    playBuilder.cancelPendingProposals=function(){
+      this.cancelPendingProposals=cancel;
+      cancel.call(this);
+      // Delay this Add after its normal queue reset, preserving real counters.
+      this.addQueue=new Promise(resolve=>{window.releaseTestAdd=resolve;});
+    };
+    return source;
+  });
+  await page.getByRole('button',{name:'Add shot',exact:true}).click();
+  expect(await page.evaluate(()=>({shots:playBuilder.document.shots.length,pending:playBuilder.pendingAddCount,busy:playBuilder.proposalBusy})))
+    .toEqual({shots:before.shots.length,pending:1,busy:true});
+  await page.evaluate(()=>window.releaseTestAdd());
+  await expectBuilderAddComplete(page,before.shots.length+1);
+  const result=await page.evaluate(async()=>{
+    const appended=playBuilder.document.shots.at(-1).id,selected=playBuilder.selectedShotId;
+    await playBuilder.action('editShot',{field:'contactStyle',value:'backhand'});
+    return {appended,selected,document:playBuilder.document,valid:playBuilder.compiled.validShotCount};
+  });
+  expect(result.selected).toBe(result.appended);
+  expect(result.document.shots.slice(0,before.shots.length)).toEqual(before.shots);
+  expect(result.document.shots.at(-1).contactStyle).toBe('backhand');
+  expect(result.valid).toBe(before.shots.length+1);
+});
 
 test('five rapid Adds serialize against current source and create five Undo steps',async({page})=>{
   const result=await page.evaluate(async()=>{

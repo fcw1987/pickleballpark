@@ -1,7 +1,7 @@
 import {chooseShotFamily} from './helpers/builder-navigation.mjs';
 import {test,expect} from '@playwright/test';
 import {mkdir} from 'node:fs/promises';
-import {openCoachTools,openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
+import {expectBuilderAddComplete,openCoachTools,openIntentTab,openPlayFileMenu,switchCourtView} from './helpers/builder-navigation.mjs';
 test.use({launchOptions:process.env.IPHONE_RECORD?{slowMo:120}:{}});
 const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy&&playBuilder.view==='3d');};
 const edit=async page=>{const inspector=page.locator('.builder-inspector:not(.builder-inspector-collapsed)');if(!await inspector.isVisible())await page.getByRole('button',{name:'Edit shot',exact:true}).click();};
@@ -19,7 +19,7 @@ test('complete portrait custom rally and detailed movement survive retained view
  const target=await page.evaluate(()=>playBuilder.courtTools.project({x:6,y:37}));await page.touchscreen.tap(target.x,target.y);const exactTarget=await page.evaluate(()=>structuredClone(playBuilder.selectedShot.target));
  await chapter(page,2,'Return');const flight=await details(page,'Flight');await flight.getByLabel('Flight',{exact:true}).selectOption('high/soft');
  await chapter(page,3,'Drop');await edit(page);await chooseShotFamily(page,'Drive');
- await page.getByRole('button',{name:'Add shot',exact:true}).click();await edit(page);await chooseShotFamily(page,'Drop');
+ await page.getByRole('button',{name:'Add shot',exact:true}).click();await expectBuilderAddComplete(page,4);await edit(page);await chooseShotFamily(page,'Drop');
  expect(await page.evaluate(()=>playBuilder.compiled.validShotCount)).toBe(4);
  await finish(page);await page.getByRole('button',{name:'Play',exact:true}).click();await expect.poll(()=>page.evaluate(()=>playBuilder.session.clock.elapsed)).toBeGreaterThan(.7);await page.getByRole('button',{name:'Pause',exact:true}).click();
  expect(await page.evaluate(()=>playBuilder.session.clock.playing)).toBe(false);

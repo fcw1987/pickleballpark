@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectBuilderAddComplete } from './helpers/builder-navigation.mjs';
 
 test.describe('fresh visible builder correction review', () => {
   test.beforeEach(async ({ page }) => {
@@ -17,6 +18,7 @@ test.describe('fresh visible builder correction review', () => {
     await page.getByLabel('Menu', { exact: true }).click();
     await expect(chapters).toHaveJSProperty('open', false);
     await page.getByRole('button', { name: 'Add shot', exact: true }).click();
+    await expectBuilderAddComplete(page, 4);
     await expect(page.locator('.builder-inspector')).toHaveClass(/builder-inspector-collapsed/);
     await expect(page.locator('[data-shot-card]')).toBeVisible();
   });
