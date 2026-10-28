@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 import { createStarterDocument, documentFromTemplate, MAX_SHOTS, validateDocument } from '../play-document.js';
@@ -164,4 +165,29 @@ test('Random Rally yields between successful hits so cancellation remains observ
   assert.equal(result.ok, false);
   assert.match(result.reason, /cancelled/i);
   assert.ok(progress.includes(4));
+});
+
+
+test('Smart Add completes authored starter edits and imported examples without changing their prefixes', async () => {
+  const authored = createStarterDocument();
+  authored.title = 'Wide serve rally';
+  authored.shots[0].target.x = 7;
+  authored.shots[2].family = 'drive';
+  const imported = JSON.parse(readFileSync(new URL('../docs/builder/examples/eight-shot-drive-drop.json', import.meta.url), 'utf8'));
+  for (const original of [authored, imported]) for (const seed of [0, 1, 17, 42, 0xffffffff]) {
+    let source = clone(original);
+    assert.equal(evaluateCandidate(source).ok, true);
+    const count = original === authored ? 3 : 1;
+    for (let index = 0; index < count; index += 1) {
+      const before = clone(source);
+      const proposal = await proposeSmartAdd(source, { seed: (seed + index) >>> 0 });
+      assert.equal(proposal.ok, true, `${original.id}/${seed}/${index}: ${proposal.reason}`);
+      assert.deepEqual(source, before, 'the source remains unchanged while Add is evaluated');
+      assert.deepEqual(proposal.document.shots.slice(0, before.shots.length), before.shots);
+      source = proposal.document;
+    }
+    assert.equal(source.shots.length, original === authored ? 6 : 9);
+    assert.deepEqual(source.shots.slice(0, original.shots.length), original.shots);
+    assert.equal(evaluateCandidate(source).ok, true);
+  }
 });

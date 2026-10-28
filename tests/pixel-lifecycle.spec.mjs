@@ -117,6 +117,10 @@ test('legacy 3D compatibility: playing replay resumes its single scheduler after
 });
 
 test('legacy 3D compatibility: 30 editor to replay cycles preserve state and release owned lifecycle resources', async ({ page }) => {
+  // Native context loss takes about one second per fully rendered context on
+  // this macOS Chromium backend. Budget for all thirty real teardowns and the
+  // existing state/resource assertions, including fixture and tracing work.
+  test.setTimeout(60000);
   const baseline = await page.evaluate(() => {
     const board = pickleboard;
     board.setTokenPosition('player1', 8.25, 30.5);
@@ -152,10 +156,12 @@ test('legacy 3D compatibility: 30 editor to replay cycles preserve state and rel
       if(renderedFrames<1)throw Error(`No actual rendered frame on cycle ${cycle+1}`);
       const during={active:board.threeD.active,canvases:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size};
       if(!during.active||during.canvases!==1||during.players!==4)throw Error(`Invalid live renderer on cycle ${cycle+1}`);
+      const context=board.threeD.renderer.getContext(),teardownStart=performance.now();
       board.threeD.exit();board.plays.exit();
-      const after={active:board.threeD.active,scheduler:board.threeD.renderLoopId,canvases:document.querySelectorAll('#threeDCanvas canvas').length,snapshot:board.captureBoardState()};
-      if(after.active||after.scheduler!==null||after.canvases!==0||JSON.stringify(after.snapshot)!==JSON.stringify(baselineSnapshot))throw Error(`Renderer cleanup or board drift on cycle ${cycle+1}`);
-      result.push({during,renderedFrames,after});
+      const teardownMs=performance.now()-teardownStart;
+      const after={active:board.threeD.active,scheduler:board.threeD.renderLoopId,canvases:document.querySelectorAll('#threeDCanvas canvas').length,contextLost:context.isContextLost(),snapshot:board.captureBoardState()};
+      if(after.active||after.scheduler!==null||after.canvases!==0||!after.contextLost||JSON.stringify(after.snapshot)!==JSON.stringify(baselineSnapshot))throw Error(`Renderer cleanup or board drift on cycle ${cycle+1}`);
+      result.push({during,renderedFrames,after,teardownMs});
     }
     return result;
   },baseline.snapshot);
@@ -163,8 +169,11 @@ test('legacy 3D compatibility: 30 editor to replay cycles preserve state and rel
   for(const [cycle,state]of cycles.entries()){
     expect(state.renderedFrames,`actual rendered frames cycle ${cycle+1}`).toBeGreaterThan(0);
     expect(state.during,`live renderer cycle ${cycle+1}`).toEqual({active:true,canvases:1,players:4});
-    expect(state.after,`cleanup cycle ${cycle+1}`).toEqual({active:false,scheduler:null,canvases:0,snapshot:baseline.snapshot});
+    expect(state.after,`cleanup cycle ${cycle+1}`).toEqual({active:false,scheduler:null,canvases:0,contextLost:true,snapshot:baseline.snapshot});
   }
+  await test.info().attach('30-cycle-native-teardown-timing.json',{
+    body:JSON.stringify({cycles:cycles.length,totalTeardownMs:cycles.reduce((sum,cycle)=>sum+cycle.teardownMs,0),teardownMs:cycles.map(cycle=>cycle.teardownMs)}),contentType:'application/json'
+  });
 
   const final = await page.evaluate(() => ({
     listeners: { ...window.__pixelLifecycleListeners },

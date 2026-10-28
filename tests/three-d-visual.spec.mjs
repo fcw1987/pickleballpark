@@ -36,7 +36,7 @@ test('legacy 3D compatibility: visible athletes combine directional artwork with
   })));
   for (const player of Object.values(players)) {
     expect(player).toMatchObject({ reference: true, artwork: true, worldY: 0, phase: 'ready' });
-    expect(player.meshCount).toBe(14); // Directional body card, ten arm pieces, and three paddle pieces.
+    expect(player.meshCount).toBe(16); // Body, two original-art sleeve planes, ten arm pieces and three paddle pieces.
     expect(player.solidParts).toBe(13);
     expect([0, 1, 2, 3]).toContain(player.frame);
     expect([-1, 1]).toContain(player.mirror);

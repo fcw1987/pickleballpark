@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { QA_SCENARIOS } from './fixtures/qa-scenarios.mjs';
+import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 
 for (const scenario of QA_SCENARIOS) {
   test(`catalog ${scenario.id}: real view contacts, camera independence and source safety`, async ({ page }) => {
@@ -8,8 +9,10 @@ for (const scenario of QA_SCENARIOS) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/?qa-scenario-browser=1');
     await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+    await installReferenceRigContract(page);
     const result = await page.evaluate(async ({ document: source, expected }) => {
       const { sampleActorWorldPosition, sampleActorPresentation } = await import('./three-d-presentation.js');
+      const { samplePlayState } = await import('./three-d-core.js');
       const b = playBuilder;
       b.loadDocument(source);
       if (b.view !== '3d') await b.switchView('3d');
@@ -21,6 +24,7 @@ for (const scenario of QA_SCENARIOS) {
       let contacts = 0;
       let worldComparisons = 0;
       let instructionalComparisons = 0;
+      let overheadProfileSamples = 0;
       const close = (left, right, label, tolerance = 1e-7) => {
         if (!Number.isFinite(left) || !Number.isFinite(right) || Math.abs(left - right) > tolerance)
           failures.push({ label, left, right });
@@ -49,7 +53,9 @@ for (const scenario of QA_SCENARIOS) {
         // Assert each renderer's exact route instead of equating those routes.
         for (const [id, state] of Object.entries(tactical)) {
           const position = sampleActorWorldPosition(segment, id, segment.contactTime, source.players[id].handedness, true);
-          [position.x, position.y, position.z].forEach((value, axis) => close(state.position[axis], value, `${id}: instructional 3D axis ${axis}`));
+          const presentation = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: id, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness: source.players[id].handedness });
+          const jump = window.__referenceRigContract.expectedJump(presentation);
+          [position.x, position.y + jump, position.z].forEach((value, axis) => close(state.position[axis], value, `${id}: instructional 3D axis ${axis}`));
           instructionalComparisons++;
         }
         for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
@@ -69,6 +75,9 @@ for (const scenario of QA_SCENARIOS) {
             const sector = (Math.round(Math.atan2(before.facing.x * dz - before.facing.z * dx,
               before.facing.x * dx + before.facing.z * dz) / (Math.PI / 4)) + 8) % 8;
             const [frame, mirror] = [[0,1],[1,1],[2,1],[3,1],[3,1],[3,-1],[2,-1],[1,-1]][sector];
+            const alignment = window.__referenceRigContract.cameraAlignment(actor, viewer.camera);
+            for (const property of ['forwardError', 'headingError', 'rollError']) close(alignment[property], 0, `${id}: ${camera} ${property}`, 1e-6);
+            close(alignment.elevation, alignment.expectedElevation, `${id}: ${camera} exact capped elevation`, 1e-6);
             const data = actor.userData, map = data.body.material.map;
             const actualFacing = sampleActorPresentation({instructionalMovement:true, segment, timeline:viewer.timeline, seconds:time, playerId:id, localTime:segment.contactTime, cameraPosition:viewer.camera.position, cameraTarget:viewer.cameraTarget, handedness:source.players[id].handedness}).bodyFacing;
             close(data.animation.bodyFacing.x, actualFacing.x, `${id}: actual tactical facing x`);
@@ -87,6 +96,29 @@ for (const scenario of QA_SCENARIOS) {
               failures.push({ label: `${id}: camera changed tactical facing` });
           }
         }
+        // The overhead leaves the court only during its stroke, peaking at
+        // contact and landing by recovery. Inspect actual roots throughout that
+        // profile, deriving the height from presentation inputs, never rig metadata.
+        const strikerId = segment.shotSemantics.playerId, handedness = source.players[strikerId].handedness;
+        const atContact = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: strikerId, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness });
+        if (window.__referenceRigContract.expectedJump(atContact) > 0) {
+          const profile = segment.shotSemantics.profile;
+          for (const ratio of [0, profile.contactRatio / 2, profile.contactRatio, (profile.contactRatio + profile.recoverRatio) / 2, profile.recoverRatio, (profile.recoverRatio + 1) / 2, 1]) {
+            const seconds = time + profile.duration * (ratio - profile.contactRatio);
+            if (seconds < 0 || seconds > viewer.timeline.duration) continue;
+            b.seek(seconds);
+            // Preparation can belong to the preceding flight segment. Resolve
+            // the timeline sample so the check spans the actual contact boundary.
+            const activeSegment = samplePlayState(viewer.timeline, seconds).segment;
+            const localTime = Math.max(0, Math.min(activeSegment.duration, seconds - activeSegment.startTime));
+            const sample = sampleActorPresentation({ instructionalMovement: true, segment: activeSegment, timeline: viewer.timeline, seconds, playerId: strikerId, localTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness });
+            const jump = window.__referenceRigContract.expectedJump(sample), position = viewer.playerObjects.get(strikerId).position;
+            close(position.x, sample.worldPosition.x, `${strikerId}: overhead profile tactical x`);
+            close(position.z, sample.worldPosition.z, `${strikerId}: overhead profile tactical z`);
+            close(position.y, sample.worldPosition.y + jump, `${strikerId}: overhead profile y`);
+            overheadProfileSamples++;
+          }
+        }
         await b.switchView('2d');
         b.seek(time);
         close(b.board.tokens.ball.x, (ball[0] / .3048) + 10, '2D/3D ball x');
@@ -102,7 +134,7 @@ for (const scenario of QA_SCENARIOS) {
         viewer.ballObject.position.toArray().forEach((value, axis) => close(value, ball[axis], 'seek history independence'));
       }
       b.pause(); viewer.setCamera('overhead');
-      return { invalid: false, failures, contacts, worldComparisons, instructionalComparisons,
+      return { invalid: false, failures, contacts, worldComparisons, instructionalComparisons, overheadProfileSamples,
         sourcePreserved: initial === JSON.stringify(b.document), historyPreserved: history === JSON.stringify(b.history),
         live: viewer.active && !viewer.renderer.getContext().isContextLost(),
         canvases: document.querySelectorAll('#threeDViewer canvas').length };
@@ -116,6 +148,7 @@ for (const scenario of QA_SCENARIOS) {
       expect(result.contacts).toBe(scenario.document.shots.length);
       expect(result.worldComparisons).toBe(result.contacts * 4);
       expect(result.instructionalComparisons).toBe(result.contacts * 4);
+      expect(result.overheadProfileSamples).toBe(scenario.document.shots.filter(shot => shot.family === 'overhead').length * 7);
       expect(result.historyPreserved).toBe(true);
       expect(result.live).toBe(true);
       expect(result.canvases).toBe(1);

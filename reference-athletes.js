@@ -13,9 +13,34 @@ export function partitionReferenceAtlas(image,metadata,createCanvas=()=>document
  }
  return {image:body,sleeves};
 }
-export async function loadReferenceAthleteAssets({signal}={}){
- const image=new Image();image.src=SOURCE;await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Unable to load reference athlete artwork'));if(image.complete&&image.naturalWidth)resolve();signal?.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true});});
- const response=await fetch(new URL('./assets/reference-athletes/metadata-v2.json',import.meta.url),{signal});if(!response.ok)throw new Error('Missing athlete atlas metadata');const metadata=await response.json();return {...partitionReferenceAtlas(image,metadata),sourceImage:image,source:SOURCE,metadata};
+let sharedAssetLoad=null;
+function sharedReferenceAthleteAssets(){
+ if(sharedAssetLoad)return sharedAssetLoad;
+ const imageReady=new Promise((resolve,reject)=>{
+  const image=new Image(),finish=error=>{image.onload=null;image.onerror=null;error?reject(error):resolve(image);};
+  image.onload=()=>finish();image.onerror=()=>finish(new Error('Unable to load reference athlete artwork'));image.src=SOURCE;
+  if(image.complete&&image.naturalWidth)finish();
+ });
+ // The immutable CPU artwork belongs to the module; GPU textures/materials
+ // remain owned by each renderer and are recreated/disposed on every entry.
+ const pending=Promise.all([imageReady,fetch(new URL('./assets/reference-athletes/metadata-v2.json',import.meta.url)).then(async response=>{if(!response.ok)throw new Error('Missing athlete atlas metadata');return response.json();})]).then(([sourceImage,metadata])=>{
+  const partition=partitionReferenceAtlas(sourceImage,metadata);return Object.freeze({...partition,sleeves:Object.freeze(partition.sleeves),sourceImage,source:SOURCE,metadata});
+ });
+ sharedAssetLoad=pending;
+ pending.catch(()=>{if(sharedAssetLoad===pending)sharedAssetLoad=null;});
+ return pending;
+}
+export function loadReferenceAthleteAssets({signal}={}){
+ if(signal?.aborted)return Promise.reject(signal.reason??new DOMException('Aborted','AbortError'));
+ const pending=sharedReferenceAthleteAssets();if(!signal)return pending;
+ // Cancellation belongs to this consumer. Aborting an obsolete 3D entry must
+ // not cancel another entry or poison the shared image/partition cache.
+ return new Promise((resolve,reject)=>{
+  let listening=true;const cleanup=()=>{if(listening){listening=false;signal.removeEventListener('abort',abort);}},abort=()=>{cleanup();reject(signal.reason??new DOMException('Aborted','AbortError'));};
+  signal.addEventListener('abort',abort,{once:true});
+  pending.then(assets=>{cleanup();resolve(assets);},error=>{cleanup();reject(error);});
+  if(signal.aborted)abort();
+ });
 }
 export class ReferenceAthleteResources{
  constructor(assets){this.assets=assets;this.source=new THREE.Source(assets.image);this.sleeveSources=(assets.sleeves||[assets.image,assets.image]).map(im=>new THREE.Source(im));this.disposed=false;this.textures=new Map();this.materials=new Set();this.geometries=new Set();}

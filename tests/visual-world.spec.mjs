@@ -2,6 +2,7 @@
 import { expect, test } from '@playwright/test';
 import { fitCameraPreset } from '../three-d-core.js';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 
 test('legacy 3D compatibility: camera fitting expands narrow views without changing preset sight lines', () => {
@@ -26,6 +27,7 @@ async function openWorld(page, viewport) {
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   await page.waitForFunction(()=>pickleboard.threeD.worldAssetsReady);
   await installDimensionalAudit(page);
+  await installReferenceRigContract(page);
   await page.evaluate(() => {
     window.__auditDimensionalWorld = ({ includeTrajectory = false } = {}) => {
       const viewer = window.pickleboard.threeD;
@@ -99,7 +101,7 @@ test('legacy 3D compatibility: reference world has original alpha artwork, solid
       root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
       const audit=window.__athleteAudit(root),body=root.userData.body,face=root.userData.paddle.children[1];
       return { reference: root.userData.referenceAthlete, positiveScale: root.scale.toArray().every(n => n > 0),
-        originalArtwork: body.material.map.image.naturalWidth>0&&body.material.alphaTest===.08,
+        originalArtwork: window.__referenceRigContract.artwork(root), alphaTest: body.material.alphaTest,
         artworkError:audit.artworkError(),
         solidPaddle:face.geometry.attributes.position.count>0&&!face.material.transparent&&face.material.opacity===1,
         depthTested: meshes.every(mesh => mesh.material.depthTest && mesh.material.depthWrite),
@@ -122,7 +124,8 @@ test('legacy 3D compatibility: reference world has original alpha artwork, solid
   expect(world.paintedTextures).toBeGreaterThan(0);
   expect(world.players).toHaveLength(4);
   for (const player of world.players) {
-    expect(player).toMatchObject({ reference: true, positiveScale: true, originalArtwork: true, solidPaddle: true, depthTested: true, owned: true });
+    expect(player).toMatchObject({ reference: true, positiveScale: true, alphaTest: .08, solidPaddle: true, depthTested: true, owned: true });
+    expect(player.originalArtwork).toEqual({ sourceLoaded: true, dimensions: true, identity: true, visibleOriginalPixels: true });
     expect(player.artworkError).toBeLessThanOrEqual(1e-6);
     for (const bottom of player.shoeBottoms) expect(Math.abs(bottom)).toBeLessThanOrEqual(0.01);
   }

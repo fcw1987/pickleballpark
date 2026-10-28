@@ -1,6 +1,7 @@
 // Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 
 async function openViewer(page) {
   await page.goto('/index.html?workspace=planner&second-render=1');
@@ -8,6 +9,7 @@ async function openViewer(page) {
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
   await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+  await installReferenceRigContract(page);
 }
 
 test('legacy 3D compatibility: 3D renderer uses antialiasing and native DPR up to the quality cap', async ({ browser }) => {
@@ -42,7 +44,7 @@ test('legacy 3D compatibility: directional artwork and solid athlete meshes own 
     const ownedGeometry = meshes.every(mesh => resources.geometries.has(mesh.geometry));
     const ownedMaterial = meshes.every(mesh => [...resources.materials].includes(mesh.material));
     const materials = meshes.every(mesh => mesh.material.type === 'MeshBasicMaterial' && mesh.material.depthTest && mesh.material.depthWrite);
-    const artwork = [...viewer.playerObjects.values()].every(root => root.userData.body.material.map === resources.textures.get(`${root.userData.player}/${root.userData.animation.frame}`));
+    const artwork = [...viewer.playerObjects.values()].map(root => window.__referenceRigContract.artwork(root));
     const tracked = [...resources.geometries, ...resources.materials, ...resources.textures.values()];
     const counts = tracked.map(() => 0);
     tracked.forEach((resource, i) => resource.addEventListener('dispose', () => counts[i]++));
@@ -50,28 +52,32 @@ test('legacy 3D compatibility: directional artwork and solid athlete meshes own 
     resources.dispose(); // A second lifecycle cleanup must not redispose released GPU resources.
     return { ownedGeometry, ownedMaterial, materials, artwork, meshCount: meshes.length, counts, remaining: resources.geometries.size + resources.materials.size + resources.textures.size };
   });
-  expect(result).toMatchObject({ ownedGeometry: true, ownedMaterial: true, materials: true, artwork: true, remaining: 0 });
-  expect(result.meshCount).toBe(56);
+  expect(result).toMatchObject({ ownedGeometry: true, ownedMaterial: true, materials: true, remaining: 0 });
+  expect(result.meshCount).toBe(64); // Body, two original-art sleeve planes, ten arm pieces and three paddle pieces per athlete.
+  for (const artwork of result.artwork) expect(artwork).toEqual({ sourceLoaded: true, dimensions: true, identity: true, visibleOriginalPixels: true });
   expect(result.counts.every(count => count === 1)).toBe(true);
 });
 
 test('legacy 3D compatibility: articulated strokes remain upright, continuously positioned, grounded, and contact calibrated', async ({ page }) => {
   await openViewer(page);
   await installDimensionalAudit(page);
-  const audit = await page.evaluate(() => {
+  const audit = await page.evaluate(async () => {
+    const { sampleActorPresentation } = await import('./three-d-presentation.js');
     const viewer = window.pickleboard.threeD;
     return viewer.timeline.segments.filter(segment => segment.shotSemantics).map(segment => {
       const actor = viewer.playerObjects.get(segment.shotSemantics.playerId);
       const samples = [];
       for (let offset = -0.12; offset <= 0.1201; offset += 0.02) {
         viewer.applyAtTime(segment.startTime + segment.contactTime + offset);
+        const presentation = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: segment.startTime + segment.contactTime + offset, playerId: segment.shotSemantics.playerId, localTime: segment.contactTime + offset, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness: actor.userData.handedness });
         samples.push({
           position: actor.position.toArray(),
           paddle: actor.userData.paddleFaceWorld.toArray(),
           ball: viewer.ballObject.position.toArray(),
           frame: actor.userData.animation.phase,
           groundY: actor.position.y,
-          cameraAlignment: actor.userData.visual.quaternion.angleTo(viewer.camera.quaternion),
+          expectedY: presentation.worldPosition.y + window.__referenceRigContract.expectedJump(presentation),
+          cameraAlignment: window.__referenceRigContract.cameraAlignment(actor, viewer.camera),
           shoeBottoms: window.__athleteAudit(actor).shoeBottoms,
           artworkError: window.__athleteAudit(actor).artworkError()
         });
@@ -80,7 +86,13 @@ test('legacy 3D compatibility: articulated strokes remain upright, continuously 
     });
   });
   for (const shot of audit) {
-    expect(shot.samples.every(sample => sample.groundY === 0 && sample.cameraAlignment < 1e-6)).toBe(true);
+    for (const sample of shot.samples) {
+      expect(sample.groundY).toBe(sample.expectedY);
+      expect(sample.cameraAlignment.forwardError).toBeLessThan(1e-6);
+      expect(sample.cameraAlignment.headingError).toBeLessThan(1e-6);
+      expect(sample.cameraAlignment.rollError).toBeLessThan(1e-6);
+      expect(Math.abs(sample.cameraAlignment.elevation - sample.cameraAlignment.expectedElevation)).toBeLessThan(1e-6);
+    }
     expect(new Set(shot.samples.map(sample => sample.frame)).size).toBeGreaterThan(1);
     for (const sample of shot.samples) {
       expect(sample.artworkError).toBeLessThan(2e-6);
