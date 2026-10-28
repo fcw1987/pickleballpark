@@ -1,12 +1,21 @@
+import { readFileSync } from 'node:fs';
+
+const artworkCalibration = {
+  cuffs: JSON.parse(readFileSync(new URL('../fixtures/reference-sleeve-measurements.json', import.meta.url), 'utf8')),
+  hair: JSON.parse(readFileSync(new URL('../fixtures/reference-sleeve-preserved-hair.json', import.meta.url), 'utf8'))
+};
+
 // Independent browser checks for the approved original-art sleeve rig.
 // Serialize the factory because the static server does not serve .mjs as modules.
-export function referenceRigBrowserContract() {
+export function referenceRigBrowserContract(calibration = { cuffs: null, hair: [] }) {
   const sourcePixels = new WeakMap();
   const sourceFor = image => {
     if (!sourcePixels.has(image)) {
       const canvas = document.createElement('canvas');
       canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
+      // Match the partition canvases' default backing store. Linux WebKit
+      // read-frequent canvases unpremultiply some channels differently.
+      const context = canvas.getContext('2d');
       context.drawImage(image, 0, 0);
       sourcePixels.set(image, context.getImageData(0, 0, canvas.width, canvas.height));
     }
@@ -51,27 +60,57 @@ export function referenceRigBrowserContract() {
         && part.material.map.image.width === source.naturalWidth && part.material.map.image.height === source.naturalHeight)
         && x >= 0 && y >= 0 && x + width <= original.width && y + height <= original.height;
       const identity = parts.every((part, index) => part.material.map === data.resources.textures.get(`${data.player}/${data.animation.frame}/${index - 1}`)
-        && part.material.map.image === (index === 0 ? assets.image : assets.sleeves[index - 1]));
-      const visibleOriginalPixels = dimensions && parts.every(part => {
-        const painted = part.material.map.image.getContext('2d', { willReadFrequently: true }).getImageData(x, y, width, height).data;
-        // The approved PNG uses antialiased partial alpha, including sleeves
-        // with no alpha=255 pixel. Audit every pixel actually admitted by the
-        // material's alpha test, preserving its complete source RGBA value.
-        const threshold = Math.max(1, Math.ceil(part.material.alphaTest * 255));
-        let opaque = 0;
-        for (let row = 0; row < height; row++) for (let col = 0; col < width; col++) {
-          const at = (row * width + col) * 4, originalAt = ((y + row) * original.width + x + col) * 4;
-          if (painted[at + 3] < threshold) continue;
-          opaque++;
-          for (let channel = 0; channel < 4; channel++) if (painted[at + channel] !== original.data[originalAt + channel]) return false;
+        && part.material.map.image === (index === 0 ? assets.image : assets.sleeves[index - 1])
+        && part.material.map.offset.x === x / original.width
+        && part.material.map.offset.y === 1 - (y + height) / original.height
+        && part.material.map.repeat.x === width / original.width
+        && part.material.map.repeat.y === height / original.height);
+      const threshold = Math.ceil(.08 * 255);
+      const painted = dimensions ? parts.map(part => part.material.map.image.getContext('2d').getImageData(x, y, width, height).data) : [];
+      const sameSource = (pixels, at, sourceAt) => [0, 1, 2, 3].every(channel => pixels[at + channel] === original.data[sourceAt + channel]);
+      const cuffs = calibration.cuffs?.[data.player]?.[data.animation.frame];
+      let visibleOriginalPixels = dimensions;
+      if (dimensions) {
+        const counts = [0, 0, 0];
+        for (let row = 0; row < height && visibleOriginalPixels; row++) for (let col = 0; col < width; col++) {
+          const at = (row * width + col) * 4, sourceAt = ((y + row) * original.width + x + col) * 4;
+          const sourceVisible = original.data[sourceAt + 3] >= threshold;
+          for (let part = 0; part < parts.length; part++) if (painted[part][at + 3] >= threshold) {
+            counts[part]++;
+            // Exact complete RGBA, including the source alpha, stays required.
+            if (!sameSource(painted[part], at, sourceAt)
+              || (part > 0 && (row < height * .44 || row >= height * .66))) visibleOriginalPixels = false;
+          }
+          // Every visible original pixel must survive in the partition. This
+          // rejects holes that a check of only surviving pixels would miss.
+          if (sourceVisible && !painted.some(pixels => pixels[at + 3] >= threshold && sameSource(pixels, at, sourceAt))) visibleOriginalPixels = false;
+          // Head, torso above the sleeves, shorts and shoes stay on the body.
+          if (sourceVisible && (row < height * .44 || row >= height * .66) && !sameSource(painted[0], at, sourceAt)) visibleOriginalPixels = false;
+          // Independently measured cuff cores must remain on their own sleeve,
+          // including overlap pixels that may also exist in the body canvas.
+          for (let side = 0; side < 2; side++) {
+            const cuff = cuffs?.[side];
+            if (!cuff?.visible || !sourceVisible) continue;
+            const [left, top, right, bottom] = cuff.bounds;
+            if (col >= left && col <= right && row >= top && row <= bottom && !sameSource(painted[side + 1], at, sourceAt)) visibleOriginalPixels = false;
+          }
         }
-        return !part.visible || opaque > 0;
-      });
+        if (parts.some((part, index) => part.visible && counts[index] === 0)) visibleOriginalPixels = false;
+        for (const hair of calibration.hair.filter(item => item.player === data.player && item.frame === data.animation.frame)) {
+          for (const [left, top, w, h] of hair.rects) for (let row = top; row < top + h; row++) for (let col = left; col < left + w; col++) {
+            const at = (row * width + col) * 4, sourceAt = ((y + row) * original.width + x + col) * 4;
+            if (original.data[sourceAt + 3] >= threshold && !sameSource(painted[0], at, sourceAt)) visibleOriginalPixels = false;
+            if (painted[hair.side + 1][at + 3] !== 0) visibleOriginalPixels = false;
+          }
+        }
+      }
       return { sourceLoaded, dimensions, identity, visibleOriginalPixels };
     }
   };
 }
 
 export async function installReferenceRigContract(page) {
-  await page.evaluate(source => { window.__referenceRigContract = new Function(`return (${source})();`)(); }, referenceRigBrowserContract.toString());
+  await page.evaluate(({ source, calibration }) => {
+    window.__referenceRigContract = new Function('calibration', `return (${source})(calibration);`)(calibration);
+  }, { source: referenceRigBrowserContract.toString(), calibration: artworkCalibration });
 }
