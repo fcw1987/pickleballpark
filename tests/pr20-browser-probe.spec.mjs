@@ -63,16 +63,16 @@ test('diagnostic: all original athlete atlas frames record exact RGBA provenance
           const record={part:part===0?'body':`sleeve${part-1}`,visible:part===0||regions[player][frame][part-1].visible,threshold,contextAttributes:actualContext.getContextAttributes?.()??null,
             canvasSize:[object.material.map.image.width,object.material.map.image.height],texture:{offset:object.material.map.offset.toArray(),repeat:object.material.map.repeat.toArray(),resourceKey:`${player}/${frame}/${part-1}`,identity:object.material.map===data.resources.textures.get(`${player}/${frame}/${part-1}`)},
             visiblePixels:0,alphaHistogram:{},comparisons:{},hair:[]};
-          for(const name of Object.keys(references))record.comparisons[name]={allPixelMismatches:0,visiblePixelMismatches:0,premultipliedMismatches:0,maxChannelDifference:[0,0,0,0],first20:[]};
+          for(const name of Object.keys(references))record.comparisons[name]={allPixelMismatches:0,visiblePixelMismatches:0,premultipliedMismatches:0,visiblePremultipliedMismatches:0,maxChannelDifference:[0,0,0,0],visibleMaxChannelDifference:[0,0,0,0],first20:[],first20Visible:[]};
           for(let row=0;row<height;row++)for(let col=0;col<width;col++) {
             const painted=rgba(actual,col,row),visible=painted[3]>=threshold;record.alphaHistogram[painted[3]]=(record.alphaHistogram[painted[3]]||0)+1;if(visible)record.visiblePixels++;
             for(const [name,reference]of Object.entries(references)) {
               const original=rgba(reference,x+col,y+row),summary=record.comparisons[name];
               if(!painted.some((value,c)=>value!==original[c]))continue;
               summary.allPixelMismatches++;if(visible)summary.visiblePixelMismatches++;
-              if(painted[3]!==original[3]||[0,1,2].some(c=>Math.round(painted[c]*painted[3]/255)!==Math.round(original[c]*original[3]/255)))summary.premultipliedMismatches++;
-              painted.forEach((value,c)=>summary.maxChannelDifference[c]=Math.max(summary.maxChannelDifference[c],Math.abs(value-original[c])));
-              if(summary.first20.length<20)summary.first20.push({global:[x+col,y+row],framePixel:[col,row],visible,painted,original});
+              if(painted[3]!==original[3]||[0,1,2].some(c=>Math.round(painted[c]*painted[3]/255)!==Math.round(original[c]*original[3]/255))){summary.premultipliedMismatches++;if(visible)summary.visiblePremultipliedMismatches++;}
+              painted.forEach((value,c)=>{summary.maxChannelDifference[c]=Math.max(summary.maxChannelDifference[c],Math.abs(value-original[c]));if(visible)summary.visibleMaxChannelDifference[c]=Math.max(summary.visibleMaxChannelDifference[c],Math.abs(value-original[c]));});
+              const pair={global:[x+col,y+row],framePixel:[col,row],visible,painted,original};if(summary.first20.length<20)summary.first20.push(pair);if(visible&&summary.first20Visible.length<20)summary.first20Visible.push(pair);
             }
           }
           for(const preserved of entry.preservedHair)for(const rect of preserved.rects){const[hx,hy,hw,hh]=rect;let visiblePixels=0;for(let row=hy;row<hy+hh;row++)for(let col=hx;col<hx+hw;col++)if(rgba(actual,col,row)[3]>=threshold)visiblePixels++;record.hair.push({rect,visiblePixels});}
@@ -86,7 +86,7 @@ test('diagnostic: all original athlete atlas frames record exact RGBA provenance
   }, { contractSource: referenceRigBrowserContract.toString(), hair });
   // Keep the actual encoded PNG RGBA alongside every mismatch: browser canvas
   // color conversion/readback must not be mistaken for changed source bytes.
-  for(const frame of report.frames)for(const part of frame.parts)for(const summary of Object.values(part.comparisons))for(const pair of summary.first20){const[x,y]=pair.global,at=(y*originalPNG.width+x)*4;pair.encodedPNG=Array.from(originalPNG.data.slice(at,at+4));}
+  for(const frame of report.frames)for(const part of frame.parts)for(const summary of Object.values(part.comparisons))for(const pair of [...summary.first20,...summary.first20Visible]){const[x,y]=pair.global,at=(y*originalPNG.width+x)*4;pair.encodedPNG=Array.from(originalPNG.data.slice(at,at+4));}
   report.engine=browserName;report.expectedFrames=16;report.expectedParts=48;
   await mkdir('release-results', {recursive:true});
   const path=`release-results/artwork-linux-pixels-${browserName}.json`;await writeFile(path,JSON.stringify(report,null,2)+'\n');await testInfo.attach('all-original-atlas-pixel-pairs',{path,contentType:'application/json'});
@@ -94,6 +94,6 @@ test('diagnostic: all original athlete atlas frames record exact RGBA provenance
     mismatches:report.frames.flatMap(f=>f.parts.filter(p=>p.comparisons.sourceFrequent.visiblePixelMismatches||!p.visiblePixels&&p.visible).map(p=>({player:f.player,frame:f.frame,part:p.part,visiblePixels:p.visiblePixels,source:p.comparisons.sourceFrequent.visiblePixelMismatches,canonical:p.comparisons.canonicalDefault.allPixelMismatches})))},null,2));
   console.log(JSON.stringify({sourceContexts:report.sourceContexts,gpu:report.gpu,
     actualRGBAExamples:report.frames.flatMap(frame=>frame.parts.map(part=>({player:frame.player,frame:frame.frame,part:part.part,contextAttributes:part.contextAttributes,
-      comparisons:Object.fromEntries(Object.entries(part.comparisons).map(([name,value])=>[name,{visiblePixelMismatches:value.visiblePixelMismatches,premultipliedMismatches:value.premultipliedMismatches,maxChannelDifference:value.maxChannelDifference,firstThree:value.first20.slice(0,3)}]))})))},null,2));
+      comparisons:Object.fromEntries(Object.entries(part.comparisons).map(([name,value])=>[name,{visiblePixelMismatches:value.visiblePixelMismatches,visiblePremultipliedMismatches:value.visiblePremultipliedMismatches,visibleMaxChannelDifference:value.visibleMaxChannelDifference,firstThreeVisible:value.first20Visible.slice(0,3)}]))})))},null,2));
   expect(report.frames).toHaveLength(16);expect(report.frames.reduce((sum,f)=>sum+f.parts.length,0)).toBe(48);
 });
