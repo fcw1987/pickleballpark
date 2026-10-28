@@ -221,10 +221,35 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   await page.locator('.builder-document-menu > summary').click();
   await page.locator('[data-action="new"]').click();
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(0);
+  if (process.env.QA_PACKAGE_SMART_DIAGNOSTICS) await page.evaluate(() => {
+    window.__packageAddTrace = [];
+    const builder = playBuilder, add = builder.queueSmartAdd.bind(builder);
+    builder.queueSmartAdd = (options = {}) => {
+      const seed = options.seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
+      const entry = { seed, started: performance.now(), before: structuredClone(builder.document) };
+      window.__packageAddTrace.push(entry);
+      return add({ ...options, seed }).then(result => {
+        Object.assign(entry, { result, milliseconds: performance.now() - entry.started,
+          pending: builder.pendingAddCount, busy: builder.proposalBusy, message: builder.message,
+          shots: builder.document.shots.length, saveError: builder.saveError });
+        return result;
+      });
+    };
+  });
   for (let index = 1; index <= 5; index += 1) {
     await page.getByRole('button', { name: 'Add shot' }).click();
-    await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(index);
+    try { await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(index); }
+    catch (error) {
+      const state = await page.evaluate(key => ({ pending: playBuilder.pendingAddCount,
+        busy: playBuilder.proposalBusy, message: playBuilder.message, sourceIntent: playBuilder.sourceIntent,
+        proposalGeneration: playBuilder.proposalGeneration, source: structuredClone(playBuilder.document),
+        valid: playBuilder.compiled.validShotCount, saveError: playBuilder.saveError,
+        saved: localStorage.getItem(key), trace: window.__packageAddTrace ?? null }), expectedSavedKey);
+      writeFileSync('release-results/package-add-failure.json', JSON.stringify({ expected: index, state }, null, 2));
+      throw error;
+    }
   }
+  if (process.env.QA_PACKAGE_SMART_DIAGNOSTICS) writeFileSync('release-results/package-add-trace.json', JSON.stringify(await page.evaluate(() => window.__packageAddTrace), null, 2));
   const adds = await page.evaluate(() => ({
     shots: playBuilder.document.shots.length,
     valid: playBuilder.compiled.validShotCount,
@@ -485,7 +510,9 @@ if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package v
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
 const legacyScopePath = '/pickleboard/';
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.ttf': 'font/ttf' };
-for (const [browserName, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
+const browsers = [['chromium', chromium], ['webkit', webkit]];
+if (process.env.QA_PACKAGE_BROWSER && !browsers.some(([name]) => name === process.env.QA_PACKAGE_BROWSER)) throw Error('Unknown package verification browser');
+for (const [browserName, browserType] of browsers.filter(([name]) => !process.env.QA_PACKAGE_BROWSER || name === process.env.QA_PACKAGE_BROWSER)) {
   for (const mode of modes) {
     if (mode === 'path-migration' || mode === 'branding-path-migration') {
       try { results.push(await verifyPathMigration(browserName, browserType, mode)); }

@@ -1,7 +1,7 @@
 // Compile authored intent into the existing production Play and event timeline.
 import { compilePlayTimeline, FEET_TO_METERS } from './three-d-core.js';
 import { isInServiceBox, serviceBoxForServer, isInNonVolleyZone } from './court-geometry.js';
-import { validateRallyRules } from './rally-rules.js';
+import { validateRallyRules, NVZ_MODEL_LIMITS_NOTE } from './rally-rules.js';
 import { documentCompatibilitySignature, validateDocument, movementProtection } from './play-document.js';
 import { sampleActorWorldPosition } from './three-d-presentation.js';
 import { resolveServiceContext, serviceIdentityIssues, receivingServiceBox } from './rally-state.js';
@@ -273,7 +273,7 @@ function makePlay(document) {
     const bounces = document.opening === 'serve' && index < 2 ? 1 : nextKind === 'volley' ? 0 : 1;
     const metadata = trajectoryMetadata(recipe);
     const kind = contactKind(recipe);
-    if (kind === 'volley' && isInNonVolleyZone(endPositions[recipe.hitter])) findings.push(finding('context', 'warning', recipe.id, 'This volley is followed by movement into the non-volley zone. The source does not record a balance-recovery event, so momentum legality cannot be certified. Keep the movement outside the zone or demonstrate recovery before entry.'));
+    if (kind === 'volley' && isInNonVolleyZone(endPositions[recipe.hitter])) findings.push(finding('context', 'warning', recipe.id, `This volley is followed by movement into the non-volley zone. ${NVZ_MODEL_LIMITS_NOTE}`));
     const strokeSide = autoStrokeSide(recipe, contact, document.players, actorStance);
     const shot = {
       from: copy(contact), to: actualTarget, intendedTarget: copy(recipe.target), type: strokeFor(recipe), stroke: strokeFor(recipe), playerId: recipe.hitter,

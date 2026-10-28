@@ -10,6 +10,7 @@ import { mountShotTimeline } from './shot-timeline.js';
 import { createPlayerCoverageControl } from './player-coverage-ui.js';
 import { MAX_SHOTS } from './play-document.js';
 import { getPlayerLabels, playerChoices, playerLabel as stablePlayerLabel } from './player-labels.js';
+import { NVZ_MODEL_LIMITS_NOTE } from './rally-rules.js';
 
 const FAMILIES = [
   ['serve', 'Serve'], ['return', 'Return'], ['drive', 'Drive'], ['drop', 'Drop'],
@@ -471,6 +472,10 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const playersGroup = el('section', 'builder-control-group builder-group-players'); playersGroup.dataset.detailGroup = 'players'; playersGroup.setAttribute('role', 'tabpanel'); playersGroup.setAttribute('aria-label', 'Players settings'); playersGroup.classList.toggle('is-active', detailGroup === 'players'); playersGroup.append(el('h3', '', 'Players'));
       const receiver = select('Receiver', 'edit-receiver', [['auto', 'Automatic'], ...players]); receiver.querySelector('select').value = selected.receiver || 'auto'; playersGroup.append(receiver);
       const contactStyle = select('Contact style', 'edit-contactStyle', [['auto', 'Automatic'], ['forehand', 'Forehand'], ['backhand', 'Backhand'], ['short-hop', 'Short hop']]); contactStyle.querySelector('select').value = selected.contactStyle || 'auto'; playersGroup.append(contactStyle);
+      if (['volley', 'reset', 'overhead'].includes(selected.family) && selected.contactStyle !== 'short-hop') {
+        const limits = el('p', 'builder-selected-summary', NVZ_MODEL_LIMITS_NOTE);
+        limits.id = 'builder-nvz-model-limits'; contactStyle.querySelector('select').setAttribute('aria-describedby', limits.id); playersGroup.append(limits);
+      }
       if (selected.family === 'serve') {
         const serveMethod = select('Serve method', 'edit-serveMethod', [['drop', 'Drop serve'], ['volley', 'Volley serve']]); serveMethod.querySelector('select').value = selected.serveMethod || 'drop'; playersGroup.append(serveMethod);
         if (shots[0] === selected && doc.opening === 'serve') {

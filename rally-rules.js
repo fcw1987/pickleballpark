@@ -3,6 +3,8 @@ import { compilePlayTimeline } from './three-d-core.js';
 import { COURT_DIMENSIONS, isInNonVolleyZone, isInServiceBox, serviceBoxForServer } from './court-geometry.js';
 import { resolveServiceContext, serviceIdentityIssues, receivingServiceBox, teamForPlayer } from './rally-state.js';
 
+export const NVZ_MODEL_LIMITS_NOTE = 'Model limits: the preview does not track full foot and equipment contact history, volley momentum, or balance recovery. It cannot certify non-volley-zone legality or that both feet have reset outside the zone.';
+
 const violation=(play,code,message,stepId=null,actor=null)=>Object.freeze({
     code,
     message,
