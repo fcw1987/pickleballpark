@@ -1,4 +1,6 @@
 import { createReferenceWorld } from './reference-world.js';
+import { createPlayerCoverageOverlay } from './player-coverage-overlay.js';
+import { getCoveragePreference } from './player-coverage.js';
 import { DepthCameraControls } from './depth-camera.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import * as THREE from './vendor/three.module.min.js';
@@ -216,6 +218,10 @@ class ThreeDPlaybackViewer {
         this.currentPlay = null;
         this.timeline = null;
         this.playerObjects = new Map();
+        this.coverageSamples = {};
+        this.coveragePreferenceUnsubscribe = getCoveragePreference().subscribe(() => {
+            if (this.active) this.renderSessionSample();
+        });
         this.ballObject = null;
         this.lastState = null;
         this.pixelScale = DEFAULT_PIXEL_SCALE;
@@ -415,6 +421,8 @@ class ThreeDPlaybackViewer {
         this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
+        this.playerCoverage = createPlayerCoverageOverlay(THREE);
+        this.scene.add(this.playerCoverage.mesh);
         // Orbit changes the whole world view. Render at native resolution;
         // detailed artwork supplies its own pixel edges, without a screen filter.
         this.cameraControls = new DepthCameraControls(this);
@@ -471,6 +479,7 @@ class ThreeDPlaybackViewer {
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
             updateAthlete(actor,sample,this.camera,weight);
+            this.coverageSamples[id] = sample;
         }
     }
 
@@ -630,6 +639,7 @@ class ThreeDPlaybackViewer {
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
+        this.playerCoverage?.update({ board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment });
         this.updateBallReadability();
         const status=segment?`${segment.step.label} · ${ball.phase}`:'Ready';
         if(this.elements.status.textContent!==status)this.elements.status.textContent=status;
@@ -685,6 +695,7 @@ class ThreeDPlaybackViewer {
     }
 
     disposeScene() {
+        this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {};
         this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;

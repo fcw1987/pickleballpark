@@ -7,6 +7,7 @@
  */
 
 import { mountShotTimeline } from './shot-timeline.js';
+import { createPlayerCoverageControl } from './player-coverage-ui.js';
 import { MAX_SHOTS } from './play-document.js';
 import { getPlayerLabels, playerChoices, playerLabel as stablePlayerLabel } from './player-labels.js';
 
@@ -569,7 +570,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const zoomOut=button('−','camera-zoom-out','builder-button builder-camera-button builder-camera-zoom');zoomOut.setAttribute('aria-label','Zoom out');
     const zoomIn=button('+','camera-zoom-in','builder-button builder-camera-button builder-camera-zoom');zoomIn.setAttribute('aria-label','Zoom in');
     const cameraHelp=el('details','builder-camera-help');cameraHelp.append(el('summary','','Camera help'),el('p','','Drag empty space to rotate and tilt. Choose Pan to move the view. On touch screens, use two fingers to pan or pinch to zoom. Drag players and targets directly to edit.'));
-    cameraBar.append(cameraModes,reset,zoomOut,zoomIn,cameraHelp);dock.append(cameraBar);root.append(dock);
+    cameraBar.append(createPlayerCoverageControl(),cameraModes,reset,zoomOut,zoomIn,cameraHelp);dock.append(cameraBar);root.append(dock);
     syncCameraControls();
     for(const dialog of [templateDialog,importDialog,randomDialog])if(dialog.parentElement!==root)root.appendChild(dialog);
     if (randomDialog.open) {

@@ -1,4 +1,5 @@
 import { drawPixelEnvironment } from './pixel-environment.js';
+import { drawPlayerCoverage } from './player-coverage-canvas.js';
 import { drawPixelAthlete } from './pixel-athletes.js';
 import { COURT_LINES } from './court-geometry.js';
 import { worldToBoard, FEET_TO_METERS } from './three-d-core.js';
@@ -49,6 +50,7 @@ export class PixelCourtRenderer {
         ctx.fillStyle='#4a9b69'; ctx.fillRect(court.x-8,court.y-8,96,192);
         ctx.fillStyle='#347fa4'; ctx.fillRect(court.x,court.y,80,176);
         ctx.fillStyle='#438eae'; ctx.fillRect(court.x,court.y+60,80,56);
+        drawPlayerCoverage(ctx, board, point);
         ctx.fillStyle='#f6f2d7';
         for (const line of COURT_LINES) {
             const a=point(line.from.x,line.from.y),b=point(line.to.x,line.to.y);
