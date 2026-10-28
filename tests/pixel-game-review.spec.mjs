@@ -91,14 +91,28 @@ test('normal-motion playback, Pause, chapter seek, and ready view switching shar
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect.poll(() => page.evaluate(() => playBuilder.session.clock.elapsed)).toBeGreaterThan(.2);
+  const range = page.locator('.builder-transport .shot-timeline-range');
+  await expect.poll(() => range.inputValue().then(Number)).toBeGreaterThan(.2);
   const moving = await page.evaluate(() => ({ time: playBuilder.session.clock.elapsed,
     value: Number(document.querySelector('.builder-transport .shot-timeline-range').value), playing: playBuilder.session.playing }));
-  expect(moving.value).toBeCloseTo(moving.time, 1);
+  expect(moving.time).toBeGreaterThan(.2);
+  expect(moving.value).toBeGreaterThan(.2);
   expect(moving.playing).toBe(true);
   await testInfo.attach('phone-normal-motion', { body: await page.screenshot(), contentType: 'image/png' });
 
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
-  const paused = await page.evaluate(() => playBuilder.session.clock.elapsed);
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
+  const pausedSample = await page.evaluate(() => {
+    const input = document.querySelector('.builder-transport .shot-timeline-range');
+    return { time: playBuilder.session.clock.elapsed, value: Number(input.value),
+      min: Number(input.min), step: input.step, playing: playBuilder.session.playing };
+  });
+  const paused = pausedSample.time;
+  const step = pausedSample.step === 'any' ? 0 : Number(pausedSample.step || '1');
+  const expectedValue = step ? pausedSample.min + Math.round((paused - pausedSample.min) / step) * step : paused;
+  const epsilon = Number.EPSILON * Math.max(1, Math.abs(expectedValue)) * 8;
+  expect(pausedSample.playing).toBe(false);
+  expect(Math.abs(pausedSample.value - expectedValue)).toBeLessThanOrEqual(step / 2 + epsilon);
   await page.waitForTimeout(120);
   expect(await page.evaluate(() => playBuilder.session.clock.elapsed)).toBeCloseTo(paused, 8);
   await page.getByLabel('Choose shot chapter', { exact: true }).click();
