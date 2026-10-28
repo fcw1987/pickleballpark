@@ -27,6 +27,29 @@ completion checks remain intact. The baseline remains v36; the combined runtime
 still uses one increment to v37. Main merging is not needed for local validation
 of these equivalent repair commits.
 
+Main `71a9ac7f64c0c30dcf8fe6539e12e30af93a4161` subsequently merged with
+exactly the repair tree. The ordinary ancestry merge `0e992fc` retained the
+complete combined tree unchanged. Its source-equivalence evidence is preserved
+with the first full run.
+
+That first full Chromium run on `375b163` completed all 414 cases: 413 passed
+and one failed, with no skips or retries. At 320×568 and 200% text, the added
+Coverage row raised playback above the phone menu's fixed bottom offset. The
+menu missed its required clearance by 4.125 pixels. The repair measures the
+playback boundary in the existing layout pass and constrains both the fixed
+menu bottom and scroll height from it. The regression assertion is unchanged.
+The failed complete report and trace remain in
+`release-results/final-combined-375b163-initial/`; final checks must run on the
+new committed candidate, without replacing this failure with a focused pass.
+
+The unchanged 17 layout/coverage checks pass in both engines after that repair.
+Five fresh WebKit phone journeys also captured zero page or console errors
+through startup, playback, scrub, view changes, rotation, planner and reload;
+the enlarged 320px menu has eight pixels of playback clearance. No error was
+filtered or suppressed. The baseline's isolated ResizeObserver warning was not
+reproduced; the observer callbacks were not changed, so this is not evidence
+that its underlying cause has been fixed.
+
 ## Efficiency composition
 
 All six efficiency commits were inspected and applied in order:

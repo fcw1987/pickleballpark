@@ -889,7 +889,7 @@ body[data-theme="dark"] :is(.builder-ui, #infoModal) {
  .builder-camera-bar .builder-camera-zoom { min-width: 44px; width: 44px; font-size: 1.25rem; }
  .builder-camera-help > summary { font-size: 0; min-width: 44px; padding-inline: 4px; }
  .builder-camera-help > summary::after { font-size: 1rem; }
- .builder-reference-dock .builder-main-menu > .builder-menu-panel { position: fixed; left: 8px; right: 8px; width: auto; bottom: 260px; max-height: calc(100dvh - 280px); }
+ .builder-reference-dock .builder-main-menu > .builder-menu-panel { position: fixed; left: 8px; right: 8px; width: auto; bottom: max(260px,var(--builder-menu-bottom-offset,260px)); max-height: calc(100dvh - max(260px,var(--builder-menu-bottom-offset,260px)) - 20px); }
  .builder-reference-dock .builder-shot-card .builder-chapter-list { position: fixed; left: 8px; right: 8px; width: auto; top: auto; bottom: 245px; max-height: calc(100dvh - 265px); }
 }
 @media (max-height: 500px) and (orientation: landscape) {
