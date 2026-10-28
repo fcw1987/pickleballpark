@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 
 const openBuilder = async page => {
   await page.goto('/index.html?qa-render-lifecycle=1');
+  await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+  await page.evaluate(() => playBuilder.switchView('3d'));
   await expect.poll(() => page.evaluate(() => Boolean(
     window.playBuilder && !playBuilder.busy && playBuilder.view === '3d' && window.pickleboard?.threeD?.renderer
   ))).toBe(true);
@@ -24,7 +26,7 @@ const loseContext = page => page.evaluate(() => new Promise((resolve, reject) =>
   extension.loseContext();
 }));
 
-test('a context lost while 3D is parked is discarded before re-entry', async ({ page }) => {
+test('legacy 3D compatibility: a context lost while 3D is parked is discarded before re-entry', async ({ page }) => {
   await openBuilder(page);
   const firstCanvas = await page.evaluate(() => {
     const canvas = pickleboard.threeD.renderer.domElement;
@@ -63,7 +65,7 @@ test('a context lost while 3D is parked is discarded before re-entry', async ({ 
   expect(await page.evaluate(() => pickleboard.threeD.renderer.domElement.height)).toBeGreaterThan(1);
 });
 
-test('an active context loss exits safely and a retry creates one live renderer', async ({ page }) => {
+test('legacy 3D compatibility: an active context loss exits safely and a retry creates one live renderer', async ({ page }) => {
   await openBuilder(page);
   await page.evaluate(() => { pickleboard.threeD.renderer.domElement.dataset.lifecycleCanvas = 'lost'; });
   await loseContext(page);
@@ -91,7 +93,7 @@ test('an active context loss exits safely and a retry creates one live renderer'
   }))).toEqual({ active: true, lostCanvasConnected: false, contextLost: false, canvasCount: 1 });
 });
 
-test('120 Help, playback, visibility, and view transitions settle to one finite renderer', async ({ page }) => {
+test('legacy 3D compatibility: 120 Help, playback, visibility, and view transitions settle to one finite renderer', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await openBuilder(page);
@@ -166,15 +168,15 @@ test('120 Help, playback, visibility, and view transitions settle to one finite 
   expect(errors).toEqual([]);
 });
 
-test('a real delayed 3D module cancelled by 2D cannot attach a stale renderer', async ({ browser }) => {
+test('legacy 3D compatibility: a real delayed 3D module cancelled by 2D cannot attach a stale renderer', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   let releaseModule;
   let markRequested;
   const moduleGate = new Promise(resolve => { releaseModule = resolve; });
   const moduleRequested = new Promise(resolve => { markRequested = resolve; });
-  // The procedural world has no actor downloads. Hold the real lazy entry
-  // without allowing service-worker precaching to impersonate a blocked load.
+  // Hold the default depth view's real lazy entry without allowing service-
+  // worker precaching to impersonate a blocked load.
   await page.route('**/three-d-playback.js', async route => {
     markRequested();
     await moduleGate;
@@ -182,6 +184,7 @@ test('a real delayed 3D module cancelled by 2D cannot attach a stale renderer', 
   });
   try {
     await page.goto('/index.html?qa-delayed-renderer=1', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.playBuilder);
     await moduleRequested;
     await expect.poll(() => page.evaluate(() => Boolean(window.playBuilder?.busy))).toBe(true);
     const draft = await page.evaluate(() => JSON.stringify(playBuilder.document));

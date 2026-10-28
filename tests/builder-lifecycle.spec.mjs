@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 const start = async page => {
   await page.goto('/index.html?lifecycle-review=1');
   await page.waitForFunction(() => window.playBuilder && !window.playBuilder.busy);
+  await page.evaluate(() => playBuilder.switchView('3d'));
 };
 
 const frames = (page, count = 4) => page.evaluate(frameCount => new Promise(resolve => {
@@ -10,7 +11,7 @@ const frames = (page, count = 4) => page.evaluate(frameCount => new Promise(reso
   requestAnimationFrame(next);
 }), count);
 
-test('30 view and planner round trips preserve source, playhead, and planner drawings', async ({ page }) => {
+test('legacy 3D compatibility: 30 view and planner round trips preserve source, playhead, and planner drawings', async ({ page }) => {
   await start(page);
   const result = await page.evaluate(async () => {
     const b = playBuilder;
@@ -45,7 +46,7 @@ test('30 view and planner round trips preserve source, playhead, and planner dra
   expect(result.planner.positions.player1).toEqual({ x: 6.25, y: 31.5 });
 });
 
-test('paused 3D demand renders settle without RAF growth', async ({ page }) => {
+test('legacy 3D compatibility: paused 3D demand renders settle without RAF growth', async ({ page }) => {
   await start(page);
   await page.evaluate(async () => { if (playBuilder.view !== '3d') await playBuilder.switchView('3d'); playBuilder.pause(); });
   await frames(page);
@@ -67,7 +68,7 @@ test('paused 3D demand renders settle without RAF growth', async ({ page }) => {
   expect(settled).toBeGreaterThan(baseline);
 });
 
-test('a delayed 3D entry cancelled by planner switch cannot reopen stale 3D', async ({ page }) => {
+test('legacy 3D compatibility: a delayed 3D entry cancelled by planner switch cannot reopen stale 3D', async ({ page }) => {
   await start(page);
   const result = await page.evaluate(async () => {
     const b = playBuilder;
@@ -89,7 +90,7 @@ test('a delayed 3D entry cancelled by planner switch cannot reopen stale 3D', as
   await expect(page.locator('#threeDViewer')).toBeHidden();
 });
 
-test('3D allocation failure returns the builder to an editable 2D fallback', async ({ page }) => {
+test('legacy 3D compatibility: 3D allocation failure returns the builder to an editable 2D fallback', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -107,7 +108,7 @@ test('3D allocation failure returns the builder to an editable 2D fallback', asy
   await expect(page.locator('#threeDViewer')).toBeHidden();
 });
 
-test('50 accelerated loop iterations exit without a pending restart', async ({ page }) => {
+test('legacy 3D compatibility: 50 accelerated loop iterations exit without a pending restart', async ({ page }) => {
   await start(page);
   const result = await page.evaluate(async () => {
     const b = playBuilder;
@@ -129,7 +130,7 @@ test('50 accelerated loop iterations exit without a pending restart', async ({ p
     activePlay: pickleboard.plays.activePlay }))).toEqual({ frame: null, timer: null, activePlay: null });
 });
 
-test('saved source reloads and malformed storage fails closed with a visible recovery state', async ({ page }) => {
+test('legacy 3D compatibility: saved source reloads and malformed storage fails closed with a visible recovery state', async ({ page }) => {
   await start(page);
   await page.evaluate(async () => {
     await playBuilder.action('title', 'Persistent lifecycle draft');
@@ -137,12 +138,14 @@ test('saved source reloads and malformed storage fails closed with a visible rec
   });
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !window.playBuilder.busy);
+  await page.evaluate(() => playBuilder.switchView('3d'));
   expect(await page.evaluate(() => ({ title: playBuilder.document.title, x: playBuilder.document.shots[0].target.x })))
     .toEqual({ title: 'Persistent lifecycle draft', x: 6.75 });
 
   await page.evaluate(() => localStorage.setItem('pickleballpark-builder-v1', '{malformed'));
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !window.playBuilder.busy);
+  await page.evaluate(() => playBuilder.switchView('3d'));
   const recovery = await page.evaluate(() => ({ title: playBuilder.document.title, status: playBuilder.saveStatus,
     valid: playBuilder.compiled.validShotCount, raw: localStorage.getItem('pickleballpark-builder-v1') }));
   expect(recovery.title).not.toBe('Persistent lifecycle draft');

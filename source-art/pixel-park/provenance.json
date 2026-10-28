@@ -1,0 +1,65 @@
+{
+  "name": "Leaf Court original park atlas",
+  "author": "Codex original pixel construction",
+  "generator": "tools/generate-pixel-park.mjs",
+  "externalAssets": [],
+  "pixelScale": 1,
+  "tileSize": 16,
+  "palette": "Custom moss green, warm sand, terracotta, lake blue and slate ink",
+  "sprites": {
+    "tree": [
+      0,
+      0,
+      32,
+      48
+    ],
+    "bush": [
+      32,
+      0,
+      16,
+      17
+    ],
+    "bench": [
+      48,
+      0,
+      24,
+      24
+    ],
+    "flowers": [
+      72,
+      0,
+      16,
+      18
+    ],
+    "fence": [
+      96,
+      0,
+      32,
+      16
+    ],
+    "clubhouse": [
+      48,
+      32,
+      64,
+      64
+    ],
+    "grass": [
+      0,
+      64,
+      16,
+      16
+    ],
+    "path": [
+      16,
+      64,
+      16,
+      16
+    ],
+    "pond": [
+      0,
+      80,
+      32,
+      48
+    ]
+  }
+}

@@ -1,8 +1,13 @@
+import {referenceAthleteGeometryKernel} from './reference-athlete-geometry.mjs';
 // Audit the rendered triangles, independently of authored contact metadata.
 export async function installDimensionalAudit(page) {
-  await page.evaluate(async () => {
+  await page.evaluate(async referenceKernelSource => {
     const THREE = await import('/vendor/three.module.min.js');
+    // Serialize our own CPU-only test factory; source-only .mjs files are served
+    // as octet-stream by the app server and cannot be browser-module imported.
+    const referenceAudit = new Function('THREE', `return (${referenceKernelSource})(THREE);`)(THREE);
     window.__athleteAudit = root => {
+      if(root.userData.referenceAthlete)return referenceAudit(root,{camera:window.pickleboard?.threeD?.camera,viewportHeight:window.pickleboard?.threeD?.renderer.domElement.clientHeight||1});
       root.updateWorldMatrix(true, true);
       const meshes = [];
       root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
@@ -56,5 +61,5 @@ export async function installDimensionalAudit(page) {
         }
       };
     };
-  });
+  }, referenceAthleteGeometryKernel.toString());
 }

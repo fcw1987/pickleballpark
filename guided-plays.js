@@ -2,7 +2,7 @@ import { GuidedPixelActors } from './guided-pixel-actors.js';
 // Guided Plays retain their board/snapshot interface and consume the shared timeline.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 import { compilePlayTimeline, samplePlayBall, boardToWorld, FEET_TO_METERS } from './three-d-core.js';
-import { sampleActorPresentation } from './three-d-presentation.js';
+import { sampleActorPresentation, sampleActorWorldPosition } from './three-d-presentation.js';
 import { CoachingSession } from './coaching-session.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import { buildShotChapters, chapterAtTime } from './shot-chapters.js';
@@ -291,7 +291,9 @@ class GuidedPlayEngine {
             if(sample){
                 const distance=segment.shotSemantics?.playerId===id?Math.abs(local-segment.contactTime):segment.nextShotSemantics?.playerId===id?Math.abs(segment.duration-local):Infinity;
                 const blend=Math.max(0,1-distance/.18);
-                samples[id]={...sample,contactWeight:blend*blend*(3-2*blend)};
+                const supportSegment=segment.shotSemantics?.playerId===id?segment:segment.nextShotSemantics?.playerId===id?this.timeline.segments[segment.index]:null;
+                const pixelSupportPosition=supportSegment?sampleActorWorldPosition(supportSegment,id,supportSegment.contactTime,this.board.tokens[id].handedness):null;
+                samples[id]={...sample,pixelContactKind:segment.shotSemantics?.playerId===id?segment.shotSemantics.contact.kind:segment.nextShotSemantics?.playerId===id?segment.nextShotSemantics.contact.kind:null,pixelSupportPosition,pixelStroke:segment.shotSemantics?.playerId===id?(segment.step.shot?.authoring?.family||segment.step.shot?.type||segment.shotSemantics.stroke):segment.nextShotSemantics?.playerId===id?(segment.nextStep?.shot?.authoring?.family||segment.nextStep?.shot?.type||segment.nextShotSemantics.stroke):null,contactWeight:blend*blend*(3-2*blend)};
             }else samples[id]={action:'ready',phase:'ready',viewDirection:this.activePlay.steps[0].positions[id].y<22?'front':'back'};
             positions[id] = { x: p.x / FEET_TO_METERS + 10, y: p.z / FEET_TO_METERS + 22 };
         }

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectBuilderAddComplete } from './helpers/builder-navigation.mjs';
 
 const evidenceDir = 'release-results/smart-visible';
 
@@ -16,6 +17,7 @@ test.describe('smart rally visible acceptance', () => {
 
     const chaptersBefore = await page.locator('.builder-chapter-list [data-action="chapter"]').count();
     await page.getByRole('button', { name: 'Add shot', exact: true }).click();
+    await expectBuilderAddComplete(page, chaptersBefore + 1);
     await expect(page.locator('.builder-chapter-list [data-action="chapter"]')).toHaveCount(chaptersBefore + 1);
     await page.screenshot({ path: `${evidenceDir}/phone-390-add.png`, fullPage: true });
 

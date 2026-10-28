@@ -1,8 +1,9 @@
+import { createHash } from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { deflateSync } from 'node:zlib';
 
-import { comparePngContent, parsePng, compareGeneratedTrees } from '../tools/check-generated.mjs';
+import { excludePreservedArt, comparePngContent, parsePng, compareGeneratedTrees } from '../tools/check-generated.mjs';
 
 const crc32 = (buffer) => {
   let crc = 0xffffffff;
@@ -70,4 +71,18 @@ test('rejects missing or extra generated paths and altered non-PNG metadata', ()
   assert.throws(() => compareGeneratedTrees(base, new Map()), /path set changed/);
   assert.throws(() => compareGeneratedTrees(base, new Map([...base, ['extra.png', png()]])), /path set changed/);
   assert.throws(() => compareGeneratedTrees(base, new Map([['metadata.json', Buffer.from('{"version":2}')]])), /non-PNG bytes changed/);
+});
+
+ test('preserved art requires explicit exact hashes and cannot hide generated or unexpected assets', () => {
+  const file = 'assets/reference-depth/tree.png';
+  const bytes = Buffer.from('approved art');
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  const expected = new Map([[file, bytes], ['assets/generated.png', bytes]]);
+  const generated = new Map([['assets/generated.png', bytes]]);
+  assert.deepEqual([...excludePreservedArt(expected, generated, { [file]: hash }).keys()], ['assets/generated.png']);
+  assert.throws(() => excludePreservedArt(expected, generated, { [file]: '0'.repeat(64) }), /bytes changed/);
+  assert.throws(() => excludePreservedArt(new Map(), generated, { [file]: hash }), /missing/);
+  assert.throws(() => excludePreservedArt(expected, new Map([[file, bytes]]), { [file]: hash }), /unexpectedly generated/);
+  assert.throws(() => excludePreservedArt(expected, generated, { 'assets/other.png': hash }), /Invalid preserved/);
+  assert.throws(() => compareGeneratedTrees(excludePreservedArt(new Map([...expected, ['assets/unregistered.png', bytes]]), generated, { [file]: hash }), generated), /path set changed/);
 });

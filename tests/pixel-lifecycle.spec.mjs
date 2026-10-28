@@ -1,3 +1,4 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
@@ -33,10 +34,12 @@ async function settleAnimationFrames(page, count = 4) {
   }), count);
 }
 
-test('paused replay renders only on demand and playback owns one scheduler', async ({ page }) => {
+test('legacy 3D compatibility: paused replay renders only on demand and playback owns one scheduler', async ({ page }) => {
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+  await page.waitForFunction(()=>pickleboard.threeD.worldAssetsReady);
+  await settleAnimationFrames(page);
 
   await page.evaluate(() => {
     const viewer = pickleboard.threeD;
@@ -91,9 +94,9 @@ test('paused replay renders only on demand and playback owns one scheduler', asy
   expect(await page.evaluate(() => pickleboard.threeD.__testRenderCount)).toBeGreaterThan(demandCalls);
 });
 
-test('playing replay resumes its single scheduler after visibility returns', async ({ page }) => {
+test('legacy 3D compatibility: playing replay resumes its single scheduler after visibility returns', async ({ page }) => {
   await page.evaluate(() => pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   await page.locator('#threeDPlayPause').click();
   await settleAnimationFrames(page, 2);
@@ -113,7 +116,11 @@ test('playing replay resumes its single scheduler after visibility returns', asy
   }))).toMatchObject({ playing: true, scheduler: expect.any(Number) });
 });
 
-test('30 editor to replay cycles preserve state and release owned lifecycle resources', async ({ page }) => {
+test('legacy 3D compatibility: 30 editor to replay cycles preserve state and release owned lifecycle resources', async ({ page }) => {
+  // Native context loss takes about one second per fully rendered context on
+  // this macOS Chromium backend. Budget for all thirty real teardowns and the
+  // existing state/resource assertions, including fixture and tracing work.
+  test.setTimeout(60000);
   const baseline = await page.evaluate(() => {
     const board = pickleboard;
     board.setTokenPosition('player1', 8.25, 30.5);
@@ -131,34 +138,42 @@ test('30 editor to replay cycles preserve state and release owned lifecycle reso
     };
   });
 
-  for (let cycle = 0; cycle < 30; cycle += 1) {
-    await page.evaluate(async index => {
-      const board = pickleboard;
-      board.plays.load(index % 2 ? 'third-shot-drive' : 'third-shot-drop');
-      if (!await board.threeD.enter()) throw new Error(`3D entry failed on cycle ${index + 1}`);
-      board.threeD.togglePlay();
-      board.threeD.togglePlay();
-      board.threeD.setPlaybackRate(index % 3 === 0 ? 0.5 : 1);
-      board.threeD.setCamera(index % 2 ? 'sideline' : 'overhead');
-      board.threeD.resize();
-    }, cycle);
-    await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
-    expect(await page.evaluate(() => ({
-      active: pickleboard.threeD.active,
-      canvases: document.querySelectorAll('#threeDCanvas canvas').length,
-      players: pickleboard.threeD.playerObjects.size
-    }))).toEqual({ active: true, canvases: 1, players: 4 });
-    await page.evaluate(() => {
-      pickleboard.threeD.exit();
-      pickleboard.plays.exit();
-    });
-    expect(await page.evaluate(() => ({
-      active: pickleboard.threeD.active,
-      scheduler: pickleboard.threeD.renderLoopId,
-      canvases: document.querySelectorAll('#threeDCanvas canvas').length,
-      snapshot: pickleboard.captureBoardState()
-    }))).toEqual({ active: false, scheduler: null, canvases: 0, snapshot: baseline.snapshot });
+  // Keep all thirty real renderer lifecycles and state checks, without adding
+  // five traced browser-protocol round trips to every individual cycle.
+  const cycles = await page.evaluate(async baselineSnapshot => {
+    const result=[];
+    for(let cycle=0;cycle<30;cycle++){
+      const board=pickleboard;
+      board.plays.load(cycle%2?'third-shot-drive':'third-shot-drop');
+      if(!await board.threeD.enter())throw Error(`3D entry failed on cycle ${cycle+1}`);
+      let renderedFrames=0;
+      const render=board.threeD.renderer.render.bind(board.threeD.renderer);
+      board.threeD.renderer.render=(...args)=>{const value=render(...args);renderedFrames++;return value;};
+      board.threeD.togglePlay();board.threeD.togglePlay();
+      board.threeD.setPlaybackRate(cycle%3===0 ? .5 : 1);
+      board.threeD.setCamera(cycle%2?'sideline':'overhead');board.threeD.resize();
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+      if(renderedFrames<1)throw Error(`No actual rendered frame on cycle ${cycle+1}`);
+      const during={active:board.threeD.active,canvases:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size};
+      if(!during.active||during.canvases!==1||during.players!==4)throw Error(`Invalid live renderer on cycle ${cycle+1}`);
+      const context=board.threeD.renderer.getContext(),teardownStart=performance.now();
+      board.threeD.exit();board.plays.exit();
+      const teardownMs=performance.now()-teardownStart;
+      const after={active:board.threeD.active,scheduler:board.threeD.renderLoopId,canvases:document.querySelectorAll('#threeDCanvas canvas').length,contextLost:context.isContextLost(),snapshot:board.captureBoardState()};
+      if(after.active||after.scheduler!==null||after.canvases!==0||!after.contextLost||JSON.stringify(after.snapshot)!==JSON.stringify(baselineSnapshot))throw Error(`Renderer cleanup or board drift on cycle ${cycle+1}`);
+      result.push({during,renderedFrames,after,teardownMs});
+    }
+    return result;
+  },baseline.snapshot);
+  expect(cycles).toHaveLength(30);
+  for(const [cycle,state]of cycles.entries()){
+    expect(state.renderedFrames,`actual rendered frames cycle ${cycle+1}`).toBeGreaterThan(0);
+    expect(state.during,`live renderer cycle ${cycle+1}`).toEqual({active:true,canvases:1,players:4});
+    expect(state.after,`cleanup cycle ${cycle+1}`).toEqual({active:false,scheduler:null,canvases:0,contextLost:true,snapshot:baseline.snapshot});
   }
+  await test.info().attach('30-cycle-native-teardown-timing.json',{
+    body:JSON.stringify({cycles:cycles.length,totalTeardownMs:cycles.reduce((sum,cycle)=>sum+cycle.teardownMs,0),teardownMs:cycles.map(cycle=>cycle.teardownMs)}),contentType:'application/json'
+  });
 
   const final = await page.evaluate(() => ({
     listeners: { ...window.__pixelLifecycleListeners },

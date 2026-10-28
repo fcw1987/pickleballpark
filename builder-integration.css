@@ -6,6 +6,7 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
 .builder-large-text .builder-ui { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
 .builder-large-text .builder-ui > * { flex-shrink: 0; }
 .builder-large-text .builder-meta { flex-wrap: wrap; }
+.builder-large-text .builder-app-title { white-space: normal; overflow-wrap: anywhere; }
 .builder-large-text .builder-cue { flex: 1 1 8rem; }
 .builder-large-text .builder-context-actions { flex-wrap: wrap; margin-left: 0; }
 .builder-large-text .builder-main-menu > summary { width: auto; min-width: 5.3rem; }
@@ -16,6 +17,19 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
 .builder-large-text .builder-context-menu { margin-left: auto; }
 .builder-large-text .builder-button { white-space: normal; }
 .builder-large-text .builder-chapter-list, .builder-large-text .builder-menu-panel { max-width: calc(100vw - 32px); }
+.builder-large-text .builder-menu-heading strong { min-width: 0; overflow-wrap: anywhere; }
+.builder-large-text .builder-appearance-toggle { max-width: 100%; overflow-wrap: anywhere; }
+/* A notice can grow the dock upward. Its file menu must remain inside the
+   viewport instead of inheriting that taller dock's offscreen upper edge. */
+@media (min-width: 701px) {
+  .builder-reference-dock:has(.builder-waypoint-notice,.builder-save-error) .builder-main-menu > .builder-menu-panel {
+    position: fixed;
+    top: calc(var(--builder-visible-top,0px) + 8px);
+    right: 12px;
+    bottom: auto;
+    max-height: min(50dvh,calc(var(--builder-visible-height,100dvh) - 200px));
+  }
+}
 .builder-large-text .builder-inspector:not(.builder-inspector-collapsed) {
   position: fixed;
   left: auto;
@@ -32,7 +46,7 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
 
 /* Keep a short landscape viewport useful while the non-modal editor is open. */
 @media (max-height: 500px) and (orientation: landscape) {
-  .builder-ui { grid-template-rows: auto minmax(0, 1fr) auto; gap: 3px; }
+  .builder-ui { grid-template-rows: minmax(0, 1fr) auto; gap: 3px; }
   .builder-meta { min-height: 44px; }
   .builder-transport { padding-block: 2px; }
 }
@@ -48,6 +62,37 @@ body.builder-workspace #playbackControls, body.builder-workspace .three-d-hud { 
 @media (max-height: 500px) and (orientation: landscape) {
   .builder-large-text .builder-chapter-list,
   .builder-large-text .builder-menu-panel { max-height: calc(100dvh - 120px); }
+  /* Enlarged controls can scroll their dock. Anchor its tall popups to the
+     visible viewport rather than lifting them above a scrolled summary. */
+  .builder-large-text .builder-reference-dock .builder-main-menu > .builder-menu-panel,
+  .builder-large-text .builder-reference-dock .builder-shot-card .builder-chapter-list {
+    position: fixed;
+    top: calc(var(--builder-visible-top,0px) + 8px);
+    bottom: auto;
+    max-height: calc(var(--builder-visible-height,100dvh) - 200px);
+  }
   .builder-large-text .builder-context-menu > .builder-menu-panel { right: 0; max-width: calc(100vw - 16px); }
   .builder-large-text .builder-transport { z-index: 60; }
 }
+
+/* The pixel edition presents the authoritative two-dimensional court. */
+#play3dView { display: none !important; }
+.builder-view-button[data-view="3d"] { display: none; }
+
+body.builder-workspace .park-banner { display: none; }
+
+/* Planner keeps identity in its own fixed label, clear of court athletes. */
+.park-banner { display: none; }
+.planner-identity { position: fixed; z-index: 10; top: max(8px,env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); padding: 6px 10px; border: 4px double #273b69; color: #202e55; background: #fffbed; font: 1rem/1.2 'Park Labels',ui-monospace,monospace; white-space: normal; text-align: center; pointer-events: none; }
+@media (min-width: 701px) {
+  .planner-identity { top: auto; bottom: max(8px,env(safe-area-inset-bottom)); }
+}
+body.builder-workspace .planner-identity { display: none; }
+
+/* Playback options sit above the complete dock so the popover leaves the
+   upper Edit/Play row reachable while a native speed select stays open. */
+.builder-reference-dock .builder-context-menu { position: static; }
+/* Enlarged controls already use a scrolling workspace. Keep the open speed
+   panel in that flow so short screens have room for both it and the editor. */
+.builder-large-text .builder-reference-dock .builder-context-menu[open] { flex: 1 0 100%; }
+.builder-large-text .builder-reference-dock .builder-context-menu > .builder-menu-panel { position: relative; top: auto; bottom: auto; right: auto; width: auto; max-width: 100%; scroll-margin-block: 8px; }

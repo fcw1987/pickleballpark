@@ -1,6 +1,8 @@
 name: Deploy verified Pages artifact
 
 on:
+  push:
+    branches: [feature/reference-depth-review]
   workflow_dispatch:
     inputs:
       commit_sha:
@@ -111,4 +113,101 @@ jobs:
         run: node tools/select-pages-artifact.mjs --confirm
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # Explicit owner-requested feature-branch test deployment. Main publication
+  # continues to use the verified Quality artifact selected above.
+  feature-preview:
+    name: Verify and deploy requested feature preview
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/reference-depth-review'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    environment:
+      name: github-pages
+      url: ${{ steps.preview-deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Check out exact feature checkpoint
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run static, unit and generated-asset checks
+        run: |
+          npm run check
+          npm run check:generated
+      - name: Use official Ubuntu archive for preview browser dependencies
+        run: |
+          sudo python3 - <<'PYTHON'
+          from pathlib import Path
+          # GitHub Ubuntu 24 runners may use either deb822 sources or a mirror file.
+          # Change only the download hostname; preserve suites, signed-by and keys.
+          for filename in ['/etc/apt/sources.list', '/etc/apt/sources.list.d/ubuntu.sources', '/etc/apt/apt-mirrors.txt']:
+              path = Path(filename)
+              if path.is_file():
+                  original = path.read_text()
+                  updated = original.replace('://azure.archive.ubuntu.com/', '://archive.ubuntu.com/')
+                  if updated != original:
+                      path.write_text(updated)
+                      print(f'Using official Ubuntu archive in {filename}')
+          PYTHON
+      - name: Install package-test browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Build and verify runtime-only feature artifact
+        run: |
+          npm run build:site -- --require-clean
+          node tools/verify-deployment-artifact.mjs dist "$GITHUB_SHA" --require-clean
+      # Preview checks cover current install/upgrade and affected authoring flows.
+      # The complete historical package matrix remains in the main Quality job.
+      - name: Verify fresh install and offline runtime in both engines
+        env:
+          QA_PACKAGE_MODE: fresh
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-fresh.json
+      - name: Verify depth checkpoint upgrade and saved work in both engines
+        env:
+          QA_PACKAGE_MODE: depth-upgrade
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-depth-upgrade.json
+      - name: Verify current public feature-preview upgrade and saved work in both engines
+        env:
+          QA_PACKAGE_MODE: preview-upgrade
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-current-upgrade.json
+      - name: Verify historical main-version upgrade and saved work in both engines
+        env:
+          QA_PACKAGE_MODE: live-upgrade
+        run: |
+          npm run verify:package
+          cp release-results/package-verification.json release-results/package-preview-live-upgrade.json
+      - name: Check affected authoring, depth matrix and mobile workflow
+        run: |
+          npx playwright test tests/reference-athletes-depth-matrix.spec.mjs tests/overhead-short-hop-preview.spec.mjs tests/pixel-editor-projection.spec.mjs tests/iphone-workflow.spec.mjs --workers=1 --retries=0
+          npx playwright test tests/reference-athletes-depth-matrix.spec.mjs tests/overhead-short-hop-preview.spec.mjs tests/pixel-editor-projection.spec.mjs tests/iphone-workflow.spec.mjs --config=playwright.webkit.config.mjs --workers=1 --retries=0
+      - name: Upload verified runtime artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          name: github-pages
+          path: dist/
+          retention-days: 7
+      - name: Verify official Pages archive against exact feature checkpoint
+        run: |
+          node tools/extract-pages-artifact.mjs "$RUNNER_TEMP/artifact.tar" verified-preview
+          node tools/verify-deployment-artifact.mjs verified-preview "$GITHUB_SHA" --require-clean
+      - name: Deploy requested feature checkpoint to existing Pages site
+        id: preview-deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

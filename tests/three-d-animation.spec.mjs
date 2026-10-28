@@ -1,5 +1,7 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { COURT_DIMENSIONS } from '../court-geometry.js';
 
 async function openPlay(page, playId = 'fifth-shot-drop') {
   const errors = [];
@@ -7,7 +9,7 @@ async function openPlay(page, playId = 'fifth-shot-drop') {
   await page.goto('/index.html?workspace=planner&animation-e2e=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(id => window.pickleboard.plays.load(id), playId);
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   return errors;
 }
@@ -32,7 +34,7 @@ async function sampleSegment(page, stepId, offset) {
   }, { stepId, offset });
 }
 
-test('serve, return, drive, block, and fifth drop resolve actors and synchronize ball launch to contact', async ({ page }) => {
+test('legacy 3D compatibility: serve, return, drive, block, and fifth drop resolve actors and synchronize ball launch to contact', async ({ page }) => {
   const errors = await openPlay(page);
   const expected = [
     ['serve', 'player1', 'serve'],
@@ -59,14 +61,14 @@ test('serve, return, drive, block, and fifth drop resolve actors and synchronize
   expect(errors).toEqual([]);
 });
 
-test('right and left handed forehands animate their dominant physical arm', async ({ page }) => {
+test('legacy 3D compatibility: right and left handed forehands animate their dominant physical arm', async ({ page }) => {
   await page.goto('/index.html?workspace=planner&animation-hands=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => {
     window.pickleboard.tokens.player1.handedness = 'left';
     window.pickleboard.plays.load('third-shot-drive');
   });
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
   const result = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
@@ -75,22 +77,22 @@ test('right and left handed forehands animate their dominant physical arm', asyn
     return ['left', 'right'].map(handedness => {
       root.userData.handedness = handedness;
       viewer.applyAtTime(segment.startTime + segment.contactTime);
-      const grip = root.getObjectByName('PaddleGrip').getWorldPosition(root.position.clone());
-      const dominant = root.userData.arms[handedness].hand.getWorldPosition(root.position.clone());
-      const support = root.userData.arms[handedness === 'left' ? 'right' : 'left'].hand.getWorldPosition(root.position.clone());
-      return { handedness: root.userData.handedness, volumetricAthlete: root.userData.volumetricAthlete,
+      const grip = root.userData.paddle.children[2].getWorldPosition(root.position.clone());
+      const dominant = root.userData.arms[0].hand.getWorldPosition(root.position.clone());
+      const support = root.userData.arms[1].hand.getWorldPosition(root.position.clone());
+      return { handedness: root.userData.handedness, referenceAthlete: root.userData.referenceAthlete,
         action: root.userData.animation.action, phase: root.userData.animation.phase,
         gripDistance: dominant.distanceTo(grip), supportDistance: support.distanceTo(grip) };
     });
   });
   for (const hand of result) {
-    expect(hand).toMatchObject({ volumetricAthlete: true, action: 'drive', phase: 'contact' });
+    expect(hand).toMatchObject({ referenceAthlete: true, action: 'drive', phase: 'contact' });
     expect(hand.gripDistance, `${hand.handedness} physical hand holds paddle grip`).toBeLessThan(0.06);
     expect(hand.supportDistance, `${hand.handedness} forehand uses dominant arm`).toBeGreaterThan(hand.gripDistance + 0.02);
   }
 });
 
-test('striker plants both world axes before contact and non-strikers use locomotion or split-step', async ({ page }) => {
+test('legacy 3D compatibility: striker plants both world axes before contact and non-strikers use locomotion or split-step', async ({ page }) => {
   await openPlay(page, 'third-shot-drive');
   const state = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
@@ -100,7 +102,7 @@ test('striker plants both world axes before contact and non-strikers use locomot
     return Object.fromEntries([...viewer.playerObjects].map(([id, root]) => [id, root.userData.animation]));
   });
   expect(state.player1.planted).toBe(true);
-  expect(state.player1.locomotionFrame).toBeNull();
+  expect(state.player1.phase).not.toBe('locomotion');
   const plantedPosition = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
     const segment = viewer.timeline.segments.find(item => item.step.id === 'third-drive');
@@ -117,7 +119,7 @@ test('striker plants both world axes before contact and non-strikers use locomot
   expect(Object.values(state).slice(1).some(player => player.action === 'shuffle' || player.phase === 'locomotion')).toBe(true);
 });
 
-test('quality guardrails keep mesh anchors finite and contact ball at the visible paddle face', async ({ page }) => {
+test('legacy 3D compatibility: quality guardrails keep mesh anchors finite and contact ball at the visible paddle face', async ({ page }) => {
   await openPlay(page, 'fifth-shot-drop');
   await installDimensionalAudit(page);
   const quality = await page.evaluate(() => {
@@ -129,20 +131,22 @@ test('quality guardrails keep mesh anchors finite and contact ball at the visibl
         const actor = viewer.playerObjects.get(segment.shotSemantics.playerId);
         const paddle = actor.userData.paddleFaceWorld.toArray();
         const ball = viewer.ballObject.position.toArray();
-        const values = [...actor.position.toArray(), ...actor.userData.paddleFaceWorld.toArray(), ...actor.userData.shoulderWorld.toArray()];
-        samples.push({ offset, distance: Math.hypot(ball[0] - paddle[0], ball[1] - paddle[1], ball[2] - paddle[2]), finite: values.every(Number.isFinite), meshDistance: window.__athleteAudit(actor).paddleDistance(viewer.ballObject.position) });
+        const values = [...actor.position.toArray(), ...actor.userData.paddleFaceWorld.toArray(), ...actor.userData.visual.localToWorld(actor.userData.rigPose.shoulder.clone()).toArray()];
+        samples.push({ offset, physicalRadius: viewer.ballObject.userData.physicalRadius, distance: Math.hypot(ball[0] - paddle[0], ball[1] - paddle[1], ball[2] - paddle[2]), finite: values.every(Number.isFinite), meshDistance: window.__athleteAudit(actor).paddleDistance(viewer.ballObject.position) });
       }
       return { step: segment.step.id, samples };
     });
   });
   for (const shot of quality) {
     expect(shot.samples.every(sample => sample.finite)).toBe(true);
+    expect(shot.samples[0].physicalRadius).toBe(COURT_DIMENSIONS.ballDiameterMeters / 2);
     expect(shot.samples.find(sample => sample.offset === 0).distance).toBeLessThan(0.01);
-    expect(shot.samples.find(sample => sample.offset === 0).meshDistance).toBeLessThan(0.02);
+    // The authored contact is the ball center; actual paddle triangles must intersect its physical sphere.
+    expect(shot.samples.find(sample => sample.offset === 0).meshDistance).toBeLessThanOrEqual(shot.samples.find(sample => sample.offset === 0).physicalRadius);
   }
 });
 
-test('pause freezes player pose and ball together, rate scales both, and seeking to start restores ready', async ({ page }) => {
+test('legacy 3D compatibility: pause freezes player pose and ball together, rate scales both, and seeking to start restores ready', async ({ page }) => {
   await openPlay(page, 'third-shot-drop');
   await page.locator('#threeDRate').selectOption('0.25',{force:true});
   await page.locator('#threeDPlayPause').click();
@@ -164,7 +168,7 @@ test('pause freezes player pose and ball together, rate scales both, and seeking
   expect(restart.animations).toEqual(['ready', 'ready', 'ready', 'ready']);
 });
 
-test('3D chapter seeking uses canonical anchors and reduced motion remains inspectable', async ({ page }) => {
+test('legacy 3D compatibility: 3D chapter seeking uses canonical anchors and reduced motion remains inspectable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openPlay(page, 'fifth-shot-drop');
   await expect(page.locator('#threeDPrevious,#threeDNext,#threeDRestart,#threeDLoop')).toHaveCount(0);

@@ -1,0 +1,12 @@
+{
+  "title": "Pickleball Park original detailed athletes",
+  "generation": "Built-in image_gen.imagegen, transparent background",
+  "source": "source-art/reference-athletes/athletes-atlas-v1.png",
+  "originalGeneratedSource": "generated_images/exec-2f07d96e-356f-4c9b-9161-6dc9d2548ce9.png",
+  "referenceRole": "User-approved Pickleball Park concept used only for proportions, clustered shading, sports kit and visual quality; no copyrighted character identities requested",
+  "characters": ["Emerald cap / green jersey", "Cream visor / mint jersey", "Cream cap / ponytail / coral jersey", "Navy cap / orange jersey"],
+  "columns": ["front", "front-right three-quarter", "right profile", "back"],
+  "alphaPreserved": true,
+  "externalPaidAssets": false,
+  "runtimeStatus": "Source-only initial directional hero proof; preserved for provenance. Runtime uses the v2 armless atlas and metadata."
+}

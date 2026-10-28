@@ -1,5 +1,17 @@
+import { expect } from '@playwright/test';
+
 export async function settleBuilderStartup(page) {
   await page.waitForFunction(() => Boolean(window.playBuilder && !playBuilder.busy));
+}
+
+// Add intentionally queues rapid clicks. Wait for the exact committed count
+// before a later edit, save, or Undo can cancel or inspect unfinished work.
+export async function expectBuilderAddComplete(page, shots) {
+  await expect.poll(() => page.evaluate(() => ({
+    shots: playBuilder.document.shots.length,
+    pending: playBuilder.pendingAddCount,
+    busy: playBuilder.proposalBusy
+  }))).toEqual({ shots, pending: 0, busy: false });
 }
 
 export async function openBuilderMainMenu(page) {
@@ -38,10 +50,9 @@ export async function openCoachTools(page) {
   return tools;
 }
 
+// Explicit compatibility API: the primary pixel court has no public 3D toggle.
 export async function switchCourtView(page, view) {
-  const label = `Switch to ${view.toUpperCase()} court view`;
-  const button = page.getByRole('button', { name: label, exact: true });
-  await button.click();
+  await page.evaluate(view => playBuilder.switchView(view), view);
   await page.waitForFunction(expected => !playBuilder.busy && playBuilder.view === expected, view);
 }
 

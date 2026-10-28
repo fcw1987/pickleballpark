@@ -1,0 +1,7 @@
+{
+  "source": "athletes-atlas-v1.png",
+  "output": "athletes-armless-v2.png",
+  "method": "Built-in image_gen precise-object-edit; exposed arm removal only; no programmatic repaint",
+  "prompt": "Preserve the 4x4 atlas composition, character identities and details. Remove exposed skin arms and hands below shirt sleeves and replace with genuine transparency. Retain all other artwork.",
+  "runtime": "Articulated ink outlined arms/paddle; foot/leg mesh deformation; pixel-strokes choreography; camera quaternion billboarding"
+}

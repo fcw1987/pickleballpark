@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import * as THREE from '../vendor/three.module.min.js';
 import { compilePlayTimeline } from '../three-d-core.js';
 import { sampleActorPresentation } from '../three-d-presentation.js';
@@ -182,4 +183,17 @@ test('a complete generated 99-hit rally keeps both handed rigs finite, in reach 
       }
     }
   }finally{r.dispose();}
+});
+
+
+test('a reachable near-extended recovery ankle keeps the exact thigh and shin lengths',()=>{
+ const presentation=JSON.parse(readFileSync(new URL('./fixtures/legacy-overhead-recovery-presentation.json',import.meta.url))),r=new AthleteResources();
+ try{for(const hand of ['left','right']){
+  const actor=createAthlete(r,'team1',hand);updateAthlete(actor,{...presentation,handedness:hand},camera);
+  for(const [name,leg]of Object.entries(actor.userData.legs)){
+   assert.ok(Math.abs(leg.thigh.scale.y*.39-.445)<1e-7,`${hand}/${name}: fixed thigh length`);
+   assert.ok(Math.abs(leg.shin.scale.y*.34-.425)<1e-7,`${hand}/${name}: fixed shin length`);
+   assert.ok(leg.foot.getWorldPosition(new THREE.Vector3()).distanceTo(new THREE.Vector3(...['x','y','z'].map(k=>presentation.footTargets[name][k])))<1e-8,`${hand}/${name}: preserve the authored ankle target`);
+  }
+ }}finally{r.dispose();}
 });

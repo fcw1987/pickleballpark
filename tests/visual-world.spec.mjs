@@ -1,9 +1,11 @@
+// Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 import { fitCameraPreset } from '../three-d-core.js';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 
-test('camera fitting expands narrow views without changing preset sight lines', () => {
+test('legacy 3D compatibility: camera fitting expands narrow views without changing preset sight lines', () => {
   const desktop = fitCameraPreset('sideline', 16 / 9, 0.12);
   const portrait = fitCameraPreset('sideline', 390 / 1060, 0.22);
   expect(desktop.position.every(Number.isFinite)).toBe(true);
@@ -21,9 +23,11 @@ async function openWorld(page, viewport) {
   await page.goto('/index.html?workspace=planner&visual-world=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+  await page.waitForFunction(()=>pickleboard.threeD.worldAssetsReady);
   await installDimensionalAudit(page);
+  await installReferenceRigContract(page);
   await page.evaluate(() => {
     window.__auditDimensionalWorld = ({ includeTrajectory = false } = {}) => {
       const viewer = window.pickleboard.threeD;
@@ -85,38 +89,44 @@ async function openWorld(page, viewport) {
   });
 }
 
-test('3D world has original lit solid geometry, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
+test('legacy 3D compatibility: reference world has original alpha artwork, solid paddles, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
   await openWorld(page, { width: 1280, height: 800 });
   const world = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, garden = viewer.world;
     const gardenMeshMaterials = new Set();
     garden.group.traverse(object => { if (object.isMesh) gardenMeshMaterials.add(object.material); });
+    const paintedTextures=new Set([...gardenMeshMaterials].flatMap(material=>Object.values(material).filter(value=>value?.isTexture)));
     const players = [...viewer.playerObjects.values()].map(root => {
       const meshes = [];
       root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
-      return { volumetric: root.userData.volumetricAthlete, positiveScale: root.scale.toArray().every(n => n > 0),
-        lit: meshes.every(mesh => mesh.material.type === 'MeshStandardMaterial'),
+      const audit=window.__athleteAudit(root),body=root.userData.body,face=root.userData.paddle.children[1];
+      return { reference: root.userData.referenceAthlete, positiveScale: root.scale.toArray().every(n => n > 0),
+        originalArtwork: window.__referenceRigContract.artwork(root), alphaTest: body.material.alphaTest,
+        artworkError:audit.artworkError(),
+        solidPaddle:face.geometry.attributes.position.count>0&&!face.material.transparent&&face.material.opacity===1,
         depthTested: meshes.every(mesh => mesh.material.depthTest && mesh.material.depthWrite),
         owned: meshes.every(mesh => viewer.actorResources.geometries.has(mesh.geometry)),
-        shoeBottoms: window.__athleteAudit(root).shoeBottoms };
+        shoeBottoms: audit.shoeBottoms };
     });
-    return { players, worldName: garden.group.name, dimensional: garden.group.userData.dimensionalWorld,
-      textureCount: garden.resources.textures.size,
-      opaqueTextures: [...garden.resources.textures].every(texture => texture.image.data.every((value,index) => index % 4 !== 3 || value === 255)),
+    return { players, worldName: garden.group.name, reference: garden.group.userData.referenceWorld,
+      paintedTextures:paintedTextures.size,
+      loadedPaint: [...paintedTextures].every(texture => Boolean(texture.image&&(texture.image.width||texture.image.naturalWidth)>0)),
       gardenMeshes: garden.resources.geometries.size,
       actorGeometries: viewer.actorResources.geometries.size,
       shadowEnabled: viewer.renderer.shadowMap.enabled,
-      diffuseGarden: gardenMeshMaterials.size > 0 && [...gardenMeshMaterials].every(material => material.type === 'MeshLambertMaterial'),
+      diffuseGarden: gardenMeshMaterials.size > 0 && [...gardenMeshMaterials].every(material => material.type === 'MeshLambertMaterial'||(material.type==='MeshBasicMaterial'&&material.transparent&&material.opacity===.21&&!material.depthWrite)),
       netGridMaterial: garden.net.getObjectByName('NetMesh').material.type,
-      contactShadows: [...viewer.playerObjects.values()].every(root => root.userData.shadow.visible && root.userData.shadow.material.opacity > 0),
-      line: `#${viewer.scene.getObjectByName('GreenBaseline').material.color.getHexString()}`,
+      line: `#${viewer.scene.getObjectByName('near-baseline').material.color.getHexString()}`,
       pixelScale: viewer.getState().pixelScale };
   });
-  expect(world).toMatchObject({ worldName: 'DimensionalSportsGarden', dimensional: true,
-    textureCount: 3, opaqueTextures: true, shadowEnabled: false, diffuseGarden: true, netGridMaterial: 'LineBasicMaterial', contactShadows: true, line: '#fff6db', pixelScale: 1 });
+  expect(world).toMatchObject({ worldName: 'ReferencePixelPark', reference: true,
+    loadedPaint: true, shadowEnabled: false, diffuseGarden: true, netGridMaterial: 'LineBasicMaterial', line: '#fff4dc', pixelScale: 1 });
+  expect(world.paintedTextures).toBeGreaterThan(0);
   expect(world.players).toHaveLength(4);
   for (const player of world.players) {
-    expect(player).toMatchObject({ volumetric: true, positiveScale: true, lit: true, depthTested: true, owned: true });
+    expect(player).toMatchObject({ reference: true, positiveScale: true, alphaTest: .08, solidPaddle: true, depthTested: true, owned: true });
+    expect(player.originalArtwork).toEqual({ sourceLoaded: true, dimensions: true, identity: true, visibleOriginalPixels: true });
+    expect(player.artworkError).toBeLessThanOrEqual(1e-6);
     for (const bottom of player.shoeBottoms) expect(Math.abs(bottom)).toBeLessThanOrEqual(0.01);
   }
   expect(world.gardenMeshes).toBeLessThan(40);
@@ -125,7 +135,7 @@ test('3D world has original lit solid geometry, deterministic acrylic surfaces, 
   expect(await page.evaluate(() => window.pickleboard.threeD.setPixelScale(1))).toBe(1);
 });
 
-test('camera presets reframe after portrait resize without resetting playback', async ({ page }) => {
+test('legacy 3D compatibility: camera presets reframe after portrait resize without resetting playback', async ({ page }) => {
   await openWorld(page, { width: 1280, height: 800 });
   await page.evaluate(() => {
     const viewer = window.pickleboard.threeD;
@@ -142,7 +152,7 @@ test('camera presets reframe after portrait resize without resetting playback', 
     };
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(() => page.evaluate(() => window.pickleboard.threeD.getState().framing.aspect)).toBeCloseTo(390 / 844, 2);
+  await expect.poll(() => page.evaluate(() => window.pickleboard.threeD.camera.aspect)).toBeCloseTo(390 / 844, 2);
 
   for (const name of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
     await page.locator('#threeDCamera').selectOption(name,{force:true});
@@ -157,9 +167,10 @@ test('camera presets reframe after portrait resize without resetting playback', 
     }), beforeResize);
     expect(state.camera).toBe(name);
     expect(state.elapsed).toBeCloseTo(beforeResize.elapsed, 8);
-    expect(state.framing.distanceScale).toBeGreaterThan(0);
-    expect(state.framing.reservedPixels).toBeGreaterThan(0);
-    expect(state.framing.reservedPixels).toBeLessThan(audit.canvas.bottom - audit.canvas.top);
+    expect(state.cameraControls.distance).toBeGreaterThan(0);
+    expect(state.cameraControls.elevation).toBeGreaterThan(0);
+    expect(audit.hudTop).toBeGreaterThan(audit.canvas.top);
+    expect(audit.hudTop).toBeLessThanOrEqual(audit.canvas.bottom);
     expect(restored).toEqual(beforeResize);
     expect(audit.bounds.left).toBeGreaterThanOrEqual(audit.canvas.left - 2);
     expect(audit.bounds.right).toBeLessThanOrEqual(audit.canvas.right + 2);
@@ -168,12 +179,11 @@ test('camera presets reframe after portrait resize without resetting playback', 
   }
 });
 
-test('all Plays keep complete actors and trajectories above the HUD at every target viewport', async ({ page }) => {
-  test.setTimeout(90000);
-  await openWorld(page, { width: 390, height: 844 });
-  const playIds = PICKLEBOARD_PLAYS.map(play => play.id);
-  for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 1164, height: 696 }]) {
-    await page.setViewportSize(viewport);
+for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 1164, height: 696 }]) {
+  test(`legacy 3D compatibility: all Plays keep complete actors and trajectories above the HUD at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    test.setTimeout(90000);
+    await openWorld(page, viewport);
+    const playIds = PICKLEBOARD_PLAYS.map(play => play.id);
     for (const playId of playIds) {
       await page.evaluate(async id => {
         const board = window.pickleboard;
@@ -229,11 +239,11 @@ test('all Plays keep complete actors and trajectories above the HUD at every tar
         expect.soft(audit.smallestActorHeight, `${viewport.width}px ${playId} ${audit.camera} readability`).toBeGreaterThan(8);
       }
     }
-  }
-});
+  });
+}
 
 
-test('phone cameras retain a visible ball without changing its trajectory or physical radius', async ({ page }) => {
+test('legacy 3D compatibility: phone cameras retain a visible ball without changing its trajectory or physical radius', async ({ page }) => {
   await openWorld(page, {width:320, height:568});
   for (const name of ['overhead','sideline','behind-green','behind-orange']) {
     await page.locator('#threeDCamera').selectOption(name,{force:true});

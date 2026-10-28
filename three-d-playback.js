@@ -1,4 +1,5 @@
-import { createDimensionalWorld } from './three-d-world.js';
+import { createReferenceWorld } from './reference-world.js';
+import { DepthCameraControls } from './depth-camera.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import * as THREE from './vendor/three.module.min.js';
 import {
@@ -11,7 +12,7 @@ import {
     fitCameraPreset
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
-import { AthleteResources, createAthlete, updateAthlete } from './three-d-athletes.js';
+import { loadReferenceAthleteAssets, ReferenceAthleteResources as AthleteResources, createReferenceAthlete as createAthlete, updateReferenceAthlete as updateAthlete } from './reference-athletes.js';
 import { ReadableBall } from './three-d-ball.js';
 import { chapterAtTime } from './shot-chapters.js';
 import { mountShotTimeline } from './shot-timeline.js';
@@ -64,14 +65,14 @@ function createStaticWorldCache(renderer, scene, world) {
         key.push(background?.isColor?background.getHex():background?.uuid,background?.version,scene.backgroundIntensity,scene.backgroundBlurriness,scene.backgroundRotation?.x,scene.backgroundRotation?.y,scene.backgroundRotation?.z,
             scene.fog?.color?.getHex(),scene.fog?.near,scene.fog?.far,scene.fog?.density);
         world.group.traverse(object=>{
-            key.push(object.uuid,object.visible,object.layers.mask,object.renderOrder,...object.matrixWorld.elements);
+            key.push(object.uuid,object.visible,object.layers.mask,object.renderOrder,object.center?.x,object.center?.y,...object.matrixWorld.elements);
             if(object.geometry){key.push(object.geometry.uuid,object.geometry.index?.version,object.geometry.drawRange.start,object.geometry.drawRange.count);
                 for(const [name,attribute]of Object.entries(object.geometry.attributes))key.push(name,attribute.version);}
             for(const material of object.material?(Array.isArray(object.material)?object.material:[object.material]):[]){
                 key.push(material.uuid,material.version,material.visible,material.opacity,material.transparent,material.side,material.depthWrite,material.depthTest,material.depthFunc,material.alphaTest,material.polygonOffset,material.polygonOffsetFactor,material.polygonOffsetUnits,
-                    material.color?.r,material.color?.g,material.color?.b,material.emissive?.r,material.emissive?.g,material.emissive?.b,material.emissiveIntensity);
+                    material.color?.r,material.color?.g,material.color?.b,material.emissive?.r,material.emissive?.g,material.emissive?.b,material.emissiveIntensity,material.rotation,material.linewidth,material.vertexColors,material.blending,material.blendSrc,material.blendDst,material.blendEquation,material.premultipliedAlpha,material.colorWrite,material.toneMapped,material.roughness,material.metalness,material.normalScale?.x,material.normalScale?.y);
                 for(const name of ['map','alphaMap','lightMap','aoMap','emissiveMap','normalMap']){const map=material[name];
-                    if(map)key.push(name,map.uuid,map.version,map.colorSpace,map.rotation,map.offset.x,map.offset.y,map.repeat.x,map.repeat.y,map.center.x,map.center.y);}
+                    if(map)key.push(name,map.uuid,map.version,map.colorSpace,map.rotation,map.offset.x,map.offset.y,map.repeat.x,map.repeat.y,map.center.x,map.center.y,map.wrapS,map.wrapT,map.magFilter,map.minFilter,map.flipY,map.premultiplyAlpha,map.matrixAutoUpdate,...map.matrix.elements);}
             }
         });
         scene.traverseVisible(light=>{if(!light.isLight)return;light.target?.updateMatrixWorld();
@@ -319,7 +320,7 @@ class ThreeDPlaybackViewer {
             // Keep asynchronous intent cancellation at the renderer boundary.
             // The dimensional scene uses locally authored geometry and needs no
             // raster actor download; the existing 2D artwork remains unchanged.
-            await Promise.resolve();
+            this.actorAssets = await loadReferenceAthleteAssets({signal:controller.signal});
             if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
         } catch(error) {
             if(generation!==this.loadGeneration)return false;
@@ -378,7 +379,7 @@ class ThreeDPlaybackViewer {
 
     initializeScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color('#c3dcde');
+        this.scene.background = new THREE.Color('#79ba69');
         this.camera = new THREE.PerspectiveCamera(48, 1, 0.05, 100);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
         // Ground contact ellipses anchor athletes without a second scene pass.
@@ -403,13 +404,20 @@ class ThreeDPlaybackViewer {
         this.gradientMap.magFilter = THREE.NearestFilter;
         this.gradientMap.generateMipmaps = false;
         this.gradientMap.needsUpdate = true;
-        this.world = createDimensionalWorld(THREE, { palette: PALETTE, gradientMap: this.gradientMap });
+        this.worldAssetsReady = false;
+        this.world = createReferenceWorld(THREE, { palette: PALETTE });
+        const loadedWorld=this.world;
+        this.world.ready?.then(()=>{if(this.world===loadedWorld&&this.renderer){this.worldAssetsReady=true;this.startRenderLoop();}},()=>{if(this.world===loadedWorld)this.worldAssetsReady=false;});
         this.scene.add(this.world.group);
+        if (this.world.dynamicGroup) this.scene.add(this.world.dynamicGroup);
+        this.staticWorldCache = createStaticWorldCache(this.renderer, this.scene, this.world);
         this.courtObject = this.world.court;
         this.netObject = this.world.net;
         this.buildPlayers();
         this.buildBall();
-        this.staticWorldCache=createStaticWorldCache(this.renderer,this.scene,this.world);
+        // Orbit changes the whole world view. Render at native resolution;
+        // detailed artwork supplies its own pixel edges, without a screen filter.
+        this.cameraControls = new DepthCameraControls(this);
 
         this.resize();
     }
@@ -424,7 +432,7 @@ class ThreeDPlaybackViewer {
 
     renderPixelRatio() {
         const cap = Number(VISUAL.render?.maxPixelRatio) || 2;
-        return Math.max(0.5, Math.min(window.devicePixelRatio || 1, cap) / this.pixelScale);
+        return Math.max(1, Math.min(window.devicePixelRatio || 1, cap));
     }
 
     setPixelScale(scale) {
@@ -439,7 +447,7 @@ class ThreeDPlaybackViewer {
 
 
     buildPlayers() {
-        this.actorResources=new AthleteResources();
+        this.actorResources=new AthleteResources(this.actorAssets);
         for(let index=1;index<=4;index++) {
             const token=this.board.tokens[`player${index}`];
             const team=token.element.classList.contains('team2-player')?'team2':'team1';
@@ -508,6 +516,7 @@ class ThreeDPlaybackViewer {
         if (!CAMERA_PRESETS[name] || !this.camera) return false;
         this.cameraPreset = name;
         this.elements.camera.value = name;
+        if(this.cameraControls)this.cameraControls.reset(name);
         this.applyCameraFraming();
         if(this.currentPlay&&this.ballObject)this.applyAtTime(this.clock.elapsed);
         this.startRenderLoop();
@@ -515,6 +524,7 @@ class ThreeDPlaybackViewer {
     }
 
     applyCameraFraming() {
+        if (this.cameraControls) {this.cameraControls.apply();return;}
         if (!this.camera || !this.cameraPreset) return;
         const width = Math.max(1, this.elements.canvas.clientWidth);
         const height = Math.max(1, this.elements.canvas.clientHeight);
@@ -614,6 +624,8 @@ class ThreeDPlaybackViewer {
     applyAtTime(seconds) {
         const segment=seconds>0?(this.timeline.segments.find(item=>seconds<item.endTime-1e-9)||this.timeline.segments.at(-1)):null;
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
+        this.world?.updateCamera?.(this.camera);
+        this.world?.updateAtTime?.(seconds);
         this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
@@ -663,7 +675,8 @@ class ThreeDPlaybackViewer {
             playId: this.currentPlay?.id || null,
             playerCount: this.playerObjects.size,
             hasBall: Boolean(this.ballObject),
-            artStyle: 'dimensional-court-garden',
+            artStyle: 'reference-pixel-depth',
+            cameraControls: this.cameraControls?.getState(),
             renderLoopCount: this.renderLoopCount,
             pixelScale: this.pixelScale,
             framing: this.cameraFraming ? { ...this.cameraFraming } : null,
@@ -672,9 +685,14 @@ class ThreeDPlaybackViewer {
     }
 
     disposeScene() {
+        this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;
-        if (this.world) { this.scene?.remove(this.world.group); this.world.dispose(); this.world=null; }
+        if (this.world) {
+            this.scene?.remove(this.world.group);
+            if (this.world.dynamicGroup) this.scene?.remove(this.world.dynamicGroup);
+            this.world.dispose(); this.world=null;
+        }
         this.readableBall?.dispose();this.readableBall=null;
         for (const actor of this.playerObjects.values()) this.scene?.remove(actor);
         this.actorResources?.dispose();this.actorResources=null;

@@ -174,13 +174,18 @@ for (const viewport of [{ width: 402, height: 874 }, { width: 844, height: 390 }
       await expect(first).toBeFocused();
       await summary.click();
     }
-    for (const view of ['2d', '3d']) {
-      const tab = page.getByRole('button', { name: `Switch to ${view.toUpperCase()} court view`, exact: true });
-      await tab.focus(); await expect(tab).toBeFocused();
-      const box = await tab.boundingBox();
+    await expect(page.getByRole('button', { name: 'Switch to 3D court view', exact: true })).toBeHidden();
+    for (const name of ['Play', 'Add shot', 'Edit shot']) {
+      const control = page.getByRole('button', { name, exact: true }).first();
+      await control.focus(); await expect(control).toBeFocused();
+      const box = await control.boundingBox();
       expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
-      await switchCourtView(page, view);
+      expect(box.height).toBeGreaterThanOrEqual(44);
     }
+    // Retained view APIs preserve the same contextual state, while 2D remains
+    // the public default and only visible court after returning.
+    for (const view of ['3d', '2d']) await switchCourtView(page, view);
+    await expect(page.locator('.pixel-court-canvas')).toBeVisible();
     const edit = page.getByRole('button', { name: 'Edit shot', exact: true }).first();
     await expect(edit).toHaveAttribute('aria-expanded', 'false');
     await edit.focus();

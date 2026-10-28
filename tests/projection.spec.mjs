@@ -21,8 +21,8 @@ test('projection is affine, invertible, and spans the complete editable bounds',
     };
   });
 
-  expect(result.viewBox).toEqual({ x: -12, y: -9.2, width: 44, height: 43.8 });
-  const expectedCorners = [[-5.3,-5.2],[30.7,-5.2],[-10.7,33.8],[25.3,33.8]];
+  expect(result.viewBox).toEqual({ x: -22, y: -8, width: 64, height: 60 });
+  const expectedCorners = [[-8,-8],[28,-8],[-8,52],[28,52]];
   result.projected.slice(0, 4).forEach((point, index) => {
     expect(point.x).toBeCloseTo(expectedCorners[index][0], 10);
     expect(point.y).toBeCloseTo(expectedCorners[index][1], 10);
@@ -58,9 +58,9 @@ test('ground content projects while editable state and numeric attributes stay c
   expect(state.position).toEqual({ x: 8.5, y: 31.25 });
   expect(state.attrs).toEqual({ dataX: 8.5, dataY: 31.25, targetX: 8.5, targetY: 31.25 });
   const actorOffset = state.actorTransform.match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
-  expect(actorOffset[0]).toBeCloseTo(-0.8325, 10);
-  expect(actorOffset[1]).toBeCloseTo(-12.770833333333332, 10);
-  expect(state.groundTransform).toBe('matrix(1 0 -0.09 0.65 1.98 0)');
+  expect(actorOffset[0]).toBeCloseTo(0, 10);
+  expect(actorOffset[1]).toBeCloseTo(-2.578125, 10);
+  expect(state.groundTransform).toBe('matrix(1 0 0 1 0 0)');
   expect(state.order.map(item => item.depth)).toEqual([...state.order.map(item => item.depth)].sort((a, b) => a - b));
 });
 
@@ -119,8 +119,11 @@ test('drawing across the net stays in court coordinates through resize and repla
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>pickleboard.captureBoardState())).toEqual(before);
   await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));
-  await page.locator('#play3dView').click();await page.locator('#threeDCanvas canvas').waitFor();
-  await page.locator('#threeDExit').click();await page.locator('#playExit').click();
+  await expect(page.locator('.pixel-court-canvas')).toBeVisible();
+  await page.locator('#playPlayPause').click();
+  await expect.poll(()=>page.evaluate(()=>pickleboard.plays.session.clock.elapsed)).toBeGreaterThan(0);
+  await page.locator('#playPlayPause').click();
+  await page.locator('#playExit').click();
   expect(await page.evaluate(()=>pickleboard.captureBoardState())).toEqual(before);
   await page.evaluate(()=>pickleboard.undoLastStroke());
   await expect(page.locator('#drawingLayer path')).toHaveCount(0);

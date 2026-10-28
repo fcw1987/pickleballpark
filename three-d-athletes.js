@@ -416,7 +416,9 @@ export function updateAthlete(root,sample,camera,contactWeight=0) {
         const hip=visual.worldToLocal(upper.localToWorld(v(s*.13,.875,0)));
         const shinEnd=ankle.clone().add(v(0,.095,0));
         const legAxis=shinEnd.clone().sub(hip),legDistance=Math.max(.001,legAxis.length());legAxis.divideScalar(legDistance);
-        const thighLength=.445,shinLength=.425,reach=clamp(legDistance,.021,thighLength+shinLength-.001);
+        // Solve against the true bone-length annulus. Shortening its outer radius
+        // stretches the rendered shin even for a physically reachable ankle.
+        const thighLength=.445,shinLength=.425,reach=clamp(legDistance,Math.abs(thighLength-shinLength),thighLength+shinLength);
         const along=(thighLength*thighLength-shinLength*shinLength+reach*reach)/(2*reach);
         const kneeBend=v(0,0,1).addScaledVector(legAxis,-legAxis.z).normalize();
         const knee=hip.clone().addScaledVector(legAxis,along).addScaledVector(kneeBend,Math.sqrt(Math.max(0,thighLength*thighLength-along*along)));

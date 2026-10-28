@@ -148,7 +148,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   root.setAttribute('aria-label', 'Build a Play');
   document.body.appendChild(root);
   document.body.classList.add('builder-workspace');
-  let current = { document: null, selectedShotId: null, selectedChapterId: null, currentShotId: null, chapters: [], findings: [], playing: false, time: 0, duration: 8.5, view: '3d', workspace: 'builder', saveStatus: 'Saved locally', library: [], templates: [], loop: false, rate: 1, busy: false, message: '', canUndo: false, canRedo: false, camera: 'overhead' };
+  let current = { document: null, selectedShotId: null, selectedChapterId: null, currentShotId: null, chapters: [], findings: [], playing: false, time: 0, duration: 8.5, view: '2d', workspace: 'builder', saveStatus: 'Saved locally', library: [], templates: [], loop: false, rate: 1, busy: false, message: '', canUndo: false, canRedo: false, camera: 'overhead' };
   let destroyed = false;
   let renderedDocument = null;
   let renderedSelectedShotId = null;
@@ -336,6 +336,9 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const chaptersOpen=Boolean(root.querySelector('.builder-chapter-menu')?.open);
     const focused=document.activeElement;const focusIdentity=root.contains(focused)?{action:focused.dataset.action,shotId:focused.dataset.shotId,label:focused.getAttribute('aria-label')}:null;
     const oldInspectorScroll=root.querySelector('.builder-inspector')?.scrollTop || 0;
+    // Enlarged controls scroll this root. Removing its children temporarily
+    // collapses scrollHeight; preserve the user's viewport through a rebuild.
+    const oldRootScroll=root.scrollTop;
     // Keep modal dialogs connected through save/field/viewport updates.
     for(const child of [...root.children])if(child.tagName!=='DIALOG')child.remove();
     root.classList.toggle('builder-planner', current.workspace === 'planner');
@@ -363,6 +366,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const meta = el('div', 'builder-meta');
     status.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft'; status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); status.className = 'builder-save-status'; playGroup.append(status); mainMenu.appendChild(menuPanel);
     meta.appendChild(mainMenu);
+    meta.appendChild(el('span', 'builder-app-title', 'PICKLEBALL PARK'));
     const needsStatus = pendingField || current.saveError || (current.saveStatus && !/^saved(?: locally| on this device)?$/i.test(current.saveStatus));
     if (needsStatus) {
       const compactStatus = el('span', 'builder-save-pill', pendingField ? 'Editing' : (current.saveStatus || 'Draft'));
@@ -545,15 +549,28 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     const undo = button('↶', 'undo', 'builder-button builder-icon-button'); undo.setAttribute('aria-label', 'Undo authored edit'); undo.disabled = !current.canUndo;
     const redo = button('↷', 'redo', 'builder-button builder-icon-button'); redo.setAttribute('aria-label', 'Redo authored edit'); redo.disabled = !current.canRedo;
     const play = button('', 'play-pause', 'builder-button builder-button-primary builder-play-button'); play.replaceChildren(el('span', 'pixel-play-icon', current.playing ? 'Ⅱ' : '▶'), el('span', 'pixel-play-label', current.playing ? 'Pause' : 'Play')); play.setAttribute('aria-pressed', String(Boolean(current.playing))); play.setAttribute('aria-label', current.playing ? 'Pause' : 'Play');
-    transportTop.append(play);
+    context.prepend(play);
+    transportTop.append(addButton, cueNode);
     const history = el('div', 'builder-history-controls'); history.setAttribute('aria-label', 'Edit history'); history.append(undo, redo); transportTop.append(history);
     const timelineHost = el('div', 'builder-transport-timeline'); timelineHost.append(timelineControl.element); transportTop.append(timelineHost);
     const optionsMenu = el('details', 'builder-menu builder-context-menu'); optionsMenu.append(el('summary', '', 'Playback options'));
     const rate = select('Playback speed', 'rate', [['0.25', '0.25×'], ['0.5', '0.5×'], ['1', '1×']]); rate.querySelector('select').value = String(current.rate || 1);
     const cameraChoices = select('Camera', 'camera', [['overhead', 'Overhead'], ['sideline', 'Sideline'], ['behind-green', 'Behind Green'], ['behind-orange', 'Behind Orange']]); cameraChoices.querySelector('select').value = current.camera || 'overhead';
     const optionsSummary=optionsMenu.querySelector('summary');optionsSummary.replaceChildren(el('span','','⋮'),el('span','sr-only','Playback options'));optionsSummary.setAttribute('aria-label','Playback options');optionsMenu.open=optionsMenuOpen;
-    const optionsPanel=el('div','builder-menu-panel');optionsPanel.append(rate,cameraChoices);optionsMenu.append(optionsPanel);
-    transportTop.append(optionsMenu); transport.append(transportTop); root.appendChild(transport);
+    const optionsPanel=el('div','builder-menu-panel');optionsPanel.append(rate);optionsMenu.append(optionsPanel);
+    transportTop.append(optionsMenu); transport.append(transportTop);
+    const dock=el('section','builder-reference-dock');dock.setAttribute('aria-label','Park controls');
+    dock.append(meta,transport);
+    const cameraBar=el('div','builder-camera-bar');cameraBar.setAttribute('aria-label','Camera controls');
+    const cameraModes=el('div','builder-camera-modes');cameraModes.setAttribute('role','group');cameraModes.setAttribute('aria-label','Drag mode');
+    const mode=globalThis.pickleboard?.threeD?.cameraControls?.getState?.().mode||'orbit';
+    for(const [value,label]of [['orbit','Rotate'],['pan','Pan']]){const control=button(label,`camera-mode-${value}`,'builder-button builder-camera-button');control.setAttribute('aria-pressed',String(mode===value));control.title=value==='orbit'?'Drag empty court to rotate and tilt':'Drag empty court to move the view';cameraModes.append(control);}
+    const reset=button('↺','camera-reset','builder-button builder-camera-button');reset.setAttribute('aria-label','Reset view');reset.title='Reset view';
+    const zoomOut=button('−','camera-zoom-out','builder-button builder-camera-button builder-camera-zoom');zoomOut.setAttribute('aria-label','Zoom out');
+    const zoomIn=button('+','camera-zoom-in','builder-button builder-camera-button builder-camera-zoom');zoomIn.setAttribute('aria-label','Zoom in');
+    const cameraHelp=el('details','builder-camera-help');cameraHelp.append(el('summary','','Camera help'),el('p','','Drag empty space to rotate and tilt. Choose Pan to move the view. On touch screens, use two fingers to pan or pinch to zoom. Drag players and targets directly to edit.'));
+    cameraBar.append(cameraModes,reset,zoomOut,zoomIn,cameraHelp);dock.append(cameraBar);root.append(dock);
+    syncCameraControls();
     for(const dialog of [templateDialog,importDialog,randomDialog])if(dialog.parentElement!==root)root.appendChild(dialog);
     if (randomDialog.open) {
       const progress = randomDialog.querySelector('.builder-proposal-status');
@@ -562,6 +579,8 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const create = randomDialog.querySelector('[data-action="random-rally"]'); if (create) create.disabled = Boolean(current.proposalBusy);
     }
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
+    root.scrollTop=oldRootScroll;
+    if(optionsMenuOpen&&document.body.classList.contains('builder-large-text'))optionsPanel.scrollIntoView({block:'nearest'});
     if(placementJustFinished){
       root.querySelector('.builder-inspector [data-action="collapse-inspector"]')?.focus({preventScroll:true});
     } else if(focusIdentity && document.activeElement===document.body){
@@ -569,6 +588,14 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       if(next?.getClientRects().length)next.focus({preventScroll:true});
     }
   }
+  function syncCameraControls(){
+    const controls=globalThis.pickleboard?.threeD?.cameraControls;
+    const ready=Boolean(controls&&globalThis.pickleboard?.threeD?.active);
+    root.querySelectorAll('.builder-camera-button').forEach(control=>{control.disabled=!ready;});
+    if(controls)root.querySelectorAll('[data-action^="camera-mode-"]').forEach(control=>control.setAttribute('aria-pressed',String(control.dataset.action===`camera-mode-${controls.getState().mode}`)));
+  }
+  const onCameraReady=()=>syncCameraControls();
+  globalThis.addEventListener('pickleboard:camera-ready',onCameraReady);
   function rerenderAction(type, payload) { return fire(type, payload); }
   function cancelActivePlacement() {
     if (current.targetPlacement) fire('cancelTarget');
@@ -583,10 +610,21 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   async function handleClick(event) {
     const target = event.target.closest('[data-action]'); if (!target || !root.contains(target)) return;
     const action = target.dataset.action;
+    // Opening the editor or using the transport dismisses a browsing menu.
+    // This keeps its upward popover clear of the live editing controls.
+    root.querySelectorAll('.builder-menu[open]').forEach(openMenu => { if (!openMenu.contains(target)) openMenu.open = false; });
     const menu = target.closest('.builder-menu'); if (menu && action !== 'rename' && !['SELECT','INPUT','TEXTAREA'].includes(target.tagName)) {menu.open = false;menu.querySelector('summary').focus();}
     const picker=target.closest('.builder-chapter-menu');
     if(picker&&['chapter','edit-chapter'].includes(action)){picker.open=false;picker.querySelector('summary')?.focus();}
     const input=document.activeElement;if(input&&root.contains(input)&&input.matches('input:not([type=range]),textarea'))input.blur();
+    if(action.startsWith('camera-')){
+      const controls=globalThis.pickleboard?.threeD?.cameraControls;if(!controls)return;
+      if(action.startsWith('camera-mode-'))controls.setMode(action.slice('camera-mode-'.length));
+      else if(action==='camera-reset')controls.reset();
+      else if(action==='camera-zoom-in')controls.zoomBy(.85);
+      else if(action==='camera-zoom-out')controls.zoomBy(1/.85);
+      syncCameraControls();return;
+    }
     if (action === 'select-shot') { inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; rerenderAction('selectShot', target.dataset.shotId); }
     else if (action === 'chapter') {
       const shotId = target.dataset.shotId;
@@ -759,10 +797,12 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   });
   root.addEventListener('toggle', event => {
     const opened = event.target;
-    if (!(opened instanceof HTMLDetailsElement) || !opened.open) return;
+    const transientSelector = '.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-actions-menu';
+    if (!(opened instanceof HTMLDetailsElement) || !opened.open || !opened.matches(transientSelector)) return;
+    if(opened.matches('.builder-context-menu')&&document.body.classList.contains('builder-large-text'))opened.querySelector('.builder-menu-panel')?.scrollIntoView({block:'nearest'});
     // Keep one unrelated transient surface visible. Nested pickers and action
     // menus belong to their parent and are therefore exempt from dismissal.
-    const transient = root.querySelectorAll('.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-actions-menu');
+    const transient = root.querySelectorAll(transientSelector);
     transient.forEach(other => {
       if (other === opened || other.contains(opened) || opened.contains(other)) return;
       other.open = false;
@@ -832,7 +872,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     return plannerConfirmation;
   };
   render();
-  return { render, showExport, confirmPlanner, destroy() { destroyed = true; importFileGeneration += 1; timelineControl?.cancel?.(); timelineControl?.destroy?.(); root.remove(); document.body.classList.remove('builder-workspace', 'planner-workspace'); }, element: root };
+  return { render, showExport, confirmPlanner, destroy() { globalThis.removeEventListener('pickleboard:camera-ready',onCameraReady); destroyed = true; importFileGeneration += 1; timelineControl?.cancel?.(); timelineControl?.destroy?.(); root.remove(); document.body.classList.remove('builder-workspace', 'planner-workspace'); }, element: root };
 }
 
 export { FAMILIES };

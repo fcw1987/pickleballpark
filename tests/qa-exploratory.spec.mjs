@@ -90,7 +90,7 @@ test.describe('touch and responsive surfaces', () => {
     { width: 320, height: 568, label: '320x568' },
     { width: 844, height: 390, label: '844x390' },
   ]) {
-    test(`touch sequence stays usable at ${viewport.label}`, async ({ browser }) => {
+    test(`touch sequence and legacy 3D API transition stay usable at ${viewport.label}`, async ({ browser }) => {
       const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true, colorScheme: 'light' });
       const page = await context.newPage();
       await page.goto('/');
@@ -127,7 +127,7 @@ test.describe('touch and responsive surfaces', () => {
   }
 });
 
-test('selected edit panel scrolls, rapid view/detail toggles settle, and resize keeps data', async ({ page }) => {
+test('selected edit panel scrolls, legacy 3D API transitions settle, and resize keeps data', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Edit shot' }).click();
   await openIntentTab(page, 'Movement');
@@ -198,7 +198,9 @@ test('reduced motion and enlarged text simulation preserve the visible controls'
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(32, 47, 60)');
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
   await expect(page.getByRole('region', { name: 'Build a Play' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Switch to 2D court view', exact: true })).toBeVisible();
+  await expect(page.locator('#threeDViewer canvas')).toBeVisible();
+  expect(await page.evaluate(() => playBuilder.view)).toBe('3d');
+  await expect(page.getByRole('button', { name: 'Switch to 3D court view', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: /^Play$/ }).first().click();
   await expect(page.getByRole('button', { name: /^Pause$/ }).first()).toBeVisible();
   await context.close();

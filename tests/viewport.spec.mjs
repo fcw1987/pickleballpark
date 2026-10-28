@@ -10,6 +10,8 @@ for (const viewport of viewports) {
   test(`court fits the usable ${viewport.name} viewport`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/index.html?workspace=planner&viewport=1');
+    await page.waitForFunction(()=>window.pickleboard?.pixelRenderer?.getDiagnostics()?.court);
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 
     const layout = await page.evaluate(() => {
       const rect = document.querySelector('#court').getBoundingClientRect();
@@ -17,6 +19,7 @@ for (const viewport of viewports) {
       const playerRect = player.getBoundingClientRect();
       const playerState = window.pickleboard.getTokenPositions().player1;
       const matrix = document.querySelector('#court').getScreenCTM();
+      const canvas=document.querySelector('.pixel-court-canvas'),painted=canvas.getBoundingClientRect();
       // Independently project the canonical feet; do not derive expected position
       // from the artwork transform under test.
       const projected = PickleboardProjection.courtToView(playerState);
@@ -27,8 +30,9 @@ for (const viewport of viewports) {
         playerCenter: { x: playerRect.left + playerRect.width / 2, y: playerRect.top + playerRect.height * 54 / 64 },
         expectedCenter,
         documentHeight: document.documentElement.scrollHeight,
-        ratio: rect.width / rect.height,
-        viewRatio: PickleboardProjection.COURT_VIEWBOX.width / PickleboardProjection.COURT_VIEWBOX.height
+        painted:{width:painted.width,height:painted.height},
+        expectedPainted:{width:canvas.width/4*matrix.a,height:canvas.height/4*matrix.d},
+        scale:{x:matrix.a,y:matrix.d}
       };
     });
 
@@ -37,7 +41,11 @@ for (const viewport of viewports) {
     expect(layout.court.top).toBeGreaterThanOrEqual(0);
     expect(layout.court.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
     expect(layout.documentHeight).toBeLessThanOrEqual(layout.viewport.height + 1);
-    expect(layout.ratio).toBeCloseTo(layout.viewRatio, 2);
+    // Pixel scenery extends into the SVG letterbox; each native pixel still
+    // represents one quarter foot under the same uniform court transform.
+    expect(layout.scale.x).toBeCloseTo(layout.scale.y, 10);
+    // Layout engines quantize CSS boxes to 1/64px; logical geometry stays exact.
+    for(const axis of ['width','height'])expect(Math.abs(layout.painted[axis]-layout.expectedPainted[axis])).toBeLessThanOrEqual(1/64+1e-8);
     expect(layout.playerCenter.x).toBeCloseTo(layout.expectedCenter.x, 0);
     expect(layout.playerCenter.y).toBeCloseTo(layout.expectedCenter.y, 0);
   });

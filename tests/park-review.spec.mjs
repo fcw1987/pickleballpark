@@ -6,7 +6,7 @@ async function loadPlay(page, playId = 'third-shot-drop') {
   await page.evaluate(id => pickleboard.plays.load(id), playId);
 }
 
-test('WebGL allocation failure returns session ownership to resumable guided playback', async ({ page }) => {
+test('retained 3D compatibility API: WebGL allocation failure returns session ownership to resumable guided playback', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -17,7 +17,7 @@ test('WebGL allocation failure returns session ownership to resumable guided pla
   await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
   await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
 
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDLoadStatus')).toBeVisible();
   await expect(page.locator('#threeDViewer')).toBeHidden();
   expect(await page.evaluate(() => pickleboard.plays.session.owner)).toBe('guided');
@@ -27,7 +27,7 @@ test('WebGL allocation failure returns session ownership to resumable guided pla
   expect(await page.evaluate(() => pickleboard.plays.clock.elapsed)).toBeGreaterThan(0.1);
 });
 
-test('failed 3D module leaves the board resumable and a retry can enter 3D', async ({ browser }) => {
+test('retained 3D compatibility API: failed 3D module leaves the board resumable and a retry can enter 3D', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   let requests = 0;
@@ -37,7 +37,7 @@ test('failed 3D module leaves the board resumable and a retry can enter 3D', asy
     // Fail the actual lazy entry; retries use a new URL after module failures.
     await page.route('**/three-d-playback.js*', route => ++requests === 1 ? route.abort() : route.continue());
 
-    await page.locator('#play3dView').click();
+    await page.evaluate(() => { void pickleboard.threeD.enter(); });
     await expect(page.locator('#threeDLoadStatus')).toContainText('Your board is safe');
     await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);
     await expect(page.locator('#play3dView')).toBeEnabled();
@@ -55,7 +55,7 @@ test('failed 3D module leaves the board resumable and a retry can enter 3D', asy
     expect(await page.evaluate(() => pickleboard.plays.clock.elapsed)).toBeGreaterThan(0.1);
     await page.locator('#playPlayPause').click();
 
-    await page.locator('#play3dView').click();
+    await page.evaluate(() => { void pickleboard.threeD.enter(); });
     await expect.poll(() => page.evaluate(() => pickleboard.threeD.active)).toBe(true);
     expect(requests).toBe(2);
     await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
@@ -63,7 +63,7 @@ test('failed 3D module leaves the board resumable and a retry can enter 3D', asy
   } finally { await context.close(); }
 });
 
-test('leaving a Play cancels a pending 3D handoff instead of opening the stale Play', async ({ browser }) => {
+test('retained 3D compatibility API: leaving a Play cancels a pending 3D handoff instead of opening the stale Play', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
   await loadPlay(page);
@@ -77,7 +77,7 @@ test('leaving a Play cancels a pending 3D handoff instead of opening the stale P
   });
 
   try {
-    await page.locator('#play3dView').click();
+    await page.evaluate(() => { void pickleboard.threeD.enter(); });
     await expect(page.locator('#play3dView')).toHaveAttribute('aria-busy', 'true');
     await expect.poll(() => moduleRequestStarted).toBe(true);
     await page.locator('#playExit').click();
@@ -97,7 +97,7 @@ test('leaving a Play cancels a pending 3D handoff instead of opening the stale P
     await expect(page.locator('#threeDViewer')).toBeHidden();
     await expect(page.locator('#threeDLoadStatus')).toBeHidden();
 
-    await page.locator('#play3dView').click();
+    await page.evaluate(() => { void pickleboard.threeD.enter(); });
     await expect.poll(() => page.evaluate(() => pickleboard.threeD.active)).toBe(true);
     expect(await page.evaluate(() => ({ owner: pickleboard.plays.session.owner,
       play: pickleboard.threeD.currentPlay.id })))
@@ -109,10 +109,10 @@ test('leaving a Play cancels a pending 3D handoff instead of opening the stale P
   }
 });
 
-test('camera changes and a 3D exit-restart keep one timeline and the original board snapshot', async ({ page }) => {
+test('retained 3D compatibility API: camera changes and a 3D exit-restart keep one timeline and the original board snapshot', async ({ page }) => {
   await loadPlay(page, 'volley-block');
   const original = await page.evaluate(() => pickleboard.plays.snapshot);
-  await page.locator('#play3dView').click();
+  await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect.poll(() => page.evaluate(() => pickleboard.threeD.active)).toBe(true);
 
   const audit = await page.evaluate(() => {

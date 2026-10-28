@@ -98,6 +98,7 @@ export class GuidedPixelActors {
     }
 
     deactivate() {
+        this.board.pixelSamples = null;
         this.active = false;
         for (const [id, entry] of this.nodes) {
             const visibility = this.originalVisibility.get(id);
@@ -117,6 +118,7 @@ export class GuidedPixelActors {
     }
 
     update(samples) {
+        this.board.pixelSamples = Object.fromEntries(normalizeSamples(samples));
         if (!this.loaded || !this.assets) return false;
         if (!this.active) this.activate();
         const sprite = visualSprite();

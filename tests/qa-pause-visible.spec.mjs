@@ -89,12 +89,15 @@ test.describe('BETA009 visible pause input', () => {
     });
   }
 
-  test('2D and 3D builder views expose one working visible Pause control', async ({ page }) => {
+  test('pixel court and legacy 3D API expose one working visible Pause control', async ({ page }) => {
     await openBuilder(page, viewports[0]);
     for (const view of ['2d', '3d']) {
       await switchCourtView(page, view);
       const counterpart = view === '2d' ? '3D' : '2D';
-      await expect(page.getByRole('button', { name: `Switch to ${counterpart} court view`, exact: true })).toBeVisible();
+      const returnControl=page.getByRole('button', { name: `Switch to ${counterpart} court view`, exact: true });
+      await expect(returnControl).toHaveCount(0);
+      await expect(page.locator(view==='3d'?'#threeDViewer canvas':'.pixel-court-canvas')).toBeVisible();
+      expect(await page.evaluate(() => playBuilder.view)).toBe(view);
       const result = await playAndHoldPause(page, 3, 'mouse');
       expect(result.label, `${view.toUpperCase()} visible transport`).toBe('Play');
       await expect(visiblePlay(page)).toHaveAttribute('aria-pressed', 'false');

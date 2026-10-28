@@ -12,10 +12,12 @@ test('publishes Pickleball Park metadata and visible identity', async ({ page })
   });
   expect(manifest).not.toHaveProperty('id');
 
-  const banner = page.locator('h1.park-banner img');
-  await expect(banner).toHaveAttribute('alt', 'Pickleball Park');
-  await expect(page.locator('h1.park-banner')).toHaveAccessibleName('Pickleball Park');
-  await expect.poll(() => banner.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+  const brand = page.locator('.planner-identity');
+  await expect(brand).toBeVisible();
+  await expect(brand).toHaveText('PICKLEBALL PARK');
+  expect(await brand.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+  await page.locator('#menuToggle').click();
+  await expect(page.getByRole('heading', { name: 'Pickleball Park', exact: true })).toBeVisible();
   const visibleText = await page.locator('body').innerText();
   expect(visibleText).not.toMatch(/\b(?:Pickleboard|Paddle Park)\b/i);
 });
@@ -46,9 +48,10 @@ for (const width of [320, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/?workspace=planner');
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
-    const brand = page.locator('h1.park-banner');
-    await expect(brand).toHaveAccessibleName('Pickleball Park');
-    await expect.poll(() => brand.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+    const brand = page.locator('.planner-identity');
+    await expect(brand).toBeVisible();
+    await expect(brand).toHaveText('PICKLEBALL PARK');
+    expect(await brand.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
     const brandBox = await brand.boundingBox();
     expect(brandBox.x).toBeGreaterThanOrEqual(0);
     expect(brandBox.x + brandBox.width).toBeLessThanOrEqual(width);
@@ -63,6 +66,7 @@ for (const width of [320, 390, 768]) {
     await page.locator('#menuToggle').click();
     const heading = page.locator('.menu-header h2');
     await expect(heading).toHaveText('Pickleball Park');
+    await expect(heading).toHaveAccessibleName('Pickleball Park');
     const headingBox = await heading.boundingBox();
     expect(headingBox.x + headingBox.width).toBeLessThanOrEqual(width);
   });

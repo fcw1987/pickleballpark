@@ -52,8 +52,9 @@ test('enlarged shot choices remain readable and intent tabs retain useful names'
   await page.setViewportSize({ width: 320, height: 568 }); await page.goto('/');
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; playBuilder.render(); });
-  for (const selector of ['.builder-main-menu > summary', '.builder-context-actions [data-action="collapse-inspector"]', '.builder-context-actions [data-action="add-shot"]', '.builder-view-button']) {
+  for (const selector of ['.builder-main-menu > summary', '.builder-context-actions [data-action="collapse-inspector"]', '.builder-ui [data-action="add-shot"]', '.builder-play-button']) {
     const control = page.locator(selector).first();
+    await expect(control).toBeVisible();
     const fits = await control.evaluate(node => {
       const range = document.createRange(); range.selectNodeContents(node);
       const text = range.getBoundingClientRect(), box = node.getBoundingClientRect();
