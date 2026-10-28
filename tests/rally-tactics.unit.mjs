@@ -38,18 +38,21 @@ test('serve preparation assesses the current striker and current contact before 
     'preparation ends at this contact, before the outgoing flight');
 });
 
-test('a midrally preparation gives responsibility to its current striker, not an opponent', () => {
+test('a midrally preparation keeps both teammates eligible and assigns the authored striker primary responsibility', () => {
   const document = documentFromTemplate(PICKLEBOARD_PLAYS.find(play => play.id === 'dink-exchange'));
   const compiled = compileDocument(document);
   const first = compiled.timeline.segments.find(segment => segment.shotSemantics);
   const currentHitter = first.shotSemantics.playerId;
   const result = snapshot(compiled, first.startTime, { players: document.players });
   assert.equal(result.phase, 'open-rally');
-  assert.deepEqual(result.eligibleHitters, [currentHitter]);
+  const eligibleTeam = document.players[currentHitter].team;
+  const expectedEligible = Object.keys(document.players).filter(id => document.players[id].team === eligibleTeam);
+  assert.deepEqual(result.eligibleHitters, expectedEligible);
+  assert.equal(result.authoredReceiver, currentHitter);
   assert.equal(result.players[currentHitter].responsibility, 'primary');
   assert.equal(result.mustBounceBeforeContact, false);
   for (const [id, actor] of Object.entries(result.players)) {
-    assert.equal(actor.eligible, id === currentHitter);
+    assert.equal(actor.eligible, document.players[id].team === eligibleTeam);
     if (id !== currentHitter) assert.notEqual(actor.responsibility, 'primary');
   }
 });
@@ -217,7 +220,7 @@ test('a grounded kitchen contact remains legal even when illustrative reach says
   const override = { ...clone(positions), player1: { x: -4, y: 0 } };
   const result = createTacticalSnapshot({ play, timeline, elapsed: 0, positions: override });
   assert.equal(validateRallyRules(play, timeline).valid, true);
-  assert.deepEqual(result.eligibleHitters, ['player1']);
+  assert.deepEqual(result.eligibleHitters, ['player1', 'player2']);
   assert.equal(result.players.player1.eligible, true);
   assert.equal(result.players.player1.reach.reachable, false);
   assert.match(result.players.player1.reach.model, /illustrative/);

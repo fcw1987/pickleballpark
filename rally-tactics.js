@@ -112,7 +112,12 @@ export function createTacticalSnapshot({ play, timeline, elapsed = 0, players = 
   const receivingIndex = inPreparation ? shotIndex : shotIndex + 1;
   const currentHitter = segment?.shotSemantics?.playerId ?? service.server;
   const authoredReceiver = inPreparation ? currentHitter : segment?.nextShotSemantics?.playerId ?? null;
-  const eligible = inPreparation && (opening === 'midrally' || shotIndex > 0) ? (currentHitter ? [currentHitter] : []) : eligibleHitters({ players: records, service, contactIndex: receivingIndex, opening, previousHitter: inPreparation ? null : currentHitter });
+  const roleEligible = eligibleHitters({ players: records, service, contactIndex: receivingIndex, opening, previousHitter: inPreparation ? null : currentHitter });
+  // A midrally setup identifies the side about to hit, not an exclusive legal
+  // striker. Keep its partner eligible; authored responsibility is ranked below.
+  const eligible = inPreparation && (opening === 'midrally' || shotIndex > 1)
+    ? roleEligible.filter(id => teamForPlayer(id, records) === teamForPlayer(currentHitter, records))
+    : roleEligible;
   const nextContact = inPreparation ? segment?.shotSemantics?.contact.point ?? sampled.ball.board : segment?.nextShotSemantics?.contact.point ?? segment?.step.shot?.to ?? sampled.ball.board;
   const contactTime = inPreparation ? (segment?.startTime ?? 0) + (segment?.contactTime ?? 0) : segment?.endTime;
   const seconds = Math.max(0, (contactTime ?? sampled.time) - sampled.time);
