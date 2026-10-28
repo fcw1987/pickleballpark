@@ -88,3 +88,21 @@ test('requires current product in generated build metadata and version metadata'
 test('reports malformed manifest JSON without throwing during reference checks', () => {
   fails('manifest.json', '{broken', 'invalid JSON');
 });
+
+test('JavaScript templates and comments cannot turn compatibility identifiers into labels', () => {
+  const code = "const hint = `Player's camera ${globalThis.pickleboard?.threeD ? 'ready' : 'loading'}`;\n" +
+    "/* user's compatibility class Pickleboard */ const view = globalThis.pickleboard; // player's Pickleboard API\n" +
+    "addEventListener('pickleboard:camera-ready', () => {});" +
+    `const pattern = /["']/g; const divided = 10 / 2; const api = globalThis.pickleboard;`;
+  assert.deepEqual(errorsAfter('new-ui.js', code), []);
+  fails('new-ui.js', code + "const label = 'Welcome to Pickleboard';", 'unapproved product-name drift');
+  fails('new-ui.js', "const label = `Player's Pickleboard camera`;", 'unapproved product-name drift');
+  fails('new-ui.js', "const label = `Welcome ${'Pickleboard'}`;", 'unapproved product-name drift');
+  fails('new-ui.js', "const label = `Welcome ${`Pickleboard`}`;", 'unapproved product-name drift');
+});
+test('inline startup scripts preserve compatibility APIs while visible and scripted labels remain checked', () => {
+  const startup = "<script>window.pickleboard?.threeD?.cancelLoading?.(); addEventListener('pickleboard:ready', () => {});</script>";
+  assert.deepEqual(errorsAfter('index.html', index + startup), []);
+  fails('index.html', index + startup + '<button>Pickleboard</button>', 'unapproved product-name drift');
+  fails('index.html', index + '<script>button.textContent = "Pickleboard";</script>', 'unapproved product-name drift');
+});

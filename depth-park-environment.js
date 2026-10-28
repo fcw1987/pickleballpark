@@ -117,7 +117,7 @@ export function createDepthParkEnvironment(THREE,{palette={}}={}) {
  function flowers(x,z,seed=0){for(let n=0;n<5;n++){const dx=Math.sin(n*2.4+seed)*.9,dz=Math.cos(n*2.4+seed)*.7,h=.7+(n%3)*.25;box('Flower stem',x+dx,h/2,z+dz,.075,h,.075,ink);box('Flower leaves',x+dx,.25,z+dz,.48,.14,.24,mat('#43894e'));const m=mat(petalColors[(n+seed)%3]);for(const [px,pz] of [[-.14,0],[.14,0],[0,-.14],[0,.14]])box('Flower petal',x+dx+px,h,z+dz+pz,.22,.15,.22,m);box('Flower center',x+dx,h+.08,z+dz,.15,.1,.15,cream);}}
  for(const [x,z,n] of [[-11,-19,0],[-11,2,1],[-11,20,2],[11,-19,1],[11,19,0],[25,-15,2],[32,-14,0],[-25,24,1],[29,22,0]])flowers(x,z,n);
  let resolveTree,rejectTree;const ready=new Promise((resolve,reject)=>{resolveTree=resolve;rejectTree=reject;});
- const treeTexture=new THREE.TextureLoader().load(new URL('./assets/reference-depth/park-tree-v1.png',import.meta.url).href,resolveTree,undefined,rejectTree);treeTexture.colorSpace=THREE.SRGBColorSpace;treeTexture.magFilter=THREE.NearestFilter;treeTexture.minFilter=THREE.LinearMipmapLinearFilter;textures.add(treeTexture);
+ const treeTexture=new THREE.TextureLoader().load(new URL('./assets/reference-depth/park-tree-v1.webp',import.meta.url).href,resolveTree,undefined,rejectTree);treeTexture.colorSpace=THREE.SRGBColorSpace;treeTexture.magFilter=THREE.NearestFilter;treeTexture.minFilter=THREE.LinearMipmapLinearFilter;textures.add(treeTexture);
  const treeMat=new THREE.SpriteMaterial({map:treeTexture,transparent:true,alphaTest:.12,toneMapped:false});materials.add(treeMat);
  function tree(x,z,size=11){const sprite=new THREE.Sprite(treeMat);sprite.name='Detailed scalloped tree';sprite.center.set(.5,.045);sprite.position.set(x,.06,z);sprite.scale.set(size*(1283/1226),size,1);group.add(sprite);const shadowGeometry=new THREE.CircleGeometry(size*.34,24);geometries.add(shadowGeometry);const shadowMat=new THREE.MeshBasicMaterial({color:'#244c3d',transparent:true,opacity:.21,depthWrite:false});materials.add(shadowMat);const shadow=new THREE.Mesh(shadowGeometry,shadowMat);shadow.rotation.x=-Math.PI/2;shadow.position.set(x,.05,z);group.add(shadow);}
  // Seven deliberately spaced trees: no trunk or crown shares a pond/bench footprint.
@@ -127,6 +127,6 @@ export function createDepthParkEnvironment(THREE,{palette={}}={}) {
  group.userData.updateAtTime=seconds=>updateFlagAtTime(seconds);
  group.userData.updateCamera=()=>{}; // THREE.Sprite uses camera-facing quads at every azimuth and tilt.
  group.userData.dispose=()=>{geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());dynamicGroup.clear();updateFlagAtTime=()=>{};};
- group.userData.art={units:'feet scaled .3048 to metres',generatedFoliage:'assets/reference-depth/park-tree-v1.png',originalGeometry:true};
+ group.userData.art={units:'feet scaled .3048 to metres',generatedFoliage:'assets/reference-depth/park-tree-v1.webp',originalGeometry:true};
  return group;
 }

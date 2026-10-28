@@ -9,7 +9,7 @@ import {referenceAthleteGeometryKernel,readReferenceAtlasPixels} from './helpers
 import {assertReferenceRig as assertRig} from './helpers/reference-rig-assertions.mjs';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 
-const atlasPixels=await readReferenceAtlasPixels(new URL('../assets/reference-athletes/athletes-armless-v2.png',import.meta.url)),paintedAudit=referenceAthleteGeometryKernel(THREE);
+const atlasPixels=await readReferenceAtlasPixels(new URL('../assets/source/reference-athletes/athletes-armless-v2.png',import.meta.url)),paintedAudit=referenceAthleteGeometryKernel(THREE);
 const metadata=JSON.parse(readFileSync(new URL('../assets/reference-athletes/metadata-v2.json',import.meta.url)));
 // The production renderer's geometry, matrices, atlas dimensions and materials;
 // texture decoding/WebGL rasterization are covered by the browser suite.

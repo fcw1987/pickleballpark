@@ -1,6 +1,6 @@
 import { createStarterDocument, validateDocument, documentFromTemplate, MAX_SHOTS } from './play-document.js';
 import { DraftStore, EditHistory, STORAGE_KEY, DRAFT_CAPACITY_CODE } from './builder-storage.js';
-import { mountBuilderUI } from './builder-ui.js';
+import { mountBuilderUI, downloadPlayBackup } from './builder-ui.js';
 import { BuilderCourtTools } from './builder-court-tools.js';
 import { builderViewBox } from './builder-framing.js';
 import { getWaypointPolicy } from './builder-waypoint-policy.js';
@@ -11,7 +11,7 @@ import { proposeSmartAdd, proposeRandomRally } from './smart-rally-generator.js'
 import { authorizeProposal, compileEffectiveCandidate, documentSourceIdentity, evaluateFullCandidate, proposeFamilyChange } from './rally-proposals.js';
 import { proposeCoachFix, proposeCoachOptions } from './rally-coach.js';
 import { playerLabel } from './player-labels.js';
-import { resolveServiceContext, updateServiceFromShotEdit } from './rally-state.js';
+import { resolveServiceContext, updateServiceFromShotEdit, updateServiceCourt } from './rally-state.js';
 import { createRallyCoverageProvider } from './rally-coverage-provider.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
@@ -141,7 +141,7 @@ export class PlayBuilder {
             playing:this.session.playing, time:this.session.clock.elapsed, duration:this.session.duration, chapters:this.chapters, currentShotId:currentChapter?.shotId || null,
             view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, unsavedChanges:this.hasUnsavedChanges, library,
             templates:PICKLEBOARD_PLAYS.map(({id,name})=>({id,name})), loop:true, rate:this.session.clock.playbackRate,
-            busy:this.busy, targetPlacement:this.courtTools.placing&&!this.courtTools.placement?.player, movementPlacement:Boolean(this.courtTools.placing&&this.courtTools.placement?.player), message:this.message, canUndo:this.history.canUndo, canRedo:this.history.canRedo,
+            busy:this.busy, retry3D:this.graphicsUnavailable&&this.view==='2d'&&!this.busy, targetPlacement:this.courtTools.placing&&!this.courtTools.placement?.player, movementPlacement:Boolean(this.courtTools.placing&&this.courtTools.placement?.player), message:this.message, canUndo:this.history.canUndo, canRedo:this.history.canRedo,
             proposalBusy:this.proposalBusy, proposalProgress:this.proposalProgress, coachOptions:this.coachOptions,
             camera:this.board.threeD?.cameraPreset || 'overhead'});
         this.fitCourt(); this.courtTools.render();
@@ -386,6 +386,7 @@ export class PlayBuilder {
         this.render();return {ok:true};
     }
     cancelPendingView() {
+        window.courtStartup?.complete();
         this.generation++;
         if(this.busy) { this.board.threeD?.cancelLoading?.(); this.busy=false; this.view='2d'; }
         globalThis.document.documentElement.removeAttribute('data-court-loading');
@@ -400,12 +401,24 @@ export class PlayBuilder {
             this.board.threeD?.suspend?.(); this.view='2d'; this.board.plays.applyAtTime(this.session.clock.elapsed);
         } else {
             this.busy=true; this.message='Opening 3D at the current playhead…'; this.render();
-            const opened=await this.board.threeD.enter();
+            let timer;
+            let opened=false;
+            try {
+                opened=await Promise.race([
+                    Promise.resolve().then(()=>this.board.threeD.enter()),
+                    new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('3D startup timed out')),12000);})
+                ]);
+            } catch {
+                // Only this attempt may cancel its loader. An older rejection or
+                // deadline must not interrupt a newer view request.
+                if(generation===this.generation&&this.workspace==='builder')this.board.threeD?.cancelLoading?.();
+            } finally { clearTimeout(timer); }
             if(generation!==this.generation||this.workspace!=='builder')return;
             this.busy=false;
+            window.courtStartup?.complete();
             globalThis.document.documentElement.removeAttribute('data-court-loading');
-            if(!opened){this.view='2d';this.message='3D is unavailable. Your draft is safe and editable in 2D. You can retry the view toggle.';this.render();return;}
-            this.view='3d'; this.message='';this.board.threeD.ballObject.userData.minimumCSSDiameter=12;
+            if(!opened){this.graphicsUnavailable=true;this.view='2d';this.message='3D is unavailable. Your draft is safe and editable in 2D. Choose Retry 3D to try again.';this.render();return;}
+            this.graphicsUnavailable=false;this.view='3d'; this.message='';this.board.threeD.ballObject.userData.minimumCSSDiameter=12;
             this.board.threeD.applyAtTime(this.session.clock.elapsed);
         }
         this.courtTools.bind(); this.render();
@@ -480,6 +493,10 @@ export class PlayBuilder {
                     if(!dirty){this.pristineSource=JSON.stringify(this.document);this.saveError=null;}
                     this.saveStatus=dirty?'Saved copy deleted · current changes not saved':'Removed from My Plays · not saved yet';
                 }
+                if(deleted&&this.saveError?.libraryFull){
+                    this.saveError={...this.saveError,libraryFull:false,message:'Space was freed. Retry saving your current draft.'};
+                    this.saveStatus='Not saved · retry save';
+                }
                 this.libraryDirty=true;this.message=deleted?'Saved play deleted. Your current court stays here.':'That saved play is already gone.';this.render();
                 return {ok:true,deleted,id:playId};
             }
@@ -497,8 +514,7 @@ export class PlayBuilder {
                     const context=resolveServiceContext(doc);
                     if(!context.known)throw Error('Choose the designated receiver on the serve before setting its serving court.');
                     if(!['right','left','unspecified'].includes(value))throw Error('Choose a supported serving court.');
-                    doc.service={...(doc.service||{}),server:context.server,receiver:context.receiver};
-                    if(value==='unspecified')delete doc.service.court;else doc.service.court=value;
+                    updateServiceCourt(doc,value);
                 });
                 return {ok:true};
             }
@@ -582,7 +598,7 @@ export class PlayBuilder {
                 else if(action==='template'){const template=PICKLEBOARD_PLAYS.find(p=>p.id===value);if(template){const draft=documentFromTemplate(template);draft.id=id();this.loadDocument(draft,{persist:false});}}
                 else {const imported=this.store.importJSON(value);imported.id=id();this.loadDocument(imported);this.message='Imported as a separate copy. Existing saved plays were kept.';}
             }
-            else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);const url=URL.createObjectURL(new Blob([this.store.exportJSON(this.document)],{type:'application/json'}));const a=globalThis.document.createElement('a');a.href=url;a.download='pickleboard-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+            else if(action==='export'){const backup=this.store.exportJSON(this.document);this.ui.showExport?.(backup);downloadPlayBackup(backup,this.document.title);}
             else if(action==='usePlanner') {
                 const plannerIntent=++this.sourceIntent;
                 this.pause();
@@ -597,7 +613,11 @@ export class PlayBuilder {
     }
 }
 function initialize(){const board=window.pickleboard;if(!board?.plays||!board.threeD)return;
-    const start=()=>{if(!window.playBuilder)window.playBuilder=new PlayBuilder(board);};
+    const start=()=>{
+        if(window.courtStartup?.expired)return;
+        try { if(!window.playBuilder)window.playBuilder=new PlayBuilder(board); }
+        catch(error){window.courtStartup?.fail();console.warn('Play builder unavailable:',error);}
+    };
     if(new URL(location.href).searchParams.get('workspace')==='planner'){
         const button=document.createElement('button');button.type='button';button.className='menu-btn';button.textContent='Build a Play';button.addEventListener('click',start);document.querySelector('.menu-content').prepend(button);
     }else start();

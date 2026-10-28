@@ -1,4 +1,4 @@
-# Pickleboard play document and compiler
+# Pickleball Park play document and compiler
 
 Status: schema version 1, trajectory model version 1. Rules reference checked 2026-09-07 against the [2026 USA Pickleball Official Rulebook PDF](https://usapickleball.org/docs/rules/USAP-Official-Rulebook.pdf), the [official rules page](https://usapickleball.org/rules/), and the [USA Pickleball Rules Summary](https://usapickleball.org/rules/summary/). The implemented standing-doubles subset follows serve position in 7.A, volley-serve requirements in 7.C, drop-serve requirements in 7.D, serve placement in 7.E, the opening two-bounce rule in 10.A, and non-volley-zone volley footing and momentum in 11.A. These references use the reorganized 2026 section numbers.
 
@@ -57,11 +57,14 @@ Coverage remains a separate derived heuristic. `recompileAssistedDocument(docume
   }],
   annotations: [],
   assistance: {autoShading: false, showGuides: false, team: "both|green|orange"},
+  service: {server: "player1", receiver: "player3", court: "left|right", courtConvention: "server-perspective-v1"}, // optional
   opening: "serve|midrally",
   ending: "stop|winner|fault",
   intentionalFault: false
 }
 ```
+
+New explicit service courts use `server-perspective-v1`: facing the net, right/even is low X from the low-Y end and high X from the high-Y end. Unmarked older declarations retain their original service-box interpretation. The editor displays their physical side without rewriting source, coordinates, identities or pins. An explicit court edit adopts the current convention in one Undo step; opening, compiling and exporting an older play preserve its original declaration. Older clients may reject the new optional marker rather than interpret it incorrectly.
 
 Court coordinates are feet in the established 20 by 44 board coordinate system. Initial athletes and the ball may use the supported 8-foot apron. Shot landing targets remain on court. Recipe IDs are unique, persist across reorder operations, and appear in derived event IDs independently of displayed shot numbers. The source limit is 99 shots and movement paths are limited to 8 waypoints per recipe.
 

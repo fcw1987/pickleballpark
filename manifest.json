@@ -1,7 +1,7 @@
 {
   "name": "Pickleball Park",
   "short_name": "Pickleball Park",
-  "description": "Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and spatial replay in an original rounded village court.",
+  "description": "Pickleball Park is an interactive pickleball coaching and strategy app with an editable tactical board, guided lessons, and 3D rally replay with camera controls and illustrative player coverage zones.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f0dc",

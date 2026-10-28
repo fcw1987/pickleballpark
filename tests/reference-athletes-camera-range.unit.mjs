@@ -3,7 +3,7 @@ import * as THREE from '../vendor/three.module.min.js';
 import {ReferenceAthleteResources,createReferenceAthlete,updateReferenceAthlete} from '../reference-athletes.js';
 import {compileEffectiveCandidate} from '../rally-proposals.js';import {sampleActorPresentation} from '../three-d-presentation.js';
 import {referenceAthleteGeometryKernel,readReferenceAtlasPixels} from './helpers/reference-athlete-geometry.mjs';
-const atlasPixels=await readReferenceAtlasPixels(new URL('../assets/reference-athletes/athletes-armless-v2.png',import.meta.url)),paintedAudit=referenceAthleteGeometryKernel(THREE);
+const atlasPixels=await readReferenceAtlasPixels(new URL('../assets/source/reference-athletes/athletes-armless-v2.png',import.meta.url)),paintedAudit=referenceAthleteGeometryKernel(THREE);
 import {assertReferenceRig,referenceBoneLength} from './helpers/reference-rig-assertions.mjs';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 

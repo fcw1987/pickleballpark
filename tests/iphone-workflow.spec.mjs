@@ -31,7 +31,7 @@ test('complete portrait custom rally and detailed movement survive retained view
  await page.getByRole('button',{name:'Place movement on court',exact:true}).click();await expect(page.getByRole('button',{name:'Cancel movement',exact:true})).toBeVisible();
  const pin=await page.evaluate(()=>playBuilder.courtTools.project({x:7,y:4}));await page.touchscreen.tap(pin.x,pin.y);
  const exactPin=await page.evaluate(()=>structuredClone(playBuilder.selectedShot.playerMovement.player2));
- await edit(page);await openCoachTools(page);await page.getByRole('checkbox',{name:'Auto Shading',exact:true}).check();await page.getByRole('checkbox',{name:'Coverage Guides',exact:true}).check();
+ await edit(page);await openCoachTools(page);await page.getByRole('checkbox',{name:'Auto Shading',exact:true}).check();await page.getByRole('checkbox',{name:'Position Guides',exact:true}).check();
  await page.getByRole('button',{name:'Undo authored edit',exact:true}).click();await page.getByRole('button',{name:'Redo authored edit',exact:true}).click();
  const saved=await page.evaluate(()=>structuredClone(playBuilder.document));expect(saved.shots[0].target).toEqual(exactTarget);expect(saved.shots[0].playerMovement.player2).toEqual(exactPin);expect(saved.shots.length).toBe(4);
  if(record){await page.screenshot({path:`${record}/custom-phone.png`});await import('node:fs/promises').then(fs=>fs.writeFile(`${record}/custom-play.json`,JSON.stringify(saved,null,2)+'\n'));}

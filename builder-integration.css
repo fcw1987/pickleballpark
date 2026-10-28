@@ -111,3 +111,48 @@ html[data-court-loading] #courtStartupStatus {
     font: 600 1rem system-ui, sans-serif;
     z-index: 2;
 }
+
+/* Court Planner shares the underlying interactive court. Give its existing
+   non-modal panel a separate phone strip instead of laying it over athletes.
+   The bounded panel scrolls on short screens and with enlarged text. */
+.builder-planner .builder-reference-dock { display: none; }
+@media (max-width: 700px) and (orientation: portrait) {
+  body:has(.builder-planner) .court-container-fullscreen {
+    height: 66dvh;
+    padding-top: 56px;
+  }
+  body:has(.builder-planner) .park-stage {
+    width: min(1050px, 100%, calc((66dvh - 72px) * var(--stage-ratio)));
+  }
+  .builder-planner .builder-inspector:not(.builder-inspector-collapsed) {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: calc(34dvh - 16px);
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  body:has(.builder-planner) .court-container-fullscreen {
+    width: calc(100% - min(320px, 42vw));
+    padding-bottom: 56px;
+  }
+  body:has(.builder-planner) .park-stage {
+    width: min(1050px, 100%, calc((100dvh - 72px) * var(--stage-ratio)));
+  }
+  .builder-planner .builder-inspector:not(.builder-inspector-collapsed) {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    width: min(304px, calc(42vw - 16px));
+    max-height: 100%;
+  }
+  /* Keep the fixed park identity in the free strip below the court. */
+  body:has(.builder-planner) .planner-identity {
+    left: calc((100% - min(320px, 42vw)) / 2);
+    top: auto;
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}

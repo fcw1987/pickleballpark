@@ -28,7 +28,7 @@ Full motion acceptance must additionally inspect approach, split step, lateral s
 
 ## Final validation policy
 
-Use Node 24 and locked dependencies. First run focused Chromium/WebKit checks while the renderer is changing. Final required gates are `npm run check`, `npm run check:generated`, complete Chromium, `node tools/run-webkit-ci.mjs`, build/package verification. WebKit permits zero failures, skips, retries, or flaky outcomes. Preserve reports and captures in ignored `release-results/` paths.
+Use Node 24 and locked dependencies. First run focused Chromium/WebKit checks while the renderer is changing. Final required gates are `npm run check`, `npm run check:generated`, complete Chromium, the complete two-shard WebKit Quality job (merged and catalog-checked by `tools/merge-webkit-ci.mjs`), build/package verification. WebKit permits zero failures, skips, retries, or flaky outcomes. Preserve reports and captures in ignored `release-results/` paths.
 
 A complete catalog run in fresh-process shards is separate evidence from the standard monolithic WebKit runner. If used to diagnose the known pristine-baseline ordinal-80 hang, record catalog identity, exact coverage, every shard result, and the standard runner's unresolved outcome explicitly. Do not describe focused runs or sharded runs as successful standard Quality execution.
 

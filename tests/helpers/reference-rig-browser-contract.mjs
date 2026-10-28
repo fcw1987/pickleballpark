@@ -52,7 +52,7 @@ export function referenceRigBrowserContract(calibration = { cuffs: null, hair: [
       const data = root.userData, { assets } = data.resources, source = assets.sourceImage;
       const sourceLoaded = source instanceof HTMLImageElement && source.complete
         && source.naturalWidth > 0 && source.naturalHeight > 0
-        && new URL(source.currentSrc || source.src).pathname.endsWith('/assets/reference-athletes/athletes-armless-v2.png');
+        && new URL(source.currentSrc || source.src).pathname.endsWith('/assets/reference-athletes/athletes-armless-v2.webp');
       if (!sourceLoaded) return { sourceLoaded: false, dimensions: false, identity: false, visibleOriginalPixels: false };
       const original = sourceFor(source), [x, y, width, height] = assets.metadata.frames[data.player][data.animation.frame].rect;
       const parts = [data.body, ...data.sleeves];

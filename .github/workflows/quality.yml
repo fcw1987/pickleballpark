@@ -2,9 +2,9 @@ name: Quality
 
 on:
   push:
-    branches: [main, branding/pickleball-park-strokes]
+    branches: [main]
   pull_request:
-    branches: [main, branding/pickleball-park-strokes]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

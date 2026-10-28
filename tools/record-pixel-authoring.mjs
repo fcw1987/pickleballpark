@@ -112,7 +112,7 @@ try {
 
   const coachTools = page.getByText('Coach tools', { exact: true });
   if (!(await coachTools.locator('..').evaluate(node => node.open))) await coachTools.click();
-  await touch(page.getByRole('checkbox', { name: 'Coverage Guides', exact: true }));
+  await touch(page.getByRole('checkbox', { name: 'Position Guides', exact: true }));
   await expect.poll(() => page.evaluate(() => playBuilder.document.assistance)).toMatchObject({ autoShading: false, showGuides: true });
   await mark('coverage guides enabled independently');
   await openEditor();

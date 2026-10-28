@@ -38,11 +38,42 @@ test('serve role and court edits use the existing UI and Undo without rewriting 
   expect(await page.evaluate(() => playBuilder.compiled.findings.some(f => /designated receiver is player4/.test(f.message)))).toBe(true);
   await page.evaluate(() => playBuilder.action('undo'));
   expect(await page.evaluate(() => playBuilder.document)).toEqual(before);
-  await page.getByLabel('Serving court', { exact: true }).selectOption('left');
-  expect(await page.evaluate(() => playBuilder.document.service.court)).toBe('left');
+  await page.getByLabel('Serving court', { exact: true }).selectOption('right');
+  expect(await page.evaluate(() => playBuilder.document.service.court)).toBe('right');
   expect(await page.evaluate(() => playBuilder.compiled.validShotCount)).toBe(0);
   await page.evaluate(() => playBuilder.action('undo'));
   expect(await page.evaluate(() => playBuilder.document)).toEqual(before);
+});
+
+test('legacy imported court keeps its diagonal until an explicit court edit and Undo restores the exact source', async ({ page }) => {
+  await page.goto('/'); await settleBuilderStartup(page);
+  const before = await page.evaluate(async () => {
+    const doc = structuredClone(playBuilder.document);
+    doc.id = 'legacy-service-court'; doc.service.court = 'right'; delete doc.service.courtConvention;
+    doc.shots[2].playerMovement = { player4: { intent: 'manual', pinned: true, target: { x: 15, y: 30 } } };
+    await playBuilder.action('import', JSON.stringify(doc));
+    return JSON.stringify(playBuilder.document);
+  });
+  expect(await page.evaluate(() => playBuilder.compiled.validShotCount)).toBe(3);
+  await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+  await openIntentTab(page, 'Players');
+  await expect(page.getByLabel('Serving court', { exact: true })).toHaveValue('left');
+  expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(before);
+  await page.getByLabel('Serving court', { exact: true }).selectOption('left');
+  expect(await page.evaluate(() => playBuilder.document.service.courtConvention)).toBe('server-perspective-v1');
+  expect(await page.evaluate(() => playBuilder.document.service.court)).toBe('left');
+  expect(await page.evaluate(() => playBuilder.compiled.validShotCount)).toBe(3);
+  expect(await page.evaluate(() => playBuilder.document.shots)).toEqual(JSON.parse(before).shots);
+  expect(await page.evaluate(() => playBuilder.document.initialLayout)).toEqual(JSON.parse(before).initialLayout);
+  await page.getByLabel('Serving court', { exact: true }).selectOption('right');
+  expect(await page.evaluate(() => playBuilder.document.service.courtConvention)).toBe('server-perspective-v1');
+  expect(await page.evaluate(() => playBuilder.compiled.validShotCount)).toBe(0);
+  await page.evaluate(() => playBuilder.action('undo'));
+  expect(await page.evaluate(() => playBuilder.document.service.court)).toBe('left');
+  expect(await page.evaluate(() => playBuilder.compiled.validShotCount)).toBe(3);
+  await page.evaluate(() => playBuilder.action('undo'));
+  expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(before);
+  expect(await page.evaluate(() => playBuilder.compiled.validShotCount)).toBe(3);
 });
 
 test('wrong-returner import stays authored and shows an actionable identity warning', async ({ page }) => {
