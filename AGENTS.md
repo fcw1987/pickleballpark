@@ -11,9 +11,13 @@ are intentional. Preserve saved plays, authored intent and unrelated local work.
 - Read the relevant existing tests and documents before changing behavior. Keep
   normal edits narrow; do not redesign the interface or rewrite saved documents
   to conceal a validation problem.
-- Run `npm run check` for routine syntax, unit, asset and brand checks. Use focused
-  Chromium/WebKit tests while developing, then the full required Quality checks
-  for the final candidate. WebKit permits no failure exceptions, skips or retries.
+- Run `npm run check:fast` for routine syntax, unit, asset and brand feedback.
+  It includes new unit files automatically and leaves six explicit corpus/rig
+  sweeps to the full `npm run check`. Use focused Chromium/WebKit tests while
+  developing, then run the full required Quality checks for the final candidate,
+  including `npm run check` and generated-asset/package verification. Required
+  browser CI permits no failure exceptions, skips or retries; both Chromium
+  partitions must exactly cover fresh full discovery before Chromium can pass.
 - Exercise storage failures, conflicts and the 50-play limit for persistence
   changes. A failed save/import/copy must retain the current work and existing
   library. Untouched lessons and New Play previews stay transient until edited.
