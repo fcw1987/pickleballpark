@@ -124,9 +124,8 @@ converts world x/z to court x/y feet, uses the actual actor positions, and sets
 both `facing` and `coverageFacing` to the engine's ball-tracking vector. The latter
 prevents the coverage consumer from applying a second visual facing adjustment.
 
-After both branches are integrated, this is the concrete builder wiring. Put the
-import at the top of `play-builder.js` and the assignment after `this.document`
-has been initialized in the constructor:
+The combined builder installs this wiring in `play-builder.js` after its
+document and edit history are initialized:
 
 ```js
 import { createRallyCoverageProvider } from './rally-coverage-provider.js';
@@ -149,9 +148,8 @@ override token positions when available. The provider deliberately returns null
 outside the builder rather than applying the builder document to an unrelated
 planner state. A planner integration may remove the property to use coverage's
 existing presentation-only fallback, or supply its own matching rally source.
-This branch supplies the adapter and runtime registration; the constructor
-assignment is left to the parent integration to avoid changing coverage wiring
-owned by its separate branch.
+The constructor assignment consumes this adapter without adding a second clock,
+changing the tactical engine, or changing coverage geometry.
 
 The returned coverage-v1 object has `timeSeconds`, engine `phase`, feet-space
 `ball`, and a player array. It carries `legalReceiverId`, `designatedReceiverId`,

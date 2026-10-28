@@ -88,7 +88,14 @@ that sample and do not interrupt the app. Provider facts are not mutated.
 allows the engine to own the final ball-aware direction. Legality and priority
 are retained as separate metadata; sector membership never assigns a receiver.
 
-Before provider integration the adapter reads the already-rendered positions,
+The builder installs `createRallyCoverageProvider` with a live getter for its
+current document and the board's installed play/timeline. Actual rendered actor
+samples override token positions. This follows imports, edits, Undo and reloads
+without retaining a stale source, and uses the engine's final ball-aware facing
+without a second visual turn. Leaving the builder returns no tactical snapshot
+for the unrelated planner state; returning resumes the current builder source.
+
+When no provider is installed, the adapter reads already-rendered positions,
 world body facing, handedness and ball, with receiver/priority left unknown.
 It does not duplicate tactical phase or receiver-selection algorithms.
 

@@ -12,6 +12,7 @@ import { authorizeProposal, compileEffectiveCandidate, documentSourceIdentity, e
 import { proposeCoachFix, proposeCoachOptions } from './rally-coach.js';
 import { playerLabel } from './player-labels.js';
 import { resolveServiceContext, updateServiceFromShotEdit } from './rally-state.js';
+import { createRallyCoverageProvider } from './rally-coverage-provider.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
 function claimShotFields(shot, fields) {
@@ -51,6 +52,19 @@ export class PlayBuilder {
         this.persistedSource=document?this.pristineSource:null;
         this.saveError=null;this.libraryDirty=true;this.library=[];
         this.history = new EditHistory(this.document); this.selectedShotId = this.document.shots[0]?.id || null;
+        // Read the installed source on every sample so edits, imports and Undo
+        // share the renderer's playhead without retaining an obsolete timeline.
+        this.board.coverageSnapshotProvider = createRallyCoverageProvider(() => {
+            if (this.workspace !== 'builder') return null;
+            return {
+                play: this.board.plays.activePlay,
+                timeline: this.board.plays.timeline,
+                document: this.document,
+                positions: Object.fromEntries(Object.keys(this.document.players).map(playerId => [
+                    playerId, { x: this.board.tokens[playerId].x, y: this.board.tokens[playerId].y }
+                ]))
+            };
+        });
         this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value) });
         this.ui.element.addEventListener('scroll',()=>{this.fitCourt();this.courtTools?.render();},{passive:true});
         this.courtTools = new BuilderCourtTools(this);
