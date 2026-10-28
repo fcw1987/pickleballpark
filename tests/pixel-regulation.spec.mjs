@@ -3,9 +3,10 @@ import { expect, test } from '@playwright/test';
 for(const viewport of [{width:320,height:568},{width:390,height:844}])test(`pixel court remains proportionate and pointer inversion stays exact at ${viewport.width}px`,async({page})=>{
  await page.setViewportSize(viewport);
  await page.goto('/?pixel-regulation=1');
- await page.waitForFunction(()=>window.pickleboard?.pixelRenderer?.getDiagnostics()?.court&&window.playBuilder&&!playBuilder.busy);
+ await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);
  await page.evaluate(()=>playBuilder.switchView('2d'));
  await expect(page.locator('.pixel-court-canvas')).toBeVisible();
+ await page.waitForFunction(()=>pickleboard.pixelRenderer.getDiagnostics()?.court);
  const state=await page.evaluate(()=>{
   const board=window.pickleboard,renderer=board.pixelRenderer,canvas=renderer.canvas,ctm=board.court.getScreenCTM();
   const points=[{x:0,y:0},{x:20,y:44},{x:10,y:22},{x:5.25,y:37.75},{x:-3,y:48}];
