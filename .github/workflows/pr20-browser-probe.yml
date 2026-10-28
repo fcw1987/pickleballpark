@@ -1,4 +1,4 @@
-name: PR20 focused browser diagnostic
+name: PR20 focused timeline precision probe
 
 on:
   push:
@@ -16,9 +16,9 @@ concurrency:
 
 jobs:
   browser-probe:
-    name: Focused Linux ${{ matrix.browser }} candidate
+    name: Focused Linux ${{ matrix.browser }} timeline
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -61,57 +61,29 @@ jobs:
         run: |
           mkdir -p release-results/pr20-browser-probe
           git rev-parse HEAD | tee release-results/pr20-browser-probe/source-commit.txt
-          git diff b45d021c596158b119f78d11e166b020cf6f3d56 HEAD -- . ':!tests/pr20-browser-probe.spec.mjs' ':!.github/workflows/pr20-browser-probe.yml' > release-results/pr20-browser-probe/non-probe-source.diff
+          git diff 28f4d0c1e7390892f861b26774be4cc5a2740ac4 HEAD -- . ':!tests/pixel-game-review.spec.mjs' ':!.github/workflows/pr20-browser-probe.yml' > release-results/pr20-browser-probe/non-timeline-source.diff
+          test ! -s release-results/pr20-browser-probe/non-timeline-source.diff
           node --version | tee release-results/pr20-browser-probe/node-version.txt
           npx playwright --version | tee release-results/pr20-browser-probe/playwright-version.txt
-      - name: Run focused actual RGBA and context diagnostic
+      - name: Run exactly one timeline precision case
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: release-results/pr20-browser-probe/collector.json
-          PLAYWRIGHT_HTML_OUTPUT_DIR: release-results/pr20-browser-probe/collector-html
+          PLAYWRIGHT_JSON_OUTPUT_NAME: release-results/pr20-browser-probe/timeline.json
         run: |
           set -o pipefail
-          npx playwright test tests/pr20-browser-probe.spec.mjs --config=${{ matrix.config }} --project=${{ matrix.browser }} --workers=1 --retries=0 --trace=on --output=release-results/pr20-browser-probe/collector-results --reporter=line,json,html 2>&1 | tee release-results/pr20-browser-probe/collector.log
-      - name: Run exactly eleven affected existing cases
-        if: ${{ !cancelled() }}
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: release-results/pr20-browser-probe/affected.json
-          PLAYWRIGHT_HTML_OUTPUT_DIR: release-results/pr20-browser-probe/affected-html
-        run: |
-          set -o pipefail
-          focused=(tests/rebrand.spec.mjs tests/visual-world.spec.mjs tests/second-render.spec.mjs tests/pixel-game-review.spec.mjs)
-          selection='full brand|all Plays keep complete actors|reference world has original alpha artwork|directional artwork and solid athlete meshes|normal-motion playback'
-          PLAYWRIGHT_JSON_OUTPUT_NAME=release-results/pr20-browser-probe/affected-catalog.json npx playwright test "${focused[@]}" --config=${{ matrix.config }} --project=${{ matrix.browser }} --grep="$selection" --list --reporter=json
+          PLAYWRIGHT_JSON_OUTPUT_NAME=release-results/pr20-browser-probe/timeline-catalog.json npx playwright test tests/pixel-game-review.spec.mjs --config=${{ matrix.config }} --project=${{ matrix.browser }} --grep='normal-motion playback' --list --reporter=json
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
-          const report=JSON.parse(fs.readFileSync('release-results/pr20-browser-probe/affected-catalog.json','utf8'));
+          const report=JSON.parse(fs.readFileSync('release-results/pr20-browser-probe/timeline-catalog.json','utf8'));
           const count=suites=>suites.reduce((n,s)=>n+(s.specs||[]).reduce((m,p)=>m+p.tests.length,0)+count(s.suites||[]),0);
-          const total=count(report.suites);if(total!==11)throw Error(`Expected exactly 11 focused cases; found ${total}`);console.log(`Exact focused catalog: ${total}`);
+          const total=count(report.suites);if(total!==1)throw Error(`Expected exactly 1 timeline case; found ${total}`);console.log(`Exact timeline catalog: ${total}`);
           NODE
-          npx playwright test "${focused[@]}" --config=${{ matrix.config }} --project=${{ matrix.browser }} --grep="$selection" --workers=1 --retries=0 --trace=on --output=release-results/pr20-browser-probe/affected-results --reporter=line,json,html 2>&1 | tee release-results/pr20-browser-probe/affected.log
-      - name: Run strict original artwork contract and negative controls
-        if: ${{ !cancelled() }}
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: release-results/pr20-browser-probe/art-contract.json
-          PLAYWRIGHT_HTML_OUTPUT_DIR: release-results/pr20-browser-probe/art-contract-html
-        run: |
-          set -o pipefail
-          PLAYWRIGHT_JSON_OUTPUT_NAME=release-results/pr20-browser-probe/art-contract-catalog.json npx playwright test tests/reference-artwork-browser-contract.spec.mjs --config=${{ matrix.config }} --project=${{ matrix.browser }} --list --reporter=json
-          node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const report=JSON.parse(fs.readFileSync('release-results/pr20-browser-probe/art-contract-catalog.json','utf8'));
-          const count=suites=>suites.reduce((n,s)=>n+(s.specs||[]).reduce((m,p)=>m+p.tests.length,0)+count(s.suites||[]),0);
-          const total=count(report.suites);if(total!==1)throw Error(`Expected exactly 1 strict artwork case; found ${total}`);console.log(`Exact strict artwork catalog: ${total}`);
-          NODE
-          npx playwright test tests/reference-artwork-browser-contract.spec.mjs --config=${{ matrix.config }} --project=${{ matrix.browser }} --workers=1 --retries=0 --trace=on --output=release-results/pr20-browser-probe/art-contract-results --reporter=line,json,html 2>&1 | tee release-results/pr20-browser-probe/art-contract.log
-      - name: Retain native report, trace and diagnostic logs
+          npx playwright test tests/pixel-game-review.spec.mjs --config=${{ matrix.config }} --project=${{ matrix.browser }} --grep='normal-motion playback' --workers=1 --retries=0 --trace=retain-on-failure --output=release-results/pr20-browser-probe/timeline-results --reporter=line,json 2>&1 | tee release-results/pr20-browser-probe/timeline.log
+      - name: Retain timeline report, log and failure traces
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: pr20-linux-${{ matrix.browser }}-candidate-${{ github.sha }}
+          name: pr20-linux-${{ matrix.browser }}-timeline-${{ github.sha }}
           path: |
             release-results/pr20-browser-probe/
-            release-results/artwork-linux-pixels-*.json
-            test-results/
-            playwright-report/
           if-no-files-found: warn
           retention-days: 7
