@@ -75,7 +75,7 @@ trajectory model remains illustrative, with no spin/aerodynamic calibration.
 ```js
 import { createTacticalSnapshot } from './rally-tactics.js';
 const snapshot = createTacticalSnapshot({
-  play, timeline, elapsed, players: document.players,
+  play, timeline, elapsed, document,
   positions: sampledActorPositionsInBoardFeet // optional
 });
 ```
@@ -86,6 +86,10 @@ on the near end. Height is `heightFeet`. When overlays sit on rendered actors,
 pass their sampled current positions converted to board feet. Otherwise the
 snapshot samples canonical timeline positions. Neither the camera nor the
 overlay owns a second clock or motion path.
+`document` is optional and supplies source service roles and player metadata for
+legacy playback whose frozen shape cannot carry those additions. New plays also
+carry their own role context. An explicit `players` argument can override player
+metadata; without a source role the snapshot honestly leaves it unknown.
 
 The stable version-1 snapshot exposes:
 
@@ -101,6 +105,64 @@ Preparation ranks the current contact using its remaining preparation time,
 rather than asking a server to reach the distant return contact. Terminal
 snapshots have no outstanding receiver/bounce requirement. Reach/priority are
 illustrative guidance and never override explicit authoring or service identity.
+Movement-only chapters use the next represented contact and the preceding
+leg's bounce facts. Trailing recovery and empty demonstrations are complete;
+they never invent a new serve or an authored striker.
+
+### Coverage-provider integration
+
+`rally-coverage-provider.js` exports
+`createRallyCoverageProvider(getState) -> coverageSnapshotProvider(context)`.
+The synchronous `getState` closure returns the current
+`{play,timeline,document?,players?,positions?}`. Its references must agree:
+`timeline.play === play`, and the optional document ID must match the play ID.
+The coverage worker's `context` is `{timeSeconds,ball,samples,segment}`; its ball
+and actor `worldPosition` values use metres, with height on world y. This adapter
+converts world x/z to court x/y feet, uses the actual actor positions, and sets
+both `facing` and `coverageFacing` to the engine's ball-tracking vector. The latter
+prevents the coverage consumer from applying a second visual facing adjustment.
+
+After both branches are integrated, this is the concrete builder wiring. Put the
+import at the top of `play-builder.js` and the assignment after `this.document`
+has been initialized in the constructor:
+
+```js
+import { createRallyCoverageProvider } from './rally-coverage-provider.js';
+
+this.board.coverageSnapshotProvider = createRallyCoverageProvider(() => {
+  if (this.workspace !== 'builder') return null;
+  return {
+    play: this.board.plays.activePlay,
+    timeline: this.board.plays.timeline,
+    document: this.document,
+    positions: Object.fromEntries(Object.keys(this.document.players).map(id => [
+      id, { x: this.board.tokens[id].x, y: this.board.tokens[id].y }
+    ]))
+  };
+});
+```
+
+The live closure follows edits, imports, undo and replacement. Renderer samples
+override token positions when available. The provider deliberately returns null
+outside the builder rather than applying the builder document to an unrelated
+planner state. A planner integration may remove the property to use coverage's
+existing presentation-only fallback, or supply its own matching rally source.
+This branch supplies the adapter and runtime registration; the constructor
+assignment is left to the parent integration to avoid changing coverage wiring
+owned by its separate branch.
+
+The returned coverage-v1 object has `timeSeconds`, engine `phase`, feet-space
+`ball`, and a player array. It carries `legalReceiverId`, `designatedReceiverId`,
+`authoredReceiverId`, `eligibleHitters`, `mustBounceBeforeContact`, and
+`coveragePriorities:[{id,priority}]`. Each player's `legalReceiver` is true/false
+only when a unique designated returner is required, and null otherwise. A
+missing, stale or invalid input returns null, which the consumer hides for that
+sample. Neither illustrative reach nor legal eligibility changes cone geometry.
+
+`node tools/verify-rally-coverage-contract.mjs <coverage-checkout>` tests the real
+consumer modules read-only, including actual actor samples, three cameras,
+bounce boundaries, the seven-hit regression and legacy movement chapters.
+After integration, omit the argument to check the current checkout.
 
 ## Verification and integration
 

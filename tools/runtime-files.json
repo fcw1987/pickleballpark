@@ -103,6 +103,7 @@
   "player-coverage.js",
   "player-labels.js",
   "rally-coach.js",
+  "rally-coverage-provider.js",
   "rally-proposals.js",
   "rally-rules.js",
   "rally-state.js",

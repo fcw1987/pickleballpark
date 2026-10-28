@@ -100,34 +100,39 @@ export function tacticalRecovery(positions, { players, hitter, family, target, s
  * contact plants differ from logical timeline interpolation. It is read-only.
  * Facing is tracking intent, not a command to overwrite stroke/torso poses.
  */
-export function createTacticalSnapshot({ play, timeline, elapsed = 0, players = play?.players, positions: sampledPositions } = {}) {
+export function createTacticalSnapshot({ play, timeline, elapsed = 0, document, players = document?.players ?? play?.players, positions: sampledPositions } = {}) {
   if (!play || !timeline || !Number.isFinite(elapsed)) throw new TypeError('A Play, compiled timeline and finite elapsed time are required.');
   const sampled = samplePlayState(timeline, elapsed), segment = sampled.segment;
   const records = players ?? Object.fromEntries(Object.keys(sampled.positions).filter(id => id !== 'ball').map(id => [id, { team: teamForPlayer(id), handedness: 'right' }]));
   const positions = sampledPositions ?? sampled.positions;
-  const service = resolveServiceContext(play);
-  const opening = play.rally?.openingBouncesSatisfied ? 'midrally' : 'serve';
-  const shotIndex = segment?.rallyLeg ? segment.rallyLeg - 1 : 0;
-  const inPreparation = !sampled.ball.launched;
+  const service = resolveServiceContext(document ?? play);
+  const opening = document?.opening ?? (play.rally?.openingBouncesSatisfied ? 'midrally' : 'serve');
+  const followingContact = timeline.segments.find(item => item.shotSemantics && item.startTime >= (segment?.endTime ?? sampled.time));
+  const contactSegment = segment?.shotSemantics ? segment : followingContact;
+  const previousContact = timeline.segments.findLast(item => item.shotSemantics && item.endTime <= sampled.time);
+  const terminal = sampled.time >= timeline.duration || !contactSegment;
+  const shotIndex = contactSegment ? contactSegment.rallyLeg - 1 : previousContact?.rallyLeg ?? 0;
+  const inPreparation = !segment?.shotSemantics || !sampled.ball.launched;
   const receivingIndex = inPreparation ? shotIndex : shotIndex + 1;
-  const currentHitter = segment?.shotSemantics?.playerId ?? service.server;
-  const authoredReceiver = inPreparation ? currentHitter : segment?.nextShotSemantics?.playerId ?? null;
-  const roleEligible = eligibleHitters({ players: records, service, contactIndex: receivingIndex, opening, previousHitter: inPreparation ? null : currentHitter });
+  const currentHitter = contactSegment?.shotSemantics.playerId ?? null;
+  const authoredReceiver = terminal ? null : inPreparation ? currentHitter : followingContact?.shotSemantics.playerId ?? null;
+  const roleEligible = terminal ? [] : eligibleHitters({ players: records, service, contactIndex: receivingIndex, opening, previousHitter: inPreparation ? previousContact?.shotSemantics.playerId : currentHitter });
   // A midrally setup identifies the side about to hit, not an exclusive legal
   // striker. Keep its partner eligible; authored responsibility is ranked below.
   const eligible = inPreparation && (opening === 'midrally' || shotIndex > 1)
     ? roleEligible.filter(id => teamForPlayer(id, records) === teamForPlayer(currentHitter, records))
     : roleEligible;
-  const nextContact = inPreparation ? segment?.shotSemantics?.contact.point ?? sampled.ball.board : segment?.nextShotSemantics?.contact.point ?? segment?.step.shot?.to ?? sampled.ball.board;
-  const contactTime = inPreparation ? (segment?.startTime ?? 0) + (segment?.contactTime ?? 0) : segment?.endTime;
+  const nextContact = inPreparation ? contactSegment?.shotSemantics.contact.point ?? sampled.ball.board : followingContact?.shotSemantics.contact.point ?? segment?.step.shot?.to ?? sampled.ball.board;
+  const contactTime = inPreparation ? (contactSegment?.startTime ?? 0) + (contactSegment?.contactTime ?? 0)
+    : followingContact ? followingContact.startTime + followingContact.contactTime : segment?.endTime;
   const seconds = Math.max(0, (contactTime ?? sampled.time) - sampled.time);
   const ranking = rankContactCandidates({ eligible, positions, contact: nextContact, players: records, availableSeconds: seconds });
   if (authoredReceiver && eligible.includes(authoredReceiver)) {
     ranking.sort((a, b) => Number(b.id === authoredReceiver) - Number(a.id === authoredReceiver) || a.score - b.score);
     ranking[0].reasons.push('authored-next-contact');
   }
-  const incomingBounced = timeline.events.some(event => event.type === 'bounce' && event.rallyLeg === segment?.rallyLeg && event.time <= sampled.time);
-  const terminal = sampled.time >= timeline.duration && timeline.duration > 0;
+  const incomingLeg = inPreparation ? previousContact?.rallyLeg : segment?.rallyLeg;
+  const incomingBounced = timeline.events.some(event => event.type === 'bounce' && event.rallyLeg === incomingLeg && event.time <= sampled.time);
   const activeTeam = inPreparation ? teamForPlayer(currentHitter, records) : oppositeTeam(teamForPlayer(currentHitter, records));
   const ball = { x: sampled.ball.board.x, y: sampled.ball.board.y, heightFeet: sampled.ball.y / FEET_TO_METERS, phase: sampled.ball.phase };
   const actors = Object.fromEntries(Object.entries(records).filter(([id]) => positions[id]).map(([id, player]) => {
@@ -141,7 +146,7 @@ export function createTacticalSnapshot({ play, timeline, elapsed = 0, players = 
       reach: ranked?.reach ?? null, reasons: ranked?.reasons ?? [] }];
   }));
   return freeze({ version: 1, coordinateSystem: 'board-feet', court: { width: 20, length: 44, netY: 22, kitchenDepth: 7 },
-    time: sampled.time, shotId: segment?.step.id ?? null, phase: terminal ? 'complete' : rallyPhase(receivingIndex, opening),
+    time: sampled.time, shotId: contactSegment?.step.id ?? null, phase: terminal ? 'complete' : rallyPhase(receivingIndex, opening),
     ball, players: actors, service: { ...service }, designatedReceiver: service.receiver, authoredReceiver,
     legalReceiver: !terminal && opening === 'serve' && receivingIndex === 1 ? service.receiver : null,
     eligibleHitters: terminal ? [] : [...eligible], mustBounceBeforeContact: !terminal && contactRequiresBounce(receivingIndex, opening) && !incomingBounced,

@@ -110,6 +110,61 @@ test('terminal snapshots have no eligible hitter or outstanding opening bounce',
   }
 });
 
+test('movement-only chapters keep the upcoming contact and preceding bounce context', () => {
+  const play = clone(PICKLEBOARD_PLAYS.find(item => item.id === 'third-shot-drop'));
+  const document = documentFromTemplate(play);
+  const serve = play.steps.find(step => step.shot?.contact.kind === 'serve');
+  play.steps.splice(2, 0, { id: 'pause-before-return', positions: clone(serve.positions), durationMs: 500 });
+  const timeline = compilePlayTimeline(play);
+  const held = timeline.segments.find(segment => segment.step.id === 'pause-before-return');
+  const returned = timeline.segments.find(segment => segment.step.id === 'return');
+  for (const elapsed of [held.startTime - .001, held.startTime + held.duration / 2, returned.startTime]) {
+    const result = createTacticalSnapshot({ play, timeline, elapsed, document });
+    assert.equal(result.phase, 'return');
+    assert.equal(result.shotId, elapsed < held.startTime ? 'serve' : 'return');
+    assert.equal(result.authoredReceiver, 'player3');
+    assert.deepEqual(result.eligibleHitters, ['player3']);
+    assert.equal(result.mustBounceBeforeContact, elapsed < held.startTime, 'the preceding serve bounces at the start of the movement chapter');
+    assert.ok(Math.abs(result.players.player3.reach.availableSeconds - (returned.startTime + returned.contactTime - elapsed)) < 1e-9,
+      'outgoing flight and the movement chapter share the same represented next contact time');
+  }
+});
+
+test('the optional document supplies legacy service roles without changing frozen playback data', () => {
+  const document = documentFromTemplate(PICKLEBOARD_PLAYS.find(item => item.id === 'third-shot-drop'));
+  const compiled = compileDocument(document);
+  const before = JSON.stringify({ document, play: compiled.play, timeline: compiled.timeline });
+  const serve = compiled.timeline.segments.find(segment => segment.rallyLeg === 1);
+  const elapsed = serve.startTime + serve.contactTime + 1e-5;
+  assert.equal(snapshot(compiled, elapsed).service.known, false, 'legacy playback alone does not invent a receiver identity');
+  const result = snapshot(compiled, elapsed, { document });
+  assert.equal(result.service.known, true);
+  assert.equal(result.legalReceiver, 'player3');
+  assert.deepEqual(result.eligibleHitters, ['player3']);
+  assert.equal(JSON.stringify({ document, play: compiled.play, timeline: compiled.timeline }), before);
+});
+
+test('trailing recovery and empty demonstrations never restart service or invent an authored striker', () => {
+  const play = PICKLEBOARD_PLAYS.find(item => item.id === 'third-shot-drop');
+  const timeline = compilePlayTimeline(play);
+  const recovery = timeline.segments.find(segment => segment.step.id === 'drop-transition');
+  const emptyPlay = { ...clone(play), steps: [clone(play.steps[0])] };
+  const emptyTimeline = compilePlayTimeline(emptyPlay);
+  for (const [candidate, candidateTimeline, elapsed] of [
+    [play, timeline, recovery.startTime + recovery.duration / 2],
+    [play, timeline, timeline.duration],
+    [emptyPlay, emptyTimeline, 0]
+  ]) {
+    const result = createTacticalSnapshot({ play: candidate, timeline: candidateTimeline, elapsed });
+    assert.equal(result.phase, 'complete');
+    assert.equal(result.authoredReceiver, null);
+    assert.equal(result.shotId, null);
+    assert.deepEqual(result.eligibleHitters, []);
+    assert.equal(result.mustBounceBeforeContact, false);
+    for (const actor of Object.values(result.players)) assert.equal(actor.responsibility, 'complete');
+  }
+});
+
 test('snapshots are deterministic, deeply frozen and do not mutate source or sampled position overrides', () => {
   const compiled = starter();
   const positions = clone(compiled.document.initialLayout);
