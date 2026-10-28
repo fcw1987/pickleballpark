@@ -1,0 +1,37 @@
+[
+  {
+    "id": "saved:model1-unmarked",
+    "file": "saved-model1.json",
+    "origin": "Synthetic saved model1 source with the unmarked legacy service convention and an authored movement pin."
+  },
+  {
+    "id": "saved:model1-drop-serve",
+    "file": "saved-drop-serve.json",
+    "origin": "Synthetic saved model1 drop serve exercises the preparatory bounce sampling function."
+  },
+  {
+    "id": "saved:smart-v2",
+    "file": "saved-smart-v2.json",
+    "origin": "Synthetic supported v2 compiler input: v3 seed7/7-hit source with only identity/title and generator-version markers changed. Not claimed to be historical v2 generator output."
+  },
+  {
+    "id": "saved:smart-v3",
+    "file": "saved-smart-v3.json",
+    "origin": "Unmodified smart-rally-v3 generator output, seed7,7hits."
+  },
+  {
+    "id": "saved:long-smart-v3",
+    "file": "long-smart-v3.json",
+    "origin": "Unmodified smart-rally-v3 generator output, seed7,99hits; reused for long-play browser capacity coverage."
+  },
+  {
+    "id": "saved:smart-v2-unmarked",
+    "file": "saved-smart-v2-unmarked.json",
+    "origin": "Synthetic legacy service encoding of the corresponding supported source. Coordinates, ownership and pins unchanged; service marker removed and raw side encoded for the old convention."
+  },
+  {
+    "id": "saved:smart-v3-unmarked",
+    "file": "saved-smart-v3-unmarked.json",
+    "origin": "Synthetic legacy service encoding of the corresponding supported source. Coordinates, ownership and pins unchanged; service marker removed and raw side encoded for the old convention."
+  }
+]
