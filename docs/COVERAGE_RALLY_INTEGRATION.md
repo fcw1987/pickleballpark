@@ -34,9 +34,10 @@ were inspected and cherry-picked in their original order; all applied cleanly:
 Both source branches and their working files remain unchanged. If both feature
 sets are already present in another checkout, apply only the final integration
 commit. Otherwise use the complete linear integration branch from `170b4ed`.
-The efficiency changes and pending baseline repair are separate dependencies;
-neither is included here. The release owner still needs to increment the static
-cache version once for the combined release.
+This records the two-feature integration stage. The efficiency changes are now
+combined as described in [Combined feature integration](COMBINED_FEATURE_INTEGRATION.md).
+The combined branch uses static cache v37 once, from the tested v36 baseline.
+The pending baseline repair remains a separate dependency.
 
 ## Focused validation
 

@@ -324,15 +324,15 @@ async function verifyMigratedAuthoringOffline(page) {
     document: structuredClone(playBuilder.document),
     otherDrafts: playBuilder.store.list({ includeRevision: true }).filter(draft => draft.id !== playBuilder.document.id)
   }));
-  await page.getByRole('button', { name: 'Add shot', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(before.document.shots.length + 1);
-  await expect.poll(() => page.evaluate(() => playBuilder.proposalBusy)).toBe(false);
+  // Migration checks need the same completed task, idle queue and successful
+  // save proof as fresh authoring; a visible count can precede completion.
+  const completion = await clickAndVerifySmartAdd(page, before.document.shots.length + 1);
   const added = await page.evaluate(() => ({ shots: playBuilder.document.shots.length, valid: playBuilder.compiled.validShotCount, playing: playBuilder.session.playing }));
   expect(added).toEqual({ shots: before.document.shots.length + 1, valid: before.document.shots.length + 1, playing: false });
   await page.locator('[data-action="undo"]').click();
   await expect.poll(() => page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(JSON.stringify(before.document));
   expect(await page.evaluate(() => playBuilder.store.list({ includeRevision: true }).filter(draft => draft.id !== playBuilder.document.id))).toEqual(before.otherDrafts);
-  return { added, undoRestored: true, otherSavedDraftsPreserved: true };
+  return { added, completion, undoRestored: true, otherSavedDraftsPreserved: true };
 }
 
 // This is a path move on one origin, rather than an in-place worker update.

@@ -115,8 +115,8 @@ No startup/view lifecycle scheduling or hidden-renderer logic is changed.
 The local key is `pickleboard-player-coverage-v1` with `on` / `off` values.
 Denied or full storage leaves a working session preference. This key is not
 part of the authored-play schema. All new modules are cached for offline use.
-The parent integration should increment the worker cache version once for the
-combined runtime release; this isolated track does not independently bump it.
+The standalone coverage track did not increment the worker cache separately.
+The combined coverage/rally/efficiency branch uses v37 once, from base v36.
 
 ## Verification and review
 

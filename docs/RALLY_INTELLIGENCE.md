@@ -177,8 +177,9 @@ Existing long-rally and frozen legacy compatibility tests remain required.
 Runtime registration consists only of adding `rally-state.js` and
 `rally-tactics.js` to `sw.js` and `tools/runtime-files.json`, and updating the
 package-test generator expectation to v3. It is a separate integration commit.
-The release owner must increment the static-cache version once for the combined
-runtime release and rerun the exact merged commit's required Quality checks.
+The combined feature branch uses static cache v37 once, from base v36. The
+release owner must reconcile that version with the repaired baseline and rerun
+the exact merged commit's required Quality checks.
 No merge, deployment, access change, or historical baseline update is part of
 this branch.
 
