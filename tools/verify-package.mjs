@@ -600,7 +600,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
+        if (mode === 'coverage-upgrade' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');
