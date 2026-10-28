@@ -46,6 +46,8 @@ const STATIC_ASSETS = [
   './player-coverage-ui.js',
   './player-coverage.css',
   './rally-rules.js',
+  './rally-state.js',
+  './rally-tactics.js',
   './visual-theme.js',
   './board-projection.js',
   './three-d-loader.js',

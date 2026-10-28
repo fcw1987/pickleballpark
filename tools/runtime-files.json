@@ -105,6 +105,8 @@
   "rally-coach.js",
   "rally-proposals.js",
   "rally-rules.js",
+  "rally-state.js",
+  "rally-tactics.js",
   "reference-athletes.js",
   "reference-world.js",
   "script.js",

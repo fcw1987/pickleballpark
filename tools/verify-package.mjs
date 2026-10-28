@@ -258,7 +258,7 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   }, expectedSavedKey);
   expect(random).toMatchObject({ shots: 99, valid: 99, chapters: 99, retainedOldDraft: true, playing: false });
   expect(random.oldBeforeSmart).toBe(true);
-  expect(random.generation).toMatchObject({ seed: 12648430, generatorVersion: 'smart-rally-v2' });
+  expect(random.generation).toMatchObject({ seed: 12648430, generatorVersion: 'smart-rally-v3' });
 
   // A real invalid authored rally is opened through the public Coach controls.
   // The protected pin stays unchanged while visible Fix/Show options and an
