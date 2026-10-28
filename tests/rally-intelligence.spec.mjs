@@ -60,3 +60,18 @@ test('wrong-returner import stays authored and shows an actionable identity warn
   await page.evaluate(() => playBuilder.action('undo'));
   expect(await page.evaluate(() => playBuilder.document)).toEqual(before);
 });
+
+test('volley contact settings explain the NVZ history limits without changing the lesson', async ({ page }) => {
+  await page.goto('/'); await settleBuilderStartup(page);
+  await page.evaluate(async () => {
+    await playBuilder.action('template', 'volley-block');
+    await playBuilder.action('selectShot', playBuilder.document.shots.find(shot => ['volley', 'reset', 'overhead'].includes(shot.family)).id);
+  });
+  const before = await page.evaluate(() => structuredClone(playBuilder.document));
+  await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+  await openIntentTab(page, 'Players');
+  await expect(page.locator('#builder-nvz-model-limits')).toBeVisible();
+  await expect(page.locator('#builder-nvz-model-limits')).toContainText('full foot and equipment contact history');
+  await expect(page.locator('#builder-nvz-model-limits')).toContainText('cannot certify non-volley-zone legality');
+  expect(await page.evaluate(() => playBuilder.document)).toEqual(before);
+});

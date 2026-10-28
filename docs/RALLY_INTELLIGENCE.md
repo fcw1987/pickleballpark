@@ -58,6 +58,8 @@ Casebook 8-23 explains grounded foot reestablishment; 14-23 illustrates momentum
 after a dead ball. The model has no full sole/clothing/paddle-ground/contact or
 balance-recovery history. A manual volley followed by NVZ entry therefore gets
 an uncertainty warning; it is not silently certified by a generated `false` flag.
+Applicable volley/reset/overhead contact settings also show this model limit
+beside Contact style, without marking every otherwise valid rally as faulty.
 
 Coaching sources:
 
@@ -181,3 +183,18 @@ The release owner must increment the static-cache version once for the combined
 runtime release and rerun the exact merged commit's required Quality checks.
 No merge, deployment, access change, or historical baseline update is part of
 this branch.
+
+The package's visible Add check waits for the actual queued proposal to finish,
+then requires success, the exact expected shot/valid counts, an idle queue and
+no save error. A count-only five-second poll could fail with four valid shots
+while the fifth proposal was still pending. The delayed-turn browser regression
+reproduces that state, resumes the same task, and verifies five saved shots with
+the original four-shot prefix intact. No timeout was increased and no engine
+rejection is treated as success. The original uninstrumented failure did not
+retain its seed or queue state, so its exact scheduling trigger is unknown.
+
+For a focused upgrade check, run
+`QA_PACKAGE_MODE=preview-upgrade QA_PACKAGE_BROWSER=chromium QA_PACKAGE_SMART_DIAGNOSTICS=1 node tools/verify-package.mjs`.
+Repeat with `webkit` sequentially. Failed Adds record queue/source/save evidence
+in ignored `release-results/package-add-failure.json`; opt-in seed/timing traces
+are written to `release-results/package-add-trace.json`.

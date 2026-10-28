@@ -9,6 +9,7 @@ import { chromium, webkit, expect } from '@playwright/test';
 import { protectedPinScenario } from '../tests/fixtures/smart-coach-scenarios.mjs';
 import { validateDeploymentArtifact } from './verify-deployment-artifact.mjs';
 import { createRuntimePackage } from './runtime-package.mjs';
+import { clickAndVerifySmartAdd } from './package-smart-add.mjs';
 const sha = b => createHash('sha256').update(b).digest('hex');
 const gitBytes = (revision, file) => execFileSync('git', ['show', `${revision}:${file}`], { maxBuffer: 20 * 1024 * 1024 });
 const gitText = (revision, file) => gitBytes(revision, file).toString('utf8');
@@ -237,8 +238,7 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
     };
   });
   for (let index = 1; index <= 5; index += 1) {
-    await page.getByRole('button', { name: 'Add shot' }).click();
-    try { await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(index); }
+    try { await clickAndVerifySmartAdd(page, index); }
     catch (error) {
       const state = await page.evaluate(key => ({ pending: playBuilder.pendingAddCount,
         busy: playBuilder.proposalBusy, message: playBuilder.message, sourceIntent: playBuilder.sourceIntent,
