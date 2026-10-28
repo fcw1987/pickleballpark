@@ -1,0 +1,3535 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 1,
+  "id": "random-rally-7-99",
+  "title": "Random Rally · 99 hits · seed 7",
+  "initialLayout": {
+    "player1": {
+      "x": 15,
+      "y": -1
+    },
+    "player2": {
+      "x": 5,
+      "y": -1
+    },
+    "player3": {
+      "x": 5,
+      "y": 42
+    },
+    "player4": {
+      "x": 15,
+      "y": 30
+    },
+    "ball": {
+      "x": 16.2,
+      "y": 0
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "smart-shot-1",
+      "family": "serve",
+      "hitter": "player1",
+      "receiver": "player3",
+      "contactStyle": "auto",
+      "target": {
+        "x": 8,
+        "y": 39
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "serveMethod": "drop",
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-2",
+      "family": "return",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 5
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-3",
+      "family": "drop",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 28
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-4",
+      "family": "volley",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-5",
+      "family": "drop",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 28
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-6",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 14
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-7",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 28
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-8",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 14
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-9",
+      "family": "lob",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 36
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-10",
+      "family": "overhead",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 14
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-11",
+      "family": "lob",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 39
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-12",
+      "family": "overhead",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-13",
+      "family": "reset",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 28
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-14",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 4
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-15",
+      "family": "drive",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 38
+      },
+      "arc": "high",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-16",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-17",
+      "family": "volley",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 30
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-18",
+      "family": "drive",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-19",
+      "family": "lob",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 41
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-20",
+      "family": "overhead",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 4
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-21",
+      "family": "drop",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 28
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-22",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 10
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-23",
+      "family": "lob",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 36
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-24",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 6
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-25",
+      "family": "drop",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 28
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-26",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 4
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-27",
+      "family": "lob",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 39
+      },
+      "arc": "high",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-28",
+      "family": "overhead",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 14
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-29",
+      "family": "drive",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 38
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-30",
+      "family": "reset",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "short-hop",
+      "target": {
+        "x": 13,
+        "y": 16
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-31",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 27
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-32",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-33",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 34
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-34",
+      "family": "reset",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 16
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-35",
+      "family": "lob",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 36
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-36",
+      "family": "overhead",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 6
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-37",
+      "family": "drop",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 28
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-38",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 14
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-39",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 28
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-40",
+      "family": "reset",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 16
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-41",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 40
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-42",
+      "family": "reset",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 16
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-43",
+      "family": "volley",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 30
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-44",
+      "family": "dink",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 16
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-45",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 30
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-46",
+      "family": "lob",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 5
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-47",
+      "family": "overhead",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 34
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-48",
+      "family": "drop",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 16
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-49",
+      "family": "lob",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 39
+      },
+      "arc": "high",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-50",
+      "family": "overhead",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-51",
+      "family": "drop",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 28
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-52",
+      "family": "dink",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 16
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-53",
+      "family": "drive",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 40
+      },
+      "arc": "high",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-54",
+      "family": "reset",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 17
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-55",
+      "family": "volley",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 30
+      },
+      "arc": "low",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-56",
+      "family": "lob",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 8
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-57",
+      "family": "overhead",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 40
+      },
+      "arc": "low",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-58",
+      "family": "reset",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 17
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-59",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 27
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-60",
+      "family": "drive",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-61",
+      "family": "volley",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 30
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-62",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 14
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-63",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 40
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-64",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 10
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-65",
+      "family": "volley",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 34
+      },
+      "arc": "low",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-66",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 10
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-67",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 40
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-68",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 6
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-69",
+      "family": "drop",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 28
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-70",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 10
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-71",
+      "family": "drop",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 28
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-72",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 10
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-73",
+      "family": "lob",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 41
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-74",
+      "family": "overhead",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 14
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-75",
+      "family": "drive",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 40
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-76",
+      "family": "lob",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 8
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-77",
+      "family": "overhead",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 40
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-78",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 6
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-79",
+      "family": "volley",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 34
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-80",
+      "family": "drop",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 17
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-81",
+      "family": "dink",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 25
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-82",
+      "family": "volley",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 14
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-83",
+      "family": "drive",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 34
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-84",
+      "family": "drive",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 10,
+        "y": 14
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-85",
+      "family": "dink",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 28
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-86",
+      "family": "dink",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 19
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-87",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 34
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-88",
+      "family": "drop",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 17
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-89",
+      "family": "drive",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 38
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-90",
+      "family": "volley",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 6
+      },
+      "arc": "medium",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-91",
+      "family": "reset",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 27
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-92",
+      "family": "drive",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 4
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-93",
+      "family": "volley",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 38
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-94",
+      "family": "reset",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 16
+      },
+      "arc": "medium",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-95",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 27
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-96",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 4.5,
+        "y": 10
+      },
+      "arc": "high",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-97",
+      "family": "volley",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 7,
+        "y": 30
+      },
+      "arc": "low",
+      "pace": "medium",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-98",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 13,
+        "y": 14
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    },
+    {
+      "id": "smart-shot-99",
+      "family": "volley",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "auto",
+      "target": {
+        "x": 15.5,
+        "y": 40
+      },
+      "arc": "low",
+      "pace": "firm",
+      "movement": {
+        "intent": "advance",
+        "pinned": false
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "serveMethod"
+        ]
+      },
+      "generation": {
+        "seed": 7,
+        "generatorVersion": "smart-rally-v3"
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "serve",
+  "ending": "stop",
+  "intentionalFault": false,
+  "service": {
+    "server": "player1",
+    "receiver": "player3",
+    "court": "left",
+    "courtConvention": "server-perspective-v1"
+  },
+  "generation": {
+    "mode": "random",
+    "generatorVersion": "smart-rally-v3",
+    "seed": 7,
+    "requestedHits": 99
+  }
+}
