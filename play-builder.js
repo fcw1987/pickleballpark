@@ -385,6 +385,7 @@ export class PlayBuilder {
     cancelPendingView() {
         this.generation++;
         if(this.busy) { this.board.threeD?.cancelLoading?.(); this.busy=false; this.view='2d'; }
+        globalThis.document.documentElement.removeAttribute('data-court-loading');
     }
     async switchView(view) {
         if(this.workspace!=='builder')return;
@@ -399,6 +400,7 @@ export class PlayBuilder {
             const opened=await this.board.threeD.enter();
             if(generation!==this.generation||this.workspace!=='builder')return;
             this.busy=false;
+            globalThis.document.documentElement.removeAttribute('data-court-loading');
             if(!opened){this.view='2d';this.message='3D is unavailable. Your draft is safe and editable in 2D. You can retry the view toggle.';this.render();return;}
             this.view='3d'; this.message='';this.board.threeD.ballObject.userData.minimumCSSDiameter=12;
             this.board.threeD.applyAtTime(this.session.clock.elapsed);

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v36`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v37`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -83,6 +83,27 @@ const STATIC_ASSETS = [
   './three-d-presentation.js',
   './three-d-pixel-actors.js',
   './three-d-ball.js',
+  './vendor/three.module.min.js',
+  './vendor/three.core.min.js',
+  './styles.css',
+  './manifest.json',
+  './assets/players/green-left-handed.png',
+  './assets/players/green-right-handed.png',
+  './assets/players/orange-left-handed.png',
+  './assets/players/orange-right-handed.png',
+  './icons/apple-icon-180.png',
+  './icons/icon-72x72.png',
+  './icons/icon-96x96.png',
+  './icons/icon-128x128.png',
+  './icons/icon-144x144.png',
+  './icons/icon-152x152.png',
+  './icons/icon-192x192.png',
+  './icons/icon-384x384.png',
+  './icons/icon-512x512.png'
+];
+// Retained SVG compatibility artwork is fetched and cached only when requested.
+// Canvas2D and the dimensional court both use different artwork.
+const OPTIONAL_ASSETS = [
   './assets/replay/metadata.json',
   './assets/replay/green-left-back-body.png',
   './assets/replay/green-left-back-left-body.png',
@@ -116,25 +137,8 @@ const STATIC_ASSETS = [
   './assets/replay/orange-right-front-body.png',
   './assets/replay/orange-right-front-right-body.png',
   './assets/replay/orange-right-left-body.png',
-  './vendor/three.module.min.js',
-  './vendor/three.core.min.js',
-  './styles.css',
-  './manifest.json',
-  './assets/players/green-left-handed.png',
-  './assets/players/green-right-handed.png',
-  './assets/players/orange-left-handed.png',
-  './assets/players/orange-right-handed.png',
-  './icons/apple-icon-180.png',
-  './icons/icon-72x72.png',
-  './icons/icon-96x96.png',
-  './icons/icon-128x128.png',
-  './icons/icon-144x144.png',
-  './icons/icon-152x152.png',
-  './icons/icon-192x192.png',
-  './icons/icon-384x384.png',
-  './icons/icon-512x512.png'
 ];
-const CACHEABLE_URLS = new Set(STATIC_ASSETS.map(path => new URL(path, self.location).href));
+const CACHEABLE_URLS = new Set([...STATIC_ASSETS, ...OPTIONAL_ASSETS].map(path => new URL(path, self.location).href));
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {

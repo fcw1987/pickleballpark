@@ -317,6 +317,24 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   return { adds, random, coach: { protectedKept: true, optionsShown: true, fixed: true, undoRestored: true }, restoredSavedLibrary: storageAfter !== storageBefore };
 }
 
+async function verifyMigratedAuthoringOffline(page) {
+  // A migrated saved document can affect authoring. Exercise one real Smart
+  // Add and Undo against that document, preserving all other saved drafts.
+  const before = await page.evaluate(() => ({
+    document: structuredClone(playBuilder.document),
+    otherDrafts: playBuilder.store.list({ includeRevision: true }).filter(draft => draft.id !== playBuilder.document.id)
+  }));
+  await page.getByRole('button', { name: 'Add shot', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length)).toBe(before.document.shots.length + 1);
+  await expect.poll(() => page.evaluate(() => playBuilder.proposalBusy)).toBe(false);
+  const added = await page.evaluate(() => ({ shots: playBuilder.document.shots.length, valid: playBuilder.compiled.validShotCount, playing: playBuilder.session.playing }));
+  expect(added).toEqual({ shots: before.document.shots.length + 1, valid: before.document.shots.length + 1, playing: false });
+  await page.locator('[data-action="undo"]').click();
+  await expect.poll(() => page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(JSON.stringify(before.document));
+  expect(await page.evaluate(() => playBuilder.store.list({ includeRevision: true }).filter(draft => draft.id !== playBuilder.document.id))).toEqual(before.otherDrafts);
+  return { added, undoRestored: true, otherSavedDraftsPreserved: true };
+}
+
 // This is a path move on one origin, rather than an in-place worker update.
 // Desktop engines verify registration/manifest identities; they do not install
 // an operating-system home-screen shortcut or claim that its old URL redirects.
@@ -514,10 +532,11 @@ const browsers = [['chromium', chromium], ['webkit', webkit]];
 if (process.env.QA_PACKAGE_BROWSER && !browsers.some(([name]) => name === process.env.QA_PACKAGE_BROWSER)) throw Error('Unknown package verification browser');
 for (const [browserName, browserType] of browsers.filter(([name]) => !process.env.QA_PACKAGE_BROWSER || name === process.env.QA_PACKAGE_BROWSER)) {
   for (const mode of modes) {
+    const caseStarted = performance.now();
     if (mode === 'path-migration' || mode === 'branding-path-migration') {
       try { results.push(await verifyPathMigration(browserName, browserType, mode)); }
       catch (error) { results.push({ browser: browserName, mode, status: 'FAIL', error: error.message }); throw error; }
-      finally { writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
+      finally { results.at(-1).durationMs = performance.now() - caseStarted; writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
       continue;
     }
     const upgrading = mode !== 'fresh';
@@ -592,15 +611,17 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       const checks = await page.evaluate(async ({ files, scopePath, candidateCache }) => {
         const cache = await caches.open(candidateCache);
         const digest = async r => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await r.arrayBuffer()))).map(v => v.toString(16).padStart(2, '0')).join('');
-        const all = [];
-        for (const f of files) {
-          const r = await fetch(`./${f.path}`); if (!r.ok) throw Error(`HTTP ${r.status}: ${f.path}`);
-          all.push({ path: f.path, sha256: await digest(r), type: r.headers.get('content-type') });
-        }
+        // Inspect installation before the exhaustive HTTP audit can populate
+        // optional on-demand caches. Every installed byte must match the build.
         const cached = [];
         for (const request of await cache.keys()) {
           const path = new URL(request.url).pathname.slice(scopePath.length) || 'index.html';
           cached.push({ path, sha256: await digest(await cache.match(request)) });
+        }
+        const all = [];
+        for (const f of files) {
+          const r = await fetch(`./${f.path}`); if (!r.ok) throw Error(`HTTP ${r.status}: ${f.path}`);
+          all.push({ path: f.path, sha256: await digest(r), type: r.headers.get('content-type') });
         }
         return { all, cached };
       }, { files: manifest.files, scopePath, candidateCache });
@@ -665,7 +686,12 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       }));
       expect(cacheProof.caches).toContain(candidateCache);
       if (upgrading) expect(cacheProof).toMatchObject({ caches: expect.arrayContaining(['unrelated-application-cache']), unrelated: 'preserve' });
-      const smartProof = (mode === 'fresh' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') ? await verifySmartRallyOffline(page) : null;
+      // Full offline authoring/99-shot generation is independent of the prior
+      // cache version once exact current bytes and migrated saves are proven.
+      // Cover it once per engine; keep a representative Add/Undo on each
+      // migrated document plus every hash, storage, planner, renderer, lesson
+      // and real-offline assertion in every historical case.
+      const smartProof = mode === 'fresh' ? await verifySmartRallyOffline(page) : await verifyMigratedAuthoringOffline(page);
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
       for (const id of ids) {
         const lesson = await page.evaluate(async id => {
@@ -688,7 +714,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0); expect(errors).toEqual([]);
       results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: ids.length, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof });
     } catch (e) { results.push({ browser: browserName, mode, status: 'FAIL', error: e.message }); throw e; }
-    finally { await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
+    finally { results.at(-1).durationMs = performance.now() - caseStarted; await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
   }
 }
 console.log(JSON.stringify(results, null, 2));

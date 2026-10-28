@@ -10,9 +10,11 @@ const targets = (process.env.QA_PERF_TARGETS || 'before=http://127.0.0.1:4173/,c
 const runCount = Number(process.env.QA_PERF_RUNS || 3);
 const viewport = (process.env.QA_PERF_VIEWPORT || '1440x900').split('x').map(Number);
 const deviceScaleFactor = Number(process.env.QA_PERF_DPR || 1);
+const longRallyShots = Number(process.env.QA_PERF_LONG_RALLY || 64);
 if (viewport.length !== 2 || viewport.some(value => !Number.isInteger(value) || value < 100 || value > 4000) ||
     !Number.isFinite(deviceScaleFactor) || deviceScaleFactor < 1 || deviceScaleFactor > 4 ||
-    !Number.isInteger(runCount) || runCount < 1 || runCount > 10) throw Error('Invalid bounded performance conditions.');
+    !Number.isInteger(runCount) || runCount < 1 || runCount > 10 ||
+    !Number.isInteger(longRallyShots) || longRallyShots < 9 || longRallyShots > 99) throw Error('Invalid bounded performance conditions.');
 const browser = await chromium.launch();
 const records = [];
 
@@ -28,7 +30,7 @@ for (const target of targets) {
     await page.goto(target.url);
     await page.waitForFunction(() => window.playBuilder?.document && playBuilder.ui?.element);
     const builderReadyMs = performance.now() - navigationStarted;
-    await page.waitForFunction(() => window.playBuilder && !playBuilder.busy && playBuilder.board.threeD?.renderer);
+    await page.waitForFunction(() => window.playBuilder && !playBuilder.busy && playBuilder.board.threeD?.worldAssetsReady && playBuilder.board.threeD.renderer.info.render.calls > 0);
     const first3DReadyMs = performance.now() - navigationStarted;
     const initial = await page.evaluate(() => {
       const renderer = playBuilder.board.threeD.renderer;
@@ -50,7 +52,7 @@ for (const target of targets) {
       };
     });
 
-    const tasks = await page.evaluate(async () => {
+    const tasks = await page.evaluate(async longRallyShots => {
       const builder = playBuilder;
       const renderer = builder.board.threeD.renderer;
       const { compileDocument } = await import('./play-compiler.js');
@@ -84,10 +86,10 @@ for (const target of targets) {
       };
 
       const byShots = [];
-      for (const shotCount of [3, 8, 64]) {
+      for (const shotCount of [3, 8, longRallyShots]) {
         const source = makeDocument(shotCount);
         const compileSamples = [];
-        const compileIterations = shotCount === 64 ? 80 : 160;
+        const compileIterations = shotCount === longRallyShots ? 80 : 160;
         for (let index = 0; index < compileIterations; index++) {
           const started = performance.now();
           const compiled = compileDocument(source);
@@ -207,13 +209,13 @@ for (const target of targets) {
           pendingRender: builder.board.threeD.renderLoopId !== null
         }
       };
-    });
+    }, longRallyShots);
 
     const reloadMs = [];
     for (let index = 0; index < 3; index++) {
       const started = performance.now();
       await page.reload();
-      await page.waitForFunction(() => window.playBuilder && !playBuilder.busy && playBuilder.document.shots.length === 64);
+      await page.waitForFunction(shots => window.playBuilder && !playBuilder.busy && playBuilder.document.shots.length === shots && playBuilder.board.threeD?.worldAssetsReady && playBuilder.board.threeD.renderer.info.render.calls > 0, longRallyShots);
       reloadMs.push(performance.now() - started);
     }
     records.push({ target: target.label, url: target.url, run, builderReadyMs, first3DReadyMs, initial, tasks, reloadMs });
@@ -231,7 +233,7 @@ const evidence = {
     viewport,
     deviceScaleFactor,
     runs: runCount,
-    workload: '3, 8 and 64 shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs, 30 details open-close/layout pairs and 50 saves per size; 120 settled renderer samples per rally; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining 64 shots',
+    workload: `3, 8 and ${longRallyShots} shot source; 160/160/80 pure compiles; 20 target edits, 100 seeks, 100 menu open-close pairs, 30 details open-close/layout pairs and 50 saves per size; 120 settled renderer samples per rally; ten 2D/3D loops; sixty paused rAF callbacks; three completed reloads retaining ${longRallyShots} shots`,
     limitations: 'CPU-side performance.now/action timing and automation callback cadence. Renderer calls measure CPU command submission, not GPU completion. Results do not measure displayed FPS or physical-device performance.'
   },
   records

@@ -57,6 +57,10 @@ export class GuidedPixelActors {
     }
 
     async load() {
+        // The visible Canvas2D court draws its own athletes from the shared
+        // samples. Its SVG image layers are hidden, including in 3D, so do not
+        // fetch or decode a second, unused set of replay atlases.
+        if (this.board.pixelRenderer) return false;
         const generation = ++this.loadGeneration;
         const assets = await loadAssets();
         if (generation !== this.loadGeneration) return false;
