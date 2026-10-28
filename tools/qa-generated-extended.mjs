@@ -292,7 +292,7 @@ export function runExtendedCorpus() {
     shots += document.shots.length;
   }
 
-  const invalidByExpected = { validation: 0, rule: 0, feasibility: 0 };
+  const invalidByExpected = { validation: 0, rule: 0, continuity: 0, feasibility: 0 };
   for (const item of invalid) {
     if (item.expected === 'validation') {
       let rejected = false;

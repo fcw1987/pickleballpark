@@ -172,6 +172,17 @@ export function validateDocument(value) {
   if (typeof value.assistance.autoShading !== 'boolean' || typeof value.assistance.showGuides !== 'boolean') fail('assistance', 'toggles must be boolean.');
   choice(value.assistance.team, ['both', ...TEAMS], 'assistance.team');
   choice(value.opening, ['serve', 'midrally'], 'opening');
+  // Optional additive context. Legacy files keep their exact bytes and may
+  // declare a receiver on the serve recipe; no position-based migration.
+  if (value.service !== undefined) {
+    object(value.service, 'service');
+    choice(value.service.server, PLAYER_IDS, 'service.server');
+    choice(value.service.receiver, PLAYER_IDS, 'service.receiver');
+    if (value.players[value.service.server].team === value.players[value.service.receiver].team) fail('service.receiver', 'must belong to the receiving team.');
+    if (value.service.court !== undefined) choice(value.service.court, ['right', 'left'], 'service.court');
+    if (value.service.correctPositionsAtScoreCall !== undefined && typeof value.service.correctPositionsAtScoreCall !== 'boolean') fail('service.correctPositionsAtScoreCall', 'must be boolean.');
+    for (const key of Object.keys(value.service)) if (!['server', 'receiver', 'court', 'correctPositionsAtScoreCall'].includes(key)) fail(`service.${key}`, 'is not supported by the per-rally service model.');
+  }
   choice(value.ending, ['stop', 'winner', 'fault'], 'ending');
   if (typeof value.intentionalFault !== 'boolean') fail('intentionalFault', 'must be boolean.');
   validateTemplateSource(value.templateSource);
@@ -210,7 +221,8 @@ export function createStarterDocument() {
     ],
     annotations: [],
     assistance: { autoShading: false, showGuides: false, team: 'both' },
-    opening: 'serve', ending: 'stop', intentionalFault: false
+    opening: 'serve', ending: 'stop', intentionalFault: false,
+    service: { server: 'player1', receiver: 'player3', court: 'right' }
   };
   validateDocument(document);
   return document;
@@ -254,7 +266,8 @@ export function documentCompatibilitySignature(document) {
   return JSON.stringify({
     initialLayout: document.initialLayout, players: document.players,
     opening: document.opening, ending: document.ending,
-    intentionalFault: document.intentionalFault
+    intentionalFault: document.intentionalFault,
+    ...(document.service ? { service: document.service } : {})
   });
 }
 

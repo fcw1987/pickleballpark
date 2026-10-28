@@ -61,7 +61,7 @@ test('extended corpus truthfully covers hundreds of valid documents and classifi
     pairwiseRows: 446,
     pairwiseDimensionPairs: 446,
     invalidDocuments: 24,
-    invalidByExpected: { validation: 17, rule: 6, feasibility: 1 },
+    invalidByExpected: { validation: 17, rule: 5, continuity: 1, feasibility: 1 },
     sampledBoundaryPoints: 77873,
     observed: {
       lengths: [1, 2, 31, 64, 8],

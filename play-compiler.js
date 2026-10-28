@@ -4,6 +4,8 @@ import { isInServiceBox, serviceBoxForServer, isInNonVolleyZone } from './court-
 import { validateRallyRules } from './rally-rules.js';
 import { documentCompatibilitySignature, validateDocument, movementProtection } from './play-document.js';
 import { sampleActorWorldPosition } from './three-d-presentation.js';
+import { resolveServiceContext, serviceIdentityIssues, receivingServiceBox } from './rally-state.js';
+import { tacticalRecovery } from './rally-tactics.js';
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const PLAYER_IDS = ['player1', 'player2', 'player3', 'player4'];
@@ -127,7 +129,7 @@ export function doublesRecovery(positions, { players, hitter, family, target, se
 }
 
 function automaticTactics(recipe) {
-  return recipe?.generation?.generatorVersion === 'smart-rally-v2' && recipe.movement.intent === 'advance' && !recipe.movement.pinned &&
+  return ['smart-rally-v2', 'smart-rally-v3'].includes(recipe?.generation?.generatorVersion) && recipe.movement.intent === 'advance' && !recipe.movement.pinned &&
     recipe.authoring?.ownership === 'automatic' && recipe.authoring.fields?.includes('movement');
 }
 
@@ -166,6 +168,11 @@ function serveFeetAt(point) {
   const y = point.y < 22 ? -.65 : 44.65;
   return [{ x: clamp(point.x - .42, 0, 20), y }, { x: clamp(point.x + .42, 0, 20), y }];
 }
+function declaredServeFeetAt(stance) {
+  // The ball/paddle may reach across an extension; grounded stance determines
+  // the serving area. Keep legacy feet synthesis unchanged for old files.
+  return [{ x: stance.x - .42, y: stance.y }, { x: stance.x + .42, y: stance.y }];
+}
 
 function finalizeLastAcceptedStep(steps, accepted) {
   const recipe = accepted.at(-1), step = steps.at(-1);
@@ -187,10 +194,11 @@ function validateRecipeIntent(document, recipe, index, priorRecipe, contact) {
   if (index === 0 && document.opening === 'serve' && recipe.family !== 'serve') findings.push(finding('rule', 'error', recipe.id, 'A standard full-rally draft must begin with a serve.'));
   if (recipe.family === 'serve' && (index > 0 || document.opening === 'midrally')) findings.push(finding('rule', 'error', recipe.id, 'A serve can only begin a standard full-rally draft.'));
   if (priorRecipe && document.players[priorRecipe.hitter].team === team) findings.push(finding('rule', 'error', recipe.id, 'Consecutive contacts must alternate between teams.'));
-  if (priorRecipe && priorRecipe.receiver !== 'auto' && priorRecipe.receiver !== recipe.hitter) findings.push(finding('rule', 'error', recipe.id, `The preceding shot names ${priorRecipe.receiver} as receiver, but ${recipe.hitter} is authored to strike.`));
+  for (const issue of serviceIdentityIssues(document).filter(issue => issue.shotId === recipe.id)) findings.push(finding('rule', 'error', recipe.id, issue.message));
+  if (priorRecipe && priorRecipe.receiver !== 'auto' && priorRecipe.receiver !== recipe.hitter) findings.push(finding('continuity', 'error', recipe.id, `The preceding shot names ${priorRecipe.receiver} as receiver, but ${recipe.hitter} is authored to strike. After the serve, either partner may legally intercept; align the two authored fields to show that choice.`));
   if (recipe.receiver !== 'auto' && document.players[recipe.receiver].team !== oppositeTeam(team)) findings.push(finding('rule', 'error', recipe.id, 'The intended receiver must be on the opposing team.'));
   if (recipe.family === 'serve') {
-    const box = serviceBoxForServer(contact);
+    const box = receivingServiceBox(resolveServiceContext(document), contact);
     const beyondKitchen = contact.y < 22 ? recipe.target.y > 29 : recipe.target.y < 15;
     if (!isInServiceBox(recipe.target, box) || !beyondKitchen) findings.push(finding('rule', 'error', recipe.id, 'The serve target must be in the diagonal receiving service court beyond the non-volley-zone line.'));
   } else if ((contact.y < 22) === (recipe.target.y < 22)) findings.push(finding('rule', 'error', recipe.id, 'The target must cross the net to the opposing side.'));
@@ -246,8 +254,9 @@ function makePlay(document) {
     // contact window, rather than the unused journey to the landing target.
     const recoverySeconds = .4 * distance(contact, actualTarget) / ((FLIGHT[recipe.family][recipe.pace] || 20) * 1.4667);
     const protectedIds = new Set([document.shots[index + 1]?.hitter, ...(protectedMovement.get(recipe.id) || []), ...Object.keys(recipe.playerMovement || {})]);
+    const recovery = recipe.generation?.generatorVersion === 'smart-rally-v3' ? tacticalRecovery : doublesRecovery;
     const endPositions = automaticRecovery
-      ? doublesRecovery(previousPositions, { players: document.players, hitter: recipe.hitter, family: recipe.family, target: recipe.target, seconds: recoverySeconds, index, opening: document.opening, servingTeam: document.players[document.shots[0].hitter].team, protectedIds })
+      ? recovery(previousPositions, { players: document.players, hitter: recipe.hitter, family: recipe.family, target: recipe.target, seconds: recoverySeconds, index, opening: document.opening, servingTeam: document.players[document.shots[0].hitter].team, protectedIds, homePositions: document.initialLayout })
       : copy(previousPositions);
     if (!automaticRecovery) endPositions[recipe.hitter] = movementTarget(recipe, contact);
     let movementImpossible = false;
@@ -264,10 +273,11 @@ function makePlay(document) {
     const bounces = document.opening === 'serve' && index < 2 ? 1 : nextKind === 'volley' ? 0 : 1;
     const metadata = trajectoryMetadata(recipe);
     const kind = contactKind(recipe);
+    if (kind === 'volley' && isInNonVolleyZone(endPositions[recipe.hitter])) findings.push(finding('context', 'warning', recipe.id, 'This volley is followed by movement into the non-volley zone. The source does not record a balance-recovery event, so momentum legality cannot be certified. Keep the movement outside the zone or demonstrate recovery before entry.'));
     const strokeSide = autoStrokeSide(recipe, contact, document.players, actorStance);
     const shot = {
       from: copy(contact), to: actualTarget, intendedTarget: copy(recipe.target), type: strokeFor(recipe), stroke: strokeFor(recipe), playerId: recipe.hitter,
-      contact: { kind, heightFeet: recipe.family === 'overhead' ? 7 : kind === 'short-hop' ? .8 : kind === 'volley' ? 3 : recipe.family === 'serve' ? 2.8 : 2.2, strokeSide, feet: kind === 'serve' ? serveFeetAt(contact) : feetAt(contact), momentumEntersNonVolleyZone: false },
+      contact: { kind, heightFeet: recipe.family === 'overhead' ? 7 : kind === 'short-hop' ? .8 : kind === 'volley' ? 3 : recipe.family === 'serve' ? 2.8 : 2.2, strokeSide, feet: kind === 'serve' ? document.service ? declaredServeFeetAt(actorStance) : serveFeetAt(contact) : feetAt(contact), momentumEntersNonVolleyZone: false },
       flight: { bounces, ...metadata }, authoring: { recipeId: recipe.id, family: recipe.family, receiver: recipe.receiver, movement: copy(recipe.movement), serveMethod: recipe.serveMethod }
     };
     if (recipe.family === 'serve' && recipe.serveMethod === 'drop') shot.servePreparation = { method: 'drop', releaseHeightFeet: 3.5, reboundDuration: .34 };
@@ -284,7 +294,10 @@ function makePlay(document) {
     Object.assign(positions, endPositions);
     if (terminalFault) break;
   }
-  return { play: { id: document.id, name: document.title, description: 'Custom visual play', mode: 'doubles', rally: { openingBouncesSatisfied: document.opening === 'midrally' }, steps, ending: document.ending, outcome: { intent: document.ending, afterShotId: accepted.at(-1)?.id ?? null, intentionalFault: document.intentionalFault }, assistance: copy(document.assistance) }, findings, accepted };
+  const service = resolveServiceContext(document);
+  if (document.opening === 'serve' && !service.known) findings.push(finding('context', 'warning', document.shots[0]?.id ?? null, 'The designated serve receiver is unknown. Declare service.server and service.receiver (or an explicit serve receiver) before generating a return. Existing authored shots have been preserved.'));
+  const context = document.service ? { service: copy(document.service) } : {};
+  return { play: { id: document.id, name: document.title, description: 'Custom visual play', mode: 'doubles', ...(document.service ? { players: copy(document.players) } : {}), rally: { openingBouncesSatisfied: document.opening === 'midrally', ...context }, steps, ending: document.ending, outcome: { intent: document.ending, afterShotId: accepted.at(-1)?.id ?? null, intentionalFault: document.intentionalFault }, assistance: copy(document.assistance) }, findings, accepted };
 }
 
 export function compileDocument(document) {
@@ -310,11 +323,12 @@ export function compileDocument(document) {
   // their authored data and playable motion, but expose the same rule conflict
   // that Smart Rally/Coach already detect through whole-rally evaluation.
   const shortHopOverheads = new Set(accepted.filter(shot => shot.family === 'overhead' && shot.contactStyle === 'short-hop').map(shot => shot.id));
-  if (shortHopOverheads.size) {
-    for (const item of validateRallyRules(play, timeline).violations) {
-      if (item.code === 'short-hop-contact' && shortHopOverheads.has(item.stepId)) {
-        findings.push(finding('rule', 'warning', item.stepId, `This overhead uses a 7 ft contact. ${item.message} Choose Automatic, Forehand, or Backhand for this overhead.`));
-      }
+  for (const item of validateRallyRules(play, timeline).violations) {
+    if (accepted.length < 2 && ['return-bounce', 'serve-bounce', 'opening-serve'].includes(item.code)) continue;
+    if (item.code === 'short-hop-contact' && shortHopOverheads.has(item.stepId)) {
+      findings.push(finding('feasibility', 'warning', item.stepId, `This overhead uses a 7 ft contact. ${item.message} Choose Automatic, Forehand, or Backhand for this overhead.`));
+    } else if (!findings.some(known => known.shotId === item.stepId && known.message === item.message)) {
+      findings.push(finding(item.category === 'model' ? 'feasibility' : 'rule', document.intentionalFault ? 'warning' : 'error', item.stepId, item.message));
     }
   }
   return Object.freeze({

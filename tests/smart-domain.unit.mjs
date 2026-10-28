@@ -6,9 +6,10 @@ import {compileEffectiveCandidate} from '../rally-proposals.js';
 import {samplePlayBall,samplePlayState} from '../three-d-core.js';
 import {sampleActorPresentation} from '../three-d-presentation.js';
 
-test('new serves use the nearby athlete and the diagonal box without rewriting a starting layout',async()=>{
+test('new serves use declared service identity and the diagonal box without rewriting a starting layout',async()=>{
   for(const x of [5,16.2]){
     const source=createStarterDocument();source.shots=[];source.initialLayout.ball.x=x;
+    source.service={server:x<10?'player2':'player1',receiver:x<10?'player4':'player3',court:x<10?'left':'right'};
     const before=structuredClone(source.initialLayout);
     const result=await proposeSmartAdd(source,{seed:123});
     assert.ok(result.ok,result.reason);
