@@ -79,3 +79,16 @@ for (const [width, height] of [[320, 780], [390, 844], [844, 390], [1440, 900]])
   await page.keyboard.press('Escape'); await expect(page.locator('.player-coverage-help')).not.toHaveAttribute('open', '');
   await page.evaluate(() => { document.body.dataset.theme = 'dark'; }); await expect(toggle(page)).toBeVisible();
 });
+
+for (const width of [320, 390]) test(`200 percent text keeps the coverage toggle and guide inside ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 844 }); await open(page); await toggle(page).click();
+  await page.addStyleTag({ content: 'html{font-size:200%}' });
+  await page.waitForFunction(() => document.body.classList.contains('builder-large-text'));
+  const guide = page.getByLabel('About player coverage', { exact: true });
+  await guide.scrollIntoViewIfNeeded();
+  for (const control of [toggle(page), guide]) {
+    const box = await control.boundingBox(); expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(width);
+  }
+  await guide.click(); const panel = await page.locator('.player-coverage-explanation').boundingBox();
+  expect(panel.x).toBeGreaterThanOrEqual(0); expect(panel.x + panel.width).toBeLessThanOrEqual(width);
+});

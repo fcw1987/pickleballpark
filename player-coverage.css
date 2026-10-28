@@ -1,4 +1,4 @@
-.player-coverage-control { display:flex; align-items:center; gap:12px; margin-right:auto; color:#344465; font-family:system-ui,sans-serif; font-size:.8125rem; }
+.player-coverage-control { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-right:auto; color:#344465; font-family:system-ui,sans-serif; font-size:.8125rem; }
 .player-coverage-toggle { display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding:6px 10px; border:1px solid #99a9a6; border-radius:7px; background:#f6f7e9; color:#263e50; font:inherit; font-weight:650; cursor:pointer; }
 .player-coverage-toggle[aria-pressed="true"] { border-color:#418978; background:#dcefe6; box-shadow:inset 0 -2px 0 #579a87; }
 .player-coverage-toggle:focus-visible,.player-coverage-help>summary:focus-visible { outline:3px solid #5068a3; outline-offset:2px; }
