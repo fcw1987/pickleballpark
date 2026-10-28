@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 2,
+  "id": "m1-variable-bounced-contact",
+  "title": "Model 2 variable-bounced-contact",
+  "initialLayout": {
+    "player1": {
+      "x": 7,
+      "y": 14
+    },
+    "player2": {
+      "x": 16,
+      "y": 5
+    },
+    "player3": {
+      "x": 9,
+      "y": 33
+    },
+    "player4": {
+      "x": 18,
+      "y": 39
+    },
+    "ball": {
+      "x": 7,
+      "y": 14
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "bounce-feed",
+      "family": "dink",
+      "intent": "cross-court-dink",
+      "quality": "neutral",
+      "hitter": "player1",
+      "receiver": "player3",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 9,
+        "y": 30
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "physics": {
+        "apexFeet": 6
+      }
+    },
+    {
+      "id": "bounced-reply",
+      "family": "return",
+      "intent": "return",
+      "quality": "neutral",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 15,
+        "y": 8
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.2
+      },
+      "physics": {
+        "apexFeet": 7
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "midrally",
+  "ending": "stop",
+  "intentionalFault": false,
+  "service": {
+    "server": "player1",
+    "receiver": "player3",
+    "court": "left",
+    "courtConvention": "server-perspective-v1"
+  },
+  "physicsVersion": "play-physics-v2"
+}

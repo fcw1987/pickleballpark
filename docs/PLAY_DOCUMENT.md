@@ -2,6 +2,11 @@
 
 Status: schema version 1, trajectory model version 1. Rules reference checked 2026-09-07 against the [2026 USA Pickleball Official Rulebook PDF](https://usapickleball.org/docs/rules/USAP-Official-Rulebook.pdf), the [official rules page](https://usapickleball.org/rules/), and the [USA Pickleball Rules Summary](https://usapickleball.org/rules/summary/). The implemented standing-doubles subset follows serve position in 7.A, volley-serve requirements in 7.C, drop-serve requirements in 7.D, serve placement in 7.E, the opening two-bounce rule in 10.A, and non-volley-zone volley footing and momentum in 11.A. These references use the reorganized 2026 section numbers.
 
+The sections below retain the model 1 contract and its defaults. M1 adds a
+separate opt-in model 2 contract under the same schema version; see
+[Model 2 source](#model-2-source) and [Model 2 physics](MODEL2_PHYSICS.md).
+Opening, compiling or exporting an existing model 1 document does not migrate it.
+
 ## Separation of concerns
 
 The play document is editable source intent. `compileDocument(document)` derives a production `play`, passes it to the existing `compilePlayTimeline`, and returns that deterministic timeline. Renderers sample the returned timeline; they do not own or advance separate copies. Camera choice, playhead, playback rate, selection, and other session state do not belong in this document. Animation frames are never persistence data.
@@ -104,3 +109,126 @@ Rule checks cover standard standing doubles facts represented in the document: d
 The trajectory model is an instructional approximation. Family, arc, and pace select bounded speeds, curve apexes, net clearances, and rebound heights. Player reach uses a bounded 14 feet/second planning heuristic with tolerance. A pinned post-contact position remains active until that athlete's next authored movement; a dependent contact that conflicts with it stops the playable prefix with a feasibility explanation. Model version 1 preserves optional authored waypoints and uses the final movement target for sampling; it emits an explicit `unsupported` warning whenever a waypoint path is present rather than silently ignoring that constraint. Declared winner and fault outcomes appear on the terminal step and in `play.outcome`. These are feasibility assumptions, not official rules, measured biomechanics, aerodynamics, ball-speed claims, tactical recommendations, or predictive coaching results. Detailed spin, stacking, scoring, tournament administration, specialist shots, and full officiating remain unsupported in model version 1.
 
 A drop serve adds explicit `shot.servePreparation` metadata to the same production timeline. Model version 1 releases the ball from a fixed 3.5-foot hand height under 32.174 ft/s² gravity, records a `preparation-bounce` event at ground contact, and samples the rebound continuously up to paddle contact. This event is separate from `bounce`, so rally-rule counting still sees exactly one receiving-court bounce after the served ball crosses the net. The ordinary volley serve and all eight retained lessons carry no preparation metadata and keep their existing contact timing.
+
+## Model 2 source
+
+Model 2 is explicit: `schemaVersion: 1`, `modelVersion: 2` and
+`physicsVersion: 'play-physics-v2'`. The version pair must survive compiled Play
+creation, GuidedPlayEngine definition cloning and timeline compilation. Unknown
+versions must fail validation rather than falling back to model 1. New drafts,
+lesson copies and legacy smart-rally-v2/v3 documents retain model 1. Model 2
+cannot embed a `templateSource` snapshot.
+
+The shared source fields, four fixed player identities, 99-shot bound, movement
+ownership and 8-foot apron remain. Model 2 additionally permits the following
+shot fields; they do not create new animation clocks or renderer-owned source:
+
+| Field | Source contract |
+| --- | --- |
+| `intent` | Optional validated tactical enum: serve, deep return, third-shot drop/drive, block, reset, cross-court/middle/straight/backhand dink, speed-up, counter, put-away, lob, overhead, Erne or around-the-post. Existing family names are also accepted where unambiguous. JSON uses the corresponding hyphenated names, such as `third-shot-drop` and `around-the-post`. |
+| `quality` | Optional `low`, `neutral`, `attackable`, `excellent` or `error`. It can select a flight profile; it does not assign the next hitter's contact height. |
+| `narration` | Optional `{ label, why }`, limited to 40 and 160 plain-text characters. Markup, controls and URLs are rejected. Compiled steps expose these as `label` and `description`. |
+| `contactMode` | Optional `bounced` or `volley`; serves infer their own contact kind and reject an override. A volley cannot combine with `short-hop`. This makes a transition volley explicit without changing family identity. |
+| `contactTiming` | Optional `{ afterBounceSeconds }`, finite from 0.001 through 1.5, for a bounced contact only. The incoming flight is sampled at that time. |
+| `contactOverride` | Optional apron `{ x, y }` for `erne` or `around-the-post` intent only. It must agree with the incoming path; it is not permission to teleport the ball. |
+| `physics` | Optional object with exactly one input: `apexFeet` (finite 0.2–30) or `launchVerticalFeetPerSecond` (finite −80–80). These are mutually exclusive; physical feasibility and collision checks still apply. |
+| `contactEvidence` | Optional `{ feet: [point, point], feetEstablishedOutsideNVZ, momentum? }`. Feet are two apron points and the reset flag is boolean. Momentum is `{ afterContactSeconds, feet: [point, point], balanced: false }`, with an observation time from 0.001 through 5 seconds. This is a supported model window, not an official limit on momentum responsibility. |
+
+Model 2 targets may use the supported apron to represent real terminal landings.
+An off-court target in an ordinary continuing leg is still an unexpected
+violation. Apron contact overrides are restricted to their applicable signature
+shots. No unrelated extra field bypasses the model 2 validator.
+An explicit model 2 service court requires `server-perspective-v1`; the unmarked
+legacy interpretation remains confined to model 1. Model 2 outcome positions
+use apron coordinates and a finite height from 0 through 30 ft. Their relative
+evidence times are finite from 0 through 30 seconds.
+
+Foot evidence describes two represented grounded points. An Erne approach may
+pass through the kitchen before contact if both modeled feet re-establish
+outside before the volley. The act of volleying begins at paddle contact; the
+whole approach is not classified as that act. Contact foot faults and explicit
+momentum evidence remain subject to the usual checks.
+
+Conversely, `feetEstablishedOutsideNVZ: false` alone cannot prove a reset fault
+when both represented feet are grounded outside. M1 does not represent the full
+grounded/airborne history required for that conclusion. It retains the source
+and reports `UNEXPECTED` `unsupported-reset-history`, rather than manufacturing
+an expected `nvz-foot` outcome. No additional history fields are introduced.
+
+### Completed point and evidence
+
+A model 2 document with `ending: 'stop'` has no `outcome`. A completed point
+requires an outcome and keeps `intentionalFault: false`:
+
+```js
+outcome: {
+  winner: 'green',                 // green | orange
+  type: 'winner',                   // winner | unforced-error | forced-error | fault
+  reason: 'unreachable',            // see supported reasons below
+  shotId: 'stable-recipe-id',
+  ruleRef: '10.B.1',
+  faultingActor: null,              // player ID, or null for a modelled unreachable winner
+  // struckActor: 'player3',        // required for a body outcome
+  evidence: {
+    position: { x, y, heightFeet },
+    afterContactSeconds: seconds    // relative to shotId's contact
+  }
+}
+```
+
+Supported reasons are `net`, `long`, `wide`, `unreachable`, `second-bounce`,
+`body`, `nvz-foot`, `nvz-momentum` and `two-bounce`. An ordinary body outcome names
+the struck player as `faultingActor` and `struckActor`. A serve striking the
+server's partner instead names that partner as `struckActor` and the server as
+`faultingActor` under rule 7.E.4. A serve striking either receiving player before
+landing names the actual touched player as `struckActor` and the designated
+receiver as `faultingActor` under rule 7.E.5. After a legal serve bounce, an
+ordinary body contact instead faults the struck player under rule 10.C.3.
+The schema checks the receiver identity and rule-specific exception; the shared
+solver independently proves whether the contact occurred before landing.
+Other fault actors must agree with the physical
+and rule evidence; a label or a rule reference alone is not
+proof. Declared position and time are compared with the independently solved
+decision. They cannot force the flight to pass through a desired result.
+M1 does not introduce a policy that infers the tactical forced/unforced-error
+distinction from geometry. Its derived `outcome.type` is `winner` only for a
+modelled unreachable result and `fault` for the other physical reasons. The
+source enum retains `forced-error` and `unforced-error` for later policy; M1
+does not certify those tactical claims.
+
+`outcome.shotId` identifies an existing shot. It need not be the last recipe:
+momentum from an earlier volley can decide the point after a later shot or dead
+ball. The declaration remains relative to that shot's contact. The derived
+outcome records the faulty act's `violationOccurrenceTime` separately from the
+later `evidenceObservedTime`; see [terminal resolution](MODEL2_PHYSICS.md#terminal-resolution).
+Momentum `afterContactSeconds` is the time when the supplied feet were observed.
+It does not necessarily identify their first NVZ touch. Linear motion to an
+endpoint inside the zone can cross its boundary earlier; proving a represented
+anchor's first line touch at the observation time requires an endpoint on the
+line and a checked approach. Rendered shoe polygons and their first edge contact
+are outside that point-anchor claim.
+
+`ending: 'winner'` means the last hitter's team wins; otherwise the completed
+point uses `ending: 'fault'`. A body hit can therefore have `ending: 'winner'`
+and derived `outcome.type: 'fault'`: the last hitter wins because the struck
+opponent faults. Expected physical faults are completed point
+results. They retain the full accepted shot count and terminal playback rather
+than truncating a valid point or turning it into an intentional-fault warning.
+An unmatched declaration remains an error finding with unexpected violations.
+The compiler result keeps the existing `{ play, timeline, findings,
+validShotCount, coverage }` interface.
+
+M1's effective-compilation path preserves model 2 physical geometry instead of
+running the legacy position suggestions or Auto Shading over it. It returns
+empty derived `coverage` and an explicit warning if either assistance toggle is
+requested. The independent Coverage view can still display sampled geometry;
+it is not the position-suggestion feature. The source assistance fields are
+preserved rather than silently rewritten.
+
+### Model 1 compatibility boundary
+
+Model 2 uses a separate solver and compiler path. It does not change model 1
+flight functions, lesson timings, legacy document fields, smart-rally versions,
+service markers or import/storage keys. The approved M0 fixture hashes and the
+contact/bounce/boundary function samples remain the compatibility evidence; do
+not replace them merely to pass a new model 2 test.

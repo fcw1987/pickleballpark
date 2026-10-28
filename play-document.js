@@ -1,6 +1,6 @@
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
-import { SERVICE_COURT_CONVENTION } from './rally-state.js';
+import { SERVICE_COURT_CONVENTION, resolveServiceContext } from './rally-state.js';
 export const SCHEMA_VERSION = 1;
 // One shared bound for authored, imported, generated, and compiled rallies.
 // Keep this in the document contract so callers never need to duplicate the
@@ -19,6 +19,9 @@ const SHOT_AUTHORING_FIELDS = Object.freeze([
   'family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace',
   'movement', 'playerMovement', 'serveMethod'
 ]);
+export const MODEL2_PHYSICS_VERSION = 'play-physics-v2';
+export const MODEL2_INTENTS = Object.freeze(['serve', 'deep-return', 'third-shot-drop', 'third-shot-drive', 'block', 'reset', 'cross-court-dink', 'middle-dink', 'straight-dink', 'backhand-dink', 'speed-up', 'counter', 'put-away', 'lob', 'overhead', 'erne', 'around-the-post', ...FAMILIES]);
+const MODEL2_REASONS = Object.freeze(['net', 'long', 'wide', 'unreachable', 'second-bounce', 'body', 'nvz-foot', 'nvz-momentum', 'two-bounce']);
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const fail = (path, message) => { throw new TypeError(`${path} ${message}`); };
@@ -51,6 +54,113 @@ const point = (value, path, { offCourt = false } = {}) => {
   const margin = offCourt ? 8 : 0;
   if (value.x < -margin || value.x > 20 + margin || value.y < -margin || value.y > 44 + margin) fail(path, `must stay within ${offCourt ? 'the supported court apron' : 'the 20 by 44 foot court'}.`);
 };
+const keys = (value, allowed, path) => {
+  object(value, path);
+  for (const key of Object.keys(value)) if (!allowed.includes(key)) fail(`${path}.${key}`, 'is not supported by model 2.');
+};
+const boundedNumber = (value, min, max, path) => {
+  if (!Number.isFinite(value) || value < min || value > max) fail(path, `must be finite between ${min} and ${max}.`);
+};
+function model2Point(value, path, height = false) {
+  keys(value, height ? ['x', 'y', 'heightFeet'] : ['x', 'y'], path);
+  point(value, path, { offCourt: true });
+  if (height) boundedNumber(value.heightFeet, 0, 30, `${path}.heightFeet`);
+}
+function model2Feet(value, path) {
+  if (!Array.isArray(value) || value.length !== 2) fail(path, 'must describe exactly two feet.');
+  value.forEach((foot, index) => model2Point(foot, `${path}[${index}]`));
+}
+function validateModel2Shot(shot, path) {
+  keys(shot, ['id', 'family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace', 'movement', 'playerMovement', 'serveMethod', 'authoring', 'generation', 'intent', 'quality', 'narration', 'contactOverride', 'contactMode', 'contactTiming', 'physics', 'contactEvidence'], path);
+  model2Point(shot.target, `${path}.target`);
+  for (const [name, movement] of [['movement', shot.movement], ...Object.entries(shot.playerMovement || {}).map(([player, movement]) => [`playerMovement.${player}`, movement])]) {
+    keys(movement, ['intent', 'pinned', 'target', 'waypoints'], `${path}.${name}`);
+    if (movement.target !== undefined) model2Point(movement.target, `${path}.${name}.target`);
+    movement.waypoints?.forEach((point, index) => model2Point(point, `${path}.${name}.waypoints[${index}]`));
+  }
+  if (shot.intent !== undefined) choice(shot.intent, MODEL2_INTENTS, `${path}.intent`);
+  if (shot.quality !== undefined) choice(shot.quality, ['low', 'neutral', 'attackable', 'excellent', 'error'], `${path}.quality`);
+  if (shot.narration !== undefined) {
+    keys(shot.narration, ['label', 'why'], `${path}.narration`);
+    string(shot.narration.label, `${path}.narration.label`, 40);
+    string(shot.narration.why, `${path}.narration.why`, 160);
+    for (const [key, value] of Object.entries(shot.narration)) {
+      if (/(?:\b[a-z][a-z0-9+.-]*:\/\/|\bwww\.|\b(?:mailto|data|javascript):|\b[a-z0-9-]+\.(?:com|org|net|io)\b)/i.test(value)) fail(`${path}.narration.${key}`, 'must not contain URLs.');
+    }
+  }
+  if (shot.contactMode !== undefined) {
+    choice(shot.contactMode, ['bounced', 'volley'], `${path}.contactMode`);
+    if (shot.family === 'serve') fail(`${path}.contactMode`, 'does not override a serve contact.');
+    if (shot.contactMode === 'volley' && shot.contactStyle === 'short-hop') fail(`${path}.contactMode`, 'cannot combine a volley with short-hop.');
+  }
+  if (shot.contactOverride !== undefined) {
+    if (!['erne', 'around-the-post'].includes(shot.intent)) fail(`${path}.contactOverride`, 'is only supported for Erne or around-the-post geometry.');
+    model2Point(shot.contactOverride, `${path}.contactOverride`);
+  }
+  if (shot.contactTiming !== undefined) {
+    keys(shot.contactTiming, ['afterBounceSeconds'], `${path}.contactTiming`);
+    boundedNumber(shot.contactTiming.afterBounceSeconds, .001, 1.5, `${path}.contactTiming.afterBounceSeconds`);
+    const volley = shot.contactMode === 'volley' || (shot.contactMode === undefined && (['volley', 'overhead'].includes(shot.family) || (shot.family === 'reset' && shot.contactStyle !== 'short-hop')));
+    if (shot.family === 'serve' || volley) fail(`${path}.contactTiming`, 'is only supported for a bounced contact.');
+  }
+  if (shot.physics !== undefined) {
+    keys(shot.physics, ['apexFeet', 'launchVerticalFeetPerSecond'], `${path}.physics`);
+    if (shot.physics.apexFeet !== undefined) boundedNumber(shot.physics.apexFeet, .2, 30, `${path}.physics.apexFeet`);
+    if (shot.physics.launchVerticalFeetPerSecond !== undefined) boundedNumber(shot.physics.launchVerticalFeetPerSecond, -80, 80, `${path}.physics.launchVerticalFeetPerSecond`);
+    if (Object.keys(shot.physics).length !== 1) fail(`${path}.physics`, 'must choose one apex or signed vertical launch input.');
+  }
+  if (shot.contactEvidence !== undefined) {
+    const evidence = shot.contactEvidence;
+    keys(evidence, ['feet', 'feetEstablishedOutsideNVZ', 'momentum'], `${path}.contactEvidence`);
+    model2Feet(evidence.feet, `${path}.contactEvidence.feet`);
+    if (typeof evidence.feetEstablishedOutsideNVZ !== 'boolean') fail(`${path}.contactEvidence.feetEstablishedOutsideNVZ`, 'must be boolean.');
+    if (evidence.momentum !== undefined) {
+      keys(evidence.momentum, ['afterContactSeconds', 'feet', 'balanced'], `${path}.contactEvidence.momentum`);
+      boundedNumber(evidence.momentum.afterContactSeconds, .001, 5, `${path}.contactEvidence.momentum.afterContactSeconds`);
+      model2Feet(evidence.momentum.feet, `${path}.contactEvidence.momentum.feet`);
+      if (evidence.momentum.balanced !== false) fail(`${path}.contactEvidence.momentum.balanced`, 'must be false for continuing volley momentum.');
+    }
+  }
+}
+function validateModel2Document(value) {
+  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome'], 'document');
+  choice(value.physicsVersion, [MODEL2_PHYSICS_VERSION], 'physicsVersion');
+  keys(value.initialLayout, [...PLAYER_IDS, 'ball'], 'initialLayout');
+  for (const [id, point] of Object.entries(value.initialLayout)) model2Point(point, `initialLayout.${id}`);
+  keys(value.players, PLAYER_IDS, 'players');
+  for (const id of PLAYER_IDS) keys(value.players[id], ['team', 'handedness'], `players.${id}`);
+  keys(value.assistance, ['autoShading', 'showGuides', 'team'], 'assistance');
+  if (value.service?.court !== undefined && value.service.courtConvention !== SERVICE_COURT_CONVENTION) fail('service.courtConvention', 'must explicitly use the server-facing convention for model 2.');
+  if (value.intentionalFault !== false) fail('intentionalFault', 'must be false for a model 2 physical outcome.');
+  if (value.ending === 'stop') {
+    if (value.outcome !== undefined) fail('outcome', 'must be absent for an incomplete stop.');
+    return;
+  }
+  const outcome = object(value.outcome, 'outcome');
+  keys(outcome, ['winner', 'type', 'reason', 'shotId', 'ruleRef', 'faultingActor', 'struckActor', 'evidence'], 'outcome');
+  choice(outcome.winner, TEAMS, 'outcome.winner');
+  choice(outcome.type, ['winner', 'unforced-error', 'forced-error', 'fault'], 'outcome.type');
+  choice(outcome.reason, MODEL2_REASONS, 'outcome.reason');
+  if (!value.shots.some(shot => shot.id === outcome.shotId)) fail('outcome.shotId', 'must identify a represented shot.');
+  string(outcome.ruleRef, 'outcome.ruleRef', 80);
+  if (outcome.faultingActor !== null) choice(outcome.faultingActor, PLAYER_IDS, 'outcome.faultingActor');
+  if (outcome.reason === 'body') {
+    choice(outcome.struckActor, PLAYER_IDS, 'outcome.struckActor');
+    const shot = value.shots.find(shot => shot.id === outcome.shotId);
+    const serveHitsServingTeam = shot.family === 'serve' && outcome.faultingActor === shot.hitter && value.players[outcome.struckActor].team === value.players[shot.hitter].team;
+    // This is the structural exception only. Independent solved evidence must
+    // establish that the receiving-team contact occurred before landing.
+    const receiver = resolveServiceContext(value).receiver;
+    const serveHitsReceivingTeam = shot === value.shots[0] && shot.family === 'serve' && outcome.ruleRef === '7.E.5'
+      && PLAYER_IDS.includes(receiver) && outcome.faultingActor === receiver
+      && value.players[receiver].team !== value.players[shot.hitter].team
+      && value.players[outcome.struckActor].team === value.players[receiver].team;
+    if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam && !serveHitsReceivingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except the server or designated receiver on an applicable serve contact.');
+  } else if (outcome.struckActor !== undefined) fail('outcome.struckActor', 'is only supported for a body contact.');
+  keys(outcome.evidence, ['position', 'afterContactSeconds'], 'outcome.evidence');
+  model2Point(outcome.evidence.position, 'outcome.evidence.position', true);
+  boundedNumber(outcome.evidence.afterContactSeconds, 0, 30, 'outcome.evidence.afterContactSeconds');
+}
 
 function validateMovement(value, path) {
   object(value, `${path}`);
@@ -120,7 +230,7 @@ export function validateDocument(value) {
   assertJsonBounds(value);
   object(value, 'document');
   if (value.schemaVersion !== SCHEMA_VERSION) fail('schemaVersion', `must be ${SCHEMA_VERSION}.`);
-  if (value.modelVersion !== 1) fail('modelVersion', 'must be 1.');
+  if (![1, 2].includes(value.modelVersion)) fail('modelVersion', 'must be 1 or 2.');
   string(value.id, 'id', 128);
   string(value.title, 'title', 120);
   object(value.initialLayout, 'initialLayout');
@@ -147,7 +257,8 @@ export function validateDocument(value) {
     choice(shot.hitter, PLAYER_IDS, `${path}.hitter`);
     if (shot.receiver !== 'auto') choice(shot.receiver, PLAYER_IDS, `${path}.receiver`);
     choice(shot.contactStyle, CONTACT_STYLES, `${path}.contactStyle`);
-    point(shot.target, `${path}.target`);
+    point(shot.target, `${path}.target`, { offCourt: value.modelVersion === 2 });
+    if (value.modelVersion === 2) validateModel2Shot(shot, path);
     choice(shot.arc, ARCS, `${path}.arc`);
     choice(shot.pace, PACES, `${path}.pace`);
     validateMovement(shot.movement, `${path}.movement`);
@@ -188,6 +299,7 @@ export function validateDocument(value) {
   choice(value.ending, ['stop', 'winner', 'fault'], 'ending');
   if (typeof value.intentionalFault !== 'boolean') fail('intentionalFault', 'must be boolean.');
   validateTemplateSource(value.templateSource);
+  if (value.modelVersion === 2) validateModel2Document(value);
   return value;
 }
 

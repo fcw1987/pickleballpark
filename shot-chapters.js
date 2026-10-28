@@ -2,6 +2,7 @@
 // A chapter starts at its shot segment's preparation/navigation boundary. For
 // serves this includes the authored preparation bounce; later shot boundaries
 // coincide with the incoming contact when the compiler places contact at zero.
+import { terminalCueLabel } from './terminal-cues.js';
 
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
 
@@ -25,6 +26,9 @@ export function buildShotChapters(timeline, { shotIds = [] } = {}) {
         const anchor = clamp(segment.startTime, 0, timeline.duration);
         const endTime = clamp(next?.startTime ?? timeline.duration, anchor, timeline.duration);
         const shotId = shotIds[index] || shotIdentity(segment, `shot-${index + 1}`);
+        const terminalEvents = timeline.play?.modelVersion === 2
+            ? (timeline.events || []).filter(event => ['net-touch', 'out', 'second-bounce', 'fault', 'dead'].includes(event.type) && event.rallyLeg === segment.rallyLeg)
+            : null;
         return Object.freeze({
             shotId,
             number: index + 1,
@@ -32,7 +36,12 @@ export function buildShotChapters(timeline, { shotIds = [] } = {}) {
             anchor,
             contactTime: clamp(segment.startTime + (segment.contactTime || 0), anchor, timeline.duration),
             startTime: anchor,
-            endTime
+            endTime,
+            ...(terminalEvents ? {
+                description: segment.step.description || '',
+                terminalEvents: Object.freeze(terminalEvents),
+                terminalLabel: terminalCueLabel(terminalEvents.findLast(event => event.type === 'fault') || terminalEvents.at(-1))
+            } : {})
         });
     });
     return Object.freeze(chapters);

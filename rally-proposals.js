@@ -114,6 +114,16 @@ export function makeProposal({ operation, sourceDocument, document = null, seed 
 export function compileEffectiveCandidate(document) {
   validateDocument(document);
   const baseCompiled = compileDocument(document);
+  // Model 2 owns its feet, interceptions and terminal evidence. Legacy
+  // position heuristics must not silently change those physical inputs.
+  if (document.modelVersion === 2) return {
+    ...baseCompiled,
+    findings: document.assistance.autoShading || document.assistance.showGuides
+      ? Object.freeze([...baseCompiled.findings, Object.freeze({ kind: 'context', severity: 'warning', shotId: null,
+        message: 'Position suggestions are unavailable for model 2 physical points; the authored geometry has been preserved.' })])
+      : baseCompiled.findings,
+    coverage: Object.freeze([])
+  };
   const assisted = baseCompiled.play
     ? applyCoverageAssistance(baseCompiled.play, document, baseCompiled.timeline)
     : { play: null, coverage: [] };

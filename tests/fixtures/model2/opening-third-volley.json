@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 2,
+  "id": "m1-opening-third-volley",
+  "title": "Model 2 opening-third-volley",
+  "initialLayout": {
+    "player1": {
+      "x": 15,
+      "y": -1
+    },
+    "player2": {
+      "x": 16,
+      "y": 5
+    },
+    "player3": {
+      "x": 5,
+      "y": 34
+    },
+    "player4": {
+      "x": 15,
+      "y": 30
+    },
+    "ball": {
+      "x": 16.2,
+      "y": 0
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "serve",
+      "family": "serve",
+      "intent": "serve",
+      "quality": "neutral",
+      "hitter": "player1",
+      "receiver": "player3",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 5,
+        "y": 38
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "pinned": false,
+        "target": {
+          "x": 15,
+          "y": 14
+        }
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "serveMethod": "volley",
+      "physics": {
+        "apexFeet": 7
+      }
+    },
+    {
+      "id": "return",
+      "family": "return",
+      "intent": "deep-return",
+      "quality": "neutral",
+      "hitter": "player3",
+      "receiver": "player1",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 15,
+        "y": 5
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.2
+      },
+      "physics": {
+        "apexFeet": 7
+      }
+    },
+    {
+      "id": "third-volley",
+      "family": "volley",
+      "intent": "counter",
+      "quality": "neutral",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 7,
+        "y": 35
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "contactMode": "volley",
+      "physics": {
+        "apexFeet": 7
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "serve",
+  "ending": "fault",
+  "intentionalFault": false,
+  "service": {
+    "server": "player1",
+    "receiver": "player3",
+    "court": "left",
+    "courtConvention": "server-perspective-v1"
+  },
+  "physicsVersion": "play-physics-v2",
+  "outcome": {
+    "winner": "orange",
+    "type": "fault",
+    "reason": "two-bounce",
+    "shotId": "third-volley",
+    "ruleRef": "10.A.2",
+    "faultingActor": "player1",
+    "evidence": {
+      "position": {
+        "x": 12.281788197651233,
+        "y": 14,
+        "heightFeet": 4.818643888553122
+      },
+      "afterContactSeconds": 0
+    }
+  }
+}

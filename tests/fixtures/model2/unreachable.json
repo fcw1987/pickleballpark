@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 2,
+  "id": "m1-unreachable",
+  "title": "Model 2 unreachable",
+  "initialLayout": {
+    "player1": {
+      "x": 1,
+      "y": 14
+    },
+    "player2": {
+      "x": 16,
+      "y": 5
+    },
+    "player3": {
+      "x": 28,
+      "y": 52
+    },
+    "player4": {
+      "x": 27,
+      "y": 51
+    },
+    "ball": {
+      "x": 1,
+      "y": 14
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "model2-hit",
+      "family": "overhead",
+      "intent": "put-away",
+      "quality": "neutral",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 1,
+        "y": 27
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "midrally",
+  "ending": "winner",
+  "intentionalFault": false,
+  "service": {
+    "server": "player1",
+    "receiver": "player3",
+    "court": "left",
+    "courtConvention": "server-perspective-v1"
+  },
+  "physicsVersion": "play-physics-v2",
+  "outcome": {
+    "winner": "green",
+    "type": "winner",
+    "reason": "unreachable",
+    "shotId": "model2-hit",
+    "ruleRef": "10.B.1",
+    "faultingActor": null,
+    "evidence": {
+      "position": {
+        "x": 1,
+        "y": 51.593468448376214,
+        "heightFeet": 0.12139107611548638
+      },
+      "afterContactSeconds": 1.4516867733681447
+    }
+  }
+}

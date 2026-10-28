@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 2,
+  "id": "m1-nvz-momentum-after-dead",
+  "title": "Model 2 nvz-momentum-after-dead",
+  "initialLayout": {
+    "player1": {
+      "x": 7,
+      "y": 14
+    },
+    "player2": {
+      "x": 16,
+      "y": 5
+    },
+    "player3": {
+      "x": 16,
+      "y": 32
+    },
+    "player4": {
+      "x": 18,
+      "y": 39
+    },
+    "ball": {
+      "x": 7,
+      "y": 14
+    }
+  },
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "left"
+    }
+  },
+  "shots": [
+    {
+      "id": "model2-hit",
+      "family": "volley",
+      "intent": "counter",
+      "quality": "neutral",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 7,
+        "y": 46
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "hold",
+        "pinned": false
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Send a soft ball over the net."
+      },
+      "contactMode": "volley",
+      "physics": {
+        "apexFeet": 5
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 6.58,
+            "y": 14
+          },
+          {
+            "x": 7.42,
+            "y": 14
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true,
+        "momentum": {
+          "afterContactSeconds": 1.5,
+          "feet": [
+            {
+              "x": 6.58,
+              "y": 15
+            },
+            {
+              "x": 7.42,
+              "y": 15
+            }
+          ],
+          "balanced": false
+        }
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "both"
+  },
+  "opening": "midrally",
+  "ending": "fault",
+  "intentionalFault": false,
+  "service": {
+    "server": "player1",
+    "receiver": "player3",
+    "court": "left",
+    "courtConvention": "server-perspective-v1"
+  },
+  "physicsVersion": "play-physics-v2",
+  "outcome": {
+    "winner": "orange",
+    "type": "fault",
+    "reason": "nvz-momentum",
+    "shotId": "model2-hit",
+    "ruleRef": "11.A.2",
+    "faultingActor": "player1",
+    "evidence": {
+      "position": {
+        "x": 6.58,
+        "y": 15,
+        "heightFeet": 0
+      },
+      "afterContactSeconds": 1.5
+    }
+  }
+}

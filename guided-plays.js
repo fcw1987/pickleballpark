@@ -7,6 +7,7 @@ import { CoachingSession } from './coaching-session.js';
 import { updateCoachingUI } from './coaching-ui.js';
 import { buildShotChapters, chapterAtTime } from './shot-chapters.js';
 import { mountShotTimeline } from './shot-timeline.js';
+import { terminalCueAtTime, terminalVisualsAtTime } from './terminal-cues.js';
 
 class GuidedPlayEngine {
     constructor(board, plays, elements) {
@@ -70,9 +71,16 @@ class GuidedPlayEngine {
     load(playId) { return this.loadDefinition(this.plays.get(playId)); }
     loadDefinition(play, suppliedTimeline = null) {
         if (!play) return false;
+        let timeline = null;
+        if (play.modelVersion === 2) {
+            this.validatePlay(play);
+            timeline = suppliedTimeline || compilePlayTimeline(play);
+            this.validateTimelineModel(play, timeline);
+        }
         if (this.activePlay) this.exit();
         this.validatePlay(play);
-        const timeline = suppliedTimeline || compilePlayTimeline(play);
+        timeline = timeline || suppliedTimeline || compilePlayTimeline(play);
+        this.validateTimelineModel(play, timeline);
         this.snapshot = this.board.captureBoardState();
         this.board.prepareForPlay(); this.board.setPlayInteractionLocked(true);
         this.board.setGameMode(play.mode, { source: 'playback' });
@@ -92,8 +100,11 @@ class GuidedPlayEngine {
     // Replace derived content without recapturing the planner snapshot or owning a new clock.
     replaceDefinition(play, seconds = 0, suppliedTimeline = null) {
         this.validatePlay(play);
+        let timeline = play.modelVersion === 2 ? suppliedTimeline || compilePlayTimeline(play) : null;
+        if (timeline) this.validateTimelineModel(play, timeline);
         this.pause();
-        const timeline = suppliedTimeline || compilePlayTimeline(play);
+        timeline = timeline || suppliedTimeline || compilePlayTimeline(play);
+        this.validateTimelineModel(play, timeline);
         this.activePlay = play; this.timeline = timeline;
         this.chapters = buildShotChapters(timeline);
         this.session.reset(timeline.duration); this.session.seek(seconds);
@@ -105,6 +116,8 @@ class GuidedPlayEngine {
         if (!play.id || !play.name || play.mode !== 'doubles' || !Array.isArray(play.steps) || !play.steps.length) {
             throw new Error(`Invalid play definition: ${play.id || 'unknown'}`);
         }
+        if (play.modelVersion !== undefined && ![1, 2].includes(play.modelVersion)) throw new Error('Unsupported playback model version.');
+        if (play.modelVersion === 2 && play.physicsVersion !== 'play-physics-v2') throw new Error('Model 2 playback requires play-physics-v2.');
         for (const step of play.steps) {
             for (const [tokenId, position] of Object.entries(step.positions || {})) {
                 if (!this.board.tokens[tokenId] || !Number.isFinite(position.x) || !Number.isFinite(position.y)) {
@@ -113,13 +126,30 @@ class GuidedPlayEngine {
             }
         }
     }
+    validateTimelineModel(play, timeline) {
+        if (play.modelVersion !== 2) return;
+        let sameSource = timeline?.play === play;
+        if (!sameSource) {
+            try { sameSource = JSON.stringify(timeline?.play) === JSON.stringify(play); }
+            catch { sameSource = false; }
+        }
+        if (!sameSource || play.physicsVersion !== 'play-physics-v2' || timeline?.play?.modelVersion !== 2 || timeline.play.physicsVersion !== play.physicsVersion
+            || timeline.modelVersion !== undefined && timeline.modelVersion !== 2
+            || timeline.physicsVersion !== undefined && timeline.physicsVersion !== play.physicsVersion) throw new Error('Model 2 playback requires the exact play and its matching versioned timeline.');
+    }
 
-    renderShotPath(shot) {
+    renderShotPath(shot, trajectory = null) {
         this.clearShotPath();
         if (!shot) return;
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.classList.add('play-shot-path');
-        path.setAttribute('d', `M ${shot.from.x} ${shot.from.y} L ${shot.to.x} ${shot.to.y}`);
+        const traced = this.activePlay?.modelVersion === 2 && trajectory
+            ? Array.from({ length: 33 }, (_, index) => {
+                const point = trajectory.sample(trajectory.totalDuration * index / 32);
+                return `${index ? 'L' : 'M'} ${point.x / FEET_TO_METERS + 10} ${point.z / FEET_TO_METERS + 22}`;
+            }).join(' ')
+            : `M ${shot.from.x} ${shot.from.y} L ${shot.to.x} ${shot.to.y}`;
+        path.setAttribute('d', traced);
         path.setAttribute('marker-end', 'url(#playArrowhead)');
         this.elements.pathLayer.appendChild(path);
         const length = path.getTotalLength();
@@ -235,6 +265,7 @@ class GuidedPlayEngine {
         this.status = 'idle'; this.stepIndex = 0; this.lastRenderedStep = null;
         this.elements.controls.hidden = true; document.body.classList.remove('play-mode');
         this.board.playBallHeight = 0;
+        this.board.playTerminalMarkers = null;
         this.board.restoreBoardState(snapshot); this.board.setPlayInteractionLocked(false);
         this.updateUI(); this.reserveControlSpace(); return true;
     }
@@ -300,13 +331,14 @@ class GuidedPlayEngine {
         const ball = samplePlayBall(this.timeline, seconds);
         positions.ball = { x: ball.x / FEET_TO_METERS + 10, y: ball.z / FEET_TO_METERS + 22 };
         this.board.playBallHeight = ball.y / FEET_TO_METERS;
+        this.board.playTerminalMarkers = this.activePlay.modelVersion === 2 ? terminalVisualsAtTime(this.timeline, seconds) : null;
         this.applyPositions(positions);
         this.pixelActors.update(samples);
         this.stepIndex = segment?.index || 0;
         this.stepInProgress = Boolean(segment && local < segment.duration - 1e-6);
         this.transition = this.stepInProgress ? { step: segment.step, duration: segment.duration * 1000 * this.timingScale, elapsed: local * 1000 * this.timingScale } : null;
         if (this.lastRenderedStep !== this.stepIndex || this.lastIteration !== this.session.iteration) {
-            this.renderShotPath(segment?.step.shot); this.lastRenderedStep = this.stepIndex; this.lastIteration = this.session.iteration;
+            this.renderShotPath(segment?.step.shot, segment?.trajectory); this.lastRenderedStep = this.stepIndex; this.lastIteration = this.session.iteration;
         }
         this.updateShotProgress(segment ? Math.max(0, Math.min(1, (local - (segment.contactTime || 0)) / Math.max(.001, segment.duration - (segment.contactTime || 0)))) : 0);
         this.lastState = { ...ball, elapsed: seconds, stepIndex: this.stepIndex, segment, local };
@@ -327,6 +359,7 @@ class GuidedPlayEngine {
             stepIndex: this.stepIndex, stepCount: this.activePlay?.steps.length, label: step?.label, description: step?.description,
             shotType: cueStep?.shot?.type || step?.shot?.type, nextShot: Boolean(cueStep && cueStep.id !== step?.id), phase: this.session.holding ? 'complete' : state?.phase || 'ready',
             elapsed: this.clock.elapsed, eventTime: state?.segment?.startTime || 0, playing: this.session.playing,
+            terminalEvent: terminalCueAtTime(this.timeline, this.clock.elapsed),
             loop: true, reducedMotion: this.reducedMotion.matches, manual });
         const text = this.session.playing ? 'Ⅱ' : '▶';
         if (this.elements.playPause.textContent !== text) this.elements.playPause.textContent = text;

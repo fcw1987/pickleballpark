@@ -1,5 +1,7 @@
 // Pure, renderer-independent foundations for Pickleboard playback.
 import { COURT_DIMENSIONS } from './court-geometry.js';
+import { compilePlayTimelineV2 } from './play-timeline-v2.js';
+import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
 export { COURT_DIMENSIONS } from './court-geometry.js';
 
 export const FEET_TO_METERS = 0.3048;
@@ -126,6 +128,8 @@ function compileLeg(shot,semantics,next){
 
 const freezeEvent=e=>Object.freeze({...e,position:Object.freeze({...e.position})}),priority={'preparation-bounce':0,'net-crossing':1,bounce:2,end:3,contact:4};
 export function compilePlayTimeline(play){
+    if(play?.modelVersion===2)return compilePlayTimelineV2(play,{resolveShotSemantics,boardToWorld});
+    if(play?.modelVersion!==undefined&&play.modelVersion!==1)throw new TypeError('Unsupported Play modelVersion.');
     if(!play?.steps?.length)throw new TypeError('A Play requires at least one step.');const segments=[],events=[];let cursor=0,rallyLeg=0,previousLeg=null;
     for(let index=1;index<play.steps.length;index++){
         const previous=play.steps[index-1],step=play.steps[index],shotSemantics=step.shot?resolveShotSemantics(step.shot,previous.positions):null,nextStep=play.steps[index+1],nextShotSemantics=nextStep?.shot?resolveShotSemantics(nextStep.shot,step.positions):null,servePreparation=shotSemantics?compileServePreparation(step.shot,shotSemantics):null,contactTime=shotSemantics?(servePreparation?.totalDuration??(previous.shot?0:shotSemantics.profile.duration*shotSemantics.profile.contactRatio)):null;
@@ -146,6 +150,7 @@ export function samplePlayBall(timeline,seconds){
 export function samplePlayState(timeline,seconds,settings={}){
     if(!timeline?.segments||!Number.isFinite(seconds))throw new TypeError('A compiled timeline and finite time are required.');const time=Math.max(0,Math.min(timeline.duration,seconds)),segment=segmentAt(timeline,time),ball=samplePlayBall(timeline,time),positions={};
     if(settings.includePositions!==false){if(!segment)Object.assign(positions,timeline.play.steps[0].positions);else{const p=segment.duration?clamp01((time-segment.startTime)/segment.duration):1,e=settings.linearPositions?p:p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;for(const[id,target]of Object.entries(segment.step.positions)){const from=segment.previous.positions[id]||target;positions[id]={x:lerp(from.x,target.x,e),y:lerp(from.y,target.y,e)}}positions.ball={...ball.board};}}
+    if(segment?.modelVersion===2&&settings.includePositions!==false)for(const id of Object.keys(positions).filter(id=>id.startsWith('player')))positions[id]=sampleActorBoardPositionV2(segment,id,time-segment.startTime);
     return Object.freeze({time,stepIndex:segment?.index||0,segment,ball,positions:Object.freeze(Object.fromEntries(Object.entries(positions).map(([id,p])=>[id,Object.freeze(p)])))});
 }
 
