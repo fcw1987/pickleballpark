@@ -5,6 +5,12 @@ observation tools, compatibility fixtures and tests. M1 adds an opt-in model 2
 compiler and shared physics path. Neither milestone adds a game, rally policy,
 score engine or workspace.
 
+M2 adds a headless `rally-engine-v1` policy engine beside the legacy generator,
+starting from verified M1 main `ce61e3b456fbc17670a855c5079d93de161a1599`.
+See [Rally engine](RALLY_ENGINE.md) for its API, recipe and bounded result states.
+Calibration and CI performance qualification remain pending; implementation is
+not evidence that their acceptance gates have passed.
+
 The starting runtime is main `c0d70093eb2658e09ad23ce14f5a7acebfa0af52`
 (PR23). PR22 already supplied the serving-convention adapter, library-capacity
 recovery, startup fallback, artwork, phone Planner and copy fixes. They are
@@ -51,6 +57,62 @@ M1 bypasses the legacy position suggestions and Auto Shading for model 2 points,
 returning empty derived coverage and a warning when requested. That preserves
 the feet, interceptions and outcome proof. The separate Coverage view remains
 available; this boundary does not add new positioning policy.
+
+## M2: headless policy and qualification
+
+`simulateRally` and `createRallySimulator` reuse M1's shared planning, flight,
+interception, actor and terminal-evidence paths. One pending leg is resolved by
+the next actual contact; trials do not repeatedly compile the whole prefix.
+Final source still passes the public document/compiler/rule validators and
+exact generated-motion checks: at most 18 ft/s sampled peak speed and at least
+2.5 ft partner spacing. M1's instructional tolerance is not extra generator
+travel. Actual incoming geometry determines height and attacking affordance.
+
+Natural/either gets one simulation. Requested length/winner selection gets at
+most 64 deterministic attempts, with eight target repairs per intent and a
+bounded work budget. It never lowers error rates secretly or invents a winner
+at the shot cap. Results distinguish `complete`, `censored`, `unsatisfied`,
+`cancelled` and `failed`. Physical outcomes retain M1's meanings; forced/unforced
+causation is separate versioned heuristic analysis.
+
+The browser adapter owns one module worker per request and can terminate it
+during final synchronous validation. Generation does not install a point, mutate
+Builder or own a playback clock. M2 adds no Game UI, scoring, highlight
+presentation or replacement of the existing Random Rally/Smart Add controls.
+
+M0's archived `rally-realism-v1` policy below remains unchanged. M2 uses a new
+`rally-realism-v2` collector: source/compiled authoring intent, actual contact
+geometry, validated expected outcomes, and ball-surface clearance above local
+tape. Earlier-shot momentum outcomes retain separate occurrence, observation
+and physical dead times.
+
+Development seeds are 0–59 and qualification seeds are the disjoint frozen
+1000–1299 range per homogeneous Pro, Advanced and Intermediate style, balanced
+across serving team/court. Beginner and flavour cohorts have correctness and
+directional comparisons, not invented numerical bands. Per-game signature rates
+remain `N/A` until games exist.
+
+```sh
+node tools/rally-realism-v2.mjs --cohort development \
+  --output release-results/game-mode-m2/development.json \
+  --archive release-results/game-mode-m2/development.jsonl
+
+node tools/rally-realism-v2.mjs --cohort qualification --require-clean \
+  --require-calibration \
+  --output release-results/game-mode-m2/qualification.json \
+  --archive release-results/game-mode-m2/qualification.jsonl
+```
+
+These are qualification commands, not a statement that qualification passed.
+Use fresh output paths; existing evidence is not overwritten. Archives retain
+every status, recipe, attempt count, available decision trace and diagnostic,
+including no-document failures. Corpus completeness, physical validity and
+calibration have separate verdicts. Insufficient samples cannot pass. Timing
+includes search, yields and final validation; Natural and conditioned costs are
+separate, and a warmed compiler-only probe is not a CI generation benchmark.
+The fifth-shot metric covers opportunities after all third-shot drives, with
+the blocked-drive subset reported separately. Acceptance bands are not silently
+changed to hide a conflict with fixed physics.
 
 ## Baseline tool
 
@@ -166,7 +228,8 @@ that reviewed runtime under the current tools-only scope.
 
 ## Contracts for later milestones
 
-These are design contracts, not implemented M0 features:
+These remain project contracts for the later game/UI milestones. M2 implements
+only the headless rally/request boundaries described above:
 
 - Default setup: traditional side-out to 11, win by 2; Advanced 4.0; Natural;
   stacking off; teams keep fixed ends. Logical service slots are separate from
@@ -178,7 +241,9 @@ These are design contracts, not implemented M0 features:
   a point; Builder and lessons retain their repeat behaviour.
 - Separate versioned PRNG streams serve policy, execution, game sequencing and
   presentation/quiz choices. A camera or quiz cannot change a generated game.
-  Recipes record versions and exact inputs. Long generation yields and cancels.
+  M2's intent, target, execution and narration streams record versions and exact
+  inputs. Long generation yields and cancels; future game and quiz streams must
+  remain independent too.
 - Natural play uses one simulation. Bounded selection for requested length or
   winner must record attempts and explicit incompleteness; it must never invent
   a winning point or hide a failed bound.
@@ -190,5 +255,5 @@ Milestones remain ordered M0 through M8, one reviewed PR each. Preserve complete
 required CI, the optimized partition/catalog gates and compatibility contracts.
 Only runtime releases bump the static cache. Merge/deploy follows architectural
 review and passing required checks; M3/M5/M6/M7 desktop/phone reviews and final
-M8 owner signoff remain required. M2 rally policy and later engine/UI work are
-not folded into the M0/M1 foundations.
+M8 owner signoff remain required. M2 is a separate headless milestone; later
+engine/UI work is not folded into the M0/M1 foundations or M2.

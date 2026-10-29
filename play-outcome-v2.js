@@ -35,10 +35,33 @@ function makeCandidate(play, segment, reason, timeAfterContact, position, faulti
     segmentIndex: segment.index, ...details };
 }
 
+// Conservative broad phase only. Actor motion is a convex blend of these
+// anchors, and every physical stage is linear in board x/y. Separated envelopes
+// cannot touch the torso proxy; all possible intersections retain the original
+// dense sweep and bisection below, including near-grazing contacts.
+export function bodyContactEnvelopeMayIntersectV2(segment,solved,endTime,actor) {
+  if(!Number.isFinite(endTime)||endTime<0)return true;
+  const ballPoints=[];
+  for(const stage of solved.stages){
+    const start=Math.max(0,stage.startTime),end=Math.min(endTime,stage.endTime);
+    if(end<start)continue;
+    for(const time of [start,end]){const local=time-stage.startTime;ballPoints.push({x:stage.from.x+stage.vx*local,y:stage.from.y+stage.vz*local});}
+  }
+  const actorPoints=[segment.previous.positions[actor],segment.step.positions[actor]];
+  const contact=segment.shotSemantics?.contact;
+  if(segment.shotSemantics?.playerId===actor&&contact?.feet?.length===2)actorPoints.push(footCenter(contact.feet));
+  for(const item of segment.model2Momentum||[])if(item.actor===actor)actorPoints.push(item.from,item.to);
+  if(!ballPoints.length||[...ballPoints,...actorPoints].some(p=>!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)))return true;
+  const bounds=points=>({minX:Math.min(...points.map(p=>p.x)),maxX:Math.max(...points.map(p=>p.x)),minY:Math.min(...points.map(p=>p.y)),maxY:Math.max(...points.map(p=>p.y))});
+  const ball=bounds(ballPoints),body=bounds(actorPoints),radius=.6+R+EPS;
+  return !(ball.maxX<body.minX-radius||ball.minX>body.maxX+radius||ball.maxY<body.minY-radius||ball.minY>body.maxY+radius);
+}
+
 // This is a torso-only collision proxy: shoes, paddle and paddle-holding hand
 // cannot accidentally be certified as body faults. Sweep and bisection are
 // deterministic. A returned ball is checked up to its actual paddle interception.
 function bodyContact(segment, solved, endTime, actor, ignoreInitialContact = false) {
+  if(!bodyContactEnvelopeMayIntersectV2(segment,solved,endTime,actor))return null;
   const radius = .6 + R;
   const inside = t => {
     const ball = solved.sampleBoard(t), body = actorAt(segment, actor, t);
@@ -249,6 +272,41 @@ function declarationMatches(play, decision, violations) {
   return !violations.some(v => v.code.startsWith('outcome-') || ['missing-outcome', 'missing-terminal-evidence'].includes(v.code));
 }
 
+// Bounded planner inspection uses exactly the production per-segment checks.
+// Public full validation still solves and checks every source leg independently.
+export function inspectModel2SegmentV2(play, segment, {index=segment.rallyLeg-1,prior=null,terminal=false,solved=null}={}) {
+  const violations=[];
+  try {
+    solved=solved||solveFlightV2(segment.step.shot.physicsV2);
+    verifySegment(play,segment,solved,prior,index,violations);
+    const physicalCandidates=geometricCandidates(play,segment,solved,terminal);
+    const contact=contactCandidates(play,segment,index,violations);
+    physicalCandidates.push(...contact.candidates);
+    return {solved,violations,physicalCandidates,momentumCandidates:contact.momentumCandidates};
+  } catch(error) {
+    violations.push(violation(play,'invalid-physics',error.message,segment,segment.shotSemantics?.playerId,'model'));
+    return {solved,violations,physicalCandidates:[],momentumCandidates:[]};
+  }
+}
+
+const candidateOrder=(a,b)=>a.time-b.time||a.evidenceObservedTime-b.evidenceObservedTime||a.shotId.localeCompare(b.shotId)||a.reason.localeCompare(b.reason);
+export function resolveModel2OutcomeCandidates(physicalCandidates=[],momentumCandidates=[]) {
+  const physical=[...physicalCandidates].sort(candidateOrder)[0]||null;
+  const ordered=[...physicalCandidates,...momentumCandidates].sort(candidateOrder);
+  const first=ordered[0]||null;
+  const decision=first?{...first,physicalDeadTime:Math.min(first.evidenceObservedTime,physical?.time??Infinity)}:null;
+  return {decision,ordered,physical};
+}
+
+export function derivedOutcomeForDecisionV2(decision) {
+  return decision&&!decision.unsupportedReason?{
+    winner:decision.winner,type:decision.reason==='unreachable'?'winner':'fault',
+    reason:decision.reason,shotId:decision.shotId,ruleRef:decision.ruleRef,
+    faultingActor:decision.faultingActor,...(decision.struckActor?{struckActor:decision.struckActor}:{}),
+    evidence:{position:boardPoint(decision.position),afterContactSeconds:decision.afterContactSeconds}
+  }:null;
+}
+
 export function analyzeModel2Outcome(play, timeline) {
   const violations = [], warnings = [], physicalCandidates = [], momentumCandidates = [];
   const segments = (timeline.rawSegments || timeline.segments || []).filter(s => s.shotSemantics);
@@ -268,15 +326,13 @@ export function analyzeModel2Outcome(play, timeline) {
       prior = { segment, solved };
     } catch (error) { violations.push(violation(play, 'invalid-physics', error.message, segment, segment.shotSemantics?.playerId, 'model')); }
   }
-  const order = (a, b) => a.time - b.time || a.evidenceObservedTime - b.evidenceObservedTime || a.shotId.localeCompare(b.shotId) || a.reason.localeCompare(b.reason);
-  physicalCandidates.sort(order); momentumCandidates.sort(order);
+  physicalCandidates.sort(candidateOrder); momentumCandidates.sort(candidateOrder);
   const physical = physicalCandidates[0] || null;
   // Momentum is attributed to the original faulty volley even when observed
   // after a later otherwise-decisive fault/dead ball (2026 Casebook14-23).
-  const decisions = [...physicalCandidates, ...momentumCandidates].sort(order);
-  let decision = decisions[0] || null;
+  const resolution=resolveModel2OutcomeCandidates(physicalCandidates,momentumCandidates),decisions=resolution.ordered;
+  let decision=resolution.decision;
   if (decision) {
-    decision = { ...decision, physicalDeadTime: Math.min(decision.evidenceObservedTime, physical?.time ?? Infinity) };
     for (const candidate of physicalCandidates) {
       if (candidate.unsupportedReason && candidate.time <= decision.time + EPS && candidate !== decisions[0]) {
         violations.push(violation(play, candidate.reason, 'Unsupported decisive geometry cannot be hidden by a simultaneous declared fault.', { step: { id: candidate.shotId } }, candidate.faultingActor));
@@ -292,12 +348,7 @@ export function analyzeModel2Outcome(play, timeline) {
     }
   }
   const matched = declarationMatches(play, decision, violations);
-  const derivedOutcome = decision && !decision.unsupportedReason ? {
-    winner: decision.winner, type: decision.reason === 'unreachable' ? 'winner' : 'fault',
-    reason: decision.reason, shotId: decision.shotId, ruleRef: decision.ruleRef,
-    faultingActor: decision.faultingActor, ...(decision.struckActor ? { struckActor: decision.struckActor } : {}),
-    evidence: { position: boardPoint(decision.position), afterContactSeconds: decision.afterContactSeconds }
-  } : null;
+  const derivedOutcome=derivedOutcomeForDecisionV2(decision);
   return Object.freeze({ decision: decision && Object.freeze(decision), physicalCandidates: Object.freeze(physicalCandidates), momentumCandidates: Object.freeze(momentumCandidates),
     violations: Object.freeze(violations), warnings: Object.freeze(warnings), derivedOutcome: derivedOutcome && Object.freeze(derivedOutcome), matched });
 }

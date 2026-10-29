@@ -92,13 +92,38 @@ export function solveFlightV2(input){
     obstruction:obstruction&&Object.freeze(obstruction),terminal:terminal&&Object.freeze(terminal),launchSpeedMph,horizontalAverageSpeedMph,sampleBoard,sample});
 }
 
+// Inverse of this same constant-gravity solver. Policy can choose a landing
+// and ball-surface clearance without approximating a separate flight or also
+// imposing an incompatible mph/apex. The returned flight remains authoritative.
+export function solveFlightForClearanceV2(input,clearanceFeet){
+  if(input.physics!==undefined)throw new TypeError('Choose a clearance or explicit launch physics, not both.');
+  finite(clearanceFeet,'clearanceFeet');
+  if(clearanceFeet< -2||clearanceFeet>24)throw new RangeError('Clearance must be between -2 and 24 feet.');
+  const from=input.from||{},target=input.target||{};
+  for(const[name,n]of Object.entries({x:from.x,y:from.y,heightFeet:from.heightFeet,targetX:target.x,targetY:target.y}))finite(n,name);
+  const fraction=(22-from.y)/(target.y-from.y);
+  if(!(fraction>0&&fraction<1))throw new RangeError('A clearance flight must cross the net plane.');
+  const x=from.x+(target.x-from.x)*fraction;
+  if(x<0||x>20)throw new RangeError('Use explicit launch physics outside the net sidelines.');
+  const height=localNetHeightFeet(x)+R+clearanceFeet;
+  const durationSquared=2*(height-from.heightFeet*(1-fraction)-R*fraction)/(G*fraction*(1-fraction));
+  if(!(durationSquared>0))throw new RangeError('The requested clearance lies below the coherent ballistic flight.');
+  const duration=Math.sqrt(durationSquared);
+  const launch=(R-from.heightFeet+.5*G*durationSquared)/duration;
+  return solveFlightV2({...input,physics:{launchVerticalFeetPerSecond:launch}});
+}
+
 // Every subsequent contact is sampled from the actual incoming solution.
-export function interceptFlightV2(flight,{kind,stance,contactOverride,afterBounceSeconds}){
+export function interceptFlightV2(flight,{kind,stance,contactOverride,afterBounceSeconds,beforeBounceSeconds}){
   let time;
+  if(beforeBounceSeconds!==undefined){
+    finite(beforeBounceSeconds,'beforeBounceSeconds');
+    if(kind!=='volley'||contactOverride||afterBounceSeconds!==undefined||beforeBounceSeconds<.001||beforeBounceSeconds>5)throw new RangeError('A bounded pre-bounce time requires an unambiguous volley contact.');
+  }
   if(kind==='volley'){
     const y=contactOverride?.y??(stance.y<22?Math.min(14.75,stance.y):Math.max(29.25,stance.y)),first=flight.stages[0];
     if(Math.abs(first.vz)<EPS)throw new RangeError('A volley requires an incoming depth crossing.');
-    time=(y-flight.from.y)/first.vz;
+    time=beforeBounceSeconds===undefined?(y-flight.from.y)/first.vz:flight.firstLandingTime-beforeBounceSeconds;
     if(time<=EPS||time>=flight.firstLandingTime-EPS||flight.obstruction)throw new RangeError('A volley must intercept a live flight before its first bounce.');
   }else{
     if(flight.obstruction)throw new RangeError('A blocked flight cannot produce a subsequent rally contact.');

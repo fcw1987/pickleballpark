@@ -5,7 +5,7 @@ import { appendFileSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const QUALITY_JOBS = ['Checks', 'Chromium', 'WebKit', 'Package', 'Quality gate'];
+export const QUALITY_JOBS = Object.freeze(['Checks', 'Chromium', 'WebKit', 'Package', 'Rally calibration', 'Quality gate']);
 const validSha = value => /^[0-9a-f]{40}$/.test(value || '');
 
 export function validatePublicationSelection({ repository, defaultBranch, currentMain, revision, workflowId, run, jobs, artifacts }) {

@@ -371,6 +371,74 @@ async function verifyModel2Offline(page) {
   return { modelVersion: 2, physicsVersion: 'play-physics-v2', sourceRoundTrip: true, undoRestored: true, realOfflineReload: true, bothTerminalRenderers: true };
 }
 
+async function verifyRallyEngineOffline(page) {
+  // The owned HTTP server is already stopped and the page has reloaded. A
+  // separate module worker must load its entire dependency graph from the
+  // installed candidate cache, rather than this page's existing module map.
+  const workers = [];
+  const observeWorker = worker => { if (new URL(worker.url()).pathname.endsWith('/rally-engine-worker.js')) workers.push(worker.url()); };
+  page.on('worker', observeWorker);
+  try {
+    const proof = await page.evaluate(async () => {
+      const [{ simulateRallyInWorker }, { validateDocument }, { compileDocument }, { validateRallyRules }] = await Promise.all([
+        import('./rally-engine-client.js'), import('./play-document.js'), import('./play-compiler.js'), import('./rally-rules.js'),
+      ]);
+      const phases = [], controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      let result;
+      try {
+        result = await simulateRallyInWorker({ seed: 0, options: { maxShots: 3 }, signal: controller.signal,
+          onProgress: progress => { if (!phases.includes(progress.phase)) phases.push(progress.phase); } });
+      } finally { clearTimeout(timeout); }
+      if (!['complete', 'censored'].includes(result.status) || !result.document) throw Error(`Offline module-worker generation failed: ${JSON.stringify(result.diagnostics)}`);
+      const sourceBeforeValidation = JSON.stringify(result.document);
+      validateDocument(result.document);
+      const compiled = compileDocument(result.document), rules = validateRallyRules(compiled.play, compiled.timeline);
+      const generated = { status: result.status, shots: result.document.shots.length, valid: compiled.validShotCount,
+        compilerErrors: compiled.findings.filter(item => item.severity === 'error'), rulesValid: rules.valid, ruleViolations: rules.violations,
+        recipeExact: JSON.stringify(result.document.generation) === JSON.stringify(result.recipe),
+        validationPreservedSource: JSON.stringify(result.document) === sourceBeforeValidation,
+        expectedOutcome: result.status === 'complete' ? rules.expectedOutcomes.some(outcome => ['shotId', 'reason', 'winner', 'ruleRef', 'faultingActor', 'struckActor'].every(field => outcome[field] === result.outcome[field])) : result.document.ending === 'stop' && result.outcome === null };
+      const b = playBuilder;
+      const imported = await b.action('import', JSON.stringify(result.document));
+      if (!imported.ok || b.saveError) throw Error(`Offline generated import/save failed: ${imported.error || b.saveError?.message}`);
+      await b.action('title', 'Offline worker rally with authored edits');
+      const why = 'Keep this authored explanation after saving, importing and reloading.';
+      const edited = await b.action('editShot', { shotId: b.document.shots[0].id, field: 'narration.why', value: why });
+      if (!edited.ok || b.saveError) throw Error(`Offline generated edit/save failed: ${edited.error || b.saveError?.message}`);
+      const editedSource = JSON.stringify(b.document), exported = b.store.exportJSON(b.document);
+      const importedSourceExact = JSON.stringify(b.store.importJSON(exported)) === editedSource;
+      const savedSourceExact = JSON.stringify(b.store.open(b.document.id)) === editedSource;
+      const importCopy = await b.action('import', exported);
+      if (!importCopy.ok || b.saveError) throw Error(`Offline edited re-import failed: ${importCopy.error || b.saveError?.message}`);
+      const expectedCopy = JSON.parse(editedSource); expectedCopy.id = b.document.id;
+      return { generated, phases, editedWhy: why, source: JSON.stringify(b.document), recipe: result.recipe,
+        importedSourceExact, savedSourceExact, separateImportedCopy: b.document.id !== JSON.parse(editedSource).id,
+        reimportPreservedEditedSource: JSON.stringify(b.document) === JSON.stringify(expectedCopy),
+        retainedProvenance: JSON.stringify(b.document.generation) === JSON.stringify(result.recipe) };
+    });
+    expect(proof.generated).toMatchObject({ valid: proof.generated.shots, compilerErrors: [], rulesValid: true, ruleViolations: [],
+      recipeExact: true, validationPreservedSource: true, expectedOutcome: true });
+    expect(proof.generated.shots).toBeGreaterThan(0); expect(proof.generated.shots).toBeLessThanOrEqual(3);
+    expect(proof.phases).toContain('validating');
+    expect(proof).toMatchObject({ importedSourceExact: true, savedSourceExact: true, separateImportedCopy: true,
+      reimportPreservedEditedSource: true, retainedProvenance: true });
+    expect(workers).toHaveLength(1);
+    await page.reload(); await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
+    const restored = await page.evaluate(() => ({ source: JSON.stringify(playBuilder.document),
+      saved: JSON.stringify(playBuilder.store.open(playBuilder.document.id)),
+      why: playBuilder.document.shots[0].narration.why,
+      generation: playBuilder.document.generation, valid: playBuilder.compiled.validShotCount,
+      errors: playBuilder.compiled.findings.filter(item => item.severity === 'error') }));
+    expect(restored).toEqual({ source: proof.source, saved: proof.source, why: proof.editedWhy,
+      generation: proof.recipe, valid: proof.generated.shots, errors: [] });
+    expect(workers, 'importing, editing, saving and restoring must not regenerate a document').toHaveLength(1);
+    return { ...proof.generated, seed: 0, maxShots: 3, actualModuleWorkers: workers.length, phases: proof.phases,
+      offlineDependencyGraph: true, sourceRoundTrip: true, authoredEditRestored: true, provenanceRestored: true,
+      separateImportedCopy: true, noRegenerationOnRestore: true, realOfflineReload: true };
+  } finally { page.off('worker', observeWorker); }
+}
+
 // This is a path move on one origin, rather than an in-place worker update.
 // Desktop engines verify registration/manifest identities; they do not install
 // an operating-system home-screen shortcut or claim that its old URL redirects.
@@ -599,8 +667,30 @@ const model2Cache = `pickleboard-static-${serviceWorkerCache(model2Files.get('sw
 expect(model2Cache, 'reviewed M0 cache').toBe('pickleboard-static-v39');
 expect(candidateCache, 'M1 must replace the M0 cache').not.toBe(model2Cache);
 
+// M2 upgrades the exact reviewed and deployed M1 source, including model-2
+// physics documents and the v40 cache. Reconstruct its immutable publication
+// metadata with the unchanged historical package algorithms.
+const rallyEngineRevision = 'ce61e3b456fbc17670a855c5079d93de161a1599';
+const rallyEngineRoot = mkdtempSync(join(tmpdir(), 'pickleballpark-rally-engine-upgrade-'));
+let rallyEngineFiles;
+try {
+  for (const file of [...runtimeInventory(rallyEngineRevision), 'tools/runtime-files.json']) {
+    mkdirSync(dirname(join(rallyEngineRoot, file)), { recursive: true });
+    writeFileSync(join(rallyEngineRoot, file), gitBytes(rallyEngineRevision, file));
+  }
+  writeFileSync(join(rallyEngineRoot, '.git'), `gitdir: ${execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim()}\n`);
+  for (const file of ['tools/runtime-package.mjs', 'tools/stamp-build.mjs']) expect(readFileSync(file).equals(gitBytes(rallyEngineRevision, file)), `M1 package algorithm ${file}`).toBe(true);
+  const packaged = createRuntimePackage({ sourceRoot: rallyEngineRoot, revision: rallyEngineRevision, requireCommittedSource: true, verifyVendor: false });
+  expect(packaged.info.sourceState).toBe('clean');
+  expect(packaged.metadata.sourceRevision).toBe(rallyEngineRevision);
+  rallyEngineFiles = packaged.files;
+} finally { rmSync(rallyEngineRoot, { recursive: true, force: true }); }
+const rallyEngineCache = `pickleboard-static-${serviceWorkerCache(rallyEngineFiles.get('sw.js').toString('utf8'))}`;
+expect(rallyEngineCache, 'reviewed and deployed M1 cache').toBe('pickleboard-static-v40');
+expect(candidateCache, 'M2 must replace the M1 cache').not.toBe(rallyEngineCache);
+
 const results = [];
-const allModes = ['fresh', 'model2-upgrade', 'coverage-upgrade', 'preview-upgrade', 'live-upgrade', 'depth-upgrade', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration'];
+const allModes = ['fresh', 'model2-upgrade', 'coverage-upgrade', 'preview-upgrade', 'live-upgrade', 'depth-upgrade', 'upgrade', 'builder-upgrade', 'usability-upgrade', 'iphone-upgrade', 'beta-starting-upgrade', 'beta-interim-upgrade', 'stabilized-upgrade', 'fidelity-interim-upgrade', 'public-upgrade', 'smart-upgrade', 'art-upgrade', 'town-upgrade', 'cache-upgrade', 'stroke-upgrade', 'stroke-contact-upgrade', 'branding-upgrade', 'path-migration', 'branding-path-migration', 'rally-engine-upgrade'];
 const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allModes;
 if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
@@ -618,9 +708,9 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       continue;
     }
     const upgrading = mode !== 'fresh';
-    const previousFiles = mode === 'model2-upgrade' ? model2Files : mode === 'coverage-upgrade' ? coverageFiles : mode === 'preview-upgrade' ? previewFiles : mode === 'live-upgrade' ? liveFiles : mode === 'depth-upgrade' ? depthFiles : mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
-    const priorCache = mode === 'model2-upgrade' ? model2Cache : mode === 'coverage-upgrade' ? coverageCache : mode === 'preview-upgrade' ? previewCache : mode === 'live-upgrade' ? liveCache : mode === 'depth-upgrade' ? depthCache : mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
-    const previousRevision = mode === 'model2-upgrade' ? model2Revision : mode === 'coverage-upgrade' ? coverageRevision : mode === 'preview-upgrade' ? previewRevision : mode === 'live-upgrade' ? liveRevision : mode === 'depth-upgrade' ? depthRevision : mode === 'branding-upgrade' ? brandingRevision : mode === 'stroke-contact-upgrade' ? strokeContactRevision : mode === 'stroke-upgrade' ? strokeRevision : mode === 'cache-upgrade' ? cacheRevision : mode === 'town-upgrade' ? townRevision : mode === 'art-upgrade' ? artRevision : mode === 'smart-upgrade' ? smartRevision : mode === 'public-upgrade' ? publicRevision : mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
+    const previousFiles = mode === 'rally-engine-upgrade' ? rallyEngineFiles : mode === 'model2-upgrade' ? model2Files : mode === 'coverage-upgrade' ? coverageFiles : mode === 'preview-upgrade' ? previewFiles : mode === 'live-upgrade' ? liveFiles : mode === 'depth-upgrade' ? depthFiles : mode === 'branding-upgrade' ? brandingFiles : mode === 'stroke-contact-upgrade' ? strokeContactFiles : mode === 'stroke-upgrade' ? strokeFiles : mode === 'cache-upgrade' ? cacheFiles : mode === 'town-upgrade' ? townFiles : mode === 'art-upgrade' ? artFiles : mode === 'smart-upgrade' ? smartFiles : mode === 'public-upgrade' ? publicFiles : mode === 'fidelity-interim-upgrade' ? fidelityFiles : mode === 'stabilized-upgrade' ? stabilizedFiles : mode === 'beta-interim-upgrade' ? betaInterimFiles : mode === 'beta-starting-upgrade' ? betaStartingFiles : mode === 'iphone-upgrade' ? iphoneFiles : mode === 'builder-upgrade' ? builderFiles : mode === 'usability-upgrade' ? usabilityFiles : oldFiles;
+    const priorCache = mode === 'rally-engine-upgrade' ? rallyEngineCache : mode === 'model2-upgrade' ? model2Cache : mode === 'coverage-upgrade' ? coverageCache : mode === 'preview-upgrade' ? previewCache : mode === 'live-upgrade' ? liveCache : mode === 'depth-upgrade' ? depthCache : mode === 'branding-upgrade' ? 'pickleboard-static-v30' : mode === 'stroke-contact-upgrade' ? 'pickleboard-static-v29' : mode === 'stroke-upgrade' ? 'pickleboard-static-v28' : mode === 'cache-upgrade' ? 'pickleboard-static-v27' : mode === 'town-upgrade' ? 'pickleboard-static-v26' : mode === 'art-upgrade' ? 'pickleboard-static-v25' : mode === 'smart-upgrade' ? 'pickleboard-static-v24' : mode === 'public-upgrade' ? 'pickleboard-static-v23' : mode === 'fidelity-interim-upgrade' ? 'pickleboard-static-v23' : mode === 'stabilized-upgrade' ? 'pickleboard-static-v22' : mode === 'beta-interim-upgrade' ? 'pickleboard-static-v21' : mode === 'beta-starting-upgrade' ? 'pickleboard-static-v20' : mode === 'iphone-upgrade' ? 'pickleboard-static-v19' : mode === 'builder-upgrade' ? 'pickleboard-static-v17' : mode === 'usability-upgrade' ? 'pickleboard-static-v18' : previousCache;
+    const previousRevision = mode === 'rally-engine-upgrade' ? rallyEngineRevision : mode === 'model2-upgrade' ? model2Revision : mode === 'coverage-upgrade' ? coverageRevision : mode === 'preview-upgrade' ? previewRevision : mode === 'live-upgrade' ? liveRevision : mode === 'depth-upgrade' ? depthRevision : mode === 'branding-upgrade' ? brandingRevision : mode === 'stroke-contact-upgrade' ? strokeContactRevision : mode === 'stroke-upgrade' ? strokeRevision : mode === 'cache-upgrade' ? cacheRevision : mode === 'town-upgrade' ? townRevision : mode === 'art-upgrade' ? artRevision : mode === 'smart-upgrade' ? smartRevision : mode === 'public-upgrade' ? publicRevision : mode === 'fidelity-interim-upgrade' ? fidelityRevision : mode === 'stabilized-upgrade' ? stabilizedRevision : mode === 'beta-interim-upgrade' ? betaInterimRevision : mode === 'beta-starting-upgrade' ? betaStartingRevision : mode === 'iphone-upgrade' ? iphoneRevision : mode === 'builder-upgrade' ? builderRevision : mode === 'usability-upgrade' ? usabilityRevision : prior.revision;
     let phase = upgrading ? 'old' : 'new', stopped = false;
     const server = createServer((req, res) => {
       const pathname = decodeURIComponent(new URL(req.url, 'http://local').pathname);
@@ -648,6 +738,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         expect(Object.hasOwn(oldManifest, 'id'), 'previous install has no explicit manifest id').toBe(false);
         expect(candidateCache, 'branding update must replace the frozen v30 cache').not.toBe(priorCache);
       }
+      let m1UpgradeProof = null;
       if (upgrading) {
         expect(await page.evaluate(() => caches.keys())).toContain(priorCache);
         await page.evaluate(async () => {
@@ -656,13 +747,34 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
           pickleboard.setTokenPosition('player1', 8.25, 12.75); pickleboard.setDrawingMode(true);
         });
         let priorDraft = null;
-        if (mode === 'model2-upgrade' || mode === 'coverage-upgrade' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
+        if (mode === 'rally-engine-upgrade' || mode === 'model2-upgrade' || mode === 'coverage-upgrade' || mode === 'preview-upgrade' || mode === 'live-upgrade' || mode === 'depth-upgrade' || mode === 'builder-upgrade' || mode === 'usability-upgrade' || mode === 'iphone-upgrade' || mode === 'beta-starting-upgrade' || mode === 'beta-interim-upgrade' || mode === 'stabilized-upgrade' || mode === 'fidelity-interim-upgrade' || mode === 'public-upgrade' || mode === 'smart-upgrade' || mode === 'art-upgrade' || mode === 'town-upgrade' || mode === 'cache-upgrade' || mode === 'stroke-upgrade' || mode === 'stroke-contact-upgrade' || mode === 'branding-upgrade') {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           priorDraft = await page.evaluate(async () => {
             await playBuilder.action('title', 'Preserved pre-update draft');
             await playBuilder.action('editShot', { field: 'target.x', value: 6.25 });
             return JSON.stringify(playBuilder.document);
           });
+        }
+        if (mode === 'rally-engine-upgrade') {
+          // Save a real M1 model-2 import with the old application, alongside
+          // its edited model-1 draft. Keep the whole saved envelope byte exact
+          // through activation and startup; neither source may be regenerated.
+          m1UpgradeProof = await page.evaluate(async fixture => {
+            const b = playBuilder, legacySource = JSON.stringify(b.document), legacyId = b.document.id;
+            const imported = await b.action('import', JSON.stringify(fixture));
+            if (!imported.ok || b.saveError) throw Error(`M1 fixture save failed: ${imported.error || b.saveError?.message}`);
+            const model2Source = JSON.stringify(b.document), model2Id = b.document.id;
+            const physical = { modelVersion: b.document.modelVersion, physicsVersion: b.document.physicsVersion,
+              valid: b.compiled.validShotCount, shots: b.document.shots.length,
+              errors: b.compiled.findings.filter(item => item.severity === 'error') };
+            const opened = await b.action('open', legacyId);
+            if (!opened.ok || JSON.stringify(b.document) !== legacySource) throw Error('M1 model-1 source changed while saving the model-2 fixture');
+            return { legacyId, legacySource, model2Id, model2Source, physical,
+              storage: localStorage.getItem('pickleballpark-builder-v1') };
+          }, readModel2Fixture('net'));
+          expect(m1UpgradeProof.physical).toEqual({ modelVersion: 2, physicsVersion: 'play-physics-v2',
+            valid: 1, shots: 1, errors: [] });
+          expect(m1UpgradeProof.storage).not.toBeNull();
         }
         const before = await page.evaluate(() => pickleboard.captureBoardState());
         phase = 'new';
@@ -674,6 +786,16 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         if (priorDraft) {
           await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
           expect(await page.evaluate(() => JSON.stringify(playBuilder.document))).toBe(priorDraft);
+        }
+        if (m1UpgradeProof) {
+          expect(await page.evaluate(() => localStorage.getItem('pickleballpark-builder-v1')),
+            'M1 saved library must survive M2 activation and startup byte for byte').toBe(m1UpgradeProof.storage);
+          const restored = await page.evaluate(({ legacyId, model2Id }) => {
+            const envelope = JSON.parse(localStorage.getItem('pickleballpark-builder-v1'));
+            return { legacy: JSON.stringify(envelope.drafts.find(doc => doc.id === legacyId)),
+              model2: JSON.stringify(envelope.drafts.find(doc => doc.id === model2Id)) };
+          }, m1UpgradeProof);
+          expect(restored).toEqual({ legacy: m1UpgradeProof.legacySource, model2: m1UpgradeProof.model2Source });
         }
         expect(await page.evaluate(() => ({ theme: localStorage.getItem('pickleboard-theme'), body: document.body.dataset.theme }))).toEqual({ theme: 'dark', body: 'dark' });
         expect(await page.evaluate(async () => (await (await caches.open('unrelated-application-cache')).match('/keep')).text())).toBe('preserve');
@@ -772,6 +894,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       // real-offline assertion in every historical case.
       const smartProof = mode === 'fresh' ? await verifySmartRallyOffline(page) : await verifyMigratedAuthoringOffline(page);
       const model2Proof = mode === 'fresh' || mode === 'model2-upgrade' ? await verifyModel2Offline(page) : null;
+      const rallyEngineProof = mode === 'fresh' || mode === 'rally-engine-upgrade' ? await verifyRallyEngineOffline(page) : null;
       const ids = await page.evaluate(() => pickleboard.plays.list().map(p => p.id)); expect(ids).toHaveLength(8);
       // Lesson definitions and runtime bytes are identical after each verified
       // migration. Sweep all eight offline once per engine, then retain one
@@ -797,7 +920,10 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         expect(lesson.valid).toBe(lesson.shots);expect(lesson.chapters).toBe(lesson.shots);
       }
       await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0); expect(errors).toEqual([]);
-      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: lessonIds.length, offlineLessonIds: lessonIds, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof, ...(model2Proof ? { model2: model2Proof } : {}) });
+      results.push({ browser: browserName, mode, status: 'PASS', runtimeHashes: checks.all.length, cacheEntries: checks.cached.length, offlineCustomReload: true, offlineLessons: lessonIds.length, offlineLessonIds: lessonIds, offlineMethod: 'owned server stopped', source: info.revision, previousPublicSource: upgrading ? previousRevision : null, identity: identityProof, offlineIdentity: { status: offlineIdentity.server.status, loadedRetained: offlineIdentity.running.sourceRevision === identityProof.loaded.sourceRevision }, smartRally: smartProof, ...(model2Proof ? { model2: model2Proof } : {}), ...(rallyEngineProof ? { rallyEngine: rallyEngineProof } : {}),
+        ...(m1UpgradeProof ? { m1Upgrade: { source: rallyEngineRevision, cache: rallyEngineCache,
+          savedLibrarySha256: sha(m1UpgradeProof.storage), model1SourceSha256: sha(m1UpgradeProof.legacySource),
+          model2SourceSha256: sha(m1UpgradeProof.model2Source), savedLibraryByteExact: true, bothSourcesByteExact: true } } : {}) });
     } catch (e) { results.push({ browser: browserName, mode, status: 'FAIL', error: e.message }); throw e; }
     finally { results.at(-1).durationMs = performance.now() - caseStarted; await browser.close(); if (!stopped) { server.closeAllConnections(); await new Promise(r => server.close(r)); } mkdirSync('release-results', { recursive: true }); writeFileSync('release-results/package-verification.json', JSON.stringify(results, null, 2)); }
   }
