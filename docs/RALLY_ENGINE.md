@@ -116,7 +116,11 @@ times supplement fixed interception probes; every proposed contact still needs
 actual solver, feet, collision, peak-speed and spacing acceptance. At a fixed
 contact opportunity the corrected M2 actor ranker considers reach, lanes and
 handedness. Across feasible opportunities it compares supported contact height,
-forward progress, recovery and available physical replies. Uninspected proposals
+improvement toward the grounded 14.25-foot ready line, actual-foot NVZ reset
+cost, recovery and available physical replies. Advancing beyond that line earns
+no extra progress. For equivalent supported contacts/replies, a clear outside-NVZ
+plant is preferred; necessary legal bounced-ball entries remain available. The
+same preference orders optimistic bounds and final audited candidates. Uninspected proposals
 are labelled as search bounds, never accepted audits. Forehand preference cannot
 override role or better reach, and a volley has no automatic priority. Incoming geometry
 supplies contact height. A baseline drive needs an achievable fast flight; a
@@ -157,6 +161,9 @@ An explicit air-contact conditional row uses 58/40, with the remainder divided
 between drive and lob; bounced opportunities never acquire a volley label.
 Decision records name the conditional prior. Calibration still measures every
 fifth opportunity after a third-shot drive, with no denominator substitution.
+The fourth-shot 85-percent soft response applies to a genuinely low, non-attackable
+drop. A supported attacking contact uses the existing high-ball policy and actual
+defender targets; a quality label alone cannot establish that opportunity.
 
 Pressure records actual incoming contact velocity, retaining launch speed as a
 separate fact. Formation load is a bounded heuristic based on represented teams,

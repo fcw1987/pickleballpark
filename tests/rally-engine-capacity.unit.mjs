@@ -35,7 +35,8 @@ function memoryStorage() {
 
 // Controlled capacity seam, NOT a sample of natural rally lengths/calibration.
 // The real policy/planner runs unchanged. Intent .65 selects deep-middle
-// serve/return, a third drop and transition resets, then middle dinks. Target
+// serve/return, a third drop and middle dinks. The fourth draw .9 deliberately
+// selects the soft reset alternative even when the good drop is attackable. Target
 // .5 keeps nominal targets centered and execution .999 gives neutral quality.
 // Consume every underlying seed-0 draw for stream accounting; narration uses
 // its original value. No failing route is retried under another seed.
@@ -43,16 +44,17 @@ function memoryStorage() {
 // deliberately bypasses the driver's ordinary random-stream construction.
 // Saved generation metadata retains origin only: this controlled fixture does
 // NOT claim production recipe reproduction from its seed or natural calibration.
-const CAPACITY_CONTROLLER = Object.freeze({ intent: .65, target: .5, execution: .999 });
+const CAPACITY_CONTROLLER = Object.freeze({ intent: .65, fourthIntent: .9, target: .5, execution: .999 });
 let capacityPromise;
 function controlledCapacityFixture() {
   capacityPromise ??= (async () => {
     const input = normalizeRallyInputV1({ seed: 0, options: { maxShots: 99 } });
     const before = JSON.stringify(input), seeded = createRallyRandomV1(0);
-    let executionDraws = 0, work = 0;
+    let executionDraws = 0, intentDraws = 0, work = 0;
     const controlledDraw = stream => () => {
       seeded[stream]();
       if (stream === 'execution') executionDraws++;
+      if (stream === 'intent' && ++intentDraws === 4) return CAPACITY_CONTROLLER.fourthIntent;
       return CAPACITY_CONTROLLER[stream];
     };
     const result = await runNaturalAttemptV1(input, {
@@ -96,7 +98,7 @@ test('controlled capacity seam constructs 99 physical contacts and censors witho
     assert.deepEqual(decision.draws.execution, { quality: .999, error: .999 });
     assert.notEqual(decision.execution.quality, 'error');
     assert.equal(decision.execution.quality, 'neutral');
-    assert.equal(decision.draws.intent, CAPACITY_CONTROLLER.intent);
+    assert.equal(decision.draws.intent, index===3?CAPACITY_CONTROLLER.fourthIntent:CAPACITY_CONTROLLER.intent);
     assert.deepEqual(decision.draws.target, { lateral: .5, depth: .5 });
     assert.deepEqual(decision.draws.perturbation, { lateral: .5, depth: .5 });
     // Clearer incoming stances now put the controlled pair at the line by the

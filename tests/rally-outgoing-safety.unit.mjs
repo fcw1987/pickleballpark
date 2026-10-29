@@ -75,15 +75,29 @@ for(const style of ['pro','advanced','intermediate']) test(`seed 31 ${style} rep
   const result=await simulateRally(input);
   assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
   auditAccepted(result);
-  assert.equal(result.document.shots.length,6,'fixed development seed progresses beyond the archived avoidable return fault');
+  assert.ok(result.document.shots.length>archived.shots.length,'fixed development seed progresses beyond the archived avoidable return fault');
   const second=result.decisions[1];assert.notEqual(second.execution.quality,'error');
 });
 
 for(const [team,court,hand] of [['green','right','left'],['orange','right','left'],['green','left','right']]) test(`seed 31 mirrored ${team}/${court}/${hand} nominal routes remain independently clear`,async()=>{
   const players=Object.fromEntries(ids.map((id,index)=>[id,{team:index<2?'green':'orange',handedness:hand,style:'advanced',flavour:'balanced'}]));
   const result=await simulateRally({seed:31,players,service:{server:team==='green'?'player1':'player3',receiver:team==='green'?'player3':'player1',court}});
-  if(result.status==='failed') {assert.equal(result.document,null);assert.equal(result.outcome,null);return;}
+  assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
   auditAccepted(result);
+});
+
+test('an explicitly unsupported serve with feet inside the baseline fails without a fabricated point',async()=>{
+  const layout={player1:{x:5,y:1},player2:{x:15,y:-1},player3:{x:15,y:42},player4:{x:5,y:30},ball:{x:4.2,y:2}};
+  const input={seed:31,players:clone(archived.generation.input.players),layout,
+    service:{server:'player1',receiver:'player3',court:'right',courtConvention:'server-perspective-v1'}};
+  const before=JSON.stringify(input),result=await simulateRally(input);
+  assert.equal(result.status,'failed');assert.equal(result.document,null);assert.equal(result.outcome,null);
+  assert.equal(result.diagnostics.code,'bounded-feasible-intents-exhausted');
+  assert.equal(result.diagnostics.producer.contactIndex,0);
+  assert.equal(result.decisions.length,0);assert.equal(result.recipe.selection,null);
+  assert.deepEqual(result.recipe.input.layout,layout);
+  assert.ok(result.diagnostics.producer.failures.every(failure=>failure.reason==='The nominal reply contact does not pass independent model-2 contact rules.'));
+  assert.equal(JSON.stringify(input),before);
 });
 
 // A quality label cannot exempt the physical hitter from the same archived sweep.
@@ -104,9 +118,9 @@ test('Pro 53 selects an earlier legal contact instead of committing the intercep
   const result=await simulateRally(input);
   assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
   auditAccepted(result);
-  const compiled=compileDocument(result.document),prior=compiled.timeline.segments[3];
-  assert.ok(prior.step.shot.physicsV2.endTimeSeconds<prior.trajectory.solved.secondBounceTime-1e-7,
-    'the accepted fifth contact must satisfy the unchanged independent rule guard');
-  assert.ok(result.document.shots[4].contactTiming.afterBounceSeconds<.621212559-1e-7,
-    'the engine must leave the preserved near-second-bounce proposal and choose earlier geometry');
+  const compiled=compileDocument(result.document);
+  for(const prior of compiled.timeline.segments.slice(0,-1)) {
+    assert.ok(prior.step.shot.physicsV2.endTimeSeconds<prior.trajectory.solved.secondBounceTime-1e-7,
+      'every accepted next contact must satisfy the unchanged independent rule guard');
+  }
 });

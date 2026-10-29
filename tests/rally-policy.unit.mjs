@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { POLICY_VERSION, CONTACT_RANKING_VERSION, FIFTH_CONTACT_PRIORS_VERSION, contactHeightBandV1, rankContactCandidatesV2, rankContactPairsV1, createSituationV1, listIntentCandidatesV1, chooseIntentV1 } from '../rally-policy.js';
+import { resolveFlightParametersV1, resolveTargetV1 } from '../rally-targets.js';
 import { resolveStyle } from '../rally-styles.js';
 import { eligibleHitters } from '../rally-state.js';
 import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
@@ -296,4 +297,34 @@ test('stable candidate ordering and supplied draws give deterministic choices wi
   assert.equal(chooseIntentV1(first.candidates, 1 - Number.EPSILON), first.candidates.at(-1));
   for (const draw of [-.1, 1, Infinity, NaN]) assert.throws(() => chooseIntentV1(first.candidates, draw), RangeError);
   assert.equal(JSON.stringify(source), before);
+});
+
+test('a genuinely low fourth-shot drop retains the 85 percent soft source prior while supported high contact uses existing attack policy',()=>{
+  for(const style of ['pro','advanced','intermediate']) {
+    const profile=resolveStyle(style);
+    const fourth={contactIndex:3,hitter:'player3',incoming:{hitter:'player1',family:'drop',intent:'third-shot-drop'},
+      positions:{...positions,player1:{x:6,y:5},player2:{x:14,y:5}},contact:{x:6,y:30,heightFeet:.8},
+      affordances:{attack:true,drive:true,bounced:true}};
+    const low=situation(fourth),soft=listIntentCandidatesV1(low,{profile});
+    assert.equal(low.attackable,false);assert.equal(soft.context,'fourthDrop');
+    const source=[...soft.candidates,...soft.excluded];
+    assert.equal(source.filter(row=>['cross-court-dink','reset'].includes(row.id)).reduce((sum,row)=>sum+row.weight,0),85);
+    assert.equal(source.find(row=>row.id==='speed-up').weight,15);
+    const highContact={x:6,y:30,heightFeet:4.5};
+    const highGeometry=situation({...fourth,contact:highContact,affordances:{drive:true,bounced:true}});
+    const attackCandidate={family:'drive',intent:'drive',pace:'firm',arc:'low',targetRegion:'deep-feet'};
+    const target=resolveTargetV1({candidate:attackCandidate,situation:highGeometry,players,draws:{lateral:.5,depth:.5}});
+    const solved=resolveFlightParametersV1({candidate:attackCandidate,contact:highContact,target,team:'orange'});
+    assert.equal(solved.attacking,true,'the high fourth drop has an actual shared-solver attacking flight');
+    assert.ok(target.y<5,'existing deep-feet target follows the actual back defenders');
+    const high=situation({...fourth,contact:highContact,affordances:{attack:solved.attacking,drive:true,bounced:true}});
+    const attack=listIntentCandidatesV1(high,{profile});
+    assert.equal(high.attackable,true);assert.equal(attack.context,'transitionHigh');
+    assert.equal(attack.candidates.find(row=>row.id==='drive').targetRegion,'deep-feet');
+    assert.equal(attack.candidates.find(row=>row.id==='drive').weight,profile.weights.transitionHigh.drive);
+    assert.ok(attack.candidates.some(row=>row.id==='reset'),'a high drop does not ban a soft response');
+    const unsupported=listIntentCandidatesV1(situation({...fourth,contact:{x:6,y:30,heightFeet:4.5},affordances:{attack:false,drive:true,bounced:true},
+      incoming:{...fourth.incoming,quality:'attackable'}}),{profile});
+    assert.equal(unsupported.context,'fourthDrop','quality and height alone cannot certify an attack');
+  }
 });

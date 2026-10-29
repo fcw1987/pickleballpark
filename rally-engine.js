@@ -237,6 +237,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         })).filter(feet => feet.reachable && feet.legalVolleyFeet));
         pair.stanceOptions = stanceCache.get(stanceKey).map((feet, stanceIndex) => ({ feet, stanceIndex, opportunityId: key,
             preference: contactOpportunityPreferenceV1({ contact: pair.contact, stance: feet.stance,
+                contactFeet: feet.feet,
                 origin: origins[pair.id], team, feasibleReplyIds: pair.replySupport.ids,
                 attackingReplyAvailable: pair.replySupport.attacking, availableSeconds: numberV1(pair.time) })
         })).sort(compareContactOpportunityPreferencesV1);
@@ -329,6 +330,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                 pair.outgoingSafety = { version: 'rally-outgoing-safety-v1', stanceIndex: option.stanceIndex,
                     checkedActors: friendlyActors(input, pair.id), supportedReplyIds: pair.replySupport.ids, excludedReplies: exclusions };
                 const preference = contactOpportunityPreferenceV1({ contact: pair.contact, stance: pair.feet.stance, origin: origins[pair.id],
+                    contactFeet: pair.feet.feet,
                     team, feasibleReplyIds: pair.replySupport.ids, attackingReplyAvailable: pair.replySupport.attacking, availableSeconds: numberV1(pair.time) });
                 const candidate = { opportunityId: next.opportunityId, preference, pair, movement, spacing };
                 if (!best || compareContactOpportunityPreferencesV1(candidate, best) < 0) best = candidate;
@@ -339,6 +341,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
             facts.push({ opportunityId: next.opportunityId, actorId: pair.id, sourceIndex: proposal.sourceIndex,
                 kind: pair.kind, contact: pair.contact, availableSeconds: numberV1(pair.time),
                 stance: pair.feet.stance, recoveryPosition: pair.feet.stance,
+                contactFeet: pair.feet.feet,
                 feasibleReplyIds: pair.replySupport.ids, attackingReplyAvailable: pair.replySupport.attacking,
                 audit: { legal: true, routeValid: true, feetValid: pair.feet.reachable && pair.feet.legalVolleyFeet,
                     peakFeetPerSecond: movement.maxPeakFeetPerSecond, minimumSpacingFeet: spacing.minimumSeparationFeet } });

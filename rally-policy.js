@@ -189,7 +189,7 @@ const definitions = {
   'let-go': ['let-go', null, null, null, null]
 };
 const rowFor = situation => situation.phase === 'serve' || situation.phase === 'return' || situation.phase === 'third' ? situation.phase
-  : situation.opening === 'serve' && situation.contactIndex === 3 && situation.incomingFamily === 'drop' ? 'fourthDrop'
+  : situation.opening === 'serve' && situation.contactIndex === 3 && situation.incomingFamily === 'drop' && !situation.attackable ? 'fourthDrop'
   : situation.opening === 'serve' && situation.contactIndex === 3 && situation.incomingFamily === 'drive' ? 'fourthDrive'
   : situation.opening === 'serve' && situation.contactIndex === 4 && (situation.priorThirdIntent === 'third-shot-drive' || situation.priorThirdFamily === 'drive') ? 'fifthDrive'
   : situation.phase === 'scramble' ? 'lobDefence' : situation.phase === 'hands' ? 'hands'

@@ -3,6 +3,7 @@
 import { contactHeightBandV1, rankContactCandidatesV2 } from './rally-policy.js';
 import { GENERATOR_MOVEMENT, GROUNDED_CONTACT_HEIGHT_FEET } from './rally-movement.js';
 import { teamForPlayer } from './rally-state.js';
+import { isInNonVolleyZone } from './court-geometry.js';
 
 export const CONTACT_OPPORTUNITY_VERSION = 'rally-contact-opportunities-v1';
 export const CONTACT_OPPORTUNITY_LIMITS = Object.freeze({ candidates: 128, replies: 24 });
@@ -32,6 +33,23 @@ const identifier = (value, name) => {
 };
 const depth = (at, team) => team === 'green' ? at.y : 44 - at.y;
 const lineDistance = (at, team) => Math.abs(depth(at, team) - (22 - 7 - GENERATOR_MOVEMENT.lineOffsetFeet));
+// Explicit feet are required even for unaudited proposal bounds. A center or
+// an optimistic outside-NVZ flag cannot prove an established grounded reset.
+const actualFeet = (values, stance) => {
+  if (!Array.isArray(values) || values.length !== 2) throw new TypeError('Two actual contactFeet are required.');
+  const feet = values.map((value, index) => point(value, `contactFeet[${index}]`));
+  if (Math.hypot((feet[0].x + feet[1].x) / 2 - stance.x, (feet[0].y + feet[1].y) / 2 - stance.y) > EPS)
+    throw new TypeError('Actual contactFeet must center on the sampled stance.');
+  return feet;
+};
+const nvzResetCost = (feet, team) => {
+  if (feet.every(foot => !isInNonVolleyZone(foot))) return 0;
+  // Minimum axis translation that establishes both feet outside the kitchen.
+  // Longitudinal recovery uses the existing grounded ready-line inset.
+  const xs = feet.map(foot => foot.x), depths = feet.map(foot => depth(foot, team));
+  return Math.max(0, Math.min(Math.max(...xs) + 1e-5, 20 - Math.min(...xs) + 1e-5,
+    Math.max(...depths) - 14.25, 29.75 - Math.min(...depths)));
+};
 const replyIds = values => {
   if (!Array.isArray(values) || values.length > CONTACT_OPPORTUNITY_LIMITS.replies
     || values.some(id => !REPLIES.has(id))) throw new TypeError('Reply support requires bounded known paddle-contact candidate IDs.');
@@ -39,16 +57,18 @@ const replyIds = values => {
 };
 
 /** Proposal preference only: this makes no acceptance or physical-audit claim. */
-export function contactOpportunityPreferenceV1({ contact, stance, origin, team, feasibleReplyIds, attackingReplyAvailable, availableSeconds } = {}) {
+export function contactOpportunityPreferenceV1({ contact, stance, contactFeet, origin, team, feasibleReplyIds, attackingReplyAvailable, availableSeconds } = {}) {
   const at = point(contact, 'contact', true), feet = point(stance, 'stance'), from = point(origin, 'origin');
   if (!['green', 'orange'].includes(team)) throw new TypeError('An explicit hitting team is required.');
   if (typeof attackingReplyAvailable !== 'boolean') throw new TypeError('An explicit shared-solver attacking-reply fact is required.');
+  const groundedFeet = actualFeet(contactFeet, feet);
   const replies = replyIds(feasibleReplyIds), seconds = finite(availableSeconds, 'availableSeconds', 0);
   const geometryHeightBand = contactHeightBandV1(at);
   const heightClass = attackingReplyAvailable && ['above-net', 'overhead'].includes(geometryHeightBand)
     ? 'attack' : geometryHeightBand === 'low' ? 'low' : 'neutral';
   return freeze({ geometryHeightBand, heightClass, heightClassRank: { low: 0, neutral: 1, attack: 2 }[heightClass],
-    contactHeightFeet: at.heightFeet, forwardProgressFeet: depth(feet, team) - depth(from, team),
+    contactHeightFeet: at.heightFeet, readyLineImprovementFeet: lineDistance(from, team) - lineDistance(feet, team),
+    nvzResetCostFeet: nvzResetCost(groundedFeet, team),
     supportedReplyCount: replies.length, recoveryLineDistanceFeet: lineDistance(feet, team), availableSeconds: seconds });
 }
 
@@ -66,7 +86,7 @@ function candidateFacts(candidate) {
   if (Math.hypot(stance.x - recoveryPosition.x, stance.y - recoveryPosition.y) > EPS) throw new TypeError('Recovery position must be the actual sampled stance at this contact.');
   return { opportunityId, actorId, sourceIndex: candidate.sourceIndex, kind: candidate.kind,
     contact: point(candidate.contact, 'contact', true), availableSeconds: finite(candidate.availableSeconds, 'availableSeconds', 0),
-    stance, recoveryPosition: { ...stance }, attackingReplyAvailable: candidate.attackingReplyAvailable,
+    stance, contactFeet: actualFeet(candidate.contactFeet, stance), recoveryPosition: { ...stance }, attackingReplyAvailable: candidate.attackingReplyAvailable,
     feasibleReplyIds,
     audit: { legal: audit.legal, routeValid: audit.routeValid, feetValid: audit.feetValid,
       peakFeetPerSecond: metric(audit.peakFeetPerSecond, 'peakFeetPerSecond'),
@@ -87,11 +107,13 @@ function exclusion(facts, eligible) {
 }
 
 // Geometry earns attack priority only with a shared-solver attacking reply.
-// Within a class, meaningful progress/recovery precede tiny height changes.
+// Within a class, actual grounded reset cost and ready-line recovery precede
+// tiny height changes; advancing beyond the ready line earns no extra reward.
 // These are explicit model preferences, not observed win probabilities.
 const criteria = [
   ['heightClassRank', 'better-supported-height-class', -1],
-  ['forwardProgressFeet', 'more-forward-progress', -1],
+  ['nvzResetCostFeet', 'less-grounded-nvz-reset', 1],
+  ['readyLineImprovementFeet', 'more-ready-line-improvement', -1],
   ['recoveryLineDistanceFeet', 'closer-recovery-to-line', 1],
   ['supportedReplyCount', 'more-supported-replies', -1],
   ['contactHeightFeet', 'higher-actual-contact', -1],
@@ -155,7 +177,7 @@ export function rankContactOpportunitiesV1({ players, positions, eligible, candi
     for (const row of actorRanking.filter(row => !row.reach.reachable)) excluded.push({ ...feasible.find(facts => facts.actorId === row.id), reason: 'outside-illustrative-reach' });
     if (!reachable.length) continue;
     const selected = feasible.find(row => row.actorId === reachable[0].id), team = teamForPlayer(selected.actorId, players);
-    const preference = contactOpportunityPreferenceV1({ contact: selected.contact, stance: selected.stance,
+    const preference = contactOpportunityPreferenceV1({ contact: selected.contact, stance: selected.stance, contactFeet: selected.contactFeet,
       origin: positions[selected.actorId], team, feasibleReplyIds: selected.feasibleReplyIds,
       attackingReplyAvailable: selected.attackingReplyAvailable, availableSeconds: selected.availableSeconds });
     ranked.push({ ...selected, actorRanking: reachable, preference,

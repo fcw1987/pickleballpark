@@ -59,7 +59,7 @@ function physicalOpportunity(fixture, { opportunityId, sourceIndex, time }) {
   const stance = sampleActorBoardPositionV2(segment, receiver, segment.duration), sampledFeet = sampleFeetStateV1(segment, segment.duration)[receiver];
   assert.ok(distance(stance, feet.stance) < 1e-10, 'the compared stance is the actual resolved contact endpoint');
   const facts = { opportunityId, sourceIndex, actorId: receiver, kind: 'volley', contact: trial.contact, availableSeconds: contact.time,
-    stance, recoveryPosition: stance, feasibleReplyIds: parameters.flight.obstruction ? [] : ['reset'],
+    stance, contactFeet: sampledFeet.feet, recoveryPosition: stance, feasibleReplyIds: parameters.flight.obstruction ? [] : ['reset'],
     attackingReplyAvailable: parameters.attacking,
     audit: { legal: trial.ok, routeValid: movement.valid && spacing.valid,
       feetValid: feet.reachable && feet.legalVolleyFeet && sampledFeet.grounded && sampledFeet.feet.every(foot => !isInNonVolleyZone(foot)),
@@ -100,7 +100,7 @@ for (const mirrored of [false, true]) {
     assert.equal(late.trial.ok, true, JSON.stringify(late.trial.findings));
     assert.equal(late.reach.reachable, true); assert.equal(late.movement.valid, true); assert.equal(late.spacing.valid, true);
     const proposal = opportunity => ({ opportunityId: opportunity.facts.opportunityId,
-      preference: contactOpportunityPreferenceV1({ contact: opportunity.facts.contact, stance: opportunity.facts.stance,
+      preference: contactOpportunityPreferenceV1({ contact: opportunity.facts.contact, stance: opportunity.facts.stance, contactFeet: opportunity.facts.contactFeet,
         origin: fixture.state.steps[0].positions[fixture.receiver], team: players[fixture.receiver].team,
         feasibleReplyIds: opportunity.facts.feasibleReplyIds, attackingReplyAvailable: opportunity.facts.attackingReplyAvailable,
         availableSeconds: opportunity.facts.availableSeconds }) });

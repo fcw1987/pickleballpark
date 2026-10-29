@@ -195,6 +195,47 @@ function strictInspectionJSON(value) {
     return item;
   });
 }
+// Incoming reuse compares a private detached data tree instead of serializing
+// the same physical projection again. Unknown structures never establish reuse.
+function inspectionDataKeys(value) {
+  const array=Array.isArray(value),prototype=Object.getPrototypeOf(value);
+  if((array?prototype!==Array.prototype:prototype!==Object.prototype&&prototype!==null)
+    ||Object.getOwnPropertySymbols(value).length||'toJSON' in value)return null;
+  const keys=Object.keys(value);
+  if(Object.getOwnPropertyNames(value).length!==keys.length+(array?1:0)
+    ||array&&(keys.length!==value.length||keys.some((key,index)=>key!==String(index))))return null;
+  return keys;
+}
+function captureInspectionData(value,active=new WeakSet()) {
+  if(value===null||typeof value==='string'||typeof value==='boolean')return value;
+  if(typeof value==='number'){
+    if(!Number.isFinite(value)||Object.is(value,-0))throw new TypeError('Uncacheable inspection input.');
+    return value;
+  }
+  if(typeof value!=='object'||active.has(value))throw new TypeError('Uncacheable inspection input.');
+  const keys=inspectionDataKeys(value);
+  if(!keys)throw new TypeError('Uncacheable inspection input.');
+  active.add(value);
+  const values=keys.map(key=>{
+    const descriptor=Object.getOwnPropertyDescriptor(value,key);
+    if(!Object.hasOwn(descriptor,'value'))throw new TypeError('Uncacheable inspection input.');
+    return captureInspectionData(descriptor.value,active);
+  });
+  active.delete(value);
+  return Object.freeze({array:Array.isArray(value),keys:Object.freeze(keys),values:Object.freeze(values)});
+}
+function matchesInspectionData(value,proof) {
+  if(proof===null||typeof proof!=='object')return Object.is(value,proof);
+  if(!value||typeof value!=='object'||Array.isArray(value)!==proof.array)return false;
+  const keys=inspectionDataKeys(value);
+  if(!keys||keys.length!==proof.keys.length)return false;
+  for(let index=0;index<keys.length;index++){
+    if(keys[index]!==proof.keys[index])return false;
+    const descriptor=Object.getOwnPropertyDescriptor(value,keys[index]);
+    if(!Object.hasOwn(descriptor,'value')||!matchesInspectionData(descriptor.value,proof.values[index]))return false;
+  }
+  return true;
+}
 function proofField(value,key) {
   if(value===null)return null;
   const descriptor=Object.getOwnPropertyDescriptor(value,key);
@@ -202,7 +243,7 @@ function proofField(value,key) {
   if(!Object.hasOwn(descriptor,'value')||descriptor.value===undefined)throw new TypeError('Uncacheable inspection input.');
   return descriptor.value;
 }
-function previousInspectionProof(state,segment,index,prior,solved) {
+function previousInspectionProof(state,segment,index,prior,solved,{typed=false,match=null,capture=false}={}) {
   try {
     if(!ownedFlights.has(solved)||(prior&&!ownedFlights.has(prior.solved)))return null;
     // Only the immediately inspected tail and the prior fields actually read
@@ -217,13 +258,16 @@ function previousInspectionProof(state,segment,index,prior,solved) {
     const priorShot=prior?proofField(proofField(prior.segment,'step'),'shot'):null;
     const priorContext=prior?{solved:ownedFlights.get(prior.solved),actor:proofField(proofField(prior.segment,'shotSemantics'),'playerId'),
       endTimeSeconds:proofField(proofField(priorShot,'physicsV2'),'endTimeSeconds'),receiver:proofField(proofField(priorShot,'authoring'),'receiver')}:null;
-    return strictInspectionJSON({header,firstService,index,terminal:false,solved:ownedFlights.get(solved),prior:priorContext,
+    const projection={header,firstService,index,terminal:false,solved:ownedFlights.get(solved),prior:priorContext,
       segment:{modelVersion:segment.modelVersion,index:segment.index,startTime:segment.startTime,endTime:segment.endTime,
         duration:segment.duration,originalDuration:segment.originalDuration,contactTime:segment.contactTime,
         rallyLeg:segment.rallyLeg,previousPositions:segment.previous.positions,stepId:segment.step.id,
         positions:segment.step.positions,shot:segment.step.shot,
         actor:segment.shotSemantics.playerId,contact:segment.shotSemantics.contact,model2Momentum:segment.model2Momentum,
-        nextContact:next?{playerId:next.playerId,contact:next.contact,sourceContact:segment.nextStep.shot.contact}:null}});
+        nextContact:next?{playerId:next.playerId,contact:next.contact,sourceContact:segment.nextStep.shot.contact}:null}};
+    if(!typed)return strictInspectionJSON(projection);
+    if(match&&matchesInspectionData(projection,match))return match;
+    return capture?captureInspectionData(projection):null;
   }catch{return null;}
 }
 function copyInspection(inspection) {
@@ -267,7 +311,8 @@ export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly
         const prior=previousContext(working),solved=working.solved.at(-1);
         const reusable=trials.get(reusePreviousTrial);
         const mayReuse=reusable?.owner===state&&reusable.revision===state.revision&&reusable.previousAudit;
-        const proof=capturePreviousInspection||mayReuse?previousInspectionProof(working,segment,index-1,prior,solved):null;
+        const proof=capturePreviousInspection||mayReuse?previousInspectionProof(working,segment,index-1,prior,solved,
+          {typed:true,match:mayReuse?reusable.previousAudit.proof:null,capture:capturePreviousInspection}):null;
         if(proof!==null&&reusable?.owner===state&&reusable.revision===state.revision&&reusable.previousAudit?.proof===proof){
           inspection=copyInspection(reusable.previousAudit.inspection);result.previousInspectionReused=true;
         }else inspection=inspectModel2SegmentV2(working.play,segment,{index:index-1,prior,terminal:false,solved});

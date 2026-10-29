@@ -12,14 +12,14 @@ const candidate = (overrides = {}) => {
   const stance = overrides.stance ?? { x: 6, y: 10 };
   return { opportunityId: 'early', actorId: 'player1', sourceIndex: 0, kind: 'volley',
     contact: { x: 6.5, y: 11, heightFeet: 2.2 }, availableSeconds: .8,
-    stance, recoveryPosition: { ...stance }, feasibleReplyIds: ['drop', 'firm-volley'], attackingReplyAvailable: false,
+    stance, contactFeet: [{x:stance.x-.42,y:stance.y},{x:stance.x+.42,y:stance.y}], recoveryPosition: { ...stance }, feasibleReplyIds: ['drop', 'firm-volley'], attackingReplyAvailable: false,
     audit: { legal: true, routeValid: true, feetValid: true, peakFeetPerSecond: 17.95, minimumSpacingFeet: 8 }, ...overrides };
 };
 const select = (candidates, overrides = {}) => rankContactOpportunitiesV1({ players, positions, eligible: ['player1', 'player2'], candidates, ...overrides });
 
 test('proposal preferences order unaudited facts without claiming physical acceptance or rejection', () => {
   const facts = { contact: { x: 19, y: 20, heightFeet: 9 }, stance: { x: 18, y: 19 }, origin: positions.player1,
-    team: 'green', feasibleReplyIds: [], attackingReplyAvailable: false, availableSeconds: .01,
+    team: 'green', contactFeet: [{x:17.58,y:19},{x:18.42,y:19}], feasibleReplyIds: [], attackingReplyAvailable: false, availableSeconds: .01,
     audit: { legal: false, routeValid: false, feetValid: false, peakFeetPerSecond: 999 }, quality: 'excellent', outcome: { winner: 'green' } };
   const preference = contactOpportunityPreferenceV1(facts);
   assert.equal(preference.supportedReplyCount, 0); assert.equal(preference.contactHeightFeet, 9);
@@ -38,7 +38,7 @@ test('the proposal preference exactly matches final audited preference and order
   const rows = [candidate(), candidate({ opportunityId: 'later', sourceIndex: 1, availableSeconds: 1.1,
     contact: { x: 6.5, y: 10, heightFeet: .2 }, kind: 'groundstroke' })];
   const proposals = rows.map(row => ({ opportunityId: row.opportunityId, preference: contactOpportunityPreferenceV1({
-    contact: row.contact, stance: row.stance, origin: positions[row.actorId], team: players[row.actorId].team,
+    contact: row.contact, stance: row.stance, contactFeet: row.contactFeet, origin: positions[row.actorId], team: players[row.actorId].team,
     feasibleReplyIds: row.feasibleReplyIds, attackingReplyAvailable: row.attackingReplyAvailable, availableSeconds: row.availableSeconds,
   }) })).sort(compareContactOpportunityPreferencesV1);
   const final = select(rows);
@@ -54,7 +54,7 @@ test('a higher early reachable opportunity beats a late floor contact using prec
   assert.equal(result.chosen.preference.heightClass, 'neutral');
   assert.equal(result.ranked[1].preference.heightClass, 'low');
   assert.equal(result.comparisons[0].reason, 'better-supported-height-class');
-  assert.deepEqual(result.chosen.criterionVector, [1, 2, -4.25, 2, 2.2, -.8]);
+  assert.deepEqual(result.chosen.criterionVector, [1, -0, 2, -4.25, 2, 2.2, -.8]);
 });
 
 test('actual peak, spacing, feet, route and legality failures discard an attractive early contact', () => {
@@ -121,7 +121,7 @@ test('above-net geometry gains attack priority only with an actual attacking rep
   assert.equal(unsupported.chosen.opportunityId, 'advanced');
   assert.equal(unsupported.ranked[1].preference.geometryHeightBand, 'above-net');
   assert.equal(unsupported.ranked[1].preference.heightClass, 'neutral');
-  assert.equal(unsupported.comparisons[0].reason, 'more-forward-progress');
+  assert.equal(unsupported.comparisons[0].reason, 'more-ready-line-improvement');
   const supported = select([{ ...high, attackingReplyAvailable: true }, advanced]);
   assert.equal(supported.chosen.opportunityId, 'early'); assert.equal(supported.chosen.preference.heightClass, 'attack');
   assert.equal(supported.comparisons[0].reason, 'better-supported-height-class');
@@ -168,9 +168,9 @@ test('source order and unknown soft labels cannot alter selection or leak into i
 
 test('orange progress and recovery use the same court-relative criteria', () => {
   const mirror = row => ({ ...row, actorId: 'player3', contact: { ...row.contact, y: 44 - row.contact.y },
-    stance: { ...row.stance, y: 44 - row.stance.y }, recoveryPosition: { ...row.recoveryPosition, y: 44 - row.recoveryPosition.y } });
+    stance: { ...row.stance, y: 44 - row.stance.y }, contactFeet: row.contactFeet.map(foot=>({...foot,y:44-foot.y})), recoveryPosition: { ...row.recoveryPosition, y: 44 - row.recoveryPosition.y } });
   const result = select([mirror(candidate())], { eligible: ['player3', 'player4'] });
-  assert.equal(result.chosen.preference.forwardProgressFeet, 2);
+  assert.equal(result.chosen.preference.readyLineImprovementFeet, 2);
   assert.equal(result.chosen.preference.recoveryLineDistanceFeet, 4.25);
 });
 
