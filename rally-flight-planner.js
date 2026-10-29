@@ -218,11 +218,15 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
   // Every hint is projected into an already feasible interval. Reserve both
   // boundaries so a preferred chord cannot consume the whole call budget.
   for (const [a, b] of intervals) { add(a); add(b); }
+  const analyticScores = new Map();
   const analyticScore = time => {
+    if (analyticScores.has(time)) return analyticScores.get(time);
     const vy = delta / time + G * time / 2, height = planeBase + planeFactor * time * time;
-    return preferencesEvidence({ speedMph: Math.sqrt(chordSquared / (time * time) + G * delta + G * G * time * time / 4) / MPH,
+    const score = preferencesEvidence({ speedMph: Math.sqrt(chordSquared / (time * time) + G * delta + G * G * time * time / 4) / MPH,
       clearanceFeet: height - R - tape, apexFeet: from.heightFeet + Math.max(0, vy) ** 2 / (2 * G),
       launchVerticalFeetPerSecond: vy, contactHeightFeet: from.heightFeet }, rankingHints, ranges).preferenceScore;
+    analyticScores.set(time, score);
+    return score;
   };
   const projected = rawTimes.flatMap(time => intervals.map(([a, b]) => clamp(time, a, b))).filter(Number.isFinite)
     .sort((a, b) => analyticScore(a) - analyticScore(b) || a - b);
