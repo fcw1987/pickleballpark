@@ -46,20 +46,20 @@ export const STYLE_PROFILES = freeze({
   pro: profile('pro', 'Pro', .95, {}, [
     [.006, .01, .12, .07], [.018, .02, .10, .08], [.045, .08, .13, .15],
     [.10, .12, .10, .20], [.14, .11, .12, .18], [.18, .15, .13, .05], [.12, .17, .07, .12]
-  ], .15, .07, { erneWeight: 4, aroundPostWeight: 1 }),
+  ], .15, .085, { erneWeight: 4, aroundPostWeight: 1 }),
   advanced: profile('advanced', 'Advanced 4.0', .8, {
     third: { 'third-shot-drop': 50, 'third-shot-drive': 48, lob: 2 },
     kitchen: { 'cross-court-dink': 40, 'middle-dink': 28, 'straight-dink': 14, 'backhand-dink': 9, lob: 5, 'speed-up': 4 }
   }, [
     [.012, .03, .08, .08], [.03, .06, .08, .10], [.09, .13, .09, .15],
     [.16, .16, .08, .18], [.22, .15, .08, .16], [.24, .18, .10, .05], [.18, .20, .05, .10]
-  ], .17, .11, { erneWeight: 3, aroundPostWeight: .7 }),
+  ], .17, .13, { erneWeight: 3, aroundPostWeight: .7 }),
   intermediate: profile('intermediate', 'Intermediate 3.0', .63, {
     third: { 'third-shot-drop': 48, 'third-shot-drive': 49, lob: 3 },
     kitchen: { 'cross-court-dink': 37, 'middle-dink': 27, 'straight-dink': 15, 'backhand-dink': 9, lob: 8, 'speed-up': 4 }
   }, [
     [.025, .04, .05, .08], [.05, .08, .05, .09], [.14, .17, .06, .13],
-    [.20, .19, .05, .15], [.28, .20, .05, .14], [.29, .20, .07, .04], [.22, .24, .03, .08]
+    [.18, .19, .05, .15], [.28, .20, .05, .14], [.29, .20, .07, .04], [.22, .24, .03, .08]
   ], .19, .14, { erneWeight: 1, aroundPostWeight: .25 }),
   beginner: profile('beginner', 'Beginner', .35, {
     third: { 'third-shot-drop': 35, 'third-shot-drive': 60, lob: 5 },
