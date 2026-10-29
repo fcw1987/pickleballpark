@@ -287,6 +287,19 @@ function declarationMatches(play, decision, violations) {
 
 // Bounded planner inspection uses exactly the production per-segment checks.
 // Public full validation still solves and checks every source leg independently.
+export function inspectModel2ContactV2(play,segment,{index=segment.rallyLeg-1,prior=null,solved=null}={}) {
+  const violations=[];
+  try {
+    solved=solved||solveFlightV2(segment.step.shot.physicsV2);
+    verifySegment(play,segment,solved,prior,index,violations);
+    const contact=contactCandidates(play,segment,index,violations);
+    return {solved,violations,physicalCandidates:contact.candidates,momentumCandidates:contact.momentumCandidates};
+  }catch(error){
+    violations.push(violation(play,'invalid-physics',error.message,segment,segment.shotSemantics?.playerId,'model'));
+    return {solved,violations,physicalCandidates:[],momentumCandidates:[]};
+  }
+}
+
 export function inspectModel2SegmentV2(play, segment, {index=segment.rallyLeg-1,prior=null,terminal=false,solved=null}={}) {
   const violations=[];
   try {

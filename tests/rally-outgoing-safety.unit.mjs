@@ -96,3 +96,17 @@ test('controlled execution-error counterpart retains the genuine body fault',()=
   assert.ok(body);assert.equal(body.struckActor,'player1');assert.equal(body.faultingActor,'player1');
   assert.ok(Math.abs(body.afterContactSeconds-.070978864)<1e-8);
 });
+
+test('Pro 53 selects an earlier legal contact instead of committing the interceptor/rule boundary gap',async()=>{
+  const input={seed:53,...clone(archived.generation.input)};
+  input.service={server:'player1',receiver:'player3',court:'left',courtConvention:'server-perspective-v1'};
+  delete input.layout; // Use this service's ordinary cohort layout, not seed31's opposite-end setup.
+  const result=await simulateRally(input);
+  assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
+  auditAccepted(result);
+  const compiled=compileDocument(result.document),prior=compiled.timeline.segments[3];
+  assert.ok(prior.step.shot.physicsV2.endTimeSeconds<prior.trajectory.solved.secondBounceTime-1e-7,
+    'the accepted fifth contact must satisfy the unchanged independent rule guard');
+  assert.ok(result.document.shots[4].contactTiming.afterBounceSeconds<.621212559-1e-7,
+    'the engine must leave the preserved near-second-bounce proposal and choose earlier geometry');
+});

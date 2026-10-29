@@ -2,7 +2,7 @@
 // construction as compilation; the driver independently validates final source.
 import { createEngineDriverV1 } from './rally-engine-driver.js';
 import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS } from './rally-recipe.js';
-import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPendingEventsV2, inspectPlanningTrialBodyV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
+import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPendingEventsV2, inspectPlanningTrialBodyV2, inspectPlanningTrialContactV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
 import { solveFlightV2, interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
 import { eligibleHitters, contactRequiresBounce, resolveServiceContext, teamForPlayer } from './rally-state.js';
@@ -311,6 +311,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                     catch (error) {
                         if (!(error instanceof TypeError || error instanceof RangeError)) throw error;
                         exclusions.push({ id: reply.id, reason: error.message,
+                            ...(error.contactFindings ? { contactFindings: error.contactFindings } : {}),
                             ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
                     }
                 }
@@ -391,6 +392,12 @@ function friendlyActors(input, hitter) {
 
 function checkFriendlyTrial(input, state, pair, trial) {
     const actors = friendlyActors(input, pair.id);
+    const contact = inspectPlanningTrialContactV2(state, trial);
+    const contactFindings = [...contact.violations, ...contact.physicalCandidates, ...contact.momentumCandidates];
+    if (contactFindings.length) {
+        const error = new RangeError('The nominal reply contact does not pass independent model-2 contact rules.');
+        error.contactFindings = contactFindings; throw error;
+    }
     const bodyEvents = inspectPlanningTrialBodyV2(state, trial, { actors });
     if (bodyEvents.length) {
         const error = new RangeError('The nominal outgoing flight intersects the planted hitter or partner.');
@@ -579,6 +586,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         if (error.guidance) await checkpoint({ shots: index, workDelta: error.guidance.trials.length });
                         diagnostics.rejections++; diagnostics.targetRepairs++;
                         choiceAttempt.repairs.push({ repair, targetDraws, perturbationDraws, reason: error.message,
+                            ...(error.contactFindings ? { contactFindings: generatedV1(error.contactFindings) } : {}),
                             ...(error.guidance ? { deliveredGuidance: generatedV1(error.guidance) } : {}),
                             ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
                         diagnostics.failures.push({ shot: index + 1, intent: chosen.id, repair, reason: error.message });

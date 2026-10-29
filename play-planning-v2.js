@@ -4,7 +4,7 @@ import { compilePlayTimeline, resolveShotSemantics, boardToWorld, STROKE_PROFILE
 import { REACH_MODEL } from './rally-tactics.js';
 import { solveFlightV2, interceptFlightV2, solveServePreparationV2, PHYSICS_VERSION } from './play-physics-v2.js';
 import { createModel2SegmentV2, holdModel2TerminalSegmentV2 } from './play-timeline-v2.js';
-import { inspectModel2SegmentV2, inspectBodyPathV2, resolveModel2OutcomeCandidates, derivedOutcomeForDecisionV2, analyzeModel2Outcome } from './play-outcome-v2.js';
+import { inspectModel2SegmentV2, inspectModel2ContactV2, inspectBodyPathV2, resolveModel2OutcomeCandidates, derivedOutcomeForDecisionV2, analyzeModel2Outcome } from './play-outcome-v2.js';
 import { teamForPlayer } from './rally-state.js';
 
 export const PLANNING_VERSION = 'play-planning-v2';
@@ -376,6 +376,12 @@ function verifiedTrialNext(state,trial) {
 export function inspectPlanningTrialBodyV2(state,trial,{actors}={}) {
   const next=verifiedTrialNext(state,trial);
   return inspectBodyPathV2(next.pendingSegment,next.solved.at(-1),actors);
+}
+
+export function inspectPlanningTrialContactV2(state,trial) {
+  const next=verifiedTrialNext(state,trial);
+  return inspectModel2ContactV2(next.play,next.pendingSegment,{index:next.solved.length-1,
+    prior:previousContext(next),solved:next.solved.at(-1)});
 }
 
 export function finishPlanningV2(state,{ending=state.play.ending,outcome=null,deriveOutcome=true,compileTimeline=false}={}) {

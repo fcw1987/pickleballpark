@@ -138,6 +138,10 @@ check before execution. Non-error delivery is checked again after perturbation;
 sampled errors retain genuine body faults. Existing saved faults are never
 exempted or rewritten. Decision analysis records the selected nominal flight
 and actor-route evidence separately from execution and its outcome.
+The current candidate contact also passes the shared contact-rule checks before
+commit. An interception accepted by the solver's numerical bound must still
+satisfy the stricter rule guard before the second bounce; neither tolerance is
+relaxed and a rejected proposal may yield to an earlier legal opportunity.
 
 `resolveDeliveredFlightV1` measures the solved speed, clearance and landing after
 execution. A non-error speed-up or counter above 45 mph tries ten explicit
