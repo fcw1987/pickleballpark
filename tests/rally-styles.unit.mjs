@@ -19,7 +19,7 @@ test('all sixteen profiles have bounded weights and coherent execution probabili
     const value = resolveStyle(style, flavour);
     assert.equal(validateStyleProfile(value), value);
     assert.equal(value.id, style); assert.equal(value.flavour, flavour);
-    assert.equal(value.settledSoftError, { pro: .085, advanced: .13, intermediate: .14, beginner: .18 }[style]);
+    assert.equal(value.settledSoftError, { pro: .07, advanced: .11, intermediate: .14, beginner: .18 }[style]);
     for (const row of Object.values(value.weights)) {
       assert.ok(Object.values(row).every(weight => Number.isFinite(weight) && weight >= 0));
       assert.ok(Object.values(row).some(weight => weight > 0));
