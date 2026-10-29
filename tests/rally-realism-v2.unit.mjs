@@ -213,6 +213,13 @@ test('runner archives no-document results and replay does not call generation', 
   const replay = await runRealismV2({ jobs, records, generate: () => { throw Error('must not run'); } });
   assert.equal(replay.generationReplayedFromArchive, true);
   assert.deepEqual(replay.summary, report.summary);
+  const historical=copy(records);
+  for(const record of historical) record.result.recipe.flightPlannerVersion='rally-flight-planner-v1';
+  const before=JSON.stringify(historical);
+  const oldReplay=await runRealismV2({jobs,records:historical,generate:()=>{throw Error('must not regenerate old request');}});
+  assert.deepEqual(oldReplay.summary,report.summary);
+  assert.deepEqual(oldReplay.versions.sourceVersions.flightPlannerVersion,['rally-flight-planner-v1']);
+  assert.equal(JSON.stringify(historical),before);
   await assert.rejects(runRealismV2({ jobs, records: [records[0], records[0]] }), /unique/);
 });
 

@@ -79,7 +79,8 @@ progress or installs a point.
 A selected result's recipe equals `document.generation`. It records engine,
 policy, flight-planner and physics versions, normalized original settings, seed and selection.
 New generation uses `rally-policy-v2` with `rally-flight-planner-v2`. Older
-`rally-policy-v1` origins retain their exact shape without a planner marker;
+`rally-policy-v1` origins retain their exact shape without a planner marker,
+and planner-v1 origins retain that marker and their historical generation envelope;
 opening, importing and saving them never upgrades or regenerates their shots.
 No-document request records instead have `selection: null`, deliberately invalid
 as persisted document provenance. Styles live in the input recipe, while saved
@@ -157,6 +158,13 @@ launch/apex/route bounds, then tries at most six deterministic preferred/boundar
 times through the unchanged `solveFlightV2`. It replaces the cascading clearance
 searches. Clearance, speed and apex are measured together rather than imposed as
 independent equalities. Around-post flights retain the same post geometry.
+Support probes and pre-choice catalog checks rank the same bounded candidates
+through the shared authoritative launch calculation, then fully materialize only
+the preferred flight. Other timings are marked unmaterialized, never audited
+successes. Diagnostics distinguish launch evaluations, full materializations and
+combined work; both kinds count toward cooperative work limits. Selected target
+and delivery construction retain their bounded alternatives and independent
+physical checks. No cached planner flight bypasses compiler construction.
 
 Generation ceilings are modeling defaults, not human limits or rules: serve 40,
 return 36, drive 45 Pro / 38 other styles, dink 20, reset 24, drop 26, lob 28, and firm
@@ -167,8 +175,8 @@ ordinary overhead stays downward. Non-error family shape ceilings are the
 actual contact height or one foot above the preferred upper apex, whichever is
 higher: ordinary dinks 5.2, attackable dinks 6.5, drives 6, drops 8, resets and
 ordinary volleys 5.5, serves/returns 9 and lobs 23 feet. These version-2 generation
-guards preserve older planner-v1 origins and explicit saved replay. A sampled lob error can hit the mesh without
-being forced into an ideal high arc. No generation restriction is retroactive
+guards preserve older planner-v1 origins and explicit saved replay. A sampled
+lob error can hit the mesh without being forced into an ideal high arc. No generation restriction is retroactive
 validation of an existing saved point.
 
 A chosen nominal target, solved flight and friendly route are established before
@@ -177,7 +185,9 @@ a second supported target within the same intended region may improve preferred
 speed. Once sampled, quality, error and perturbation draws stay fixed. The first
 constructible delivered timing is inspected once for actual physical events; a
 genuine fault is adjudicated regardless of the quality label, without searching
-later timings to avoid it. An unequivocal own-side body hit finishes through the
+later timings to avoid it. Nominal lanes must clear the mesh; delivered admission
+permits a supported mesh hit under the same quality-specific speed and shape
+bounds, without granting an error allowance or relabeling neutral execution. An unequivocal own-side body hit finishes through the
 shared terminal path; a projected later opponent body hit cannot preempt an
 earlier legal paddle interception. Unsupported construction returns `unsupported-execution`
 with preserved evidence and no selected point, never a new quality roll or a
@@ -191,7 +201,9 @@ The final public compiler consumes the serialized nine-decimal source. A separat
 apex, signed launch and ground time for every family, including errors. It does
 not trust a planner acceptance flag and leaves old playback/import equations
 unchanged. Fresh output needs this audit as well as existing source, rules,
-movement, spacing and terminal checks.
+movement, spacing and terminal checks. Immutable planner analysis nodes are quantized once
+per synchronous evidence observation; mutable planning/source copies keep their
+existing behavior. The driver detaches returned analysis from committed source.
 
 The fifth-shot 66/31 drop/firm-volley row remains the marginal source reference.
 An explicit air-contact conditional row uses 58/40, with the remainder divided

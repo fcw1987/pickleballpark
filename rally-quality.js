@@ -244,7 +244,8 @@ export function resolveDeliveredFlightV1({ candidate, contact, team, execution, 
     .filter(key => Number.isFinite(applied.physics?.[key])).map(key => [key, applied.physics[key]]));
   const planner = planRallyFlightV1({ from: contact, target: applied.target, family: candidate.family, intent, style,
     quality: execution.quality, pace: applied.pace ?? candidate.pace ?? 'medium', arc: applied.arc ?? candidate.arc ?? 'medium',
-    preferred, route, errorReason: execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null });
+    preferred, route, allowNetFault: true,
+    errorReason: execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null });
   const shared = { version: DELIVERED_FLIGHT_VERSION, plannerVersion: planner.plannerVersion,
     accepted: planner.status === 'solved', source: { target: { ...applied.target }, preferredFlight: { ...preferred } },
     trials: planner.diagnostics.trials, maximumTrials: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET,

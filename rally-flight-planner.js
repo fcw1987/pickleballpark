@@ -1,6 +1,6 @@
 // Generation policy only. Saved Model 1/2 source and the authoritative solver
 // keep their existing equations and interpretation.
-import { PHYSICS_V2, solveFlightV2, localNetHeightFeet } from './play-physics-v2.js';
+import { PHYSICS_V2, solveFlightV2, solveFlightLaunchV2, localNetHeightFeet } from './play-physics-v2.js';
 
 export const FLIGHT_PLANNER_VERSION = 'rally-flight-planner-v2';
 export const MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET = 6;
@@ -111,6 +111,14 @@ function measurements(flight) {
     terminalReason: flight.terminal?.reason ?? null,
   };
 }
+const PREFERENCE_SCALE = { speedMph: 10, clearanceFeet: 1, apexFeet: 3, launchVerticalFeetPerSecond: 15 };
+function preferenceScore(actual, preferred, ranges) {
+  const preferredSum = Object.entries(preferred).reduce((sum, [metric, requested]) => sum
+    + Math.min(1e100, Math.abs(actual[metric] - requested) / PREFERENCE_SCALE[metric]), 0);
+  const rangeSum = Object.entries(ranges).reduce((sum, [metric, range]) => sum
+    + .1 * Math.abs(actual[metric] - clamp(actual[metric], range[0], range[1])) / (PREFERENCE_SCALE[metric] ?? 3), 0);
+  return preferredSum + rangeSum;
+}
 function preferencesEvidence(actual, preferred, ranges) {
   const departures = Object.entries(preferred).map(([metric, requested]) => ({
     metric, requested, actual: actual[metric], departure: actual[metric] - requested,
@@ -128,11 +136,14 @@ function preferencesEvidence(actual, preferred, ranges) {
   return { preferredDepartures: departures, rangeDepartures, preferenceScore: score };
 }
 
-/** One exact landing target, at most six authoritative solves. Preferred
- * values are ranked hints; feasibility always precedes preference. No RNG,
- * cache, inverse-clearance solver, target repair or outcome relabeling. */
+/** One exact landing target, at most six full authoritative solves. First-only
+ * mode ranks the same bounded candidates with authoritative launch solves.
+ * Preferred values are ranked hints; feasibility always precedes preference.
+ * No RNG, inverse-clearance solver, target repair or outcome relabeling. */
 export function planRallyFlightV1({ from, target, family, intent = null, style = 'advanced', quality = 'neutral',
-  pace = 'medium', arc = 'medium', preferred = {}, route = 'over-net', errorReason = null } = {}) {
+  pace = 'medium', arc = 'medium', preferred = {}, route = 'over-net', errorReason = null, materialization = 'all', allowNetFault = false } = {}) {
+  if (typeof allowNetFault !== 'boolean') throw new TypeError('allowNetFault must be a boolean.');
+  if (!['all', 'first'].includes(materialization)) throw new RangeError('Unsupported flight materialization mode.');
   from = boundPoint(from, 'from', true); target = boundPoint(target, 'target');
   if (!FAMILIES.includes(family)) throw new RangeError('Unsupported generation flight family.');
   family = normalize(family);
@@ -158,7 +169,7 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
     || ['firm-volley', 'speed-up', 'counter', 'put-away'].includes(family));
   const minimumSpeedMph = fast ? 22 : 0, ranges = preferredRanges(family, intent, quality, styleId);
   const diagnostics = { speedCeilingMph, familyCeilingMph: familyCeiling, minimumSpeedMph, maximumApexFeet,
-    maxSolverCalls: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET, solverCalls: 0, feasibleTimeIntervals: [], trials: [], reason: null };
+    maxSolverCalls: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET, solverCalls: 0, launchSolverCalls: 0, workUnits: 0, materialization, allowNetFault, launchCandidates: [], feasibleTimeIntervals: [], trials: [], reason: null };
   const unavailable = reason => freeze({ status: 'unavailable', plannerVersion: FLIGHT_PLANNER_VERSION,
     physics: null, flight: null, solutions: [], diagnostics: { ...diagnostics, reason } });
   const fraction = (22 - from.y) / (target.y - from.y);
@@ -188,11 +199,11 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
       low = Math.max(low, timeForPlaneHeight(tape - 2.5 - R + HEIGHT_MARGIN));
       if (!(tape + R - HEIGHT_MARGIN > planeBase)) return unavailable('The exact chord lies above the intended net mesh collision.');
       high = Math.min(high, timeForPlaneHeight(tape + R - HEIGHT_MARGIN));
-    } else if (!isError || !mesh) {
+    } else if ((!isError && !allowNetFault) || !mesh) {
       low = Math.max(low, timeForPlaneHeight(tape + R + HEIGHT_MARGIN));
     } else {
-      // Long/wide errors may hit the mesh first, but unsupported under-net,
-      // net-gap and post paths are never presented as those chosen outcomes.
+      // Fixed deliveries and long/wide errors may hit mesh first. Unsupported
+      // under-net, net-gap and post paths remain unavailable.
       low = Math.max(low, timeForPlaneHeight(tape - 2.5 - R + HEIGHT_MARGIN));
     }
     if (post) low = Math.max(low, timeForPlaneHeight(3 + R + HEIGHT_MARGIN));
@@ -234,9 +245,9 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
   const analyticScore = time => {
     if (analyticScores.has(time)) return analyticScores.get(time);
     const vy = delta / time + G * time / 2, height = planeBase + planeFactor * time * time;
-    const score = preferencesEvidence({ speedMph: Math.sqrt(chordSquared / (time * time) + G * delta + G * G * time * time / 4) / MPH,
+    const score = preferenceScore({ speedMph: Math.sqrt(chordSquared / (time * time) + G * delta + G * G * time * time / 4) / MPH,
       clearanceFeet: height - R - tape, apexFeet: from.heightFeet + Math.max(0, vy) ** 2 / (2 * G),
-      launchVerticalFeetPerSecond: vy, contactHeightFeet: from.heightFeet }, rankingHints, ranges).preferenceScore;
+      launchVerticalFeetPerSecond: vy, contactHeightFeet: from.heightFeet }, rankingHints, ranges);
     analyticScores.set(time, score);
     return score;
   };
@@ -245,26 +256,54 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
   for (const time of projected) { if (candidates.length >= MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET) break; add(time); }
   candidates.sort((a, b) => analyticScore(a) - analyticScore(b) || a - b);
   const solutions = [];
-  for (const time of candidates.slice(0, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET)) {
-    const physics = { launchVerticalFeetPerSecond: Number((delta / time + G * time / 2).toFixed(9)) || 0 };
-    diagnostics.solverCalls++;
-    const flight = solveFlightV2({ from, target, family, quality, pace, arc, physics });
-    const actual = measurements(flight), crossing = flight.events.find(e => e.type === 'net-crossing');
+  const rejectionReason = (actual, obstruction, crossing) => {
     let reason = null;
     if (actual.speedMph > speedCeilingMph || actual.speedMph < minimumSpeedMph) reason = 'Actual launch speed violates the generation envelope.';
     else if (actual.apexFeet < from.heightFeet || actual.apexFeet > maximumApexFeet || actual.launchVerticalFeetPerSecond < -80 || actual.launchVerticalFeetPerSecond > 80) reason = 'Actual vertical shape violates the generation envelope.';
     else if (family === 'overhead' && actual.launchVerticalFeetPerSecond > 0) reason = 'An overhead must launch downward.';
     else if (family === 'lob' && !isError && from.heightFeet < 15 && actual.apexFeet < 15) reason = 'A lob must retain a meaningful high apex.';
-    else if (errorReason === 'net' && flight.obstruction?.kind !== 'net') reason = 'The intended net error does not hit net mesh.';
-    else if (flight.obstruction && !isError) reason = 'The actual non-error flight is obstructed.';
-    else if (flight.obstruction && flight.obstruction.kind !== 'net') reason = 'Unsupported under-net, net-gap or post policy construction.';
-    else if (!flight.obstruction && (!crossing || Boolean(crossing.aroundPost) !== (route === 'around-the-post'))) reason = 'The actual flight does not satisfy the requested route.';
+    else if (errorReason === 'net' && obstruction?.kind !== 'net') reason = 'The intended net error does not hit net mesh.';
+    else if (obstruction && !isError && !(allowNetFault && obstruction.kind === 'net')) reason = 'The actual non-error flight is obstructed.';
+    else if (obstruction && obstruction.kind !== 'net') reason = 'Unsupported under-net, net-gap or post policy construction.';
+    else if (!obstruction && (!crossing || Boolean(crossing.aroundPost) !== (route === 'around-the-post'))) reason = 'The actual flight does not satisfy the requested route.';
+    return reason;
+  };
+  let ranked = candidates.slice(0, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET).map(time => ({ time,
+    physics: { launchVerticalFeetPerSecond: Number((delta / time + G * time / 2).toFixed(9)) || 0 } }));
+  if (materialization === 'first') {
+    ranked = ranked.map(candidate => {
+      diagnostics.launchSolverCalls++; diagnostics.workUnits++;
+      const launch = solveFlightLaunchV2({ from, target, family, quality, pace, arc, physics: candidate.physics });
+      const t = (22 - launch.from.y) / launch.first.vz, x = launch.from.x + launch.first.vx * t;
+      const planeHeight = launch.from.heightFeet + launch.first.vy * t - .5 * G * t * t;
+      const actual = { speedMph: launch.launchSpeedMph, apexFeet: launch.apexFeet,
+        launchVerticalFeetPerSecond: launch.vy, contactHeightFeet: launch.from.heightFeet,
+        flightTimeSeconds: timeForVertical(launch.first.vy, launch.from.heightFeet),
+        clearanceFeet: planeHeight - R - localNetHeightFeet(x) };
+      const reason = rejectionReason(actual, launch.obstruction, launch.events.find(e => e.type === 'net-crossing'));
+      const diagnostic = { timeSeconds: candidate.time, physics: { ...candidate.physics },
+        status: reason ? 'launch-rejected' : 'not-materialized', reason };
+      diagnostics.launchCandidates.push(diagnostic);
+      return { ...candidate, diagnostic, reason, preferenceScore: preferenceScore(actual, rankingHints, ranges),
+        flightTimeSeconds: actual.flightTimeSeconds };
+    }).filter(candidate => !candidate.reason).sort((a, b) => a.preferenceScore - b.preferenceScore
+      || a.flightTimeSeconds - b.flightTimeSeconds);
+  }
+  for (const { time, physics, diagnostic } of ranked) {
+    diagnostics.solverCalls++; diagnostics.workUnits++;
+    const flight = solveFlightV2({ from, target, family, quality, pace, arc, physics });
+    const actual = measurements(flight), crossing = flight.events.find(e => e.type === 'net-crossing');
+    const reason = rejectionReason(actual, flight.obstruction, crossing);
+    if (diagnostic) diagnostic.status = 'materialized';
     const preferences = preferencesEvidence(actual, rankingHints, ranges);
     const evidence = { plannerVersion: FLIGHT_PLANNER_VERSION, actual, ...preferences,
       requestedPreferred: { ...hints }, effectivePreferred: { ...rankingHints }, speedCeilingMph, minimumSpeedMph,
       intendedError: errorReason, route, target: { ...target } };
     diagnostics.trials.push({ timeSeconds: time, physics: { ...physics }, accepted: reason === null, reason, actual });
-    if (!reason) solutions.push({ physics, flight, evidence });
+    if (!reason) {
+      solutions.push({ physics, flight, evidence });
+      if (materialization === 'first') break;
+    }
   }
   solutions.sort((a, b) => a.evidence.preferenceScore - b.evidence.preferenceScore
     || a.evidence.actual.flightTimeSeconds - b.evidence.actual.flightTimeSeconds);

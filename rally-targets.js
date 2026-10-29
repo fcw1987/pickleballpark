@@ -144,7 +144,7 @@ export function resolveTargetV1({ candidate, situation, players, draws }) {
 
 /** Choose a bounded coherent flight. Section 7 values are preferences; the
  * shared planner jointly chooses time, speed and vertical shape. */
-export function resolveFlightParametersV1({ candidate, contact, target, team, quality = 'neutral', style = 'advanced', route = 'over-net' }) {
+export function resolveFlightParametersV1({ candidate, contact, target, team, quality = 'neutral', style = 'advanced', route = 'over-net', materialization = 'all' }) {
   assertNominal(candidate); assertTeam(team);
   if (candidate.physics !== undefined) throw new TypeError('Choose nominal policy physics or an explicit planned flight, not both.');
   const from = point(contact, 'contact', true), landing = point(target, 'target');
@@ -156,7 +156,7 @@ export function resolveFlightParametersV1({ candidate, contact, target, team, qu
     : candidate.family === 'overhead' ? { launchVerticalFeetPerSecond: -18, speedMph: 40 }
       : CLEARANCE_PRIORS_V1[candidate.family] === undefined ? {} : { clearanceFeet: CLEARANCE_PRIORS_V1[candidate.family] };
   const planner = planRallyFlightV1({ from, target: landing, family: candidate.family, intent: candidate.intent ?? null,
-    pace: candidate.pace ?? 'medium', arc: candidate.arc ?? 'medium', quality, style, preferred, route });
+    pace: candidate.pace ?? 'medium', arc: candidate.arc ?? 'medium', quality, style, preferred, route, materialization });
   if (planner.status !== 'solved') {
     const error = new RangeError(`Nominal flight unavailable: ${planner.diagnostics.reason}`);
     error.plannerDiagnostics = planner.diagnostics;

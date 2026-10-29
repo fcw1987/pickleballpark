@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { solveFlightV2 } from '../play-physics-v2.js';
 import { generationFlightApexCeilingFeetV2 } from '../rally-flight-planner.js';
 import { assessGeneratedFlightFeasibilityV1 } from '../rally-flight-audit.js';
-import { simulateRally } from '../rally-engine.js';
+import { simulateRally, runNaturalAttemptV1 } from '../rally-engine.js';
+import { normalizeRallyInputV1 } from '../rally-recipe.js';
+import { createRallyRandomV1 } from '../rally-random.js';
+import { validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPlanningTrialEventsV2 } from '../play-planning-v2.js';
@@ -88,4 +91,25 @@ for(const row of archivedInputs) test(`${row.name} exact archived input complete
     assert.ok(Math.abs(result.outcome.evidence.afterContactSeconds-.056527514)<1e-9);
     assert.equal(last.execution.quality,'neutral');assert.equal(last.resolution.solutionIndex,0);
   }
+});
+
+
+test('a fixed neutral reset may hit the mesh within its shape cap without resampling or a fake error label',async()=>{
+  const request=normalizeRallyInputV1({seed:22,options:{lengthFeel:'epic'}}),attemptSeed=1549107850;
+  const result=await runNaturalAttemptV1(request,{attemptIndex:20,attemptSeed,random:createRallyRandomV1(attemptSeed),checkpoint:async()=>{}});
+  assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
+  assert.equal(result.document.shots.length,7);assert.equal(result.outcome.reason,'net');
+  assert.equal(result.outcome.shotId,'shot-7');
+  validateDocument(result.document);
+  const {compiled}=independent(result),last=result.decisions.at(-1),source=result.document.shots.at(-1);
+  assert.equal(last.chosen.family,'reset');assert.equal(last.execution.quality,'neutral');
+  assert.equal(last.execution.errorReason,null);assert.equal(source.quality,'neutral');
+  assert.deepEqual(last.draws.execution,{quality:.8444628245197237,error:.3883689953945577});
+  assert.equal(last.resolution.solutionIndex,0);
+  assert.equal(last.resolution.choiceAttempts.filter(x=>x.executionDraws).length,1);
+  assert.deepEqual(last.resolution.choiceAttempts.at(-1).repairs,[]);
+  const flight=compiled.timeline.segments.at(-1).trajectory.solved;
+  assert.equal(flight.obstruction.kind,'net');assert.ok(flight.launchSpeedMph<=24);
+  assert.ok(flight.metadata.apexFeet<=5.5);
+  assert.equal(assessGeneratedFlightFeasibilityV1({document:result.document,compiled}).status,'PASS');
 });

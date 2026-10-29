@@ -249,3 +249,74 @@ test('v2 non-error family apex ceilings constrain every admitted alternative and
     }
   }
 });
+
+test('first materialization matches eager authoritative selection with bounded honest diagnostics', () => {
+  const inputs = archived.map(fixture => fixture.input);
+  for (const family of ['serve', 'return', 'drive', 'dink', 'reset', 'drop', 'lob', 'volley', 'overhead']) {
+    for (const heightFeet of [family === 'overhead' ? 4 : .6, 8.5]) inputs.push({ family,
+      from: { x: 7, y: family === 'dink' ? 17 : family === 'drive' ? 8 : 14, heightFeet },
+      target: { x: 11, y: family === 'dink' ? 27 : family === 'drive' ? 36 : 35 } });
+  }
+  inputs.push({ ...archived.find(f => f.id === 'dink-nonerror').input, target: { x: 10, y: 27 } });
+  for (const name of ['around-the-post', 'erne']) {
+    const shot = readFixture(`model2/${name}.json`).shots[0];
+    inputs.push({ from: { ...shot.contactOverride, heightFeet: 2.2 }, target: { ...shot.target }, family: shot.family,
+      intent: shot.intent, pace: shot.pace, arc: shot.arc, preferred: shot.physics, route: name === 'around-the-post' ? name : 'over-net' });
+  }
+  inputs.push(normal, { ...normal, preferred: { speedMph: Number.MAX_VALUE, apexFeet: Number.MAX_VALUE } },
+    { ...normal, target: { x: 11, y: 20 } }, { from: { x: -8, y: -8, heightFeet: .2 }, target: { x: 28, y: 52 }, family: 'dink' });
+  for (const source of inputs) for (const mirror of [false, true]) {
+    const input = structuredClone(source);
+    if (mirror) for (const point of [input.from, input.target]) { point.x = 20 - point.x; point.y = 44 - point.y; }
+    const before = JSON.stringify(input);
+    const eager = planRallyFlightV1(input), first = planRallyFlightV1({ ...input, materialization: 'first' });
+    assert.equal(first.status, eager.status);
+    assert.equal(JSON.stringify(input), before);
+    assert.equal(eager.diagnostics.launchSolverCalls, 0);
+    assert.equal(eager.diagnostics.workUnits, eager.diagnostics.solverCalls);
+    assert.equal(first.diagnostics.workUnits, first.diagnostics.solverCalls + first.diagnostics.launchSolverCalls);
+    assert.ok(first.diagnostics.solverCalls <= 6 && first.diagnostics.launchSolverCalls <= 6);
+    assert.equal(first.diagnostics.trials.length, first.diagnostics.solverCalls);
+    assert.equal(first.diagnostics.launchCandidates.filter(c => c.status === 'materialized').length, first.diagnostics.solverCalls);
+    for (const candidate of first.diagnostics.launchCandidates) {
+      assert.ok(['not-materialized', 'launch-rejected', 'materialized'].includes(candidate.status));
+      assert.equal(Object.hasOwn(candidate, 'accepted'), false);
+      if (candidate.status === 'launch-rejected') assert.ok(candidate.reason);
+    }
+    if (eager.status === 'solved') {
+      assert.deepEqual(first.physics, eager.physics);
+      assert.deepEqual(first.evidence, eager.evidence);
+      assert.equal(JSON.stringify(first.flight), JSON.stringify(eager.flight));
+      for (const time of [0, eager.flight.firstLandingTime / 2, eager.flight.firstLandingTime, eager.flight.totalDuration]) {
+        assert.deepEqual(first.flight.sampleBoard(time), eager.flight.sampleBoard(time));
+      }
+      assert.equal(first.solutions.length, 1);
+      assert.equal(first.diagnostics.solverCalls, 1);
+    } else {
+      assert.equal(first.flight, null); assert.deepEqual(first.solutions, []);
+    }
+  }
+  assert.throws(() => planRallyFlightV1({ ...normal, materialization: 'unknown' }), RangeError);
+});
+
+test('delivery-only net admission keeps neutral reset envelopes and exact nominal failures', () => {
+  for (const mirror of [false, true]) {
+    const from = { x: 11.886375668, y: 5.99755817, heightFeet: 3.196298531 };
+    const target = { x: 10.71221581716, y: 25.70721707849 };
+    if (mirror) for (const point of [from, target]) { point.x = 20 - point.x; point.y = 44 - point.y; }
+    const input = { from, target, family: 'reset', quality: 'neutral', preferred: { launchVerticalFeetPerSecond: 12.175325777 } };
+    assert.equal(planRallyFlightV1(input).status, 'unavailable');
+    const result = planRallyFlightV1({ ...input, allowNetFault: true });
+    assert.equal(result.status, 'solved'); assert.equal(result.flight.obstruction.kind, 'net');
+    assert.equal(result.flight.metadata.launchVerticalFeetPerSecond, 12.175325777);
+    assert.equal(result.diagnostics.speedCeilingMph, 24); assert.equal(result.diagnostics.maximumApexFeet, 5.5);
+    assert.ok(result.flight.launchSpeedMph <= 24 && result.flight.metadata.apexFeet <= 5.5);
+    assert.deepEqual(result.flight.target, target);
+    const first = planRallyFlightV1({ ...input, allowNetFault: true, materialization: 'first' });
+    assert.deepEqual(first.evidence, result.evidence); assert.deepEqual(first.physics, result.physics);
+    assert.equal(JSON.stringify(first.flight), JSON.stringify(result.flight));
+    assert.equal(result.solutions.every(s => s.flight.obstruction?.kind === 'net' || !s.flight.obstruction), true);
+    assert.equal(planRallyFlightV1({ ...input, allowNetFault: true, route: 'around-the-post' }).status, 'unavailable');
+  }
+  for (const value of [null, 1, 'true']) assert.throws(() => planRallyFlightV1({ ...normal, allowNetFault: value }), TypeError);
+});

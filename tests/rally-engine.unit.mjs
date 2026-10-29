@@ -205,6 +205,11 @@ test('concurrent real requests stay isolated and returned documents/traces are d
   assert.notEqual(left.document,right.document);assert.notEqual(left.decisions,same.decisions);
   const sameBefore=plain(same),rightBefore=plain(right);
   left.document.title='Caller edit';left.decisions[0].chosen.intent='caller-analysis-edit';
+  const callerSource=plain(left.document),callerOutcome=plain(left.outcome);
+  left.decisions[0].resolution.deliveredGuidance.trials[0].actual.landing.x=999;
+  left.decisions[0].resolution.flightGuidance.diagnostics.trials[0].physics.launchVerticalFeetPerSecond=-79;
+  assert.equal(plain(left.document),callerSource,'analysis edits cannot change committed source');
+  assert.equal(plain(left.outcome),callerOutcome,'analysis edits cannot change independently validated outcome');
   assert.equal(plain(same),sameBefore);assert.equal(plain(right),rightBefore);
   assert.notEqual(right.recipe.seed,same.recipe.seed);
 });

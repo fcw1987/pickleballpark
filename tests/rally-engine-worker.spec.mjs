@@ -166,29 +166,31 @@ test('conditioned worker generation leaves the host responsive without installin
         }) : null;
         observer?.observe({ type: 'longtask' });
         const interval = setInterval(() => beats.push(performance.now()), 4);
-        const started = performance.now(), statuses = [];
+        const started = performance.now(), statuses = [], requests = [];
         try {
             for (const [seed, lengthFeel] of [[22, 'epic'], [23, 'long']]) {
                 const result = await window.rallyWorkerClient.simulateRallyInWorker({ seed, options: { lengthFeel } });
                 statuses.push(result.status);
+                requests.push({ seed, lengthFeel, status: result.status, code: result.diagnostics?.code, attempts: result.diagnostics?.attempts,
+                    failure: result.diagnostics?.producer?.executionFailure?.reason ?? null });
             }
             await new Promise(resolve => requestAnimationFrame(resolve));
             for (const entry of observer?.takeRecords() || []) longTasks.push({ startTime: entry.startTime, duration: entry.duration });
         } finally { clearInterval(interval); observer?.disconnect(); }
-        return { statuses, longTaskSupported, longTasks, beats: beats.length,
+        return { statuses, requests, longTaskSupported, longTasks, beats: beats.length,
             maxHeartbeatGapMs: beats.reduce((max, time, i) => i ? Math.max(max, time - beats[i - 1]) : max, 0),
             durationMs: performance.now() - started, builderInstalled: window.playBuilder !== undefined,
             sentinel: localStorage.getItem('rally-worker-sentinel') };
     });
+    const path = testInfo.outputPath('worker-responsiveness.json');
+    await writeFile(path, JSON.stringify({ ...result, note: result.longTaskSupported
+        ? 'Long Task API measured the blank main-thread host during real worker generation.'
+        : 'Long Task API unavailable in this engine; heartbeat is observed scheduling evidence, not proof of a 50 ms task bound.' }, null, 2));
+    await testInfo.attach('worker-responsiveness', { path, contentType: 'application/json' });
     expect(result.statuses.every(status => ['complete', 'unsatisfied'].includes(status))).toBe(true);
     expect(result.beats).toBeGreaterThan(0);
     expect(result.longTasks.filter(task => task.duration > 50)).toEqual([]);
     if (testInfo.project.name === 'chromium') expect(result.longTaskSupported).toBe(true);
     expect(result.builderInstalled).toBe(false);
     expect(result.sentinel).toBe('preserve unrelated data');
-    const path = testInfo.outputPath('worker-responsiveness.json');
-    await writeFile(path, JSON.stringify({ ...result, note: result.longTaskSupported
-        ? 'Long Task API measured the blank main-thread host during real worker generation.'
-        : 'Long Task API unavailable in this engine; heartbeat is observed scheduling evidence, not proof of a 50 ms task bound.' }, null, 2));
-    await testInfo.attach('worker-responsiveness', { path, contentType: 'application/json' });
 });

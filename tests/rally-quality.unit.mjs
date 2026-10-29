@@ -440,3 +440,25 @@ test('known low and high soft contacts gain a real ordinary line air attack thro
     assert.equal(reply.attacking,true);assert.equal(reply.flight.obstruction,null);assert.ok(reply.flight.launchSpeedMph<=38);
   }
 });
+
+test('fixed reset perturbation delivers its genuine net fault for every non-error quality without relabelling or error allowance', () => {
+  for (const team of ['green', 'orange']) for (const quality of ['neutral', 'excellent', 'low', 'attackable']) {
+    const contact = { x: 11.886375668, y: 5.99755817, heightFeet: 3.196298531 };
+    const target = { x: 10.71221581716, y: 25.70721707849 };
+    if (team === 'orange') for (const point of [contact, target]) { point.x = 20 - point.x; point.y = 44 - point.y; }
+    const input = { candidate: { family: 'reset', intent: 'reset' }, contact, team,
+      execution: { quality, errorReason: null }, applied: { target, physics: { launchVerticalFeetPerSecond: 12.175325777 } } };
+    const before = JSON.stringify(input), delivered = resolveDeliveredFlightV1(input);
+    assert.equal(JSON.stringify(input), before); assert.deepEqual(delivered.applied.target, target);
+    assert.equal(input.execution.quality, quality);
+    assert.equal(delivered.guidance.plannerDiagnostics.allowNetFault, true);
+    assert.equal(delivered.guidance.plannerDiagnostics.speedCeilingMph, 24);
+    assert.equal(delivered.guidance.plannerDiagnostics.maximumApexFeet, 5.5);
+    assert.equal(delivered.flight.obstruction.kind, 'net'); assert.equal(delivered.flight.terminal.reason, 'net');
+    assert.equal(delivered.applied.physics.launchVerticalFeetPerSecond, 12.175325777);
+    const replay = solveFlightV2({ from: contact, target, family: 'reset', quality, pace: 'medium', arc: 'medium', physics: delivered.applied.physics });
+    assert.equal(JSON.stringify(replay), JSON.stringify(delivered.flight));
+    assert.ok(replay.launchSpeedMph <= 24 && replay.metadata.apexFeet <= 5.5);
+    assert.equal(Object.hasOwn(delivered.applied, 'intendedError'), false);
+  }
+});

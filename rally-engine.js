@@ -40,6 +40,18 @@ const owned = ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 
 const numberV1 = value => Number.isInteger(value) ? value : Math.round(value * 1e9) / 1e9;
 const generatedV1 = value => typeof value === 'number' ? numberV1(value) : Array.isArray(value) ? value.map(generatedV1)
     : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, generatedV1(item)])) : value;
+function generatedEvidenceV1(value, immutable = new WeakMap()) {
+    if (typeof value === 'number') return numberV1(value);
+    if (!value || typeof value !== 'object') return value;
+    // Analysis alone shares immutable nodes; mutable planning/source copies
+    // keep their original semantics. The driver detaches the selected trace.
+    const cacheable = Object.isFrozen(value);
+    if (cacheable && immutable.has(value)) return immutable.get(value);
+    const result = Array.isArray(value) ? value.map(item => generatedEvidenceV1(item, immutable))
+        : Object.fromEntries(Object.entries(value).map(([key, item]) => [key, generatedEvidenceV1(item, immutable)]));
+    if (cacheable) { immutable.set(value, result); Object.freeze(result); }
+    return result;
+}
 
 function headerFor(input, attemptIndex, attemptSeed) {
     return { schemaVersion: 1, modelVersion: 2, physicsVersion: 'play-physics-v2',
@@ -93,31 +105,36 @@ function contactReplySupportV1(input, pair) {
         { id: 'reset', family: 'reset', pace: 'soft', target: { x: 10, y: team === 'green' ? 27 : 17 } }
     ];
     if (pair.contact.heightFeet >= 7) probes.push({ id: 'overhead', family: 'overhead', pace: 'firm', target: { x: 10, y: team === 'green' ? 31 : 13 } });
-    let drive = false, attacking = false, solverCalls = 0;
+    let drive = false, attacking = false, solverCalls = 0, launchSolverCalls = 0, workUnits = 0;
+    const countPlanner = diagnostics => {
+        solverCalls += diagnostics?.solverCalls ?? 0; launchSolverCalls += diagnostics?.launchSolverCalls ?? 0;
+        workUnits += diagnostics?.workUnits ?? diagnostics?.solverCalls ?? 0;
+    };
     for (const probe of probes) try {
         const result = resolveFlightParametersV1({ candidate: { family: probe.family, pace: probe.pace, arc: 'medium', intent: probe.id },
-            contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style });
-        solverCalls += result.planner.diagnostics.solverCalls;
+            contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style, materialization: 'first' });
+        countPlanner(result.planner.diagnostics);
         ids.push(probe.id);
         solvedProbes.push({ ...probe, ...result });
         if (probe.id === 'drive') drive = result.attacking;
         if (result.attacking || probe.id === 'overhead' && result.flight.launchSpeedMph >= 22) attacking = true;
-    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; solverCalls += error.plannerDiagnostics?.solverCalls ?? 0; }
+    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; countPlanner(error.plannerDiagnostics); }
     if (!ids.length) try {
         const probe = { id: 'lob', family: 'lob', pace: 'medium', arc: 'high', target: { x: 10, y: team === 'green' ? 40 : 4 } };
-        const result = resolveFlightParametersV1({ candidate: { ...probe, intent: 'lob' }, contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style });
+        const result = resolveFlightParametersV1({ candidate: { ...probe, intent: 'lob' }, contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style, materialization: 'first' });
+        countPlanner(result.planner.diagnostics);
         ids.push('lob'); solvedProbes.push({ ...probe, ...result });
-    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; solverCalls += error.plannerDiagnostics?.solverCalls ?? 0; }
+    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; countPlanner(error.plannerDiagnostics); }
     if (pair.signature) {
-        const planned = signatureFlight(input, pair);
-        solverCalls += planned.diagnostics.solverCalls;
+        const planned = signatureFlight(input, pair, 'first');
+        countPlanner(planned.diagnostics);
         if (planned.status === 'solved') {
             ids.push(pair.signature.intent);
             solvedProbes.push({ id: pair.signature.intent, ...pair.signature.recipe, target: pair.signature.target,
                 physics: planned.physics, flight: planned.flight });
         }
     }
-    return { ids: [...new Set(ids)], probes: solvedProbes, drive, solverCalls,
+    return { ids: [...new Set(ids)], probes: solvedProbes, drive, solverCalls, launchSolverCalls, workUnits,
         attacking: attacking && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
 }
 
@@ -234,7 +251,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         if (!replyCache.has(replyKey)) {
             const support = contactReplySupportV1(input, pair);
             replyCache.set(replyKey, support);
-            await checkpoint({ shots: index, workDelta: support.solverCalls });
+            await checkpoint({ shots: index, workDelta: support.workUnits });
         }
         pair.replySupport = replyCache.get(replyKey);
         if (!pair.replySupport.ids.length) continue;
@@ -445,17 +462,17 @@ function checkNominalReply(input, state, index, pair, reply, { record = false } 
     return safety;
 }
 
-function signatureFlight(input, pair) {
+function signatureFlight(input, pair, materialization = 'all') {
     const signature = pair.signature;
     return planRallyFlightV1({ from: pair.contact, target: signature.target, family: signature.recipe.family,
         intent: signature.intent, style: input.players[pair.id].style, quality: 'neutral',
         pace: signature.recipe.pace, arc: signature.recipe.arc, preferred: clone(signature.physics),
-        route: signature.intent === 'around-the-post' ? 'around-the-post' : 'over-net' });
+        route: signature.intent === 'around-the-post' ? 'around-the-post' : 'over-net', materialization });
 }
 
-function candidateFlight(input, pair, candidate, situation, draws) {
+function candidateFlight(input, pair, candidate, situation, draws, materialization = 'all') {
     if (pair.signature?.intent === candidate.intent) {
-        const planner = signatureFlight(input, pair);
+        const planner = signatureFlight(input, pair, materialization);
         if (planner.status !== 'solved') {
             const error = new RangeError(`Signature flight unavailable: ${planner.diagnostics.reason}`);
             error.plannerDiagnostics = planner.diagnostics; throw error;
@@ -466,7 +483,7 @@ function candidateFlight(input, pair, candidate, situation, draws) {
     }
     const target = resolveTargetV1({ candidate, situation, players: input.players, draws });
     return { target, parameters: resolveFlightParametersV1({ candidate, contact: pair.contact, target,
-        team: input.players[pair.id].team, style: input.players[pair.id].style }) };
+        team: input.players[pair.id].team, style: input.players[pair.id].style, materialization }) };
 }
 
 function finishAttempt(input, state, document, decisions, diagnostics, censored) {
@@ -539,11 +556,14 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                 if (!candidate.addsContact) continue;
                 await checkpoint({ shots: index, workDelta: 1 });
                 try {
-                    const { parameters } = candidateFlight(input, pair, candidate, situation, { lateral: .5, depth: .5 });
-                    await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.solverCalls ?? 0 });
+                    const { parameters } = candidateFlight(input, pair, candidate, situation, { lateral: .5, depth: .5 }, 'first');
+                    await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.workUnits ?? parameters.planner?.diagnostics.solverCalls ?? 0 });
                     if (parameters.flight.obstruction) throw new RangeError('No clear nominal flight.');
                     feasible.push(candidate);
-                } catch (error) { excluded.push({ id: candidate.id, intent: candidate.intent, weight: candidate.weight, reason: error.message }); }
+                } catch (error) {
+                    if (error.plannerDiagnostics) await checkpoint({ shots: index, workDelta: error.plannerDiagnostics.workUnits ?? error.plannerDiagnostics.solverCalls ?? 0 });
+                    excluded.push({ id: candidate.id, intent: candidate.intent, weight: candidate.weight, reason: error.message });
+                }
             }
             const total = feasible.reduce((sum, candidate) => sum + candidate.weight, 0);
             let remaining = feasible.map(candidate => ({ ...candidate, probability: candidate.weight / total }));
@@ -561,7 +581,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                     const targetDraws = { lateral: random.target(), depth: random.target() };
                     try {
                         const { target, parameters } = candidateFlight(input, pair, chosen, situation, targetDraws);
-                        await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.solverCalls ?? 0 });
+                        await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.workUnits ?? parameters.planner?.diagnostics.solverCalls ?? 0 });
                         let supported = null, lastNominalError = null;
                         for (const [solutionIndex, solution] of parameters.solutions.entries()) {
                             await checkpoint({ shots: index, workDelta: 1 });
@@ -584,7 +604,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         if (!nominal || supported.speedDeparture < nominal.speedDeparture) nominal = supported;
                         if (nominal.speedDeparture <= 1e-9 || feasibleTargets >= 2) break;
                     } catch (error) {
-                        if (error.plannerDiagnostics) await checkpoint({ shots: index, workDelta: error.plannerDiagnostics.solverCalls ?? 0 });
+                        if (error.plannerDiagnostics) await checkpoint({ shots: index, workDelta: error.plannerDiagnostics.workUnits ?? error.plannerDiagnostics.solverCalls ?? 0 });
                         diagnostics.rejections++; diagnostics.targetRepairs++;
                         choiceAttempt.repairs.push({ stage: 'nominal', repair, targetDraws, reason: error.message,
                             ...(error.plannerDiagnostics ? { flightPlanner: generatedV1(error.plannerDiagnostics) } : {}) });
@@ -654,9 +674,9 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                             chosen: { id: chosen.id, intent: chosen.intent, family: chosen.family }, draws: { intent: intentDraw, execution: executionDraws, target: targetDraws, perturbation: perturbationDraws, narration: narrationDraw }, execution,
                             resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair, solutionIndex,
                                 flightPlannerVersion: FLIGHT_PLANNER_VERSION,
-                                nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedV1(deliveredGuidance),
+                                nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedEvidenceV1(deliveredGuidance),
                                 ...(applied.physicalTransformation ? { physicalTransformation: generatedV1(applied.physicalTransformation) } : {}),
-                                ...(parameters.guidance ? { flightGuidance: generatedV1(parameters.guidance) } : {}),
+                                ...(parameters.guidance ? { flightGuidance: generatedEvidenceV1(parameters.guidance) } : {}),
                                 actualContact: generatedV1(trial.contact), actualFeet: generatedV1(trial.feet), intendedError: execution.errorReason, choiceAttempts } });
                         // A friendly body hit on the outgoing side before the net
                         // cannot be superseded by an opponent paddle interception.
