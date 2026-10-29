@@ -429,6 +429,18 @@ export function inspectPlanningTrialContactV2(state,trial) {
     prior:previousContext(next),solved:next.solved.at(-1)});
 }
 
+// Observe contact and body safety against one query-time source verification.
+// This grants no acceptance token or commit authority; later queries still
+// verify the mutable trial inputs independently.
+export function inspectPlanningTrialSafetyV2(state,trial,{actors}={}) {
+  const next=verifiedTrialNext(state,trial);
+  const contact=inspectModel2ContactV2(next.play,next.pendingSegment,{index:next.solved.length-1,
+    prior:previousContext(next),solved:next.solved.at(-1)});
+  const bodyEvents=contact.violations.length||contact.physicalCandidates.length||contact.momentumCandidates.length?[]:
+    inspectBodyPathV2(next.pendingSegment,next.solved.at(-1),actors);
+  return {contact,bodyEvents};
+}
+
 export function finishPlanningV2(state,{ending=state.play.ending,outcome=null,deriveOutcome=true,compileTimeline=false}={}) {
   assertState(state);
   const analysis=inspectPendingLegV2(state,{terminal:ending!=='stop',ending});
