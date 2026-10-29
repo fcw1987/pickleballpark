@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { probeSignatureCandidatesV1, SIGNATURE_LIMITS } from '../rally-signatures.js';
 import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2 } from '../play-planning-v2.js';
-import { solveFlightV2, interceptFlightV2, PHYSICS_V2 } from '../play-physics-v2.js';
+import { solveFlightV2, interceptFlightV2, sampleFlightVelocityV2, PHYSICS_V2 } from '../play-physics-v2.js';
+import { inspectBodyPathV2, inspectModel2SegmentV2, resolveModel2OutcomeCandidates } from '../play-outcome-v2.js';
+import { sampleActorFeetV2 } from '../play-actors-v2.js';
+import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
 import { compileDocument } from '../play-compiler.js';
 import { validateDocument } from '../play-document.js';
 import { validateRallyRules } from '../rally-rules.js';
@@ -38,9 +41,9 @@ function feed(intent, { far = false, right = false, leftHanded = false, distant 
     footState, opening: 'midrally', contactIndex: 1, eligibleIds: [receiver] } };
 }
 
-for (const intent of ['erne', 'around-the-post']) for (const far of [false, true]) for (const right of [false, true]) {
-  test(`${intent} probes an actual ${far ? 'far' : 'near'} ${right ? 'right' : 'left'} incoming path and survives independent compilation`, () => {
-    const { input, document, receiver } = feed(intent, { far, right });
+for (const intent of ['erne', 'around-the-post']) for (const far of [false, true]) for (const right of [false, true]) for (const leftHanded of [false, true]) {
+  test(`${intent} probes an actual ${far ? 'far' : 'near'} ${right ? 'right' : 'left'} path with a ${leftHanded ? 'left' : 'right'} hand and survives independent compilation`, () => {
+    const { input, document, receiver } = feed(intent, { far, right, leftHanded });
     const source = JSON.stringify({ document, pending: input.pendingRecipe, footState: input.footState });
     const result = probeSignatureCandidatesV1(input), candidate = result.candidates.find(item => item.intent === intent);
     assert.ok(candidate, JSON.stringify(result)); assert.equal(candidate.playerId, receiver);
@@ -62,8 +65,45 @@ for (const intent of ['erne', 'around-the-post']) for (const far of [false, true
     validateDocument(completed);
     const compiled = compileDocument(completed), rules = validateRallyRules(compiled.play, compiled.timeline);
     assert.equal(compiled.validShotCount, 2, JSON.stringify(compiled.findings)); assert.deepEqual(errors(compiled), []); assert.deepEqual(rules.violations, []);
+    const segments = compiled.timeline.segments.filter(segment => segment.shotSemantics);
+    for (const segment of segments) {
+      assert.equal(inspectGeneratedMovementV1(segment).valid, true);
+      assert.equal(inspectGeneratedSpacingV1(segment).valid, true);
+      assert.deepEqual(inspectBodyPathV2(segment, segment.trajectory.solved, Object.keys(document.players)), [], 'the exact represented torso sweep has no earlier body contact');
+      const inspected = inspectModel2SegmentV2(compiled.play, segment, { index: segment.rallyLeg - 1, terminal: false, solved: segment.trajectory.solved });
+      assert.deepEqual(inspected.violations, []); assert.deepEqual(inspected.physicalCandidates, []); assert.deepEqual(inspected.momentumCandidates, []);
+      const resolution = resolveModel2OutcomeCandidates(inspected.physicalCandidates, inspected.momentumCandidates);
+      assert.equal(resolution.physical, null); assert.deepEqual(resolution.ordered, []);
+    }
+    if (intent === 'erne') assert.ok(sampleActorFeetV2(segments[0], receiver, segments[0].duration - 1e-4).every(outsideNVZ), 'both grounded feet clear the NVZ before contact');
+    assert.equal(candidate.flightPlannerVersion, 'rally-flight-planner-v1');
+    assert.equal(candidate.flightPlannerDiagnostics.solverCalls, candidate.flightPlannerDiagnostics.trials.length);
+    assert.ok(candidate.flightPlannerDiagnostics.solverCalls <= SIGNATURE_LIMITS.maxSolverCallsPerTarget);
+    assert.ok(result.work.launchTrials >= candidate.flightPlannerDiagnostics.solverCalls);
+    assert.equal(candidate.flightEvidence.route, intent === 'erne' ? 'over-net' : 'around-the-post');
+    assert.equal(candidate.flightEvidence.minimumSpeedMph, intent === 'erne' ? 0 : 22);
+    assert.deepEqual(Object.keys(candidate.recipe.physics), ['launchVerticalFeetPerSecond']);
+    assert.equal(typeof candidate.recipe.physics.launchVerticalFeetPerSecond, 'number');
+    // Replay the actual JSON source independently, using its rounded contact
+    // and saved vertical velocity; planner metadata cannot establish its speed.
+    const sourceRecipe = JSON.parse(JSON.stringify(candidate.recipe));
+    const sourceContact = Object.fromEntries(Object.entries(segments[1].shotSemantics.contact.point).map(([axis, value]) => [axis, Number(value.toFixed(9))]));
+    const replay = solveFlightV2({ from: sourceContact, ...sourceRecipe });
+    const velocity = sampleFlightVelocityV2(replay, 0);
+    const speedMph = Math.hypot(velocity.xFeetPerSecond, velocity.yFeetPerSecond, velocity.heightFeetPerSecond) / (22 / 15);
+    assert.ok(speedMph <= (intent === 'erne' ? 45 : 38));
+    if (intent === 'around-the-post') assert.ok(speedMph >= 22);
+    assert.equal(replay.obstruction, null);
+    for (const fraction of [0, .25, .5, .75, 1]) for (const axis of ['x', 'y', 'heightFeet']) {
+      assert.ok(Math.abs(replay.sampleBoard(replay.firstLandingTime * fraction)[axis] - candidate.flight.sampleBoard(candidate.flight.firstLandingTime * fraction)[axis]) < 1e-6, `replayed ${axis}`);
+    }
+    assert.ok(Math.abs(replay.firstLandingTime - candidate.flight.firstLandingTime) < 1e-6);
+    assert.ok(replay.events.some(event => event.type === 'net-crossing' && Boolean(event.aroundPost) === (intent === 'around-the-post')));
     assert.equal(JSON.stringify({ document, pending: input.pendingRecipe, footState: input.footState }), source);
-    assert.ok(result.work.contactTrials <= 2 * 13); assert.ok(result.work.launchTrials <= result.work.contactTrials * SIGNATURE_LIMITS.maxLaunchTrials);
+    assert.ok(result.work.contactTrials <= 2 * 13);
+    assert.ok(result.work.targetTrials <= result.work.contactTrials * SIGNATURE_LIMITS.maxTargetTrials);
+    assert.ok(result.work.launchTrials <= result.work.targetTrials * SIGNATURE_LIMITS.maxSolverCallsPerTarget);
+    assert.ok(result.work.launchTrials > 0);
   });
 }
 
@@ -77,6 +117,28 @@ test('signature candidates are deterministic across hands and do not install una
     const reset = { ...input, footState: clone(input.footState) }; reset.footState[input.eligibleIds[0]].feetEstablishedOutsideNVZ = false;
     assert.equal(probeSignatureCandidatesV1(reset).candidates.length, 0);
   }
+});
+
+test('signature requests preserve explicit player style and finite bounded failure evidence', () => {
+  for (const style of ['pro', 'advanced', 'intermediate', 'beginner']) {
+    const { input, receiver } = feed('around-the-post'); input.players[receiver].style = style;
+    const result = probeSignatureCandidatesV1(input), candidate = result.candidates.find(item => item.intent === 'around-the-post');
+    assert.ok(candidate, JSON.stringify(result));
+    assert.equal(candidate.flightEvidence.speedCeilingMph, style === 'pro' ? 45 : 38);
+    const velocity = sampleFlightVelocityV2(candidate.flight, 0);
+    assert.ok(Math.hypot(velocity.xFeetPerSecond, velocity.yFeetPerSecond, velocity.heightFeetPerSecond) / (22 / 15) <= (style === 'pro' ? 45 : 38));
+  }
+  const { input, receiver } = feed('erne', { distant: true }), before = JSON.stringify(input.pendingRecipe);
+  const result = probeSignatureCandidatesV1(input);
+  assert.deepEqual(result.candidates, []);
+  assert.deepEqual(result.exclusions.filter(item => item.playerId === receiver).map(item => [item.intent, item.code]), [
+    ['erne', 'no-supported-contact-and-route'], ['around-the-post', 'no-supported-contact-and-route'],
+  ]);
+  assert.ok(Object.values(result.work).every(value => Number.isInteger(value) && value >= 0));
+  assert.ok(result.work.contactTrials <= 13);
+  assert.ok(result.work.targetTrials <= result.work.contactTrials * SIGNATURE_LIMITS.maxTargetTrials);
+  assert.ok(result.work.launchTrials <= result.work.targetTrials * SIGNATURE_LIMITS.maxSolverCallsPerTarget);
+  assert.equal(JSON.stringify(input.pendingRecipe), before); assert.equal('outcome' in result, false);
 });
 
 test('opening bounce restrictions and service identity cannot be bypassed by an Erne label', () => {

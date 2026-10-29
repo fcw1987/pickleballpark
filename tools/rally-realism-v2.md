@@ -125,3 +125,20 @@ exactly-12 complete-point performance. Natural exactly-12 timings must still be
 reported separately, with insufficient samples made explicit. If acceptance
 requires only complete exactly-12 points, a capped-prefix benchmark does not
 answer that question and cannot be presented as its numerical PASS.
+
+## Generated-flight feasibility
+
+The separate `rally-generated-flight-feasibility-v1` observation audits compiled
+serialized stage velocities for every generated family and error. Its model
+ceilings are distinct from the original Section 7 preferred ranges and unchanged
+Section 13 calibration bands. Physical rule validity, model support, generated
+flight feasibility, corpus completeness and calibration retain separate verdicts.
+A speed failure does not erase a row or remove it from original natural
+denominators. Missing or unattempted output keeps aggregate feasibility
+`NOT_EVALUATED` unless an observed violation makes it `FAIL`; partial checking
+cannot claim `PASS`. Reports retain actual source policy/planner versions,
+including archive replay without relabelling an old origin.
+
+Current generation records policy v2 and planner v1. Old policy-v1 documents
+remain importable and replay identically, even when this new analysis flags an
+unrealistic stored flight. The collector never repairs or regenerates them.

@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
 import { validateRallyRules } from '../rally-rules.js';
-import { normalizeRallyInputV1, validateGenerationRecipeV1, createRallyRequestRecipeV1 } from '../rally-recipe.js';
+import { assessGeneratedFlightFeasibilityV1 } from '../rally-flight-audit.js';
+import { normalizeRallyInputV1, validateGenerationRecipeV1, createRallyRequestRecipeV1, RALLY_ENGINE_VERSION, RALLY_POLICY_VERSION, RALLY_PHYSICS_VERSION, RALLY_FLIGHT_PLANNER_VERSION } from '../rally-recipe.js';
 import { parseSeeds } from './rally-realism.mjs';
 import { METRICS_VERSION_V2, observeRallyV2, summarizeObservationsV2, evaluateCalibrationV2 } from './rally-realism-metrics-v2.mjs';
 import holdoutSource from './rally-holdout-v1.json' with { type: 'json' };
@@ -101,6 +102,7 @@ const missingObservation = (job, result, generationMs, error = null) => ({
   seed: job.seed, settings: clone(job.input), status: result.status, physicallyValid: false, accepted: false, complete: false, censored: false,
   documentPresent: !!result.document, shots: 0, sourceShots: result.document?.shots?.length ?? null,
   outcome: null, outcomeClassification: result.outcomeClassification ?? null,
+  generatedFlightFeasibility: { ...assessGeneratedFlightFeasibilityV1({ document: result.document }), status: 'NOT_EVALUATED' },
   service: result.recipe?.input?.service ?? job.input.service ?? null, servingTeam: null,
   firstAllFourUpShot: null, longestDinkRun: 0, generationMs, validationMs: null,
   attempts: result.recipe?.selection?.attempts ?? result.diagnostics?.attempts ?? null, selectedAttempt: result.recipe?.selection?.selectedAttempt ?? null,
@@ -141,7 +143,9 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
     let observation;
     if (!result.document && !validationError) {
       try {
-        const request = createRallyRequestRecipeV1(normalizeRallyInputV1(job.input));
+        const request = clone(createRallyRequestRecipeV1(normalizeRallyInputV1(job.input)));
+        // Historical request-only archive rows retain their original strict identity.
+        if (replay && result.recipe?.policyVersion === 'rally-policy-v1') { request.policyVersion = 'rally-policy-v1'; delete request.flightPlannerVersion; }
         if (canonical(result.recipe) !== canonical(request)) throw Error('No-document result does not retain the normalized request recipe');
         const diagnostic = result.diagnostics;
         if (!Number.isInteger(diagnostic?.attempts) || diagnostic.attempts < 0 || diagnostic.attempts > 64
@@ -169,6 +173,7 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
       message: validationError?.message ?? result.diagnostics?.reason ?? 'No fully validated selected document', documentPresent: !!result.document });
     const record = { archiveVersion: REPORT_VERSION_V2, metricsVersion: METRICS_VERSION_V2, sourceRevision: replay?.sourceRevision ?? sourceRevision, analysisSourceRevision: sourceRevision,
       job: clone(job), result: originalResult, generationMs, validationMs,
+      generatedFlightFeasibility: clone(observation.generatedFlightFeasibility),
       validation: clone(observation.validation), ...(validationError ? { validationError: { name: validationError.name, message: validationError.message } } : {}) };
     observations.push(observation); archives.push(record);
     // An archive write failure is fatal and must not retry the generated rally.
@@ -178,10 +183,16 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
   const attempted = new Set(observations.map(row => row.jobId));
   const missingJobs = jobs.filter(job => !attempted.has(job.id)).map(job => job.id);
   const summary = summarizeObservationsV2(observations);
+  const scheduledFeasibility = (audit, scheduledRallies, observedRallies) => ({ ...audit,
+    scheduledRallies, missingScheduledRallies: scheduledRallies - observedRallies,
+    status: scheduledRallies > observedRallies && audit.status !== 'FAIL' ? 'NOT_EVALUATED' : audit.status,
+  });
+  summary.generatedFlightFeasibility = scheduledFeasibility(summary.generatedFlightFeasibility, jobs.length, observations.length);
   const byStyle = [...new Set(jobs.map(job => `${job.style}:${job.flavour}`))].map(id => {
     const [style, flavour] = id.split(':'), rows = observations.filter(row => row.style === style && row.flavour === flavour);
     const planned = jobs.filter(job => job.style === style && job.flavour === flavour);
     const summarized = summarizeObservationsV2(rows);
+    summarized.generatedFlightFeasibility = scheduledFeasibility(summarized.generatedFlightFeasibility, planned.length, rows.length);
     const naturalJobs = planned.filter(job => (job.input.options?.lengthFeel ?? 'natural') === 'natural' && (job.input.options?.winner ?? 'either') === 'either');
     const naturalIds = new Set(naturalJobs.map(job => job.id));
     const naturalSummary = summarizeObservationsV2(rows.filter(row => naturalIds.has(row.jobId)));
@@ -195,18 +206,25 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
   const calibrationStatuses = byStyle.map(row => row.calibration.status).filter(status => status !== 'NOT_APPLICABLE');
   const calibrationStatus = !calibrationStatuses.length ? 'NOT_APPLICABLE' : calibrationStatuses.includes('FAIL') ? 'FAIL'
     : calibrationStatuses.includes('INSUFFICIENT_SAMPLE') ? 'INSUFFICIENT_SAMPLE' : 'PASS';
+  const origins = archives.map(record => record.result.document?.generation ?? record.result.recipe).filter(Boolean);
+  const sourceVersions = Object.fromEntries(['generatorVersion', 'policyVersion', 'physicsVersion', 'flightPlannerVersion'].map(field => [field, [...new Set(origins.map(origin => origin[field] ?? null))]]));
+  const requestedVersions = { generatorVersion: RALLY_ENGINE_VERSION, policyVersion: RALLY_POLICY_VERSION,
+    physicsVersion: RALLY_PHYSICS_VERSION, flightPlannerVersion: RALLY_FLIGHT_PLANNER_VERSION };
+  const versions = { ...Object.fromEntries(Object.entries(sourceVersions).map(([field, values]) => [field,
+    values.length === 1 ? values[0] : values.length === 0 && !records ? requestedVersions[field] : null])), sourceVersions };
   return {
     reportVersion: REPORT_VERSION_V2, metricsVersion: METRICS_VERSION_V2,
-    status: invalid ? 'INVALID' : incomplete ? 'INCOMPLETE' : summary.modelSupport.status === 'FAIL' ? 'MODEL_SUPPORT_FAIL' : 'PASS',
-    statusMeaning: 'Corpus completeness, independent rule validity and explicit generator-model support; calibration has its own verdict',
+    status: invalid ? 'INVALID' : incomplete ? 'INCOMPLETE' : summary.modelSupport.status === 'FAIL' ? 'MODEL_SUPPORT_FAIL' : summary.generatedFlightFeasibility.status === 'FAIL' ? 'GENERATED_FLIGHT_FEASIBILITY_FAIL' : 'PASS',
+    statusMeaning: 'Corpus completeness, independent rule validity, generator-model support and separate generated-flight feasibility; calibration retains its original verdict and denominators',
     sourceRevision, generationReplayedFromArchive: !!records, cohortEvidence: describeCohortEvidenceV2(jobs),
     generationSourceRevisions: [...new Set(records ? records.map(record => record.sourceRevision) : [sourceRevision])],
-    versions: { generatorVersion: 'rally-engine-v1', policyVersion: 'rally-policy-v1', physicsVersion: 'play-physics-v2' },
+    versions,
     corpus: { status: missingJobs.length ? 'INCOMPLETE' : 'COMPLETE', scheduledRallies: jobs.length, attemptedRallies: observations.length, missingJobs },
     physicalValidity: { status: invalidPhysical ? 'INVALID' : observations.some(row => row.physicallyValid) ? 'PASS' : 'NOT_EVALUATED',
       validDocuments: observations.filter(row => row.physicallyValid).length, invalidDocuments: observations.filter(row => row.documentPresent && !row.physicallyValid).length,
       missingDocuments: observations.filter(row => !row.documentPresent).length },
     modelSupport: summary.modelSupport,
+    generatedFlightFeasibility: summary.generatedFlightFeasibility,
     calibration: { status: calibrationStatus, scope: 'homogeneous unconditioned natural core-style cohorts; no game-level rates', minConditionalSamples, minPerformanceSamples },
     schedule: clone(jobs), failures, summary, byStyle, observations,
   };
@@ -250,7 +268,7 @@ async function main(args) {
     if (options['--archive-input']) report.archiveInput = { sha256: sha256(await readFile(options['--archive-input'])) };
     const text = `${JSON.stringify(report, null, 2)}\n`;
     if (options['--output']) { await mkdir(dirname(resolve(options['--output'])), { recursive: true }); await writeFile(options['--output'], text, { flag: 'wx' });
-      console.log(JSON.stringify({ output: options['--output'], status: report.status, modelSupport: report.modelSupport.status, calibration: report.calibration.status, attemptedRallies: report.corpus.attemptedRallies,
+      console.log(JSON.stringify({ output: options['--output'], status: report.status, modelSupport: report.modelSupport.status, generatedFlightFeasibility: report.generatedFlightFeasibility.status, calibration: report.calibration.status, attemptedRallies: report.corpus.attemptedRallies,
         cohortPurpose: report.cohortEvidence.purpose, examinationState: report.cohortEvidence.examinationState })); }
     else process.stdout.write(text);
     if (report.status !== 'PASS' || options['--require-calibration'] && report.calibration.status !== 'PASS') process.exitCode = 1;

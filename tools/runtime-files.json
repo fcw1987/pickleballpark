@@ -115,6 +115,8 @@
   "rally-engine-driver.js",
   "rally-engine-worker.js",
   "rally-engine.js",
+  "rally-flight-audit.js",
+  "rally-flight-planner.js",
   "rally-movement.js",
   "rally-narration.js",
   "rally-policy.js",

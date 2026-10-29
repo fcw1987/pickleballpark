@@ -97,84 +97,103 @@ const fixtures = [
   }
 ];
 
-// The third archive entry is a sampled wide error: preserve it separately,
-// then regenerate its actual opportunity with a low quality (no new draws).
 const archivedError = structuredClone(fixtures[2]);
-fixtures[2].execution = { ...fixtures[2].execution, quality: 'low', errorReason: null };
+fixtures[2].execution = { quality: 'low', errorReason: null };
 fixtures[2].applied = applyExecutionV1({ execution: fixtures[2].execution, contact: fixtures[2].contact,
-  team: fixtures[2].team, target: {"x": 5.527985711, "y": 34.990986555}, physics: {"launchVerticalFeetPerSecond": -2.579309586},
-  family: 'volley', pace: 'firm', arc: 'low', draws: {"lateral": 0.0470567368902266, "depth": 0.48913028300739825} });
-const near = (a,b) => assert.ok(Math.abs(a-b)<1e-7, `${a} != ${b}`);
-function verify(input, result) {
-  const independently = solveFlightV2({ from: input.contact, ...result.applied, family: input.candidate.family, quality: input.execution.quality });
-  near(independently.launchSpeedMph,result.flight.launchSpeedMph);
+  team: fixtures[2].team, target: {x:5.527985711,y:34.990986555}, physics: {launchVerticalFeetPerSecond:-2.579309586},
+  family:'volley',pace:'firm',arc:'low',draws:{lateral:.0470567368902266,depth:.48913028300739825} });
+const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
+function verify(input,result) {
+  const independent=solveFlightV2({from:input.contact,...result.applied,family:input.candidate.family,quality:input.execution.quality});
+  near(independent.launchSpeedMph,result.flight.launchSpeedMph);
   near(result.guidance.actual.launchSpeedMph,result.flight.launchSpeedMph);
-  for (const axis of ['x','y']) near(result.flight.landing[axis],result.applied.target[axis]);
-  const start=result.flight.sampleBoard(0), end=result.flight.sampleBoard(result.flight.firstLandingTime);
-  for (const axis of ['x','y','heightFeet']) near(start[axis],input.contact[axis]);
-  near(end.heightFeet,result.flight.landing.heightFeet);
-  assert.ok(result.guidance.trials.length<=11);
+  for(const fraction of [0,.3,.7,1]) for(const axis of ['x','y','heightFeet'])
+    near(independent.sampleBoard(independent.firstLandingTime*fraction)[axis],result.flight.sampleBoard(result.flight.firstLandingTime*fraction)[axis]);
+  assert.ok(result.guidance.trials.length<=6);
+  assert.ok(result.guidance.plannerDiagnostics.solverCalls<=6);
   assert.ok(Object.isFrozen(result.guidance.actual.landing));
-  assert.equal(result.flight.obstruction,null);
+  assert.ok(result.flight.launchSpeedMph<=result.guidance.speedCeilingMph);
 }
-test('actual archived over-ceiling post-quality attacks receive coherent same-target repairs',()=>{
-  assert.equal(fixtures.length,3);
-  for(const input of fixtures){
-    const before=JSON.stringify(input), result=resolveDeliveredFlightV1(input);
-    if(input !== fixtures[2]) assert.ok(result.guidance.source.launchSpeedMph>45);
-    assert.ok(result.flight.launchSpeedMph<=45);
-    if(input !== fixtures[2]) assert.equal(result.guidance.repaired,true);
+test('archived over-ceiling post-quality attacks receive bounded coherent same-target plans',()=>{
+  for(const input of fixtures) {
+    const before=JSON.stringify(input),wasFrozen=Object.isFrozen(input.applied.target),result=resolveDeliveredFlightV1(input);
+    assert.equal(Object.isFrozen(input.applied.target),wasFrozen);
+    assert.ok(result.flight.launchSpeedMph<=45);assert.ok(result.flight.launchSpeedMph>=22);
     assert.deepEqual(result.applied.target,input.applied.target);
-    assert.ok(result.guidance.actual.netClearanceInches>=result.guidance.source.netClearanceInches);
-    assert.equal(JSON.stringify(input),before);
-    assert.deepEqual(resolveDeliveredFlightV1(input).guidance,result.guidance);
-    verify(input,result);
+    assert.equal(JSON.stringify(input),before);assert.deepEqual(resolveDeliveredFlightV1(input).guidance,result.guidance);
+    assert.equal(result.flight.obstruction,null);verify(input,result);
+    assert.equal(result.applied,result.solutions[0].applied);
+    assert.equal(result.flight,result.solutions[0].flight);
+    for(const [index,solution] of result.solutions.entries()) {
+      assert.equal(solution.guidance.selectionIndex,index);assert.equal(solution.guidance.trials,result.guidance.trials);
+      near(solution.guidance.actual.launchSpeedMph,solution.flight.launchSpeedMph);verify(input,solution);
+    }
   }
 });
-test('mirrored attacks and low/high contacts repair or reject with finite bounded evidence',()=>{
-  for(const original of fixtures) for(const heightFeet of [.6,2.2,4.5,8.5]) for(const mirror of [false,true]) {
-    const input=structuredClone(original);
-    input.contact.heightFeet=heightFeet;
-    if(mirror){ input.contact.y=44-input.contact.y;input.applied.target.y=44-input.applied.target.y;input.team='orange'; }
-    input.applied.physics={launchVerticalFeetPerSecond: original.applied.physics.launchVerticalFeetPerSecond};
-    try { const r=resolveDeliveredFlightV1(input);assert.ok(r.flight.launchSpeedMph<=45);verify(input,r); }
-    catch(error){ assert.ok(error instanceof RangeError);assert.ok(error.guidance);assert.equal(error.guidance.accepted,false);assert.ok(error.guidance.trials.length<=11); }
+test('known feasible attacks succeed at low and high contacts in both directions',()=>{
+  for(const original of fixtures.slice(0,2)) for(const heightFeet of [.6,2.2,4.5,8.5]) for(const mirror of [false,true]) {
+    const input=structuredClone(original);input.contact.heightFeet=heightFeet;
+    if(mirror){input.contact.y=44-input.contact.y;input.applied.target.y=44-input.applied.target.y;input.team=input.team==='green'?'orange':'green';}
+    const result=resolveDeliveredFlightV1(input);assert.equal(result.flight.obstruction,null);verify(input,result);
   }
 });
-test('sampled net/long/wide errors preserve source geometry and report exceptional actual measurements',()=>{
-  for(const team of ['green','orange']) for(const errorReason of ['net','long','wide']) {
-    const contact={x:7,y:team==='green'?14:30,heightFeet:4.1},execution={quality:'error',errorReason};
-    const applied=applyExecutionV1({contact,team,execution,target:{x:7,y:team==='green'?35:9},physics:{launchVerticalFeetPerSecond:-4},family:'volley',pace:'firm',arc:'low',draws:{lateral:.6,depth:.5}});
-    const input={candidate:{family:'volley',intent:'speed-up'},contact,team,execution,applied};
-    const r=resolveDeliveredFlightV1(input), original=solveFlightV2({from:contact,...applied,family:'volley'});
-    assert.equal(r.applied,applied);near(r.flight.launchSpeedMph,original.launchSpeedMph);
-    assert.deepEqual(r.flight.landing,original.landing);assert.equal(r.guidance.speedCeilingMph,null);
-    assert.equal(r.guidance.trials.length,1);assert.ok(r.guidance.limitations.some(x=>x.includes('Sampled error')));
-    if(errorReason==='net') assert.equal(r.flight.terminal.reason,'net');
-    if(errorReason==='long') assert.ok(r.flight.landing.y<0||r.flight.landing.y>44);
-    if(errorReason==='wide') assert.ok(r.flight.landing.x<0||r.flight.landing.x>20);
+const families=['serve','return','drive','drop','reset','dink','lob','volley','overhead'];
+function fixture(family,quality,errorReason,team) {
+  const y=family==='lob'?3:family==='serve'?0:14;
+  const destination=family==='lob'&&errorReason==='net'?23:family==='overhead'&&errorReason==='net'?24:['drop','reset','dink'].includes(family)?27:family==='overhead'?32:38;
+  const contact={x:7,y:team==='green'?y:44-y,heightFeet:family==='overhead'?7.5:family==='volley'?3.5:2.2};
+  const target={x:13,y:team==='green'?destination:44-destination},execution={quality,errorReason};
+  const applied=applyExecutionV1({contact,target,team,family,execution,draws:{lateral:.5,depth:.5}});
+  return {candidate:{family,intent:family},contact,team,execution,applied};
+}
+test('all nine families jointly solve every quality and intended error in both directions',()=>{
+  for(const family of families) for(const quality of ['neutral','low','excellent','attackable','error'])
+    for(const errorReason of quality==='error'?['net','long','wide']:[null]) for(const team of ['green','orange']) {
+      const input=fixture(family,quality,errorReason,team),before=JSON.stringify(input),result=resolveDeliveredFlightV1(input);
+      verify(input,result);assert.equal(JSON.stringify(input),before);
+      assert.deepEqual(result.applied.target,input.applied.target);assert.equal(result.applied.quality,quality);
+      if(errorReason==='net')assert.equal(result.flight.obstruction.kind,'net');
+      else assert.equal(result.flight.obstruction,null);
+      if(errorReason==='long')assert.ok(result.applied.target.y<0||result.applied.target.y>44);
+      if(errorReason==='wide')assert.ok(result.applied.target.x<0||result.applied.target.x>20);
+      if(family==='lob')assert.ok(result.flight.metadata.apexFeet>=15);
+      if(family==='overhead')assert.ok(result.flight.metadata.launchVerticalFeetPerSecond<=0);
+    }
+});
+test('soft popups retain their intended NVZ target while reported shape is measured',()=>{
+  for(const family of ['dink','drop','reset']) for(const team of ['green','orange']) {
+    const input=fixture(family,'attackable',null,team),result=resolveDeliveredFlightV1(input);
+    near(result.applied.target.y,team==='green'?28.2:15.8);
+    assert.equal(result.applied.physicalTransformation.kind,'soft-popup');
+    assert.equal(result.guidance.accepted,true);assert.ok(result.guidance.evidence.preferredDepartures.length);
+    assert.ok(result.flight.metadata.netClearanceInches>=14);verify(input,result);
   }
 });
-test('illustrative diagnostics do not enforce every family range or rewrite popups',()=>{
-  const contact={x:7,y:14,heightFeet:2.2},execution={quality:'attackable',errorReason:null};
-  const applied=applyExecutionV1({contact,execution,team:'green',target:{x:7,y:29},family:'dink',pace:'soft',arc:'medium',draws:{lateral:.5,depth:.5}});
-  const r=resolveDeliveredFlightV1({candidate:{family:'dink',intent:'middle-dink'},contact,execution,team:'green',applied});
-  assert.equal(r.applied,applied);assert.equal(r.guidance.trials.length,1);assert.ok(r.flight.metadata.netClearanceInches>=14);
-  assert.equal(r.guidance.diagnostics.length,3);assert.equal(r.guidance.accepted,true);
+test('archived 49.77 mph sampled error replays the original explicit physics unchanged',()=>{
+  const original=solveFlightV2({from:archivedError.contact,...archivedError.applied,family:archivedError.candidate.family,quality:'error'});
+  near(original.launchSpeedMph,49.76620213634538);
+  const repeated=solveFlightV2({from:archivedError.contact,target:archivedError.applied.target,physics:archivedError.applied.physics,family:'volley',pace:'firm',arc:'low',quality:'error'});
+  assert.deepEqual(repeated.metadata,original.metadata);
+  for(const fraction of [0,.2,.6,1])assert.deepEqual(repeated.sampleBoard(repeated.firstLandingTime*fraction),original.sampleBoard(original.firstLandingTime*fraction));
+  const generated=resolveDeliveredFlightV1(archivedError);assert.ok(generated.flight.launchSpeedMph<=50);verify(archivedError,generated);
 });
-test('actual archived 49.77 mph sampled error remains an independently solved visible exception',()=>{
-  const r=resolveDeliveredFlightV1(archivedError);
-  assert.ok(r.flight.launchSpeedMph>49);
-  assert.equal(r.guidance.repaired,false);
-  assert.deepEqual(r.applied.target,archivedError.applied.target);
-  assert.ok(r.guidance.diagnostics.some(d=>d.metric==='speedMph'&&d.withinRange===false));
-});
-test('unavailable coherent attack rejects with bounded immutable evidence rather than fabricated result',()=>{
-  const input={candidate:{intent:'counter',family:'volley'},contact:{x:7,y:14,heightFeet:30},team:'green',
-    execution:{quality:'neutral'},applied:{target:{x:7,y:52},physics:{launchVerticalFeetPerSecond:-80},pace:'firm',arc:'low'}};
+test('known infeasible geometry rejects with bounded immutable evidence and no invented ending',()=>{
+  const input=fixture('dink','excellent',null,'green');input.contact={x:0,y:0,heightFeet:.13};input.applied={...input.applied,target:{x:20,y:44}};
+  const before=JSON.stringify(input);
   assert.throws(()=>resolveDeliveredFlightV1(input),error=>{
-    assert.ok(error instanceof RangeError);assert.equal(error.guidance.accepted,false);
-    assert.ok(error.guidance.trials.length<=11);assert.ok(Object.isFrozen(error.guidance.trials));
-    assert.ok(error.guidance.source.launchSpeedMph>45);return true;
-  });
+    assert.ok(error instanceof RangeError);assert.equal(error.guidance.accepted,false);assert.ok(error.guidance.trials.length<=6);
+    assert.ok(Object.isFrozen(error.guidance.trials));assert.equal(error.outcome,undefined);return true;
+  });assert.equal(JSON.stringify(input),before);
+});
+
+test('named fast intents keep actual attacking pace while a generic volley can remain a placement',()=>{
+  for(const intent of ['speed-up','counter','firm-volley','put-away','overhead'])for(const team of ['green','orange']) {
+    const input=fixture('volley','neutral',null,team);input.candidate.intent=intent;
+    const result=resolveDeliveredFlightV1(input);assert.ok(result.flight.launchSpeedMph>=22);assert.ok(result.flight.launchSpeedMph<=45);verify(input,result);
+  }
+  const input=fixture('volley','neutral',null,'green');input.applied={...input.applied,target:{x:12,y:27},preferredFlight:{speedMph:14}};
+  const result=resolveDeliveredFlightV1(input);assert.ok(result.flight.launchSpeedMph<22);verify(input,result);
+  const serialized=JSON.stringify(result.guidance);assert.equal(typeof serialized,'string');
+  const inspect=value=>{if(value&&typeof value==='object')for(const item of Object.values(value))inspect(item);else assert.notEqual(typeof value,'function');};
+  inspect(result.guidance);
 });

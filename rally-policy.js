@@ -1,12 +1,13 @@
 // M2 policy projects information available before a choice. It owns no RNG,
 // simulator clock, execution roll or future outcome and never changes a source.
+import { RALLY_POLICY_VERSION } from './rally-recipe.js';
 import { localNetHeightFeet, PHYSICS_V2 } from './play-physics-v2.js';
 import { isInNonVolleyZone } from './court-geometry.js';
 import { assessReach, REACH_MODEL } from './rally-tactics.js';
 import { teamForPlayer, oppositeTeam, eligibleHitters } from './rally-state.js';
 import { resolveStyle, validateStyleProfile } from './rally-styles.js';
 
-export const POLICY_VERSION = 'rally-policy-v1';
+export const POLICY_VERSION = RALLY_POLICY_VERSION;
 export const CONTACT_RANKING_VERSION = 'rally-contact-ranking-v2';
 export const FIFTH_CONTACT_PRIORS_VERSION = 'rally-fifth-contact-priors-v1';
 const EPS = 1e-9;

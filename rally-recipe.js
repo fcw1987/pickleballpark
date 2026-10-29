@@ -3,7 +3,8 @@
 import { SERVICE_COURT_CONVENTION } from './rally-state.js';
 
 export const RALLY_ENGINE_VERSION = 'rally-engine-v1';
-export const RALLY_POLICY_VERSION = 'rally-policy-v1';
+export const RALLY_POLICY_VERSION = 'rally-policy-v2';
+export const RALLY_FLIGHT_PLANNER_VERSION = 'rally-flight-planner-v1';
 export const RALLY_PHYSICS_VERSION = 'play-physics-v2';
 export const RALLY_STYLE_IDS = Object.freeze(['pro', 'advanced', 'intermediate', 'beginner']);
 export const RALLY_FLAVOUR_IDS = Object.freeze(['balanced', 'bangers', 'kitchen-masters', 'lobbers']);
@@ -113,11 +114,15 @@ export function normalizeRallyInputV1(value) {
 
 /** Strict persisted model2 origin. Returned input is never applied to edited shots. */
 export function validateGenerationRecipeV1(value) {
-  object(value, 'generation', ['mode', 'generatorVersion', 'policyVersion', 'physicsVersion', 'seed', 'input', 'selection']);
+  object(value, 'generation', ['mode', 'generatorVersion', 'policyVersion', 'flightPlannerVersion', 'physicsVersion', 'seed', 'input', 'selection']);
   required(value, ['mode', 'generatorVersion', 'policyVersion', 'physicsVersion', 'seed', 'input', 'selection'], 'generation');
   choice(value.mode, ['engine'], 'generation.mode');
   choice(value.generatorVersion, [RALLY_ENGINE_VERSION], 'generation.generatorVersion');
-  choice(value.policyVersion, [RALLY_POLICY_VERSION], 'generation.policyVersion');
+  choice(value.policyVersion, ['rally-policy-v1', RALLY_POLICY_VERSION], 'generation.policyVersion');
+  if (value.policyVersion === RALLY_POLICY_VERSION) {
+    required(value, ['flightPlannerVersion'], 'generation');
+    choice(value.flightPlannerVersion, [RALLY_FLIGHT_PLANNER_VERSION], 'generation.flightPlannerVersion');
+  } else if (own(value, 'flightPlannerVersion')) fail('generation.flightPlannerVersion', 'is unsupported for rally-policy-v1.');
   choice(value.physicsVersion, [RALLY_PHYSICS_VERSION], 'generation.physicsVersion');
   const seed = integer(value.seed, 0, 0xffffffff, 'generation.seed');
   object(value.input, 'generation.input', ['players', 'layout', 'service', 'options']);
@@ -138,7 +143,7 @@ export function validateGenerationRecipeV1(value) {
 export function createRallyRequestRecipeV1(normalized) {
   const input = normalizeRallyInputV1(normalized);
   return freeze({ mode: 'engine', generatorVersion: RALLY_ENGINE_VERSION, policyVersion: RALLY_POLICY_VERSION,
-    physicsVersion: RALLY_PHYSICS_VERSION, seed: input.seed,
+    flightPlannerVersion: RALLY_FLIGHT_PLANNER_VERSION, physicsVersion: RALLY_PHYSICS_VERSION, seed: input.seed,
     input: { players: input.players, layout: input.layout, service: input.service, options: input.options },
     selection: null });
 }

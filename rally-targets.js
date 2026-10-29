@@ -2,9 +2,10 @@
 // trajectory construction belongs exclusively to the shared versioned solver.
 import { isOnCourt } from './court-geometry.js';
 import { receivingServiceBox, SERVICE_COURT_CONVENTION, teamForPlayer } from './rally-state.js';
-import { PHYSICS_VERSION, PHYSICS_V2, solveFlightV2, solveFlightForClearanceV2 } from './play-physics-v2.js';
+import { PHYSICS_V2 } from './play-physics-v2.js';
+import { planRallyFlightV1 } from './rally-flight-planner.js';
 
-export const TARGETS_VERSION = 'rally-targets-v1';
+export const TARGETS_VERSION = 'rally-targets-v2';
 export const CLEARANCE_PRIORS_V1 = Object.freeze({
   serve: 1.2, return: 1.2, drive: .7, drop: .6, reset: .6, dink: .35, volley: .5
 });
@@ -68,36 +69,6 @@ function openLane(records, draw) {
     .sort((a, b) => b.width - a.width || a.left - b.left);
   const gap = gaps[0];
   return gap.left + gap.width * (.2 + .6 * draw);
-}
-
-function overheadParameters(base) {
-  const attempts = [], available = [];
-  for (const launchVerticalFeetPerSecond of OVERHEAD_LAUNCH_PRIORS_V1) {
-    const physics = { launchVerticalFeetPerSecond };
-    try {
-      const flight = solveFlightV2({ ...base, physics });
-      const unobstructed = !flight.obstruction && !flight.terminal;
-      attempts.push(Object.freeze({ launchVerticalFeetPerSecond, launchSpeedMph: flight.launchSpeedMph,
-        netClearanceInches: flight.metadata.netClearanceInches, unobstructed,
-        reason: unobstructed ? 'coherent-opponent-landing' : `obstructed:${flight.obstruction?.kind ?? flight.terminal?.reason}` }));
-      if (unobstructed) available.push({ physics, flight });
-    } catch (error) {
-      attempts.push(Object.freeze({ launchVerticalFeetPerSecond, unobstructed: false, reason: error.message }));
-    }
-  }
-  if (!available.length) throw new RangeError('No unobstructed overhead flight exists within the bounded launch policy.');
-  // Speed is an observed result of each coherent flight, not another imposed
-  // equality alongside gravity, landing and launch. Keep the first supported
-  // prior in the guidance band; otherwise use the slowest unobstructed option.
-  const inBand = available.find(({ flight }) => flight.launchSpeedMph >= 35 - EPS && flight.launchSpeedMph <= 45 + EPS);
-  const selected = inBand ?? available.toSorted((a, b) => a.flight.launchSpeedMph - b.flight.launchSpeedMph
-    || OVERHEAD_LAUNCH_PRIORS_V1.indexOf(a.physics.launchVerticalFeetPerSecond) - OVERHEAD_LAUNCH_PRIORS_V1.indexOf(b.physics.launchVerticalFeetPerSecond))[0];
-  const guidance = Object.freeze({ version: 'overhead-launch-guidance-v1', minimumMph: 35, maximumMph: 45,
-    withinBand: !!inBand, attempts: Object.freeze(attempts) });
-  return { ...selected, guidance,
-    reason: inBand ? 'overhead-speed-guidance-attained' : 'overhead-speed-guidance-unattainable-conservative-flight',
-    ...(!inBand ? { limitation: Object.freeze({ kind: 'overhead-speed-guidance', minimumMph: 35, maximumMph: 45,
-      actualLaunchSpeedMph: selected.flight.launchSpeedMph, reason: 'No unobstructed bounded launch meets the guidance band for this contact and landing.' }) } : {}) };
 }
 
 /** Continuous jittered targets; service roles come from the declared recipe. */
@@ -171,8 +142,9 @@ export function resolveTargetV1({ candidate, situation, players, draws }) {
   return Object.freeze(target);
 }
 
-/** Choose one coherent physical flight; speed and apex remain solver outputs. */
-export function resolveFlightParametersV1({ candidate, contact, target, team, quality = 'neutral' }) {
+/** Choose a bounded coherent flight. Section 7 values are preferences; the
+ * shared planner jointly chooses time, speed and vertical shape. */
+export function resolveFlightParametersV1({ candidate, contact, target, team, quality = 'neutral', style = 'advanced', route = 'over-net' }) {
   assertNominal(candidate); assertTeam(team);
   if (candidate.physics !== undefined) throw new TypeError('Choose nominal policy physics or an explicit planned flight, not both.');
   const from = point(contact, 'contact', true), landing = point(target, 'target');
@@ -180,26 +152,21 @@ export function resolveFlightParametersV1({ candidate, contact, target, team, qu
   const ownContact = team === 'green' ? from.y + PHYSICS_V2.ballRadiusFeet <= 22 + EPS : from.y - PHYSICS_V2.ballRadiusFeet >= 22 - EPS;
   const opponentLanding = isOnCourt(landing) && (team === 'green' ? landing.y > 22 : landing.y < 22);
   if (!ownContact || !opponentLanding) throw new RangeError('A nominal flight needs a whole-ball own-side contact and opponent landing.');
-  const family = candidate.family;
-  const base = { physicsVersion: PHYSICS_VERSION, from, target: landing, family,
-    pace: candidate.pace ?? 'medium', arc: candidate.arc ?? 'medium', quality };
-  let physics, flight, overhead = null;
-  if (family === 'lob') {
-    physics = { apexFeet: 18 }; flight = solveFlightV2({ ...base, physics });
-  } else if (family === 'overhead') {
-    overhead = overheadParameters(base);
-    ({ physics, flight } = overhead);
-  } else {
-    const clearance = CLEARANCE_PRIORS_V1[family];
-    if (clearance === undefined) throw new TypeError('Unsupported nominal shot family.');
-    flight = solveFlightForClearanceV2(base, clearance);
-    physics = { launchVerticalFeetPerSecond: flight.metadata.launchVerticalFeetPerSecond };
+  const preferred = candidate.family === 'lob' ? { apexFeet: 18 }
+    : candidate.family === 'overhead' ? { launchVerticalFeetPerSecond: -18, speedMph: 40 }
+      : CLEARANCE_PRIORS_V1[candidate.family] === undefined ? {} : { clearanceFeet: CLEARANCE_PRIORS_V1[candidate.family] };
+  const planner = planRallyFlightV1({ from, target: landing, family: candidate.family, intent: candidate.intent ?? null,
+    pace: candidate.pace ?? 'medium', arc: candidate.arc ?? 'medium', quality, style, preferred, route });
+  if (planner.status !== 'solved') {
+    const error = new RangeError(`Nominal flight unavailable: ${planner.diagnostics.reason}`);
+    error.plannerDiagnostics = planner.diagnostics;
+    throw error;
   }
-  if (flight.obstruction || flight.terminal) throw new RangeError('The nominal flight is obstructed.');
-  const clearanceInches = flight.metadata.netClearanceInches;
+  const { physics, flight } = planner, clearanceInches = flight.metadata.netClearanceInches;
   const attacking = flight.launchSpeedMph >= 22 - EPS && Number.isFinite(clearanceInches)
     && clearanceInches >= -EPS && clearanceInches <= 16 + EPS && !flight.obstruction && opponentLanding;
-  return Object.freeze({ version: TARGETS_VERSION, physics: Object.freeze(physics), flight, attacking,
-    reason: overhead?.reason ?? (attacking ? 'solved-pace-and-clearance' : flight.launchSpeedMph < 22 ? 'solved-flight-below-attack-pace' : 'solved-flight-clearance-outside-attack-band'),
-    ...(overhead ? { guidance: overhead.guidance, ...(overhead.limitation ? { limitation: overhead.limitation } : {}) } : {}) });
+  return Object.freeze({ version: TARGETS_VERSION, physics, flight, attacking,
+    reason: attacking ? 'solved-pace-and-clearance' : flight.launchSpeedMph < 22 ? 'solved-flight-below-attack-pace' : 'solved-flight-clearance-outside-attack-band',
+    guidance: Object.freeze({ version: planner.plannerVersion, ...planner.evidence, diagnostics: planner.diagnostics }),
+    solutions: planner.solutions, planner });
 }

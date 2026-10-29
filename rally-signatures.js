@@ -7,10 +7,12 @@ import { inspectModel2SegmentV2 } from './play-outcome-v2.js';
 import { eligibleHitters, contactRequiresBounce, teamForPlayer } from './rally-state.js';
 import { sampleActorFeetV2 } from './play-actors-v2.js';
 import { contactFeetV1, boundMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from './rally-movement.js';
+import { planRallyFlightV1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from './rally-flight-planner.js';
 
-export const SIGNATURE_VERSION = 'rally-signatures-v1';
+export const SIGNATURE_VERSION = 'rally-signatures-v2';
 export const SIGNATURE_LIMITS = Object.freeze({ volleyFractions: Object.freeze([.35, .5, .65, .8, .9, .95]),
   bounceDelays: Object.freeze([.03, .06, .12, .2, .28, .4, .6]), maxLaunchTrials: 8,
+  maxTargetTrials: 8, maxSolverCallsPerTarget: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET,
   maximumContactHeightFeet: 6.5, peakFeetPerSecond: 17.95 });
 const IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 const R = PHYSICS_V2.ballRadiusFeet, EPS = 1e-7;
@@ -48,17 +50,26 @@ function outgoingChoices(intent, contact, team) {
     apex: Math.max(contact.heightFeet, apex),
   })));
 }
-function outgoingFlight(intent, contact, team, work) {
-  for (const choice of outgoingChoices(intent, contact, team).slice(0, SIGNATURE_LIMITS.maxLaunchTrials)) {
-    work.launchTrials++;
+function outgoingFlight(intent, contact, player, work) {
+  // One planner request per exact target: old apex alternatives are hints,
+  // never an outer launch search stacked on top of the bounded planner.
+  const choices = outgoingChoices(intent, contact, player.team).filter((choice, index, all) =>
+    all.findIndex(other => canonical(other.target) === canonical(choice.target)) === index)
+    .slice(0, SIGNATURE_LIMITS.maxTargetTrials);
+  for (const choice of choices) {
+    work.targetTrials++;
     try {
       if (choice.apex > 30) continue;
-      const family = intent === 'erne' ? 'volley' : 'drive', physics = { apexFeet: choice.apex };
-      const flight = solveFlightV2({ physicsVersion: PHYSICS_VERSION, from: contact, target: choice.target,
-        family, arc: 'medium', pace: intent === 'erne' ? 'soft' : 'firm', quality: 'neutral', physics });
-      if (flight.obstruction || !flight.events.some(event => event.type === 'net-crossing')) continue;
-      if (intent === 'around-the-post' && !flight.events.some(event => event.type === 'net-crossing' && event.aroundPost)) continue;
-      return { flight, physics, target: xy(choice.target), family };
+      const family = intent === 'erne' ? 'volley' : 'drive';
+      const planned = planRallyFlightV1({ from: contact, target: choice.target, family, intent,
+        style: player.style || 'advanced', arc: 'medium', pace: intent === 'erne' ? 'soft' : 'firm',
+        quality: 'neutral', preferred: { apexFeet: choice.apex },
+        route: intent === 'erne' ? 'over-net' : 'around-the-post' });
+      work.launchTrials += planned.diagnostics.solverCalls;
+      if (planned.status !== 'solved') continue;
+      return { flight: planned.flight, physics: { ...planned.physics }, target: xy(choice.target), family,
+        flightPlannerVersion: planned.plannerVersion, flightEvidence: planned.evidence,
+        flightPlannerDiagnostics: planned.diagnostics };
     } catch (error) { if (!(error instanceof RangeError || error instanceof TypeError)) throw error; }
   }
   return null;
@@ -102,7 +113,7 @@ export function probeSignatureCandidatesV1({ incomingFlight, pendingSegment, pen
   players, positions = pendingSegment?.previous?.positions, footState, service = {}, contactIndex = pendingSegment?.rallyLeg,
   opening = 'serve', eligibleIds, signatureShots = true } = {}) {
   if (typeof signatureShots !== 'boolean') throw new TypeError('signatureShots must be boolean.');
-  const work = { contactTrials: 0, launchTrials: 0, routeTrials: 0 };
+  const work = { contactTrials: 0, targetTrials: 0, launchTrials: 0, routeTrials: 0 };
   if (!signatureShots) return freeze({ version: SIGNATURE_VERSION, candidates: [], exclusions: [{ code: 'disabled' }], work });
   if (incomingFlight?.physicsVersion !== PHYSICS_VERSION || typeof incomingFlight.sampleBoard !== 'function'
     || pendingSegment?.modelVersion !== 2 || !pendingSegment.shotSemantics || !Number.isFinite(incomingFlight.firstLandingTime)) throw new TypeError('An actual supported incoming flight and its pending model2 segment are required.');
@@ -155,7 +166,7 @@ export function probeSignatureCandidatesV1({ incomingFlight, pendingSegment, pen
         if (intent === 'erne' && !ownNVZBand(contact, team)) continue;
         if (intent === 'around-the-post' && (!ownNVZBand(contact, team)
           || !(contact.x < PHYSICS_V2.postInsideLeft - PHYSICS_V2.postDiameterFeet - R || contact.x > PHYSICS_V2.postInsideRight + PHYSICS_V2.postDiameterFeet + R))) continue;
-        const outgoing = outgoingFlight(intent, contact, team, work); if (!outgoing) continue;
+        const outgoing = outgoingFlight(intent, contact, player, work); if (!outgoing) continue;
         const contactStyle = strokeSide(player, origin, contact);
         const feet = contactFeetV1({ contact, target: outgoing.target, team, handedness: player.handedness, contactStyle, kind, position: origin });
         if (!feet.reachable || !feet.legalVolleyFeet || intent === 'erne' && !feet.feet.every(p => outsideNVZ(p) && outsideSideline(p))) continue;
@@ -177,6 +188,8 @@ export function probeSignatureCandidatesV1({ incomingFlight, pendingSegment, pen
         candidates.push({ intent, playerId, kind, contact, time: intercept.time,
           contactTimeSeconds: route.resolved.endTime, contactStyle, feet, contactOverride: xy(contact),
           target: outgoing.target, physics: outgoing.physics, flight: outgoing.flight, recipe,
+          flightPlannerVersion: outgoing.flightPlannerVersion, flightEvidence: outgoing.flightEvidence,
+          flightPlannerDiagnostics: outgoing.flightPlannerDiagnostics,
           pendingMovement: route.pendingMovement, ...(route.pendingRecipe ? { pendingRecipe: route.pendingRecipe } : {}),
           footState: sampleFeetStateV1(route.resolved, route.resolved.duration),
           route: { peak: route.peak, spacing: route.spacing, groundedResetVerified: intent !== 'erne' || contactEvidence.feetEstablishedOutsideNVZ },

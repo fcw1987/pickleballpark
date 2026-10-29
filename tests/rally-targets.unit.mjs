@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveTargetV1, resolveFlightParametersV1, CLEARANCE_PRIORS_V1, OVERHEAD_LAUNCH_PRIORS_V1 } from '../rally-targets.js';
+import { resolveTargetV1, resolveFlightParametersV1, CLEARANCE_PRIORS_V1 } from '../rally-targets.js';
 import { receivingServiceBox, SERVICE_COURT_CONVENTION } from '../rally-state.js';
 import { isInServiceBox, isInNonVolleyZone } from '../court-geometry.js';
 import { PHYSICS_VERSION, PHYSICS_V2, solveFlightV2, interceptFlightV2 } from '../play-physics-v2.js';
@@ -151,7 +151,8 @@ test('third-shot drive feet targets remain physically feasible against up and ba
     assert.deepEqual(target, resolveTargetV1({ candidate: regular, situation: context, players, draws: { lateral: .5, depth } }));
     const actual = resolveFlightParametersV1({ candidate: third, contact: context.contact, target, team });
     assert.equal(actual.flight.obstruction, null); assert.equal(actual.flight.terminal, null);
-    assert.ok(Math.abs(actual.flight.metadata.netClearanceInches - CLEARANCE_PRIORS_V1.drive * 12) < 1e-8);
+    assert.ok(actual.flight.launchSpeedMph <= 38); assert.ok(actual.flight.launchSpeedMph >= 22);
+    assert.ok(actual.guidance.diagnostics.solverCalls <= 6);
     assert.ok(Number.isFinite(actual.flight.launchSpeedMph)); assert.equal(actual.outcome, undefined);
   }
 });
@@ -176,14 +177,16 @@ test('open-court lateral gaps still follow defenders while depth follows the con
   assert.notEqual(a.x, b.x); assert.equal(a.y, b.y);
 });
 
-test('regular flight parameters reproduce their exact ball-surface clearance through the shared solver', () => {
+test('regular flight parameters honor bounded envelopes and reproduce through the shared solver', () => {
   for (const team of ['green', 'orange']) for (const family of Object.keys(CLEARANCE_PRIORS_V1)) {
     const near = team === 'green', close = ['dink', 'reset', 'volley'].includes(family);
     const contact = { x: 7, y: near ? close ? 14 : 4 : close ? 30 : 40, heightFeet: family === 'volley' ? 3.5 : 2.2 };
     const target = { x: 12, y: near ? close && family !== 'volley' ? 27 : 40 : close && family !== 'volley' ? 17 : 4 };
     const choice = candidate(family, 'deep-middle');
     const result = resolveFlightParametersV1({ candidate: choice, contact, target, team });
-    assert.ok(Math.abs(result.flight.metadata.netClearanceInches - CLEARANCE_PRIORS_V1[family] * 12) < 1e-8, `${team}/${family}`);
+    assert.ok(result.flight.launchSpeedMph <= ({serve:40,return:36,drive:38,drop:26,reset:24,dink:20,volley:45})[family], `${team}/${family}`);
+    assert.ok(result.guidance.diagnostics.solverCalls <= 6);
+    assert.ok(result.guidance.preferredDepartures.some(item => item.metric === 'clearanceFeet'));
     assert.deepEqual(Object.keys(result.physics), ['launchVerticalFeetPerSecond']);
     const reconstructed = solveFlightV2({ from: contact, target, family, arc: choice.arc, pace: choice.pace, quality: 'neutral', physics: result.physics });
     for (const fraction of [0, .3, .7, 1]) assert.deepEqual(reconstructed.sampleBoard(reconstructed.firstLandingTime * fraction), result.flight.sampleBoard(result.flight.firstLandingTime * fraction));
@@ -203,59 +206,36 @@ test('an actual fast, low-clearance flight creates an attack affordance; height 
   assert.equal(labelledError.flight.terminal, null); assert.equal(labelledError.outcome, undefined);
 });
 
-test('lob apex and bounded overhead launches do not impose incompatible independent speed or clearance', () => {
-  const lob = resolveFlightParametersV1({ candidate: candidate('lob', 'deep-overhead'), contact: { x: 7, y: 14, heightFeet: 2.2 }, target: { x: 12, y: 40 }, team: 'green' });
-  assert.deepEqual(lob.physics, { apexFeet: 18 }); assert.equal(lob.flight.metadata.apexFeet, 18);
-  assert.equal(lob.attacking, false);
-  const overhead = resolveFlightParametersV1({ candidate: { ...candidate('overhead', 'open-court'), pace: 'firm' }, contact: { x: 7, y: 14, heightFeet: 7.5 }, target: { x: 14, y: 31 }, team: 'green' });
-  const unchangedDefault = solveFlightV2({ from: { x: 7, y: 14, heightFeet: 7.5 }, target: { x: 14, y: 31 }, family: 'overhead', pace: 'firm' });
-  assert.equal(unchangedDefault.metadata.launchVerticalFeetPerSecond, -24, 'M1 defaults remain independent of the new generator policy');
-  assert.ok(unchangedDefault.launchSpeedMph > 45);
-  assert.deepEqual(overhead.physics, { launchVerticalFeetPerSecond: -18 });
-  assert.equal(overhead.flight.metadata.apexFeet, 7.5);
-  assert.notEqual(overhead.flight.metadata.netClearanceInches, .5 * 12);
-  assert.equal(overhead.guidance.withinBand, true);
-  assert.ok(overhead.flight.launchSpeedMph >= 35 && overhead.flight.launchSpeedMph <= 45);
-});
-
-test('deep and transition overheads choose a coherent guidance-band launch on mirrored courts', () => {
-  for (const near of [true, false]) for (const y of [5, 10, 14]) {
-    const contact = { x: 7, y: near ? y : 44 - y, heightFeet: 8.5 };
-    const target = { x: 11, y: near ? 30 : 14 }, team = near ? 'green' : 'orange';
-    const choice = { ...candidate('overhead', 'open-court'), pace: 'firm' };
-    const result = resolveFlightParametersV1({ candidate: choice, contact, target, team });
-    assert.equal(result.guidance.withinBand, true, `${team}/${y}`);
-    assert.equal(result.guidance.attempts.length, OVERHEAD_LAUNCH_PRIORS_V1.length);
-    assert.ok(result.flight.launchSpeedMph >= 35 - 1e-7 && result.flight.launchSpeedMph <= 45 + 1e-7);
-    assert.equal(result.flight.obstruction, null);
-    assert.deepEqual(result.flight.target, target);
-    const chosen = result.physics.launchVerticalFeetPerSecond;
-    const first = result.guidance.attempts.find(attempt => attempt.unobstructed && attempt.launchSpeedMph >= 35 - 1e-7 && attempt.launchSpeedMph <= 45 + 1e-7);
-    assert.equal(chosen, first.launchVerticalFeetPerSecond);
-    const reconstructed = solveFlightV2({ from: contact, target, family: 'overhead', arc: choice.arc, pace: choice.pace, quality: 'neutral', physics: result.physics });
-    assert.deepEqual(reconstructed.sampleBoard(reconstructed.firstLandingTime / 2), result.flight.sampleBoard(result.flight.firstLandingTime / 2));
+test('lob and overhead shape constraints coexist with bounded actual launch speeds', () => {
+  for (const team of ['green', 'orange']) {
+    const near=team==='green';
+    const lob=resolveFlightParametersV1({candidate:candidate('lob','deep-overhead'),contact:{x:7,y:near?14:30,heightFeet:2.2},target:{x:12,y:near?40:4},team});
+    assert.ok(lob.flight.metadata.apexFeet>=15);assert.ok(lob.flight.launchSpeedMph<=28);assert.equal(lob.attacking,false);
+    for(const y of [5,10,14]) {
+      const contact={x:7,y:near?y:44-y,heightFeet:8.5},target={x:11,y:near?30:14};
+      const result=resolveFlightParametersV1({candidate:{...candidate('overhead','open-court'),pace:'firm'},contact,target,team});
+      assert.ok(result.flight.launchSpeedMph>=22);assert.ok(result.flight.launchSpeedMph<=45);
+      assert.ok(result.physics.launchVerticalFeetPerSecond<=0);assert.equal(result.flight.obstruction,null);
+      assert.ok(result.guidance.diagnostics.solverCalls<=6);assert.ok(result.solutions.length<=6);
+      const reconstructed=solveFlightV2({from:contact,target,family:'overhead',pace:'firm',arc:'medium',physics:result.physics});
+      assert.deepEqual(reconstructed.sampleBoard(reconstructed.firstLandingTime/2),result.flight.sampleBoard(result.flight.firstLandingTime/2));
+    }
   }
 });
-
-test('an unattainable overhead speed band returns a conservative coherent flight with an explicit limitation', () => {
-  const contact = { x: 7, y: 14, heightFeet: 8.5 }, target = { x: 8, y: 26 };
-  const result = resolveFlightParametersV1({ candidate: candidate('overhead', 'open-court'), contact, target, team: 'green' });
-  assert.equal(result.guidance.withinBand, false);
-  assert.ok(result.limitation); assert.equal(result.limitation.kind, 'overhead-speed-guidance');
-  assert.equal(result.reason, 'overhead-speed-guidance-unattainable-conservative-flight');
-  const available = result.guidance.attempts.filter(attempt => attempt.unobstructed);
-  assert.equal(result.flight.launchSpeedMph, Math.min(...available.map(attempt => attempt.launchSpeedMph)));
-  assert.equal(result.flight.obstruction, null); assert.deepEqual(result.flight.target, target);
-  assert.equal(result.outcome, undefined, 'guidance exhaustion is not a fabricated point result');
+test('a previously incompatible low clearance is a preference and can yield a coherent bounded flight',()=>{
+  const contact={x:9.027572576,y:17.199999999,heightFeet:4.231963166},target={x:13.432435641,y:39.2};
+  const result=resolveFlightParametersV1({candidate:{...candidate('drive','deep-feet'),pace:'firm',arc:'low'},contact,target,team:'green',style:'advanced'});
+  assert.ok(result.flight.launchSpeedMph<=38);assert.ok(result.flight.launchSpeedMph>=22);
+  assert.equal(result.flight.obstruction,null);assert.deepEqual(result.flight.target,target);
+  assert.ok(result.guidance.preferredDepartures.length);assert.equal(result.outcome,undefined);
 });
-
-test('infeasible inverse flights fail instead of shifting their target or fabricating an ending', () => {
-  const input = { candidate: candidate('volley', 'hip-middle'), contact: { x: 7, y: 14, heightFeet: 8 }, target: { x: 12, y: 40 }, team: 'green' };
-  const before = JSON.stringify(input);
-  assert.throws(() => resolveFlightParametersV1(input), /coherent ballistic/);
-  assert.equal(JSON.stringify(input), before);
-  assert.throws(() => resolveFlightParametersV1({ ...input, candidate: { ...input.candidate, physics: { apexFeet: 9 } } }), /not both/);
-  assert.throws(() => resolveFlightParametersV1({ ...input, contact: { x: 7, y: 22 - PHYSICS_V2.ballRadiusFeet / 2, heightFeet: 2.2 } }), /whole-ball/);
+test('known infeasible geometry fails without shifting the target or fabricating an ending',()=>{
+  const input={candidate:candidate('dink','kitchen-cross'),contact:{x:0,y:0,heightFeet:.13},target:{x:20,y:44},team:'green'};
+  const before=JSON.stringify(input);
+  assert.throws(()=>resolveFlightParametersV1(input),error=>{assert.ok(error instanceof RangeError);assert.ok(error.plannerDiagnostics.solverCalls<=6);return true;});
+  assert.equal(JSON.stringify(input),before);
+  assert.throws(()=>resolveFlightParametersV1({...input,candidate:{...input.candidate,physics:{apexFeet:9}}}),/not both/);
+  assert.throws(()=>resolveFlightParametersV1({...input,contact:{x:7,y:22-PHYSICS_V2.ballRadiusFeet/2,heightFeet:2.2}}),/whole-ball/);
 });
 
 test('nominal helpers reject signature invention, leaving decisions, malformed draws and unknown regions', () => {

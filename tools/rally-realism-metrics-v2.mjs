@@ -1,4 +1,5 @@
 // Versioned model-2 observations. Legacy rally-realism-v1 remains unchanged.
+import { assessGeneratedFlightFeasibilityV1, GENERATED_FLIGHT_AUDIT_VERSION } from '../rally-flight-audit.js';
 import { samplePlayState } from '../three-d-core.js';
 import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
 import { distribution } from './rally-realism-metrics.mjs';
@@ -121,7 +122,7 @@ export function observeRallyV2({ document, compiled, rules, result, seed, settin
     const evidenceTimeMatches = finite(before?.sampleTimeSeconds) && finite(before?.contactTimeSeconds)
       && Math.abs(before.sampleTimeSeconds - expectedSampleTime) <= 1e-6 && Math.abs(before.contactTimeSeconds - time) <= 1e-6;
     const evidencePositions = evidenceTimeMatches ? samplePlayState(compiled.timeline, expectedSampleTime).positions : null;
-    const contactMatches = evidenceTimeMatches && before?.policyVersion === 'rally-policy-v1' && ['x', 'y', 'heightFeet'].every(axis => Math.abs(before.contact?.[axis] - semantics.contact.point[axis]) <= 1e-6)
+    const contactMatches = evidenceTimeMatches && before?.policyVersion === (document.generation?.policyVersion ?? 'rally-policy-v1') && ['x', 'y', 'heightFeet'].every(axis => Math.abs(before.contact?.[axis] - semantics.contact.point[axis]) <= 1e-6)
       && ids.every(id => ['x', 'y'].every(axis => Math.abs(before.positions?.[id]?.[axis] - evidencePositions[id][axis]) <= 1e-6));
     const incomingAttackable = contactMatches && typeof before.attackable === 'boolean' && before.affordances?.attack === before.attackable ? before.attackable : null;
     const crossing = compiled.timeline.events.find(event => event.type === 'net-crossing' && event.rallyLeg === segment.rallyLeg);
@@ -167,6 +168,7 @@ export function observeRallyV2({ document, compiled, rules, result, seed, settin
     physicallyValid: accepted, accepted: accepted && (complete || censored), complete, censored,
     documentPresent: !!document, shots: contacts.length, sourceShots: document?.shots?.length ?? null,
     modelSupport,
+    generatedFlightFeasibility: assessGeneratedFlightFeasibilityV1({ document, compiled }),
     outcome, outcomeClassification: result.outcomeClassification ? clone(result.outcomeClassification) : null,
     service: service ? clone(service) : null,
     servingTeam: service?.server ? document?.players?.[service.server]?.team ?? null : null,
@@ -213,8 +215,31 @@ export function summarizeObservationsV2(observations) {
     policy: CONTACT_SUPPORT_POLICY_V2, checkedRallies: checkedSupportRows.length,
     checkedContacts: checkedSupportRows.reduce((sum, row) => sum + row.modelSupport.checkedContacts, 0),
     unsupportedContacts: supportViolations.length, violations: supportViolations };
+  const feasibilityRows = observations.map(row => ({ row, audit: row.generatedFlightFeasibility ?? {
+    status: 'NOT_EVALUATED', checkedFlights: 0, violations: [], flights: [],
+  } }));
+  const checkedFeasibility = feasibilityRows.filter(({ audit }) => ['PASS', 'FAIL'].includes(audit.status));
+  const feasibilityViolations = feasibilityRows.flatMap(({ row, audit }) => audit.violations.map(violation => ({ seed: row.seed, ...violation })));
+  const feasibilityFlights = checkedFeasibility.flatMap(({ audit }) => audit.flights);
+  const generatedFlightFeasibility = {
+    version: GENERATED_FLIGHT_AUDIT_VERSION,
+    status: feasibilityRows.some(({ audit }) => audit.status === 'FAIL') ? 'FAIL'
+      : !feasibilityRows.length || feasibilityRows.some(({ audit }) => audit.status === 'NOT_EVALUATED') ? 'NOT_EVALUATED'
+      : checkedFeasibility.length ? 'PASS' : 'NOT_APPLICABLE',
+    attemptedRallies: observations.length, checkedRallies: checkedFeasibility.length,
+    checkedFlights: checkedFeasibility.reduce((sum, { audit }) => sum + audit.checkedFlights, 0),
+    statusCounts: Object.fromEntries(['PASS', 'FAIL', 'NOT_EVALUATED', 'NOT_APPLICABLE'].map(status => [status, feasibilityRows.filter(({ audit }) => audit.status === status).length])),
+    families: Object.fromEntries([...new Set(feasibilityFlights.map(flight => flight.family))].sort().map(family => {
+      const rows = feasibilityFlights.filter(flight => flight.family === family);
+      return [family, { checkedFlights: rows.length, passedFlights: rows.filter(flight => flight.status === 'PASS').length,
+        failedFlights: rows.filter(flight => flight.status === 'FAIL').length,
+        launchSpeedMph: distribution(rows.map(flight => flight.launchSpeedMph)) }];
+    })),
+    violations: feasibilityViolations,
+  };
   return {
     modelSupport,
+    generatedFlightFeasibility,
     diagnostics: {
       status: 'DIAGNOSTIC_ONLY; existing calibration bands and denominators remain unchanged',
       scope: 'Valid unconditioned complete natural-rally contacts; model-support checks separately include censored and conditioned outputs',

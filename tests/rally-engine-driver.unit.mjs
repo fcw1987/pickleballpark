@@ -17,6 +17,18 @@ const clone = value => structuredClone(value);
 // actual M1 compiler's feet, then cross the same independent final validators.
 function fixtureResult(document, attemptSeed = 7) {
   document = clone(document);
+  // These older authored fixtures predate generation envelopes. Preserve their
+  // real trajectories while labeling the scripted terminal mistakes as errors.
+  const authored = compileDocument(document);
+  for (const [index, shot] of document.shots.entries()) {
+    const solved = authored.timeline.segments[index].trajectory.solved;
+    if (shot.family === 'dink' && solved.launchSpeedMph > 25) {
+      shot.family = 'drive'; shot.intent = 'drive'; shot.quality = 'error';
+      shot.physics = { launchVerticalFeetPerSecond: solved.stages[0].vy };
+    } else if (shot.family === 'drive' && solved.launchSpeedMph < 22) {
+      shot.quality = 'error'; shot.physics = { launchVerticalFeetPerSecond: solved.stages[0].vy };
+    }
+  }
   const compiled = compileDocument(document);
   assert.equal(compiled.validShotCount, document.shots.length);
   for (const [index, shot] of document.shots.entries()) {
@@ -278,4 +290,35 @@ test('independent engine validation rejects unsupported grounded heights without
   assert.equal(result.diagnostics.code, 'engine-contact-height', JSON.stringify(result.diagnostics));
   assert.equal(result.document, null);
   assert.equal(result.diagnostics.validation.maximumHeightFeet, 8.5);
+});
+
+test('fresh serialized envelope failure is explicit despite fabricated planner acceptance', async () => {
+  const source = fixtureResult(readModel2Fixture('net'));
+  // This authored dink error is publicly legal, but 29.28mph exceeds its 25mph
+  // fresh-generation ceiling. The audit must read the compiled serialized leg.
+  source.document.shots[0].family = 'dink';
+  source.document.shots[0].intent = 'cross-court-dink';
+  source.stats.generatedFlightFeasibility = { status: 'PASS', speedMph: 1 };
+  source.diagnostics.flightPlanner = { accepted: true, speedMph: 1 };
+  const before = JSON.stringify(source);
+  const result = await createEngineDriverV1(async () => source, { yieldControl: immediate })({ seed: 7 });
+  assert.equal(result.status, 'failed'); assert.equal(result.document, null); assert.equal(result.outcome, null);
+  assert.equal(result.diagnostics.code, 'generated-flight-feasibility');
+  const audit = result.diagnostics.validation.generatedFlightFeasibility;
+  assert.equal(audit.status, 'FAIL'); assert.equal(audit.checkedFlights, 1);
+  assert.equal(audit.violations[0].code, 'launch-speed-above-envelope');
+  assert.ok(audit.flights[0].launchSpeedMph > 29);
+  assert.deepEqual(result.decisions, source.decisions);
+  assert.equal(JSON.stringify(source), before);
+});
+
+test('selected output records bounded independent audit summaries without saved traces', async () => {
+  const result = await createEngineDriverV1(async () => net(7), { yieldControl: immediate })({ seed: 7 });
+  assert.equal(result.status, 'complete');
+  assert.deepEqual(result.stats.generatedFlightFeasibility, {
+    version: 'rally-generated-flight-feasibility-v1', status: 'PASS', checkedFlights: 1,
+  });
+  assert.equal(result.diagnostics.validation.generatedFlightFeasibility.status, 'PASS');
+  assert.equal(Object.hasOwn(result.document, 'generatedFlightFeasibility'), false);
+  assert.equal(Object.hasOwn(result.document.generation, 'flights'), false);
 });

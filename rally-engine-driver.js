@@ -5,6 +5,7 @@ import { createRallyRandomV1, deriveRallySeedV1 } from './rally-random.js';
 import { validateDocument } from './play-document.js';
 import { compileDocument } from './play-compiler.js';
 import { validateRallyRules } from './rally-rules.js';
+import { assessGeneratedFlightFeasibilityV1 } from './rally-flight-audit.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1, GROUNDED_CONTACT_HEIGHT_FEET } from './rally-movement.js';
 
 export const ENGINE_DRIVER_VERSION = 'rally-engine-driver-v1';
@@ -124,6 +125,10 @@ function validateAttemptDocument(provisional, normalized, recipe) {
     });
     const movement = inspectGeneratedMovementV1(compiled.timeline), spacing = inspectGeneratedSpacingV1(compiled.timeline);
     if (!movement.valid || !spacing.valid) throw new DriverFailure('generated-movement', 'The final sampled paths exceed generated movement or spacing bounds.', { movement, spacing });
+    const generatedFlightFeasibility = assessGeneratedFlightFeasibilityV1({ document, compiled });
+    if (recipe.policyVersion === 'rally-policy-v2' && generatedFlightFeasibility.status !== 'PASS') {
+        throw new DriverFailure('generated-flight-feasibility', 'The serialized generated flights exceed the supported generation envelope.', { generatedFlightFeasibility });
+    }
     if (provisional.status === 'complete') {
         const outcome = document.outcome;
         const match = rules.expectedOutcomes?.find(item => item.shotId === outcome.shotId && item.reason === outcome.reason
@@ -138,7 +143,7 @@ function validateAttemptDocument(provisional, normalized, recipe) {
     } else if (rules.expectedOutcomes?.length || compiled.timeline.outcome) throw new DriverFailure('censored-evidence', 'A censored prefix cannot conceal a decisive physical ending.');
     return { document, outcome: provisional.status === 'complete' ? clone(document.outcome) : null,
         validation: { sourceShots: document.shots.length, acceptedShots: compiled.validShotCount,
-            compilerErrors: 0, unexpectedViolations: 0, expectedOutcomes: rules.expectedOutcomes?.length ?? 0, movement, spacing } };
+            compilerErrors: 0, unexpectedViolations: 0, expectedOutcomes: rules.expectedOutcomes?.length ?? 0, movement, spacing, generatedFlightFeasibility } };
 }
 
 export function createEngineDriverV1(runAttempt, config = {}) {
@@ -234,7 +239,10 @@ export function createEngineDriverV1(runAttempt, config = {}) {
                 if (accepted) {
                     check();
                     return { status: provisional.status, document: validated.document, outcome: validated.outcome,
-                        decisions: clone(provisional.decisions), stats: clone(provisional.stats ?? null), recipe,
+                        decisions: clone(provisional.decisions), stats: { ...clone(provisional.stats ?? {}),
+                            generatedFlightFeasibility: { version: validated.validation.generatedFlightFeasibility.version,
+                                status: validated.validation.generatedFlightFeasibility.status,
+                                checkedFlights: validated.validation.generatedFlightFeasibility.checkedFlights } }, recipe,
                         diagnostics: diagnostics('selected', { validation: validated.validation, producer: clone(provisional.diagnostics ?? {}) }),
                         outcomeClassification: clone(provisional.outcomeClassification ?? null) };
                 }

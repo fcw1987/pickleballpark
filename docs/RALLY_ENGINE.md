@@ -77,7 +77,10 @@ progress or installs a point.
 ## Origin and decision records
 
 A selected result's recipe equals `document.generation`. It records engine,
-policy and physics versions, normalized original settings, seed and selection.
+policy, flight-planner and physics versions, normalized original settings, seed and selection.
+New generation uses `rally-policy-v2` with `rally-flight-planner-v1`. Older
+`rally-policy-v1` origins retain their exact shape without a planner marker;
+opening, importing and saving them never upgrades or regenerates their shots.
 No-document request records instead have `selection: null`, deliberately invalid
 as persisted document provenance. Styles live in the input recipe, while saved
 players retain team/handedness. Per-shot provenance identifies the selected seed;
@@ -147,14 +150,40 @@ commit. An interception accepted by the solver's numerical bound must still
 satisfy the stricter rule guard before the second bounce; neither tolerance is
 relaxed and a rejected proposal may yield to an earlier legal opportunity.
 
-`resolveDeliveredFlightV1` measures the solved speed, clearance and landing after
-execution. A non-error speed-up or counter above 45 mph tries ten explicit
-increases in coherent clearance while retaining the executed landing target;
-each is a fresh shared-solver solution. If no supported option fits, the ordinary
-bounded target/opportunity search records the rejection. Reported velocity is
-never clamped. All other section-7 family ranges remain explicit diagnostic
-guidance, and sampled error geometry remains visible even when outside those
-ranges. Speed, apex, clearance and landing cannot all be independent equalities.
+`rally-flight-planner-v1` is shared by nominal targets, reply probes, execution,
+delivered admission and grounded signatures. It derives a finite time interval
+from the actual contact, landing and a modeled speed ceiling, intersects signed
+launch/apex/route bounds, then tries at most six deterministic preferred/boundary
+times through the unchanged `solveFlightV2`. It replaces the cascading clearance
+searches. Clearance, speed and apex are measured together rather than imposed as
+independent equalities. Around-post flights retain the same post geometry.
+
+Generation ceilings are modeling defaults, not human limits or rules: serve 40,
+return 36, drive 45 Pro / 38 other styles, dink 20, reset 24, drop 26, lob 28, and firm
+volleys/fast attacks/overheads 45 mph. Errors allow at most the smaller of 50 mph
+and 1.25 times the family ceiling. Preferred Section 7 ranges remain diagnostics;
+departures stay visible. A meaningful non-error lob has a high apex and an
+ordinary overhead stays downward; a sampled lob error can hit the mesh without
+being forced into an ideal high arc. No generation restriction is retroactive
+validation of an existing saved point.
+
+A chosen nominal target, solved flight and friendly route are established before
+execution quality/error is drawn. At most eight targets are considered per intent;
+a second supported target within the same intended region may improve preferred
+speed. Once sampled, quality, error and perturbation draws stay fixed while the
+bounded delivered timings are tried. Exhaustion returns `unsupported-execution`
+with preserved evidence and no selected point, never a new quality roll or a
+fabricated winner. Net/long/wide targets and signed launch are solved jointly;
+actual earlier net/body/out events remain authoritative. Soft popups carry within
+the short landing region instead of silently becoming deep drives. Their incoming
+reply height still comes from the solved trajectory, not the quality label.
+
+The final public compiler consumes the serialized nine-decimal source. A separate
+`rally-generated-flight-feasibility-v1` audit measures actual stage velocity,
+apex, signed launch and ground time for every family, including errors. It does
+not trust a planner acceptance flag and leaves old playback/import equations
+unchanged. Fresh output needs this audit as well as existing source, rules,
+movement, spacing and terminal checks.
 
 The fifth-shot 66/31 drop/firm-volley row remains the marginal source reference.
 An explicit air-contact conditional row uses 58/40, with the remainder divided
@@ -176,8 +205,8 @@ formation and incoming-speed evidence all qualify. Attacks and scrambling retain
 the ordinary context. These are versioned tactical hypotheses requiring measured
 calibration, not claims of empirical causation.
 
-`rally-targets.js` resolves regions/launch inputs through the shared solver and
-its inverse clearance helper. Speed, apex and clearance are not independent
+`rally-targets.js` resolves regions and launch inputs through the shared bounded
+planner and authoritative solver. Speed, apex and clearance are not independent
 constraints. Pair movement goals yield to actual time and complementary lanes.
 One request-local pending plan retains the unbounded tactical destinations until
 the real next-contact time is known. A later bounced contact can extend movement;

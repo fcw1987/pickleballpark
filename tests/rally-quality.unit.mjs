@@ -1,12 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assessPressureV1, sampleExecutionV1, applyExecutionV1, classifyOutcomeV1, FORMATION_PRESSURE_VERSION, PHYSICAL_TRANSFORMATION_VERSION, RISK_CONTEXT_VERSION } from '../rally-quality.js';
+import { assessPressureV1, sampleExecutionV1, applyExecutionV1, resolveDeliveredFlightV1, classifyOutcomeV1, FORMATION_PRESSURE_VERSION, PHYSICAL_TRANSFORMATION_VERSION, RISK_CONTEXT_VERSION } from '../rally-quality.js';
 import { resolveStyle } from '../rally-styles.js';
 import { solveFlightV2, solveFlightForClearanceV2, sampleFlightVelocityV2, interceptFlightV2, localNetHeightFeet, PHYSICS_V2 } from '../play-physics-v2.js';
-import { contactFeetV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
+import { contactFeetV1 } from '../rally-movement.js';
 import { resolveFlightParametersV1 } from '../rally-targets.js';
-import { compileDocument } from '../play-compiler.js';
-import { validateRallyRules } from '../rally-rules.js';
+import { isInNonVolleyZone } from '../court-geometry.js';
+// Execution constructs preferences only; every physical assertion below uses
+// the delivered planner and then an independent authoritative replay solve.
+function applyAndResolve(input) {
+  const applied=applyExecutionV1(input);
+  return resolveDeliveredFlightV1({candidate:{family:input.family??'drive',intent:input.intent??input.family??'drive'},
+    contact:input.contact,team:input.team,execution:input.execution,style:input.style??'advanced',applied}).applied;
+}
 const profile = { execution: { kitchen: { error: .1, attackable: .1, excellent: .1, low: .1 } }, pressureErrorScale: .2, errorWeights: { net: .5, long: .3, wide: .2 } };
 const outcome = { type: 'fault', reason: 'net', shotId: 'shot-7', faultingActor: 'player1' };
 
@@ -39,7 +45,7 @@ test('neutral receives unallocated probability and pressure increases risk witho
 test('error perturbations produce source parameters whose actual solver can demonstrate net, long and wide', () => {
   for (const team of ['green', 'orange']) for (const reason of ['net', 'long', 'wide']) {
     const contact = { x: 7, y: team === 'green' ? 14 : 30, heightFeet: 2.2 }, target = { x: 7, y: team === 'green' ? 35 : 9 };
-    const result = applyExecutionV1({ execution: { quality: 'error', errorReason: reason }, contact, target, team,
+    const result = applyAndResolve({ execution: { quality: 'error', errorReason: reason }, contact, target, team,
       physics: { apexFeet: 6 }, draws: { lateral: .6, depth: .5 } });
     const solved = solveFlightV2({ from: contact, target: result.target, family: 'drive', physics: result.physics });
     assert.equal(result.intendedError, reason);
@@ -51,10 +57,10 @@ test('error perturbations produce source parameters whose actual solver can demo
 
 test('execution never overwrites contact height or manufactures an outcome', () => {
   const contact = { x: 7, y: 14, heightFeet: 4.1 }, target = { x: 8, y: 32 }, before = JSON.stringify({ contact, target });
-  const result = applyExecutionV1({ execution: { quality: 'attackable', errorReason: null }, contact, target, team: 'green', physics: { apexFeet: 5 }, draws: { lateral: .5, depth: .5 } });
-  assert.equal(result.physics.apexFeet, 5.6); assert.equal(JSON.stringify({ contact, target }), before);
+  const result = applyAndResolve({ execution: { quality: 'attackable', errorReason: null }, contact, target, team: 'green', physics: { apexFeet: 5 }, draws: { lateral: .5, depth: .5 } });
+  assert.equal(result.preferredFlight.apexFeet, 5.6); assert.equal(JSON.stringify({ contact, target }), before);
   assert.equal('outcome' in result, false); assert.equal('heightFeet' in result, false);
-  assert.throws(() => applyExecutionV1({ execution: { quality: 'error' }, contact, target, team: 'green', draws: { lateral: .5, depth: .5 } }), /reason/);
+  assert.throws(() => applyAndResolve({ execution: { quality: 'error' }, contact, target, team: 'green', draws: { lateral: .5, depth: .5 } }), /reason/);
 });
 
 test('a quality roll alone is insufficient evidence of forced causation', () => {
@@ -89,7 +95,7 @@ test('net-error execution uses coherent shared mesh contact even just above the 
     const contact = { x: 7, y: team === 'green' ? ownDepth : 44 - ownDepth, heightFeet };
     const target = { x: 10, y: team === 'green' ? 35 : 9 }, execution = { quality: 'error', errorReason: 'net' };
     const before = JSON.stringify({ contact, target, execution });
-    const result = applyExecutionV1({ execution, contact, target, team, physics: { apexFeet: 30 }, draws: { lateral: .5, depth: .5 } });
+    const result = applyAndResolve({ execution, contact, target, team, physics: { apexFeet: 30 }, draws: { lateral: .5, depth: .5 } });
     const solved = solveFlightV2({ from: contact, target: result.target, family: 'drive', quality: result.quality, physics: result.physics });
     assert.equal(solved.obstruction.kind, 'net'); assert.equal(solved.terminal.reason, 'net');
     assert.ok(solved.launchSpeedMph < 50, `${team}/${ownDepth}/${heightFeet}: ${solved.launchSpeedMph}mph`);
@@ -105,7 +111,7 @@ test('an unavailable bounded net solve fails without changing source quality or 
   const input = { execution: { quality: 'error', errorReason: 'net' }, contact: { x: 7, y: 21.5, heightFeet: 30 },
     target: { x: 10, y: 35 }, team: 'green', draws: { lateral: .5, depth: .5 } };
   const before = JSON.stringify(input);
-  assert.throws(() => applyExecutionV1(input), /six shared-solver trials/);
+  assert.throws(() => applyAndResolve(input), /Delivered flight unavailable/);
   assert.equal(JSON.stringify(input), before);
 });
 
@@ -192,7 +198,7 @@ test('pressure uses actual sampled velocity, retains launch evidence and explici
   }
 });
 
-test('low and excellent create distinct coherent clearances and target precision in mirrored courts', () => {
+test('low and excellent supply distinct clearance preferences with bounded coherent delivery in mirrored courts', () => {
   for (const team of ['green', 'orange']) for (const family of ['dink', 'drop', 'reset', 'drive', 'volley', 'serve', 'return']) {
     const contact = { x: 7, y: team === 'green' ? 14.25 : 29.75, heightFeet: 1.4 };
     const target = { x: 13, y: team === 'green' ? (['dink', 'drop', 'reset'].includes(family) ? 26.5 : 38) : (['dink', 'drop', 'reset'].includes(family) ? 17.5 : 6) };
@@ -200,20 +206,20 @@ test('low and excellent create distinct coherent clearances and target precision
     const source = { contact, target, team, family, pace: 'soft', arc: 'medium', physics: { launchVerticalFeetPerSecond: nominal.metadata.launchVerticalFeetPerSecond }, draws: { lateral: .75, depth: .75 } };
     const before = JSON.stringify(source), flights = {};
     for (const quality of ['neutral', 'low', 'excellent']) {
-      const actual = applyExecutionV1({ ...source, execution: { quality, errorReason: null } });
+      const actual = applyAndResolve({ ...source, execution: { quality, errorReason: null } });
       flights[quality] = solveFlightV2({ from: contact, target: actual.target, family, quality, pace: actual.pace, arc: actual.arc, physics: actual.physics });
       assert.equal(flights[quality].obstruction, null); assert.equal(actual.physicalTransformation.version, PHYSICAL_TRANSFORMATION_VERSION);
       assert.equal(actual.physicalTransformation.sourceContact.heightFeet, contact.heightFeet);
       assert.equal('outcome' in actual, false); assert.equal('heightFeet' in actual, false);
       if (quality !== 'neutral') {
         assert.equal(actual.physicalTransformation.kind, 'controlled-clearance');
-        assert.ok(actual.physicalTransformation.solveAttempts.length <= 3);
-        assert.ok(Math.abs(flights[quality].metadata.netClearanceInches / 12 - actual.physicalTransformation.solvedClearanceFeet) < 1e-9);
+        assert.equal(actual.physicalTransformation.solveAttempts.length,0);
+        assert.ok(Math.abs(flights[quality].metadata.netClearanceInches / 12 - actual.physicalTransformation.solvedClearanceFeet) < 1e-8);
         assert.ok(Math.abs(actual.target.x - target.x) < .2);
       }
     }
     assert.notEqual(flights.low.metadata.netClearanceInches, flights.excellent.metadata.netClearanceInches);
-    assert.ok(flights.low.metadata.netClearanceInches < flights.neutral.metadata.netClearanceInches);
+    assert.ok(flights.low.launchSpeedMph<=({serve:40,return:36,drive:38,volley:45,dink:20,drop:26,reset:24})[family]);
     assert.equal(JSON.stringify(source), before);
   }
 });
@@ -242,54 +248,30 @@ function popupFixture(family, mirrored = false) {
   return mirrored ? { doc: mirrorCourt(doc), source: mirrorCourt(source) } : { doc, source };
 }
 
-test('soft attackable transformations yield incoming-derived legal line volleys with actual route and spacing proof in both courts', () => {
-  for (const family of ['dink', 'drop', 'reset']) for (const mirrored of [false, true]) {
-    const { doc, source } = popupFixture(family, mirrored), before = JSON.stringify({ doc, source });
-    const applied = applyExecutionV1({ ...source, execution: { quality: 'attackable', errorReason: null } });
-    const flight = solveFlightV2({ from: source.contact, target: applied.target, family, quality: applied.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics });
-    assert.equal(applied.physicalTransformation.kind, 'soft-popup'); assert.equal(flight.obstruction, null);
-    assert.ok(Math.abs(flight.metadata.netClearanceInches / 12 - (family === 'drop' ? 1.6 : 1.2)) < 1e-9);
-    const depth = mirrored ? 17.2 : 26.8, t = (depth - source.contact.y) / flight.stages[0].vz;
-    const incoming = interceptFlightV2(flight, { kind: 'volley', stance: { x: 10, y: mirrored ? 14.25 : 29.75 }, beforeBounceSeconds: flight.firstLandingTime - t });
-    assert.ok(incoming.point.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(incoming.point.x));
-    const opposite = mirrored ? 'green' : 'orange', replyTarget = { x: 10, y: mirrored ? 41 : 3 }, contacts = [];
-    for (const id of Object.keys(doc.players).filter(id => doc.players[id].team === opposite)) {
-      const origin = doc.initialLayout[id], side = (incoming.point.x - origin.x) * (opposite === 'green' ? -1 : 1) >= 0 ? 'forehand' : 'backhand';
-      const feet = contactFeetV1({ contact: incoming.point, target: replyTarget, team: opposite, handedness: 'right', contactStyle: side, kind: 'volley', position: origin, availableSeconds: t });
-      if (!feet.reachable || !feet.legalVolleyFeet || feet.arrivalPeakFeetPerSecond > 17.95) continue;
-      const copy = structuredClone(doc), soft = copy.shots[1]; soft.target = applied.target; soft.physics = applied.physics;
-      soft.playerMovement[id] = { intent: 'manual', target: { x: feet.stance.x, y: incoming.point.y }, pinned: false };
-      const reply = resolveFlightParametersV1({ candidate: { family: 'drive', intent: 'drive', pace: 'firm', arc: 'low' }, contact: incoming.point, target: replyTarget, team: opposite });
-      copy.shots.push({ id: 'reply', family: 'drive', intent: 'drive', hitter: id, receiver: 'auto', contactStyle: side, target: replyTarget, pace: 'firm', arc: 'low', quality: 'neutral', physics: reply.physics,
-        contactMode: 'volley', contactTiming: { beforeBounceSeconds: flight.firstLandingTime - t }, contactEvidence: { feet: feet.feet, feetEstablishedOutsideNVZ: true }, movement: hold(),
-        playerMovement: Object.fromEntries(Object.keys(copy.players).filter(actor => actor !== id).map(actor => [actor, hold()])) });
-      const compiled = compileDocument(copy), rules = validateRallyRules(compiled.play, compiled.timeline);
-      const movement = inspectGeneratedMovementV1(compiled.timeline), spacing = inspectGeneratedSpacingV1(compiled.timeline);
-      if (compiled.findings.some(finding => finding.severity === 'error') || !rules.valid || !movement.valid || !spacing.valid) continue;
-      assert.equal(compiled.validShotCount, 3);
-      for (const axis of ['x', 'y', 'heightFeet']) {
-        assert.ok(Math.abs(compiled.timeline.segments[1].shotSemantics.contact.point[axis] - source.contact[axis]) < 1e-9);
-        assert.ok(Math.abs(compiled.timeline.segments[2].shotSemantics.contact.point[axis] - incoming.point[axis]) < 1e-9);
-      }
-      assert.equal(reply.attacking, true); assert.ok(movement.maxPeakFeetPerSecond <= 18 + 1e-6); assert.ok(spacing.minimumSeparationFeet >= 2.5 - 1e-6);
-      assert.equal('physicalTransformation' in soft, false); contacts.push(id);
-    }
-    assert.ok(contacts.length > 0, `${family}/${mirrored}: no independently valid attacking opportunity`);
-    assert.equal(JSON.stringify({ doc, source }), before);
-    assert.equal(Object.isFrozen(applied.physicalTransformation), true);
+test('soft attackable transformations preserve their short region with an independently replayable higher shape',()=>{
+  for(const family of ['dink','drop','reset']) for(const mirrored of [false,true]) {
+    const {source}=popupFixture(family,mirrored),before=JSON.stringify(source);
+    const applied=applyAndResolve({...source,execution:{quality:'attackable',errorReason:null}});
+    const flight=solveFlightV2({from:source.contact,target:applied.target,family,quality:applied.quality,pace:applied.pace,arc:applied.arc,physics:applied.physics});
+    assert.equal(applied.physicalTransformation.kind,'soft-popup');assert.equal(flight.obstruction,null);
+    assert.equal(applied.target.x,source.target.x);assert.ok(Math.abs(applied.target.y-(mirrored?15.8:28.2))<1e-8);assert.ok(isInNonVolleyZone(applied.target));assert.ok(flight.launchSpeedMph<=({dink:20,drop:26,reset:24})[family]);
+    assert.ok(flight.metadata.netClearanceInches>=14);assert.equal(JSON.stringify(source),before);
+    assert.equal(Object.isFrozen(applied.physicalTransformation),true);
   }
 });
 
-test('physical quality transformations preserve explicit lob/overhead physics and reject impossible soft geometry honestly', () => {
+test('physical quality transformations retain lob/overhead shape preferences and reject infeasible geometry honestly', () => {
   for (const family of ['lob', 'overhead']) for (const quality of ['attackable', 'low', 'excellent', 'neutral']) {
     const physics = family === 'lob' ? { apexFeet: 18 } : { launchVerticalFeetPerSecond: -12 };
-    const result = applyExecutionV1({ execution: { quality, errorReason: null }, family, contact: { x: 7, y: 14, heightFeet: 7.5 }, target: { x: 13, y: 38 }, team: 'green', physics, draws: { lateral: .5, depth: .5 } });
-    assert.deepEqual(result.physics, physics); assert.equal(result.physicalTransformation.kind, 'explicit-flight-preserved');
+    const result = applyAndResolve({ execution: { quality, errorReason: null }, family, contact: { x: 7, y: 14, heightFeet: 7.5 }, target: { x: 13, y: 38 }, team: 'green', physics, draws: { lateral: .5, depth: .5 } });
+    assert.deepEqual(result.preferredFlight,physics);assert.equal(result.physicalTransformation.kind,'family-shape-preference');
+    const flight=solveFlightV2({from:{x:7,y:14,heightFeet:7.5},target:result.target,family,physics:result.physics});
+    if(family==='lob')assert.ok(flight.metadata.apexFeet>=15);else assert.ok(flight.metadata.launchVerticalFeetPerSecond<=0);
   }
   for (const team of ['green', 'orange']) for (const quality of ['attackable', 'low', 'excellent']) {
-    const source = { execution: { quality, errorReason: null }, family: 'dink', contact: { x: 7, y: team === 'green' ? 21.5 : 22.5, heightFeet: 30 }, target: { x: 13, y: team === 'green' ? 26.5 : 17.5 }, team, draws: { lateral: .5, depth: .5 } };
+    const source = { execution: { quality, errorReason: null }, family: 'dink', contact: { x: 0, y: team === 'green' ? 0 : 44, heightFeet: .13 }, target: { x: 20, y: team === 'green' ? 44 : 0 }, team, draws: { lateral: .5, depth: .5 } };
     const before = JSON.stringify(source);
-    assert.throws(() => applyExecutionV1(source), /three shared-solver trials/);
+    assert.throws(() => applyAndResolve(source), /Delivered flight unavailable/);
     assert.equal(JSON.stringify(source), before);
   }
 });
@@ -384,25 +366,17 @@ test('missing settled facts and absent policy priors never become easy-opportuni
   for (const invalid of [NaN, Infinity, -.1, 1.1, null, '0.07', true]) assert.throws(() => sampleRisk(original, softChoice, { ...profile, settledSoftError: invalid }), /Settled soft error/);
 });
 
-test('an actual solved pop-up opportunity retains ordinary risk even when every other settled fact holds', () => {
-  const { source } = popupFixture('dink');
-  const applied = applyExecutionV1({ ...source, execution: { quality: 'attackable', errorReason: null } });
-  const flight = solveFlightV2({ from: source.contact, target: applied.target, family: 'dink', quality: applied.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics });
-  const time = (26.8 - source.contact.y) / flight.stages[0].vz;
-  const incoming = interceptFlightV2(flight, { kind: 'volley', stance: { x: 10, y: 29.75 }, beforeBounceSeconds: flight.firstLandingTime - time });
-  const reply = resolveFlightParametersV1({ candidate: { family: 'drive', intent: 'drive', pace: 'firm', arc: 'low' }, contact: incoming.point, target: { x: 10, y: 3 }, team: 'orange' });
-  const stance = { x: incoming.point.x + .5, y: 29.75 };
-  const feet = contactFeetV1({ contact: incoming.point, target: { x: 10, y: 3 }, team: 'orange', position: stance, kind: 'volley', contactStyle: 'backhand' });
-  assert.equal(feet.legalVolleyFeet, true); assert.equal(feet.reachable, true);
-  const situation = { ...settledSoftSituation(), contact: incoming.point, feet: feet.feet,
-    attackable: reply.attacking && incoming.point.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(incoming.point.x),
-    pressure: assessPressureV1({ contact: incoming.point, position: feet.stance, availableSeconds: time, incomingFlight: flight,
-      incomingIntent: 'cross-court-dink', incomingContactVelocity: sampleFlightVelocityV2(flight, time) }) };
-  assert.equal(situation.attackable, true);
-  const execution = sampleRisk(situation);
-  assert.equal(execution.riskContext.kind, 'phase-default'); assert.equal(execution.riskContext.conditions.notAttackable, false);
-  for (const [key, value] of Object.entries(execution.riskContext.conditions)) if (key !== 'notAttackable') assert.equal(value, true, key);
-  assert.deepEqual(execution.probabilities, sampleRisk(situation, null).probabilities);
+test('an actual solved pop-up retains ordinary risk when the measured reply opportunity is attackable',()=>{
+  const {source}=popupFixture('dink');
+  const applied=applyAndResolve({...source,execution:{quality:'attackable',errorReason:null}});
+  const flight=solveFlightV2({from:source.contact,target:applied.target,family:'dink',quality:applied.quality,pace:applied.pace,arc:applied.arc,physics:applied.physics});
+  const time=flight.firstLandingTime*.6,contact=flight.sampleBoard(time);
+  assert.ok(contact.heightFeet-PHYSICS_V2.ballRadiusFeet>localNetHeightFeet(contact.x));
+  const situation={...settledSoftSituation(),contact,attackable:true};
+  const execution=sampleRisk(situation);
+  assert.equal(execution.riskContext.kind,'phase-default');assert.equal(execution.riskContext.conditions.notAttackable,false);
+  for(const [key,value]of Object.entries(execution.riskContext.conditions))if(key!=='notAttackable')assert.equal(value,true,key);
+  assert.deepEqual(execution.probabilities,sampleRisk(situation,null).probabilities);
 });
 
 test('settled opportunity thresholds include their documented boundaries and do not depend on role, seed or rally length', () => {
@@ -414,5 +388,55 @@ test('settled opportunity thresholds include their documented boundaries and do 
     const changed = { ...situation, hittingTeam: team, servingTeam, contactIndex, seed: contactIndex * 17, requestedWinner: team };
     assert.deepEqual(sampleRisk(changed).probabilities, expected.probabilities);
     assert.deepEqual(sampleRisk(changed).riskContext, expected.riskContext);
+  }
+});
+
+test('execution perturbation emits preferences without running or retaining a solved equality',()=>{
+  const input={execution:{quality:'low',errorReason:null},contact:{x:7,y:14,heightFeet:4.1},target:{x:13,y:38},team:'green',family:'drive',physics:{launchVerticalFeetPerSecond:-10},draws:{lateral:.75,depth:.75}};
+  const before=JSON.stringify(input),applied=applyExecutionV1(input);
+  assert.equal(applied.physics,undefined);assert.deepEqual(applied.preferredFlight,{clearanceFeet:.4});
+  assert.equal(applied.physicalTransformation.solvedClearanceFeet,null);assert.deepEqual(applied.physicalTransformation.solveAttempts,[]);
+  assert.equal(JSON.stringify(input),before);assert.equal(input.execution.quality,'low');
+  const result=resolveDeliveredFlightV1({candidate:{family:'drive',intent:'drive'},contact:input.contact,team:'green',execution:input.execution,applied});
+  assert.ok(result.flight.launchSpeedMph<=38);assert.equal(result.flight.obstruction,null);
+});
+
+test('soft popup carry follows the fixed draw within the back NVZ band at both ends',()=>{
+  for(const family of ['dink','drop','reset'])for(const team of ['green','orange'])for(const depth of [0,.5,.999999]) {
+    const near=team==='green',contact={x:7,y:near?14:30,heightFeet:2.2},target={x:13,y:near?26.5:17.5};
+    const execution={quality:'attackable',errorReason:null},input={contact,target,team,family,pace:'soft',execution,draws:{lateral:.5,depth}},before=JSON.stringify(input);
+    const raw=applyExecutionV1(input),result=resolveDeliveredFlightV1({candidate:{family,intent:family},contact,team,execution,applied:raw});
+    const baselineDepth=near?44-result.applied.target.y:result.applied.target.y;
+    assert.ok(Math.abs(baselineDepth-(15.2+1.2*depth))<1e-8);assert.ok(isInNonVolleyZone(result.applied.target));
+    assert.ok(near?result.applied.target.y>target.y:result.applied.target.y<target.y);
+    assert.equal(result.applied.physicalTransformation.kind,'soft-popup');assert.ok(result.guidance.plannerDiagnostics.solverCalls<=6);
+    assert.ok(result.flight.launchSpeedMph<=({dink:20,drop:26,reset:24})[family]);
+    const independent=solveFlightV2({from:contact,target:result.applied.target,family,pace:'soft',arc:'medium',quality:'attackable',physics:result.applied.physics});
+    assert.deepEqual(independent.metadata,result.flight.metadata);assert.equal(JSON.stringify(input),before);
+  }
+});
+test('known low and high soft contacts gain a real ordinary line air attack through popup loft and NVZ carry',()=>{
+  for(const team of ['green','orange'])for(const source of [{y:20,heightFeet:.6},{y:21,heightFeet:2.2}]) {
+    const near=team==='green',contact={x:7,y:near?source.y:44-source.y,heightFeet:source.heightFeet},target={x:7,y:near?26.5:17.5};
+    const flights={};
+    for(const quality of ['low','excellent','attackable']) {
+      const execution={quality,errorReason:null},raw=applyExecutionV1({contact,target,team,family:'dink',pace:'soft',execution,draws:{lateral:.5,depth:.5}});
+      const result=resolveDeliveredFlightV1({candidate:{family:'dink',intent:'middle-dink'},contact,team,execution,applied:raw});
+      const independent=solveFlightV2({from:contact,target:result.applied.target,family:'dink',pace:'soft',arc:'medium',quality,physics:result.applied.physics});
+      assert.deepEqual(independent.metadata,result.flight.metadata);assert.equal(result.flight.obstruction,null);assert.ok(isInNonVolleyZone(result.applied.target));
+      assert.ok(result.flight.launchSpeedMph<=20);flights[quality]=result.flight;
+    }
+    const planeY=near?26.8:17.2;
+    // The good short balls land before the earliest grounded line reach.
+    for(const quality of ['low','excellent'])assert.ok(near?flights[quality].landing.y<planeY:flights[quality].landing.y>planeY);
+    const flight=flights.attackable,time=(planeY-contact.y)/flight.stages[0].vz;
+    assert.ok(time>0&&time<flight.firstLandingTime);
+    const at=flight.sampleBoard(time),opponent=near?'orange':'green',replyTarget={x:7,y:near?3:41};
+    assert.ok(at.heightFeet-PHYSICS_V2.ballRadiusFeet>localNetHeightFeet(at.x));
+    const feet=contactFeetV1({contact:at,target:replyTarget,team:opponent,position:{x:6.5,y:near?29.75:14.25},kind:'volley',contactStyle:near?'backhand':'forehand',handedness:'right',availableSeconds:time});
+    assert.equal(feet.reachable,true);assert.equal(feet.routeReachable,true);assert.equal(feet.legalVolleyFeet,true);
+    assert.ok(feet.feet.every(foot=>!isInNonVolleyZone(foot)));assert.ok(feet.arrivalPeakFeetPerSecond<18);
+    const reply=resolveFlightParametersV1({candidate:{family:'drive',intent:'drive',pace:'firm',arc:'low'},contact:at,target:replyTarget,team:opponent});
+    assert.equal(reply.attacking,true);assert.equal(reply.flight.obstruction,null);assert.ok(reply.flight.launchSpeedMph<=38);
   }
 });

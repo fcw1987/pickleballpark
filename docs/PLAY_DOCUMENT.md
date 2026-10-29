@@ -255,7 +255,8 @@ recorded input; saved `document.players` keeps team and handedness only.
 generation: {
   mode: 'engine',
   generatorVersion: 'rally-engine-v1',
-  policyVersion: 'rally-policy-v1',
+  policyVersion: 'rally-policy-v2',
+  flightPlannerVersion: 'rally-flight-planner-v1',
   physicsVersion: 'play-physics-v2',
   seed,                         // uint32 original request seed
   input: {
@@ -271,6 +272,11 @@ generation: {
   }
 }
 ```
+
+The current policy/planner pair is strict: policy v2 requires planner v1.
+Previously generated policy-v1 records retain their original fields and omit
+this marker. Both remain valid origins; import/open/save never rewrites one
+version into another. The authoritative saved model2 equations are unchanged.
 
 Style IDs are `pro`, `advanced`, `intermediate` and `beginner`; flavour IDs are
 `balanced`, `bangers`, `kitchen-masters` and `lobbers`. Defaults are Advanced 4.0

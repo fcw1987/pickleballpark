@@ -405,3 +405,98 @@ test('runner distinguishes generator-model support failure from independent rule
   assert.equal(report.modelSupport.unsupportedContacts, 1);
   assert.equal(report.failures.length, 0, 'support failure is not fabricated as an official-rule or search failure');
 });
+
+test('missing output audit stays unevaluated and all attempted statuses remain in original denominators', async () => {
+  const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7, 8, 9] });
+  let index = 0;
+  const report = await runRealismV2({ jobs, generate: async input => ({
+    status: ['failed', 'unsatisfied', 'cancelled'][index++], document: null, outcome: null, decisions: [],
+    recipe: createRallyRequestRecipeV1(normalizeRallyInputV1(input)),
+    diagnostics: { attempts: 1, attemptedSeeds: [input.seed] },
+  }) });
+  assert.equal(report.corpus.attemptedRallies, 3);
+  assert.equal(report.generatedFlightFeasibility.status, 'NOT_EVALUATED');
+  assert.equal(report.generatedFlightFeasibility.checkedFlights, 0);
+  assert.equal(report.generatedFlightFeasibility.statusCounts.NOT_EVALUATED, 3);
+  assert.equal(report.summary.denominators.attemptedRallies, 3);
+  assert.equal(report.summary.denominators.invalidOrMissing, 3);
+  assert.equal(report.physicalValidity.status, 'NOT_EVALUATED');
+  assert.ok(report.observations.every(row => row.generatedFlightFeasibility.status === 'NOT_EVALUATED'));
+});
+
+test('physical validity and natural denominators survive a separate generated flight failure', async () => {
+  const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7] });
+  const report = await runRealismV2({ jobs, generate: async input => engineResultFor(input, readModel2Fixture('net')) });
+  assert.equal(report.physicalValidity.status, 'PASS');
+  assert.equal(report.generatedFlightFeasibility.status, 'FAIL');
+  assert.equal(report.status, 'GENERATED_FLIGHT_FEASIBILITY_FAIL');
+  assert.equal(report.summary.denominators.naturalCompleteRallies, 1);
+  assert.equal(report.summary.denominators.invalidOrMissing, 0);
+  assert.equal(report.generatedFlightFeasibility.families.dink.checkedFlights, 1);
+  assert.equal(report.generatedFlightFeasibility.families.dink.failedFlights, 1);
+  assert.equal(report.observations[0].accepted, true);
+  assert.equal(report.versions.policyVersion, 'rally-policy-v2');
+  assert.equal(report.versions.flightPlannerVersion, 'rally-flight-planner-v1');
+});
+
+test('archive replay reports actual mixed provenance without upgrading historical origins', async () => {
+  const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7, 8] }), records = [];
+  await runRealismV2({ jobs, generate: async input => engineResultFor(input, readModel2Fixture('net')), onRecord: async record => records.push(record) });
+  const legacy = records[0].result;
+  for (const generation of [legacy.recipe, legacy.document.generation]) { generation.policyVersion = 'rally-policy-v1'; delete generation.flightPlannerVersion; }
+  const before = JSON.stringify(records);
+  const report = await runRealismV2({ jobs, records });
+  assert.equal(report.physicalValidity.status, 'PASS');
+  assert.equal(report.versions.policyVersion, null);
+  assert.deepEqual(report.versions.sourceVersions.policyVersion, ['rally-policy-v1', 'rally-policy-v2']);
+  assert.deepEqual(report.versions.sourceVersions.flightPlannerVersion, [null, 'rally-flight-planner-v1']);
+  assert.equal(report.summary.denominators.naturalCompleteRallies, 2);
+  assert.equal(JSON.stringify(records), before);
+});
+
+test('pre-choice evidence must match actual saved policy identity for old and current generated origins', () => {
+  const { document, compiled, rules } = observed('long');
+  document.generation = copy(createGenerationRecipeV1(normalizeRallyInputV1({ seed: 7 })));
+  const segment = compiled.timeline.segments[0], time = segment.startTime + segment.contactTime;
+  const decision = { shotId: document.shots[0].id, situation: { policyVersion: 'rally-policy-v2', hitter: document.shots[0].hitter, contactIndex: 0,
+    contact: copy(segment.shotSemantics.contact.point), positions: copy(samplePlayState(compiled.timeline, time).positions),
+    sampleTimeSeconds: time, contactTimeSeconds: time, attackable: false, affordances: { attack: false } } };
+  const result = { ...resultFor(document), decisions: [decision] };
+  const observe = () => observeRallyV2({ document, compiled, rules, result, seed: 7 }).contacts[0].incomingAttackable;
+  assert.equal(observe(), false);
+  decision.situation.policyVersion = 'rally-policy-v1'; assert.equal(observe(), null);
+  document.generation.policyVersion = 'rally-policy-v1'; delete document.generation.flightPlannerVersion;
+  assert.equal(observe(), false);
+});
+
+test('partial feasibility checking never reports an aggregate PASS for missing attempts', () => {
+  const { document, compiled, rules } = observed('net');
+  document.generation = copy(createGenerationRecipeV1(normalizeRallyInputV1({ seed: 7 })));
+  document.shots[0].family = 'drive';
+  const rebuilt = compileDocument(document), rebuiltRules = validateRallyRules(rebuilt.play, rebuilt.timeline);
+  const row = observeRallyV2({ document, compiled: rebuilt, rules: rebuiltRules, result: resultFor(document), seed: 7 });
+  assert.equal(row.generatedFlightFeasibility.status, 'PASS');
+  const absent = { ...copy(row), accepted: false, complete: false, contacts: [], generatedFlightFeasibility: {
+    status: 'NOT_EVALUATED', checkedFlights: 0, violations: [], flights: [],
+  } };
+  const summary = summarizeObservationsV2([row, absent]);
+  assert.equal(summary.generatedFlightFeasibility.status, 'NOT_EVALUATED');
+  assert.equal(summary.generatedFlightFeasibility.checkedRallies, 1);
+  assert.equal(summary.generatedFlightFeasibility.statusCounts.NOT_EVALUATED, 1);
+});
+
+test('scheduled but unattempted jobs keep aggregate generated flight feasibility unevaluated', async () => {
+  const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7, 8] });
+  const records = [];
+  await runRealismV2({ jobs, generate: async input => {
+    const result = engineResultFor(input, readModel2Fixture('net'));
+    result.document.shots[0].family = 'drive';
+    return result;
+  }, onRecord: async record => records.push(record) });
+  const replay = await runRealismV2({ jobs, records: records.slice(0, 1) });
+  assert.equal(replay.status, 'INCOMPLETE');
+  assert.equal(replay.generatedFlightFeasibility.status, 'NOT_EVALUATED');
+  assert.equal(replay.generatedFlightFeasibility.checkedRallies, 1);
+  assert.equal(replay.generatedFlightFeasibility.missingScheduledRallies, 1);
+  assert.equal(replay.byStyle[0].generatedFlightFeasibility.status, 'NOT_EVALUATED');
+});

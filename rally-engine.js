@@ -3,7 +3,8 @@
 import { createEngineDriverV1 } from './rally-engine-driver.js';
 import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS } from './rally-recipe.js';
 import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPendingEventsV2, inspectPlanningTrialSafetyV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
-import { solveFlightV2, interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
+import { interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
+import { planRallyFlightV1, FLIGHT_PLANNER_VERSION } from './rally-flight-planner.js';
 import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
 import { eligibleHitters, contactRequiresBounce, resolveServiceContext, teamForPlayer } from './rally-state.js';
 import { REACH_MODEL } from './rally-tactics.js';
@@ -92,27 +93,31 @@ function contactReplySupportV1(input, pair) {
         { id: 'reset', family: 'reset', pace: 'soft', target: { x: 10, y: team === 'green' ? 27 : 17 } }
     ];
     if (pair.contact.heightFeet >= 7) probes.push({ id: 'overhead', family: 'overhead', pace: 'firm', target: { x: 10, y: team === 'green' ? 31 : 13 } });
-    let drive = false, attacking = false;
+    let drive = false, attacking = false, solverCalls = 0;
     for (const probe of probes) try {
         const result = resolveFlightParametersV1({ candidate: { family: probe.family, pace: probe.pace, arc: 'medium', intent: probe.id },
-            contact: pair.contact, target: probe.target, team });
+            contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style });
+        solverCalls += result.planner.diagnostics.solverCalls;
         ids.push(probe.id);
         solvedProbes.push({ ...probe, ...result });
         if (probe.id === 'drive') drive = result.attacking;
         if (result.attacking || probe.id === 'overhead' && result.flight.launchSpeedMph >= 22) attacking = true;
-    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; }
+    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; solverCalls += error.plannerDiagnostics?.solverCalls ?? 0; }
     if (!ids.length) try {
         const probe = { id: 'lob', family: 'lob', pace: 'medium', arc: 'high', target: { x: 10, y: team === 'green' ? 40 : 4 } };
-        const result = resolveFlightParametersV1({ candidate: { ...probe, intent: 'lob' }, contact: pair.contact, target: probe.target, team });
+        const result = resolveFlightParametersV1({ candidate: { ...probe, intent: 'lob' }, contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style });
         ids.push('lob'); solvedProbes.push({ ...probe, ...result });
-    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; }
+    } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; solverCalls += error.plannerDiagnostics?.solverCalls ?? 0; }
     if (pair.signature) {
-        ids.push(pair.signature.intent);
-        solvedProbes.push({ id: pair.signature.intent, ...pair.signature.recipe, target: pair.signature.target,
-            physics: pair.signature.physics, flight: solveFlightV2({ from: pair.contact, target: pair.signature.target,
-                family: pair.signature.recipe.family, pace: pair.signature.recipe.pace, arc: pair.signature.recipe.arc, physics: pair.signature.physics }) });
+        const planned = signatureFlight(input, pair);
+        solverCalls += planned.diagnostics.solverCalls;
+        if (planned.status === 'solved') {
+            ids.push(pair.signature.intent);
+            solvedProbes.push({ id: pair.signature.intent, ...pair.signature.recipe, target: pair.signature.target,
+                physics: planned.physics, flight: planned.flight });
+        }
     }
-    return { ids: [...new Set(ids)], probes: solvedProbes, drive,
+    return { ids: [...new Set(ids)], probes: solvedProbes, drive, solverCalls,
         attacking: attacking && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
 }
 
@@ -208,7 +213,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         const signatures = probeSignatureCandidatesV1({ incomingFlight: incoming, pendingSegment: state.pendingSegment,
             pendingRecipe: previous, players: input.players, positions: origins,
             footState: sampleFeetStateV1(state.pendingSegment, 0), service, contactIndex: index, eligibleIds: eligible });
-        await checkpoint({ shots: index, workDelta: signatures.work.contactTrials + signatures.work.launchTrials + signatures.work.routeTrials });
+        await checkpoint({ shots: index, workDelta: signatures.work.contactTrials + signatures.work.launchTrials + signatures.work.routeTrials + (signatures.work.targetTrials ?? 0) });
         for (const candidate of signatures.candidates) pairs.push({ id: candidate.playerId, kind: candidate.kind,
             contactStyle: candidate.contactStyle, delay: candidate.recipe.contactTiming?.afterBounceSeconds,
             beforeBounceSeconds: candidate.kind === 'volley' ? numberV1(incoming.firstLandingTime - candidate.time) : undefined,
@@ -225,8 +230,13 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         if (!reachable.has(sourceIndex)) continue;
         const key = [pair.kind, numberV1(pair.time), pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
         const supportKey = [pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
-        if (!replyCache.has(supportKey)) replyCache.set(supportKey, contactReplySupportV1(input, pair));
-        pair.replySupport = replyCache.get(supportKey);
+        const replyKey = [supportKey, input.players[pair.id].style, pair.signature?.intent ?? '', pair.signature?.target.x ?? '', pair.signature?.target.y ?? ''].join(':');
+        if (!replyCache.has(replyKey)) {
+            const support = contactReplySupportV1(input, pair);
+            replyCache.set(replyKey, support);
+            await checkpoint({ shots: index, workDelta: support.solverCalls });
+        }
+        pair.replySupport = replyCache.get(replyKey);
         if (!pair.replySupport.ids.length) continue;
         const team = input.players[pair.id].team;
         const stanceKey = [pair.id, pair.kind, supportKey, pair.contactStyle].join(':');
@@ -435,15 +445,28 @@ function checkNominalReply(input, state, index, pair, reply, { record = false } 
     return safety;
 }
 
+function signatureFlight(input, pair) {
+    const signature = pair.signature;
+    return planRallyFlightV1({ from: pair.contact, target: signature.target, family: signature.recipe.family,
+        intent: signature.intent, style: input.players[pair.id].style, quality: 'neutral',
+        pace: signature.recipe.pace, arc: signature.recipe.arc, preferred: clone(signature.physics),
+        route: signature.intent === 'around-the-post' ? 'around-the-post' : 'over-net' });
+}
+
 function candidateFlight(input, pair, candidate, situation, draws) {
     if (pair.signature?.intent === candidate.intent) {
-        const target = clone(pair.signature.target), physics = clone(pair.signature.physics);
-        return { target, parameters: { physics, flight: solveFlightV2({ from: pair.contact, target,
-            family: candidate.family, pace: candidate.pace, arc: candidate.arc, quality: 'neutral', physics }) } };
+        const planner = signatureFlight(input, pair);
+        if (planner.status !== 'solved') {
+            const error = new RangeError(`Signature flight unavailable: ${planner.diagnostics.reason}`);
+            error.plannerDiagnostics = planner.diagnostics; throw error;
+        }
+        return { target: clone(pair.signature.target), parameters: { physics: planner.physics, flight: planner.flight,
+            guidance: { version: planner.plannerVersion, ...planner.evidence, diagnostics: planner.diagnostics },
+            solutions: planner.solutions, planner } };
     }
     const target = resolveTargetV1({ candidate, situation, players: input.players, draws });
     return { target, parameters: resolveFlightParametersV1({ candidate, contact: pair.contact, target,
-        team: input.players[pair.id].team }) };
+        team: input.players[pair.id].team, style: input.players[pair.id].style }) };
 }
 
 function finishAttempt(input, state, document, decisions, diagnostics, censored) {
@@ -503,7 +526,7 @@ function finishAttempt(input, state, document, decisions, diagnostics, censored)
 
 export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, random, checkpoint }) {
     const document = headerFor(input, attemptIndex, attemptSeed), state = createPlanningStateV2(document), decisions = [];
-    const diagnostics = { code: 'planning', rejections: 0, targetRepairs: 0, excludedContacts: 0, contactExclusions: [], failures: [] };
+    const diagnostics = { code: 'planning', flightPlannerVersion: FLIGHT_PLANNER_VERSION, rejections: 0, targetRepairs: 0, excludedContacts: 0, contactExclusions: [], failures: [] };
     try {
     for (let index = 0; index < input.options.maxShots; index++) {
         let accepted = false, foundPair = false;
@@ -517,6 +540,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                 await checkpoint({ shots: index, workDelta: 1 });
                 try {
                     const { parameters } = candidateFlight(input, pair, candidate, situation, { lateral: .5, depth: .5 });
+                    await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.solverCalls ?? 0 });
                     if (parameters.flight.obstruction) throw new RangeError('No clear nominal flight.');
                     feasible.push(candidate);
                 } catch (error) { excluded.push({ id: candidate.id, intent: candidate.intent, weight: candidate.weight, reason: error.message }); }
@@ -526,25 +550,81 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
             const preCandidates = clone(remaining), preExcluded = clone(excluded), choiceAttempts = [];
             while (remaining.length) {
                 const intentDraw = random.intent(), chosen = chooseIntentV1(remaining, intentDraw);
-                const executionDraws = { quality: random.execution(), error: random.execution() };
-                const execution = sampleExecutionV1({ profile, situation, choice: chosen, draws: executionDraws });
-                const choiceAttempt = { candidateId: chosen.id, candidates: remaining.map(candidate => ({ id: candidate.id, probability: candidate.probability })), intentDraw, executionDraws, repairs: [] };
+                const choiceAttempt = { candidateId: chosen.id, candidates: remaining.map(candidate => ({ id: candidate.id, probability: candidate.probability })), intentDraw, repairs: [] };
                 choiceAttempts.push(choiceAttempt);
+                let nominal = null, feasibleTargets = 0;
+                // Target and friendly-route feasibility precede every execution
+                // draw. A bounded second supported target can improve a soft
+                // flight's preferred speed without changing its intended region.
                 for (let repair = 0; repair < RALLY_ENGINE_LIMITS.targetsPerIntent; repair++) {
-                    let committed = false;
                     await checkpoint({ shots: index, workDelta: 1 });
                     const targetDraws = { lateral: random.target(), depth: random.target() };
-                    const perturbationDraws = { lateral: random.target(), depth: random.target() };
-                    const narrationDraw = random.narration();
                     try {
                         const { target, parameters } = candidateFlight(input, pair, chosen, situation, targetDraws);
-                        const nominalSafety = checkNominalReply(input, state, index, pair, { id: chosen.intent, family: chosen.family,
-                            pace: chosen.pace, arc: chosen.arc, target, physics: parameters.physics, flight: parameters.flight }, { record: true });
-                        const perturbed = applyExecutionV1({ execution, target, contact: pair.contact, team: player.team, physics: parameters.physics, family: chosen.family,
-                            pace: chosen.pace, arc: chosen.arc, draws: perturbationDraws });
-                        const { applied, flight, guidance: deliveredGuidance } = resolveDeliveredFlightV1({ candidate: chosen, contact: pair.contact,
-                            team: player.team, execution, applied: perturbed, style: player.style });
-                        await checkpoint({ shots: index, workDelta: deliveredGuidance.trials.length });
+                        await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.solverCalls ?? 0 });
+                        let supported = null, lastNominalError = null;
+                        for (const [solutionIndex, solution] of parameters.solutions.entries()) {
+                            await checkpoint({ shots: index, workDelta: 1 });
+                            try {
+                                const nominalSafety = checkNominalReply(input, state, index, pair, { id: chosen.intent, family: chosen.family,
+                                    pace: chosen.pace, arc: chosen.arc, target, physics: solution.physics, flight: solution.flight }, { record: true });
+                                const speedDeparture = Math.abs(solution.evidence.rangeDepartures.find(row => row.metric === 'speedMph')?.departure ?? 0);
+                                supported = { target, targetDraws, parameters: { ...parameters, ...solution,
+                                    guidance: { ...parameters.guidance, ...solution.evidence, selectionIndex: solutionIndex } }, nominalSafety, repair, speedDeparture };
+                                break;
+                            } catch (error) {
+                                lastNominalError = error;
+                                choiceAttempt.repairs.push({ stage: 'nominal-route', repair, solutionIndex, targetDraws, reason: error.message,
+                                    ...(error.contactFindings ? { contactFindings: generatedV1(error.contactFindings) } : {}),
+                                    ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
+                            }
+                        }
+                        if (!supported) throw lastNominalError ?? new RangeError('No bounded nominal flight has a clear incoming contact and friendly route.');
+                        feasibleTargets++;
+                        if (!nominal || supported.speedDeparture < nominal.speedDeparture) nominal = supported;
+                        if (nominal.speedDeparture <= 1e-9 || feasibleTargets >= 2) break;
+                    } catch (error) {
+                        if (error.plannerDiagnostics) await checkpoint({ shots: index, workDelta: error.plannerDiagnostics.solverCalls ?? 0 });
+                        diagnostics.rejections++; diagnostics.targetRepairs++;
+                        choiceAttempt.repairs.push({ stage: 'nominal', repair, targetDraws, reason: error.message,
+                            ...(error.plannerDiagnostics ? { flightPlanner: generatedV1(error.plannerDiagnostics) } : {}) });
+                        diagnostics.failures.push({ shot: index + 1, intent: chosen.id, repair, stage: 'nominal', reason: error.message });
+                        if (diagnostics.failures.length > 8) diagnostics.failures.shift();
+                    }
+                }
+                if (!nominal) {
+                    excluded.push({ id: chosen.id, intent: chosen.intent, weight: chosen.weight, reason: 'bounded-target-repairs-exhausted' });
+                    remaining = remaining.filter(candidate => candidate.id !== chosen.id);
+                    const weight = remaining.reduce((sum, candidate) => sum + candidate.weight, 0);
+                    remaining = remaining.map(candidate => ({ ...candidate, probability: candidate.weight / weight }));
+                    continue;
+                }
+                // From this boundary onward, neither quality nor its error draw
+                // can be redrawn by trying a new intent, contact or target.
+                const executionDraws = { quality: random.execution(), error: random.execution() };
+                const execution = sampleExecutionV1({ profile, situation, choice: chosen, draws: executionDraws });
+                const perturbationDraws = { lateral: random.target(), depth: random.target() }, narrationDraw = random.narration();
+                choiceAttempt.executionDraws = executionDraws;
+                const { target, parameters, targetDraws, nominalSafety, repair } = nominal;
+                const route = chosen.intent === 'around-the-post' ? 'around-the-post' : 'over-net';
+                let delivery = null;
+                try {
+                    const perturbed = applyExecutionV1({ execution, target, contact: pair.contact, team: player.team, physics: parameters.physics,
+                        family: chosen.family, intent: chosen.intent, style: player.style, route, pace: chosen.pace, arc: chosen.arc, draws: perturbationDraws });
+                    delivery = resolveDeliveredFlightV1({ candidate: chosen, contact: pair.contact, team: player.team, execution, applied: perturbed, style: player.style, route });
+                    await checkpoint({ shots: index, workDelta: delivery.guidance.trials.length });
+                } catch (error) {
+                    if (error.guidance) await checkpoint({ shots: index, workDelta: error.guidance.trials.length });
+                    return { status: 'failed', document: null, outcome: null, decisions, stats: null, outcomeClassification: null,
+                        diagnostics: { ...diagnostics, code: 'unsupported-execution', contactIndex: index,
+                            executionFailure: { candidateId: chosen.id, execution, executionDraws, targetDraws, perturbationDraws,
+                                reason: error.message, choiceAttempts, ...(error.guidance ? { deliveredGuidance: generatedV1(error.guidance) } : {}) } } };
+                }
+                for (const [solutionIndex, solution] of delivery.solutions.entries()) {
+                    let committed = false;
+                    await checkpoint({ shots: index, workDelta: 1 });
+                    const { applied, flight, guidance: deliveredGuidance } = solution;
+                    try {
                         if (execution.quality !== 'error' && flight.obstruction) throw new RangeError('A non-error execution must cross a playable lane.');
                         let recipe = { ...baseRecipe(`shot-${index + 1}`, index, pair, applied.target, chosen.family), intent: chosen.intent,
                             quality: execution.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics,
@@ -561,9 +641,6 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         recipe.authoring = automaticOwnership([...owned, 'contactOverride'].filter(field => Object.hasOwn(recipe, field)));
                         const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial,
                             capturePendingEvents: execution.quality !== 'error' });
-                        // Verified reuse proves the previous leg has exactly the
-                        // geometry already audited for this opportunity. An
-                        // altered tail still receives the full route checks.
                         if (!trial.ok || !trial.previousInspectionReused && !routeValid(trial.resolvedPrevious)) throw new RangeError(trial.reason || 'The actual resolved movement or spacing is infeasible.');
                         const deliveredSafety = execution.quality === 'error' ? null : checkFriendlyTrial(input, state, pair, trial);
                         commitPlanningTrialV2(state, trial);
@@ -572,11 +649,11 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         decisions.push({ id: `decision-${index + 1}`, shotId: recipe.id, situation, candidates: preCandidates, excluded: preExcluded,
                             policyContext: { context: sourceCandidates.context, ...(sourceCandidates.conditioning ? { conditioning: clone(sourceCandidates.conditioning) } : {}) },
                             chosen: { id: chosen.id, intent: chosen.intent, family: chosen.family }, draws: { intent: intentDraw, execution: executionDraws, target: targetDraws, perturbation: perturbationDraws, narration: narrationDraw }, execution,
-                            resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair,
+                            resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair, solutionIndex,
+                                flightPlannerVersion: FLIGHT_PLANNER_VERSION,
                                 nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedV1(deliveredGuidance), ...(deliveredSafety ? { deliveredSafety } : {}),
                                 ...(applied.physicalTransformation ? { physicalTransformation: generatedV1(applied.physicalTransformation) } : {}),
                                 ...(parameters.guidance ? { flightGuidance: generatedV1(parameters.guidance) } : {}),
-                                ...(parameters.limitation ? { flightLimitation: parameters.limitation } : {}),
                                 actualContact: generatedV1(trial.contact), actualFeet: generatedV1(trial.feet), intendedError: execution.errorReason, choiceAttempts } });
                         const inspection = inspectPendingEventsV2(state);
                         if (execution.quality === 'error' && inspection.derivedOutcome) return finishAttempt(input, state, document, decisions, diagnostics, false);
@@ -585,21 +662,17 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         break;
                     } catch (error) {
                         if (committed) throw error;
-                        if (error.guidance) await checkpoint({ shots: index, workDelta: error.guidance.trials.length });
-                        diagnostics.rejections++; diagnostics.targetRepairs++;
-                        choiceAttempt.repairs.push({ repair, targetDraws, perturbationDraws, reason: error.message,
+                        diagnostics.rejections++;
+                        choiceAttempt.repairs.push({ stage: 'execution-route', repair, solutionIndex, targetDraws, perturbationDraws, reason: error.message,
                             ...(error.contactFindings ? { contactFindings: generatedV1(error.contactFindings) } : {}),
-                            ...(error.guidance ? { deliveredGuidance: generatedV1(error.guidance) } : {}),
                             ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
-                        diagnostics.failures.push({ shot: index + 1, intent: chosen.id, repair, reason: error.message });
-                        if (diagnostics.failures.length > 8) diagnostics.failures.shift();
                     }
                 }
                 if (accepted) break;
-                excluded.push({ id: chosen.id, intent: chosen.intent, weight: chosen.weight, reason: 'bounded-target-repairs-exhausted' });
-                remaining = remaining.filter(candidate => candidate.id !== chosen.id);
-                const weight = remaining.reduce((sum, candidate) => sum + candidate.weight, 0);
-                remaining = remaining.map(candidate => ({ ...candidate, probability: candidate.weight / weight }));
+                return { status: 'failed', document: null, outcome: null, decisions, stats: null, outcomeClassification: null,
+                    diagnostics: { ...diagnostics, code: 'unsupported-execution', contactIndex: index,
+                        executionFailure: { candidateId: chosen.id, execution, executionDraws, targetDraws, perturbationDraws,
+                            reason: 'No bounded delivered timing has a supported route after the fixed execution draw.', choiceAttempts } } };
             }
             if (accepted) break;
         }

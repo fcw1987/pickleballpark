@@ -146,7 +146,7 @@ test('a real Pro lob probe contacts the descending ball within the grounded 8.5-
   assert.ok(incoming.solved.sampleBoard(t+1e-5).heightFeet<incoming.solved.sampleBoard(t-1e-5).heightFeet,'the incoming solver must reach that contact while descending');
 });
 
-test('a controlled soft pop-up creates a physically supported ordinary NVZ air attack',async()=>{
+test('a short-region soft pop-up permits a legal low NVZ volley without inventing an attack',async()=>{
   const players=Object.fromEntries(IDS.map((id,index)=>[id,{team:index<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}]));
   // Keep a neutral middle exchange alive, then perturb one actual soft shot.
   // This controlled geometry fixture is excluded from natural calibration.
@@ -161,8 +161,10 @@ test('a controlled soft pop-up creates a physically supported ordinary NVZ air a
   assert.equal(result.status,'censored',plain(result.diagnostics));
   const compiled=validateResult(result);
   assert.equal(result.decisions[6].resolution.physicalTransformation.kind,'soft-popup');
-  assert.equal(result.decisions[7].situation.attackable,true);
-  assert.equal(result.decisions[7].situation.contactSelection.evidence.chosen.preference.heightClass,'attack');
+  assert.equal(isInNonVolleyZone(result.document.shots[6].target),true,'a pop-up retains the short intended region');
+  assert.ok(result.decisions[7].situation.contact.heightFeet<2,'this known fixed landing produces a low physical reply');
+  assert.equal(result.decisions[7].situation.attackable,false,'execution quality cannot invent an above-net opportunity');
+  assert.equal(result.decisions[7].situation.contactSelection.evidence.chosen.preference.heightClass,'neutral');
   const contacts=compiled.timeline.segments.filter((segment,index)=>index>0&&segment.shotSemantics.contact.kind==='volley'
     &&isInNonVolleyZone(segment.shotSemantics.contact.point)&&result.document.shots[index].contactTiming?.beforeBounceSeconds!==undefined);
   assert.ok(contacts.length>0,'the fixed generated probe must include a genuine volley over the NVZ');

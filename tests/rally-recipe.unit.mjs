@@ -167,3 +167,33 @@ test('99 fully populated source records fit unchanged JSON and import/export/sto
   document.annotations = [Array(10001).fill(0)];
   assert.throws(() => validateDocument(document), /too many values/);
 });
+
+
+test('policy-v2 requires its exact planner pair while policy-v1 retains its old strict bytes', () => {
+  const current = recipe();
+  assert.equal(current.policyVersion, 'rally-policy-v2');
+  assert.equal(current.flightPlannerVersion, 'rally-flight-planner-v1');
+  assert.equal(current.generatorVersion, 'rally-engine-v1');
+  const legacy = clone(current); legacy.policyVersion = 'rally-policy-v1'; delete legacy.flightPlannerVersion;
+  const document = model2Document({ generation: legacy });
+  document.shots[0].target.x = 8.25;
+  document.shots[0].authoring = { ownership: 'authored', fields: ['target'] };
+  const bytes = JSON.stringify(document), store = new DraftStore({ storage: memoryStorage(), validate: validateDocument });
+  assert.equal(validateGenerationRecipeV1(legacy), legacy);
+  const imported = store.importJSON(bytes); store.save(imported);
+  assert.equal(JSON.stringify(store.open(document.id)), bytes);
+  assert.equal(JSON.stringify(store.importJSON(store.exportJSON(imported))), bytes);
+  for (const mutate of [
+    value => { delete value.flightPlannerVersion; },
+    value => { value.flightPlannerVersion = 'rally-flight-planner-v2'; },
+    value => { value.policyVersion = 'rally-policy-v3'; },
+    value => { value.generatorVersion = 'rally-engine-v2'; },
+    value => { value.policyVersion = 'rally-policy-v1'; },
+  ]) {
+    const invalid = clone(current); mutate(invalid);
+    assert.throws(() => validateGenerationRecipeV1(invalid), TypeError);
+  }
+  for (const planner of [null, 'rally-flight-planner-v1']) {
+    assert.throws(() => validateGenerationRecipeV1({ ...clone(legacy), flightPlannerVersion: planner }), /unsupported/);
+  }
+});

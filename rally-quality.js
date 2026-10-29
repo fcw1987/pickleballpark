@@ -1,13 +1,14 @@
 // Execution and causation are explicit tactical heuristics. Physical outcomes
 // are established separately by the shared solver and model2 rule validator.
 import { assessReach } from './rally-tactics.js';
-import { solveFlightV2, solveFlightForClearanceV2, sampleFlightVelocityV2 } from './play-physics-v2.js';
+import { sampleFlightVelocityV2 } from './play-physics-v2.js';
+import { planRallyFlightV1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from './rally-flight-planner.js';
 import { isInNonVolleyZone } from './court-geometry.js';
 
 export const QUALITY_VERSION = 'rally-quality-v1';
 export const CAUSATION_VERSION = 'rally-causation-v1';
 export const FORMATION_PRESSURE_VERSION = 'rally-formation-pressure-v1';
-export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v1';
+export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v2';
 export const RISK_CONTEXT_VERSION = 'rally-execution-risk-v1';
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const point = (p, name) => { if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) throw new TypeError(`${name} needs finite board coordinates.`); };
@@ -141,97 +142,73 @@ export function sampleExecutionV1({ profile, situation = {}, choice = null, draw
       incomingSpeedMph: Number.isFinite(pressure?.incomingSpeedMph) ? pressure.incomingSpeedMph : null } });
 }
 
-/** Perturb source parameters only. This does not claim that a sampled error
- * ended the point: the real solved geometry may supply a different result. */
-export function applyExecutionV1({ execution, target, contact, team, physics, family = 'drive', pace = 'medium', arc = 'medium', draws } = {}) {
+/** Perturb target and shape preferences without solving or preserving an old
+ * vertical equality across a different landing. Delivery performs one joint solve. */
+export function applyExecutionV1({ execution, target, contact, team, physics, family = 'drive', pace = 'medium', arc = 'medium',
+  intent = null, style = 'advanced', route = 'over-net', draws } = {}) {
   point(target, 'target'); point(contact, 'contact');
   if (!Number.isFinite(contact.heightFeet) || contact.heightFeet < 0) throw new TypeError('Execution requires the actual finite contact height.');
   if (!['green', 'orange'].includes(team) || !['error', 'attackable', 'excellent', 'low', 'neutral'].includes(execution?.quality)) throw new TypeError('Execution quality and team are required.');
   const lateral = draw(draws?.lateral, 'lateral target draw'), depth = draw(draws?.depth, 'depth target draw');
   const spread = execution.quality === 'excellent' ? .15 : execution.quality === 'low' ? .2 : execution.quality === 'attackable' ? .75 : .4;
   const next = { x: clamp(target.x + (lateral - .5) * 2 * spread, -8, 28), y: clamp(target.y + (depth - .5) * 2 * spread, -8, 52) };
-  let adjusted = physics ? { ...physics } : undefined;
-  let transformation = 'target-precision', requestedClearanceFeet = null, solvedClearanceFeet = null;
-  const solveAttempts = [];
+  const preferredFlight = Object.fromEntries(['speedMph', 'apexFeet', 'launchVerticalFeetPerSecond'].filter(key => Number.isFinite(physics?.[key])).map(key => [key, physics[key]]));
+  let transformation = 'target-precision', requestedClearanceFeet = null;
   if (execution.quality === 'error') {
     if (execution.errorReason === 'net') {
+      // One fixed draw-derived mesh endpoint permits a real collision even
+      // from a high contact. No clearance or endpoint retry cascade.
       next.x = clamp(target.x, 2, 18);
+      next.y = 22 + (team === 'green' ? 1 : -1) * (.3 + .3 * depth);
       requestedClearanceFeet = -1.5;
-      let meshFlight = null;
-      // A low contact cannot be assigned a fixed downward launch: its tiny
-      // ground time would create extreme horizontal speed or an under-net leg.
-      // Ask the shared inverse for a coherent ball-surface mesh clearance, and
-      // verify its actual obstruction before returning an error source recipe.
-      for (const margin of [.6, .3, .1, .03, .01, .003]) {
-        const candidate = { x: next.x, y: 22 + (team === 'green' ? margin : -margin) };
-        try {
-          const solved = solveFlightForClearanceV2({ from: contact, target: candidate, family, quality: execution.quality, pace, arc }, -1.5);
-          if (solved.obstruction?.kind !== 'net' || solved.terminal?.reason !== 'net'
-            || !Number.isFinite(solved.metadata.apexFeet) || solved.metadata.apexFeet > 30) {
-            solveAttempts.push({ clearanceFeet: -1.5, target: candidate, accepted: false, reason: 'The solved flight does not reach the supported net mesh.' }); continue;
-          }
-          solveAttempts.push({ clearanceFeet: -1.5, target: candidate, accepted: true });
-          meshFlight = solved; next.y = candidate.y; break;
-        } catch (error) {
-          if (!(error instanceof TypeError || error instanceof RangeError)) throw error;
-          solveAttempts.push({ clearanceFeet: -1.5, target: candidate, accepted: false, reason: error.message });
-        }
-      }
-      if (!meshFlight) throw new RangeError('A net execution could not reach the supported mesh within six shared-solver trials.');
-      adjusted = { launchVerticalFeetPerSecond: meshFlight.metadata.launchVerticalFeetPerSecond };
-      transformation = 'net-mesh'; solvedClearanceFeet = meshFlight.metadata.netClearanceInches === null ? null : meshFlight.metadata.netClearanceInches / 12;
-    } else if (execution.errorReason === 'long') next.y = team === 'green' ? 45 + depth * 3 : -1 - depth * 3;
-    else if (execution.errorReason === 'wide') next.x = target.x < 10 ? -.5 - lateral * 3 : 20.5 + lateral * 3;
-    else throw new TypeError('An execution error needs a supported target perturbation reason.');
-    if (transformation !== 'net-mesh') transformation = 'error-target';
-  } else if ((execution.quality === 'attackable' && SOFT_FAMILIES.has(family))
-    || QUALITY_CLEARANCES[execution.quality]?.[family] !== undefined) {
-    const popup = execution.quality === 'attackable';
-    if (popup) {
-      // A high short ball can still land before grounded line reach. A soft
-      // misexecution may carry deeper as well as higher; the inverse supplies
-      // one coherent flight, never a prescribed opponent contact height.
-      const baselineDepth = 10 + depth * 2;
-      next.x = clamp(next.x, .8, 19.2); next.y = team === 'green' ? 44 - baselineDepth : baselineDepth;
+      transformation = 'net-mesh';
+    } else if (execution.errorReason === 'long') {
+      next.y = team === 'green' ? 45 + depth * 3 : -1 - depth * 3;
+      transformation = 'error-target';
+    } else if (execution.errorReason === 'wide') {
+      next.x = target.x < 10 ? -.5 - lateral * 3 : 20.5 + lateral * 3;
+      transformation = 'error-target';
+    } else throw new TypeError('An execution error needs a supported target perturbation reason.');
+  } else if (execution.quality === 'attackable' && SOFT_FAMILIES.has(family)) {
+    // Extra loft carries an intended NVZ ball toward the back of that same
+    // region. The existing depth draw sets a 15.2–16.4 ft baseline depth;
+    // a defender can sometimes reach it in the air from grounded line feet.
+    if (isInNonVolleyZone(target)) {
+      next.x = clamp(next.x, .8, 19.2);
+      const baselineDepth = 15.2 + 1.2 * depth;
+      next.y = team === 'green' ? 44 - baselineDepth : baselineDepth;
     }
-    requestedClearanceFeet = popup ? family === 'drop' ? 1.6 : 1.2 : QUALITY_CLEARANCES[execution.quality][family];
-    transformation = popup ? 'soft-popup' : 'controlled-clearance';
-    let solved = null;
-    for (const extra of [0, .2, .4]) {
-      const clearanceFeet = requestedClearanceFeet + extra;
-      try {
-        const trial = solveFlightForClearanceV2({ from: contact, target: next, family, quality: execution.quality, pace, arc }, clearanceFeet);
-        if (trial.obstruction || trial.terminal) throw new RangeError('The quality flight must remain playable.');
-        solved = trial; solveAttempts.push({ clearanceFeet, accepted: true }); break;
-      } catch (error) {
-        if (!(error instanceof TypeError || error instanceof RangeError)) throw error;
-        solveAttempts.push({ clearanceFeet, accepted: false, reason: error.message });
-      }
-    }
-    if (!solved) throw new RangeError('The physical quality transformation has no supported flight within three shared-solver trials.');
-    adjusted = { launchVerticalFeetPerSecond: solved.metadata.launchVerticalFeetPerSecond };
-    solvedClearanceFeet = solved.metadata.netClearanceInches / 12;
+    requestedClearanceFeet = family === 'drop' ? 1.6 : 1.2;
+    transformation = 'soft-popup';
+  } else if (QUALITY_CLEARANCES[execution.quality]?.[family] !== undefined) {
+    requestedClearanceFeet = QUALITY_CLEARANCES[execution.quality][family];
+    transformation = 'controlled-clearance';
   } else if (['lob', 'overhead'].includes(family)) {
-    transformation = adjusted ? 'explicit-flight-preserved' : 'family-flight-preserved';
-  } else if (adjusted?.apexFeet !== undefined) {
+    transformation = 'family-shape-preference';
+  } else if (Number.isFinite(preferredFlight.apexFeet)) {
     const shift = execution.quality === 'attackable' ? .6 : execution.quality === 'low' ? -.2 : 0;
-    adjusted.apexFeet = clamp(adjusted.apexFeet + shift, finite(contact.heightFeet), 30);
+    preferredFlight.apexFeet = clamp(preferredFlight.apexFeet + shift, contact.heightFeet, 30);
     if (shift) transformation = 'apex-perturbation';
-  } else if (adjusted?.launchVerticalFeetPerSecond !== undefined && execution.quality === 'attackable') {
-    adjusted.launchVerticalFeetPerSecond = clamp(adjusted.launchVerticalFeetPerSecond + 2, -80, 80);
+  } else if (Number.isFinite(preferredFlight.launchVerticalFeetPerSecond) && execution.quality === 'attackable') {
+    preferredFlight.launchVerticalFeetPerSecond = clamp(preferredFlight.launchVerticalFeetPerSecond + 2, -80, 80);
     transformation = 'launch-loft';
   }
-  return freeze({ target: next, quality: execution.quality, pace, arc, ...(adjusted ? { physics: adjusted } : {}), intendedError: execution.errorReason,
+  if (requestedClearanceFeet !== null) {
+    // The new quality hint supersedes the nominal vertical recipe rather than
+    // imposing both constraints on the same landing.
+    delete preferredFlight.launchVerticalFeetPerSecond; delete preferredFlight.apexFeet;
+    preferredFlight.clearanceFeet = requestedClearanceFeet;
+  }
+  return freeze({ target: next, quality: execution.quality, pace, arc, preferredFlight, intent, style: typeof style === 'string' ? style : style?.id, route, intendedError: execution.errorReason,
     physicalTransformation: { version: PHYSICAL_TRANSFORMATION_VERSION, kind: transformation, family, quality: execution.quality,
       sourceContact: { x: contact.x, y: contact.y, heightFeet: contact.heightFeet }, sourceTarget: { x: target.x, y: target.y },
-      sourcePhysics: physics ? { ...physics } : null, target: { ...next }, physics: adjusted ? { ...adjusted } : null,
-      targetSpreadFeet: spread, requestedClearanceFeet, solvedClearanceFeet, solveAttempts } });
+      sourcePhysics: physics ? { ...physics } : null, target: { ...next }, preferredFlight: { ...preferredFlight },
+      physics: null, targetSpreadFeet: spread, requestedClearanceFeet, solvedClearanceFeet: null, solveAttempts: [] } });
 }
 
 // Section 7 ranges are illustrative diagnostics, not simultaneous equations.
-// Only the speed-up/counter delivered ceiling is an opportunity admission gate.
-export const DELIVERED_FLIGHT_VERSION = 'rally-delivered-flight-v1';
-export const DELIVERED_CLEARANCE_OFFSETS_V1 = Object.freeze([.05, .1, .2, .35, .5, .75, 1, 1.5, 2, 3]);
+// Every newly generated family is constrained by the shared planner envelope.
+export const DELIVERED_FLIGHT_VERSION = 'rally-delivered-flight-v2';
 function deliveredRanges(candidate, execution, style) {
   if (['speed-up', 'counter'].includes(candidate.intent)) return { speedMph: [30, 45], netClearanceInches: [2, 12], apexFeet: [0, 4.5] };
   const rec = (typeof style === 'string' ? style : style?.id) !== 'pro';
@@ -257,52 +234,40 @@ function deliveredFacts(flight, team) {
     opponentLanding: landing.x >= 0 && landing.x <= 20 && (team === 'green' ? landing.y > 22 && landing.y <= 44 : landing.y >= 0 && landing.y < 22),
     obstruction: flight.obstruction?.kind ?? null, terminalReason: flight.terminal?.reason ?? null };
 }
-/** Post-execution admission: never resamples quality, edits an error, or adjusts
- * measured velocity. Every alternative is a fresh solution for the SAME target.
- * Raising clearance preserves the loft already supplied by execution, including
- * attackable popups. Ten explicit offsets bound work; failure asks the caller's
- * existing target/opportunity repair to continue, without inventing an ending. */
-export function resolveDeliveredFlightV1({ candidate, contact, team, execution, applied, style } = {}) {
+/** All generated families and errors receive one bounded joint solve after
+ * perturbation. External source physics is a preference, never an admission flag. */
+export function resolveDeliveredFlightV1({ candidate, contact, team, execution, applied, style = applied?.style ?? 'advanced',
+  intent = candidate?.intent ?? applied?.intent ?? null, route = applied?.route ?? 'over-net' } = {}) {
   point(contact, 'contact'); point(applied?.target, 'applied.target');
   if (!['green', 'orange'].includes(team) || !candidate?.family || !['error', 'attackable', 'excellent', 'low', 'neutral'].includes(execution?.quality)) throw new TypeError('Delivered flight requires a candidate, team and execution quality.');
-  const base = { from: contact, target: applied.target, family: candidate.family, quality: execution.quality, pace: applied.pace, arc: applied.arc };
-  let flight = solveFlightV2({ ...base, physics: applied.physics }), selected = applied;
-  const source = deliveredFacts(flight, team), trials = [];
-  const hardCeiling = execution.quality !== 'error' && ['speed-up', 'counter'].includes(candidate.intent);
-  const eligible = facts => !facts.obstruction && !facts.terminalReason && facts.opponentLanding && facts.launchSpeedMph <= 45;
-  trials.push({ kind: 'delivered-source', ...source, accepted: !hardCeiling || eligible(source) });
-  if (hardCeiling && !eligible(source) && !source.obstruction && source.opponentLanding && source.netClearanceInches !== null) {
-    for (const offset of DELIVERED_CLEARANCE_OFFSETS_V1) {
-      const clearanceFeet = Math.max(2 / 12, source.netClearanceInches / 12) + offset;
-      try {
-        const alternative = solveFlightForClearanceV2(base, clearanceFeet), facts = deliveredFacts(alternative, team), accepted = eligible(facts);
-        trials.push({ kind: 'raised-clearance', requestedClearanceFeet: clearanceFeet, ...facts, accepted });
-        if (accepted) {
-          flight = alternative;
-          selected = { ...applied, physics: { launchVerticalFeetPerSecond: alternative.metadata.launchVerticalFeetPerSecond } };
-          break;
-        }
-      } catch (error) {
-        if (!(error instanceof TypeError || error instanceof RangeError)) throw error;
-        trials.push({ kind: 'raised-clearance', requestedClearanceFeet: clearanceFeet, accepted: false, reason: error.message });
-      }
-    }
+  const preferred = applied.preferredFlight ?? Object.fromEntries(['speedMph', 'apexFeet', 'launchVerticalFeetPerSecond']
+    .filter(key => Number.isFinite(applied.physics?.[key])).map(key => [key, applied.physics[key]]));
+  const planner = planRallyFlightV1({ from: contact, target: applied.target, family: candidate.family, intent, style,
+    quality: execution.quality, pace: applied.pace ?? candidate.pace ?? 'medium', arc: applied.arc ?? candidate.arc ?? 'medium',
+    preferred, route, errorReason: execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null });
+  const shared = { version: DELIVERED_FLIGHT_VERSION, plannerVersion: planner.plannerVersion,
+    accepted: planner.status === 'solved', source: { target: { ...applied.target }, preferredFlight: { ...preferred } },
+    trials: planner.diagnostics.trials, maximumTrials: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET,
+    speedCeilingMph: planner.diagnostics.speedCeilingMph, plannerDiagnostics: planner.diagnostics,
+    limitations: ['Constant gravity; no drag or spin forces.', 'Section 7 illustrative ranges are preferences; actual generation envelopes are enforced.',
+      ...(execution.quality === 'error' ? ['Sampled error target and quality preserved; actual earlier physical faults remain authoritative.'] : [])] };
+  if (planner.status !== 'solved') {
+    const error = new RangeError(`Delivered flight unavailable: ${planner.diagnostics.reason}`);
+    error.guidance = freeze(shared); error.plannerDiagnostics = planner.diagnostics; throw error;
   }
-  const actual = deliveredFacts(flight, team), ranges = deliveredRanges(candidate, execution, style);
-  const diagnostics = Object.entries(ranges).map(([metric, range]) => ({ metric, range, actual: actual[metric],
-    withinRange: actual[metric] === null ? null : actual[metric] >= range[0] && actual[metric] <= range[1] }));
-  const accepted = !hardCeiling || eligible(actual);
-  const guidance = freeze({ version: DELIVERED_FLIGHT_VERSION, accepted, source, actual, diagnostics, trials,
-    maximumTrials: 1 + DELIVERED_CLEARANCE_OFFSETS_V1.length,
-    speedCeilingMph: hardCeiling ? 45 : null, repaired: selected !== applied,
-    limitations: ['Constant gravity; no drag or spin forces.', 'Section 7 illustrative ranges are diagnostics, except the non-error speed-up/counter ceiling.',
-      ...(execution.quality === 'error' ? ['Sampled error geometry preserved; guidance ranges do not reject intentional errors.'] : []),
-      ...(!accepted ? ['No bounded coherent clearance alternative retains this target and meets the delivered speed ceiling.'] : [])] });
-  if (!accepted) {
-    const error = new RangeError('Delivered speed-up/counter opportunity rejected: no bounded coherent flight at or below 45 mph for this executed target.');
-    error.guidance = guidance; throw error;
-  }
-  return freeze({ applied: selected, flight, guidance });
+  const ranges = deliveredRanges(candidate, execution, style), sourceApplied = structuredClone(applied);
+  const solutions = planner.solutions.map((solution, selectionIndex) => {
+    const { flight, physics, evidence } = solution, actual = deliveredFacts(flight, team);
+    const diagnostics = Object.entries(ranges).map(([metric, range]) => ({ metric, range, actual: actual[metric],
+      withinRange: actual[metric] === null ? null : actual[metric] >= range[0] && actual[metric] <= range[1] }));
+    const selected = { ...sourceApplied, physics, ...(sourceApplied.physicalTransformation ? { physicalTransformation: {
+      ...sourceApplied.physicalTransformation, physics, solvedClearanceFeet: evidence.actual.clearanceFeet,
+      plannerVersion: planner.plannerVersion } } : {}) };
+    return { applied: selected, flight, evidence,
+      guidance: { ...shared, actual, diagnostics, selectionIndex, evidence,
+        repaired: JSON.stringify(applied.physics ?? null) !== JSON.stringify(physics) } };
+  });
+  return freeze({ ...solutions[0], solutions });
 }
 
 export function classifyOutcomeV1({ outcome, pressure = null, pressureDecisionId = null, execution = null,
