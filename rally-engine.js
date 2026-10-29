@@ -2,7 +2,7 @@
 // construction as compilation; the driver independently validates final source.
 import { createEngineDriverV1 } from './rally-engine-driver.js';
 import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS } from './rally-recipe.js';
-import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
+import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPendingEventsV2, inspectPlanningTrialBodyV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
 import { solveFlightV2, interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
 import { eligibleHitters, contactRequiresBounce, resolveServiceContext, teamForPlayer } from './rally-state.js';
@@ -11,8 +11,8 @@ import { createSituationV1, rankContactPairsV1, rankContactCandidatesV2, listInt
 import { resolveStyle } from './rally-styles.js';
 import { rankContactOpportunitiesV1, contactOpportunityPreferenceV1, compareContactOpportunityPreferencesV1 } from './rally-contact-selection.js';
 import { resolveTargetV1, resolveFlightParametersV1 } from './rally-targets.js';
-import { assessPressureV1, sampleExecutionV1, applyExecutionV1, classifyOutcomeV1 } from './rally-quality.js';
-import { contactFeetV1, planMovementV1, replanMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1, GROUNDED_CONTACT_HEIGHT_FEET } from './rally-movement.js';
+import { assessPressureV1, sampleExecutionV1, applyExecutionV1, resolveDeliveredFlightV1, classifyOutcomeV1 } from './rally-quality.js';
+import { contactFeetV1, contactFeetCandidatesV1, planMovementV1, replanMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1, GROUNDED_CONTACT_HEIGHT_FEET } from './rally-movement.js';
 import { narrateShotV1, summarizePointV1, excitementScoreV1 } from './rally-narration.js';
 import { probeSignatureCandidatesV1 } from './rally-signatures.js';
 import { automaticOwnership } from './rally-proposals.js';
@@ -87,7 +87,7 @@ function routeValid(segment) {
 // outgoing policy choice. These are physical possibilities, not future intent,
 // execution quality, movement destinations or outcome evidence.
 function contactReplySupportV1(input, pair) {
-    const team = input.players[pair.id].team, ids = [], probes = [
+    const team = input.players[pair.id].team, ids = [], solvedProbes = [], probes = [
         { id: 'drive', family: 'drive', pace: 'firm', target: { x: 10, y: team === 'green' ? 41 : 3 } },
         { id: 'reset', family: 'reset', pace: 'soft', target: { x: 10, y: team === 'green' ? 27 : 17 } }
     ];
@@ -97,15 +97,22 @@ function contactReplySupportV1(input, pair) {
         const result = resolveFlightParametersV1({ candidate: { family: probe.family, pace: probe.pace, arc: 'medium', intent: probe.id },
             contact: pair.contact, target: probe.target, team });
         ids.push(probe.id);
+        solvedProbes.push({ ...probe, ...result });
         if (probe.id === 'drive') drive = result.attacking;
         if (result.attacking || probe.id === 'overhead' && result.flight.launchSpeedMph >= 22) attacking = true;
     } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; }
     if (!ids.length) try {
-        resolveFlightParametersV1({ candidate: { family: 'lob', pace: 'medium', arc: 'high', intent: 'lob' },
-            contact: pair.contact, target: { x: 10, y: team === 'green' ? 40 : 4 }, team }); ids.push('lob');
+        const probe = { id: 'lob', family: 'lob', pace: 'medium', arc: 'high', target: { x: 10, y: team === 'green' ? 40 : 4 } };
+        const result = resolveFlightParametersV1({ candidate: { ...probe, intent: 'lob' }, contact: pair.contact, target: probe.target, team });
+        ids.push('lob'); solvedProbes.push({ ...probe, ...result });
     } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; }
-    if (pair.signature) ids.push(pair.signature.intent);
-    return { ids: [...new Set(ids)], drive,
+    if (pair.signature) {
+        ids.push(pair.signature.intent);
+        solvedProbes.push({ id: pair.signature.intent, ...pair.signature.recipe, target: pair.signature.target,
+            physics: pair.signature.physics, flight: solveFlightV2({ from: pair.contact, target: pair.signature.target,
+                family: pair.signature.recipe.family, pace: pair.signature.recipe.pace, arc: pair.signature.recipe.arc, physics: pair.signature.physics }) });
+    }
+    return { ids: [...new Set(ids)], probes: solvedProbes, drive,
         attacking: attacking && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
 }
 
@@ -213,7 +220,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
     // Only audited opportunities can be returned.
     const cheap = rankContactPairsV1({ pairs, eligible, positions: origins, players: input.players });
     const reachable = new Set(cheap.filter(row => row.reach.reachable).map(row => row.pairIndex));
-    const groups = new Map(), replyCache = new Map();
+    const groups = new Map(), replyCache = new Map(), stanceCache = new Map();
     for (const [sourceIndex, pair] of pairs.entries()) {
         if (!reachable.has(sourceIndex)) continue;
         const key = [pair.kind, numberV1(pair.time), pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
@@ -221,9 +228,22 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         if (!replyCache.has(supportKey)) replyCache.set(supportKey, contactReplySupportV1(input, pair));
         pair.replySupport = replyCache.get(supportKey);
         if (!pair.replySupport.ids.length) continue;
-        const preference = contactOpportunityPreferenceV1({ contact: pair.contact, stance: pair.feet.stance,
-            origin: origins[pair.id], team: input.players[pair.id].team, feasibleReplyIds: pair.replySupport.ids,
-            attackingReplyAvailable: pair.replySupport.attacking, availableSeconds: numberV1(pair.time) });
+        const team = input.players[pair.id].team;
+        const stanceKey = [pair.id, pair.kind, supportKey, pair.contactStyle].join(':');
+        if (!stanceCache.has(stanceKey)) stanceCache.set(stanceKey, pair.signature ? [pair.feet] : generatedV1(contactFeetCandidatesV1({
+            contact: pair.contact, target: { x: 10, y: team === 'green' ? 36 : 8 }, team,
+            handedness: input.players[pair.id].handedness, contactStyle: pair.contactStyle, kind: pair.kind,
+            position: origins[pair.id], availableSeconds: pair.time
+        })).filter(feet => feet.reachable && feet.legalVolleyFeet));
+        pair.stanceOptions = stanceCache.get(stanceKey).map((feet, stanceIndex) => ({ feet, stanceIndex, opportunityId: key,
+            preference: contactOpportunityPreferenceV1({ contact: pair.contact, stance: feet.stance,
+                origin: origins[pair.id], team, feasibleReplyIds: pair.replySupport.ids,
+                attackingReplyAvailable: pair.replySupport.attacking, availableSeconds: numberV1(pair.time) })
+        })).sort(compareContactOpportunityPreferencesV1);
+        if (!pair.stanceOptions.length) continue;
+        // Every bounded stance contributes to the optimistic bound. A repaired
+        // stance can improve forward position as well as outgoing clearance.
+        const preference = pair.stanceOptions[0].preference;
         const proposal = { opportunityId: key, preference, sourceIndex };
         const group = groups.get(key) ?? { opportunityId: key, proposals: [] };
         if (!group.proposals.some(item => pairs[item.sourceIndex].id === pair.id)) group.proposals.push(proposal);
@@ -261,34 +281,66 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
             availableSeconds: numberV1(opportunity.time) });
         for (const actor of actorOrder) {
             const proposal = next.proposals.find(item => pairs[item.sourceIndex].id === actor.id);
-            await checkpoint({ shots: index, workDelta: 1 });
-            const pair = pairs[proposal.sourceIndex], team = input.players[pair.id].team;
-            const pendingRecipe = repairPendingMovement(input, state, pair);
-            if (!pendingRecipe) { diagnostics.excludedContacts++; continue; }
-            const probe = baseRecipe('shot-' + (index + 1), index, pair, { x: 10, y: team === 'green' ? 30 : 14 });
-            const trial = trialRecipeV2(state, probe, { pendingRecipe, capturePreviousInspection: true });
-            const movement = trial.resolvedPrevious ? inspectGeneratedMovementV1(trial.resolvedPrevious) : null;
-            const spacing = trial.resolvedPrevious ? inspectGeneratedSpacingV1(trial.resolvedPrevious) : null;
-            const valid = trial.ok && movement?.valid && spacing?.valid;
+            const source = pairs[proposal.sourceIndex], team = input.players[source.id].team;
+            let best = null;
+            for (const option of source.stanceOptions) {
+                if (best && compareContactOpportunityPreferencesV1(best, option) <= 0) break;
+                await checkpoint({ shots: index, workDelta: 1 });
+                const pair = { ...source, feet: option.feet };
+                const pendingRecipe = repairPendingMovement(input, state, pair);
+                if (!pendingRecipe) { diagnostics.excludedContacts++; continue; }
+                const probe = baseRecipe('shot-' + (index + 1), index, pair, { x: 10, y: team === 'green' ? 30 : 14 });
+                const trial = trialRecipeV2(state, probe, { pendingRecipe, capturePreviousInspection: true });
+                const movement = trial.resolvedPrevious ? inspectGeneratedMovementV1(trial.resolvedPrevious) : null;
+                const spacing = trial.resolvedPrevious ? inspectGeneratedSpacingV1(trial.resolvedPrevious) : null;
+                if (!trial.ok || !movement?.valid || !spacing?.valid) {
+                    diagnostics.excludedContacts++;
+                    diagnostics.contactExclusions.push({ actor: pair.id, kind: pair.kind, delay: pair.delay ?? null,
+                        reason: trial.reason || 'actual-route-bound', contact: pair.contact, stance: pair.feet.stance, movement });
+                    if (diagnostics.contactExclusions.length > 8) diagnostics.contactExclusions.shift();
+                    continue;
+                }
+                pair.pendingRecipe = pendingRecipe; pair.probeTrial = trial;
+                pair.positions = generatedV1(Object.fromEntries(IDS.map(id => [id, sampleActorBoardPositionV2(trial.resolvedPrevious, id, trial.resolvedPrevious.duration)])));
+                pair.footState = generatedV1(sampleFeetStateV1(trial.resolvedPrevious, trial.resolvedPrevious.duration));
+                pair.sampleTimeSeconds = numberV1(trial.resolvedPrevious.endTime); pair.contactTimeSeconds = pair.sampleTimeSeconds;
+                const supported = [], exclusions = [];
+                for (const reply of source.replySupport.probes) {
+                    await checkpoint({ shots: index, workDelta: 1 });
+                    try { checkNominalReply(input, state, index, pair, reply); supported.push(reply); }
+                    catch (error) {
+                        if (!(error instanceof TypeError || error instanceof RangeError)) throw error;
+                        exclusions.push({ id: reply.id, reason: error.message,
+                            ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
+                    }
+                }
+                if (!supported.length) {
+                    diagnostics.excludedContacts++;
+                    diagnostics.contactExclusions.push({ actor: pair.id, kind: pair.kind, contact: pair.contact,
+                        stance: pair.feet.stance, reason: 'no-clear-nominal-outgoing-reply', replies: exclusions });
+                    if (diagnostics.contactExclusions.length > 8) diagnostics.contactExclusions.shift();
+                    continue;
+                }
+                pair.replySupport = { ids: supported.map(reply => reply.id), probes: supported,
+                    drive: supported.some(reply => reply.id === 'drive' && reply.attacking),
+                    attacking: supported.some(reply => reply.attacking || reply.id === 'overhead' && reply.flight.launchSpeedMph >= 22)
+                        && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
+                pair.outgoingSafety = { version: 'rally-outgoing-safety-v1', stanceIndex: option.stanceIndex,
+                    checkedActors: friendlyActors(input, pair.id), supportedReplyIds: pair.replySupport.ids, excludedReplies: exclusions };
+                const preference = contactOpportunityPreferenceV1({ contact: pair.contact, stance: pair.feet.stance, origin: origins[pair.id],
+                    team, feasibleReplyIds: pair.replySupport.ids, attackingReplyAvailable: pair.replySupport.attacking, availableSeconds: numberV1(pair.time) });
+                const candidate = { opportunityId: next.opportunityId, preference, pair, movement, spacing };
+                if (!best || compareContactOpportunityPreferencesV1(candidate, best) < 0) best = candidate;
+            }
+            if (!best) continue;
+            const { pair, movement, spacing } = best;
+            Object.assign(source, pair);
             facts.push({ opportunityId: next.opportunityId, actorId: pair.id, sourceIndex: proposal.sourceIndex,
                 kind: pair.kind, contact: pair.contact, availableSeconds: numberV1(pair.time),
                 stance: pair.feet.stance, recoveryPosition: pair.feet.stance,
                 feasibleReplyIds: pair.replySupport.ids, attackingReplyAvailable: pair.replySupport.attacking,
-                audit: { legal: trial.ok, routeValid: !!valid, feetValid: pair.feet.reachable && pair.feet.legalVolleyFeet,
-                    peakFeetPerSecond: movement?.maxPeakFeetPerSecond ?? null, minimumSpacingFeet: spacing?.minimumSeparationFeet ?? null } });
-            if (!valid) {
-                diagnostics.excludedContacts++;
-                diagnostics.contactExclusions.push({ actor: pair.id, kind: pair.kind, delay: pair.delay ?? null,
-                    reason: trial.reason || 'actual-route-bound', contact: pair.contact, stance: pair.feet.stance, movement });
-                if (diagnostics.contactExclusions.length > 8) diagnostics.contactExclusions.shift();
-                continue;
-            }
-            pair.pendingRecipe = pendingRecipe;
-            pair.probeTrial = trial;
-            pair.positions = generatedV1(Object.fromEntries(IDS.map(actor => [actor, sampleActorBoardPositionV2(trial.resolvedPrevious, actor, trial.resolvedPrevious.duration)])));
-            pair.footState = generatedV1(sampleFeetStateV1(trial.resolvedPrevious, trial.resolvedPrevious.duration));
-            pair.sampleTimeSeconds = numberV1(trial.resolvedPrevious.endTime);
-            pair.contactTimeSeconds = pair.sampleTimeSeconds;
+                audit: { legal: true, routeValid: true, feetValid: pair.feet.reachable && pair.feet.legalVolleyFeet,
+                    peakFeetPerSecond: movement.maxPeakFeetPerSecond, minimumSpacingFeet: spacing.minimumSeparationFeet } });
             // The best-ranked actor passed every physical check at this fixed
             // opportunity. A lower-ranked actor cannot replace that choice;
             // its unused route needs no speculative collision sweep.
@@ -313,7 +365,8 @@ function situationFor(input, state, index, pair, decisions) {
     const origin = state.pendingSegment?.previous.positions[pair.id] ?? input.layout[pair.id];
     return { ...snapshot, sampleTimeSeconds: pair.sampleTimeSeconds, contactTimeSeconds: pair.contactTimeSeconds,
         contactSelection: { version: 'rally-contact-selection-v1', strategy: pair.selectionStrategy ?? 'initial-serve',
-            evidence: pair.selectionEvidence ? generatedV1(pair.selectionEvidence) : null },
+            evidence: pair.selectionEvidence ? generatedV1(pair.selectionEvidence) : null,
+            ...(pair.outgoingSafety ? { outgoingSafety: generatedV1(pair.outgoingSafety) } : {}) },
         service: clone(input.service), pressure: generatedV1(assessPressureV1({ contact: pair.contact, position: origin,
         availableSeconds: pair.availableSeconds, incomingFlight: state.solved.at(-1),
         incomingContactVelocity: index > 0 ? sampleFlightVelocityV2(state.solved.at(-1), pair.time) : undefined, incomingIntent: previous?.intent, selfPaced: index === 0,
@@ -330,6 +383,47 @@ function addMovement(input, state, index, pair, recipe, flight) {
         quality: recipe.quality, pace: recipe.pace, peakFeetPerSecond: 17.95 });
     if (!movement.ok) throw new RangeError(movement.reason);
     return { recipe: { ...recipe, movement: generatedV1(movement.movement), playerMovement: generatedV1(movement.playerMovement) }, plan: movement };
+}
+
+function friendlyActors(input, hitter) {
+    return IDS.filter(id => input.players[id].team === input.players[hitter].team);
+}
+
+function checkFriendlyTrial(input, state, pair, trial) {
+    const actors = friendlyActors(input, pair.id);
+    const bodyEvents = inspectPlanningTrialBodyV2(state, trial, { actors });
+    if (bodyEvents.length) {
+        const error = new RangeError('The nominal outgoing flight intersects the planted hitter or partner.');
+        error.bodyEvents = bodyEvents; throw error;
+    }
+    return { version: 'rally-outgoing-safety-v1', checkedActors: actors,
+        representedFlightSeconds: numberV1(trial.flight.totalDuration), clear: true };
+}
+
+// Check the actual nominal target and all four planned routes before applying
+// an execution perturbation. The body's shared sweep keeps its original proxy
+// and initial-contact clearing; no hitter is exempt from the physical path.
+function checkNominalReply(input, state, index, pair, reply, { record = false } = {}) {
+    let recipe = pair.signature?.intent === reply.id ? { ...clone(pair.signature.recipe), id: `shot-${index + 1}` }
+        : baseRecipe(`shot-${index + 1}`, index, pair, reply.target, reply.family);
+    recipe = { ...recipe, intent: reply.id, quality: 'neutral', pace: reply.pace ?? 'medium', arc: reply.arc ?? 'medium',
+        physics: clone(reply.physics) };
+    recipe = generatedV1(addMovement(input, state, index, pair, recipe, reply.flight).recipe);
+    const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial,
+        capturePendingEvents: true });
+    if (!trial.ok || !trial.previousInspectionReused && !routeValid(trial.resolvedPrevious)) throw new RangeError(trial.reason || 'The nominal reply has an infeasible incoming route.');
+    const safety = checkFriendlyTrial(input, state, pair, trial);
+    if (record) {
+        const segment = trial.pendingSegment;
+        safety.nominal = { contact: generatedV1(trial.contact), family: recipe.family, quality: recipe.quality,
+            target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, arc: recipe.arc,
+            actorRoute: { startTime: segment.startTime, duration: segment.duration, originalDuration: segment.originalDuration,
+                contactTime: segment.contactTime, hitter: segment.shotSemantics.playerId,
+                feet: clone(segment.shotSemantics.contact.feet), previousPositions: clone(segment.previous.positions),
+                positions: clone(segment.step.positions), momentum: clone(segment.model2Momentum),
+                endTimeSeconds: segment.step.shot.physicsV2.endTimeSeconds } };
+    }
+    return safety;
 }
 
 function candidateFlight(input, pair, candidate, situation, draws) {
@@ -435,10 +529,13 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                     const narrationDraw = random.narration();
                     try {
                         const { target, parameters } = candidateFlight(input, pair, chosen, situation, targetDraws);
-                        const applied = applyExecutionV1({ execution, target, contact: pair.contact, team: player.team, physics: parameters.physics, family: chosen.family,
+                        const nominalSafety = checkNominalReply(input, state, index, pair, { id: chosen.intent, family: chosen.family,
+                            pace: chosen.pace, arc: chosen.arc, target, physics: parameters.physics, flight: parameters.flight }, { record: true });
+                        const perturbed = applyExecutionV1({ execution, target, contact: pair.contact, team: player.team, physics: parameters.physics, family: chosen.family,
                             pace: chosen.pace, arc: chosen.arc, draws: perturbationDraws });
-                        const flight = solveFlightV2({ from: pair.contact, target: applied.target, family: chosen.family, quality: execution.quality,
-                            pace: applied.pace, arc: applied.arc, physics: applied.physics });
+                        const { applied, flight, guidance: deliveredGuidance } = resolveDeliveredFlightV1({ candidate: chosen, contact: pair.contact,
+                            team: player.team, execution, applied: perturbed, style: player.style });
+                        await checkpoint({ shots: index, workDelta: deliveredGuidance.trials.length });
                         if (execution.quality !== 'error' && flight.obstruction) throw new RangeError('A non-error execution must cross a playable lane.');
                         let recipe = { ...baseRecipe(`shot-${index + 1}`, index, pair, applied.target, chosen.family), intent: chosen.intent,
                             quality: execution.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics,
@@ -453,11 +550,13 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         }
                         recipe = generatedV1(recipe);
                         recipe.authoring = automaticOwnership([...owned, 'contactOverride'].filter(field => Object.hasOwn(recipe, field)));
-                        const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial });
+                        const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial,
+                            capturePendingEvents: execution.quality !== 'error' });
                         // Verified reuse proves the previous leg has exactly the
                         // geometry already audited for this opportunity. An
                         // altered tail still receives the full route checks.
                         if (!trial.ok || !trial.previousInspectionReused && !routeValid(trial.resolvedPrevious)) throw new RangeError(trial.reason || 'The actual resolved movement or spacing is infeasible.');
+                        const deliveredSafety = execution.quality === 'error' ? null : checkFriendlyTrial(input, state, pair, trial);
                         commitPlanningTrialV2(state, trial);
                         pendingMovementPlans.set(state, movement.plan);
                         committed = true;
@@ -465,19 +564,23 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                             policyContext: { context: sourceCandidates.context, ...(sourceCandidates.conditioning ? { conditioning: clone(sourceCandidates.conditioning) } : {}) },
                             chosen: { id: chosen.id, intent: chosen.intent, family: chosen.family }, draws: { intent: intentDraw, execution: executionDraws, target: targetDraws, perturbation: perturbationDraws, narration: narrationDraw }, execution,
                             resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair,
+                                nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedV1(deliveredGuidance), ...(deliveredSafety ? { deliveredSafety } : {}),
                                 ...(applied.physicalTransformation ? { physicalTransformation: generatedV1(applied.physicalTransformation) } : {}),
                                 ...(parameters.guidance ? { flightGuidance: generatedV1(parameters.guidance) } : {}),
                                 ...(parameters.limitation ? { flightLimitation: parameters.limitation } : {}),
                                 actualContact: generatedV1(trial.contact), actualFeet: generatedV1(trial.feet), intendedError: execution.errorReason, choiceAttempts } });
-                        const inspection = inspectPendingLegV2(state, { terminal: true });
+                        const inspection = inspectPendingEventsV2(state);
                         if (execution.quality === 'error' && inspection.derivedOutcome) return finishAttempt(input, state, document, decisions, diagnostics, false);
                         if (inspection.derivedOutcome && ['net', 'long', 'wide', 'nvz-foot', 'nvz-momentum', 'two-bounce'].includes(inspection.derivedOutcome.reason)) return finishAttempt(input, state, document, decisions, diagnostics, false);
                         accepted = true;
                         break;
                     } catch (error) {
                         if (committed) throw error;
+                        if (error.guidance) await checkpoint({ shots: index, workDelta: error.guidance.trials.length });
                         diagnostics.rejections++; diagnostics.targetRepairs++;
-                        choiceAttempt.repairs.push({ repair, targetDraws, perturbationDraws, reason: error.message });
+                        choiceAttempt.repairs.push({ repair, targetDraws, perturbationDraws, reason: error.message,
+                            ...(error.guidance ? { deliveredGuidance: generatedV1(error.guidance) } : {}),
+                            ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
                         diagnostics.failures.push({ shot: index + 1, intent: chosen.id, repair, reason: error.message });
                         if (diagnostics.failures.length > 8) diagnostics.failures.shift();
                     }

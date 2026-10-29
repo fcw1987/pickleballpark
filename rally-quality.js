@@ -1,7 +1,7 @@
 // Execution and causation are explicit tactical heuristics. Physical outcomes
 // are established separately by the shared solver and model2 rule validator.
 import { assessReach } from './rally-tactics.js';
-import { solveFlightForClearanceV2, sampleFlightVelocityV2 } from './play-physics-v2.js';
+import { solveFlightV2, solveFlightForClearanceV2, sampleFlightVelocityV2 } from './play-physics-v2.js';
 import { isInNonVolleyZone } from './court-geometry.js';
 
 export const QUALITY_VERSION = 'rally-quality-v1';
@@ -226,6 +226,83 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
       sourceContact: { x: contact.x, y: contact.y, heightFeet: contact.heightFeet }, sourceTarget: { x: target.x, y: target.y },
       sourcePhysics: physics ? { ...physics } : null, target: { ...next }, physics: adjusted ? { ...adjusted } : null,
       targetSpreadFeet: spread, requestedClearanceFeet, solvedClearanceFeet, solveAttempts } });
+}
+
+// Section 7 ranges are illustrative diagnostics, not simultaneous equations.
+// Only the speed-up/counter delivered ceiling is an opportunity admission gate.
+export const DELIVERED_FLIGHT_VERSION = 'rally-delivered-flight-v1';
+export const DELIVERED_CLEARANCE_OFFSETS_V1 = Object.freeze([.05, .1, .2, .35, .5, .75, 1, 1.5, 2, 3]);
+function deliveredRanges(candidate, execution, style) {
+  if (['speed-up', 'counter'].includes(candidate.intent)) return { speedMph: [30, 45], netClearanceInches: [2, 12], apexFeet: [0, 4.5] };
+  const rec = (typeof style === 'string' ? style : style?.id) !== 'pro';
+  return ({
+    serve: { speedMph: [25, 40], netClearanceInches: [12, 30], apexFeet: [6, 8] },
+    return: { speedMph: [22, 36], netClearanceInches: [12, 30], apexFeet: [6, 8] },
+    drive: { speedMph: rec ? [28, 38] : [35, 45], netClearanceInches: [6, 16], apexFeet: [3.5, 5] },
+    drop: { speedMph: [15, 22], netClearanceInches: [6, 18], apexFeet: [5.5, 7] },
+    dink: execution.quality === 'attackable'
+      ? { speedMph: [10, 16], netClearanceInches: [14, 24], apexFeet: [4.5, 5.5] }
+      : { speedMph: [8, 14], netClearanceInches: [2, 10], apexFeet: [3.4, 4.2] },
+    reset: { speedMph: [10, 16], netClearanceInches: [2, 10], apexFeet: [3.4, 4.5] },
+    lob: { speedMph: [18, 25], apexFeet: [15, 22] },
+    overhead: { speedMph: [35, 45], contactHeightFeet: [7, 8.5] },
+  })[candidate.family] ?? {};
+}
+function deliveredFacts(flight, team) {
+  const m = flight.metadata, landing = flight.landing;
+  return { source: 'play-physics-v2', launchSpeedMph: m.launchSpeedMph,
+    speedMph: m.launchSpeedMph, launchVerticalFeetPerSecond: m.launchVerticalFeetPerSecond,
+    netClearanceInches: m.netClearanceInches, apexFeet: m.apexFeet, contactHeightFeet: m.contactHeightFeet,
+    landing: { x: landing.x, y: landing.y, heightFeet: landing.heightFeet },
+    opponentLanding: landing.x >= 0 && landing.x <= 20 && (team === 'green' ? landing.y > 22 && landing.y <= 44 : landing.y >= 0 && landing.y < 22),
+    obstruction: flight.obstruction?.kind ?? null, terminalReason: flight.terminal?.reason ?? null };
+}
+/** Post-execution admission: never resamples quality, edits an error, or adjusts
+ * measured velocity. Every alternative is a fresh solution for the SAME target.
+ * Raising clearance preserves the loft already supplied by execution, including
+ * attackable popups. Ten explicit offsets bound work; failure asks the caller's
+ * existing target/opportunity repair to continue, without inventing an ending. */
+export function resolveDeliveredFlightV1({ candidate, contact, team, execution, applied, style } = {}) {
+  point(contact, 'contact'); point(applied?.target, 'applied.target');
+  if (!['green', 'orange'].includes(team) || !candidate?.family || !['error', 'attackable', 'excellent', 'low', 'neutral'].includes(execution?.quality)) throw new TypeError('Delivered flight requires a candidate, team and execution quality.');
+  const base = { from: contact, target: applied.target, family: candidate.family, quality: execution.quality, pace: applied.pace, arc: applied.arc };
+  let flight = solveFlightV2({ ...base, physics: applied.physics }), selected = applied;
+  const source = deliveredFacts(flight, team), trials = [];
+  const hardCeiling = execution.quality !== 'error' && ['speed-up', 'counter'].includes(candidate.intent);
+  const eligible = facts => !facts.obstruction && !facts.terminalReason && facts.opponentLanding && facts.launchSpeedMph <= 45;
+  trials.push({ kind: 'delivered-source', ...source, accepted: !hardCeiling || eligible(source) });
+  if (hardCeiling && !eligible(source) && !source.obstruction && source.opponentLanding && source.netClearanceInches !== null) {
+    for (const offset of DELIVERED_CLEARANCE_OFFSETS_V1) {
+      const clearanceFeet = Math.max(2 / 12, source.netClearanceInches / 12) + offset;
+      try {
+        const alternative = solveFlightForClearanceV2(base, clearanceFeet), facts = deliveredFacts(alternative, team), accepted = eligible(facts);
+        trials.push({ kind: 'raised-clearance', requestedClearanceFeet: clearanceFeet, ...facts, accepted });
+        if (accepted) {
+          flight = alternative;
+          selected = { ...applied, physics: { launchVerticalFeetPerSecond: alternative.metadata.launchVerticalFeetPerSecond } };
+          break;
+        }
+      } catch (error) {
+        if (!(error instanceof TypeError || error instanceof RangeError)) throw error;
+        trials.push({ kind: 'raised-clearance', requestedClearanceFeet: clearanceFeet, accepted: false, reason: error.message });
+      }
+    }
+  }
+  const actual = deliveredFacts(flight, team), ranges = deliveredRanges(candidate, execution, style);
+  const diagnostics = Object.entries(ranges).map(([metric, range]) => ({ metric, range, actual: actual[metric],
+    withinRange: actual[metric] === null ? null : actual[metric] >= range[0] && actual[metric] <= range[1] }));
+  const accepted = !hardCeiling || eligible(actual);
+  const guidance = freeze({ version: DELIVERED_FLIGHT_VERSION, accepted, source, actual, diagnostics, trials,
+    maximumTrials: 1 + DELIVERED_CLEARANCE_OFFSETS_V1.length,
+    speedCeilingMph: hardCeiling ? 45 : null, repaired: selected !== applied,
+    limitations: ['Constant gravity; no drag or spin forces.', 'Section 7 illustrative ranges are diagnostics, except the non-error speed-up/counter ceiling.',
+      ...(execution.quality === 'error' ? ['Sampled error geometry preserved; guidance ranges do not reject intentional errors.'] : []),
+      ...(!accepted ? ['No bounded coherent clearance alternative retains this target and meets the delivered speed ceiling.'] : [])] });
+  if (!accepted) {
+    const error = new RangeError('Delivered speed-up/counter opportunity rejected: no bounded coherent flight at or below 45 mph for this executed target.');
+    error.guidance = guidance; throw error;
+  }
+  return freeze({ applied: selected, flight, guidance });
 }
 
 export function classifyOutcomeV1({ outcome, pressure = null, pressureDecisionId = null, execution = null,

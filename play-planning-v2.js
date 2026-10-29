@@ -4,7 +4,7 @@ import { compilePlayTimeline, resolveShotSemantics, boardToWorld, STROKE_PROFILE
 import { REACH_MODEL } from './rally-tactics.js';
 import { solveFlightV2, interceptFlightV2, solveServePreparationV2, PHYSICS_VERSION } from './play-physics-v2.js';
 import { createModel2SegmentV2, holdModel2TerminalSegmentV2 } from './play-timeline-v2.js';
-import { inspectModel2SegmentV2, resolveModel2OutcomeCandidates, derivedOutcomeForDecisionV2, analyzeModel2Outcome } from './play-outcome-v2.js';
+import { inspectModel2SegmentV2, inspectBodyPathV2, resolveModel2OutcomeCandidates, derivedOutcomeForDecisionV2, analyzeModel2Outcome } from './play-outcome-v2.js';
 import { teamForPlayer } from './rally-state.js';
 
 export const PLANNING_VERSION = 'play-planning-v2';
@@ -128,21 +128,25 @@ function buildRecipe(state,recipe) {
   }
 }
 
-function patchPendingMovement(state,pendingRecipe) {
+function patchPendingMovement(state,pendingRecipe,{trialDraft=false}={}) {
   if(!state.pendingRecipe)throw new TypeError('There is no pending recipe to repair.');
   const invariant=value=>Object.fromEntries(Object.entries(value).filter(([key])=>!['movement','playerMovement'].includes(key)));
   if(JSON.stringify(invariant(pendingRecipe))!==JSON.stringify(invariant(state.pendingRecipe)))throw new TypeError('A pending repair may change only movement and playerMovement.');
-  const steps=state.steps.slice(),step=copy(steps.at(-1)),previous=steps.at(-2),stance=footCenter(step.shot.contact.feet);
+  const steps=state.steps.slice(),original=steps.at(-1);
+  // A trial immediately deep-clones this private draft in buildRecipe. Copy
+  // only branches replaced here; standalone tail replacement still detaches
+  // the entire step before exposing it through the live planning state.
+  const step=trialDraft?{...original,shot:{...original.shot}}:copy(original),previous=steps.at(-2),stance=footCenter(step.shot.contact.feet);
   const positions=copy(previous.positions);positions[pendingRecipe.hitter]=movementTarget(pendingRecipe.movement,stance);
   for(const[id,command]of Object.entries(pendingRecipe.playerMovement||{}))positions[id]=movementTarget(command,previous.positions[id]);
   positions.ball=copy(step.positions.ball);step.positions=positions;
-  step.shot.authoring={...copy(pendingRecipe),recipeId:pendingRecipe.id};
+  step.shot.authoring={...(trialDraft?pendingRecipe:copy(pendingRecipe)),recipeId:pendingRecipe.id};
   steps[steps.length-1]=step;
   const locks=new Map(state.pendingLocksBefore);
   for(const[id,command]of [[pendingRecipe.hitter,pendingRecipe.movement],...Object.entries(pendingRecipe.playerMovement||{})]){
     if(command.pinned)locks.set(id,xy(positions[id]));else locks.delete(id);
   }
-  return {...state,steps,play:{...state.play,steps},locks,pendingRecipe:copy(pendingRecipe)};
+  return {...state,steps,play:{...state.play,steps},locks,pendingRecipe:trialDraft?pendingRecipe:copy(pendingRecipe)};
 }
 
 function segmentFor(previous,step,nextStep,index,startTime,momentum) {
@@ -238,11 +242,11 @@ function privateInspection(inspection) {
   return Object.freeze(result);
 }
 
-export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly=false,capturePreviousInspection=false,reusePreviousTrial}={}) {
+export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly=false,capturePreviousInspection=false,reusePreviousTrial,capturePendingEvents=false}={}) {
   assertState(state);
   let working=state,construction;
   try {
-    if(pendingRecipe)working=patchPendingMovement(state,pendingRecipe);
+    if(pendingRecipe)working=patchPendingMovement(state,pendingRecipe,{trialDraft:true});
     construction=buildRecipe(working,recipe);
   } catch(error) {
     construction={built:false,recipe,findings:[finding(recipe?.id??null,error.message,'feasibility')]};
@@ -280,12 +284,19 @@ export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly
     const pending=buildOnly?null:segmentFor(steps.at(-2),construction.step,null,index+1,cursor,working.momentum);
     const extra=pending?momentumFor(pending):null,momentum=extra?[...working.momentum,extra]:working.momentum;
     if(pending)pending.model2Momentum=momentum;result.pendingSegment=pending;
+    // These two private fields may share a detached snapshot while a trial is
+    // uncommitted. Commit separates them before either enters the live state.
+    const acceptedRecipe=copy(recipe);
     const next={...working,steps,play:{...working.play,steps},solved:[...working.solved,construction.flight],locks:construction.locks,
-      findings:[...working.findings,...result.findings],recipes:[...working.recipes,copy(recipe)],
+      findings:[...working.findings,...result.findings],recipes:[...working.recipes,acceptedRecipe],
       revision:state.revision+1,cursor,finalizedSegments,finalizedInspections,momentum,pendingSegment:pending,
-      pendingRecipe:copy(recipe),pendingLocksBefore:new Map(working.locks)};
+      pendingRecipe:acceptedRecipe,pendingLocksBefore:new Map(working.locks)};
     if(pendingRecipe)next.recipes[next.recipes.length-2]=copy(pendingRecipe);
-    trials.set(result,{owner:state,revision:state.revision,next,previousAudit});
+    // Opt in only for callers that inspect uncommitted outgoing geometry.
+    // Bind the exposed nested segment to its original physical inputs without
+    // copying or registering the private next state as a public planning state.
+    const pendingEventsProof=capturePendingEvents&&pending?previousInspectionProof(next,pending,index,previousContext(next),construction.flight):null;
+    trials.set(result,{owner:state,revision:state.revision,next,previousAudit,pendingEventsProof});
   }else trials.set(result,{owner:state,revision:state.revision,next:null});
   result.ok=result.built&&!result.findings.some(item=>item.severity==='error');
   result.reason=result.findings[0]?.message??'';
@@ -305,11 +316,15 @@ export function commitPlanningTrialV2(state,trial,{allowInvalid=false}={}) {
     state.findings.push(...trial.findings);state.revision++;
     return state;
   }
-  Object.assign(state,record.next);return state;
+  Object.assign(state,record.next,{pendingRecipe:copy(record.next.pendingRecipe)});return state;
 }
 
 export function planningPlayV2(state,{ending=state.play.ending,outcome=state.play.outcome}={}) {
   assertState(state);
+  return planningPlay(state,{ending,outcome});
+}
+
+function planningPlay(state,{ending,outcome}) {
   const steps=state.steps.slice();
   if(ending==='stop'&&steps.length>1){
     const step=copy(steps.at(-1)),solved=state.solved.at(-1),at=solved.sampleBoard(solved.firstLandingTime);
@@ -321,8 +336,12 @@ export function planningPlayV2(state,{ending=state.play.ending,outcome=state.pla
 
 export function inspectPendingLegV2(state,{terminal=true,ending=terminal?'winner':'stop'}={}) {
   assertState(state);
+  return inspectPendingLeg(state,{terminal,ending});
+}
+
+function inspectPendingLeg(state,{terminal,ending}) {
   if(!state.pendingSegment)return {decision:null,derivedOutcome:null,violations:[],physicalCandidates:[],momentumCandidates:[],segment:null};
-  const play=planningPlayV2(state,{ending,outcome:null});
+  const play=planningPlay(state,{ending,outcome:null});
   const index=state.solved.length,segment=segmentFor(play.steps[index-1],play.steps[index],null,index,state.cursor,state.momentum);
   const inspection=inspectModel2SegmentV2(play,segment,{index:index-1,prior:previousContext(state),terminal,solved:state.solved.at(-1)});
   const history=state.finalizedInspections.filter(Boolean);
@@ -331,6 +350,32 @@ export function inspectPendingLegV2(state,{terminal=true,ending=terminal?'winner
   const {decision}=resolveModel2OutcomeCandidates(physicalCandidates,momentumCandidates);
   return {...inspection,physicalCandidates,momentumCandidates,decision,derivedOutcome:derivedOutcomeForDecisionV2(decision),segment,
     violations:[...history.flatMap(item=>item.violations),...inspection.violations]};
+}
+
+// Inspect the complete outgoing physical span without classifying terminal reach.
+// terminal:false alone defaults to a first-bounce stop in the legacy API.
+export function inspectPendingEventsV2(state) {
+  return inspectPendingLegV2(state,{terminal:false,ending:'winner'});
+}
+
+export function inspectPlanningTrialEventsV2(state,trial) {
+  return inspectPendingLeg(verifiedTrialNext(state,trial),{terminal:false,ending:'winner'});
+}
+
+function verifiedTrialNext(state,trial) {
+  assertState(state);
+  const record=trials.get(trial);
+  if(!record||record.owner!==state||record.revision!==state.revision)throw new TypeError('A trial belongs to a different or stale planning state.');
+  if(!trial.ok||!record.next?.pendingSegment)throw new TypeError('A valid built planning trial with a pending segment is required.');
+  const next=record.next,index=next.solved.length-1;
+  const proof=previousInspectionProof(next,next.pendingSegment,index,previousContext(next),next.solved.at(-1));
+  if(record.pendingEventsProof===null||proof!==record.pendingEventsProof)throw new TypeError('The planning trial inspection inputs were mutated or are unsupported.');
+  return next;
+}
+
+export function inspectPlanningTrialBodyV2(state,trial,{actors}={}) {
+  const next=verifiedTrialNext(state,trial);
+  return inspectBodyPathV2(next.pendingSegment,next.solved.at(-1),actors);
 }
 
 export function finishPlanningV2(state,{ending=state.play.ending,outcome=null,deriveOutcome=true,compileTimeline=false}={}) {

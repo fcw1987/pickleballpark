@@ -127,6 +127,27 @@ the legacy implicit contact plane is unchanged when that timing is absent.
 Execution perturbs supported physical inputs. An error ends the point only when
 the solved geometry supplies it. Let-go is defensive choice, not a paddle hit.
 
+Each ordinary contact has at most eight grounded stance candidates. The nearest
+existing pose remains available, alongside bounded lateral and rear alternatives
+that preserve hand, paddle reach and NVZ constraints. All candidates contribute
+to the opportunity search bound; accepted stances still pass the actual incoming
+route, collision, peak-speed and spacing checks. Nominal replies use planned
+routes for all four players and the unchanged shared body sweep against the
+hitter and partner. The selected jittered nominal target receives the same
+check before execution. Non-error delivery is checked again after perturbation;
+sampled errors retain genuine body faults. Existing saved faults are never
+exempted or rewritten. Decision analysis records the selected nominal flight
+and actor-route evidence separately from execution and its outcome.
+
+`resolveDeliveredFlightV1` measures the solved speed, clearance and landing after
+execution. A non-error speed-up or counter above 45 mph tries ten explicit
+increases in coherent clearance while retaining the executed landing target;
+each is a fresh shared-solver solution. If no supported option fits, the ordinary
+bounded target/opportunity search records the rejection. Reported velocity is
+never clamped. All other section-7 family ranges remain explicit diagnostic
+guidance, and sampled error geometry remains visible even when outside those
+ranges. Speed, apex, clearance and landing cannot all be independent equalities.
+
 The fifth-shot 66/31 drop/firm-volley row remains the marginal source reference.
 An explicit air-contact conditional row uses 58/40, with the remainder divided
 between drive and lob; bounced opportunities never acquire a volley label.
@@ -163,6 +184,14 @@ Final source independently crosses public document/compiler/rule validation and
 exact generated movement/spacing checks. Every represented contact must be
 accepted with zero unexpected violations. A successful planning trial alone
 cannot bypass this gate.
+
+Interim pending-event inspection retains the full represented physical span,
+including body collisions after the first bounce, while deferring unnecessary
+second-bounce reach classification. Final outcome inspection still performs that
+classification. Selected-actor nominal body inspection calls the same swept body
+solver on owned, unchanged trial data; final public validation checks every actor
+independently. Sample reuse stays inside one synchronous movement inspection,
+and ordinary sampler results retain exact values, freezing and error behavior.
 
 Browser callers use `simulateRallyInWorker` from `rally-engine-client.js`. Each
 request owns one module worker running the same engine as Node. The client may

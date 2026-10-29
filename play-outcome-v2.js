@@ -88,6 +88,19 @@ function bodyContact(segment, solved, endTime, actor, ignoreInitialContact = fal
   return null;
 }
 
+// Selective feasibility uses the identical swept torso test and represented
+// contact-relative bound as full adjudication, including hitter clearance.
+export function inspectBodyPathV2(segment,solved,actors) {
+  if(!Array.isArray(actors)||Array.from(actors).some(actor=>!PLAYERS.includes(actor))||new Set(actors).size!==actors.length)
+    throw new TypeError('Distinct represented player IDs are required.');
+  const end=segment.step.shot.physicsV2.endTimeSeconds??solved.firstLandingTime;
+  if(!Number.isFinite(end)||end<0)throw new TypeError('A finite represented body-path bound is required.');
+  return actors.flatMap(struckActor=>{
+    const time=bodyContact(segment,solved,end,struckActor,struckActor===segment.shotSemantics.playerId);
+    return time===null?[]:[{struckActor,afterContactSeconds:time,position:boardPoint(solved.sampleBoard(time))}];
+  });
+}
+
 // A conservative continuous bound, rather than claiming impossibility from a
 // few snapshots. Horizontal reach is deliberately generous at every height. The
 // Lipschitz margin covers motion between samples; an ambiguous case is not an ace.

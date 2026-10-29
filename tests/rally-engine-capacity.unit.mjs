@@ -99,7 +99,9 @@ test('controlled capacity seam constructs 99 physical contacts and censors witho
     assert.equal(decision.draws.intent, CAPACITY_CONTROLLER.intent);
     assert.deepEqual(decision.draws.target, { lateral: .5, depth: .5 });
     assert.deepEqual(decision.draws.perturbation, { lateral: .5, depth: .5 });
-    const opening = ['serve-deep-middle', 'return-deep-middle', 'third-shot-drop', 'reset', 'reset'];
+    // Clearer incoming stances now put the controlled pair at the line by the
+    // fifth contact; the same soft-middle controller then selects a dink.
+    const opening = ['serve-deep-middle', 'return-deep-middle', 'third-shot-drop', 'reset'];
     assert.equal(decision.chosen.id, opening[index] ?? 'middle-dink', 'the capacity controller must keep its explicit soft-middle semantics');
     assert.deepEqual(shot.generation, { seed: 0, generatorVersion: 'rally-engine-v1' });
   }

@@ -1,4 +1,11 @@
-# Pickleball Park Game Mode
+# Pickleball Park realistic rallies
+
+The October 29 product direction is for rallies to feel like played points:
+players move, make tactical choices and reach physical endings. The app must
+not expose “Game Mode” as a label or frame this as a separate mode. This file
+and the milestone identifiers retain their internal brief references. Revisit
+any proposed later workspace entry with the architect before implementing UI;
+the current M2 work remains headless.
 
 These foundations follow the owner brief dated October 28, 2026. M0 adds
 observation tools, compatibility fixtures and tests. M1 adds an opt-in model 2

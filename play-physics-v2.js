@@ -78,15 +78,22 @@ export function solveFlightV2(input){
     events.push(event('second-bounce',secondBounceTime,sampleStage(rebound,secondBounceTime)));
   }
   const totalDuration=stages.at(-1).endTime;
-  const sampleBoard=seconds=>{finite(seconds,'seconds');const t=clamp(seconds,0,totalDuration),selected=stages.find(s=>t<s.endTime-EPS)||stages.at(-1),at=sampleStage(selected,t);
-    const bounce=events.find(e=>e.type==='bounce'&&Math.abs(e.time-t)<EPS);
-    return Object.freeze({...at,phase:bounce?'bounce':t>=totalDuration-EPS?(terminal?'dead':'second-bounce'):selected.phase,bounced:t>=firstLandingTime-EPS});};
+  // Every solved flight has its incoming stage followed by rebound or net
+  // drop. Cache their immutable boundaries and construct the public sample
+  // directly, retaining the exact arithmetic and EPS comparisons below.
+  const firstStage=stages[0],lastStage=stages.at(-1),stageBoundary=firstStage.endTime-EPS;
+  const endBoundary=totalDuration-EPS,bounceBoundary=firstLandingTime-EPS;
+  const sampleBoard=seconds=>{finite(seconds,'seconds');const t=clamp(seconds,0,totalDuration),selected=t<stageBoundary?firstStage:lastStage;
+    const local=clamp(t-selected.startTime,0,selected.duration),bounce=Math.abs(firstLandingTime-t)<EPS;
+    return Object.freeze({x:selected.from.x+selected.vx*local,y:selected.from.y+selected.vz*local,
+      heightFeet:Math.max(R,selected.from.heightFeet+selected.vy*local-.5*G*local*local),
+      phase:bounce?'bounce':t>=endBoundary?(terminal?'dead':'second-bounce'):selected.phase,bounced:t>=bounceBoundary});};
   const launchSpeedMph=Math.hypot(vx,vy,vz)/(22/15),horizontalAverageSpeedMph=Math.hypot(target.x-from.x,target.y-from.y)/flightDuration/(22/15);
   const metadata=Object.freeze({physicsVersion:PHYSICS_VERSION,type:input.family,from:{x:from.x,y:from.y},to:target,
     contactHeightFeet:from.heightFeet,apexFeet,speedMph:launchSpeedMph,launchSpeedMph,launchVerticalFeetPerSecond:vy,horizontalAverageSpeedMph,
     netClearanceInches:netPoint?(netPoint.heightFeet-R-localNetHeightFeet(netPoint.x))*12:null,
     spin:Object.freeze({type:'flat',rpm:0}),bounce:Object.freeze({enabled:true,heightFeet:Math.pow(Math.sqrt(vy*vy+2*G*(from.heightFeet-R))*PHYSICS_V2.restitution,2)/(2*G)})});
-  const sample=seconds=>{const p=sampleBoard(seconds);return Object.freeze({...physicsBoardToWorld(p),phase:p.phase,bounced:p.bounced});};
+  const sample=seconds=>{const p=sampleBoard(seconds);return Object.freeze({x:(p.x-10)*.3048,y:p.heightFeet*.3048,z:(p.y-22)*.3048,phase:p.phase,bounced:p.bounced});};
   return Object.freeze({physicsVersion:PHYSICS_VERSION,metadata,from:Object.freeze(from),target:Object.freeze(target),stages:Object.freeze(stages),events:Object.freeze(events.sort((a,b)=>a.time-b.time)),
     firstLandingTime,flightDuration:firstLandingTime,landing:Object.freeze(landing),secondBounceTime,totalDuration,netTime,netPoint,
     obstruction:obstruction&&Object.freeze(obstruction),terminal:terminal&&Object.freeze(terminal),launchSpeedMph,horizontalAverageSpeedMph,sampleBoard,sample});

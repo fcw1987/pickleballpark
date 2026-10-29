@@ -120,6 +120,46 @@ export function contactFeetV1({ contact, target, team, handedness = 'right', con
     } : {}) });
 }
 
+/** Bounded outgoing-aware alternatives. The established nearest pose stays first;
+ * every alternative reports travel from the actual supplied player position.
+ * Flight clearance and the sampled incoming route remain the caller's audit. */
+export function contactFeetCandidatesV1(args = {}) {
+  const first = contactFeetV1(args), candidates = [first];
+  const { contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds } = args;
+  // Serves retain their declared layout, including any existing illegality.
+  if (kind === 'serve') return freeze(candidates);
+  const origin = position ? point(position, 'position') : null;
+  const hand = (handedness === 'right' ? 1 : -1) * (contactStyle === 'backhand' ? -1 : 1);
+  const bodySide = (team === 'green' ? 1 : -1) * hand;
+  const dx = target.x - contact.x, dy = target.y - contact.y, length = Math.hypot(dx, dy);
+  const forward = length ? { x: dx / length, y: dy / length } : { x: 0, y: team === 'green' ? 1 : -1 };
+  const seen = new Set([`${first.stance.x.toFixed(8)},${first.stance.y.toFixed(8)}`]);
+  for (const radius of [2.9, 1.8, .95]) for (const degrees of [90, -90, 135, -135, 180, 60, -60, 120, -120]) {
+    const angle = degrees * Math.PI / 180;
+    const stance = { x: contact.x + radius * (forward.x * Math.cos(angle) - forward.y * Math.sin(angle)),
+      y: contact.y + radius * (forward.y * Math.cos(angle) + forward.x * Math.sin(angle)) };
+    if (bodySide * (stance.x - contact.x) < CONTACT_SIDE_CLEARANCE - EPS
+      || stance.x < -7.5 || stance.x > 27.5 || stance.y < -7.5 || stance.y > 51.5
+      || (team === 'green' ? stance.y > 21.99 : stance.y < 22.01)) continue;
+    const leftSign = team === 'green' ? 1 : -1;
+    const feet = [{ x: stance.x + leftSign * .42, y: stance.y }, { x: stance.x - leftSign * .42, y: stance.y }];
+    const established = feet.every(outsideNVZ);
+    if (kind === 'volley' && (!established || (stance.x >= -.42 - 1e-5 && stance.x <= 20.42 + 1e-5
+      && (team === 'green' ? stance.y > 14.25 : stance.y < 29.75)))) continue;
+    const key = `${stance.x.toFixed(8)},${stance.y.toFixed(8)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const travel = origin ? distance(origin, stance) : null;
+    candidates.push(freeze({ feet, stance, grounded: true, reachable: true, legalVolleyFeet: kind !== 'volley' || established,
+      feetEstablishedOutsideNVZ: established,
+      ...(origin ? { originUsed: true, stanceFeasible: true, travelFeet: travel, bodyClearanceFeet: distance(stance, contact),
+        ...(availableSeconds !== undefined ? { routeReachable: travel <= 9 * availableSeconds + EPS,
+          arrivalPeakFeetPerSecond: availableSeconds > 0 ? 2 * travel / availableSeconds : travel === 0 ? 0 : null } : {}) } : {}) }));
+    if (candidates.length === 8) return freeze(candidates);
+  }
+  return freeze(candidates);
+}
+
 /** A full ease-in/ease-out route peaks at twice its average speed. */
 export function boundMovementV1(from, desired, seconds, peakFeetPerSecond = GENERATOR_MOVEMENT.peakFeetPerSecond) {
   point(from, 'from'); point(desired, 'desired');
@@ -360,7 +400,18 @@ export function inspectGeneratedMovementV1(timelineOrSegment, { maxPeakFeetPerSe
       const cuts = [0, duration, original, original / 2, contact, contact / 2, release, release + (original - release) / 2];
       for (const evidence of segment.model2Momentum || []) if (evidence.actor === actor) cuts.push(evidence.contactTime - segment.startTime, evidence.time - segment.startTime);
       const times = [...new Set(cuts.filter(t => Number.isFinite(t) && t >= 0 && t <= duration))].sort((a, b) => a - b);
-      const tracks = [time => sampleActorBoardPositionV2(segment, actor, time), ...[0, 1].map(index => time => sampleActorFeetV2(segment, actor, time).toSorted((a, b) => a.x - b.x || a.y - b.y)[index])];
+      // Inspection-local reuse only: every distinct time still reaches the shared
+      // samplers, and each new actor, segment, and inspection starts fresh.
+      const boardSamples = new Map(), feetSamples = new Map();
+      const boardAt = time => {
+        if (!boardSamples.has(time)) boardSamples.set(time, sampleActorBoardPositionV2(segment, actor, time));
+        return boardSamples.get(time);
+      };
+      const feetAt = time => {
+        if (!feetSamples.has(time)) feetSamples.set(time, sampleActorFeetV2(segment, actor, time).toSorted((a, b) => a.x - b.x || a.y - b.y));
+        return feetSamples.get(time);
+      };
+      const tracks = [boardAt, ...[0, 1].map(index => time => feetAt(time)[index])];
       for (const [trackIndex, at] of tracks.entries()) for (let i = 1; i < times.length; i++) {
         const start = times[i - 1], end = times[i], seconds = end - start;
         if (seconds < 1e-12) continue;
