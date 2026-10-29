@@ -45,18 +45,18 @@ test('quality gate reports every non-success conclusion together', () => {
   );
 });
 
-test('Quality runs the frozen qualification cohort once and retains failure evidence', () => {
+test('Quality runs the complete reserved holdout once and retains failure evidence', () => {
   const workflow = readFileSync(new URL('../.github/workflows/quality.yml', import.meta.url), 'utf8');
   const calibration = workflow.match(/^  rally-calibration:\n([\s\S]*?)(?=^  [a-z][a-z-]*:|$(?![\s\S]))/m)?.[1];
-  assert.ok(calibration, 'Qualification needs its own unsharded job');
+  assert.ok(calibration, 'The reserved holdout needs its own unsharded job');
   assert.match(calibration, /^    name: Rally calibration$/m);
   assert.doesNotMatch(calibration, /^    (?:strategy|continue-on-error):/m);
   assert.equal(workflow.match(/node tools\/rally-realism-v2\.mjs/g)?.length, 1);
-  assert.match(calibration, /run: >-\n\s+node tools\/rally-realism-v2\.mjs --cohort qualification\n\s+--output release-results\/game-mode-m2\/qualification\.json\n\s+--archive release-results\/game-mode-m2\/qualification\.jsonl\n\s+--require-calibration --require-clean\n/);
+  assert.match(calibration, /run: >-\n\s+node tools\/rally-realism-v2\.mjs --cohort holdout\n\s+--output release-results\/game-mode-m2\/holdout-v1\.json\n\s+--archive release-results\/game-mode-m2\/holdout-v1\.jsonl\n\s+--require-calibration --require-clean\n/);
   assert.doesNotMatch(calibration, /--(?:styles|seeds|archive-input)\b/);
   const retain = calibration.slice(calibration.indexOf('      - name: Retain calibration'));
   assert.match(retain, /\n        if: always\(\)\n/);
   assert.match(retain, /\n          if-no-files-found: error\n/);
-  assert.match(retain, /\n            release-results\/game-mode-m2\/qualification\.json\n            release-results\/game-mode-m2\/qualification\.jsonl\n/);
+  assert.match(retain, /\n            release-results\/game-mode-m2\/holdout-v1\.json\n            release-results\/game-mode-m2\/holdout-v1\.jsonl\n/);
   assert.match(workflow, /^    needs: \[checks, chromium, webkit, package, rally-calibration\]$/m);
 });

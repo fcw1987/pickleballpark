@@ -14,7 +14,8 @@ import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
 import { model2Document, model2Shot } from './fixtures/model2/factories.mjs';
 import { readModel2Fixture } from './fixtures/model2/cases.mjs';
 import { observeRallyV2, summarizeObservationsV2, evaluateCalibrationV2, heightAffordanceV2, assessContactSupportV2, CONTACT_SUPPORT_POLICY_V2 } from '../tools/rally-realism-metrics-v2.mjs';
-import { createCohortSchedule, DEVELOPMENT_SEEDS, QUALIFICATION_SEEDS, runRealismV2 } from '../tools/rally-realism-v2.mjs';
+import { createCohortSchedule, DEVELOPMENT_SEEDS, QUALIFICATION_SEEDS, HOLDOUT_DEFINITION_V1, HOLDOUT_SEEDS_V1,
+  validateHoldoutDefinitionV1, validateHoldoutScheduleV1, describeCohortEvidenceV2, runRealismV2 } from '../tools/rally-realism-v2.mjs';
 
 const copy = value => structuredClone(value);
 function resultFor(document, status = document.ending === 'stop' ? 'censored' : 'complete') {
@@ -133,6 +134,71 @@ test('development and qualification schedules are disjoint, frozen and balanced 
   }
   assert.throws(() => createCohortSchedule({ cohort: 'qualification', seeds: [7] }), /Frozen/);
   assert.throws(() => createCohortSchedule({ cohort: 'custom', seeds: [7, 7] }), /unique/);
+});
+
+test('the reserved holdout is an immutable complete 3600-job schedule with balanced service roles', () => {
+  const definitionBytes = readFileSync(new URL('../tools/rally-holdout-v1.json', import.meta.url), 'utf8');
+  const definition = JSON.parse(definitionBytes), jobs = createCohortSchedule({ cohort: 'holdout' });
+  assert.deepEqual(HOLDOUT_DEFINITION_V1, definition);
+  assert.equal(HOLDOUT_SEEDS_V1.length, 1200); assert.equal(HOLDOUT_SEEDS_V1[0], 50000); assert.equal(HOLDOUT_SEEDS_V1.at(-1), 51199);
+  assert.equal(jobs.length, 3600); assert.equal(new Set(jobs.map(job => job.id)).size, 3600);
+  assert.equal(validateHoldoutScheduleV1(jobs), true);
+  for (const style of definition.styles) {
+    const rows = jobs.filter(job => job.style === style), counts = {};
+    assert.equal(rows.length, 1200); assert.deepEqual(rows.map(job => job.seed), HOLDOUT_SEEDS_V1);
+    for (const row of rows) {
+      const role = row.input.service, id = `${role.server}:${role.receiver}:${role.court}`;
+      counts[id] = (counts[id] ?? 0) + 1;
+      assert.equal(role.courtConvention, 'server-perspective-v1'); assert.equal(row.input.seed, row.seed);
+      assert.deepEqual(row.input.options, definition.options);
+      assert.ok(Object.values(row.input.players).every(player => player.style === style && player.flavour === 'balanced'));
+    }
+    assert.deepEqual(counts, { 'player1:player3:right': 300, 'player1:player3:left': 300, 'player3:player1:right': 300, 'player3:player1:left': 300 });
+  }
+  assert.equal(HOLDOUT_SEEDS_V1.some(seed => DEVELOPMENT_SEEDS.includes(seed) || QUALIFICATION_SEEDS.includes(seed)), false);
+  assert.throws(() => { HOLDOUT_DEFINITION_V1.options.maxShots = 12; }, TypeError);
+  assert.throws(() => { HOLDOUT_SEEDS_V1.push(51200); }, TypeError);
+  assert.throws(() => { jobs[0].input.service.court = 'left'; }, TypeError);
+  assert.throws(() => { jobs.push(jobs[0]); }, TypeError);
+  assert.equal(readFileSync(new URL('../tools/rally-holdout-v1.json', import.meta.url), 'utf8'), definitionBytes);
+});
+
+test('holdout definition and schedule validation reject replacements, extensions and conditional work', () => {
+  for (const patch of [
+    { seedStart: 49999 }, { seedCountPerStyle: 1199 }, { seedCountPerStyle: 1201 }, { seedCountPerStyle: Infinity },
+    { styles: ['pro'] }, { styles: ['pro', 'intermediate', 'advanced'] }, { styles: ['pro', 'advanced', 'beginner'] },
+    { serviceRotation: [...HOLDOUT_DEFINITION_V1.serviceRotation].reverse() }, { flavour: 'bangers' },
+    { options: { ...HOLDOUT_DEFINITION_V1.options, maxShots: 12 } }, { options: { ...HOLDOUT_DEFINITION_V1.options, winner: 'green' } },
+    { status: 'COMPLETE' }, { purpose: 'Extend the count after seeing results' }, { unrecognized: true },
+  ]) assert.throws(() => validateHoldoutDefinitionV1({ ...copy(HOLDOUT_DEFINITION_V1), ...patch }), /immutable reservation/);
+  assert.throws(() => createCohortSchedule({ cohort: 'holdout', seeds: [50000] }), /Frozen/);
+  assert.throws(() => createCohortSchedule({ cohort: 'holdout', styles: ['pro'] }), /every reserved style/);
+  assert.throws(() => createCohortSchedule({ cohort: 'holdout', flavour: 'bangers' }), /balanced flavour/);
+  const jobs = createCohortSchedule({ cohort: 'holdout' });
+  assert.throws(() => validateHoldoutScheduleV1(jobs.slice(1)), /exact complete/);
+  assert.throws(() => validateHoldoutScheduleV1([...jobs, jobs[0]]), /exact complete/);
+  for (const mutate of [
+    row => { row.seed = 51200; row.input.seed = 51200; },
+    row => { row.input.service.receiver = 'player4'; },
+    row => { row.input.options.maxShots = 12; },
+    row => { row.input.options.lengthFeel = 'short'; },
+  ]) {
+    const changed = [...jobs], replacement = copy(jobs[0]); mutate(replacement); changed[0] = replacement;
+    assert.throws(() => validateHoldoutScheduleV1(changed), /exact complete/);
+  }
+});
+
+test('cohort evidence distinguishes reservation purpose from examined qualification without asserting blindness', () => {
+  const holdout = describeCohortEvidenceV2(createCohortSchedule({ cohort: 'holdout' }));
+  assert.equal(holdout.purpose, 'reserved-frozen-candidate-holdout');
+  assert.equal(holdout.reservationDefinition.status, 'RESERVED_NOT_RUN');
+  assert.equal(holdout.examinationState, 'NOT_ESTABLISHED_BY_COLLECTOR'); assert.equal(holdout.unseenClaim, 'NOT_ASSERTED');
+  assert.match(holdout.note, /not current run history/); assert.match(holdout.note, /retuning are not unseen/);
+  const regression = describeCohortEvidenceV2(createCohortSchedule({ cohort: 'qualification' }));
+  assert.equal(regression.purpose, 'examined-qualification-regression-data');
+  assert.equal(regression.unseenClaim, 'NOT_ASSERTED'); assert.match(regression.note, /1000–1299 have been examined/);
+  const help = spawnSync(process.execPath, ['tools/rally-realism-v2.mjs', '--help'], { encoding: 'utf8' });
+  assert.equal(help.status, 0); assert.match(help.stdout, /holdout/); assert.match(help.stdout, /does not establish whether results remain unseen/);
 });
 
 test('runner archives no-document results and replay does not call generation', async () => {

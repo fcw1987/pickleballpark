@@ -111,9 +111,14 @@ routes before commit. Trials may replace that bounded tail; they do not rebuild
 the finalized prefix or introduce another flight approximation.
 
 The engine enumerates actual incoming contacts and eligible players, respecting
-designated receiver and opening-bounce rules. Its corrected M2 ranker considers
-reach, lanes, partner spacing and handedness without changing legacy selection.
-Forehand preference cannot override role or better reach. Incoming geometry
+designated receiver and opening-bounce rules. Bounded continuous reach critical
+times supplement fixed interception probes; every proposed contact still needs
+actual solver, feet, collision, peak-speed and spacing acceptance. At a fixed
+contact opportunity the corrected M2 actor ranker considers reach, lanes and
+handedness. Across feasible opportunities it compares supported contact height,
+forward progress, recovery and available physical replies. Uninspected proposals
+are labelled as search bounds, never accepted audits. Forehand preference cannot
+override role or better reach, and a volley has no automatic priority. Incoming geometry
 supplies contact height. A baseline drive needs an achievable fast flight; a
 kitchen speed-up also needs the ball lower surface above the local tape.
 Grounded contacts are capped at 8.5 feet. Ordinary volley timing can identify
@@ -122,9 +127,31 @@ the legacy implicit contact plane is unchanged when that timing is absent.
 Execution perturbs supported physical inputs. An error ends the point only when
 the solved geometry supplies it. Let-go is defensive choice, not a paddle hit.
 
+The fifth-shot 66/31 drop/firm-volley row remains the marginal source reference.
+An explicit air-contact conditional row uses 58/40, with the remainder divided
+between drive and lob; bounced opportunities never acquire a volley label.
+Decision records name the conditional prior. Calibration still measures every
+fifth opportunity after a third-shot drive, with no denominator substitution.
+
+Pressure records actual incoming contact velocity, retaining launch speed as a
+separate fact. Formation load is a bounded heuristic based on represented teams,
+without a serving-team bonus. Execution quality changes supported placement,
+clearance and depth through the same solver. Feet/body targets track represented
+defenders. A poor soft execution may create a higher reply; the following contact
+height remains a physical observation. Settled neutral soft exchanges have a
+separate execution-risk context only when feet, reach margin, time, movement,
+formation and incoming-speed evidence all qualify. Attacks and scrambling retain
+the ordinary context. These are versioned tactical hypotheses requiring measured
+calibration, not claims of empirical causation.
+
 `rally-targets.js` resolves regions/launch inputs through the shared solver and
 its inverse clearance helper. Speed, apex and clearance are not independent
 constraints. Pair movement goals yield to actual time and complementary lanes.
+One request-local pending plan retains the unbounded tactical destinations until
+the real next-contact time is known. A later bounced contact can extend movement;
+an earlier contact shortens it. The arriving hitter keeps the exact chosen feet.
+Unbounded goals never enter saved source. An attackable or error-quality soft
+shot does not automatically bring the serving pair forward.
 Fresh contacts carry explicit grounded feet/reset state. Continuous sampled
 actor/foot peak speed is at most 18 ft/s and partner spacing at least 2.5 ft;
 M1 tolerance is not extra generation travel. Full shoe/equipment collision,
@@ -164,8 +191,13 @@ and insufficient conditional samples remain visible; a physical-validity PASS
 cannot imply calibration passed.
 
 Homogeneous Pro, Advanced and Intermediate Natural/either cohorts use development
-seeds 0–59 and disjoint frozen qualification seeds 1000–1299, balanced by serving
-team/court. Beginner/flavour cohorts have correctness and directional checks, not
+seeds 0–59. The preserved 900-point qualification archive at source `9493af3`
+is physically valid but failed calibration; its seeds 1000–1299 are now examined
+regression data. A new immutable holdout reserves 1200 seeds per style,
+50000–51199, balanced by serving team/court. Its first run requires a frozen,
+reviewed candidate. Do not tune with it, extend it after results, or describe
+examined results as unseen. See [measurement workflow](../tools/rally-realism-v2.md).
+Beginner/flavour cohorts have correctness and directional checks, not
 invented numerical bands. Per-game Erne/ATP rates stay `N/A` until games exist.
 Natural and conditioned costs are separate. The 12-contact performance target
 includes search, yields and final validation; warmed compiler-only probes do

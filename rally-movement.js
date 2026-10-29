@@ -168,7 +168,7 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
       const from = origins[id], near = team === 'green', waiting = opening === 'serve' && index < 2 && team === servingTeam;
       const receiverWaiting = opening === 'serve' && index === 0 && id === service.receiver;
       const receivingApproach = team !== servingTeam && index >= 1;
-      const ownApproach = team === hittingTeam && quality !== 'error' && (receivingApproach || index >= 2 && (softAdvance || driveAdvance || firmVolleyAdvance));
+      const ownApproach = team === hittingTeam && quality !== 'error' && (receivingApproach || index >= 2 && (controlled && softAdvance || driveAdvance || firmVolleyAdvance));
       const shouldAdvance = !waiting && !receiverWaiting && (ownApproach || team !== hittingTeam && receivingApproach || id !== service.receiver && index === 0 && team !== servingTeam);
       const lineY = near ? 14.25 : 29.75;
       let y = shouldAdvance ? lineY : from.y;
@@ -218,6 +218,50 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
     diagnostics: { version: MOVEMENT_VERSION, peakFeetPerSecond, provisional: true,
       arrivalNeedsPendingValidation: contactTime === 0 && distance(positions[hitter], stance) > EPS,
       goals, phaseSeconds: durations, notes: diagnostics } });
+}
+
+/** Resolve the one pending tactical plan against its actual contact/dead time.
+ * Goals stay request-local; only these achievable destinations enter source. */
+export function replanMovementV1({ plan, segment, players, durationSeconds, arrival,
+  peakFeetPerSecond = 18 } = {}) {
+  if (!Number.isFinite(durationSeconds) || durationSeconds < segment.contactTime
+    || !Number.isFinite(peakFeetPerSecond) || peakFeetPerSecond <= 0 || peakFeetPerSecond > 18) {
+    throw new TypeError('Pending movement needs actual duration and a peak speed in (0,18].');
+  }
+  const hitter = segment.shotSemantics.playerId, feet = segment.shotSemantics.contact.feet;
+  const origins = Object.fromEntries(IDS.map(id => [id, id === hitter ? footCenter(feet) : point(segment.previous.positions[id], id)]));
+  const goals = Object.fromEntries(IDS.map(id => [id, point(plan.diagnostics.goals[id], `goal.${id}`)]));
+  if (arrival && (!IDS.includes(arrival.id) || !arrival.stance)) throw new TypeError('An arrival needs a represented hitter and exact stance.');
+  const destinations = {}, duration = durationSeconds;
+  for (const team of ['green', 'orange']) {
+    const pair = IDS.filter(id => teamForPlayer(id, players) === team);
+    let progress = 1;
+    for (const id of pair) {
+      if (id === arrival?.id) continue;
+      const seconds = id === hitter ? Math.max(0, duration - segment.contactTime - .12) : duration;
+      const length = distance(origins[id], goals[id]);
+      if (length) progress = Math.min(progress, peakFeetPerSecond * seconds / (2 * length));
+    }
+    progress = clamp(progress, 0, 1);
+    for (const id of pair) destinations[id] = id === arrival?.id ? point(arrival.stance, 'arrival stance')
+      : { x: origins[id].x + (goals[id].x - origins[id].x) * progress,
+        y: origins[id].y + (goals[id].y - origins[id].y) * progress };
+  }
+  const predicted = () => ({ ...segment, endTime: segment.startTime + duration, duration, originalDuration: duration,
+    step: { ...segment.step, positions: destinations } });
+  for (const pair of [['player1', 'player2'], ['player3', 'player4']]) {
+    if (!inspectGeneratedSpacingV1(predicted(), { pairs: [pair] }).valid) {
+      for (const id of pair) if (id !== arrival?.id) destinations[id] = xy(origins[id]);
+      if (!inspectGeneratedSpacingV1(predicted(), { pairs: [pair] }).valid) {
+        return freeze({ ok: false, reason: 'The actual pending arrival crowds its partner.' });
+      }
+    }
+  }
+  const movement = inspectGeneratedMovementV1(predicted());
+  if (!movement.valid) return freeze({ ok: false, reason: 'The actual pending arrival exceeds the generated route bound.' });
+  return freeze({ ok: true, movement: command(destinations[hitter]),
+    playerMovement: Object.fromEntries(IDS.filter(id => id !== hitter).map(id => [id, command(destinations[id])])),
+    positions: destinations });
 }
 
 /** Read actual sampled grounded feet; do not install a provisional endpoint's

@@ -20,6 +20,11 @@ const BASE_WEIGHTS = {
   // The PPA fifth-shot cohort follows third-shot drives, regardless of whether
   // the fourth contact was specifically a block. Metrics retain both cohorts.
   fifthDrive: { drop: 66, 'firm-volley': 31, drive: 2, lob: 1 },
+  // The source percentages above describe all fifth opportunities. An actual
+  // air contact has different conditional priors because bounced contacts
+  // cannot supply a firm volley. This is a policy calibration, not a source
+  // claim or permission to create an unavailable volley.
+  fifthDriveAir: { drop: 58, 'firm-volley': 40, drive: 1, lob: 1 },
   transitionLow: { reset: 80, drive: 15, lob: 5 },
   transitionHigh: { drive: 70, reset: 30 },
   kitchen: { 'cross-court-dink': 40, 'middle-dink': 30, 'straight-dink': 15, 'backhand-dink': 10, lob: 3, 'speed-up': 2 },
@@ -30,38 +35,39 @@ const execution = rows => Object.fromEntries(EXECUTION_PHASES.map((phase, index)
   const [error, attackable, excellent, low] = rows[index];
   return [phase, { error, attackable, excellent, low }];
 }));
-const profile = (id, label, skill, overrides, rows, pressureErrorScale, signature) => ({
+const profile = (id, label, skill, overrides, rows, pressureErrorScale, settledSoftError, signature) => ({
   id, label, version: STYLE_VERSION, skill,
   weights: { ...BASE_WEIGHTS, ...overrides }, execution: execution(rows),
-  pressureErrorScale, errorWeights: { net: .45, long: .35, wide: .2 }, signature
+  // Settled soft error is a narrow opportunity prior, not a measured rate.
+  pressureErrorScale, settledSoftError, errorWeights: { net: .45, long: .35, wide: .2 }, signature
 });
 
 export const STYLE_PROFILES = freeze({
   pro: profile('pro', 'Pro', .95, {}, [
     [.006, .01, .12, .07], [.018, .02, .10, .08], [.045, .08, .13, .15],
     [.10, .12, .10, .20], [.14, .11, .12, .18], [.18, .15, .13, .05], [.12, .17, .07, .12]
-  ], .15, { erneWeight: 4, aroundPostWeight: 1 }),
+  ], .15, .07, { erneWeight: 4, aroundPostWeight: 1 }),
   advanced: profile('advanced', 'Advanced 4.0', .8, {
     third: { 'third-shot-drop': 50, 'third-shot-drive': 48, lob: 2 },
     kitchen: { 'cross-court-dink': 40, 'middle-dink': 28, 'straight-dink': 14, 'backhand-dink': 9, lob: 5, 'speed-up': 4 }
   }, [
     [.012, .03, .08, .08], [.03, .06, .08, .10], [.09, .13, .09, .15],
     [.16, .16, .08, .18], [.22, .15, .08, .16], [.24, .18, .10, .05], [.18, .20, .05, .10]
-  ], .17, { erneWeight: 3, aroundPostWeight: .7 }),
+  ], .17, .11, { erneWeight: 3, aroundPostWeight: .7 }),
   intermediate: profile('intermediate', 'Intermediate 3.0', .63, {
     third: { 'third-shot-drop': 48, 'third-shot-drive': 49, lob: 3 },
     kitchen: { 'cross-court-dink': 37, 'middle-dink': 27, 'straight-dink': 15, 'backhand-dink': 9, lob: 8, 'speed-up': 4 }
   }, [
     [.025, .04, .05, .08], [.05, .08, .05, .09], [.14, .17, .06, .13],
     [.20, .19, .05, .15], [.28, .20, .05, .14], [.29, .20, .07, .04], [.22, .24, .03, .08]
-  ], .19, { erneWeight: 1, aroundPostWeight: .25 }),
+  ], .19, .14, { erneWeight: 1, aroundPostWeight: .25 }),
   beginner: profile('beginner', 'Beginner', .35, {
     third: { 'third-shot-drop': 35, 'third-shot-drive': 60, lob: 5 },
     kitchen: { 'cross-court-dink': 30, 'middle-dink': 23, 'straight-dink': 16, 'backhand-dink': 9, lob: 14, 'speed-up': 8 }
   }, [
     [.065, .06, .025, .08], [.09, .11, .025, .08], [.22, .21, .03, .10],
     [.23, .23, .025, .11], [.20, .25, .025, .11], [.32, .23, .04, .03], [.30, .28, .02, .07]
-  ], .22, { erneWeight: .5, aroundPostWeight: .1 })
+  ], .22, .18, { erneWeight: .5, aroundPostWeight: .1 })
 });
 
 export const FLAVOUR_PROFILES = freeze({
@@ -76,11 +82,12 @@ const assertNumber = (number, min, max, name) => {
 };
 export function validateStyleProfile(value) {
   if (!value || typeof value !== 'object' || !STYLE_IDS.includes(value.id) || value.version !== STYLE_VERSION) throw new TypeError('A supported versioned style profile is required.');
-  if (Object.keys(value).some(key => !['id', 'label', 'version', 'skill', 'flavour', 'weights', 'execution', 'pressureErrorScale', 'errorWeights', 'signature'].includes(key))) throw new TypeError('Unsupported style profile field.');
+  if (Object.keys(value).some(key => !['id', 'label', 'version', 'skill', 'flavour', 'weights', 'execution', 'pressureErrorScale', 'settledSoftError', 'errorWeights', 'signature'].includes(key))) throw new TypeError('Unsupported style profile field.');
   if (typeof value.label !== 'string' || !value.label.length || value.label.length > 40 || /[<>\u0000-\u001f\u007f]/.test(value.label)) throw new TypeError('A bounded plain style label is required.');
   if (value.flavour !== undefined && !FLAVOUR_IDS.includes(value.flavour)) throw new TypeError('Unsupported style flavour.');
   assertNumber(value.skill, 0, 1, 'skill');
   assertNumber(value.pressureErrorScale, 0, 1, 'pressureErrorScale');
+  assertNumber(value.settledSoftError, 0, 1, 'settledSoftError');
   for (const [row, expected] of Object.entries(BASE_WEIGHTS)) {
     const weights = value.weights?.[row];
     if (!weights || Object.keys(weights).some(key => !(key in expected)) || Object.keys(expected).some(key => !(key in weights))) throw new TypeError(`weights.${row} must retain the policy's supported candidate identities.`);

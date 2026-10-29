@@ -34,21 +34,31 @@ function memoryStorage() {
 }
 
 // Controlled capacity seam, NOT a sample of natural rally lengths/calibration.
-// The real policy/planner runs unchanged. Its two execution draws per choice
-// are fixed at .999 (no sampled error); intent, target and narration retain
-// their original seed-0 streams. No failing route is retried under another seed.
+// The real policy/planner runs unchanged. Intent .65 selects deep-middle
+// serve/return, a third drop and transition resets, then middle dinks. Target
+// .5 keeps nominal targets centered and execution .999 gives neutral quality.
+// Consume every underlying seed-0 draw for stream accounting; narration uses
+// its original value. No failing route is retried under another seed.
 // Exercise final acceptance independently below: this lower-level producer
 // deliberately bypasses the driver's ordinary random-stream construction.
+// Saved generation metadata retains origin only: this controlled fixture does
+// NOT claim production recipe reproduction from its seed or natural calibration.
+const CAPACITY_CONTROLLER = Object.freeze({ intent: .65, target: .5, execution: .999 });
 let capacityPromise;
 function controlledCapacityFixture() {
   capacityPromise ??= (async () => {
     const input = normalizeRallyInputV1({ seed: 0, options: { maxShots: 99 } });
     const before = JSON.stringify(input), seeded = createRallyRandomV1(0);
     let executionDraws = 0, work = 0;
+    const controlledDraw = stream => () => {
+      seeded[stream]();
+      if (stream === 'execution') executionDraws++;
+      return CAPACITY_CONTROLLER[stream];
+    };
     const result = await runNaturalAttemptV1(input, {
       attemptIndex: 0,
       attemptSeed: 0,
-      random: { ...seeded, execution: () => { executionDraws++; return .999; } },
+      random: { ...seeded, intent: controlledDraw('intent'), target: controlledDraw('target'), execution: controlledDraw('execution') },
       checkpoint: async event => { work += event.workDelta ?? 0; }
     });
     assert.equal(JSON.stringify(input), before, 'the attempt must preserve its normalized input');
@@ -68,7 +78,10 @@ test('controlled capacity seam constructs 99 physical contacts and censors witho
   assert.equal(result.outcome, null);
   assert.equal(result.outcomeClassification, null);
   assert.equal(executionDraws, MAX_SHOTS * 2);
-  assert.equal(seededDraws.execution, 0, 'only the explicit test seam replaces execution draws');
+  assert.equal(seededDraws.execution, executionDraws, 'the explicit controller consumes every underlying execution draw');
+  assert.equal(seededDraws.intent, MAX_SHOTS);
+  assert.equal(seededDraws.target, MAX_SHOTS * 4);
+  assert.equal(seededDraws.narration, MAX_SHOTS);
   for (const stream of ['intent', 'target', 'narration']) assert.ok(seededDraws[stream] > 0);
   assert.ok(work > MAX_SHOTS && work <= 65536, `bounded attempt work: ${work}`);
   assert.deepEqual(result.diagnostics.failures, []);
@@ -82,6 +95,12 @@ test('controlled capacity seam constructs 99 physical contacts and censors witho
     assert.equal(decision.shotId, shot.id);
     assert.deepEqual(decision.draws.execution, { quality: .999, error: .999 });
     assert.notEqual(decision.execution.quality, 'error');
+    assert.equal(decision.execution.quality, 'neutral');
+    assert.equal(decision.draws.intent, CAPACITY_CONTROLLER.intent);
+    assert.deepEqual(decision.draws.target, { lateral: .5, depth: .5 });
+    assert.deepEqual(decision.draws.perturbation, { lateral: .5, depth: .5 });
+    const opening = ['serve-deep-middle', 'return-deep-middle', 'third-shot-drop', 'reset', 'reset'];
+    assert.equal(decision.chosen.id, opening[index] ?? 'middle-dink', 'the capacity controller must keep its explicit soft-middle semantics');
     assert.deepEqual(shot.generation, { seed: 0, generatorVersion: 'rally-engine-v1' });
   }
 });
@@ -138,7 +157,7 @@ test('physical 99-contact source fits unchanged JSON/import/export/save bounds a
   assert.equal(JSON.stringify(restored.importJSON(restored.exportJSON(restored.open(document.id)))), source);
   assert.equal(JSON.parse(storage.getItem(STORAGE_KEY)).drafts[0].shots.length, MAX_SHOTS);
   assert.equal(JSON.stringify(document), source);
-  context.diagnostic(`Controlled seed-0 capacity fixture only: ${bounds.values} values; ${byteLength(source)} compact bytes; ${byteLength(exported)} exported bytes.`);
+  context.diagnostic(`Controlled neutral soft-middle capacity seam; seed-0 stream accounting only, not natural calibration or production recipe reproduction: ${bounds.values} values; ${byteLength(source)} compact bytes; ${byteLength(exported)} exported bytes.`);
 });
 
 test('authored edits and Undo retain the physical 99-contact point and its origin across save/import', async () => {

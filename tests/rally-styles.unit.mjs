@@ -19,6 +19,7 @@ test('all sixteen profiles have bounded weights and coherent execution probabili
     const value = resolveStyle(style, flavour);
     assert.equal(validateStyleProfile(value), value);
     assert.equal(value.id, style); assert.equal(value.flavour, flavour);
+    assert.equal(value.settledSoftError, { pro: .07, advanced: .11, intermediate: .14, beginner: .18 }[style]);
     for (const row of Object.values(value.weights)) {
       assert.ok(Object.values(row).every(weight => Number.isFinite(weight) && weight >= 0));
       assert.ok(Object.values(row).some(weight => weight > 0));
@@ -56,6 +57,8 @@ test('malformed profiles cannot smuggle nonfinite values, probabilities or unsup
   const mutations = [
     value => { value.version = 'future'; }, value => { value.extra = true; },
     value => { value.skill = NaN; }, value => { value.pressureErrorScale = 1.1; },
+    value => { delete value.settledSoftError; },
+    ...[-.01, 1.01, NaN, Infinity, null, '0.07', true, {}].map(invalid => value => { value.settledSoftError = invalid; }),
     value => { value.weights.third.lob = Infinity; }, value => { value.weights.third.lob = -1; },
     value => { value.weights.third.unknown = 1; }, value => { delete value.weights.third.lob; },
     value => { value.weights.extra = { drive: 1 }; },
@@ -68,5 +71,18 @@ test('malformed profiles cannot smuggle nonfinite values, probabilities or unsup
   for (const mutate of mutations) {
     const value = clone(source); mutate(value);
     assert.throws(() => validateStyleProfile(value), TypeError);
+  }
+});
+
+test('settled soft error is an explicit immutable bounded policy prior independent of flavour and ordinary phase risks', () => {
+  for (const style of STYLE_IDS) for (const flavour of FLAVOUR_IDS) {
+    const value = resolveStyle(style, flavour);
+    assert.equal(value.settledSoftError, STYLE_PROFILES[style].settledSoftError);
+    assert.deepEqual(value.execution, STYLE_PROFILES[style].execution);
+    assert.throws(() => { value.settledSoftError = 0; }, TypeError);
+  }
+  for (const edge of [0, 1]) {
+    const source = clone(resolveStyle('pro')); source.settledSoftError = edge;
+    assert.equal(validateStyleProfile(source), source);
   }
 });

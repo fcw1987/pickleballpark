@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { POLICY_VERSION, CONTACT_RANKING_VERSION, contactHeightBandV1, rankContactCandidatesV2, rankContactPairsV1, createSituationV1, listIntentCandidatesV1, chooseIntentV1 } from '../rally-policy.js';
+import { POLICY_VERSION, CONTACT_RANKING_VERSION, FIFTH_CONTACT_PRIORS_VERSION, contactHeightBandV1, rankContactCandidatesV2, rankContactPairsV1, createSituationV1, listIntentCandidatesV1, chooseIntentV1 } from '../rally-policy.js';
 import { resolveStyle } from '../rally-styles.js';
 import { eligibleHitters } from '../rally-state.js';
 import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
@@ -181,8 +181,56 @@ test('fifth-shot priors following a third drive are not restricted to a fourth-s
     priorDecisions: [{ intent: 'serve' }, { intent: 'deep-return' }, { intent: 'third-shot-drive', family: 'drive' }, { intent: 'counter' }],
     incoming: { family: 'volley', intent: 'counter' }, contact: { x: 6, y: 14, heightFeet: 3.5, kind: 'volley' }, affordances: { attack: true } }), { profile: resolveStyle('pro') });
   assert.equal(result.context, 'fifthDrive');
-  assert.equal(result.candidates.find(candidate => candidate.id === 'drop').weight, 66);
-  assert.equal(result.candidates.find(candidate => candidate.id === 'firm-volley').weight, 31);
+  assert.equal(result.candidates.find(candidate => candidate.id === 'drop').weight, 58);
+  assert.equal(result.candidates.find(candidate => candidate.id === 'firm-volley').weight, 40);
+  assert.deepEqual(result.conditioning, { version: FIFTH_CONTACT_PRIORS_VERSION, fact: 'contactKind', value: 'volley',
+    profileRow: 'fifthDriveAir', basis: 'model-contact-conditional-prior', referenceRow: 'fifthDrive' });
+  assert.ok(Object.isFrozen(result.conditioning));
+  assert.deepEqual(resolveStyle('pro').weights.fifthDrive, { drop: 66, 'firm-volley': 31, drive: 2, lob: 1 }, 'the marginal reference stays separate');
+});
+
+test('fifth-shot contact conditioning uses actual incoming contacts before feasibility filtering and choice', () => {
+  for (const style of ['pro', 'advanced', 'intermediate']) for (const incoming of [
+    { family: 'volley', intent: 'counter' }, { family: 'volley', intent: 'block' }, { family: 'reset', intent: 'reset' },
+  ]) {
+    const settings = { contactIndex: 4, positions: { ...positions, player1: { x: 6, y: 4 }, player2: { x: 14, y: 4 } },
+      priorDecisions: [{}, {}, { chosen: { family: 'drive', intent: 'third-shot-drive' } }], incoming,
+      contact: { x: 6, y: 4, heightFeet: .9, kind: 'volley' }, affordances: { drive: true, volley: true } };
+    const profile = resolveStyle(style), before = JSON.stringify(profile);
+    const air = listIntentCandidatesV1(situation(settings), { profile });
+    assert.equal(air.candidates.find(candidate => candidate.id === 'firm-volley').probability, .4);
+    assert.ok(air.candidates.every(candidate => candidate.reasons.includes(`conditioning:${FIFTH_CONTACT_PRIORS_VERSION}`)
+      && candidate.reasons.includes('profile-row:fifthDriveAir') && candidate.reasons.includes('contact-kind:volley')));
+    const bounced = listIntentCandidatesV1(situation({ ...settings,
+      contact: { ...settings.contact, kind: 'groundstroke' }, affordances: { drive: true, bounced: true } }), { profile });
+    assert.equal(bounced.conditioning.profileRow, 'fifthDrive');
+    assert.equal(bounced.candidates.some(candidate => candidate.id === 'firm-volley'), false);
+    assert.equal(bounced.candidates.find(candidate => candidate.id === 'drop').probability, 66 / 69);
+    const excluded = bounced.excluded.find(candidate => candidate.id === 'firm-volley');
+    assert.equal(excluded.reason, 'no-volley-contact'); assert.equal(excluded.weight, 31);
+    assert.ok(excluded.reasons.includes('contact-kind:groundstroke'));
+    const filtered = listIntentCandidatesV1(situation(settings), { profile, availableCandidateIds: ['drop', 'drive', 'lob'] });
+    assert.equal(filtered.candidates.some(candidate => candidate.id === 'firm-volley'), false);
+    assert.equal(filtered.excluded.find(candidate => candidate.id === 'firm-volley').reason, 'candidate-flight-unavailable');
+    assert.equal(filtered.candidates.find(candidate => candidate.id === 'drop').probability, 58 / 60);
+    assert.equal(chooseIntentV1(filtered.candidates, .7).id, 'drop');
+    assert.equal(JSON.stringify(profile), before);
+  }
+});
+
+test('fifth air priors preserve flavour weights and do not condition later or third-drop contacts', () => {
+  const source = situation({ contactIndex: 4, positions: { ...positions, player1: { x: 6, y: 4 }, player2: { x: 14, y: 4 } },
+    priorDecisions: [{}, {}, { family: 'drive' }],
+    contact: { x: 6, y: 4, heightFeet: .9, kind: 'volley' }, affordances: { drive: true, volley: true } });
+  const banger = listIntentCandidatesV1(source, { profile: resolveStyle('pro', 'bangers') });
+  assert.equal(banger.candidates.find(candidate => candidate.id === 'drop').weight, 58 * .75);
+  assert.equal(banger.candidates.find(candidate => candidate.id === 'firm-volley').weight, 40);
+  assert.equal(banger.candidates.find(candidate => candidate.id === 'drive').weight, 1.6);
+  for (const patch of [{ contactIndex: 5 }, { priorThirdFamily: 'drop', priorThirdIntent: 'third-shot-drop' }]) {
+    const other = listIntentCandidatesV1({ ...source, ...patch });
+    assert.equal(other.conditioning, undefined);
+    assert.ok(other.candidates.every(candidate => !candidate.reasons.some(reason => reason.startsWith('conditioning:'))));
+  }
 });
 
 test('leaving an out flight is an audited defensive action and never an extra paddle contact', () => {

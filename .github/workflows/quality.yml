@@ -292,11 +292,13 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Qualify all 900 natural rallies once with independent validation
+      # First holdout use follows frozen-candidate review. The collector does
+      # not establish blindness; examined results cannot regain unseen status.
+      - name: Evaluate all 3600 reserved holdout rallies once with independent validation
         run: >-
-          node tools/rally-realism-v2.mjs --cohort qualification
-          --output release-results/game-mode-m2/qualification.json
-          --archive release-results/game-mode-m2/qualification.jsonl
+          node tools/rally-realism-v2.mjs --cohort holdout
+          --output release-results/game-mode-m2/holdout-v1.json
+          --archive release-results/game-mode-m2/holdout-v1.jsonl
           --require-calibration --require-clean
       - name: Retain calibration report and every attempted rally
         if: always()
@@ -304,8 +306,8 @@ jobs:
         with:
           name: rally-calibration-results
           path: |
-            release-results/game-mode-m2/qualification.json
-            release-results/game-mode-m2/qualification.jsonl
+            release-results/game-mode-m2/holdout-v1.json
+            release-results/game-mode-m2/holdout-v1.jsonl
           if-no-files-found: error
           retention-days: 7
 

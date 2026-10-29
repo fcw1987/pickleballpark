@@ -39,6 +39,7 @@ const STATIC_ASSETS = [
   './rally-recipe.js',
   './rally-random.js',
   './rally-policy.js',
+  './rally-contact-selection.js',
   './rally-styles.js',
   './rally-targets.js',
   './rally-movement.js',

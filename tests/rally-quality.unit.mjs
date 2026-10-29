@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assessPressureV1, sampleExecutionV1, applyExecutionV1, classifyOutcomeV1 } from '../rally-quality.js';
-import { solveFlightV2 } from '../play-physics-v2.js';
+import { assessPressureV1, sampleExecutionV1, applyExecutionV1, classifyOutcomeV1, FORMATION_PRESSURE_VERSION, PHYSICAL_TRANSFORMATION_VERSION, RISK_CONTEXT_VERSION } from '../rally-quality.js';
+import { resolveStyle } from '../rally-styles.js';
+import { solveFlightV2, solveFlightForClearanceV2, sampleFlightVelocityV2, interceptFlightV2, localNetHeightFeet, PHYSICS_V2 } from '../play-physics-v2.js';
+import { contactFeetV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
+import { resolveFlightParametersV1 } from '../rally-targets.js';
+import { compileDocument } from '../play-compiler.js';
+import { validateRallyRules } from '../rally-rules.js';
 const profile = { execution: { kitchen: { error: .1, attackable: .1, excellent: .1, low: .1 } }, pressureErrorScale: .2, errorWeights: { net: .5, long: .3, wide: .2 } };
 const outcome = { type: 'fault', reason: 'net', shotId: 'shot-7', faultingActor: 'player1' };
 
@@ -114,4 +119,300 @@ test('self-paced serve preparation retains real facts without incoming reaction-
   assert.equal(selfPaced.reachable, reactive.reachable); assert.equal(selfPaced.selfPaced, true);
   assert.equal(selfPaced.factors.reachLoad, 0); assert.equal(selfPaced.factors.shortTime, 0);
   assert.throws(() => assessPressureV1({ ...source, selfPaced: 'true' }), /boolean/);
+});
+
+test('court control adds bounded pressure for a back or split pair against opponents up in mirrored courts', () => {
+  for (const y of [4, 40]) {
+    const source = { contact: { x: 7, y, heightFeet: 2 }, position: { x: 7, y }, availableSeconds: 1 };
+    const easy = assessPressureV1(source);
+    for (const [ownFormation, load] of [['back', .25], ['split', .12], ['up', 0]]) {
+      const actual = assessPressureV1({ ...source, ownFormation, opponentFormation: 'up' });
+      assert.equal(actual.score, easy.score + load);
+      assert.deepEqual(actual.formation, { version: FORMATION_PRESSURE_VERSION, ownFormation, opponentFormation: 'up', pressureLoad: load });
+      assert.equal(actual.factors.formationLoad, load);
+      for (const key of ['reachMarginFeet', 'distanceFeet', 'reachable', 'availableSeconds', 'movementSpeedFeetPerSecond', 'contactHeightFeet', 'incomingSpeedMph']) assert.equal(actual[key], easy[key]);
+      assert.equal(Object.isFrozen(actual.formation), true);
+    }
+    for (const opponentFormation of ['back', 'split']) assert.equal(assessPressureV1({ ...source, ownFormation: 'back', opponentFormation }).score, easy.score);
+  }
+  const overloaded = assessPressureV1({ contact: { x: 14, y: 14, heightFeet: 0 }, position: { x: 7, y: 14 }, availableSeconds: 0,
+    movementSpeedFeetPerSecond: 14, incomingFlight: { launchSpeedMph: 45 }, incomingIntent: 'speed-up', ownFormation: 'back', opponentFormation: 'up' });
+  assert.equal(overloaded.score, 1);
+});
+
+test('unavailable formation preserves existing pressure and unsupported formation fails explicitly', () => {
+  const source = { contact: { x: 7, y: 14, heightFeet: 2 }, position: { x: 7, y: 14 }, availableSeconds: 1 };
+  const baseline = assessPressureV1(source);
+  assert.deepEqual(assessPressureV1({ ...source, ownFormation: null, opponentFormation: null }), baseline);
+  assert.deepEqual(assessPressureV1({ ...source, ownFormation: undefined, opponentFormation: undefined }), baseline);
+  assert.equal('formation' in baseline, false); assert.equal('formationLoad' in baseline.factors, false);
+  for (const unknown of [{ ownFormation: 'back' }, { opponentFormation: 'up' }]) assert.equal(assessPressureV1({ ...source, ...unknown }).score, baseline.score);
+  for (const value of ['unknown', '', 0, true, {}]) {
+    assert.throws(() => assessPressureV1({ ...source, ownFormation: value }), /formations/);
+    assert.throws(() => assessPressureV1({ ...source, opponentFormation: value }), /formations/);
+  }
+});
+
+test('self-paced preparation suppresses formation pressure and formation cannot force an error or forced-error label', () => {
+  const source = { contact: { x: 7, y: 14, heightFeet: 2 }, position: { x: 7, y: 14 }, availableSeconds: 1, ownFormation: 'back', opponentFormation: 'up' };
+  const pressure = assessPressureV1(source), selfPaced = assessPressureV1({ ...source, selfPaced: true });
+  assert.equal(selfPaced.score, 0); assert.equal(selfPaced.formation.pressureLoad, 0); assert.equal(selfPaced.factors.formationLoad, 0);
+  assert.equal(selfPaced.formation.ownFormation, 'back'); assert.equal(selfPaced.formation.opponentFormation, 'up');
+  const sampled = sampleExecutionV1({ profile, situation: { phase: 'kitchen', pressure }, draws: { quality: .9 } });
+  assert.equal(sampled.quality, 'neutral'); assert.ok(Math.abs(sampled.probabilities.error - .15) < 1e-12);
+  assert.equal(classifyOutcomeV1({ outcome, pressure, execution: { quality: 'error' }, pressureDecisionId: 'previous', previousIntent: 'speed-up' }).kind, 'unforced-error');
+});
+
+test('pressure uses actual sampled velocity, retains launch evidence and explicitly identifies unavailable/fallback speed', () => {
+  const flight = solveFlightForClearanceV2({ from: { x: 5, y: 14.25, heightFeet: 2 }, target: { x: 15, y: 37 }, family: 'drive', pace: 'firm', arc: 'low' }, .7);
+  for (const time of [flight.firstLandingTime * .7, flight.firstLandingTime, flight.firstLandingTime + .16]) {
+    const velocity = sampleFlightVelocityV2(flight, time), contact = flight.sampleBoard(time);
+    const source = { contact, position: contact, availableSeconds: time, incomingFlight: flight, incomingIntent: 'drive', incomingContactVelocity: velocity };
+    const before = JSON.stringify(source), actual = assessPressureV1(source);
+    assert.equal(actual.incomingSpeedMph, velocity.speedMph); assert.equal(actual.incomingLaunchSpeedMph, flight.launchSpeedMph);
+    assert.equal(actual.incomingSpeedBasis, 'sampled-contact-velocity'); assert.deepEqual(actual.incomingContactVelocity, velocity);
+    assert.equal(actual.factors.speedLoad, Math.max(0, Math.min(1, (velocity.speedMph - 15) / 30)));
+    assert.equal(JSON.stringify(source), before); assert.equal(Object.isFrozen(actual.incomingContactVelocity), true);
+    const inconsistent = { ...velocity, xFeetPerSecond: velocity.xFeetPerSecond + 1 };
+    assert.throws(() => assessPressureV1({ ...source, incomingContactVelocity: inconsistent }), /components/);
+    const otherTime = sampleFlightVelocityV2(flight, time + .01);
+    assert.throws(() => assessPressureV1({ ...source, incomingContactVelocity: { ...otherTime, timeSeconds: time } }), /solved flight/);
+    assert.throws(() => assessPressureV1({ ...source, incomingContactVelocity: otherTime }), /actual contact/);
+  }
+  const base = { contact: { x: 7, y: 14, heightFeet: 2 }, position: { x: 7, y: 14 } };
+  const fallback = assessPressureV1({ ...base, incomingFlight: { launchSpeedMph: 35 } });
+  assert.equal(fallback.incomingSpeedMph, 35); assert.equal(fallback.incomingSpeedBasis, 'launch-speed-fallback');
+  assert.equal('incomingContactVelocity' in fallback, false);
+  assert.equal(assessPressureV1(base).incomingSpeedBasis, 'unavailable');
+  assert.equal(assessPressureV1(base).incomingLaunchSpeedMph, null);
+  const valid = sampleFlightVelocityV2(flight, .2);
+  for (const invalid of [false, [], {}, { ...valid, version: 'invented' }, { ...valid, phase: 'bounce' }, { ...valid, timeSeconds: -1 },
+    ...['timeSeconds', 'xFeetPerSecond', 'yFeetPerSecond', 'heightFeetPerSecond', 'speedMph'].map(key => ({ ...valid, [key]: NaN })), { ...valid, speedMph: -1 }]) {
+    assert.throws(() => assessPressureV1({ ...base, incomingContactVelocity: invalid }), /velocity/);
+  }
+});
+
+test('low and excellent create distinct coherent clearances and target precision in mirrored courts', () => {
+  for (const team of ['green', 'orange']) for (const family of ['dink', 'drop', 'reset', 'drive', 'volley', 'serve', 'return']) {
+    const contact = { x: 7, y: team === 'green' ? 14.25 : 29.75, heightFeet: 1.4 };
+    const target = { x: 13, y: team === 'green' ? (['dink', 'drop', 'reset'].includes(family) ? 26.5 : 38) : (['dink', 'drop', 'reset'].includes(family) ? 17.5 : 6) };
+    const nominal = solveFlightForClearanceV2({ from: contact, target, family, pace: 'soft', arc: 'medium' }, ['dink'].includes(family) ? .35 : ['drop', 'reset'].includes(family) ? .6 : 1.2);
+    const source = { contact, target, team, family, pace: 'soft', arc: 'medium', physics: { launchVerticalFeetPerSecond: nominal.metadata.launchVerticalFeetPerSecond }, draws: { lateral: .75, depth: .75 } };
+    const before = JSON.stringify(source), flights = {};
+    for (const quality of ['neutral', 'low', 'excellent']) {
+      const actual = applyExecutionV1({ ...source, execution: { quality, errorReason: null } });
+      flights[quality] = solveFlightV2({ from: contact, target: actual.target, family, quality, pace: actual.pace, arc: actual.arc, physics: actual.physics });
+      assert.equal(flights[quality].obstruction, null); assert.equal(actual.physicalTransformation.version, PHYSICAL_TRANSFORMATION_VERSION);
+      assert.equal(actual.physicalTransformation.sourceContact.heightFeet, contact.heightFeet);
+      assert.equal('outcome' in actual, false); assert.equal('heightFeet' in actual, false);
+      if (quality !== 'neutral') {
+        assert.equal(actual.physicalTransformation.kind, 'controlled-clearance');
+        assert.ok(actual.physicalTransformation.solveAttempts.length <= 3);
+        assert.ok(Math.abs(flights[quality].metadata.netClearanceInches / 12 - actual.physicalTransformation.solvedClearanceFeet) < 1e-9);
+        assert.ok(Math.abs(actual.target.x - target.x) < .2);
+      }
+    }
+    assert.notEqual(flights.low.metadata.netClearanceInches, flights.excellent.metadata.netClearanceInches);
+    assert.ok(flights.low.metadata.netClearanceInches < flights.neutral.metadata.netClearanceInches);
+    assert.equal(JSON.stringify(source), before);
+  }
+});
+
+const hold = () => ({ intent: 'hold', pinned: false });
+const mirrorIds = { player1: 'player3', player2: 'player4', player3: 'player1', player4: 'player2', green: 'orange', orange: 'green' };
+const mirrorCourt = value => Array.isArray(value) ? value.map(mirrorCourt) : value && typeof value === 'object'
+  ? Object.fromEntries(Object.entries(value).map(([key, child]) => [mirrorIds[key] ?? key,
+    key === 'x' && Number.isFinite(child) ? 20 - child : key === 'y' && Number.isFinite(child) ? 44 - child : mirrorCourt(child)]))
+  : typeof value === 'string' ? mirrorIds[value] ?? value : value;
+
+function popupFixture(family, mirrored = false) {
+  const players = Object.fromEntries(['player1', 'player2', 'player3', 'player4'].map((id, i) => [id, { team: i < 2 ? 'green' : 'orange', handedness: 'right' }]));
+  const positions = { player1: { x: 5, y: 14.25 }, player2: { x: 15, y: 14.25 }, player3: { x: 4.2, y: 29.75 }, player4: { x: 15, y: 29.75 }, ball: { x: 5, y: 28.5 } };
+  const first = solveFlightForClearanceV2({ from: { ...positions.ball, heightFeet: 2.2 }, target: { x: 15, y: 17 }, family: 'dink', pace: 'soft', arc: 'medium' }, .35);
+  const incoming = interceptFlightV2(first, { kind: 'groundstroke', stance: positions.player2, afterBounceSeconds: .16 });
+  const feet = contactFeetV1({ contact: incoming.point, target: { x: 5, y: 26.5 }, team: 'green', position: positions.player2, kind: 'groundstroke', contactStyle: 'backhand' });
+  const source = { contact: incoming.point, target: { x: 5, y: 26.5 }, team: 'green', family, pace: 'soft', arc: 'medium', draws: { lateral: .5, depth: .5 } };
+  const doc = { schemaVersion: 1, modelVersion: 2, physicsVersion: 'play-physics-v2', id: 'quality-popup', title: 'Quality popup fixture', players, initialLayout: positions,
+    assistance: { autoShading: false, showGuides: false, team: 'green' }, opening: 'midrally', ending: 'stop', intentionalFault: false, annotations: [],
+    shots: [{ id: 'incoming', family: 'dink', hitter: 'player3', receiver: 'auto', contactStyle: 'forehand', target: { x: 15, y: 17 }, arc: 'medium', pace: 'soft', quality: 'neutral',
+      physics: { launchVerticalFeetPerSecond: first.metadata.launchVerticalFeetPerSecond }, movement: hold(), playerMovement: { player1: hold(), player2: { intent: 'manual', target: feet.stance, pinned: false }, player4: hold() },
+      contactEvidence: { feet: [{ x: positions.player3.x - .42, y: 29.75 }, { x: positions.player3.x + .42, y: 29.75 }], feetEstablishedOutsideNVZ: true } },
+    { id: 'soft', family, hitter: 'player2', receiver: 'auto', contactStyle: 'backhand', target: source.target, arc: 'medium', pace: 'soft', quality: 'attackable', contactMode: 'bounced', contactTiming: { afterBounceSeconds: .16 },
+      movement: hold(), playerMovement: { player1: hold(), player3: hold(), player4: hold() }, contactEvidence: { feet: feet.feet, feetEstablishedOutsideNVZ: feet.feetEstablishedOutsideNVZ } }] };
+  return mirrored ? { doc: mirrorCourt(doc), source: mirrorCourt(source) } : { doc, source };
+}
+
+test('soft attackable transformations yield incoming-derived legal line volleys with actual route and spacing proof in both courts', () => {
+  for (const family of ['dink', 'drop', 'reset']) for (const mirrored of [false, true]) {
+    const { doc, source } = popupFixture(family, mirrored), before = JSON.stringify({ doc, source });
+    const applied = applyExecutionV1({ ...source, execution: { quality: 'attackable', errorReason: null } });
+    const flight = solveFlightV2({ from: source.contact, target: applied.target, family, quality: applied.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics });
+    assert.equal(applied.physicalTransformation.kind, 'soft-popup'); assert.equal(flight.obstruction, null);
+    assert.ok(Math.abs(flight.metadata.netClearanceInches / 12 - (family === 'drop' ? 1.6 : 1.2)) < 1e-9);
+    const depth = mirrored ? 17.2 : 26.8, t = (depth - source.contact.y) / flight.stages[0].vz;
+    const incoming = interceptFlightV2(flight, { kind: 'volley', stance: { x: 10, y: mirrored ? 14.25 : 29.75 }, beforeBounceSeconds: flight.firstLandingTime - t });
+    assert.ok(incoming.point.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(incoming.point.x));
+    const opposite = mirrored ? 'green' : 'orange', replyTarget = { x: 10, y: mirrored ? 41 : 3 }, contacts = [];
+    for (const id of Object.keys(doc.players).filter(id => doc.players[id].team === opposite)) {
+      const origin = doc.initialLayout[id], side = (incoming.point.x - origin.x) * (opposite === 'green' ? -1 : 1) >= 0 ? 'forehand' : 'backhand';
+      const feet = contactFeetV1({ contact: incoming.point, target: replyTarget, team: opposite, handedness: 'right', contactStyle: side, kind: 'volley', position: origin, availableSeconds: t });
+      if (!feet.reachable || !feet.legalVolleyFeet || feet.arrivalPeakFeetPerSecond > 17.95) continue;
+      const copy = structuredClone(doc), soft = copy.shots[1]; soft.target = applied.target; soft.physics = applied.physics;
+      soft.playerMovement[id] = { intent: 'manual', target: { x: feet.stance.x, y: incoming.point.y }, pinned: false };
+      const reply = resolveFlightParametersV1({ candidate: { family: 'drive', intent: 'drive', pace: 'firm', arc: 'low' }, contact: incoming.point, target: replyTarget, team: opposite });
+      copy.shots.push({ id: 'reply', family: 'drive', intent: 'drive', hitter: id, receiver: 'auto', contactStyle: side, target: replyTarget, pace: 'firm', arc: 'low', quality: 'neutral', physics: reply.physics,
+        contactMode: 'volley', contactTiming: { beforeBounceSeconds: flight.firstLandingTime - t }, contactEvidence: { feet: feet.feet, feetEstablishedOutsideNVZ: true }, movement: hold(),
+        playerMovement: Object.fromEntries(Object.keys(copy.players).filter(actor => actor !== id).map(actor => [actor, hold()])) });
+      const compiled = compileDocument(copy), rules = validateRallyRules(compiled.play, compiled.timeline);
+      const movement = inspectGeneratedMovementV1(compiled.timeline), spacing = inspectGeneratedSpacingV1(compiled.timeline);
+      if (compiled.findings.some(finding => finding.severity === 'error') || !rules.valid || !movement.valid || !spacing.valid) continue;
+      assert.equal(compiled.validShotCount, 3);
+      for (const axis of ['x', 'y', 'heightFeet']) {
+        assert.ok(Math.abs(compiled.timeline.segments[1].shotSemantics.contact.point[axis] - source.contact[axis]) < 1e-9);
+        assert.ok(Math.abs(compiled.timeline.segments[2].shotSemantics.contact.point[axis] - incoming.point[axis]) < 1e-9);
+      }
+      assert.equal(reply.attacking, true); assert.ok(movement.maxPeakFeetPerSecond <= 18 + 1e-6); assert.ok(spacing.minimumSeparationFeet >= 2.5 - 1e-6);
+      assert.equal('physicalTransformation' in soft, false); contacts.push(id);
+    }
+    assert.ok(contacts.length > 0, `${family}/${mirrored}: no independently valid attacking opportunity`);
+    assert.equal(JSON.stringify({ doc, source }), before);
+    assert.equal(Object.isFrozen(applied.physicalTransformation), true);
+  }
+});
+
+test('physical quality transformations preserve explicit lob/overhead physics and reject impossible soft geometry honestly', () => {
+  for (const family of ['lob', 'overhead']) for (const quality of ['attackable', 'low', 'excellent', 'neutral']) {
+    const physics = family === 'lob' ? { apexFeet: 18 } : { launchVerticalFeetPerSecond: -12 };
+    const result = applyExecutionV1({ execution: { quality, errorReason: null }, family, contact: { x: 7, y: 14, heightFeet: 7.5 }, target: { x: 13, y: 38 }, team: 'green', physics, draws: { lateral: .5, depth: .5 } });
+    assert.deepEqual(result.physics, physics); assert.equal(result.physicalTransformation.kind, 'explicit-flight-preserved');
+  }
+  for (const team of ['green', 'orange']) for (const quality of ['attackable', 'low', 'excellent']) {
+    const source = { execution: { quality, errorReason: null }, family: 'dink', contact: { x: 7, y: team === 'green' ? 21.5 : 22.5, heightFeet: 30 }, target: { x: 13, y: team === 'green' ? 26.5 : 17.5 }, team, draws: { lateral: .5, depth: .5 } };
+    const before = JSON.stringify(source);
+    assert.throws(() => applyExecutionV1(source), /three shared-solver trials/);
+    assert.equal(JSON.stringify(source), before);
+  }
+});
+
+function settledSoftSituation() {
+  const flight = solveFlightForClearanceV2({ from: { x: 7, y: 29.75, heightFeet: 2.2 }, target: { x: 7, y: 17.5 }, family: 'dink', pace: 'soft', arc: 'medium' }, .35);
+  const time = flight.firstLandingTime + .16, contact = flight.sampleBoard(time);
+  const pressure = assessPressureV1({ contact, position: { x: 7, y: 14.25 }, availableSeconds: time,
+    incomingFlight: flight, incomingIntent: 'cross-court-dink', incomingContactVelocity: sampleFlightVelocityV2(flight, time) });
+  return { phase: 'kitchen', allFourUp: true, attackable: false, incomingFamily: 'dink', incomingPace: 'soft', contact,
+    feet: [{ x: 6.58, y: 14.25 }, { x: 7.42, y: 14.25 }], hitterFootState: { grounded: true, outsideNVZ: true, establishedOutsideNVZ: true }, pressure };
+}
+const softChoice = { family: 'dink', pace: 'soft', intent: 'cross-court-dink' };
+const sampleRisk = (situation, choice = softChoice, profile = resolveStyle('pro')) => sampleExecutionV1({ profile, situation, choice, draws: { quality: .9, error: .5 } });
+
+test('only proven settled soft opportunities substitute the explicit style prior before ordinary pressure addition', () => {
+  for (const style of ['pro', 'advanced', 'intermediate', 'beginner']) {
+    const value = resolveStyle(style), situation = settledSoftSituation(); situation.pressure = { ...situation.pressure, score: .1 };
+    const before = JSON.stringify({ value, situation, softChoice });
+    const ordinary = sampleRisk(situation, null, value), settled = sampleRisk(situation, softChoice, value);
+    assert.equal(settled.riskContext.version, RISK_CONTEXT_VERSION); assert.equal(settled.riskContext.kind, 'settled-soft');
+    assert.ok(Object.values(settled.riskContext.conditions).every(Boolean));
+    assert.equal(settled.riskContext.phaseBaseErrorProbability, value.execution.kitchen.error);
+    assert.equal(settled.riskContext.baseErrorProbability, value.settledSoftError);
+    assert.equal(settled.riskContext.pressureErrorAddition, .1 * value.pressureErrorScale);
+    assert.ok(Math.abs(settled.probabilities.error - (value.settledSoftError + .1 * value.pressureErrorScale)) < 1e-12);
+    assert.ok(Math.abs(ordinary.probabilities.error - (value.execution.kitchen.error + .1 * value.pressureErrorScale)) < 1e-12);
+    for (const result of [ordinary, settled]) {
+      assert.ok(Math.abs(Object.values(result.probabilities).reduce((a, b) => a + b, 0) - 1) < 1e-12);
+      assert.ok(Object.values(result.probabilities).every(p => p >= 0 && p <= 1));
+    }
+    for (const quality of ['attackable', 'excellent', 'low']) assert.equal(settled.probabilities[quality], ordinary.probabilities[quality]);
+    assert.equal(JSON.stringify({ value, situation, softChoice }), before);
+    assert.equal(Object.isFrozen(situation), false); assert.equal(Object.isFrozen(softChoice), false);
+    assert.equal(Object.isFrozen(settled.riskContext.choice), true);
+  }
+  for (const [family, intent] of [['dink', 'middle-dink'], ['reset', 'reset'], ['drop', 'drop']]) {
+    assert.equal(sampleRisk({ ...settledSoftSituation(), incomingFamily: family }, { family, pace: 'soft', intent }).riskContext.kind, 'settled-soft');
+  }
+});
+
+test('pop-ups, attacks, fast incoming soft labels, moving contacts and unsafe feet retain ordinary risk', () => {
+  const original = settledSoftSituation();
+  const mutations = [
+    s => { s.attackable = true; }, s => { s.allFourUp = false; }, s => { s.incomingFamily = 'drive'; }, s => { s.incomingPace = 'firm'; },
+    s => { s.hitterFootState.grounded = false; }, s => { s.hitterFootState.outsideNVZ = false; }, s => { s.hitterFootState.establishedOutsideNVZ = false; },
+    s => { s.feet[0].y = 15; }, s => { s.feet[0].x = NaN; },
+    s => { s.pressure.score = .15; }, s => { s.pressure.availableSeconds = .499; }, s => { s.pressure.reachMarginFeet = 1.99; }, s => { s.pressure.movementSpeedFeetPerSecond = 3.001; },
+    s => { s.pressure.incomingSpeedMph = 22; }, s => { s.pressure.incomingSpeedBasis = 'launch-speed-fallback'; },
+  ];
+  const fast = solveFlightForClearanceV2({ from: { x: 7, y: 14.25, heightFeet: 3.5 }, target: { x: 13, y: 43.2 }, family: 'dink', pace: 'soft', arc: 'low' }, .5);
+  const fastVelocity = sampleFlightVelocityV2(fast, fast.firstLandingTime * .7);
+  assert.ok(fastVelocity.speedMph > 22);
+  mutations.push(s => { s.pressure.incomingSpeedMph = fastVelocity.speedMph; s.pressure.incomingContactVelocity = fastVelocity; });
+  for (const mutate of mutations) {
+    const changed = structuredClone(original); mutate(changed);
+    const result = sampleRisk(changed), ordinary = sampleRisk(changed, null);
+    assert.equal(result.riskContext.kind, 'phase-default'); assert.deepEqual(result.probabilities, ordinary.probabilities);
+  }
+  for (const phase of ['serve', 'return', 'third', 'third-shot', 'transition', 'hands', 'hands-battle', 'scramble']) {
+    const changed = { ...original, phase };
+    assert.deepEqual(sampleRisk(changed).probabilities, sampleRisk(changed, null).probabilities, phase);
+    assert.equal(sampleRisk(changed).riskContext.kind, 'phase-default');
+  }
+  for (const choice of [null, {}, { ...softChoice, family: 'drive', intent: 'drive' }, { ...softChoice, intent: 'speed-up' }, { ...softChoice, pace: 'firm' },
+    { ...softChoice, family: 'volley', intent: 'counter' }, { ...softChoice, family: 'overhead', intent: 'overhead' }, { ...softChoice, intent: 'unknown' }]) {
+    assert.equal(sampleRisk(original, choice).riskContext.kind, 'phase-default');
+  }
+});
+
+test('missing settled facts and absent policy priors never become easy-opportunity defaults', () => {
+  const original = settledSoftSituation();
+  for (const key of ['phase', 'allFourUp', 'attackable', 'incomingFamily', 'incomingPace', 'feet', 'hitterFootState', 'pressure']) {
+    const changed = structuredClone(original); delete changed[key];
+    assert.equal(sampleRisk(changed).riskContext.kind, 'phase-default', key);
+  }
+  for (const key of ['score', 'availableSeconds', 'reachMarginFeet', 'movementSpeedFeetPerSecond', 'incomingSpeedMph', 'incomingSpeedBasis']) {
+    for (const replacement of [undefined, null, NaN]) {
+      const changed = structuredClone(original); changed.pressure[key] = replacement;
+      assert.equal(sampleRisk(changed).riskContext.kind, 'phase-default', key);
+    }
+  }
+  for (const key of ['grounded', 'outsideNVZ', 'establishedOutsideNVZ']) {
+    const changed = structuredClone(original); delete changed.hitterFootState[key];
+    assert.equal(sampleRisk(changed).riskContext.kind, 'phase-default', key);
+  }
+  for (const key of ['family', 'pace', 'intent']) {
+    const choice = { ...softChoice }; delete choice[key];
+    assert.equal(sampleRisk(original, choice).riskContext.kind, 'phase-default', key);
+  }
+  assert.equal(sampleRisk(original, softChoice, profile).riskContext.kind, 'phase-default');
+  for (const invalid of [NaN, Infinity, -.1, 1.1, null, '0.07', true]) assert.throws(() => sampleRisk(original, softChoice, { ...profile, settledSoftError: invalid }), /Settled soft error/);
+});
+
+test('an actual solved pop-up opportunity retains ordinary risk even when every other settled fact holds', () => {
+  const { source } = popupFixture('dink');
+  const applied = applyExecutionV1({ ...source, execution: { quality: 'attackable', errorReason: null } });
+  const flight = solveFlightV2({ from: source.contact, target: applied.target, family: 'dink', quality: applied.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics });
+  const time = (26.8 - source.contact.y) / flight.stages[0].vz;
+  const incoming = interceptFlightV2(flight, { kind: 'volley', stance: { x: 10, y: 29.75 }, beforeBounceSeconds: flight.firstLandingTime - time });
+  const reply = resolveFlightParametersV1({ candidate: { family: 'drive', intent: 'drive', pace: 'firm', arc: 'low' }, contact: incoming.point, target: { x: 10, y: 3 }, team: 'orange' });
+  const stance = { x: incoming.point.x + .5, y: 29.75 };
+  const feet = contactFeetV1({ contact: incoming.point, target: { x: 10, y: 3 }, team: 'orange', position: stance, kind: 'volley', contactStyle: 'backhand' });
+  assert.equal(feet.legalVolleyFeet, true); assert.equal(feet.reachable, true);
+  const situation = { ...settledSoftSituation(), contact: incoming.point, feet: feet.feet,
+    attackable: reply.attacking && incoming.point.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(incoming.point.x),
+    pressure: assessPressureV1({ contact: incoming.point, position: feet.stance, availableSeconds: time, incomingFlight: flight,
+      incomingIntent: 'cross-court-dink', incomingContactVelocity: sampleFlightVelocityV2(flight, time) }) };
+  assert.equal(situation.attackable, true);
+  const execution = sampleRisk(situation);
+  assert.equal(execution.riskContext.kind, 'phase-default'); assert.equal(execution.riskContext.conditions.notAttackable, false);
+  for (const [key, value] of Object.entries(execution.riskContext.conditions)) if (key !== 'notAttackable') assert.equal(value, true, key);
+  assert.deepEqual(execution.probabilities, sampleRisk(situation, null).probabilities);
+});
+
+test('settled opportunity thresholds include their documented boundaries and do not depend on role, seed or rally length', () => {
+  const situation = settledSoftSituation();
+  situation.pressure = { ...situation.pressure, score: .149999, availableSeconds: .5, reachMarginFeet: 2, movementSpeedFeetPerSecond: 3, incomingSpeedMph: 21.999999 };
+  const expected = sampleRisk(situation);
+  assert.equal(expected.riskContext.kind, 'settled-soft');
+  for (const team of ['green', 'orange']) for (const servingTeam of ['green', 'orange']) for (const contactIndex of [5, 28, 98]) {
+    const changed = { ...situation, hittingTeam: team, servingTeam, contactIndex, seed: contactIndex * 17, requestedWinner: team };
+    assert.deepEqual(sampleRisk(changed).probabilities, expected.probabilities);
+    assert.deepEqual(sampleRisk(changed).riskContext, expected.riskContext);
+  }
 });

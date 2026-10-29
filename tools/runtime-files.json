@@ -109,6 +109,7 @@
   "player-coverage.js",
   "player-labels.js",
   "rally-coach.js",
+  "rally-contact-selection.js",
   "rally-coverage-provider.js",
   "rally-engine-client.js",
   "rally-engine-driver.js",

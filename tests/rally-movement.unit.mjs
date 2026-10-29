@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { contactFeetV1, boundMovementV1, planMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1 } from '../rally-movement.js';
+import { contactFeetV1, boundMovementV1, planMovementV1, replanMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
 import { sampleActorBoardPositionV2 } from '../play-actors-v2.js';
 
 const players = {
@@ -15,6 +15,48 @@ function segment({ from = positions, to = positions, hitter = 'player1', feet = 
     previous: { positions: structuredClone(from) }, step: { id, positions: structuredClone(to) },
     shotSemantics: { playerId: hitter, contact: { feet } }, model2Momentum: momentum };
 }
+
+test('a later real contact extends all unpinned tactical routes from retained goals and pins the exact arriving hitter', () => {
+  const from = structuredClone(positions); from.player4.y = 41;
+  const feet = [{ x: 4.58, y: 3 }, { x: 5.42, y: 3 }];
+  const plan = planMovementV1({ positions: from, players, hitter: 'player1', contact: from.player1, target: { x: 10, y: 35 },
+    contactFeet: feet, durationSeconds: .4, index: 2, service: { server: 'player1', receiver: 'player3' },
+    family: 'drive', intent: 'third-shot-drive', pace: 'firm' });
+  const pending = segment({ from, to: plan.positions, feet, duration: .4 });
+  const before = JSON.stringify({ plan, pending });
+  const arrival = { id: 'player3', stance: { x: 5.2, y: 40.5 } };
+  const longer = replanMovementV1({ plan, segment: pending, players, durationSeconds: 1.5, arrival });
+  assert.equal(longer.ok, true);
+  for (const id of ['player1', 'player2', 'player4']) {
+    assert.ok(distance(from[id], longer.positions[id]) > distance(from[id], plan.positions[id]) + 1);
+    assert.ok(distance(longer.positions[id], plan.diagnostics.goals[id]) < distance(plan.positions[id], plan.diagnostics.goals[id]));
+  }
+  assert.deepEqual(longer.positions.player3, arrival.stance);
+  const actual = segment({ from, to: longer.positions, feet, duration: 1.5 });
+  assert.equal(inspectGeneratedMovementV1(actual).valid, true);
+  assert.equal(inspectGeneratedSpacingV1(actual).valid, true);
+  assert.equal(JSON.stringify({ plan, pending }), before);
+});
+
+test('an earlier real contact shrinks the retained tactical routes while impossible exact arrivals are rejected', () => {
+  const from = structuredClone(positions); from.player4.y = 41;
+  const feet = [{ x: 4.58, y: 3 }, { x: 5.42, y: 3 }];
+  const plan = planMovementV1({ positions: from, players, hitter: 'player1', contact: from.player1, target: { x: 10, y: 35 },
+    contactFeet: feet, durationSeconds: 1.5, index: 2, service: { server: 'player1', receiver: 'player3' },
+    family: 'drive', intent: 'third-shot-drive', pace: 'firm' });
+  const pending = segment({ from, to: plan.positions, feet, duration: 1.5 });
+  const shorter = replanMovementV1({ plan, segment: pending, players, durationSeconds: .25,
+    arrival: { id: 'player3', stance: { x: 5, y: 40.5 } } });
+  assert.equal(shorter.ok, true);
+  for (const id of ['player1', 'player2', 'player4']) assert.ok(distance(from[id], shorter.positions[id]) < distance(from[id], plan.positions[id]));
+  const actual = segment({ from, to: shorter.positions, feet, duration: .25 });
+  assert.equal(inspectGeneratedMovementV1(actual).valid, true);
+  assert.equal(inspectGeneratedSpacingV1(actual).valid, true);
+  assert.equal(replanMovementV1({ plan, segment: pending, players, durationSeconds: .25,
+    arrival: { id: 'player3', stance: { x: 5, y: 30 } } }).ok, false);
+  assert.equal(replanMovementV1({ plan, segment: pending, players, durationSeconds: 1,
+    arrival: { id: 'player3', stance: from.player4 } }).ok, false, 'spacing cannot move the exact arriving hitter');
+});
 
 test('contact stance mirrors handedness and team while keeping explicit grounded feet within paddle reach', () => {
   for (const team of ['green', 'orange']) for (const handedness of ['right', 'left']) {
@@ -253,5 +295,31 @@ test('a controlled firm volley continues a paired approach, while soft or attack
   for (const change of [{ pace: 'soft' }, { quality: 'attackable' }, { quality: 'error' }]) {
     const held = planMovementV1({ ...input, ...change });
     assert.equal(held.positions.player1.y, 9); assert.equal(held.positions.player2.y, 9);
+  }
+});
+
+test('controlled soft shots give the serving pair line goals while attackable drops and resets keep their depth', () => {
+  for (const team of ['green', 'orange']) for (const family of ['drop', 'reset']) {
+    const from = structuredClone(positions), hitter = team === 'green' ? 'player1' : 'player3';
+    const partner = team === 'green' ? 'player2' : 'player4', y = team === 'green' ? 3 : 41;
+    from[hitter] = { x: 5, y }; from[partner] = { x: 15, y };
+    const input = { positions: from, players, hitter, contact: from[hitter], target: { x: 12, y: team === 'green' ? 30 : 14 },
+      contactFeet: [{ x: 4.58, y }, { x: 5.42, y }], durationSeconds: .6, index: 2,
+      service: { server: hitter, receiver: team === 'green' ? 'player3' : 'player1' },
+      family, intent: family === 'drop' ? 'third-shot-drop' : 'reset', pace: 'soft' };
+    for (const quality of ['low', 'neutral', 'excellent']) {
+      const plan = planMovementV1({ ...input, quality });
+      assert.equal(plan.ok, true);
+      for (const id of [hitter, partner]) {
+        assert.equal(plan.diagnostics.goals[id].y, team === 'green' ? 14.25 : 29.75);
+        assert.ok(Math.abs(plan.positions[id].y-y) > 0);
+      }
+    }
+    const weak = planMovementV1({ ...input, quality: 'attackable' });
+    assert.equal(weak.ok, true);
+    for (const id of [hitter, partner]) {
+      assert.equal(weak.diagnostics.goals[id].y,y);
+      assert.equal(weak.positions[id].y,y);
+    }
   }
 });

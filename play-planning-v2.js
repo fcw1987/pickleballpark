@@ -13,7 +13,8 @@ const IDS=['player1','player2','player3','player4'];
 const xy=p=>({x:p.x,y:p.y});
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const finding=(shotId,message,kind='rule',severity='error')=>Object.freeze({kind,severity,shotId,message});
-const records=new WeakMap(),trials=new WeakMap();
+const records=new WeakMap(),trials=new WeakMap(),ownedFlights=new WeakMap();
+let nextOwnedFlight=0;
 const adapters={resolveShotSemantics,boardToWorld};
 export function model2ContactKind(recipe){
   if(recipe.family==='serve')return 'serve';
@@ -98,6 +99,7 @@ function buildRecipe(state,recipe) {
       const spec={physicsVersion:PHYSICS_VERSION,from:copy(contact),target:copy(recipe.target),family:recipe.family,
         arc:recipe.arc,pace:recipe.pace,quality:recipe.quality,...(recipe.physics?{physics:copy(recipe.physics)}:{})};
       const flight=solveFlightV2(spec);
+      ownedFlights.set(flight,++nextOwnedFlight);
       spec.endTimeSeconds=document.ending==='stop'?flight.firstLandingTime:flight.totalDuration;spec.endpoint=document.ending==='stop'?'bounce':'terminal';
       const shot={from:xy(contact),to:xy(flight.sampleBoard(spec.endTimeSeconds)),intendedTarget:copy(recipe.target),type:stroke(recipe),stroke:stroke(recipe),playerId:recipe.hitter,
         contact:{kind,point:copy(contact),heightFeet:contact.heightFeet,strokeSide:side,feet,
@@ -146,6 +148,17 @@ function patchPendingMovement(state,pendingRecipe) {
 function segmentFor(previous,step,nextStep,index,startTime,momentum) {
   return createModel2SegmentV2({previous,step,nextStep,index,startTime,model2Momentum:momentum},adapters);
 }
+
+// Generator-only tail repair. Reuse the finalized prefix and flight solution;
+// invalidate outstanding trials just as a committed contact would.
+export function replacePendingMovementV2(state,pendingRecipe) {
+  assertState(state);
+  const next=patchPendingMovement(state,pendingRecipe),index=state.solved.length;
+  next.recipes=state.recipes.slice();next.recipes[index-1]=copy(pendingRecipe);
+  next.pendingSegment=segmentFor(next.steps[index-1],next.steps[index],null,index,state.cursor,state.momentum);
+  next.revision=state.revision+1;
+  Object.assign(state,next);return state;
+}
 function momentumFor(segment) {
   const evidence=segment.step.shot.authoring?.contactEvidence?.momentum;
   if(!evidence)return null;
@@ -160,7 +173,72 @@ function previousContext(state) {
   return segment?{segment,solved:state.solved.at(-2)}:null;
 }
 
-export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly=false}={}) {
+// Exact private JSON proof, not a hash or a public trial's mutable data.
+// No coercion, accessors, sparse/undefined values, functions, exotic objects or
+// cycles can alias a different physical input into the same proof.
+function strictInspectionJSON(value) {
+  return JSON.stringify(value,function(key,item){
+    const descriptor=Object.getOwnPropertyDescriptor(this,key);
+    if(descriptor&&(!Object.hasOwn(descriptor,'value')||!Object.is(descriptor.value,item)))throw new TypeError('Uncacheable inspection input.');
+    if(item===null)return item;
+    const type=typeof item;
+    if(type==='number'){if(!Number.isFinite(item)||Object.is(item,-0))throw new TypeError('Uncacheable inspection input.');return item;}
+    if(type==='string'||type==='boolean')return item;
+    if(type!=='object')throw new TypeError('Uncacheable inspection input.');
+    const array=Array.isArray(item),prototype=Object.getPrototypeOf(item);
+    if((!array&&prototype!==Object.prototype&&prototype!==null)||Object.getOwnPropertySymbols(item).length
+      ||Object.getOwnPropertyNames(item).length!==Object.keys(item).length+(array?1:0))throw new TypeError('Uncacheable inspection input.');
+    return item;
+  });
+}
+function proofField(value,key) {
+  if(value===null)return null;
+  const descriptor=Object.getOwnPropertyDescriptor(value,key);
+  if(!descriptor){if(key in value)throw new TypeError('Uncacheable inspection input.');return null;}
+  if(!Object.hasOwn(descriptor,'value')||descriptor.value===undefined)throw new TypeError('Uncacheable inspection input.');
+  return descriptor.value;
+}
+function previousInspectionProof(state,segment,index,prior,solved) {
+  try {
+    if(!ownedFlights.has(solved)||(prior&&!ownedFlights.has(prior.solved)))return null;
+    // Only the immediately inspected tail and the prior fields actually read
+    // by verifySegment are included. Owned immutable solvers use private IDs;
+    // fresh trajectory wrappers and future outgoing art/flight are not inputs.
+    const descriptors=Object.getOwnPropertyDescriptors(state.play);
+    if(Object.values(descriptors).some(item=>!Object.hasOwn(item,'value')))return null;
+    const header=Object.fromEntries(Object.entries(descriptors).filter(([key])=>key!=='steps').map(([key,item])=>[key,item.value]));
+    const first=state.play.steps.find(step=>step.shot)?.shot,next=segment.nextShotSemantics;
+    const firstService=first?{family:proofField(first,'family'),type:proofField(first,'type'),playerId:proofField(first,'playerId'),hitter:proofField(first,'hitter'),
+      kind:proofField(proofField(first,'contact'),'kind'),receiver:proofField(first,'receiver'),authoredReceiver:proofField(proofField(first,'authoring'),'receiver')}:null;
+    const priorShot=prior?proofField(proofField(prior.segment,'step'),'shot'):null;
+    const priorContext=prior?{solved:ownedFlights.get(prior.solved),actor:proofField(proofField(prior.segment,'shotSemantics'),'playerId'),
+      endTimeSeconds:proofField(proofField(priorShot,'physicsV2'),'endTimeSeconds'),receiver:proofField(proofField(priorShot,'authoring'),'receiver')}:null;
+    return strictInspectionJSON({header,firstService,index,terminal:false,solved:ownedFlights.get(solved),prior:priorContext,
+      segment:{modelVersion:segment.modelVersion,index:segment.index,startTime:segment.startTime,endTime:segment.endTime,
+        duration:segment.duration,originalDuration:segment.originalDuration,contactTime:segment.contactTime,
+        rallyLeg:segment.rallyLeg,previousPositions:segment.previous.positions,stepId:segment.step.id,
+        positions:segment.step.positions,shot:segment.step.shot,
+        actor:segment.shotSemantics.playerId,contact:segment.shotSemantics.contact,model2Momentum:segment.model2Momentum,
+        nextContact:next?{playerId:next.playerId,contact:next.contact,sourceContact:segment.nextStep.shot.contact}:null}});
+  }catch{return null;}
+}
+function copyInspection(inspection) {
+  return {solved:inspection.solved,violations:copy(inspection.violations),
+    physicalCandidates:copy(inspection.physicalCandidates),momentumCandidates:copy(inspection.momentumCandidates)};
+}
+function freezeInspectionData(value) {
+  if(value&&typeof value==='object'&&!Object.isFrozen(value)){
+    Object.values(value).forEach(freezeInspectionData);Object.freeze(value);
+  }
+  return value;
+}
+function privateInspection(inspection) {
+  const result=copyInspection(inspection);
+  for(const field of ['violations','physicalCandidates','momentumCandidates'])freezeInspectionData(result[field]);
+  return Object.freeze(result);
+}
+
+export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly=false,capturePreviousInspection=false,reusePreviousTrial}={}) {
   assertState(state);
   let working=state,construction;
   try {
@@ -170,19 +248,26 @@ export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly
     construction={built:false,recipe,findings:[finding(recipe?.id??null,error.message,'feasibility')]};
   }
   const result={...construction,ok:construction.built&&!construction.findings.some(item=>item.severity==='error'),
-    reason:construction.findings[0]?.message??'',resolvedPrevious:null,pendingSegment:null,
+    reason:construction.findings[0]?.message??'',resolvedPrevious:null,pendingSegment:null,previousInspectionReused:false,
     acceptedPendingRecipe:pendingRecipe?copy(working.pendingRecipe):null};
   if(construction.built){
     const index=working.solved.length,steps=working.steps.slice();
     if(index)steps[steps.length-1]=construction.previousResolved;
     steps.push(construction.step);
-    let cursor=working.cursor,inspection=null;
+    let cursor=working.cursor,inspection=null,previousAudit=null;
     const finalizedSegments=working.finalizedSegments.slice(),finalizedInspections=working.finalizedInspections.slice();
     if(index&&!buildOnly){
       const segment=segmentFor(steps[index-1],steps[index],construction.step,index,cursor,working.momentum);
       result.resolvedPrevious=segment;cursor=segment.endTime;finalizedSegments.push(segment);
       if(inspect){
-        inspection=inspectModel2SegmentV2(working.play,segment,{index:index-1,prior:previousContext(working),terminal:false,solved:working.solved.at(-1)});
+        const prior=previousContext(working),solved=working.solved.at(-1);
+        const reusable=trials.get(reusePreviousTrial);
+        const mayReuse=reusable?.owner===state&&reusable.revision===state.revision&&reusable.previousAudit;
+        const proof=capturePreviousInspection||mayReuse?previousInspectionProof(working,segment,index-1,prior,solved):null;
+        if(proof!==null&&reusable?.owner===state&&reusable.revision===state.revision&&reusable.previousAudit?.proof===proof){
+          inspection=copyInspection(reusable.previousAudit.inspection);result.previousInspectionReused=true;
+        }else inspection=inspectModel2SegmentV2(working.play,segment,{index:index-1,prior,terminal:false,solved});
+        if(capturePreviousInspection&&proof!==null)previousAudit={proof,inspection:privateInspection(inspection)};
         for(const issue of inspection.violations)result.findings.push(finding(issue.stepId||issue.shotId||recipe.id,issue.message,issue.category==='model'?'feasibility':'rule'));
         const decisive=resolveModel2OutcomeCandidates(inspection.physicalCandidates,inspection.momentumCandidates).decision;
         if(inspection.physicalCandidates.length){
@@ -200,7 +285,7 @@ export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly
       revision:state.revision+1,cursor,finalizedSegments,finalizedInspections,momentum,pendingSegment:pending,
       pendingRecipe:copy(recipe),pendingLocksBefore:new Map(working.locks)};
     if(pendingRecipe)next.recipes[next.recipes.length-2]=copy(pendingRecipe);
-    trials.set(result,{owner:state,revision:state.revision,next});
+    trials.set(result,{owner:state,revision:state.revision,next,previousAudit});
   }else trials.set(result,{owner:state,revision:state.revision,next:null});
   result.ok=result.built&&!result.findings.some(item=>item.severity==='error');
   result.reason=result.findings[0]?.message??'';

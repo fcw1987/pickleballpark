@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { resolveTargetV1, resolveFlightParametersV1, CLEARANCE_PRIORS_V1, OVERHEAD_LAUNCH_PRIORS_V1 } from '../rally-targets.js';
 import { receivingServiceBox, SERVICE_COURT_CONVENTION } from '../rally-state.js';
 import { isInServiceBox, isInNonVolleyZone } from '../court-geometry.js';
-import { PHYSICS_VERSION, PHYSICS_V2, solveFlightV2 } from '../play-physics-v2.js';
+import { PHYSICS_VERSION, PHYSICS_V2, solveFlightV2, interceptFlightV2 } from '../play-physics-v2.js';
 
 const players = {
   player1: { team: 'green', handedness: 'right' }, player2: { team: 'green', handedness: 'right' },
@@ -80,12 +80,100 @@ test('cross-court and straight target regions remain distinct under continuous h
   assert.ok(targets.every((x, index) => index === 0 || x > targets[index - 1]));
 });
 
-test('deep attacks aim beyond the line so interception can happen before the nominal bounce', () => {
+test('deep attacks land beyond represented back defenders or in the open lane', () => {
   for (const targetRegion of ['deep-feet', 'hip-middle', 'open-court', 'deep-overhead']) {
     const target = resolveTargetV1({ candidate: candidate('drive', targetRegion), situation: situation(), players, draws });
-    assert.ok(target.y >= 36 && target.y <= 42);
+    if (targetRegion === 'deep-feet') assert.equal(target.y, 41.25);
+    else if (targetRegion === 'hip-middle') assert.equal(target.y, 43.2, 'the baseline clips the requested body-lane depth');
+    else assert.ok(target.y >= 36 && target.y <= 42);
     assert.ok(target.x > 0 && target.x < 20);
   }
+});
+
+function defenderContext(team, ownDepth, extra = {}) {
+  const near = team === 'green', sampled = structuredClone(positions);
+  const selected = near ? 'player3' : 'player1', other = near ? 'player4' : 'player2';
+  sampled[selected] = { x: near ? 13 : 7, y: near ? 44 - ownDepth : ownDepth };
+  sampled[other] = { x: near ? 3 : 17, y: near ? 44 - ownDepth : ownDepth };
+  return { context: situation(team, { positions: sampled, ...extra }), selected };
+}
+
+test('feet and hip lanes track a represented defender moving between back and up on both ends', () => {
+  for (const team of ['green', 'orange']) for (const targetRegion of ['deep-feet', 'hip-middle']) {
+    const choice = candidate('drive', targetRegion);
+    for (const depth of [0, .5, .999999]) {
+      const targets = [];
+      for (const ownDepth of [4, 14.25]) {
+        const { context, selected } = defenderContext(team, ownDepth), before = JSON.stringify(context);
+        const target = resolveTargetV1({ candidate: choice, situation: context, players, draws: { lateral: .5, depth } });
+        const offset = targetRegion === 'deep-feet' ? .5 + depth * 1.5 : 5 + depth * 2;
+        const expectedDepth = Math.max(.8, Math.min(21.2, ownDepth - offset));
+        assert.equal(target.x, context.positions[selected].x);
+        assert.ok(Math.abs((team === 'green' ? 44 - target.y : target.y) - expectedDepth) < 1e-9);
+        assert.ok(team === 'green' ? target.y > context.positions[selected].y : target.y < context.positions[selected].y);
+        assert.deepEqual(Object.keys(target).sort(), ['x', 'y']); assert.equal(JSON.stringify(context), before);
+        targets.push(target);
+      }
+      assert.notEqual(targets[0].y, targets[1].y, `${team}/${targetRegion}: moving the defender must change depth`);
+    }
+  }
+});
+
+test('body-lane and feet target flights derive their distinct defender-plane heights through the same solver', () => {
+  for (const team of ['green', 'orange']) {
+    const { context, selected } = defenderContext(team, 14.25, { contact: { x: team === 'green' ? 7 : 13, y: team === 'green' ? 14.25 : 29.75, heightFeet: 3.5 } });
+    const observed = {};
+    for (const targetRegion of ['deep-feet', 'hip-middle']) {
+      const choice = { ...candidate('volley', targetRegion), pace: 'firm', arc: 'low' };
+      const target = resolveTargetV1({ candidate: choice, situation: context, players, draws });
+      const input = { candidate: choice, contact: context.contact, target, team }, before = JSON.stringify(input);
+      const solved = resolveFlightParametersV1(input), flight = solved.flight;
+      const defenderY = context.positions[selected].y, time = (defenderY - context.contact.y) / flight.stages[0].vz;
+      const interception = interceptFlightV2(flight, { kind: 'volley', stance: context.positions[selected], beforeBounceSeconds: flight.firstLandingTime - time });
+      assert.ok(time > 0 && time < flight.firstLandingTime);
+      assert.ok(Math.abs(interception.point.y - defenderY) < 1e-9);
+      assert.ok(interception.point.heightFeet >= PHYSICS_V2.ballRadiusFeet);
+      assert.equal(flight.obstruction, null); assert.equal(solved.outcome, undefined); assert.equal(target.heightFeet, undefined);
+      const reconstructed = solveFlightV2({ from: context.contact, target, family: 'volley', pace: 'firm', arc: 'low', physics: solved.physics });
+      assert.deepEqual(reconstructed.sampleBoard(time), flight.sampleBoard(time));
+      assert.equal(JSON.stringify(input), before); observed[targetRegion] = interception.point.heightFeet;
+    }
+    assert.ok(observed['hip-middle'] > observed['deep-feet'] + .5, `${team}: deeper body lane must keep the ball higher at the actual defender plane`);
+  }
+});
+
+test('third-shot drive feet targets remain physically feasible against up and back defenders at both ends', () => {
+  for (const team of ['green', 'orange']) for (const ownDepth of [4, 14.25]) for (const depth of [0, .5, .999999]) {
+    const { context } = defenderContext(team, ownDepth, { contact: { x: team === 'green' ? 7 : 13, y: team === 'green' ? 3 : 41, heightFeet: 1.4 } });
+    const third = { ...candidate('drive', 'deep-feet', 'third-shot-drive'), pace: 'firm', arc: 'low' };
+    const regular = { ...third, id: 'drive', intent: 'drive' };
+    const target = resolveTargetV1({ candidate: third, situation: context, players, draws: { lateral: .5, depth } });
+    assert.deepEqual(target, resolveTargetV1({ candidate: regular, situation: context, players, draws: { lateral: .5, depth } }));
+    const actual = resolveFlightParametersV1({ candidate: third, contact: context.contact, target, team });
+    assert.equal(actual.flight.obstruction, null); assert.equal(actual.flight.terminal, null);
+    assert.ok(Math.abs(actual.flight.metadata.netClearanceInches - CLEARANCE_PRIORS_V1.drive * 12) < 1e-8);
+    assert.ok(Number.isFinite(actual.flight.launchSpeedMph)); assert.equal(actual.outcome, undefined);
+  }
+});
+
+test('defender-relative target bounds stay inside the opposing half and body jitter is continuous around that defender', () => {
+  for (const team of ['green', 'orange']) for (const ownDepth of [-2, .25, 14.25, 24]) for (const targetRegion of ['deep-feet', 'hip-middle']) {
+    const { context } = defenderContext(team, ownDepth);
+    const points = Array.from({ length: 51 }, (_, index) => resolveTargetV1({ candidate: candidate('drive', targetRegion), situation: context, players, draws: { lateral: index / 51, depth: index / 51 } }));
+    assert.equal(new Set(points.map(point => point.x)).size, 51);
+    for (const target of points) {
+      assert.ok(target.x >= .8 && target.x <= 19.2); assert.ok(target.y >= .8 && target.y <= 43.2);
+      assert.ok(team === 'green' ? target.y > 22 : target.y < 22);
+    }
+  }
+});
+
+test('open-court lateral gaps still follow defenders while depth follows the contact geometry', () => {
+  const choice = candidate('volley', 'open-court'), original = situation('green');
+  const shifted = structuredClone(original); shifted.positions.player3.x = 3; shifted.positions.player4.x = 7;
+  const a = resolveTargetV1({ candidate: choice, situation: original, players, draws });
+  const b = resolveTargetV1({ candidate: choice, situation: shifted, players, draws });
+  assert.notEqual(a.x, b.x); assert.equal(a.y, b.y);
 });
 
 test('regular flight parameters reproduce their exact ball-surface clearance through the shared solver', () => {

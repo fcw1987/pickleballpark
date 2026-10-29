@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { simulateRally, createRallySimulator } from '../rally-engine.js';
+import { simulateRally, createRallySimulator, runNaturalAttemptV1 } from '../rally-engine.js';
+import { createEngineDriverV1 } from '../rally-engine-driver.js';
 import { normalizeRallyInputV1 } from '../rally-recipe.js';
 import { validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
@@ -145,11 +146,23 @@ test('a real Pro lob probe contacts the descending ball within the grounded 8.5-
   assert.ok(incoming.solved.sampleBoard(t+1e-5).heightFeet<incoming.solved.sampleBoard(t-1e-5).heightFeet,'the incoming solver must reach that contact while descending');
 });
 
-test('a real Pro ordinary volley can contact the ball over the NVZ while both grounded feet stay outside',async()=>{
+test('a controlled soft pop-up creates a physically supported ordinary NVZ air attack',async()=>{
   const players=Object.fromEntries(IDS.map((id,index)=>[id,{team:index<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}]));
-  const result=await simulateRally({seed:0,players,service:{server:'player1',receiver:'player3',court:'right',courtConvention:'server-perspective-v1'}});
-  assert.equal(result.status,'complete',plain(result.diagnostics));
+  // Keep a neutral middle exchange alive, then perturb one actual soft shot.
+  // This controlled geometry fixture is excluded from natural calibration.
+  // .15 lies in the Pro attackable interval for both ordinary and settled
+  // soft risk; the fixture still proves the resulting physical reply.
+  let executionDraw=0;
+  const simulate=createEngineDriverV1((input,controls)=>runNaturalAttemptV1(input,{
+    ...controls,random:{...controls.random,intent:()=>.65,target:()=>.5,
+      execution:()=>executionDraw++===12?.15:.999}
+  }),{yieldControl:async()=>{}});
+  const result=await simulate({seed:0,players,options:{maxShots:8},service:{server:'player1',receiver:'player3',court:'right',courtConvention:'server-perspective-v1'}});
+  assert.equal(result.status,'censored',plain(result.diagnostics));
   const compiled=validateResult(result);
+  assert.equal(result.decisions[6].resolution.physicalTransformation.kind,'soft-popup');
+  assert.equal(result.decisions[7].situation.attackable,true);
+  assert.equal(result.decisions[7].situation.contactSelection.evidence.chosen.preference.heightClass,'attack');
   const contacts=compiled.timeline.segments.filter((segment,index)=>index>0&&segment.shotSemantics.contact.kind==='volley'
     &&isInNonVolleyZone(segment.shotSemantics.contact.point)&&result.document.shots[index].contactTiming?.beforeBounceSeconds!==undefined);
   assert.ok(contacts.length>0,'the fixed generated probe must include a genuine volley over the NVZ');

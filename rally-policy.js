@@ -8,6 +8,7 @@ import { resolveStyle, validateStyleProfile } from './rally-styles.js';
 
 export const POLICY_VERSION = 'rally-policy-v1';
 export const CONTACT_RANKING_VERSION = 'rally-contact-ranking-v2';
+export const FIFTH_CONTACT_PRIORS_VERSION = 'rally-fifth-contact-priors-v1';
 const EPS = 1e-9;
 const freeze = value => {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) { Object.values(value).forEach(freeze); Object.freeze(value); }
@@ -132,7 +133,8 @@ export function createSituationV1({ players, positions, feet = {}, footState = {
   // above-net attack. Explicit attack proof can also certify drive feasibility
   // for callers using the earlier API; an explicit false drive wins that tie.
   actions.drive = affordances.drive === true || (affordances.drive === undefined && affordances.attack === true);
-  actions.attack = actions.attack && actions.drive && ['above-net', 'overhead'].includes(band);
+  actions.overhead = actions.overhead && band === 'overhead';
+  actions.attack = actions.attack && (actions.drive || actions.overhead) && ['above-net', 'overhead'].includes(band);
   const actualFeet = Array.isArray(feet[hitter]) && feet[hitter].length === 2
     ? feet[hitter].map((value, index) => point(value, `feet.${hitter}[${index}]`)) : [];
   const footFacts = { outsideNVZ: actualFeet.length === 2 && actualFeet.every(foot => !isInNonVolleyZone(foot)),
@@ -217,7 +219,19 @@ export function listIntentCandidatesV1(situation, { profile = resolveStyle(), av
   if (typeof signatureShots !== 'boolean') throw new TypeError('signatureShots must be boolean.');
   for (const values of [availableIntents, availableCandidateIds]) if (values !== null && (!(Array.isArray(values) || values instanceof Set) || [...values].some(value => typeof value !== 'string'))) throw new TypeError('Availability must be an explicit array or set of candidate identifiers.');
   validateStyleProfile(profile);
-  const row = rowFor(situation), weights = { ...profile.weights[row] };
+  const row = rowFor(situation);
+  // The observed fifth-shot mix is marginal over air and bounced contacts.
+  // Apply the separate model air prior only after a real incoming contact has
+  // been selected; a bounced contact still cannot create a firm volley.
+  const conditioning = row === 'fifthDrive' ? {
+    version: FIFTH_CONTACT_PRIORS_VERSION,
+    fact: 'contactKind', value: situation.contactKind,
+    profileRow: situation.contactKind === 'volley' ? 'fifthDriveAir' : 'fifthDrive',
+    basis: 'model-contact-conditional-prior', referenceRow: 'fifthDrive',
+  } : null;
+  const weights = { ...profile.weights[conditioning?.profileRow ?? row] };
+  const conditioningReasons = conditioning ? [`conditioning:${conditioning.version}`,
+    `contact-kind:${conditioning.value ?? 'unspecified'}`, `profile-row:${conditioning.profileRow}`] : [];
   if (row === 'kitchen') weights['speed-up'] = situation.attackable ? 50 : situation.heightBand === 'low' ? 1 : weights['speed-up'];
   if (situation.incomingFamily === 'dink' && situation.hitterUp) weights.erne = profile.signature.erneWeight;
   if (situation.affordances.aroundPost) weights['around-the-post'] = profile.signature.aroundPostWeight;
@@ -230,13 +244,14 @@ export function listIntentCandidatesV1(situation, { profile = resolveStyle(), av
     const reason = weight <= 0 ? 'zero-profile-weight' : unavailable(id, situation, signatureShots)
       ?? (available && !available.has(intent) ? 'intent-flight-unavailable' : null)
       ?? (candidateIds && !candidateIds.has(id) ? 'candidate-flight-unavailable' : null);
-    if (reason) { excluded.push({ id, intent, weight, reason }); continue; }
+    if (reason) { excluded.push({ id, intent, weight, reason,
+      ...(conditioning ? { reasons: [...conditioningReasons] } : {}) }); continue; }
     candidates.push({ id, intent, family, targetRegion, pace, arc, weight, probability: 0,
-      addsContact: id !== 'let-go', reasons: [`context:${row}`, `style:${profile.id}`, `flavour:${profile.flavour ?? 'balanced'}`] });
+      addsContact: id !== 'let-go', reasons: [`context:${row}`, `style:${profile.id}`, `flavour:${profile.flavour ?? 'balanced'}`, ...conditioningReasons] });
   }
   const totalWeight = candidates.reduce((sum, candidate) => sum + candidate.weight, 0);
   for (const candidate of candidates) candidate.probability = candidate.weight / totalWeight;
-  return freeze({ policyVersion: POLICY_VERSION, context: row, candidates, excluded, totalWeight });
+  return freeze({ policyVersion: POLICY_VERSION, context: row, ...(conditioning ? { conditioning } : {}), candidates, excluded, totalWeight });
 }
 
 /** The caller supplies a stream draw; this helper has no random state. */

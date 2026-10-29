@@ -47,6 +47,12 @@ function defenderNear(records, lateral) {
   if (!records.length) throw new TypeError('A represented opponent is required.');
   return [...records].sort((a, b) => Math.abs(a.position.x - lateral) - Math.abs(b.position.x - lateral) || a.id.localeCompare(b.id))[0];
 }
+function behindDefenderDepth(defender, offsetFeet) {
+  const depth = defender.team === 'green' ? defender.position.y : 44 - defender.position.y;
+  // Behind means toward that defender's baseline. Near a court boundary the
+  // in-court landing limit wins; a nominal target never invents an out ball.
+  return clamp(depth - offsetFeet, .8, 21.2);
+}
 function backhandTarget(record, draw, minX, maxX) {
   const forehandDirection = (record.team === 'green' ? -1 : 1) * (record.handedness === 'left' ? -1 : 1);
   const direction = -forehandDirection;
@@ -140,12 +146,19 @@ export function resolveTargetV1({ candidate, situation, players, draws }) {
     const ownDepth = defender.team === 'green' ? defender.position.y : 44 - defender.position.y;
     baselineDepth = clamp(ownDepth + 1 + depth * 2, 6, 13);
   } else if (region === 'deep-feet') {
-    x = jitter(defenderNear(records, oppositeLane).position.x, 3.5, lateral, minX, maxX);
-    baselineDepth = 2 + depth * 4;
+    const defender = defenderNear(records, oppositeLane);
+    x = jitter(defender.position.x, 3.5, lateral, minX, maxX);
+    baselineDepth = behindDefenderDepth(defender, .5 + depth * 1.5);
   } else if (region === 'hip-middle') {
-    x = jitter(10, 4, lateral, minX, maxX); baselineDepth = 2 + depth * 4;
+    const defender = defenderNear(records, oppositeLane);
+    x = jitter(defender.position.x, 2, lateral, minX, maxX);
+    // A body-directed lane needs a ground landing beyond the represented
+    // player. The shared flight decides its height at that player's plane.
+    baselineDepth = behindDefenderDepth(defender, 5 + depth * 2);
   } else if (region === 'open-court') {
     x = openLane(records, lateral);
+    // The open lane already follows the represented defender gaps. It has no
+    // named defender for a feet/body offset; depth follows contact geometry.
     // Higher contacts can attack a shorter open landing without imposing an
     // impossible low net crossing on a long high-origin ballistic chord.
     baselineDepth = candidate.family === 'overhead' ? 10 + depth * 5

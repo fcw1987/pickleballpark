@@ -5,6 +5,56 @@ production document/compiler/rule acceptance, grounded generator-model support,
 and numerical calibration. `rally-realism-v1` and its archived measurements are
 unchanged. A rule-valid document is not a claim of complete human biomechanics.
 
+## Reserved holdout and examined regression data
+
+`tools/rally-holdout-v1.json` reserves seeds **50000–51199**, 1200 per style
+for Pro, Advanced and Intermediate: **3600 natural rallies** in total. Its four
+server/receiver/court roles each occur 300 times per style. All players use the
+balanced flavour, Natural length, winner Either, signatures enabled and the
+ordinary 99-contact limit. The complete definition and generated schedule are
+validated and immutable; replacement seeds, subsets, extra styles, changed
+flavours, reordered roles and increased counts are rejected.
+
+The reservation inventory found 361 used seed values across 286 JSON/JSONL files
+and explicit source seed literals, with zero overlap and zero unreadable files.
+Evidence is retained in `release-results/game-mode-m2/holdout-reservation.json`.
+This documents the reservation check; it does not prove future blindness.
+
+The **first holdout run is allowed only after the candidate is frozen and
+reviewed**. Current work remains targeted tests and the existing development
+cohort. Do not run the holdout to guide unfinished tuning. After that review,
+the calibration job invokes the full reservation once, without retries:
+
+```sh
+node tools/rally-realism-v2.mjs --cohort holdout \
+  --output release-results/game-mode-m2/holdout-v1.json \
+  --archive release-results/game-mode-m2/holdout-v1.jsonl \
+  --require-calibration --require-clean
+```
+
+The CLI requires clean committed source for this cohort, refuses existing output
+files, and includes the definition hash in collector provenance. Clean source
+does not establish review approval or unseen results. The report's
+`cohortEvidence` names the reserved purpose and records
+`examinationState: NOT_ESTABLISHED_BY_COLLECTOR` / `unseenClaim: NOT_ASSERTED`.
+The definition's unchanged `RESERVED_NOT_RUN` value records its original
+reservation; it is not a live execution ledger. Record actual usage and review
+history with the resulting evidence. If results are examined and used for
+retuning, later runs must be labelled examined regression evidence, never unseen
+holdout evidence. Do not extend the seed range or count based on results.
+
+`--cohort qualification` retains the exact original **1000–1299** schedule and
+API. Those 900 archived rallies have been examined and are now regression data;
+new reports identify that purpose explicitly. Preserve their original archives.
+Development remains the original 0–59 seeds per core style.
+
+The holdout retains every attempted result and the independent completeness,
+physical validity, generator support and calibration verdicts. All existing
+numeric bands, conditional denominators and minimum counts of **10** remain
+unchanged. Sparse line-drive evidence remains insufficient; the action
+diagnostics below do not broaden that gate. Exactly-12 timing still requires
+natural complete points and does not substitute capped prefixes.
+
 ## Additive action diagnostics
 
 `summary.diagnostics.lineInitiatedAttacks` observes contacts at the existing

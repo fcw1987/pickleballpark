@@ -139,9 +139,20 @@ An off-court target in an ordinary continuing leg is still an unexpected
 violation. Apron contact overrides are restricted to their applicable signature
 shots. No unrelated extra field bypasses the model 2 validator.
 An explicit model 2 service court requires `server-perspective-v1`; the unmarked
-legacy interpretation remains confined to model 1. Model 2 outcome positions
-use apron coordinates and a finite height from 0 through 30 ft. Their relative
-evidence times are finite from 0 through 30 seconds.
+legacy interpretation remains confined to model 1. Model 2 terminal
+`outcome.evidence.position` has exactly `{ x, y, heightFeet }`: finite horizontal
+coordinates with absolute values at most 200,000 ft and a finite height from
+0 through 30 ft. Its relative evidence time remains finite from 0 through
+30 seconds. The horizontal bound is an arithmetic guard for solved evidence,
+not an enlarged playing area. Under the supported source and launch domain,
+the horizontal displacement multiplier is below 2,436 over source spans of
+36 ft across and 60 ft deep, so 200,000 ft conservatively bounds both axes.
+A legal first landing can rebound beyond the apron before the terminal
+second bounce. Preserve that solved terminal position; do not replace it
+with the first landing or clamp the flight. Independent compilation and rule
+validation must still prove the declared position, time and earliest physical
+outcome. Contacts, feet, movement destinations, layouts and landing targets
+retain their existing 8-foot apron bounds.
 
 Foot evidence describes two represented grounded points. An Erne approach may
 pass through the kitchen before contact if both modeled feet re-establish

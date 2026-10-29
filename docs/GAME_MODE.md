@@ -86,9 +86,13 @@ geometry, validated expected outcomes, and ball-surface clearance above local
 tape. Earlier-shot momentum outcomes retain separate occurrence, observation
 and physical dead times.
 
-Development seeds are 0–59 and qualification seeds are the disjoint frozen
-1000–1299 range per homogeneous Pro, Advanced and Intermediate style, balanced
-across serving team/court. Beginner and flavour cohorts have correctness and
+Development seeds are 0–59. The preserved `9493af3` qualification run of seeds
+1000–1299 was physically valid (900/900 points) but failed calibration. Those
+seeds are now examined regression evidence. The immutable holdout reserves
+50000–51199, 1200 per homogeneous Pro, Advanced and Intermediate style, balanced
+across serving team/court. Its first run follows candidate freeze and architect
+review; do not use its results for unfinished tuning or extend it after results.
+Beginner and flavour cohorts have correctness and
 directional comparisons, not invented numerical bands. Per-game signature rates
 remain `N/A` until games exist.
 
@@ -97,10 +101,10 @@ node tools/rally-realism-v2.mjs --cohort development \
   --output release-results/game-mode-m2/development.json \
   --archive release-results/game-mode-m2/development.jsonl
 
-node tools/rally-realism-v2.mjs --cohort qualification --require-clean \
+node tools/rally-realism-v2.mjs --cohort holdout --require-clean \
   --require-calibration \
-  --output release-results/game-mode-m2/qualification.json \
-  --archive release-results/game-mode-m2/qualification.jsonl
+  --output release-results/game-mode-m2/holdout-v1.json \
+  --archive release-results/game-mode-m2/holdout-v1.jsonl
 ```
 
 These are qualification commands, not a statement that qualification passed.

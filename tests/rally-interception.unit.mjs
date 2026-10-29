@@ -43,12 +43,12 @@ test('saved explicit pre-bounce timing is model2-only, bounded and exclusive of 
 test('a feasible fifth air contact is sampled between actor planes rather than forced to bounce', async () => {
   const { simulateRally } = await import('../rally-engine.js');
   const players = Object.fromEntries(['player1','player2','player3','player4'].map((id,index)=>[id,{team:index<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}]));
-  const result = await simulateRally({ seed: 2, players, service: { server: 'player3', receiver: 'player1', court: 'right', courtConvention: 'server-perspective-v1' } });
-  assert.equal(result.status, 'complete');
+  const result = await simulateRally({ seed: 2, players, options: { maxShots: 5 }, service: { server: 'player3', receiver: 'player1', court: 'right', courtConvention: 'server-perspective-v1' } });
+  assert.equal(result.status, 'censored');
   assert.equal(result.decisions[2].chosen.family, 'drive');
   assert.equal(result.decisions[4].situation.contactKind, 'volley');
   assert.ok(result.document.shots[4].contactTiming.beforeBounceSeconds > 0);
-  assert.equal(result.decisions[4].situation.contactSelection.strategy, 'fifth-air-contact-when-feasible');
+  assert.equal(result.decisions[4].situation.contactSelection.strategy, 'feasibility-then-fixed-opportunity-actors-then-opportunities');
 });
 
 test('leaving a real out flight adds a defensive decision without inventing an opponent contact', async () => {

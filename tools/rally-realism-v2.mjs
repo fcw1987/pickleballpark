@@ -11,6 +11,7 @@ import { validateRallyRules } from '../rally-rules.js';
 import { normalizeRallyInputV1, validateGenerationRecipeV1, createRallyRequestRecipeV1 } from '../rally-recipe.js';
 import { parseSeeds } from './rally-realism.mjs';
 import { METRICS_VERSION_V2, observeRallyV2, summarizeObservationsV2, evaluateCalibrationV2 } from './rally-realism-metrics-v2.mjs';
+import holdoutSource from './rally-holdout-v1.json' with { type: 'json' };
 
 export const REPORT_VERSION_V2 = 2;
 export const CORE_STYLE_IDS = Object.freeze(['pro', 'advanced', 'intermediate']);
@@ -23,27 +24,77 @@ const key = job => job.id;
 const canonical = value => Array.isArray(value) ? `[${value.map(canonical).join(',')}]` : value && typeof value === 'object' ? `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}` : JSON.stringify(value);
 const validSeeds = seeds => Array.isArray(seeds) && seeds.length && new Set(seeds).size === seeds.length
   && seeds.every(seed => Number.isInteger(seed) && seed >= 0 && seed <= 0xffffffff);
+const freeze = value => {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) { Object.values(value).forEach(freeze); Object.freeze(value); }
+  return value;
+};
+const SERVICE_ROTATION = Object.freeze([
+  Object.freeze({ server: 'player1', receiver: 'player3', court: 'right' }), Object.freeze({ server: 'player1', receiver: 'player3', court: 'left' }),
+  Object.freeze({ server: 'player3', receiver: 'player1', court: 'right' }), Object.freeze({ server: 'player3', receiver: 'player1', court: 'left' }),
+]);
+
+/** Version 1 fixes the complete reservation; changing its range needs a new definition. */
+export function validateHoldoutDefinitionV1(value) {
+  const keys = ['version', 'cohort', 'baselineSourceRevision', 'seedStart', 'seedCountPerStyle', 'styles', 'flavour', 'serviceRotation', 'options', 'purpose', 'status'];
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length !== keys.length
+    || canonical(Object.keys(value).sort()) !== canonical(keys.sort())
+    || value.version !== 'rally-holdout-v1' || value.cohort !== 'm2-holdout-v1'
+    || value.baselineSourceRevision !== '9493af303c181a91f74f0fed3bc4c121ad822072'
+    || value.seedStart !== 50000 || value.seedCountPerStyle !== 1200
+    || !Array.isArray(value.styles) || value.styles.length !== CORE_STYLE_IDS.length
+    || value.styles.some((style, index) => style !== CORE_STYLE_IDS[index]) || value.flavour !== 'balanced'
+    || !Array.isArray(value.serviceRotation) || value.serviceRotation.length !== SERVICE_ROTATION.length
+    || value.serviceRotation.some((role, index) => !role || Object.keys(role).length !== 3
+      || ['server', 'receiver', 'court'].some(key => role[key] !== SERVICE_ROTATION[index][key]))
+    || !value.options || Object.keys(value.options).length !== 4
+    || value.options.lengthFeel !== 'natural' || value.options.winner !== 'either' || value.options.signatureShots !== true || value.options.maxShots !== 99
+    || value.status !== 'RESERVED_NOT_RUN'
+    || value.purpose !== 'Reserved before resumed tuning; run once on a frozen reviewed candidate. Do not extend after results.') {
+    throw TypeError('Holdout v1 must retain its complete bounded immutable reservation definition');
+  }
+  return freeze(clone(value));
+}
+export const HOLDOUT_DEFINITION_V1 = validateHoldoutDefinitionV1(holdoutSource);
+export const HOLDOUT_SEEDS_V1 = Object.freeze(Array.from({ length: HOLDOUT_DEFINITION_V1.seedCountPerStyle }, (_, index) => HOLDOUT_DEFINITION_V1.seedStart + index));
 
 export function createCohortSchedule({ cohort = 'development', styles = CORE_STYLE_IDS, flavour = 'balanced', seeds } = {}) {
-  if (!['development', 'qualification', 'custom'].includes(cohort)) throw TypeError('Unknown corpus cohort');
+  if (!['development', 'qualification', 'holdout', 'custom'].includes(cohort)) throw TypeError('Unknown corpus cohort');
   if (!Array.isArray(styles) || !styles.length || new Set(styles).size !== styles.length || styles.some(style => ![...CORE_STYLE_IDS, 'beginner'].includes(style))) throw TypeError('Styles must be unique supported skill IDs');
   if (!['balanced', 'bangers', 'kitchen-masters', 'lobbers'].includes(flavour)) throw TypeError('Unsupported flavour');
-  if (cohort !== 'custom' && seeds !== undefined) throw TypeError('Frozen development/qualification cohorts do not accept replacement seeds');
-  seeds = cohort === 'development' ? DEVELOPMENT_SEEDS : cohort === 'qualification' ? QUALIFICATION_SEEDS : seeds;
+  if (cohort !== 'custom' && seeds !== undefined) throw TypeError('Frozen development/qualification/holdout cohorts do not accept replacement seeds');
+  if (cohort === 'holdout' && (canonical(styles) !== canonical(HOLDOUT_DEFINITION_V1.styles) || flavour !== HOLDOUT_DEFINITION_V1.flavour)) throw TypeError('Holdout v1 requires every reserved style in order and its balanced flavour');
+  seeds = cohort === 'development' ? DEVELOPMENT_SEEDS : cohort === 'qualification' ? QUALIFICATION_SEEDS : cohort === 'holdout' ? HOLDOUT_SEEDS_V1 : seeds;
   if (!validSeeds(seeds)) throw TypeError('Corpus seeds must be unique explicit uint32 values');
-  const roles = [
-    { server: 'player1', receiver: 'player3', court: 'right' }, { server: 'player1', receiver: 'player3', court: 'left' },
-    { server: 'player3', receiver: 'player1', court: 'right' }, { server: 'player3', receiver: 'player1', court: 'left' },
-  ];
-  return styles.flatMap(style => seeds.map((seed, ordinal) => ({
+  const roles = cohort === 'holdout' ? HOLDOUT_DEFINITION_V1.serviceRotation : SERVICE_ROTATION;
+  const jobs = styles.flatMap(style => seeds.map((seed, ordinal) => ({
     id: `${cohort}:${style}:${flavour}:${seed}`, cohort, style, flavour, seed,
     input: {
       seed,
       players: Object.fromEntries(['player1', 'player2', 'player3', 'player4'].map((id, index) => [id, { team: index < 2 ? 'green' : 'orange', handedness: 'right', style, flavour }])),
       service: { ...roles[ordinal % roles.length], courtConvention: 'server-perspective-v1' },
-      options: { lengthFeel: 'natural', winner: 'either', signatureShots: true, maxShots: 99 },
+      options: cohort === 'holdout' ? clone(HOLDOUT_DEFINITION_V1.options) : { lengthFeel: 'natural', winner: 'either', signatureShots: true, maxShots: 99 },
     },
   })));
+  return cohort === 'holdout' ? freeze(jobs) : jobs;
+}
+
+export function validateHoldoutScheduleV1(jobs) {
+  if (!Array.isArray(jobs) || jobs.length !== HOLDOUT_DEFINITION_V1.seedCountPerStyle * HOLDOUT_DEFINITION_V1.styles.length
+    || canonical(jobs) !== canonical(createCohortSchedule({ cohort: 'holdout' }))) throw TypeError('Holdout v1 requires its exact complete reserved generation schedule');
+  return true;
+}
+
+/** Reservation metadata is not a ledger of which results a reviewer has seen. */
+export function describeCohortEvidenceV2(jobs) {
+  const cohorts = [...new Set(jobs.map(job => job.cohort))];
+  return {
+    cohorts,
+    purpose: cohorts.includes('holdout') ? 'reserved-frozen-candidate-holdout' : cohorts.includes('qualification') ? 'examined-qualification-regression-data' : 'development-or-custom-observation',
+    examinationState: 'NOT_ESTABLISHED_BY_COLLECTOR', unseenClaim: 'NOT_ASSERTED',
+    ...(cohorts.includes('holdout') ? { reservationDefinition: clone(HOLDOUT_DEFINITION_V1),
+      note: 'The definition status records the original reservation, not current run history. First use requires a frozen reviewed candidate; examined results used for retuning are not unseen evidence. Do not extend the count or range after results.' }
+      : cohorts.includes('qualification') ? { note: 'Qualification seeds 1000–1299 have been examined. This unchanged cohort is regression evidence and does not establish an unseen holdout.' } : {}),
+  };
 }
 
 const missingObservation = (job, result, generationMs, error = null) => ({
@@ -61,6 +112,7 @@ const missingObservation = (job, result, generationMs, error = null) => ({
 export async function runRealismV2({ generate, jobs = createCohortSchedule(), signal, onRecord = async () => {}, records = null,
   clock = () => performance.now(), sourceRevision = null, minConditionalSamples = 10, minPerformanceSamples = 10 } = {}) {
   if (!Array.isArray(jobs) || !jobs.length || new Set(jobs.map(key)).size !== jobs.length || jobs.some(job => typeof job.id !== 'string' || !job.input || !Number.isInteger(job.seed) || job.seed < 0 || job.seed > 0xffffffff || job.input.seed !== job.seed)) throw TypeError('A unique explicit corpus schedule is required');
+  if (jobs.some(job => job.cohort === 'holdout')) validateHoldoutScheduleV1(jobs);
   if (typeof clock !== 'function' || typeof onRecord !== 'function') throw TypeError('Clock and archive callback must be functions');
   if (!generate && !records) generate = (await import('../rally-engine.js')).simulateRally;
   if (!records && typeof generate !== 'function') throw TypeError('A rally generator is required');
@@ -147,7 +199,7 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
     reportVersion: REPORT_VERSION_V2, metricsVersion: METRICS_VERSION_V2,
     status: invalid ? 'INVALID' : incomplete ? 'INCOMPLETE' : summary.modelSupport.status === 'FAIL' ? 'MODEL_SUPPORT_FAIL' : 'PASS',
     statusMeaning: 'Corpus completeness, independent rule validity and explicit generator-model support; calibration has its own verdict',
-    sourceRevision, generationReplayedFromArchive: !!records,
+    sourceRevision, generationReplayedFromArchive: !!records, cohortEvidence: describeCohortEvidenceV2(jobs),
     generationSourceRevisions: [...new Set(records ? records.map(record => record.sourceRevision) : [sourceRevision])],
     versions: { generatorVersion: 'rally-engine-v1', policyVersion: 'rally-policy-v1', physicsVersion: 'play-physics-v2' },
     corpus: { status: missingJobs.length ? 'INCOMPLETE' : 'COMPLETE', scheduledRallies: jobs.length, attemptedRallies: observations.length, missingJobs },
@@ -163,7 +215,7 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
 async function main(args) {
   const options = {};
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--help') { console.log('Usage: node tools/rally-realism-v2.mjs --cohort development|qualification [--styles pro,advanced,intermediate] [--flavour balanced] [--seeds 7,9 (custom only)] [--output report.json] [--archive rows.jsonl] [--archive-input rows.jsonl] [--require-calibration] [--require-clean]'); return; }
+    if (args[i] === '--help') { console.log('Usage: node tools/rally-realism-v2.mjs --cohort development|qualification|holdout|custom [--styles pro,advanced,intermediate] [--flavour balanced] [--seeds 7,9 (custom only)] [--output report.json] [--archive rows.jsonl] [--archive-input rows.jsonl] [--require-calibration] [--require-clean]\nHoldout: immutable 3600-job reservation; requires --require-clean and a frozen reviewed candidate before first use. Qualification: examined seeds 1000–1299, retained as regression data. The collector does not establish whether results remain unseen.'); return; }
     if (['--require-calibration', '--require-clean'].includes(args[i])) { options[args[i]] = true; continue; }
     if (!['--cohort', '--styles', '--flavour', '--seeds', '--output', '--archive', '--archive-input'].includes(args[i]) || !args[i + 1] || args[i + 1].startsWith('--')) throw Error(`Unknown or missing argument: ${args[i]}`);
     if (options[args[i]]) throw Error(`Repeated argument: ${args[i]}`);
@@ -178,10 +230,11 @@ async function main(args) {
   const cohort = options['--cohort'] ?? (options['--seeds'] ? 'custom' : 'development');
   const jobs = createCohortSchedule({ cohort, styles: options['--styles']?.split(',') ?? CORE_STYLE_IDS,
     flavour: options['--flavour'] ?? 'balanced', ...(options['--seeds'] ? { seeds: parseSeeds(options['--seeds']) } : {}) });
+  if (cohort === 'holdout' && !options['--require-clean']) throw Error('Reserved holdout use requires --require-clean and a frozen reviewed candidate');
   const git = (...parameters) => execFileSync('git', parameters, { encoding: 'utf8' }).trim();
   const sourceRevision = git('rev-parse', 'HEAD'), sourceState = git('status', '--porcelain', '--untracked-files=all') ? 'dirty' : 'clean';
-  if (options['--require-clean'] && sourceState !== 'clean') throw Error('Qualification requires a clean committed source');
-  const files = ['rally-realism-v2.mjs', 'rally-realism-metrics-v2.mjs'];
+  if (options['--require-clean'] && sourceState !== 'clean') throw Error(`${cohort === 'holdout' ? 'Holdout' : 'Qualification'} requires a clean committed source`);
+  const files = ['rally-realism-v2.mjs', 'rally-realism-metrics-v2.mjs', ...(cohort === 'holdout' ? ['rally-holdout-v1.json'] : [])];
   const collectorFilesSha256 = Object.fromEntries(await Promise.all(files.map(async file => [file, sha256(await readFile(new URL(file, import.meta.url)))])));
   const records = options['--archive-input'] ? (await readFile(options['--archive-input'], 'utf8')).split('\n').filter(Boolean).map(line => JSON.parse(line)) : null;
   if (options['--archive']) { await mkdir(dirname(resolve(options['--archive'])), { recursive: true }); await writeFile(options['--archive'], '', { flag: 'wx' }); }
@@ -197,7 +250,8 @@ async function main(args) {
     if (options['--archive-input']) report.archiveInput = { sha256: sha256(await readFile(options['--archive-input'])) };
     const text = `${JSON.stringify(report, null, 2)}\n`;
     if (options['--output']) { await mkdir(dirname(resolve(options['--output'])), { recursive: true }); await writeFile(options['--output'], text, { flag: 'wx' });
-      console.log(JSON.stringify({ output: options['--output'], status: report.status, modelSupport: report.modelSupport.status, calibration: report.calibration.status, attemptedRallies: report.corpus.attemptedRallies })); }
+      console.log(JSON.stringify({ output: options['--output'], status: report.status, modelSupport: report.modelSupport.status, calibration: report.calibration.status, attemptedRallies: report.corpus.attemptedRallies,
+        cohortPurpose: report.cohortEvidence.purpose, examinationState: report.cohortEvidence.examinationState })); }
     else process.stdout.write(text);
     if (report.status !== 'PASS' || options['--require-calibration'] && report.calibration.status !== 'PASS') process.exitCode = 1;
   } finally { process.removeListener('SIGINT', interrupt); }

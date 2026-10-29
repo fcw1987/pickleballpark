@@ -71,6 +71,16 @@ function model2Point(value, path, height = false) {
   point(value, path, { offCourt: true });
   if (height) boundedNumber(value.heightFeet, 0, 30, `${path}.heightFeet`);
 }
+// Solved terminal evidence can continue beyond the authored 8-foot apron.
+// The supported solver's horizontal displacement multiplier is below 2436
+// over source spans of 36/60 ft; 200000 ft conservatively bounds both axes.
+// This arithmetic guard does not authorize contacts, targets or player travel.
+function model2TerminalEvidencePosition(value, path) {
+  keys(value, ['x', 'y', 'heightFeet'], path);
+  boundedNumber(value.x, -200000, 200000, `${path}.x`);
+  boundedNumber(value.y, -200000, 200000, `${path}.y`);
+  boundedNumber(value.heightFeet, 0, 30, `${path}.heightFeet`);
+}
 function model2Feet(value, path) {
   if (!Array.isArray(value) || value.length !== 2) fail(path, 'must describe exactly two feet.');
   value.forEach((foot, index) => model2Point(foot, `${path}[${index}]`));
@@ -169,7 +179,7 @@ function validateModel2Document(value) {
     if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam && !serveHitsReceivingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except the server or designated receiver on an applicable serve contact.');
   } else if (outcome.struckActor !== undefined) fail('outcome.struckActor', 'is only supported for a body contact.');
   keys(outcome.evidence, ['position', 'afterContactSeconds'], 'outcome.evidence');
-  model2Point(outcome.evidence.position, 'outcome.evidence.position', true);
+  model2TerminalEvidencePosition(outcome.evidence.position, 'outcome.evidence.position');
   boundedNumber(outcome.evidence.afterContactSeconds, 0, 30, 'outcome.evidence.afterContactSeconds');
 }
 
