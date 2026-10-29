@@ -2,7 +2,7 @@
 // keep their existing equations and interpretation.
 import { PHYSICS_V2, solveFlightV2, localNetHeightFeet } from './play-physics-v2.js';
 
-export const FLIGHT_PLANNER_VERSION = 'rally-flight-planner-v1';
+export const FLIGHT_PLANNER_VERSION = 'rally-flight-planner-v2';
 export const MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET = 6;
 export const GENERATION_FLIGHT_ENVELOPES_V1 = Object.freeze({
   serve: 40, return: 36, drive: Object.freeze({ pro: 45, other: 38 }),
@@ -81,6 +81,17 @@ function preferredRanges(family, intent, quality, style) {
   })[family] ?? { speedMph: [22, 45], clearanceFeet: [2 / 12, 1] };
 }
 
+/** Version 2 generation shape guard; explicit older flights keep their replay. */
+export function generationFlightApexCeilingFeetV2({ family, intent = null, quality = 'neutral', contactHeightFeet, style = 'advanced' } = {}) {
+  generationFlightCeilingMphV1({ family, intent, quality, style });
+  finite(contactHeightFeet, 'contactHeightFeet');
+  if (contactHeightFeet < R || contactHeightFeet > 30) throw new RangeError('Contact height must be between the ball radius and 30 feet.');
+  family = normalize(family); intent = normalize(intent);
+  if (quality === 'error' || family === 'overhead') return 30;
+  const ranges = preferredRanges(family, intent, quality, typeof style === 'string' ? style : style.id);
+  return Math.max(contactHeightFeet, (ranges.apexFeet?.[1] ?? 4.5) + 1);
+}
+
 function measurements(flight) {
   const m = flight.metadata, first = flight.stages[0];
   // Mesh obstruction clears netPoint in the solver; measure the original
@@ -142,10 +153,11 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
   const isError = quality === 'error' || errorReason !== null;
   const familyCeiling = generationFlightCeilingMphV1({ family, intent, style, quality: 'neutral' });
   const speedCeilingMph = generationFlightCeilingMphV1({ family, intent, style, quality: isError ? 'error' : quality });
+  const maximumApexFeet = generationFlightApexCeilingFeetV2({ family, intent, style, quality: isError ? 'error' : quality, contactHeightFeet: from.heightFeet });
   const fast = !isError && (['drive', 'overhead'].includes(family) || ['speed-up', 'counter', 'firm-volley', 'put-away', 'overhead'].includes(intent)
     || ['firm-volley', 'speed-up', 'counter', 'put-away'].includes(family));
   const minimumSpeedMph = fast ? 22 : 0, ranges = preferredRanges(family, intent, quality, styleId);
-  const diagnostics = { speedCeilingMph, familyCeilingMph: familyCeiling, minimumSpeedMph,
+  const diagnostics = { speedCeilingMph, familyCeilingMph: familyCeiling, minimumSpeedMph, maximumApexFeet,
     maxSolverCalls: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET, solverCalls: 0, feasibleTimeIntervals: [], trials: [], reason: null };
   const unavailable = reason => freeze({ status: 'unavailable', plannerVersion: FLIGHT_PLANNER_VERSION,
     physics: null, flight: null, solutions: [], diagnostics: { ...diagnostics, reason } });
@@ -161,7 +173,7 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
   const ceilingTimes = speedTimes(speedCeilingMph - SPEED_MARGIN, chordSquared, delta);
   if (!ceilingTimes) return unavailable('The exact target has no flight below the generation speed ceiling.');
   let low = Math.max(TIME_MIN, ceilingTimes[0], timeForVertical(-80 + HEIGHT_MARGIN, from.heightFeet));
-  const maxVertical = Math.min(80 - HEIGHT_MARGIN, Math.max(0, Math.sqrt(2 * G * (30 - from.heightFeet)) - HEIGHT_MARGIN));
+  const maxVertical = Math.min(80 - HEIGHT_MARGIN, Math.max(0, Math.sqrt(2 * G * (maximumApexFeet - from.heightFeet)) - HEIGHT_MARGIN));
   let high = Math.min(ceilingTimes[1], timeForVertical(maxVertical, from.heightFeet));
   if (family === 'overhead') high = Math.min(high, timeForVertical(0, from.heightFeet));
   if (family === 'lob' && !isError && from.heightFeet < 15) low = Math.max(low, timeForVertical(Math.sqrt(2 * G * (15 + HEIGHT_MARGIN - from.heightFeet)), from.heightFeet));
@@ -240,7 +252,7 @@ export function planRallyFlightV1({ from, target, family, intent = null, style =
     const actual = measurements(flight), crossing = flight.events.find(e => e.type === 'net-crossing');
     let reason = null;
     if (actual.speedMph > speedCeilingMph || actual.speedMph < minimumSpeedMph) reason = 'Actual launch speed violates the generation envelope.';
-    else if (actual.apexFeet < from.heightFeet || actual.apexFeet > 30 || actual.launchVerticalFeetPerSecond < -80 || actual.launchVerticalFeetPerSecond > 80) reason = 'Actual vertical shape violates the generation envelope.';
+    else if (actual.apexFeet < from.heightFeet || actual.apexFeet > maximumApexFeet || actual.launchVerticalFeetPerSecond < -80 || actual.launchVerticalFeetPerSecond > 80) reason = 'Actual vertical shape violates the generation envelope.';
     else if (family === 'overhead' && actual.launchVerticalFeetPerSecond > 0) reason = 'An overhead must launch downward.';
     else if (family === 'lob' && !isError && from.heightFeet < 15 && actual.apexFeet < 15) reason = 'A lob must retain a meaningful high apex.';
     else if (errorReason === 'net' && flight.obstruction?.kind !== 'net') reason = 'The intended net error does not hit net mesh.';

@@ -46,12 +46,9 @@ function auditAccepted(result) {
     const feet=shot.contactEvidence.feet;
     assert.equal(feet.length,2);assert.ok(feet.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)));
     if(segments[index].shotSemantics.contact.kind==='volley') assert.ok(feet.every(p=>!isInNonVolleyZone(p)));
-    if(result.decisions[index].execution.quality!=='error') {
-      const solved=solveFlightV2(segments[index].step.shot.physicsV2);
-      const friendly=ids.filter(id=>doc.players[id].team===doc.players[shot.hitter].team);
-      assert.deepEqual(inspectBodyPathV2(segments[index],solved,friendly),[],`${shot.id} nonerror delivered flight cannot hit its friendly actors`);
-    }
+
   }
+  if(result.outcome) assert.ok(rules.expectedOutcomes.some(outcome=>outcome.reason===result.outcome.reason && outcome.shotId===result.outcome.shotId));
   auditNominals(result);
   return compiled;
 }

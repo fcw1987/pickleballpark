@@ -78,7 +78,7 @@ progress or installs a point.
 
 A selected result's recipe equals `document.generation`. It records engine,
 policy, flight-planner and physics versions, normalized original settings, seed and selection.
-New generation uses `rally-policy-v2` with `rally-flight-planner-v1`. Older
+New generation uses `rally-policy-v2` with `rally-flight-planner-v2`. Older
 `rally-policy-v1` origins retain their exact shape without a planner marker;
 opening, importing and saving them never upgrades or regenerates their shots.
 No-document request records instead have `selection: null`, deliberately invalid
@@ -142,7 +142,7 @@ route, collision, peak-speed and spacing checks. Nominal replies use planned
 routes for all four players and the unchanged shared body sweep against the
 hitter and partner. The selected jittered nominal target receives the same
 check before execution. Non-error delivery is checked again after perturbation;
-sampled errors retain genuine body faults. Existing saved faults are never
+actual deliveries retain genuine body faults regardless of the quality label. Existing saved faults are never
 exempted or rewritten. Decision analysis records the selected nominal flight
 and actor-route evidence separately from execution and its outcome.
 The current candidate contact also passes the shared contact-rule checks before
@@ -150,7 +150,7 @@ commit. An interception accepted by the solver's numerical bound must still
 satisfy the stricter rule guard before the second bounce; neither tolerance is
 relaxed and a rejected proposal may yield to an earlier legal opportunity.
 
-`rally-flight-planner-v1` is shared by nominal targets, reply probes, execution,
+`rally-flight-planner-v2` is shared by nominal targets, reply probes, execution,
 delivered admission and grounded signatures. It derives a finite time interval
 from the actual contact, landing and a modeled speed ceiling, intersects signed
 launch/apex/route bounds, then tries at most six deterministic preferred/boundary
@@ -163,15 +163,23 @@ return 36, drive 45 Pro / 38 other styles, dink 20, reset 24, drop 26, lob 28, a
 volleys/fast attacks/overheads 45 mph. Errors allow at most the smaller of 50 mph
 and 1.25 times the family ceiling. Preferred Section 7 ranges remain diagnostics;
 departures stay visible. A meaningful non-error lob has a high apex and an
-ordinary overhead stays downward; a sampled lob error can hit the mesh without
+ordinary overhead stays downward. Non-error family shape ceilings are the
+actual contact height or one foot above the preferred upper apex, whichever is
+higher: ordinary dinks 5.2, attackable dinks 6.5, drives 6, drops 8, resets and
+ordinary volleys 5.5, serves/returns 9 and lobs 23 feet. These version-2 generation
+guards preserve older planner-v1 origins and explicit saved replay. A sampled lob error can hit the mesh without
 being forced into an ideal high arc. No generation restriction is retroactive
 validation of an existing saved point.
 
 A chosen nominal target, solved flight and friendly route are established before
 execution quality/error is drawn. At most eight targets are considered per intent;
 a second supported target within the same intended region may improve preferred
-speed. Once sampled, quality, error and perturbation draws stay fixed while the
-bounded delivered timings are tried. Exhaustion returns `unsupported-execution`
+speed. Once sampled, quality, error and perturbation draws stay fixed. The first
+constructible delivered timing is inspected once for actual physical events; a
+genuine fault is adjudicated regardless of the quality label, without searching
+later timings to avoid it. An unequivocal own-side body hit finishes through the
+shared terminal path; a projected later opponent body hit cannot preempt an
+earlier legal paddle interception. Unsupported construction returns `unsupported-execution`
 with preserved evidence and no selected point, never a new quality roll or a
 fabricated winner. Net/long/wide targets and signed launch are solved jointly;
 actual earlier net/body/out events remain authoritative. Soft popups carry within
@@ -179,7 +187,7 @@ the short landing region instead of silently becoming deep drives. Their incomin
 reply height still comes from the solved trajectory, not the quality label.
 
 The final public compiler consumes the serialized nine-decimal source. A separate
-`rally-generated-flight-feasibility-v1` audit measures actual stage velocity,
+`rally-generated-flight-feasibility-v2` audit measures actual stage velocity,
 apex, signed launch and ground time for every family, including errors. It does
 not trust a planner acceptance flag and leaves old playback/import equations
 unchanged. Fresh output needs this audit as well as existing source, rules,

@@ -154,3 +154,29 @@ test('a serialized low lob net error crosses public replay and the independent a
   assert.equal(JSON.stringify(document), before);
   assert.equal(JSON.stringify(document.shots[0].physics), sourcePhysics);
 });
+
+test('v2 audit rejects measured high arcs while explicit v1 replay keeps its historical shape envelope', () => {
+  for (const direction of [1, -1]) for (const [family, apex, speedMph, maximumApexFeet] of [['dink', 13, 20, 5.2], ['drive', 16.7, 28, 6], ['return', 30, 30, 9]]) {
+    const source = specimen({ family, direction, speedMph, vy: Math.sqrt(2 * G * (apex - 2.2)) });
+    source.document.generation.flightPlannerVersion = 'rally-flight-planner-v2';
+    const solved = source.compiled.timeline.segments[0].trajectory.solved;
+    source.compiled.timeline.segments[0].trajectory.solved = { ...solved, metadata: { ...solved.metadata, apexFeet: 1 } };
+    const audit = assessGeneratedFlightFeasibilityV1(source);
+    assert.equal(audit.status, 'FAIL');
+    const violation = audit.violations.find(v => v.code === 'apex-outside-envelope');
+    assert.ok(violation, JSON.stringify(audit)); assert.equal(violation.maximumApexFeet, maximumApexFeet);
+    source.document.generation.flightPlannerVersion = 'rally-flight-planner-v1';
+    const before = JSON.stringify(source.document);
+    assert.equal(assessGeneratedFlightFeasibilityV1(source).status, 'PASS');
+    assert.equal(JSON.stringify(source.document), before);
+    source.document.generation.flightPlannerVersion = 'rally-flight-planner-v2';
+    source.document.shots[0].quality = 'error';
+    assert.equal(assessGeneratedFlightFeasibilityV1(source).status, 'PASS');
+  }
+  for (const direction of [1, -1]) {
+    const high = specimen({ family: 'dink', height: 12, vy: 0, speedMph: 15, direction });
+    high.document.generation.flightPlannerVersion = 'rally-flight-planner-v2';
+    const audit = assessGeneratedFlightFeasibilityV1(high);
+    assert.equal(audit.status, 'PASS'); assert.equal(audit.flights[0].maximumApexFeet, 12);
+  }
+});

@@ -4,7 +4,7 @@ import { SERVICE_COURT_CONVENTION } from './rally-state.js';
 
 export const RALLY_ENGINE_VERSION = 'rally-engine-v1';
 export const RALLY_POLICY_VERSION = 'rally-policy-v2';
-export const RALLY_FLIGHT_PLANNER_VERSION = 'rally-flight-planner-v1';
+export const RALLY_FLIGHT_PLANNER_VERSION = 'rally-flight-planner-v2';
 export const RALLY_PHYSICS_VERSION = 'play-physics-v2';
 export const RALLY_STYLE_IDS = Object.freeze(['pro', 'advanced', 'intermediate', 'beginner']);
 export const RALLY_FLAVOUR_IDS = Object.freeze(['balanced', 'bangers', 'kitchen-masters', 'lobbers']);
@@ -121,7 +121,7 @@ export function validateGenerationRecipeV1(value) {
   choice(value.policyVersion, ['rally-policy-v1', RALLY_POLICY_VERSION], 'generation.policyVersion');
   if (value.policyVersion === RALLY_POLICY_VERSION) {
     required(value, ['flightPlannerVersion'], 'generation');
-    choice(value.flightPlannerVersion, [RALLY_FLIGHT_PLANNER_VERSION], 'generation.flightPlannerVersion');
+    choice(value.flightPlannerVersion, ['rally-flight-planner-v1', RALLY_FLIGHT_PLANNER_VERSION], 'generation.flightPlannerVersion');
   } else if (own(value, 'flightPlannerVersion')) fail('generation.flightPlannerVersion', 'is unsupported for rally-policy-v1.');
   choice(value.physicsVersion, [RALLY_PHYSICS_VERSION], 'generation.physicsVersion');
   const seed = integer(value.seed, 0, 0xffffffff, 'generation.seed');

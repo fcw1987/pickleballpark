@@ -2,7 +2,7 @@
 // construction as compilation; the driver independently validates final source.
 import { createEngineDriverV1 } from './rally-engine-driver.js';
 import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS } from './rally-recipe.js';
-import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPendingEventsV2, inspectPlanningTrialSafetyV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
+import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPlanningTrialEventsV2, inspectPlanningTrialSafetyV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
 import { interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { planRallyFlightV1, FLIGHT_PLANNER_VERSION } from './rally-flight-planner.js';
 import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
@@ -625,7 +625,6 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                     await checkpoint({ shots: index, workDelta: 1 });
                     const { applied, flight, guidance: deliveredGuidance } = solution;
                     try {
-                        if (execution.quality !== 'error' && flight.obstruction) throw new RangeError('A non-error execution must cross a playable lane.');
                         let recipe = { ...baseRecipe(`shot-${index + 1}`, index, pair, applied.target, chosen.family), intent: chosen.intent,
                             quality: execution.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics,
                             ...(index === 0 ? { receiver: input.service.receiver } : {}),
@@ -640,9 +639,13 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         recipe = generatedV1(recipe);
                         recipe.authoring = automaticOwnership([...owned, 'contactOverride'].filter(field => Object.hasOwn(recipe, field)));
                         const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial,
-                            capturePendingEvents: execution.quality !== 'error' });
+                            capturePendingEvents: true });
                         if (!trial.ok || !trial.previousInspectionReused && !routeValid(trial.resolvedPrevious)) throw new RangeError(trial.reason || 'The actual resolved movement or spacing is infeasible.');
-                        const deliveredSafety = execution.quality === 'error' ? null : checkFriendlyTrial(input, state, pair, trial);
+                        // Actual physical events are outcomes, not a filter on the fixed
+                        // execution draw. Inspect the guarded trial once before committing.
+                        const inspection = inspectPlanningTrialEventsV2(state, trial);
+                        if (inspection.violations.length || inspection.physicalCandidates.some(candidate => candidate.unsupportedReason))
+                            throw new RangeError('The delivered flight has unsupported model-2 geometry.');
                         commitPlanningTrialV2(state, trial);
                         pendingMovementPlans.set(state, movement.plan);
                         committed = true;
@@ -651,13 +654,20 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                             chosen: { id: chosen.id, intent: chosen.intent, family: chosen.family }, draws: { intent: intentDraw, execution: executionDraws, target: targetDraws, perturbation: perturbationDraws, narration: narrationDraw }, execution,
                             resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair, solutionIndex,
                                 flightPlannerVersion: FLIGHT_PLANNER_VERSION,
-                                nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedV1(deliveredGuidance), ...(deliveredSafety ? { deliveredSafety } : {}),
+                                nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedV1(deliveredGuidance),
                                 ...(applied.physicalTransformation ? { physicalTransformation: generatedV1(applied.physicalTransformation) } : {}),
                                 ...(parameters.guidance ? { flightGuidance: generatedV1(parameters.guidance) } : {}),
                                 actualContact: generatedV1(trial.contact), actualFeet: generatedV1(trial.feet), intendedError: execution.errorReason, choiceAttempts } });
-                        const inspection = inspectPendingEventsV2(state);
-                        if (execution.quality === 'error' && inspection.derivedOutcome) return finishAttempt(input, state, document, decisions, diagnostics, false);
-                        if (inspection.derivedOutcome && ['net', 'long', 'wide', 'nvz-foot', 'nvz-momentum', 'two-bounce'].includes(inspection.derivedOutcome.reason)) return finishAttempt(input, state, document, decisions, diagnostics, false);
+                        // A friendly body hit on the outgoing side before the net
+                        // cannot be superseded by an opponent paddle interception.
+                        // Projected opponent bodies remain pending until contact selection.
+                        const body = inspection.decision;
+                        const earlyFriendlyBody = body?.reason === 'body' &&
+                            friendlyActors(input, pair.id).includes(body.struckActor) &&
+                            body.afterContactSeconds < flight.firstLandingTime &&
+                            (input.players[pair.id].team === 'green' ? body.position?.y < 22 : body.position?.y > 22);
+                        if (earlyFriendlyBody) return finishAttempt(input, state, document, decisions, diagnostics, false);
+                        if (inspection.derivedOutcome && inspection.derivedOutcome.reason !== 'body') return finishAttempt(input, state, document, decisions, diagnostics, false);
                         accepted = true;
                         break;
                     } catch (error) {

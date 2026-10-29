@@ -20,7 +20,7 @@ const event=(type,time,position,details={})=>Object.freeze({type,time,position:O
 // Apex is an input. Launch/average speeds are derived, not independent and
 // potentially incompatible constraints. Restitution approximates surface losses;
 // aerodynamic drag and spin forces are deliberately outside this model version.
-export function solveFlightV2(input){
+export function solveFlightLaunchV2(input){
   if(input.physicsVersion!==undefined&&input.physicsVersion!==PHYSICS_VERSION)throw new RangeError('Unsupported physics version.');
   const from=point(input.from||{}),target={...input.target};
   for(const[name,n]of Object.entries(from))finite(n,`from.${name}`);
@@ -45,8 +45,8 @@ export function solveFlightV2(input){
   const flightDuration=(vy+Math.sqrt(vy*vy+2*G*(from.heightFeet-R)))/G;
   if(!(flightDuration>.001))throw new RangeError('A positive flight time is required.');
   const vx=(target.x-from.x)/flightDuration,vz=(target.y-from.y)/flightDuration;
-  const first=stage(from,vx,vy,vz,0,flightDuration,'flight'),stages=[],events=[];
-  let obstruction=null,netTime=null,netPoint=null,terminal=null;
+  const first=stage(from,vx,vy,vz,0,flightDuration,'flight'),events=[];
+  let obstruction=null,netTime=null,netPoint=null;
   if((from.y-22)*(target.y-22)<0){
     netTime=(22-from.y)/vz;netPoint=sampleStage(first,netTime);
     const x=netPoint.x,tape=localNetHeightFeet(x),bottom=tape-2.5;
@@ -59,6 +59,20 @@ export function solveFlightV2(input){
     else if(!around&&Math.abs(netPoint.heightFeet-R-tape)<=EPS)events.push(event('net-touch',netTime,netPoint,{remainsLive:true}));
     if(!obstruction)events.push(event('net-crossing',netTime,netPoint,{aroundPost:around}));
   }
+  const launchSpeedMph=Math.hypot(vx,vy,vz)/(22/15),horizontalAverageSpeedMph=Math.hypot(target.x-from.x,target.y-from.y)/flightDuration/(22/15);
+  return Object.freeze({from:Object.freeze(from),target:Object.freeze(target),apexFeet,vy,flightDuration,vx,vz,first,
+    netTime,netPoint:netPoint&&Object.freeze(netPoint),
+    obstruction:obstruction&&Object.freeze({...obstruction,position:Object.freeze(point(obstruction.position))}),
+    events:Object.freeze(events),launchSpeedMph,horizontalAverageSpeedMph});
+}
+
+export function solveFlightV2(input){
+  const launch=solveFlightLaunchV2(input);
+  const {from,target,apexFeet,vy,flightDuration,vx,vz,first,launchSpeedMph,horizontalAverageSpeedMph}=launch;
+  let netTime=launch.netTime,netPoint=launch.netPoint&&point(launch.netPoint);
+  const obstruction=launch.obstruction&&{...launch.obstruction,position:netPoint};
+  const stages=[],events=[...launch.events];
+  let terminal=null;
   let firstLandingTime,landing,secondBounceTime=null;
   if(obstruction?.kind==='net'){
     const direction=Math.sign(vz),t=Math.max(0,(22-direction*(R+.01)-from.y)/vz),hit=sampleStage(first,t);
@@ -88,7 +102,6 @@ export function solveFlightV2(input){
     return Object.freeze({x:selected.from.x+selected.vx*local,y:selected.from.y+selected.vz*local,
       heightFeet:Math.max(R,selected.from.heightFeet+selected.vy*local-.5*G*local*local),
       phase:bounce?'bounce':t>=endBoundary?(terminal?'dead':'second-bounce'):selected.phase,bounced:t>=bounceBoundary});};
-  const launchSpeedMph=Math.hypot(vx,vy,vz)/(22/15),horizontalAverageSpeedMph=Math.hypot(target.x-from.x,target.y-from.y)/flightDuration/(22/15);
   const metadata=Object.freeze({physicsVersion:PHYSICS_VERSION,type:input.family,from:{x:from.x,y:from.y},to:target,
     contactHeightFeet:from.heightFeet,apexFeet,speedMph:launchSpeedMph,launchSpeedMph,launchVerticalFeetPerSecond:vy,horizontalAverageSpeedMph,
     netClearanceInches:netPoint?(netPoint.heightFeet-R-localNetHeightFeet(netPoint.x))*12:null,

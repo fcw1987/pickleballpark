@@ -436,7 +436,7 @@ test('physical validity and natural denominators survive a separate generated fl
   assert.equal(report.generatedFlightFeasibility.families.dink.failedFlights, 1);
   assert.equal(report.observations[0].accepted, true);
   assert.equal(report.versions.policyVersion, 'rally-policy-v2');
-  assert.equal(report.versions.flightPlannerVersion, 'rally-flight-planner-v1');
+  assert.equal(report.versions.flightPlannerVersion, 'rally-flight-planner-v2');
 });
 
 test('archive replay reports actual mixed provenance without upgrading historical origins', async () => {
@@ -449,7 +449,7 @@ test('archive replay reports actual mixed provenance without upgrading historica
   assert.equal(report.physicalValidity.status, 'PASS');
   assert.equal(report.versions.policyVersion, null);
   assert.deepEqual(report.versions.sourceVersions.policyVersion, ['rally-policy-v1', 'rally-policy-v2']);
-  assert.deepEqual(report.versions.sourceVersions.flightPlannerVersion, [null, 'rally-flight-planner-v1']);
+  assert.deepEqual(report.versions.sourceVersions.flightPlannerVersion, [null, 'rally-flight-planner-v2']);
   assert.equal(report.summary.denominators.naturalCompleteRallies, 2);
   assert.equal(JSON.stringify(records), before);
 });

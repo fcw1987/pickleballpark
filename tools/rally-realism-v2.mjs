@@ -146,6 +146,7 @@ export async function runRealismV2({ generate, jobs = createCohortSchedule(), si
         const request = clone(createRallyRequestRecipeV1(normalizeRallyInputV1(job.input)));
         // Historical request-only archive rows retain their original strict identity.
         if (replay && result.recipe?.policyVersion === 'rally-policy-v1') { request.policyVersion = 'rally-policy-v1'; delete request.flightPlannerVersion; }
+        else if (replay && result.recipe?.policyVersion === 'rally-policy-v2' && result.recipe.flightPlannerVersion === 'rally-flight-planner-v1') request.flightPlannerVersion = 'rally-flight-planner-v1';
         if (canonical(result.recipe) !== canonical(request)) throw Error('No-document result does not retain the normalized request recipe');
         const diagnostic = result.diagnostics;
         if (!Number.isInteger(diagnostic?.attempts) || diagnostic.attempts < 0 || diagnostic.attempts > 64

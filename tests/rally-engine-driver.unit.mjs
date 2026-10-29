@@ -316,7 +316,7 @@ test('selected output records bounded independent audit summaries without saved 
   const result = await createEngineDriverV1(async () => net(7), { yieldControl: immediate })({ seed: 7 });
   assert.equal(result.status, 'complete');
   assert.deepEqual(result.stats.generatedFlightFeasibility, {
-    version: 'rally-generated-flight-feasibility-v1', status: 'PASS', checkedFlights: 1,
+    version: 'rally-generated-flight-feasibility-v2', status: 'PASS', checkedFlights: 1,
   });
   assert.equal(result.diagnostics.validation.generatedFlightFeasibility.status, 'PASS');
   assert.equal(Object.hasOwn(result.document, 'generatedFlightFeasibility'), false);

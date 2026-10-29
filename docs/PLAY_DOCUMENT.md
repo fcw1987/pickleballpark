@@ -256,7 +256,7 @@ generation: {
   mode: 'engine',
   generatorVersion: 'rally-engine-v1',
   policyVersion: 'rally-policy-v2',
-  flightPlannerVersion: 'rally-flight-planner-v1',
+  flightPlannerVersion: 'rally-flight-planner-v2',
   physicsVersion: 'play-physics-v2',
   seed,                         // uint32 original request seed
   input: {

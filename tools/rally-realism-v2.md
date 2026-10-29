@@ -128,7 +128,7 @@ answer that question and cannot be presented as its numerical PASS.
 
 ## Generated-flight feasibility
 
-The separate `rally-generated-flight-feasibility-v1` observation audits compiled
+The separate `rally-generated-flight-feasibility-v2` observation audits compiled
 serialized stage velocities for every generated family and error. Its model
 ceilings are distinct from the original Section 7 preferred ranges and unchanged
 Section 13 calibration bands. Physical rule validity, model support, generated

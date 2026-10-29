@@ -1,9 +1,9 @@
 // Generation-only analysis of public compiled, serialized model-2 flights.
 // This diagnostic is deliberately separate from saved-document rule validity.
 import { PHYSICS_V2, sampleFlightVelocityV2 } from './play-physics-v2.js';
-import { generationFlightCeilingMphV1 } from './rally-flight-planner.js';
+import { generationFlightCeilingMphV1, generationFlightApexCeilingFeetV2 } from './rally-flight-planner.js';
 
-export const GENERATED_FLIGHT_AUDIT_VERSION = 'rally-generated-flight-feasibility-v1';
+export const GENERATED_FLIGHT_AUDIT_VERSION = 'rally-generated-flight-feasibility-v2';
 const TOLERANCE = 1e-6;
 const FAST_INTENTS = new Set(['speed-up', 'speedup', 'counter', 'firm-volley', 'put-away', 'putaway']);
 const finite = Number.isFinite;
@@ -46,19 +46,21 @@ export function assessGeneratedFlightFeasibilityV1({ document, compiled } = {}) 
     const fast = ['drive', 'overhead'].includes(family) || FAST_INTENTS.has(intent) || FAST_INTENTS.has(family);
     const minimumSpeedMph = quality !== 'error' && fast ? 22 : null;
     const minimumApexFeet = family === 'lob' && quality !== 'error' ? Math.max(15, from.heightFeet) : from.heightFeet;
+    const maximumApexFeet = document.generation.flightPlannerVersion === 'rally-flight-planner-v2'
+      ? generationFlightApexCeilingFeetV2({ family, intent, style, quality, contactHeightFeet: from.heightFeet }) : 30;
     const before = violations.length;
     if (![vx, vy, vz, speedMph, apexFeet, ballisticTimeSeconds, solved.firstLandingTime, maximumSpeedMph].every(finite)
         || !validPoint(landing) || ballisticTimeSeconds <= .001 || solved.firstLandingTime <= 0) fail('invalid-flight-kinematics');
     if (['x', 'y', 'heightFeet'].some(key => Math.abs(from[key] - segment.shotSemantics.contact.point[key]) > TOLERANCE)) fail('compiled-contact-mismatch');
     if (speedMph > maximumSpeedMph + TOLERANCE) fail('launch-speed-above-envelope', { speedMph, maximumSpeedMph, toleranceMph: TOLERANCE });
     if (minimumSpeedMph !== null && speedMph < minimumSpeedMph - TOLERANCE) fail('launch-speed-below-fast-floor', { speedMph, minimumSpeedMph });
-    if (apexFeet < minimumApexFeet - TOLERANCE || apexFeet > 30 + TOLERANCE) fail('apex-outside-envelope', { apexFeet, minimumApexFeet, maximumApexFeet: 30 });
+    if (apexFeet < minimumApexFeet - TOLERANCE || apexFeet > maximumApexFeet + TOLERANCE) fail('apex-outside-envelope', { apexFeet, minimumApexFeet, maximumApexFeet });
     if (vy < -80 - TOLERANCE || vy > 80 + TOLERANCE) fail('vertical-launch-outside-envelope', { launchVerticalFeetPerSecond: vy });
     if (family === 'overhead' && vy > TOLERANCE) fail('overhead-launch-upward', { launchVerticalFeetPerSecond: vy });
     if (Math.abs(landing.heightFeet - radius) > TOLERANCE) fail('landing-above-surface', { landing: point(landing) });
     flights.push({ ...identity, status: violations.length === before ? 'PASS' : 'FAIL',
       launchSpeedMph: speedMph, maximumSpeedMph, minimumSpeedMph, launchVerticalFeetPerSecond: vy,
-      apexFeet, minimumApexFeet, ballisticTimeSeconds, firstLandingTimeSeconds: solved.firstLandingTime,
+      apexFeet, minimumApexFeet, maximumApexFeet, ballisticTimeSeconds, firstLandingTimeSeconds: solved.firstLandingTime,
       from: point(from), landing: point(landing), obstruction: solved.obstruction?.kind ?? null });
   }
   return { version: GENERATED_FLIGHT_AUDIT_VERSION, status: violations.length ? 'FAIL' : 'PASS',

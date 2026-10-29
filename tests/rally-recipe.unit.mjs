@@ -169,11 +169,15 @@ test('99 fully populated source records fit unchanged JSON and import/export/sto
 });
 
 
-test('policy-v2 requires its exact planner pair while policy-v1 retains its old strict bytes', () => {
+test('policy-v2 requires a supported planner version while historical origins retain their strict bytes', () => {
   const current = recipe();
   assert.equal(current.policyVersion, 'rally-policy-v2');
-  assert.equal(current.flightPlannerVersion, 'rally-flight-planner-v1');
+  assert.equal(current.flightPlannerVersion, 'rally-flight-planner-v2');
   assert.equal(current.generatorVersion, 'rally-engine-v1');
+  const boundedV1 = clone(current); boundedV1.flightPlannerVersion = 'rally-flight-planner-v1';
+  const boundedBytes = JSON.stringify(boundedV1);
+  assert.equal(validateGenerationRecipeV1(boundedV1), boundedV1);
+  assert.equal(JSON.stringify(boundedV1), boundedBytes);
   const legacy = clone(current); legacy.policyVersion = 'rally-policy-v1'; delete legacy.flightPlannerVersion;
   const document = model2Document({ generation: legacy });
   document.shots[0].target.x = 8.25;
@@ -185,7 +189,7 @@ test('policy-v2 requires its exact planner pair while policy-v1 retains its old 
   assert.equal(JSON.stringify(store.importJSON(store.exportJSON(imported))), bytes);
   for (const mutate of [
     value => { delete value.flightPlannerVersion; },
-    value => { value.flightPlannerVersion = 'rally-flight-planner-v2'; },
+    value => { value.flightPlannerVersion = 'rally-flight-planner-v3'; },
     value => { value.policyVersion = 'rally-policy-v3'; },
     value => { value.generatorVersion = 'rally-engine-v2'; },
     value => { value.policyVersion = 'rally-policy-v1'; },

@@ -76,7 +76,7 @@ for (const intent of ['erne', 'around-the-post']) for (const far of [false, true
       assert.equal(resolution.physical, null); assert.deepEqual(resolution.ordered, []);
     }
     if (intent === 'erne') assert.ok(sampleActorFeetV2(segments[0], receiver, segments[0].duration - 1e-4).every(outsideNVZ), 'both grounded feet clear the NVZ before contact');
-    assert.equal(candidate.flightPlannerVersion, 'rally-flight-planner-v1');
+    assert.equal(candidate.flightPlannerVersion, 'rally-flight-planner-v2');
     assert.equal(candidate.flightPlannerDiagnostics.solverCalls, candidate.flightPlannerDiagnostics.trials.length);
     assert.ok(candidate.flightPlannerDiagnostics.solverCalls <= SIGNATURE_LIMITS.maxSolverCallsPerTarget);
     assert.ok(result.work.launchTrials >= candidate.flightPlannerDiagnostics.solverCalls);

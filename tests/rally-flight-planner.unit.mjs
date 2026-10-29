@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { planRallyFlightV1, generationFlightCeilingMphV1, FLIGHT_PLANNER_VERSION,
+import { planRallyFlightV1, generationFlightCeilingMphV1, generationFlightApexCeilingFeetV2, FLIGHT_PLANNER_VERSION,
   GENERATION_FLIGHT_ENVELOPES_V1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from '../rally-flight-planner.js';
 import { solveFlightV2, PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
 
@@ -40,6 +40,7 @@ function verify(input, result) {
     const independentApex = input.from.heightFeet + Math.max(0, first.vy) ** 2 / (2 * G);
     near(independentApex, evidence.actual.apexFeet);
     assert.ok(independentApex >= input.from.heightFeet && independentApex <= 30);
+    assert.ok(independentApex <= generationFlightApexCeilingFeetV2({ ...input, contactHeightFeet: input.from.heightFeet }) + 1e-9);
     assert.ok(first.vy >= -80 && first.vy <= 80);
     assert.ok(evidence.actual.flightTimeSeconds > .001);
     const t = (22 - input.from.y) / first.vz;
@@ -68,7 +69,7 @@ function verify(input, result) {
 }
 
 test('generation envelopes are declarative defaults, immutable and shared with independent audits', () => {
-  assert.equal(FLIGHT_PLANNER_VERSION, 'rally-flight-planner-v1');
+  assert.equal(FLIGHT_PLANNER_VERSION, 'rally-flight-planner-v2');
   assert.equal(MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET, 6);
   assert.ok(Object.isFrozen(GENERATION_FLIGHT_ENVELOPES_V1.drive));
   for (const [family, expected] of Object.entries({ serve: 40, return: 36, drive: 38, dink: 20, reset: 24, drop: 26,
@@ -84,6 +85,12 @@ test('generation envelopes are declarative defaults, immutable and shared with i
 for (const fixture of archived) test(`preserved exact archive regression: ${fixture.id}`, () => {
   const before = JSON.stringify(fixture.input), result = planRallyFlightV1(fixture.input);
   assert.equal(fixture.expectedStatus, 'solved', 'these are known feasible cases, never success-or-rejection tests');
+  if (fixture.id === 'dink-nonerror') {
+    assert.equal(result.status, 'unavailable', 'the old cross-court target cannot satisfy the v2 dink shape and speed ceilings');
+    verify({ ...fixture.input, target: { x: 10, y: 27 } }, planRallyFlightV1({ ...fixture.input, target: { x: 10, y: 27 } }));
+    assert.equal(JSON.stringify(fixture.input), before);
+    return;
+  }
   verify(fixture.input, result);
   assert.equal(JSON.stringify(fixture.input), before);
   if (fixture.id.endsWith('shot6')) {
@@ -97,7 +104,9 @@ for (const fixture of archived) test(`preserved exact archive regression: ${fixt
 test('all nine families solve exact low/high contacts in both directions', () => {
   for (const family of ['serve', 'return', 'drive', 'dink', 'reset', 'drop', 'lob', 'volley', 'overhead']) {
     for (const heightFeet of [family === 'overhead' ? 4 : .6, 8.5]) for (const mirror of [false, true]) {
-      const input = { from: { x: 7, y: mirror ? 30 : 14, heightFeet }, target: { x: 11, y: mirror ? 9 : 35 }, family };
+      const fromY = family === 'dink' ? 17 : family === 'drive' ? 8 : 14;
+      const targetY = family === 'dink' ? 27 : family === 'drive' ? 36 : 35;
+      const input = { from: { x: 7, y: mirror ? 44 - fromY : fromY, heightFeet }, target: { x: 11, y: mirror ? 44 - targetY : targetY }, family };
       const result = planRallyFlightV1(input); verify(input, result);
       if (['drive', 'overhead'].includes(family)) assert.ok(result.flight.launchSpeedMph >= 22);
     }
@@ -219,4 +228,24 @@ test('malformed inputs reject without mutation or nonfinite output', () => {
   for (const input of invalid) assert.throws(() => planRallyFlightV1(input), error => error instanceof TypeError || error instanceof RangeError);
   const input = structuredClone(normal); Object.freeze(input.from); Object.freeze(input.target); Object.freeze(input);
   verify(input, planRallyFlightV1(input));
+});
+
+test('v2 non-error family apex ceilings constrain every admitted alternative and preserve high contacts', () => {
+  for (const [family, expected] of Object.entries({ dink: 5.2, drive: 6, drop: 8, reset: 5.5, volley: 5.5, serve: 9, return: 9, lob: 23 })) {
+    assert.equal(generationFlightApexCeilingFeetV2({ family, contactHeightFeet: 2.2 }), expected);
+    assert.equal(generationFlightApexCeilingFeetV2({ family, contactHeightFeet: 12 }), Math.max(12, expected));
+    assert.equal(generationFlightApexCeilingFeetV2({ family, contactHeightFeet: 2.2, quality: 'error' }), 30);
+  }
+  assert.equal(generationFlightApexCeilingFeetV2({ family: 'dink', quality: 'attackable', contactHeightFeet: 2.2 }), 6.5);
+  for (const intent of ['speed-up', 'counter', 'firm-volley', 'put-away']) assert.equal(generationFlightApexCeilingFeetV2({ family: 'volley', intent, contactHeightFeet: 2.2 }), 5.5);
+  for (const [family, oldApex, fromY, targetY] of [['dink', 13, 17, 27], ['drive', 16.7, 8, 36], ['return', 30, 8, 36]]) {
+    for (const mirror of [false, true]) {
+      const input = { family, from: { x: 7, y: mirror ? 44 - fromY : fromY, heightFeet: 2.2 }, target: { x: 11, y: mirror ? 44 - targetY : targetY }, preferred: { apexFeet: oldApex } };
+      const result = planRallyFlightV1(input); verify(input, result);
+      assert.ok(result.solutions.every(s => s.evidence.actual.apexFeet < oldApex));
+      const high = { ...input, from: { ...input.from, heightFeet: 12 } };
+      const highResult = planRallyFlightV1(high); verify(high, highResult);
+      assert.ok(highResult.solutions.every(s => s.evidence.actual.apexFeet <= 12));
+    }
+  }
 });
