@@ -162,6 +162,11 @@ report retains the original calibration verdict separately from release
 acceptance and the reference-device median goal. These inputs are consumed
 regression evidence, never a new or relabeled holdout. No point replacement,
 sample extension or numerical-failure retry is permitted.
+Every represented line-drive must retain matched pre-choice geometry and an
+explicit physical affordance; that trace integrity remains mandatory even when
+the separate frequency goal lacks samples. Cancellation during collection,
+independent repetition or finalization cannot claim successful acceptance;
+partial records and an interruption failure report are retained.
 
 Browser responsiveness remains required. Actual phone responsiveness QA must
 also pass in the actual app interface; headless engine evidence cannot satisfy

@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { createExaminedRegressionScheduleV1, compareRallyResultsV1, deterministicResultProjectionV1, runRequiredRegressionV1 } from '../tools/rally-regression-v1.mjs';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createExaminedRegressionScheduleV1, compareRallyResultsV1, deterministicResultProjectionV1, runRequiredRegressionV1,
+ recordRegressionRepeatV1, finalizeRegressionReportV1, persistRegressionInterruptionV1 } from '../tools/rally-regression-v1.mjs';
 import { createCohortSchedule } from '../tools/rally-realism-v2.mjs';
 
 test('required regression is the complete examined input schedule with separate immutable identity',()=>{
@@ -36,4 +39,53 @@ test('required workflow invokes examined regression without weakening its gate o
  assert.match(block,/name: Rally physical regression/);assert.match(block,/tools\/rally-regression-v1\.mjs/);
  assert.match(block,/--require-clean/);assert.doesNotMatch(block,/--cohort holdout|continue-on-error|--require-calibration/);
  assert.match(workflow,/needs: \[checks, chromium, webkit, package, rally-calibration\]/);
+});
+
+test('cancelling the last independent repeat passes its signal and preserves the original observation',async()=>{
+ const controller=new AbortController(),persisted=[];
+ const record={job:{id:'last',input:{seed:5}},result:{status:'complete',document:{id:'preserved'}}};
+ await assert.rejects(recordRegressionRepeatV1(record,{signal:controller.signal,
+  generate:async input=>{assert.equal(input.signal,controller.signal);controller.abort();return{status:'cancelled'};},
+  persist:async value=>persisted.push(structuredClone(value))}),error=>error.name==='AbortError'&&error.phase==='independent-repeat');
+ assert.equal(persisted.length,1);assert.equal(persisted[0].result.document.id,'preserved');
+ assert.equal(persisted[0].interruption.repeatedResult.status,'cancelled');assert.equal(persisted[0].determinism,undefined);
+});
+
+test('an interrupted collector starts no new independent repeat',async()=>{
+ const controller=new AbortController();controller.abort();let generated=0,persisted=0;
+ await assert.rejects(recordRegressionRepeatV1({job:{id:'next',input:{seed:6}},result:{status:'complete'}},
+  {signal:controller.signal,generate:async()=>generated++,persist:async()=>persisted++}),/interrupted/);
+ assert.equal(generated,0);assert.equal(persisted,1);
+});
+
+test('interruption during final archive hashing cannot publish acceptance',async()=>{
+ const controller=new AbortController();let published=0;
+ await assert.rejects(finalizeRegressionReportV1({releaseAcceptance:{status:'PASS'}},{signal:controller.signal,
+  hashArchive:async()=>{controller.abort();return'abc';},publish:async()=>published++}),
+  error=>error.name==='AbortError'&&error.phase==='archive-hashing');
+ assert.equal(published,0);
+});
+
+test('interruption during final report writing cannot return a successful completion',async()=>{
+ const controller=new AbortController();let published=0;
+ await assert.rejects(finalizeRegressionReportV1({releaseAcceptance:{status:'PASS'}},{signal:controller.signal,
+  hashArchive:async()=>'abc',publish:async()=>{published++;controller.abort();}}),
+  error=>error.name==='AbortError'&&error.phase==='report-publication');
+ assert.equal(published,1,'the runner must replace this run’s own output with its interrupted failure report');
+});
+
+test('final publication cancellation leaves a failed report and exact partial archive on disk',async()=>{
+ const directory=await mkdtemp(join(tmpdir(),'rally-interruption-'));
+ const output=join(directory,'report.json'),archive=join(directory,'records.jsonl'),controller=new AbortController();
+ const bytes='{"preserved":"first result"}\n';await writeFile(archive,bytes);let outputCreated=false;
+ try{
+  await assert.rejects((async()=>{
+   try{await finalizeRegressionReportV1({releaseAcceptance:{status:'PASS'}},{signal:controller.signal,
+    hashArchive:async()=>'abc',publish:async value=>{await writeFile(output,JSON.stringify(value),{flag:'wx'});outputCreated=true;controller.abort();}});}
+   catch(error){await persistRegressionInterruptionV1({output,archive,sourceRevision:'source',persistedRecords:1,error,outputCreated});throw error;}
+  })(),/interrupted/);
+  const report=JSON.parse(await readFile(output,'utf8'));assert.equal(report.status,'INTERRUPTED');
+  assert.equal(report.releaseAcceptance.status,'FAIL');assert.equal(report.persistedRecords,1);
+  assert.equal(await readFile(archive,'utf8'),bytes);
+ }finally{await rm(directory,{recursive:true,force:true});}
 });

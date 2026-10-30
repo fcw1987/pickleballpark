@@ -7,6 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { availableParallelism, cpus } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { setImmediate as yieldTurn } from 'node:timers/promises';
 import { createCohortSchedule, runRealismV2 } from './rally-realism-v2.mjs';
 import { evaluateRallyReleaseAcceptanceV1 } from './rally-release-acceptance-v1.mjs';
 
@@ -43,12 +44,68 @@ export function compareRallyResultsV1(jobId, first, second) {
   return { jobId, firstSha256: digest(deterministicResultProjectionV1(first)),
     secondSha256: digest(deterministicResultProjectionV1(second)) };
 }
-async function hashFile(path) {
+async function hashFile(path, signal) {
   const hash = createHash('sha256');
-  for await (const chunk of createReadStream(path)) hash.update(chunk);
+  for await (const chunk of createReadStream(path)) {
+    checkInterruption(signal, 'archive-hashing');
+    hash.update(chunk);
+  }
   return hash.digest('hex');
 }
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+function checkInterruption(signal, phase) {
+  if (!signal?.aborted) return;
+  const error = new Error(`Regression interrupted during ${phase}.`);
+  error.name = 'AbortError'; error.code = 'REGRESSION_INTERRUPTED'; error.phase = phase;
+  throw error;
+}
+
+/** Preserve the first observation even when its independent repeat is cancelled. */
+export async function recordRegressionRepeatV1(record, { signal, generate, persist }) {
+  let repeated;
+  if (!signal?.aborted) {
+    try { repeated = await generate({ ...clone(record.job.input), signal }); }
+    catch (error) { repeated = { status: 'failed', document: null, outcome: null,
+      decisions: [], stats: null, recipe: null, outcomeClassification: null,
+      diagnostics: { code: 'repeat-exception', name: error.name, message: error.message } }; }
+  }
+  if (signal?.aborted) {
+    record.interruption = { phase: 'independent-repeat', repeatedResult: repeated ?? null };
+    await persist(record);
+    checkInterruption(signal, 'independent-repeat');
+  }
+  const comparison = compareRallyResultsV1(record.job.id, record.result, repeated);
+  record.determinism = comparison;
+  if (comparison.firstSha256 !== comparison.secondSha256) record.determinismFailure = { repeatedResult: repeated };
+  await persist(record);
+  checkInterruption(signal, 'archive-write');
+  return comparison;
+}
+
+/** Finalization has a cancellation boundary after hashing and after publication. */
+export async function finalizeRegressionReportV1(report, { signal, hashArchive, publish }) {
+  checkInterruption(signal, 'finalization');
+  report.archive = { sha256: await hashArchive() };
+  checkInterruption(signal, 'archive-hashing');
+  await publish(report);
+  // Deliver a queued SIGINT before declaring completion. The caller replaces
+  // its own newly written report with a non-success record if this throws.
+  await yieldTurn();
+  checkInterruption(signal, 'report-publication');
+  return report;
+}
+
+export async function persistRegressionInterruptionV1({ output, archive, sourceRevision, persistedRecords, error, outputCreated }) {
+  const interrupted = { status: 'INTERRUPTED', sourceRevision, persistedRecords,
+    interruption: { phase: error.phase ?? 'collection', message: error.message },
+    releaseAcceptance: { contractVersion: 'rally-release-acceptance-v1', status: 'FAIL',
+      requiredChecks: [{ name: 'uninterruptedCompletion', status: 'FAIL' }] },
+    archive: { path: archive, evidence: 'Partial records retained unchanged; no successful completion claimed.' } };
+  // Only a report successfully created by this run may be replaced. Existing
+  // unrelated evidence remains protected by the exclusive-create path.
+  await writeFile(output, `${JSON.stringify(interrupted, null, 2)}\n`, { flag: outputCreated ? 'w' : 'wx' });
+  return interrupted;
+}
 
 export async function runRequiredRegressionV1({ output, archive, requireClean = false } = {}) {
   if (!output || !archive || resolve(output) === resolve(archive)) throw Error('Distinct report and archive paths are required.');
@@ -65,25 +122,20 @@ export async function runRequiredRegressionV1({ output, archive, requireClean = 
   const file = await open(archive, 'wx'); await file.close();
   const { simulateRally } = await import('../rally-engine.js');
   const jobs = createExaminedRegressionScheduleV1(), comparisons = [], statuses = {};
+  let persistedRecords = 0, outputCreated = false;
   const controller = new AbortController(), interrupt = () => controller.abort();
   process.once('SIGINT', interrupt);
   const startedAt = new Date().toISOString(), began = performance.now();
   try {
     const report = await runRealismV2({ jobs, sourceRevision, signal: controller.signal,
       onRecord: async record => {
-        let repeated;
-        try { repeated = await simulateRally(clone(record.job.input)); }
-        catch (error) { repeated = { status: 'failed', document: null, outcome: null,
-          decisions: [], stats: null, recipe: null, outcomeClassification: null,
-          diagnostics: { code: 'repeat-exception', name: error.name, message: error.message } }; }
-        const comparison = compareRallyResultsV1(record.job.id, record.result, repeated);
+        const comparison = await recordRegressionRepeatV1(record, { signal: controller.signal, generate: simulateRally,
+          persist: async value => { await appendFile(archive, `${JSON.stringify(value)}\n`); persistedRecords++; } });
         comparisons.push(comparison);
-        record.determinism = comparison;
-        if (comparison.firstSha256 !== comparison.secondSha256) record.determinismFailure = { repeatedResult: repeated };
-        await appendFile(archive, `${JSON.stringify(record)}\n`);
         statuses[record.result.status] = (statuses[record.result.status] ?? 0) + 1;
         if (comparisons.length % 300 === 0) console.log(JSON.stringify({ attempted: comparisons.length, statuses, elapsedMs: performance.now() - began }));
       } });
+    checkInterruption(controller.signal, 'acceptance');
     const determinism = { version: 'rally-determinism-regression-v1',
       status: comparisons.length === jobs.length && comparisons.every(c => c.firstSha256 === c.secondSha256) ? 'PASS' : 'FAIL',
       comparisons };
@@ -96,12 +148,17 @@ export async function runRequiredRegressionV1({ output, archive, requireClean = 
       architecture: process.arch, cpuModel: cpus()[0]?.model ?? null, availableParallelism: availableParallelism(),
       measurementNote: 'First-run end-to-end Natural generation includes default real yields and independent final validation. The separate independent determinism repeat is not included in that latency observation.' };
     report.timing = { startedAt, elapsedMs: performance.now() - began };
-    report.archive = { sha256: await hashFile(archive) };
-    await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, { flag: 'wx' });
+    await finalizeRegressionReportV1(report, { signal: controller.signal, hashArchive: () => hashFile(archive, controller.signal),
+      publish: async value => { await writeFile(output, `${JSON.stringify(value, null, 2)}\n`, { flag: 'wx' }); outputCreated = true; } });
     console.log(JSON.stringify({ output, archive, sourceRevision, releaseAcceptance: report.releaseAcceptance.status,
       physicalRegression: report.status, determinism: determinism.status, realismGoals: report.calibration.status,
       attempted: report.corpus.attemptedRallies, scheduled: jobs.length, archiveSha256: report.archive.sha256 }));
     return report;
+  } catch (error) {
+    if (controller.signal.aborted) {
+      await persistRegressionInterruptionV1({ output, archive, sourceRevision, persistedRecords, error, outputCreated });
+    }
+    throw error;
   } finally { process.removeListener('SIGINT', interrupt); }
 }
 

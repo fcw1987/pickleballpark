@@ -12,6 +12,11 @@ function fixture() {
   const observations = schedule.map(job => ({ jobId: job.id, seed: job.seed, style: job.style, flavour: job.flavour,
     cohort: job.cohort, settings: structuredClone(job.input), status: 'complete', complete: true, censored: false,
     accepted: true, physicallyValid: true, documentPresent: true, conditioned: false, shots: 12, sourceShots: 12,
+    contacts: Array.from({ length: 12 }, (_, index) => ({ ordinal: index + 1, shotId: `shot${index}`, time: index + 1,
+      hitter: 'player1', hittingTeam: 'green', family: index === 0 ? 'serve' : 'drive', hitterUp: true,
+      contact: { x: 5, y: 15, heightFeet: 3 },
+      positions: { player1: { x: 5, y: 15 }, player2: { x: 15, y: 15 }, player3: { x: 5, y: 29 }, player4: { x: 15, y: 29 } },
+      incomingAttackable: true, decisionEvidence: { matched: true, sampleTimeSeconds: index + 1, contactTimeSeconds: index + 1 } })),
     generationMs: 75, validation: { acceptedShots: 12, compilerErrors: [], ruleViolations: [], outcomeMatched: true,
       terminalMatched: true, sourceUnchanged: true }, modelSupport: { ...audit, checkedContacts: 12, unsupportedContacts: 0 },
     generatedFlightFeasibility: { ...audit, checkedFlights: 12 } }));
@@ -24,7 +29,7 @@ function fixture() {
       denominators: { naturalCompleteRallies: 1200, invalidOrMissing: 0, censoredRallies: 0,
         conditionedCompleteRallies: 0, lineDrives: 20, lineDrivesWithAttackabilityEvidence: 20 },
       metrics: { naturalShotCount: distribution(Array(1200).fill(12)), naturalNineShotsOrFewer: rate(1),
-        naturalThirtyShotsOrMore: rate(0), allFourUp: rate(.6), thirdDriveShareOfDriveDrop: rate(.45),
+        naturalThirtyShotsOrMore: rate(0), allFourUp: rate(.1), thirdDriveShareOfDriveDrop: rate(.45),
         thirdLobShare: rate(0), thirdShotKeptInPlay: rate(.94), fifthAfterDrive: { drop: rate(.65), firmVolley: rate(.31) },
         driveRalliesOverByFourth: rate(.1), receivingTeamWins: rate(.5), lobShare: rate(.02), teamSplitAfterSixth: rate(.05),
         dinksWhileOpponentNotUp: rate(.03), lineDrivesWithoutAttackableBall: rate(0), serveFaults: rate(.01),
@@ -42,11 +47,21 @@ test('owner-approved contract reports research failures and slow median without 
   assert.equal(result.status, 'PASS');
   assert.equal(result.reportedGoals.calibration.status, 'FAIL');
   assert.deepEqual(result.reportedGoals.byStyle[0].calibration, data.report.byStyle[0].calibration);
-  assert.ok(result.reportedGoals.byStyle[0].calibration.gates.some(gate => gate.status === 'FAIL'));
+  assert.equal(result.reportedGoals.byStyle[0].calibration.gates.filter(gate => gate.status === 'FAIL').length, 6);
   assert.equal(result.reportedGoals.referenceDeviceMedianGoalMs.exclusiveMaximum, 50);
   assert.deepEqual(data.report, original);
 });
 for (const [name, corrupt] of [
+  ['missing contact observations', d => { delete d.report.observations[0].contacts; }],
+  ['missing line-drive snapshot', d => { delete d.report.observations[0].contacts[1].decisionEvidence; }],
+  ['unmatched line-drive snapshot', d => { d.report.observations[0].contacts[1].decisionEvidence.matched = false; }],
+  ['mismatched line-drive snapshot time', d => { d.report.observations[0].contacts[1].decisionEvidence.sampleTimeSeconds++; }],
+  ['mismatched actual contact time', d => { d.report.observations[0].contacts[1].time++; }],
+  ['missing actual contact geometry', d => { delete d.report.observations[0].contacts[1].contact; }],
+  ['corrupt actual geometry', d => { d.report.observations[0].contacts[1].positions.player1.y = NaN; }],
+  ['mismatched actual hitter geometry', d => { d.report.observations[0].contacts[1].positions.player1.y = 5; }],
+  ['unknown incoming affordance', d => { d.report.observations[0].contacts[1].incomingAttackable = null; }],
+  ['nonboolean incoming affordance', d => { d.report.observations[0].contacts[1].incomingAttackable = 'true'; }],
   ['missing observation', d => d.report.observations.pop()],
   ['duplicate observation', d => { d.report.observations[1] = d.report.observations[0]; }],
   ['style corruption', d => { d.report.observations[0].style = 'advanced'; }],
@@ -84,4 +99,22 @@ test('fewer than ten exact twelve-contact timing samples fails', () => {
   });
   d.report.byStyle[0].metrics.generationTiming.natural.twelveContacts = distribution(Array(9).fill(75));
   assert.equal(evaluate(d).status, 'FAIL');
+});
+
+test('zero or insufficient line-drive frequency stays a reported goal', () => {
+  for (const count of [0, 1]) {
+    const d = fixture();
+    for (const row of d.report.observations) row.contacts.forEach(contact => { contact.family = 'drop'; });
+    if (count) d.report.observations[0].contacts[1].family = 'drive';
+    for (const group of d.report.byStyle) {
+      group.denominators.lineDrives = count;
+      group.denominators.lineDrivesWithAttackabilityEvidence = count;
+      group.calibration = evaluateCalibrationV2(group, { style: group.style, expectedRallies: 1200,
+        minConditionalSamples: 10, minPerformanceSamples: 10 });
+    }
+    const result = evaluate(d);
+    assert.equal(result.status, 'PASS');
+    assert.equal(result.reportedGoals.byStyle[0].calibration.gates.find(g => g.name === 'lineDriveAffordanceEvidence').status,
+      'INSUFFICIENT_SAMPLE');
+  }
 });

@@ -57,6 +57,31 @@ export function evaluateRallyReleaseAcceptanceV1(report, { determinism } = {}) {
         && row.modelSupport.unsupportedContacts === 0 && audit(row.generatedFlightFeasibility)
         && row.generatedFlightFeasibility.checkedFlights === row.shots;
     }));
+  // Frequency/coverage remains a research goal, but every represented line drive
+  // must retain the collector's matched pre-choice proof and actual geometry.
+  add('lineDrivePreChoiceEvidenceIntegrity', Array.isArray(rows) && rows.length === 3600 && rows.every(row => {
+    if (!Array.isArray(row?.contacts) || row.contacts.length !== row.shots
+      || new Set(row.contacts.map(contact => contact?.shotId)).size !== row.contacts.length) return false;
+    return row.contacts.every((contact, index) => {
+      if (!contact || contact.ordinal !== index + 1 || typeof contact.shotId !== 'string' || !contact.shotId
+        || typeof contact.family !== 'string' || !contact.family || !Number.isFinite(contact.time) || contact.time < 0
+        || !['x', 'y', 'heightFeet'].every(axis => Number.isFinite(contact.contact?.[axis]))
+        || contact.contact.heightFeet < 0 || !['player1', 'player2', 'player3', 'player4'].every(id =>
+          ['x', 'y'].every(axis => Number.isFinite(contact.positions?.[id]?.[axis])))
+        || !Object.hasOwn(row.settings?.players ?? {}, contact.hitter)
+        || contact.hittingTeam !== row.settings.players[contact.hitter].team) return false;
+      const position = contact.positions[contact.hitter];
+      const depth = contact.hittingTeam === 'green' ? position.y : 44 - position.y;
+      const hitterUp = depth >= 12.5 && depth < 22;
+      if (contact.hitterUp !== hitterUp) return false;
+      if (contact.family !== 'drive' || !hitterUp) return true;
+      const evidence = contact.decisionEvidence;
+      return evidence?.matched === true && typeof contact.incomingAttackable === 'boolean'
+        && Number.isFinite(evidence.sampleTimeSeconds) && Number.isFinite(evidence.contactTimeSeconds)
+        && Math.abs(evidence.sampleTimeSeconds - contact.time) <= 1e-6
+        && Math.abs(evidence.contactTimeSeconds - contact.time) <= 1e-6;
+    });
+  }));
   add('physicalModelAndFlightSummaries', report?.physicalValidity?.status === 'PASS'
     && report.physicalValidity.validDocuments === 3600 && report.physicalValidity.invalidDocuments === 0
     && report.physicalValidity.missingDocuments === 0 && audit(report?.modelSupport)
