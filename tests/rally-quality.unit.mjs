@@ -253,8 +253,9 @@ test('soft attackable transformations preserve their short region with an indepe
     const {source}=popupFixture(family,mirrored),before=JSON.stringify(source);
     const applied=applyAndResolve({...source,execution:{quality:'attackable',errorReason:null}});
     const flight=solveFlightV2({from:source.contact,target:applied.target,family,quality:applied.quality,pace:applied.pace,arc:applied.arc,physics:applied.physics});
-    assert.equal(applied.physicalTransformation.kind,'soft-popup');assert.equal(flight.obstruction,null);
-    assert.equal(applied.target.x,source.target.x);assert.ok(Math.abs(applied.target.y-(mirrored?15.8:28.2))<1e-8);assert.ok(isInNonVolleyZone(applied.target));assert.ok(flight.launchSpeedMph<=({dink:20,drop:26,reset:24})[family]);
+    assert.equal(applied.physicalTransformation.kind,family==='dink'?'dink-popup':'soft-popup');assert.equal(flight.obstruction,null);
+    const baselineDepth=family==='dink'?15.175:15.8;
+    assert.equal(applied.target.x,source.target.x);assert.ok(Math.abs(applied.target.y-(mirrored?baselineDepth:44-baselineDepth))<1e-8);assert.ok(isInNonVolleyZone(applied.target));assert.ok(flight.launchSpeedMph<=({dink:20,drop:26,reset:24})[family]);
     assert.ok(flight.metadata.netClearanceInches>=14);assert.equal(JSON.stringify(source),before);
     assert.equal(Object.isFrozen(applied.physicalTransformation),true);
   }
@@ -407,9 +408,9 @@ test('soft popup carry follows the fixed draw within the back NVZ band at both e
     const execution={quality:'attackable',errorReason:null},input={contact,target,team,family,pace:'soft',execution,draws:{lateral:.5,depth}},before=JSON.stringify(input);
     const raw=applyExecutionV1(input),result=resolveDeliveredFlightV1({candidate:{family,intent:family},contact,team,execution,applied:raw});
     const baselineDepth=near?44-result.applied.target.y:result.applied.target.y;
-    assert.ok(Math.abs(baselineDepth-(15.2+1.2*depth))<1e-8);assert.ok(isInNonVolleyZone(result.applied.target));
+    assert.ok(Math.abs(baselineDepth-(family==='dink'?15.05+.25*depth:15.2+1.2*depth))<1e-8);assert.ok(isInNonVolleyZone(result.applied.target));
     assert.ok(near?result.applied.target.y>target.y:result.applied.target.y<target.y);
-    assert.equal(result.applied.physicalTransformation.kind,'soft-popup');assert.ok(result.guidance.plannerDiagnostics.solverCalls<=6);
+    assert.equal(result.applied.physicalTransformation.kind,family==='dink'?'dink-popup':'soft-popup');assert.ok(result.guidance.plannerDiagnostics.solverCalls<=6);
     assert.ok(result.flight.launchSpeedMph<=({dink:20,drop:26,reset:24})[family]);
     const independent=solveFlightV2({from:contact,target:result.applied.target,family,pace:'soft',arc:'medium',quality:'attackable',physics:result.applied.physics});
     assert.deepEqual(independent.metadata,result.flight.metadata);assert.equal(JSON.stringify(input),before);

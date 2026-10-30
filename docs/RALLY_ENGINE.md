@@ -78,10 +78,16 @@ progress or installs a point.
 
 A selected result's recipe equals `document.generation`. It records engine,
 policy, flight-planner and physics versions, normalized original settings, seed and selection.
-New generation uses `rally-policy-v2` with `rally-flight-planner-v2`. Older
-`rally-policy-v1` origins retain their exact shape without a planner marker,
-and planner-v1 origins retain that marker and their historical generation envelope;
-opening, importing and saving them never upgrades or regenerates their shots.
+New generation uses `rally-policy-v3` with `rally-flight-planner-v2`. Policy v3
+identifies the dink-only popup depth/loft transformation; it does not change
+intent or execution probabilities. Sampled quality, a witnessed legal attacking
+opportunity, the chosen reply and the eventual outcome remain separate facts.
+The dink retains its NVZ landing, 20 mph ceiling and applicable 6.5 ft apex
+ceiling. Drop/reset mappings are unchanged.
+Older `rally-policy-v1` origins retain their exact shape without a planner marker.
+Policy-v2 origins retain either their planner-v1 or planner-v2 marker and their
+historical generation envelope; policy v3 requires planner v2. Opening, importing
+and saving any of them never upgrades or regenerates their shots.
 No-document request records instead have `selection: null`, deliberately invalid
 as persisted document provenance. Styles live in the input recipe, while saved
 players retain team/handedness. Per-shot provenance identifies the selected seed;
@@ -210,8 +216,16 @@ earlier legal paddle interception. Unsupported construction returns `unsupported
 with preserved evidence and no selected point, never a new quality roll or a
 fabricated winner. Net/long/wide targets and signed launch are solved jointly;
 actual earlier net/body/out events remain authoritative. Soft popups carry within
-the short landing region instead of silently becoming deep drives. Their incoming
-reply height still comes from the solved trajectory, not the quality label.
+the short landing region instead of silently becoming deep drives. The
+`rally-dink-popup-v1` mapping uses the fixed depth draw for a 15.05–15.30 ft
+baseline depth and a 6.4 ft apex preference, raised to the actual contact height
+when necessary. These are jointly solved preferences under the existing family
+bounds, not independent speed/clearance equations. Its delivery analysis leaves
+receiver opportunity `unestablished`: only normal contact search and the actual
+eligible actor's route, feet and supported attacking flight can establish one.
+A valid popup without a legal attack remains a valid shot. Drop/reset retain
+their earlier mapping. Incoming reply height still comes from the solved
+trajectory, not the quality label.
 
 The final public compiler consumes the serialized nine-decimal source. A separate
 `rally-generated-flight-feasibility-v2` audit measures actual stage velocity,

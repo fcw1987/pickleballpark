@@ -8,7 +8,7 @@ import { validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
 import { previewDocumentV2 } from '../play-compiler-v2.js';
 import { validateRallyRules } from '../rally-rules.js';
-import { normalizeRallyInputV1, createGenerationRecipeV1, createRallyRequestRecipeV1 } from '../rally-recipe.js';
+import { normalizeRallyInputV1, createGenerationRecipeV1, createRallyRequestRecipeV1, RALLY_POLICY_VERSION } from '../rally-recipe.js';
 import { samplePlayState } from '../three-d-core.js';
 import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
 import { model2Document, model2Shot } from './fixtures/model2/factories.mjs';
@@ -213,13 +213,40 @@ test('runner archives no-document results and replay does not call generation', 
   const replay = await runRealismV2({ jobs, records, generate: () => { throw Error('must not run'); } });
   assert.equal(replay.generationReplayedFromArchive, true);
   assert.deepEqual(replay.summary, report.summary);
-  const historical=copy(records);
-  for(const record of historical) record.result.recipe.flightPlannerVersion='rally-flight-planner-v1';
-  const before=JSON.stringify(historical);
-  const oldReplay=await runRealismV2({jobs,records:historical,generate:()=>{throw Error('must not regenerate old request');}});
-  assert.deepEqual(oldReplay.summary,report.summary);
-  assert.deepEqual(oldReplay.versions.sourceVersions.flightPlannerVersion,['rally-flight-planner-v1']);
-  assert.equal(JSON.stringify(historical),before);
+  for (const [policyVersion, flightPlannerVersion] of [
+    ['rally-policy-v1', null],
+    ['rally-policy-v2', 'rally-flight-planner-v1'],
+    ['rally-policy-v2', 'rally-flight-planner-v2'],
+  ]) {
+    const historical = copy(records);
+    for (const record of historical) {
+      record.result.recipe.policyVersion = policyVersion;
+      if (flightPlannerVersion === null) delete record.result.recipe.flightPlannerVersion;
+      else record.result.recipe.flightPlannerVersion = flightPlannerVersion;
+    }
+    const before = JSON.stringify(historical), archived = [];
+    const oldReplay = await runRealismV2({ jobs, records: historical,
+      generate: () => { throw Error('must not regenerate old request'); }, onRecord: async row => archived.push(row) });
+    assert.deepEqual(oldReplay.summary, report.summary);
+    assert.deepEqual(oldReplay.versions.sourceVersions.policyVersion, [policyVersion]);
+    assert.deepEqual(oldReplay.versions.sourceVersions.flightPlannerVersion, [flightPlannerVersion]);
+    assert.ok(archived.every(row => !row.validationError));
+    assert.equal(JSON.stringify(historical), before);
+    assert.deepEqual(archived.map(row => row.result.recipe), historical.map(row => row.result.recipe));
+  }
+  for (const [policyVersion, flightPlannerVersion] of [
+    ['rally-policy-v4', 'rally-flight-planner-v2'],
+    ['rally-policy-v2', 'rally-flight-planner-v3'],
+    [RALLY_POLICY_VERSION, 'rally-flight-planner-v1'],
+  ]) {
+    const invalid = [copy(records[0])], archived = [];
+    Object.assign(invalid[0].result.recipe, { policyVersion, flightPlannerVersion });
+    const before = JSON.stringify(invalid);
+    await runRealismV2({ jobs: [jobs[0]], records: invalid,
+      generate: () => { throw Error('must not regenerate unsupported request'); }, onRecord: async row => archived.push(row) });
+    assert.match(archived[0].validationError.message, /normalized request recipe/);
+    assert.equal(JSON.stringify(invalid), before);
+  }
   await assert.rejects(runRealismV2({ jobs, records: [records[0], records[0]] }), /unique/);
 });
 
@@ -442,22 +469,23 @@ test('physical validity and natural denominators survive a separate generated fl
   assert.equal(report.generatedFlightFeasibility.families.dink.checkedFlights, 1);
   assert.equal(report.generatedFlightFeasibility.families.dink.failedFlights, 1);
   assert.equal(report.observations[0].accepted, true);
-  assert.equal(report.versions.policyVersion, 'rally-policy-v2');
+  assert.equal(report.versions.policyVersion, RALLY_POLICY_VERSION);
   assert.equal(report.versions.flightPlannerVersion, 'rally-flight-planner-v2');
 });
 
 test('archive replay reports actual mixed provenance without upgrading historical origins', async () => {
-  const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7, 8] }), records = [];
+  const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7, 8, 9] }), records = [];
   await runRealismV2({ jobs, generate: async input => engineResultFor(input, readModel2Fixture('net')), onRecord: async record => records.push(record) });
   const legacy = records[0].result;
   for (const generation of [legacy.recipe, legacy.document.generation]) { generation.policyVersion = 'rally-policy-v1'; delete generation.flightPlannerVersion; }
+  for (const generation of [records[1].result.recipe, records[1].result.document.generation]) generation.policyVersion = 'rally-policy-v2';
   const before = JSON.stringify(records);
   const report = await runRealismV2({ jobs, records });
   assert.equal(report.physicalValidity.status, 'PASS');
   assert.equal(report.versions.policyVersion, null);
-  assert.deepEqual(report.versions.sourceVersions.policyVersion, ['rally-policy-v1', 'rally-policy-v2']);
+  assert.deepEqual(report.versions.sourceVersions.policyVersion, ['rally-policy-v1', 'rally-policy-v2', RALLY_POLICY_VERSION]);
   assert.deepEqual(report.versions.sourceVersions.flightPlannerVersion, [null, 'rally-flight-planner-v2']);
-  assert.equal(report.summary.denominators.naturalCompleteRallies, 2);
+  assert.equal(report.summary.denominators.naturalCompleteRallies, 3);
   assert.equal(JSON.stringify(records), before);
 });
 
@@ -465,15 +493,19 @@ test('pre-choice evidence must match actual saved policy identity for old and cu
   const { document, compiled, rules } = observed('long');
   document.generation = copy(createGenerationRecipeV1(normalizeRallyInputV1({ seed: 7 })));
   const segment = compiled.timeline.segments[0], time = segment.startTime + segment.contactTime;
-  const decision = { shotId: document.shots[0].id, situation: { policyVersion: 'rally-policy-v2', hitter: document.shots[0].hitter, contactIndex: 0,
+  const decision = { shotId: document.shots[0].id, situation: { policyVersion: RALLY_POLICY_VERSION, hitter: document.shots[0].hitter, contactIndex: 0,
     contact: copy(segment.shotSemantics.contact.point), positions: copy(samplePlayState(compiled.timeline, time).positions),
     sampleTimeSeconds: time, contactTimeSeconds: time, attackable: false, affordances: { attack: false } } };
   const result = { ...resultFor(document), decisions: [decision] };
   const observe = () => observeRallyV2({ document, compiled, rules, result, seed: 7 }).contacts[0].incomingAttackable;
-  assert.equal(observe(), false);
-  decision.situation.policyVersion = 'rally-policy-v1'; assert.equal(observe(), null);
-  document.generation.policyVersion = 'rally-policy-v1'; delete document.generation.flightPlannerVersion;
-  assert.equal(observe(), false);
+  for (const policyVersion of [RALLY_POLICY_VERSION, 'rally-policy-v2', 'rally-policy-v1']) {
+    document.generation.policyVersion = policyVersion;
+    if (policyVersion === 'rally-policy-v1') delete document.generation.flightPlannerVersion;
+    decision.situation.policyVersion = policyVersion;
+    assert.equal(observe(), false);
+    decision.situation.policyVersion = policyVersion === RALLY_POLICY_VERSION ? 'rally-policy-v1' : RALLY_POLICY_VERSION;
+    assert.equal(observe(), null, 'pre-choice evidence from a different policy is unavailable');
+  }
 });
 
 test('partial feasibility checking never reports an aggregate PASS for missing attempts', () => {

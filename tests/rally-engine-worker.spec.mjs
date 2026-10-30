@@ -36,13 +36,23 @@ async function openHost(page) {
 test('module-worker points match Node and repeat independently of progress observers', async ({ page }, testInfo) => {
     const players = (style, mixedHands) => Object.fromEntries(['player1', 'player2', 'player3', 'player4'].map((id, index) =>
         [id, { team: index < 2 ? 'green' : 'orange', handedness: mixedHands && index % 2 ? 'right' : 'left', style, flavour: 'balanced' }]));
+    const rightPlayers = style => Object.fromEntries(['player1', 'player2', 'player3', 'player4'].map((id, index) =>
+        [id, { team: index < 2 ? 'green' : 'orange', handedness: 'right', style, flavour: 'balanced' }]));
     const inputs = [
         ['advanced', { seed: 7 }],
         ['pro-orange-left', { seed: 19, players: players('pro', true), service: { server: 'player3', receiver: 'player1', court: 'left' } }],
-        ['intermediate-green-left', { seed: 31, players: players('intermediate', false), service: { server: 'player1', receiver: 'player3', court: 'left' } }]
+        ['intermediate-green-left', { seed: 31, players: players('intermediate', false), service: { server: 'player1', receiver: 'player3', court: 'left' } }],
+        ['dink-popup-volley', { seed: 1074, players: rightPlayers('advanced'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 6 } }],
+        ['dink-popup-groundstroke', { seed: 1002, players: rightPlayers('pro'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 15 } }]
     ];
     for (const [label, input] of inputs) {
         const expected = await nodeResult(input);
+        if (label.startsWith('dink-popup-')) {
+            const contact = expected.result.decisions.at(-1).situation;
+            expect(contact.attackable).toBe(true);
+            expect(contact.contactKind).toBe(label === 'dink-popup-volley' ? 'volley' : 'groundstroke');
+            expect(expected.result.document.generation.policyVersion).toBe('rally-policy-v3');
+        }
         const { createRallySimulator } = await import('../rally-engine.js');
         let denseYields = 0, sparseYields = 0;
         const dense = await createRallySimulator({ workChunk: 1, yieldControl: async () => { denseYields++; } })(input);

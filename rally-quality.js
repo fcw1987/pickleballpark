@@ -8,7 +8,8 @@ import { isInNonVolleyZone } from './court-geometry.js';
 export const QUALITY_VERSION = 'rally-quality-v1';
 export const CAUSATION_VERSION = 'rally-causation-v1';
 export const FORMATION_PRESSURE_VERSION = 'rally-formation-pressure-v1';
-export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v2';
+export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v3';
+export const DINK_POPUP_VERSION = 'rally-dink-popup-v1';
 export const RISK_CONTEXT_VERSION = 'rally-execution-risk-v1';
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const point = (p, name) => { if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) throw new TypeError(`${name} needs finite board coordinates.`); };
@@ -153,7 +154,7 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
   const spread = execution.quality === 'excellent' ? .15 : execution.quality === 'low' ? .2 : execution.quality === 'attackable' ? .75 : .4;
   const next = { x: clamp(target.x + (lateral - .5) * 2 * spread, -8, 28), y: clamp(target.y + (depth - .5) * 2 * spread, -8, 52) };
   const preferredFlight = Object.fromEntries(['speedMph', 'apexFeet', 'launchVerticalFeetPerSecond'].filter(key => Number.isFinite(physics?.[key])).map(key => [key, physics[key]]));
-  let transformation = 'target-precision', requestedClearanceFeet = null;
+  let transformation = 'target-precision', requestedClearanceFeet = null, dinkPopup = null;
   if (execution.quality === 'error') {
     if (execution.errorReason === 'net') {
       // One fixed draw-derived mesh endpoint permits a real collision even
@@ -170,16 +171,26 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
       transformation = 'error-target';
     } else throw new TypeError('An execution error needs a supported target perturbation reason.');
   } else if (execution.quality === 'attackable' && SOFT_FAMILIES.has(family)) {
-    // Extra loft carries an intended NVZ ball toward the back of that same
-    // region. The existing depth draw sets a 15.2–16.4 ft baseline depth;
-    // a defender can sometimes reach it in the air from grounded line feet.
+    // A weak dink must carry its loft toward the receiver, rather than crest
+    // at the net and fall below ordinary line reach. This fixed draw mapping
+    // stays inside the intended NVZ; it does not certify an opponent attack.
+    // Drop/reset retain their previous mapping until separately witnessed.
     if (isInNonVolleyZone(target)) {
       next.x = clamp(next.x, .8, 19.2);
-      const baselineDepth = 15.2 + 1.2 * depth;
+      const baselineDepth = family === 'dink' ? 15.05 + .25 * depth : 15.2 + 1.2 * depth;
       next.y = team === 'green' ? 44 - baselineDepth : baselineDepth;
     }
-    requestedClearanceFeet = family === 'drop' ? 1.6 : 1.2;
-    transformation = 'soft-popup';
+    if (family === 'dink') {
+      delete preferredFlight.launchVerticalFeetPerSecond;
+      preferredFlight.apexFeet = Math.max(contact.heightFeet, 6.4);
+      transformation = 'dink-popup';
+      dinkPopup = { version: DINK_POPUP_VERSION, sampledWeakness: 'soft-popup',
+        receiverOpportunity: { status: 'unestablished', scope: 'at-delivery',
+          reason: 'Execution shape alone does not establish a legal opponent contact and attacking reply.' } };
+    } else {
+      requestedClearanceFeet = family === 'drop' ? 1.6 : 1.2;
+      transformation = 'soft-popup';
+    }
   } else if (QUALITY_CLEARANCES[execution.quality]?.[family] !== undefined) {
     requestedClearanceFeet = QUALITY_CLEARANCES[execution.quality][family];
     transformation = 'controlled-clearance';
@@ -203,7 +214,8 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
     physicalTransformation: { version: PHYSICAL_TRANSFORMATION_VERSION, kind: transformation, family, quality: execution.quality,
       sourceContact: { x: contact.x, y: contact.y, heightFeet: contact.heightFeet }, sourceTarget: { x: target.x, y: target.y },
       sourcePhysics: physics ? { ...physics } : null, target: { ...next }, preferredFlight: { ...preferredFlight },
-      physics: null, targetSpreadFeet: spread, requestedClearanceFeet, solvedClearanceFeet: null, solveAttempts: [] } });
+      physics: null, targetSpreadFeet: spread, requestedClearanceFeet, solvedClearanceFeet: null, solveAttempts: [],
+      ...(dinkPopup ? { dinkPopup } : {}) } });
 }
 
 // Section 7 ranges are illustrative diagnostics, not simultaneous equations.

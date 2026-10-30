@@ -126,7 +126,7 @@ function validateAttemptDocument(provisional, normalized, recipe) {
     const movement = inspectGeneratedMovementV1(compiled.timeline), spacing = inspectGeneratedSpacingV1(compiled.timeline);
     if (!movement.valid || !spacing.valid) throw new DriverFailure('generated-movement', 'The final sampled paths exceed generated movement or spacing bounds.', { movement, spacing });
     const generatedFlightFeasibility = assessGeneratedFlightFeasibilityV1({ document, compiled });
-    if (recipe.policyVersion === 'rally-policy-v2' && generatedFlightFeasibility.status !== 'PASS') {
+    if (['rally-policy-v2', 'rally-policy-v3'].includes(recipe.policyVersion) && generatedFlightFeasibility.status !== 'PASS') {
         throw new DriverFailure('generated-flight-feasibility', 'The serialized generated flights exceed the supported generation envelope.', { generatedFlightFeasibility });
     }
     if (provisional.status === 'complete') {
