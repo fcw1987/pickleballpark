@@ -50,6 +50,7 @@ const STATIC_ASSETS = [
   './rally-signatures.js',
   './play-physics-v2.js',
   './play-outcome-v2.js',
+  './generated-route-certificate-v1.js',
   './play-timeline-v2.js',
   './play-actors-v2.js',
   './terminal-cues.js',

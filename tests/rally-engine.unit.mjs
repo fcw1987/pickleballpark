@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { simulateRally, createRallySimulator, runNaturalAttemptV1 } from '../rally-engine.js';
 import { createEngineDriverV1 } from '../rally-engine-driver.js';
 import { normalizeRallyInputV1 } from '../rally-recipe.js';
@@ -9,6 +10,7 @@ import { validateRallyRules } from '../rally-rules.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
 import { samplePlayState } from '../three-d-core.js';
 import { eligibleHitters, resolveServiceContext } from '../rally-state.js';
+import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
 import { isInNonVolleyZone } from '../court-geometry.js';
 
 const IDS=['player1','player2','player3','player4'];
@@ -146,7 +148,7 @@ test('a real Pro lob probe contacts the descending ball within the grounded 8.5-
   assert.ok(incoming.solved.sampleBoard(t+1e-5).heightFeet<incoming.solved.sampleBoard(t-1e-5).heightFeet,'the incoming solver must reach that contact while descending');
 });
 
-test('a short-region soft pop-up permits a legal low NVZ volley without inventing an attack',async()=>{
+test('a current-policy dink popup establishes a supported bounced attack through physical contact search',async()=>{
   const players=Object.fromEntries(IDS.map((id,index)=>[id,{team:index<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}]));
   // Keep a neutral middle exchange alive, then perturb one actual soft shot.
   // This controlled geometry fixture is excluded from natural calibration.
@@ -160,11 +162,22 @@ test('a short-region soft pop-up permits a legal low NVZ volley without inventin
   const result=await simulate({seed:0,players,options:{maxShots:8},service:{server:'player1',receiver:'player3',court:'right',courtConvention:'server-perspective-v1'}});
   assert.equal(result.status,'censored',plain(result.diagnostics));
   const compiled=validateResult(result);
-  assert.equal(result.decisions[6].resolution.physicalTransformation.kind,'soft-popup');
+  const popup=result.decisions[6],reply=result.decisions[7],selection=reply.situation.contactSelection;
+  assert.equal(popup.resolution.physicalTransformation.kind,'dink-popup');
+  assert.equal(popup.resolution.physicalTransformation.dinkPopup.receiverOpportunity.status,'unestablished');
+  assert.equal(popup.resolution.physicalTransformation.dinkPopup.receiverOpportunity.scope,'at-delivery');
+  assert.equal(popup.draws.execution.quality,.15);assert.deepEqual(popup.draws.perturbation,{lateral:.5,depth:.5});
   assert.equal(isInNonVolleyZone(result.document.shots[6].target),true,'a pop-up retains the short intended region');
-  assert.ok(result.decisions[7].situation.contact.heightFeet<2,'this known fixed landing produces a low physical reply');
-  assert.equal(result.decisions[7].situation.attackable,false,'execution quality cannot invent an above-net opportunity');
-  assert.equal(result.decisions[7].situation.contactSelection.evidence.chosen.preference.heightClass,'neutral');
+  close(reply.situation.contact.heightFeet,3.024246384,'actual bounced contact');
+  assert.equal(reply.situation.contactKind,'groundstroke');assert.equal(result.document.shots[7].contactMode,'bounced');
+  assert.equal(reply.situation.attackable,true);assert.equal(selection.evidence.chosen.preference.heightClass,'attack');
+  const contact=reply.situation.contact;
+  assert.ok(contact.heightFeet-PHYSICS_V2.ballRadiusFeet-localNetHeightFeet(contact.x)>.05,'the actual lower ball surface clears the local tape');
+  assert.deepEqual(selection.outgoingSafety.supportedReplyIds,['drive','reset']);
+  for(const key of ['legal','routeValid','feetValid'])assert.equal(selection.evidence.chosen.audit[key],true);
+  assert.ok(selection.evidence.chosen.audit.peakFeetPerSecond<=18);assert.ok(selection.evidence.chosen.audit.minimumSpacingFeet>=2.5);
+  assert.ok(reply.situation.feet.every(foot=>!isInNonVolleyZone(foot)));
+  close(compiled.timeline.segments[7].trajectory.solved.launchSpeedMph,26.309017541,'supported speed-up');
   const contacts=compiled.timeline.segments.filter((segment,index)=>index>0&&segment.shotSemantics.contact.kind==='volley'
     &&isInNonVolleyZone(segment.shotSemantics.contact.point)&&result.document.shots[index].contactTiming?.beforeBounceSeconds!==undefined);
   assert.ok(contacts.length>0,'the fixed generated probe must include a genuine volley over the NVZ');
@@ -174,6 +187,21 @@ test('a short-region soft pop-up permits a legal low NVZ volley without inventin
     assert.equal(segment.step.shot.contact.feetEstablishedOutsideNVZ,true);
     assert.ok(!['erne','around-the-post'].includes(segment.step.shot.authoring.intent),'ordinary volley geometry must not borrow a signature override');
   }
+});
+
+test('explicit historical policy-v2 popup source replays its legal low volley unchanged',()=>{
+  const document=JSON.parse(readFileSync(new URL('./fixtures/model2/controlled-popup-policy-v2.json',import.meta.url),'utf8'));
+  const before=plain(document);
+  assert.equal(document.generation.policyVersion,'rally-policy-v2');assert.equal(validateDocument(document),document);
+  const compiled=compileDocument(document),rules=validateRallyRules(compiled.play,compiled.timeline);
+  assert.equal(compiled.validShotCount,8);assert.deepEqual(compiled.findings,[]);
+  assert.equal(rules.valid,true);assert.deepEqual(rules.violations,[]);assert.deepEqual(rules.expectedOutcomes,[]);
+  const contact=compiled.timeline.segments[7].shotSemantics.contact;
+  assert.equal(contact.kind,'volley');close(contact.point.heightFeet,1.484232773,'historical low volley');
+  assert.ok(contact.point.heightFeet-PHYSICS_V2.ballRadiusFeet<localNetHeightFeet(contact.point.x));
+  assert.ok(contact.feet.every(foot=>!isInNonVolleyZone(foot)));
+  assert.equal(document.shots[7].contactEvidence.feetEstablishedOutsideNVZ,true);
+  assert.equal(plain(document),before);
 });
 
 test('repeat requests and different yield schedules produce identical source, traces and outcomes',async()=>{

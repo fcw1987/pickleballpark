@@ -30,9 +30,9 @@ function memoryStorage() {
   const values = new Map();
   return { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, String(value)), removeItem: key => values.delete(key) };
 }
-// Replay only saved physical source through the public final-validation gate.
-// This test producer neither regenerates policy decisions nor changes a flight.
-async function publicReplay(document) {
+// Submit saved physical source as a fresh attempt: the driver replaces provenance
+// with the current request recipe and must enforce current generation envelopes.
+async function submitAsFreshGeneration(document) {
   const driver = createEngineDriverV1(async () => ({ status: 'complete', document: clone(document),
     outcome: clone(document.outcome), decisions: document.shots.map(shot => ({ shotId: shot.id })),
     stats: null, outcomeClassification: null, diagnostics: { rejections: 0 } }), { yieldControl: async () => {} });
@@ -65,11 +65,20 @@ for (const mirrored of [false, true]) test(`off-apron solved terminal evidence p
   assert.equal(inspectGeneratedSpacingV1(compiled.timeline).valid, true);
   assert.equal(compiled.timeline.events.filter(event => event.type === 'dead').length, 1);
   assert.equal(compiled.timeline.events.some(event => event.type === 'body'), false, 'no earlier collision is hidden by terminal evidence');
-  const replay = await publicReplay(document);
-  assert.equal(replay.status, 'complete', JSON.stringify(replay.diagnostics));
-  assert.deepEqual(replay.outcome, document.outcome);
-  assert.deepEqual(replay.document, document);
-  assert.equal(replay.diagnostics.validation.unexpectedViolations, 0);
+  assert.equal(JSON.stringify(document), before);
+});
+
+for (const mirrored of [false, true]) test(`archived off-apron source is rejected as fresh generation${mirrored ? ' when mirrored' : ''}`, async () => {
+  const document = mirrored ? mirror(fixture()) : fixture(), before = JSON.stringify(document);
+  const result = await submitAsFreshGeneration(document);
+  assert.equal(result.status, 'failed');assert.equal(result.document, null);assert.equal(result.outcome, null);
+  assert.equal(result.diagnostics.code, 'generated-flight-feasibility');
+  const violations = result.diagnostics.validation.generatedFlightFeasibility.violations;
+  assert.deepEqual(violations.map(({shotId,family,intent,code,maximumSpeedMph})=>({shotId,family,intent,code,maximumSpeedMph})), [
+    {shotId:'shot-4',family:'reset',intent:'block',code:'launch-speed-above-envelope',maximumSpeedMph:24},
+    {shotId:'shot-11',family:'volley',intent:'speed-up',code:'launch-speed-above-envelope',maximumSpeedMph:45}
+  ]);
+  close(violations[0].speedMph,24.012877001);close(violations[1].speedMph,46.715688138);
   assert.equal(JSON.stringify(document), before);
 });
 
@@ -91,7 +100,7 @@ test('structurally valid tampered terminal position or time fails independent so
     assert.ok(compiled.findings.some(item => item.severity === 'error'));
     assert.ok(compiled.validShotCount < value.shots.length);
     assert.equal(rules.valid, false);
-    const result = await publicReplay(value);
+    const result = await submitAsFreshGeneration(value);
     assert.equal(result.status, 'failed'); assert.equal(result.document, null);
     assert.equal(result.diagnostics.code, 'final-validation');
   }

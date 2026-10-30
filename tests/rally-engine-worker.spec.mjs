@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { compileDocument } from '../play-compiler.js';
 import { validateDocument } from '../play-document.js';
@@ -32,6 +32,26 @@ async function openHost(page) {
         localStorage.setItem('rally-worker-sentinel', 'preserve unrelated data');
     });
 }
+
+test('archived correctness repairs retain exact Node and module-worker source and outcomes', async ({ page }, testInfo) => {
+    const rows = JSON.parse(await readFile(new URL('./fixtures/model2/m2-qualification-failures-v1.json', import.meta.url), 'utf8'));
+    await openHost(page);
+    const evidence = [];
+    for (const row of rows) {
+        const expected = await nodeResult(row.input);
+        expect(expected.result.status).toBe('complete');
+        const actual = await page.evaluate(async input => {
+            const result = await window.rallyWorkerClient.simulateRallyInWorker(input);
+            return Object.fromEntries(['status', 'document', 'outcome', 'decisions', 'stats', 'recipe', 'outcomeClassification'].map(key => [key, result[key]]));
+        }, row.input);
+        expect(actual).toEqual(project(expected.result));
+        evidence.push({ id: row.id, node: digest(project(expected.result)), browser: digest(actual),
+            outcome: actual.outcome, contacts: actual.document.shots.length });
+    }
+    const path = testInfo.outputPath('archived-repair-parity.json');
+    await writeFile(path, JSON.stringify(evidence, null, 2));
+    await testInfo.attach('archived-repair-parity', { path, contentType: 'application/json' });
+});
 
 test('module-worker points match Node and repeat independently of progress observers', async ({ page }, testInfo) => {
     const players = (style, mixedHands) => Object.fromEntries(['player1', 'player2', 'player3', 'player4'].map((id, index) =>

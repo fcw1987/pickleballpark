@@ -75,6 +75,18 @@ exact generated-motion checks: at most 18 ft/s sampled peak speed and at least
 2.5 ft partner spacing. M1's instructional tolerance is not extra generator
 travel. Actual incoming geometry determines height and attacking affordance.
 
+Failed contact search alone cannot finish a point. The optional
+`generated-contact-endpoint-route-v1` certificate independently excludes all
+full eased generator routes ending at interception: an 18 ft/s peak permits
+at most 9 feet of endpoint travel per second, plus the existing 3-foot paddle
+reach and all available contact lead-in. Continuous bounds cover the complete
+incoming flight. A verified certificate supports the actual second-bounce
+fault under 10.B.1; it does not shrink M1's broader reach model or claim an
+unreachable winner. Ambiguous proofs retain a generation failure. Saved-source
+validation recomputes the proof and still checks every earlier physical event.
+Fixed wide execution can incidentally pass outside a post; its actual route
+does not turn it into an ATP selection or change its quality, target or draws.
+
 Natural/either gets one simulation. Requested length/winner selection gets at
 most 64 deterministic attempts, with eight target repairs per intent and a
 bounded work budget. It never lowers error rates secretly or invents a winner
@@ -95,10 +107,15 @@ and physical dead times.
 
 Development seeds are 0–59. The preserved `9493af3` qualification run of seeds
 1000–1299 was physically valid (900/900 points) but failed calibration. Those
-seeds are now examined regression evidence. The immutable holdout reserves
+seeds are now examined regression evidence. The immutable first holdout used
 50000–51199, 1200 per homogeneous Pro, Advanced and Intermediate style, balanced
-across serving team/court. Its first run follows candidate freeze and architect
-review; do not use its results for unfinished tuning or extend it after results.
+across serving team/court. Its first run in Quality 40992222059 is now consumed
+and examined: 3592 complete points, eight generation failures, and failed
+calibration/performance gates. Preserve that failed report and reservation;
+the definition's original `RESERVED_NOT_RUN` metadata is not a live run ledger.
+Further use of these inputs is regression/development evidence. A new disjoint
+qualification schedule requires architectural review before its one frozen
+evaluation; do not replace points, extend samples or retry numerical failures.
 Beginner and flavour cohorts have correctness and
 directional comparisons, not invented numerical bands. Per-game signature rates
 remain `N/A` until games exist.
@@ -108,13 +125,9 @@ node tools/rally-realism-v2.mjs --cohort development \
   --output release-results/game-mode-m2/development.json \
   --archive release-results/game-mode-m2/development.jsonl
 
-node tools/rally-realism-v2.mjs --cohort holdout --require-clean \
-  --require-calibration \
-  --output release-results/game-mode-m2/holdout-v1.json \
-  --archive release-results/game-mode-m2/holdout-v1.jsonl
 ```
 
-These are qualification commands, not a statement that qualification passed.
+This development command is not a statement that qualification passed.
 Use fresh output paths; existing evidence is not overwritten. Archives retain
 every status, recipe, attempt count, available decision trace and diagnostic,
 including no-document failures. Corpus completeness, physical validity and

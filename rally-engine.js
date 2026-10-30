@@ -18,6 +18,7 @@ import { probeSignatureCandidatesV1 } from './rally-signatures.js';
 import { automaticOwnership } from './rally-proposals.js';
 import { isInNonVolleyZone } from './court-geometry.js';
 import { STROKE_PROFILES } from './three-d-core.js';
+import { certifyGeneratedRouteExclusionV1 } from './generated-route-certificate-v1.js';
 
 export { RALLY_ENGINE_VERSION } from './rally-recipe.js';
 export const RALLY_ENGINE_LIMITS = Object.freeze({ maxShots: 99, targetsPerIntent: 8, maxContactPairs: 4, groundedContactHeightFeet: GROUNDED_CONTACT_HEIGHT_FEET });
@@ -130,7 +131,9 @@ function contactReplySupportV1(input, pair) {
         countPlanner(planned.diagnostics);
         if (planned.status === 'solved') {
             ids.push(pair.signature.intent);
-            solvedProbes.push({ id: pair.signature.intent, ...pair.signature.recipe, target: pair.signature.target,
+            // Reply IDs are canonical policy intents; the saved recipe keeps
+            // its separate shot identity on pair.signature.recipe.
+            solvedProbes.push({ ...pair.signature.recipe, id: pair.signature.intent, target: pair.signature.target,
                 physics: planned.physics, flight: planned.flight });
         }
     }
@@ -467,9 +470,9 @@ function candidateFlight(input, pair, candidate, situation, draws, materializati
         team: input.players[pair.id].team, style: input.players[pair.id].style, materialization }) };
 }
 
-function finishAttempt(input, state, document, decisions, diagnostics, censored) {
+function finishAttempt(input, state, document, decisions, diagnostics, censored, declaredOutcome = null) {
     const ending = censored ? 'stop' : 'winner';
-    let finished = finishGenerationPlanningV2(state, { ending });
+    let finished = finishGenerationPlanningV2(state, { ending, outcome: declaredOutcome });
     // The final tail has no next contact. Bound its source commands by the
     // actual dead event (or stop bounce), retaining shared terminal sampling.
     for (let repair = 0; planningView(state).pendingRecipe && repair < 8; repair++) {
@@ -479,7 +482,7 @@ function finishAttempt(input, state, document, decisions, diagnostics, censored)
         const recipe = repairPendingMovement(input, state, null, duration);
         if (!recipe) throw new RangeError('The actual terminal movement is infeasible.');
         replaceGenerationPendingMovementV2(state, recipe);
-        const next = finishGenerationPlanningV2(state, { ending });
+        const next = finishGenerationPlanningV2(state, { ending, outcome: declaredOutcome });
         const nextDecision = next.decision;
         const nextDead = nextDecision?.physicalDeadTime ?? nextDecision?.evidenceObservedTime ?? nextDecision?.time;
         const priorDead = decision?.physicalDeadTime ?? decision?.evidenceObservedTime ?? decision?.time;
@@ -688,6 +691,20 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
         if (!foundPair) {
             const inspection = inspectGenerationPendingLegV2(state, { terminal: true });
             if (inspection.derivedOutcome && inspection.derivedOutcome.reason !== 'second-bounce') return finishAttempt(input, state, document, decisions, diagnostics, false);
+            // Failed search is not evidence of a winner. A narrower theorem
+            // may prove that no generated full route ending at interception
+            // can reach this flight. Public compilation recomputes that proof,
+            // retains the broader reach uncertainty, and adjudicates the real
+            // second bounce as a fault rather than an unreachable winner.
+            if (inspection.derivedOutcome?.reason === 'second-bounce' && !inspection.violations.length) {
+                const certificate = certifyGeneratedRouteExclusionV1(planningView(state).play, inspection.segment, inspection.solved);
+                if (certificate) {
+                    const defender = [...certificate.actors].sort((a, b) => a.continuousLowerBoundFeet - b.continuousLowerBoundFeet || a.actor.localeCompare(b.actor))[0].actor;
+                    const outcome = { ...inspection.derivedOutcome, faultingActor: defender,
+                        evidence: { ...inspection.derivedOutcome.evidence, generatedRouteCertificate: certificate } };
+                    return finishAttempt(input, state, document, decisions, diagnostics, false, outcome);
+                }
+            }
             return { status: 'failed', document: null, outcome: null, decisions, stats: null,
                 diagnostics: { ...diagnostics, code: 'no-feasible-contact', contactIndex: index,
                     pending: { recipe: clone(planningView(state).pendingRecipe), origins: clone(planningView(state).pendingSegment?.previous.positions), endpoints: clone(planningView(state).pendingSegment?.step.positions), physical: inspection.derivedOutcome } }, outcomeClassification: null };

@@ -396,14 +396,14 @@ function planningPlay(state,{ending,outcome}) {
   return {...state.play,ending,outcome:outcome?copy(outcome):null,steps};
 }
 
-export function inspectPendingLegV2(state,{terminal=true,ending=terminal?'winner':'stop'}={}) {
+export function inspectPendingLegV2(state,{terminal=true,ending=terminal?'winner':'stop',outcome=null}={}) {
   assertState(state);
-  return inspectPendingLeg(state,{terminal,ending});
+  return inspectPendingLeg(state,{terminal,ending,outcome});
 }
 
-function inspectPendingLeg(state,{terminal,ending}) {
+function inspectPendingLeg(state,{terminal,ending,outcome=null}) {
   if(!state.pendingSegment)return {decision:null,derivedOutcome:null,violations:[],physicalCandidates:[],momentumCandidates:[],segment:null};
-  const play=planningPlay(state,{ending,outcome:null});
+  const play=planningPlay(state,{ending,outcome});
   const index=state.solved.length,segment=segmentFor(play.steps[index-1],play.steps[index],null,index,state.cursor,state.momentum);
   const inspection=inspectModel2SegmentV2(play,segment,{index:index-1,prior:previousContext(state),terminal,solved:state.solved.at(-1)});
   const history=state.finalizedInspections.filter(Boolean);
@@ -460,7 +460,7 @@ export function inspectPlanningTrialSafetyV2(state,trial,{actors}={}) {
 
 export function finishPlanningV2(state,{ending=state.play.ending,outcome=null,deriveOutcome=true,compileTimeline=false}={}) {
   assertState(state);
-  const analysis=inspectPendingLegV2(state,{terminal:ending!=='stop',ending});
+  const analysis=inspectPendingLegV2(state,{terminal:ending!=='stop',ending,outcome});
   const selected=outcome||(deriveOutcome&&ending!=='stop'?analysis.derivedOutcome:null);
   if(selected&&ending!=='stop')ending=teamForPlayer(state.steps.at(-1)?.shot?.playerId,state.play.players)===selected.winner?'winner':'fault';
   const play=planningPlayV2(state,{ending,outcome:selected});

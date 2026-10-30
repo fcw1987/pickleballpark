@@ -1,3 +1,4 @@
+import { validGeneratedRouteCertificateShapeV1 } from './generated-route-certificate-v1.js';
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 import { SERVICE_COURT_CONVENTION, resolveServiceContext } from './rally-state.js';
@@ -178,7 +179,8 @@ function validateModel2Document(value) {
       && value.players[outcome.struckActor].team === value.players[receiver].team;
     if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam && !serveHitsReceivingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except the server or designated receiver on an applicable serve contact.');
   } else if (outcome.struckActor !== undefined) fail('outcome.struckActor', 'is only supported for a body contact.');
-  keys(outcome.evidence, ['position', 'afterContactSeconds'], 'outcome.evidence');
+  keys(outcome.evidence, ['position', 'afterContactSeconds', 'generatedRouteCertificate'], 'outcome.evidence');
+  if (outcome.evidence.generatedRouteCertificate !== undefined && (outcome.reason !== 'second-bounce' || outcome.type !== 'fault' || outcome.ruleRef !== '10.B.1' || !PLAYER_IDS.includes(outcome.faultingActor) || !validGeneratedRouteCertificateShapeV1(outcome.evidence.generatedRouteCertificate))) fail('outcome.evidence.generatedRouteCertificate', 'requires a supported versioned second-bounce fault certificate.');
   model2TerminalEvidencePosition(outcome.evidence.position, 'outcome.evidence.position');
   boundedNumber(outcome.evidence.afterContactSeconds, 0, 30, 'outcome.evidence.afterContactSeconds');
 }

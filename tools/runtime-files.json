@@ -98,6 +98,7 @@
   "play-compiler.js",
   "play-document.js",
   "play-outcome-v2.js",
+  "generated-route-certificate-v1.js",
   "play-physics-v2.js",
   "play-planning-v2.js",
   "play-timeline-v2.js",

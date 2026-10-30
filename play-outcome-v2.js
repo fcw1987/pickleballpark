@@ -1,3 +1,4 @@
+import { certifyGeneratedRouteExclusionV1, matchesGeneratedRouteCertificateV1 } from './generated-route-certificate-v1.js';
 // Geometry/evidence checks for opt-in model 2. Labels never establish a fault.
 import { isInNonVolleyZone, isInServiceBox } from './court-geometry.js';
 import { receivingServiceBox, resolveServiceContext, serviceIdentityIssues, teamForPlayer, oppositeTeam } from './rally-state.js';
@@ -167,9 +168,12 @@ function geometricCandidates(play, segment, solved, isLast) {
   }
   if (isLast && play.ending !== 'stop' && solved.secondBounceTime !== null && solved.secondBounceTime <= end + EPS) {
     const reach = assessTerminalReach(play, segment, solved);
+    const declaredCertificate=play.outcome?.shotId===segment.step.id?play.outcome?.evidence?.generatedRouteCertificate:null;
+    const generatedRouteCertificate=declaredCertificate?certifyGeneratedRouteExclusionV1(play,segment,solved):null;
+    const certified=matchesGeneratedRouteCertificateV1(declaredCertificate,generatedRouteCertificate);
     const defender = [...reach.players].sort((a, b) => a.minSampledClearanceFeet - b.minSampledClearanceFeet || a.actor.localeCompare(b.actor))[0]?.actor;
-    add(reach.unreachable ? 'unreachable' : 'second-bounce', solved.secondBounceTime, solved.sampleBoard(solved.secondBounceTime),
-      reach.unreachable ? null : defender, '10.B.1', { reach });
+    add(!certified && reach.unreachable ? 'unreachable' : 'second-bounce', solved.secondBounceTime, solved.sampleBoard(solved.secondBounceTime),
+      !certified && reach.unreachable ? null : certified ? [...generatedRouteCertificate.actors].sort((a,b)=>a.continuousLowerBoundFeet-b.continuousLowerBoundFeet||a.actor.localeCompare(b.actor))[0].actor : defender, '10.B.1', { reach, ...(certified?{generatedRouteCertificate}:{}) });
   }
   return results;
 }
@@ -275,6 +279,7 @@ function declarationMatches(play, decision, violations) {
   for (const key of ['reason', 'shotId', 'winner', 'faultingActor', 'ruleRef']) if (declared[key] !== decision[key]) add(`outcome-${key}`, `Declared outcome ${key} does not match the independently computed terminal event.`);
   if ((declared.struckActor ?? null) !== (decision.struckActor ?? null)) add('outcome-struckActor', 'The declared struck actor does not match the torso collision.');
   const evidence = declared.evidence;
+  if(evidence?.generatedRouteCertificate && !matchesGeneratedRouteCertificateV1(evidence.generatedRouteCertificate,decision.generatedRouteCertificate)) add('outcome-generated-route-certificate','Declared generated-route exclusion must match an independent proof from the current geometry.');
   if (!finitePoint(evidence?.position) || distance(evidence.position, decision.position) > EVIDENCE_EPS || Math.abs(evidence.position.heightFeet - decision.position.heightFeet) > EVIDENCE_EPS || !Number.isFinite(evidence.afterContactSeconds) || Math.abs(evidence.afterContactSeconds - decision.afterContactSeconds) > EVIDENCE_EPS) add('outcome-evidence', 'Declared terminal geometry and contact-relative timing must match the solved event.');
   const finalHitter = play.steps.filter(s => s.shot).at(-1)?.shot.playerId;
   const finalWinner = teamForPlayer(finalHitter, play.players) === decision.winner;
@@ -329,7 +334,7 @@ export function derivedOutcomeForDecisionV2(decision) {
     winner:decision.winner,type:decision.reason==='unreachable'?'winner':'fault',
     reason:decision.reason,shotId:decision.shotId,ruleRef:decision.ruleRef,
     faultingActor:decision.faultingActor,...(decision.struckActor?{struckActor:decision.struckActor}:{}),
-    evidence:{position:boardPoint(decision.position),afterContactSeconds:decision.afterContactSeconds}
+    evidence:{position:boardPoint(decision.position),afterContactSeconds:decision.afterContactSeconds,...(decision.generatedRouteCertificate?{generatedRouteCertificate:decision.generatedRouteCertificate}:{})}
   }:null;
 }
 

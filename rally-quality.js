@@ -1,7 +1,7 @@
 // Execution and causation are explicit tactical heuristics. Physical outcomes
 // are established separately by the shared solver and model2 rule validator.
 import { assessReach } from './rally-tactics.js';
-import { sampleFlightVelocityV2 } from './play-physics-v2.js';
+import { PHYSICS_V2, sampleFlightVelocityV2 } from './play-physics-v2.js';
 import { planRallyFlightV1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from './rally-flight-planner.js';
 import { isInNonVolleyZone } from './court-geometry.js';
 
@@ -254,12 +254,21 @@ export function resolveDeliveredFlightV1({ candidate, contact, team, execution, 
   if (!['green', 'orange'].includes(team) || !candidate?.family || !['error', 'attackable', 'excellent', 'low', 'neutral'].includes(execution?.quality)) throw new TypeError('Delivered flight requires a candidate, team and execution quality.');
   const preferred = applied.preferredFlight ?? Object.fromEntries(['speedMph', 'apexFeet', 'launchVerticalFeetPerSecond']
     .filter(key => Number.isFinite(applied.physics?.[key])).map(key => [key, applied.physics[key]]));
+  // A fixed wide execution can miss outside a post without becoming an ATP
+  // tactical selection. Nominal route admission remains strict; only delivered
+  // geometry follows the exact sampled contact-to-target chord.
+  const errorReason = execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null;
+  const fraction = (22 - contact.y) / (applied.target.y - contact.y);
+  const netX = contact.x + (applied.target.x - contact.x) * fraction;
+  const incidentalAroundPost = route === 'over-net' && errorReason === 'wide' && fraction > 0 && fraction < 1
+    && (netX < -1.25 - PHYSICS_V2.ballRadiusFeet || netX > 21.25 + PHYSICS_V2.ballRadiusFeet);
+  const deliveredRoute = incidentalAroundPost ? 'around-the-post' : route;
   const planner = planRallyFlightV1({ from: contact, target: applied.target, family: candidate.family, intent, style,
     quality: execution.quality, pace: applied.pace ?? candidate.pace ?? 'medium', arc: applied.arc ?? candidate.arc ?? 'medium',
-    preferred, route, allowNetFault: true,
-    errorReason: execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null });
+    preferred, route: deliveredRoute, allowNetFault: true, errorReason });
   const shared = { version: DELIVERED_FLIGHT_VERSION, plannerVersion: planner.plannerVersion,
-    accepted: planner.status === 'solved', source: { target: { ...applied.target }, preferredFlight: { ...preferred } },
+    accepted: planner.status === 'solved', nominalRoute: route, deliveredRoute, incidentalAroundPost,
+    source: { target: { ...applied.target }, preferredFlight: { ...preferred } },
     trials: planner.diagnostics.trials, maximumTrials: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET,
     speedCeilingMph: planner.diagnostics.speedCeilingMph, plannerDiagnostics: planner.diagnostics,
     limitations: ['Constant gravity; no drag or spin forces.', 'Section 7 illustrative ranges are preferences; actual generation envelopes are enforced.',

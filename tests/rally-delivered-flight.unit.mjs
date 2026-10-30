@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveDeliveredFlightV1, applyExecutionV1 } from '../rally-quality.js';
+import { planRallyFlightV1 } from '../rally-flight-planner.js';
 import { solveFlightV2 } from '../play-physics-v2.js';
 // Actual contacts and delivered source recipes from development-63016b5.jsonl;
 // Pro 25 shot 13, Pro 50 shot 15, Advanced 50 shot 12. No archive runtime dependency.
@@ -130,11 +131,36 @@ test('archived over-ceiling post-quality attacks receive bounded coherent same-t
     }
   }
 });
-test('known feasible attacks succeed at low and high contacts in both directions',()=>{
-  for(const original of fixtures.slice(0,2)) for(const heightFeet of [.6,2.2,4.5,8.5]) for(const mirror of [false,true]) {
+test('supported high-contact attacks succeed in both directions',()=>{
+  for(const original of fixtures.slice(0,2)) for(const heightFeet of [4.5,8.5]) for(const mirror of [false,true]) {
     const input=structuredClone(original);input.contact.heightFeet=heightFeet;
     if(mirror){input.contact.y=44-input.contact.y;input.applied.target.y=44-input.applied.target.y;input.team=input.team==='green'?'orange':'green';}
+    const before=JSON.stringify(input),nominal=planRallyFlightV1({from:input.contact,target:input.applied.target,
+      family:input.candidate.family,intent:input.candidate.intent,style:input.style,quality:input.execution.quality,
+      pace:input.applied.pace,arc:input.applied.arc,preferred:input.applied.physics,allowNetFault:false});
+    assert.equal(nominal.status,'solved');assert.equal(nominal.flight.obstruction,null);assert.ok(nominal.diagnostics.solverCalls<=6);
     const result=resolveDeliveredFlightV1(input);assert.equal(result.flight.obstruction,null);verify(input,result);
+    assert.ok(result.flight.launchSpeedMph>=22);assert.equal(JSON.stringify(input),before);
+  }
+});
+test('unsupported low-contact nominal attacks retain independently solved delivered net faults',()=>{
+  for(const original of fixtures.slice(0,2)) for(const heightFeet of [.6,2.2]) for(const mirror of [false,true]) {
+    const input=structuredClone(original);input.contact.heightFeet=heightFeet;
+    if(mirror){input.contact.y=44-input.contact.y;input.applied.target.y=44-input.applied.target.y;input.team=input.team==='green'?'orange':'green';}
+    const before=JSON.stringify(input);
+    const nominal=planRallyFlightV1({from:input.contact,target:input.applied.target,family:input.candidate.family,
+      intent:input.candidate.intent,style:input.style,quality:input.execution.quality,pace:input.applied.pace,
+      arc:input.applied.arc,preferred:input.applied.physics,allowNetFault:false});
+    assert.equal(nominal.status,'unavailable');assert.ok(nominal.diagnostics.solverCalls<=6);
+    const result=resolveDeliveredFlightV1(input);
+    assert.deepEqual(result.applied.target,input.applied.target);assert.equal(result.applied.quality,'low');
+    for(const solution of result.solutions){
+      assert.equal(solution.flight.obstruction.kind,'net');
+      const independent=solveFlightV2({from:input.contact,...solution.applied,family:'volley',quality:'low'});
+      assert.deepEqual(solution.flight.obstruction,independent.obstruction);
+      assert.ok(solution.flight.launchSpeedMph>=22);verify(input,solution);
+    }
+    assert.equal(JSON.stringify(input),before);
   }
 });
 const families=['serve','return','drive','drop','reset','dink','lob','volley','overhead'];
@@ -162,9 +188,14 @@ test('all nine families jointly solve every quality and intended error in both d
 });
 test('soft popups retain their intended NVZ target while reported shape is measured',()=>{
   for(const family of ['dink','drop','reset']) for(const team of ['green','orange']) {
-    const input=fixture(family,'attackable',null,team),result=resolveDeliveredFlightV1(input);
-    near(result.applied.target.y,team==='green'?28.2:15.8);
-    assert.equal(result.applied.physicalTransformation.kind,'soft-popup');
+    const input=fixture(family,'attackable',null,team),before=JSON.stringify(input),result=resolveDeliveredFlightV1(input);
+    const dink=family==='dink';
+    near(result.applied.target.y,team==='green'?(dink?28.825:28.2):(dink?15.175:15.8));
+    assert.equal(result.applied.physicalTransformation.kind,dink?'dink-popup':'soft-popup');
+    assert.equal(result.applied.physicalTransformation.version,'rally-execution-physical-v3');
+    if(dink){assert.equal(result.applied.physicalTransformation.dinkPopup.version,'rally-dink-popup-v1');near(result.flight.metadata.apexFeet,6.4);}
+    assert.ok(result.applied.target.y>=15&&result.applied.target.y<=29);
+    assert.equal(JSON.stringify(input),before);
     assert.equal(result.guidance.accepted,true);assert.ok(result.guidance.evidence.preferredDepartures.length);
     assert.ok(result.flight.metadata.netClearanceInches>=14);verify(input,result);
   }
