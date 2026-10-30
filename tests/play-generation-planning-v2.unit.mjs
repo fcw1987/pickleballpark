@@ -129,3 +129,121 @@ test('delivered unsupported geometry is inspected synchronously and never commit
   assert.ok(result.inspection.violations.length||result.inspection.physicalCandidates.some(candidate=>candidate.unsupportedReason));
   assert.equal(observeGenerationPlanningSessionV2(isolated),before);
 });
+
+test('C2 immutable flight views and prefix positions survive later revisions without resampling wrappers',()=>{
+  const source=readModel2Fixture('transition-volley'),session=createGenerationPlanningSessionV2(source);
+  commitGenerationRecipeV2(session,source.shots[0]);
+  const first=observeGenerationPlanningSessionV2(session),flight=first.solved[0],bytes=json(flight),setup=first.steps[0].positions;
+  assert.ok(Object.isFrozen(flight.sample));assert.ok(Object.isFrozen(flight.sampleBoard));
+  for(const sample of [flight.sample(.1),flight.sampleBoard(.1)]){
+    assert.ok(Object.isFrozen(sample));assert.ok(Object.values(sample).every(value=>value===null||typeof value!=='object'));
+    assert.throws(()=>{sample.x=999;},TypeError);
+  }
+  assert.notEqual(flight.sampleBoard(.1),flight.sampleBoard(.1));
+  assert.throws(()=>{flight.sampleBoard.extra=999;},TypeError);
+  assert.throws(()=>{flight.metadata.to.x=999;},TypeError);
+  const recipe=source.shots[1],probe=probeGenerationIncomingV2(session,recipe);
+  const nominalOptions={incoming:probe.handle,actors:['player3','player4'],record:true};
+  const nominal=probeGenerationReplyV2(session,recipe,nominalOptions),nominalBytes=json(nominal);
+  assert.equal(json(probeGenerationReplyV2(session,recipe,nominalOptions)),nominalBytes);
+  assert.equal(commitGenerationRecipeV2(session,recipe,{incoming:probe.handle}).committed,true);
+  const next=observeGenerationPlanningSessionV2(session);
+  assert.equal(next.solved[0],flight);assert.equal(next.steps[0].positions,setup);assert.equal(next.play,first.play);
+  assert.equal(json(flight),bytes);assert.equal(json(nominal),nominalBytes);
+});
+
+test('C2 cached incoming cannot hide pending source mutation, functions or throwing descriptors',()=>{
+  const source=readModel2Fixture('transition-volley'),session=createGenerationPlanningSessionV2(source);
+  commitGenerationRecipeV2(session,source.shots[0]);
+  const recipe=structuredClone(source.shots[1]),pending=structuredClone(source.shots[0]);
+  const incoming=probeGenerationIncomingV2(session,recipe,{pendingRecipe:pending}),before=observeGenerationPlanningSessionV2(session);
+  const options={incoming:incoming.handle,pendingRecipe:pending,actors:['player3','player4']};
+  assert.equal(probeGenerationReplyV2(session,recipe,options).previousInspectionReused,true);
+  pending.physics.apexFeet++;
+  assert.match(probeGenerationReplyV2(session,recipe,options).reason,/only movement/);
+  assert.equal(commitGenerationRecipeV2(session,recipe,options).ok,false);
+  pending.physics.apexFeet--;pending.physics.extra=()=>{};
+  assert.equal(probeGenerationReplyV2(session,recipe,options).ok,false);
+  assert.equal(commitGenerationRecipeV2(session,recipe,options).ok,false);
+  delete pending.physics.extra;
+  Object.defineProperty(pending.physics,'hidden',{enumerable:true,get(){throw new TypeError('unsupported pending descriptor');}});
+  assert.match(probeGenerationReplyV2(session,recipe,options).reason,/unsupported pending descriptor/);
+  assert.equal(observeGenerationPlanningSessionV2(session),before);
+});
+
+test('C2 reused incoming preparation is not changed by failed or altered nominal packaging',()=>{
+  const source=readModel2Fixture('transition-volley'),session=createGenerationPlanningSessionV2(source);
+  commitGenerationRecipeV2(session,source.shots[0]);
+  const recipe=structuredClone(source.shots[1]),pending=structuredClone(source.shots[0]);
+  const incoming=probeGenerationIncomingV2(session,recipe,{pendingRecipe:pending});
+  const options={incoming:incoming.handle,pendingRecipe:pending,actors:['player3','player4'],record:true};
+  const expected=json(probeGenerationReplyV2(session,recipe,options)),before=json(observeGenerationPlanningSessionV2(session));
+  const bad=structuredClone(recipe);bad.physics.extra=()=>{};
+  assert.equal(probeGenerationReplyV2(session,bad,options).ok,false);
+  const changed=structuredClone(recipe);changed.movement={intent:'manual',target:{x:0,y:35},pinned:true};
+  probeGenerationReplyV2(session,changed,options);
+  assert.equal(json(probeGenerationReplyV2(session,recipe,options)),expected);
+  assert.equal(json(observeGenerationPlanningSessionV2(session)),before);
+  const changedPending=structuredClone(pending);changedPending.playerMovement={player2:{intent:'manual',target:{x:18,y:10},pinned:false}};
+  assert.equal(probeGenerationReplyV2(session,recipe,{...options,pendingRecipe:changedPending}).previousInspectionReused,false);
+  assert.equal(json(probeGenerationReplyV2(session,recipe,options)),expected);
+});
+
+test('C2 geometric audit reuse cannot retain stale pending movement source bytes',()=>{
+  const source=readModel2Fixture('transition-volley'),session=createGenerationPlanningSessionV2(source),state=createPlanningStateV2(source);
+  commitGenerationRecipeV2(session,source.shots[0]);commitPlanningTrialV2(state,trialRecipeV2(state,source.shots[0]));
+  const recipe=source.shots[1],pending=structuredClone(source.shots[0]);
+  const incoming=probeGenerationIncomingV2(session,recipe,{pendingRecipe:pending});
+  pending.movement.waypoints=[];
+  const expected=trialRecipeV2(state,recipe,{pendingRecipe:pending});commitPlanningTrialV2(state,expected);
+  assert.equal(commitGenerationRecipeV2(session,recipe,{pendingRecipe:pending,incoming:incoming.handle}).committed,true);
+  const actual=finishGenerationPlanningV2(session,{ending:source.ending}),publicResult=finishPlanningV2(state,{ending:source.ending});
+  assert.equal(json(actual.play),json(publicResult.play));assert.equal(json(actual.rawSegments),json(publicResult.rawSegments));
+  assert.deepEqual(actual.recipes,state.recipes);
+});
+
+for(const operation of ['incoming','nominal','commit','replace','finish'])test(`C2 ${operation} rejects reentrant revision changes while preserving the inner update`,()=>{
+  const source=readModel2Fixture('transition-volley'),session=createGenerationPlanningSessionV2(source);
+  commitGenerationRecipeV2(session,source.shots[0]);
+  const inner=structuredClone(source.shots[0]);inner.playerMovement={player2:{intent:'manual',target:{x:17,y:6},pinned:false}};
+  let entered=false;
+  const reenter=()=>{if(!entered){entered=true;replaceGenerationPendingMovementV2(session,inner);}};
+  const recipe=structuredClone(source.shots[1]);
+  let action;
+  if(operation==='incoming'){
+    Object.defineProperty(recipe,'contactTiming',{enumerable:true,get(){reenter();return undefined;}});
+    action=()=>probeGenerationIncomingV2(session,recipe);
+  }else if(operation==='nominal'||operation==='commit'){
+    const physics=recipe.physics;Object.defineProperty(recipe,'physics',{enumerable:true,get(){reenter();return physics;}});
+    action=()=>operation==='nominal'?probeGenerationReplyV2(session,recipe,{actors:['player3','player4']}):commitGenerationRecipeV2(session,recipe);
+  }else if(operation==='replace'){
+    const outer=structuredClone(source.shots[0]),movement=outer.movement;
+    Object.defineProperty(outer,'movement',{enumerable:true,get(){reenter();return movement;}});
+    action=()=>replaceGenerationPendingMovementV2(session,outer);
+  }else action=()=>finishGenerationPlanningV2(session,{get ending(){reenter();return source.ending;}});
+  assert.throws(action,/changed during this operation/);assert.equal(entered,true);
+  const observed=observeGenerationPlanningSessionV2(session);
+  assert.deepEqual(observed.pendingRecipe,inner);assert.equal(observed.solved.length,1);
+  assert.equal(finishGenerationPlanningV2(session,{ending:'stop'}).recipes.length,1);
+});
+
+test('C2 commit checks the entry revision after the final selected-source clone',()=>{
+  const source=readModel2Fixture('transition-volley'),session=createGenerationPlanningSessionV2(source);
+  commitGenerationRecipeV2(session,source.shots[0]);
+  const inner=structuredClone(source.shots[0]);inner.playerMovement={player2:{intent:'manual',target:{x:17,y:6},pinned:false}};
+  const recipe=structuredClone(source.shots[1]);let reads=0;
+  Object.defineProperty(recipe,'epochProbe',{enumerable:true,get(){if(++reads===3)replaceGenerationPendingMovementV2(session,inner);return 'inert';}});
+  assert.throws(()=>commitGenerationRecipeV2(session,recipe),/changed during this operation/);
+  assert.equal(reads,3);assert.deepEqual(observeGenerationPlanningSessionV2(session).pendingRecipe,inner);
+  assert.equal(observeGenerationPlanningSessionV2(session).solved.length,1);
+});
+
+test('C2 observation never caches a stale tail when a retained header getter reenters',()=>{
+  const source=readModel2Fixture('transition-volley');let session,entered=false,inner;
+  source.title={get value(){if(session&&!entered){entered=true;replaceGenerationPendingMovementV2(session,inner);}return 'header';}};
+  session=createGenerationPlanningSessionV2(source);commitGenerationRecipeV2(session,source.shots[0]);
+  inner=structuredClone(source.shots[0]);inner.playerMovement={player2:{intent:'manual',target:{x:17,y:6},pinned:false}};
+  assert.throws(()=>observeGenerationPlanningSessionV2(session),/changed during this operation/);
+  const view=observeGenerationPlanningSessionV2(session);
+  assert.deepEqual(view.pendingRecipe,inner);assert.equal(observeGenerationPlanningSessionV2(session),view);
+});

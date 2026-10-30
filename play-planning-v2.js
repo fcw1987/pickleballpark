@@ -477,45 +477,144 @@ export function finishPlanningV2(state,{ending=state.play.ending,outcome=null,de
 }
 
 // Generator sessions never expose their mutable planning state or probe geometry.
-const generationSessions=new WeakMap(),generationIncoming=new WeakMap();
+const generationSessions=new WeakMap(),generationIncoming=new WeakMap(),generationFlightViews=new WeakMap(),generationPositionViews=new WeakMap();
+const generationSafeSamplers=new WeakMap();
 function sessionRecord(session){
   const record=generationSessions.get(session);
   if(!record)throw new TypeError('An owned model 2 generation session is required.');
   return record;
 }
+function assertGenerationRevision(state,revision){
+  if(state.revision!==revision)throw new TypeError('The generation session changed during this operation.');
+}
 function detachedGenerationData(value,seen=new Map()){
   if(value===null||typeof value!=='object'){
-    if(typeof value==='function')return (...args)=>detachedGenerationData(value(...args));
+    if(typeof value==='function')return generationSafeSamplers.get(value)||Object.freeze((...args)=>detachedGenerationData(value(...args)));
     return value;
   }
+  if(ownedFlights.has(value))return generationFlightView(value);
   if(seen.has(value))return seen.get(value);
   const result=Array.isArray(value)?[]:{};seen.set(value,result);
   for(const [key,item]of Object.entries(value))result[key]=detachedGenerationData(item,seen);
   return Object.freeze(result);
 }
+function generationFlightView(flight){
+  let view=generationFlightViews.get(flight);
+  if(!view){
+    // These two authoritative samplers return fresh frozen primitive records.
+    // Their closures read immutable numeric stages, never mutable metadata.
+    generationSafeSamplers.set(flight.sample,Object.freeze(seconds=>flight.sample(seconds)));
+    generationSafeSamplers.set(flight.sampleBoard,Object.freeze(seconds=>flight.sampleBoard(seconds)));
+    const data={};for(const [key,value]of Object.entries(flight))data[key]=detachedGenerationData(value);
+    view=Object.freeze(data);generationFlightViews.set(flight,view);
+  }
+  return view;
+}
+function generationSegment(input,solved){
+  const segment=createModel2SegmentFromSolvedV2(input,adapters,solved);
+  generationSafeSamplers.set(segment.trajectory.sample,Object.freeze(seconds=>segment.trajectory.sample(seconds)));
+  generationSafeSamplers.set(segment.trajectory.sampleBoard,Object.freeze(seconds=>segment.trajectory.sampleBoard(seconds)));
+  return segment;
+}
+function generationPositions(positions){
+  let view=generationPositionViews.get(positions);
+  if(!view){view=detachedGenerationData(positions);generationPositionViews.set(positions,view);}
+  return view;
+}
 export function createGenerationPlanningSessionV2(source){
   const session=Object.freeze({});
-  generationSessions.set(session,{state:createPlanningStateV2(source),view:null,viewRevision:-1});
+  generationSessions.set(session,{state:createPlanningStateV2(source),view:null,viewRevision:-1,header:null});
   return session;
 }
 export function observeGenerationPlanningSessionV2(session){
-  const record=sessionRecord(session),state=record.state;
-  if(record.viewRevision!==state.revision){
-    const header={...state.play};delete header.steps;
-    record.view=detachedGenerationData({pendingSegment:state.pendingSegment,pendingRecipe:state.pendingRecipe,
-      steps:state.steps.map(step=>({positions:step.positions})),solved:state.solved,play:header});
-    record.viewRevision=state.revision;
+  const record=sessionRecord(session),state=record.state,revision=state.revision;
+  if(record.viewRevision!==revision){
+    const sourceHeader={...state.play};delete sourceHeader.steps;
+    const header=record.header||detachedGenerationData(sourceHeader);
+    const view=Object.freeze({pendingSegment:detachedGenerationData(state.pendingSegment),pendingRecipe:detachedGenerationData(state.pendingRecipe),
+      steps:Object.freeze(state.steps.map(step=>Object.freeze({positions:generationPositions(step.positions)}))),
+      solved:Object.freeze(state.solved.map(generationFlightView)),play:header});
+    assertGenerationRevision(state,revision);
+    record.header=header;record.view=view;record.viewRevision=revision;
   }
   return record.view;
 }
-function generationWorking(state,recipe,pendingRecipe){
-  let working=state,prepared;
-  try{
-    if(pendingRecipe)working=patchPendingMovement(state,pendingRecipe,{trialDraft:true});
-    prepared=prepareRecipe(working,recipe);
-  }catch(error){prepared={built:false,recipe,findings:[finding(recipe?.id??null,error.message,'feasibility')]};}
-  return {working,prepared};
+
+function generationPlainData(value,active=new WeakSet()){
+  if(value===null)return true;
+  if(typeof value!=='object')return ['string','number','boolean','undefined'].includes(typeof value);
+  if(active.has(value))return false;
+  const array=Array.isArray(value),prototype=Object.getPrototypeOf(value),keys=Object.keys(value);
+  if((array?prototype!==Array.prototype:prototype!==Object.prototype&&prototype!==null)
+    ||Object.getOwnPropertySymbols(value).length||Object.getOwnPropertyNames(value).length!==keys.length+(array?1:0))return false;
+  active.add(value);
+  for(const key of keys){
+    const descriptor=Object.getOwnPropertyDescriptor(value,key);
+    if(!Object.hasOwn(descriptor,'value')||!generationPlainData(descriptor.value,active)){active.delete(value);return false;}
+  }
+  active.delete(value);return true;
 }
+function generationRequestDependencies(state,recipe,pendingRecipe){
+  try{
+    if(!generationPlainData(pendingRecipe)||!generationPlainData(recipe.contactEvidence)||!generationPlainData(recipe.contactTiming)
+      ||!generationPlainData(recipe.contactOverride)||!generationPlainData(recipe.target)
+      ||Object.values(Object.getOwnPropertyDescriptors(recipe)).some(descriptor=>!Object.hasOwn(descriptor,'value')))return null;
+    const values=[recipe.id,model2ContactKind(recipe),recipe.hitter,recipe.contactStyle==='backhand'?'backhand':'forehand',
+      recipe.contactTiming?.afterBounceSeconds,recipe.contactTiming?.beforeBounceSeconds,
+      recipe.contactOverride?.x,recipe.contactOverride?.y,Boolean(recipe.contactOverride),Boolean(pendingRecipe)];
+    if(!state.solved.length)values.push(recipe.family,recipe.serveMethod,stroke(recipe));
+    const feet=recipe.contactEvidence?.feet;
+    values.push(Boolean(feet),recipe.contactEvidence?.feetEstablishedOutsideNVZ??true,Boolean(recipe.contactEvidence?.momentum));
+    if(feet){
+      values.push(feet.length);
+      for(const foot of feet){
+        const keys=Object.keys(foot);if(keys.some(key=>!['x','y','heightFeet'].includes(key)))return null;
+        values.push(keys.join(','),foot.x,foot.y,foot.heightFeet);
+      }
+    }else values.push(recipe.target.x,recipe.target.y);
+    const command=value=>{
+      if(!value){values.push(null);return;}
+      const keys=Object.keys(value);if(keys.some(key=>!['intent','pinned','target'].includes(key)))throw new TypeError();
+      values.push(keys.join(','),value.intent,value.pinned);
+      if(value.target){const keys=Object.keys(value.target);if(keys.some(key=>!['x','y'].includes(key)))throw new TypeError();values.push(keys.join(','),value.target.x,value.target.y);}
+      else values.push(null);
+    };
+    if(pendingRecipe){
+      values.push(Object.keys(pendingRecipe).join(','),Boolean(pendingRecipe.playerMovement));
+      command(pendingRecipe.movement);
+      const commands=pendingRecipe.playerMovement||{},keys=Object.keys(commands);values.push(keys.join(','));
+      for(const id of keys){if(!IDS.includes(id))return null;command(commands[id]);}
+    }
+    return values;
+  }catch{return null;}
+}
+function equalGenerationDependencies(a,b){return Boolean(a&&b&&a.length===b.length&&a.every((value,index)=>Object.is(value,b[index])));}
+function generationWorking(state,recipe,pendingRecipe,incomingHandle){
+  let working=state,prepared;
+  const old=generationIncomingRecord(state,incomingHandle);
+  try{
+    // Preserve the movement-only source guard even when geometry is reusable.
+    if(pendingRecipe){
+      if(!state.pendingRecipe)throw new TypeError('There is no pending recipe to repair.');
+      const invariant=value=>Object.fromEntries(Object.entries(value).filter(([key])=>!['movement','playerMovement'].includes(key)));
+      if(JSON.stringify(invariant(pendingRecipe))!==JSON.stringify(invariant(state.pendingRecipe)))throw new TypeError('A pending repair may change only movement and playerMovement.');
+    }
+    const dependencies=generationRequestDependencies(state,recipe,pendingRecipe);
+    if(old?.prepared?.built&&old.solved===state.solved.at(-1)&&old.priorSolved===previousContext(state)?.solved
+      &&equalGenerationDependencies(dependencies,old.requestDependencies)){
+      working=old.working;
+      const positions=copy(old.prepared.previous.positions);positions[recipe.hitter]=movementTarget(recipe.movement,old.prepared.stance);
+      for(const[id,command]of Object.entries(recipe.playerMovement||{}))positions[id]=movementTarget(command,old.prepared.previous.positions[id]);
+      prepared={...old.prepared,recipe,findings:[...old.prepared.findings],locks:new Map(working.locks),positions};
+      return {working,prepared,previous:{...old.previous,reused:true},dependencies};
+    }
+    if(pendingRecipe)working=patchPendingMovement(state,copy(pendingRecipe),{trialDraft:true});
+    prepared=prepareRecipe(working,recipe);
+    return {working,prepared,previous:null,dependencies};
+  }catch(error){prepared={built:false,recipe,findings:[finding(recipe?.id??null,error.message,'feasibility')]};}
+  return {working,prepared,previous:null,dependencies:null};
+}
+
 function contactStep(recipe,prepared){
   const {contact,feet,kind,side}=prepared;
   return {shot:{from:xy(contact),type:stroke(recipe),stroke:stroke(recipe),playerId:recipe.hitter,
@@ -545,9 +644,9 @@ function incomingDependencies(recipe,prepared){
 function generationPrevious(state,working,recipe,prepared,incomingHandle){
   const old=generationIncomingRecord(state,incomingHandle),index=working.solved.length;
   if(!index)return {segment:null,inspection:null,reused:false,dependencies:null,cursor:working.cursor};
-  const segment=createModel2SegmentFromSolvedV2({previous:working.steps[index-1],step:prepared.previousResolved,
-    nextStep:contactStep(recipe,prepared),index,startTime:working.cursor,model2Momentum:working.momentum},adapters,working.solved.at(-1));
-  const prior=previousContext(working),solved=working.solved.at(-1),dependencies=incomingDependencies(recipe,prepared);
+  const dependencies=incomingDependencies(recipe,prepared),prior=previousContext(working),solved=working.solved.at(-1);
+  const segment=generationSegment({previous:working.steps[index-1],step:prepared.previousResolved,
+    nextStep:contactStep(recipe,prepared),index,startTime:working.cursor,model2Momentum:working.momentum},working.solved.at(-1));
   const reused=Boolean(old&&old.solved===solved&&old.priorSolved===prior?.solved&&old.dependencies?.length===dependencies.length
     &&dependencies.every((value,index)=>Object.is(value,old.dependencies[index])));
   const inspection=reused?old.inspection:inspectModel2SegmentV2(working.play,segment,{index:index-1,prior,terminal:false,solved});
@@ -564,39 +663,48 @@ function generationStatus(prepared){
   return {ok:prepared.built&&!prepared.findings.some(item=>item.severity==='error'),reason:prepared.findings[0]?.message??'',findings:prepared.findings};
 }
 export function probeGenerationIncomingV2(session,recipe,{pendingRecipe}={}){
-  const state=sessionRecord(session).state,{working,prepared}=generationWorking(state,recipe,pendingRecipe);
+  const state=sessionRecord(session).state,revision=state.revision;
+  const {working,prepared}=generationWorking(state,recipe,pendingRecipe);
+  assertGenerationRevision(state,revision);
+  const basePrepared={...prepared,findings:[...prepared.findings]};
   let previous=null,movement=null,spacing=null;
   if(prepared.built){
     previous=generationPrevious(state,working,recipe,prepared);
     appendGenerationInspection(prepared.findings,recipe,prepared,previous);
     if(previous.segment){movement=inspectGeneratedMovementV1(previous.segment);spacing=inspectGeneratedSpacingV1(previous.segment);}
   }
-  const handle=Object.freeze({});
-  generationIncoming.set(handle,{state,revision:state.revision,dependencies:previous?.dependencies,inspection:previous?.inspection,
-    solved:working.solved.at(-1),priorSolved:previousContext(working)?.solved});
+  const handle=Object.freeze({}),requestDependencies=generationRequestDependencies(state,recipe,pendingRecipe);
   const segment=previous?.segment;
-  return Object.freeze({...detachedGenerationData({...generationStatus(prepared),movement,spacing,contact:prepared.contact,feet:prepared.feet,
+  const result=Object.freeze({...detachedGenerationData({...generationStatus(prepared),movement,spacing,contact:prepared.contact,feet:prepared.feet,
     positions:segment?Object.fromEntries(IDS.map(id=>[id,sampleActorBoardPositionV2(segment,id,segment.duration)])):undefined,
     footState:segment?sampleFeetStateV1(segment,segment.duration):undefined,
     sampleTimeSeconds:segment?.endTime,contactTimeSeconds:segment?.endTime}),handle});
+  assertGenerationRevision(state,revision);
+  generationIncoming.set(handle,{state,revision,dependencies:previous?.dependencies,inspection:previous?.inspection,
+    solved:working.solved.at(-1),priorSolved:previousContext(working)?.solved,working,prepared:basePrepared,previous,
+    requestDependencies,movement,spacing});
+  return result;
 }
 function generationReplyConstruction(session,recipe,{incoming,pendingRecipe}={}){
-  const state=sessionRecord(session).state;generationIncomingRecord(state,incoming);
-  const {working,prepared}=generationWorking(state,recipe,pendingRecipe);
-  if(!prepared.built)return {state,working,construction:prepared,previous:null,pending:null};
+  const state=sessionRecord(session).state,revision=state.revision;generationIncomingRecord(state,incoming);
+  const {working,prepared,previous:cachedPrevious}=generationWorking(state,recipe,pendingRecipe,incoming);
+  assertGenerationRevision(state,revision);
+  if(!prepared.built)return {state,revision,working,construction:prepared,previous:null,pending:null};
   const construction=materializeRecipe(working,recipe,prepared);
-  if(!construction.built)return {state,working,construction,previous:null,pending:null};
-  const previous=generationPrevious(state,working,recipe,prepared,incoming);
+  assertGenerationRevision(state,revision);
+  if(!construction.built)return {state,revision,working,construction,previous:null,pending:null};
+  const previous=cachedPrevious||generationPrevious(state,working,recipe,prepared,incoming);
   appendGenerationInspection(construction.findings,recipe,prepared,previous);
-  const index=working.solved.length,pending=createModel2SegmentFromSolvedV2({previous:construction.previousResolved||working.steps.at(-1),
-    step:construction.step,nextStep:null,index:index+1,startTime:previous.cursor,model2Momentum:working.momentum},adapters,construction.flight);
+  const index=working.solved.length,pending=generationSegment({previous:construction.previousResolved||working.steps.at(-1),
+    step:construction.step,nextStep:null,index:index+1,startTime:previous.cursor,model2Momentum:working.momentum},construction.flight);
   const extra=momentumFor(pending);if(extra)pending.model2Momentum=[...working.momentum,extra];
-  return {state,working,construction,previous,pending};
+  assertGenerationRevision(state,revision);
+  return {state,revision,working,construction,previous,pending};
 }
 export function probeGenerationReplyV2(session,recipe,{incoming,pendingRecipe,actors,record=false}={}){
-  const {working,construction,previous,pending}=generationReplyConstruction(session,recipe,{incoming,pendingRecipe});
+  const {state,revision,working,construction,previous,pending}=generationReplyConstruction(session,recipe,{incoming,pendingRecipe});
   const status=generationStatus(construction);
-  const routeValid=previous?.reused?true:previous?.segment?inspectGeneratedMovementV1(previous.segment).valid&&inspectGeneratedSpacingV1(previous.segment).valid:true;
+  const routeValid=generationRouteValid(sessionRecord(session).state,incoming,previous);
   let contact=null,bodyEvents=[];
   if(status.ok&&pending){
     const prior=previous?.segment?{segment:previous.segment,solved:working.solved.at(-1)}:previousContext(working);
@@ -611,27 +719,68 @@ export function probeGenerationReplyV2(session,recipe,{incoming,pendingRecipe,ac
     actorRoute:{startTime:pending.startTime,duration:pending.duration,originalDuration:pending.originalDuration,contactTime:pending.contactTime,
       hitter:pending.shotSemantics.playerId,feet:pending.shotSemantics.contact.feet,previousPositions:pending.previous.positions,
       positions:pending.step.positions,momentum:pending.model2Momentum,endTimeSeconds:pending.step.shot.physicsV2.endTimeSeconds}};
-  return detachedGenerationData(result);
+  const detached=detachedGenerationData(result);
+  assertGenerationRevision(state,revision);
+  return detached;
+}
+function generationRouteValid(state,incoming,previous){
+  const cached=previous?.reused?generationIncomingRecord(state,incoming):null;
+  if(cached?.movement&&cached?.spacing)return cached.movement.valid&&cached.spacing.valid;
+  return previous?.segment?inspectGeneratedMovementV1(previous.segment).valid&&inspectGeneratedSpacingV1(previous.segment).valid:true;
 }
 export function commitGenerationRecipeV2(session,recipe,{incoming,pendingRecipe}={}){
-  const state=sessionRecord(session).state;generationIncomingRecord(state,incoming);
-  // Checkpoint one retains the selected-delivery public construction kernel,
-  // entirely inside the owned session, and checks events before committing.
-  const trial=trialRecipeV2(state,recipe,{pendingRecipe,capturePendingEvents:true});
-  const routeValid=trial.resolvedPrevious?inspectGeneratedMovementV1(trial.resolvedPrevious).valid&&inspectGeneratedSpacingV1(trial.resolvedPrevious).valid:true;
-  if(!trial.ok||!routeValid)return detachedGenerationData({ok:trial.ok,reason:trial.reason,routeValid,previousInspectionReused:false,contact:trial.contact,feet:trial.feet,inspection:null});
-  const inspection=inspectPlanningTrialEventsV2(state,trial);
-  const supported=!inspection.violations.length&&!inspection.physicalCandidates.some(candidate=>candidate.unsupportedReason);
-  if(supported)commitPlanningTrialV2(state,trial);
-  return detachedGenerationData({ok:true,reason:'',routeValid,previousInspectionReused:false,committed:supported,
-    contact:trial.contact,feet:trial.feet,inspection});
+  const {state,revision,working,construction,previous,pending}=generationReplyConstruction(session,recipe,{incoming,pendingRecipe});
+  const status=generationStatus(construction),routeValid=generationRouteValid(state,incoming,previous);
+  if(!status.ok||!routeValid)return detachedGenerationData({ok:status.ok,reason:status.reason,routeValid,
+    previousInspectionReused:previous?.reused??false,contact:construction.contact,feet:construction.feet,inspection:null});
+  const index=working.solved.length,steps=working.steps.slice();
+  if(index)steps[steps.length-1]=construction.previousResolved;
+  steps.push(construction.step);
+  const play={...working.play,steps},prior=previous?.segment?{segment:previous.segment,solved:working.solved.at(-1)}:previousContext(working);
+  const current=inspectModel2SegmentV2(play,pending,{index,prior,terminal:false,solved:construction.flight});
+  const history=working.finalizedInspections.filter(Boolean);
+  if(previous?.inspection)history.push(previous.inspection);
+  const physicalCandidates=[...history.flatMap(item=>item.physicalCandidates),...current.physicalCandidates];
+  const momentumCandidates=[...history.flatMap(item=>item.momentumCandidates),...current.momentumCandidates];
+  const {decision}=resolveModel2OutcomeCandidates(physicalCandidates,momentumCandidates);
+  const inspection={...current,physicalCandidates,momentumCandidates,decision,derivedOutcome:derivedOutcomeForDecisionV2(decision),segment:pending,
+    violations:[...history.flatMap(item=>item.violations),...current.violations]};
+  const supported=!inspection.violations.length&&!physicalCandidates.some(candidate=>candidate.unsupportedReason);
+  if(supported){
+    const finalizedPrevious=index?{...previous.segment,nextStep:construction.step,
+      nextShotSemantics:resolveShotSemantics(construction.step.shot,previous.segment.step.positions)}:null;
+    const acceptedRecipe=copy(recipe),recipes=[...working.recipes,acceptedRecipe];
+    if(pendingRecipe)recipes[recipes.length-2]=copy(pendingRecipe);
+    // No state field changes until all route, source and physical checks pass.
+    assertGenerationRevision(state,revision);
+    Object.assign(state,{steps,play,solved:[...working.solved,construction.flight],locks:construction.locks,
+      findings:[...working.findings,...construction.findings],recipes,revision:state.revision+1,
+      cursor:previous.cursor,finalizedSegments:index?[...working.finalizedSegments,finalizedPrevious]:working.finalizedSegments,
+      finalizedInspections:index?[...working.finalizedInspections,previous.inspection]:working.finalizedInspections,
+      momentum:pending.model2Momentum,pendingSegment:pending,pendingRecipe:acceptedRecipe,pendingLocksBefore:new Map(working.locks)});
+  }
+  assertGenerationRevision(state,supported?revision+1:revision);
+  return detachedGenerationData({ok:true,reason:'',routeValid,previousInspectionReused:previous?.reused??false,committed:supported,
+    contact:construction.contact,feet:construction.feet,inspection});
 }
+
 export function replaceGenerationPendingMovementV2(session,pendingRecipe){
-  replacePendingMovementV2(sessionRecord(session).state,pendingRecipe);
+  const state=sessionRecord(session).state,revision=state.revision;
+  const next=patchPendingMovement(state,pendingRecipe),index=state.solved.length;
+  next.recipes=state.recipes.slice();next.recipes[index-1]=copy(pendingRecipe);
+  next.pendingSegment=segmentFor(next.steps[index-1],next.steps[index],null,index,state.cursor,state.momentum);
+  next.revision=revision+1;
+  assertGenerationRevision(state,revision);
+  Object.assign(state,next);
   return observeGenerationPlanningSessionV2(session);
 }
-export function inspectGenerationPendingLegV2(session,options){return detachedGenerationData(inspectPendingLegV2(sessionRecord(session).state,options));}
+export function inspectGenerationPendingLegV2(session,options){
+  const state=sessionRecord(session).state,revision=state.revision;
+  const result=detachedGenerationData(inspectPendingLegV2(state,options));
+  assertGenerationRevision(state,revision);return result;
+}
 export function finishGenerationPlanningV2(session,options){
-  const state=sessionRecord(session).state;
-  return detachedGenerationData({...finishPlanningV2(state,options),recipes:state.recipes});
+  const state=sessionRecord(session).state,revision=state.revision;
+  const result=detachedGenerationData({...finishPlanningV2(state,options),recipes:state.recipes});
+  assertGenerationRevision(state,revision);return result;
 }

@@ -114,6 +114,23 @@ One pending leg is resolved against the next actual interception and actor
 routes before commit. Trials may replace that bounded tail; they do not rebuild
 the finalized prefix or introduce another flight approximation.
 
+Generation owns its planning state behind opaque session and probe handles.
+Incoming probes resolve the existing flight and actor routes without building an
+unrelated outgoing flight. Nominal probes use the same contact, segment and body
+kernels without public trial histories or a committable next-state graph. A
+constructible delivery receives its actual event inspection before an atomic
+source/state append. The independent public compiler still rebuilds the selected
+source and validates every represented contact.
+
+Private reuse requires the owning session, revision, incoming/prior flight and
+exact contact/movement dependencies. Changed dependencies are inspected again;
+forged, foreign and stale handles reject. Returned observations are detached and
+immutable. Cached flight views expose only safe samplers with fresh frozen
+numeric results. A reentrant input access that changes the session revision
+rejects the outer operation before it can cache stale data or append state.
+Public authored-planning results keep their existing mutability and exact source
+proof guards. No caller flag can declare a geometry result trusted.
+
 The engine enumerates actual incoming contacts and eligible players, respecting
 designated receiver and opening-bounce rules. Bounded continuous reach critical
 times supplement fixed interception probes; every proposed contact still needs
