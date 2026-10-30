@@ -323,6 +323,12 @@ Natural and conditioned costs are separate. The 12-contact performance target
 includes search, yields and final validation; warmed compiler-only probes do
 not satisfy it.
 
+The owner-approved October 30, 2026 latency revision requires a median below
+50 ms for natural complete exactly-12-contact points. The p95 limit stays below
+100 ms, with at least 10 eligible points per style and the same browser
+responsiveness checks. Every other calibration band and denominator is
+unchanged. Old reports retain their original 20 ms bands, timings and verdicts.
+
 The source-compatible fifth-shot cohort covers all opportunities after a
 third-shot drive, with the blocked-drive subset separately reported. The PPA's
 66% drop / 31% firm-volley figures are not limited to fourth-shot blocks.

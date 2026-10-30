@@ -121,6 +121,11 @@ including no-document failures. Corpus completeness, physical validity and
 calibration have separate verdicts. Insufficient samples cannot pass. Timing
 includes search, yields and final validation; Natural and conditioned costs are
 separate, and a warmed compiler-only probe is not a CI generation benchmark.
+The owner approved a median generation target below 50 ms on October 30, 2026,
+replacing 20 ms. The p95 remains below 100 ms, with at least 10 natural complete
+exactly-12-contact points per style and unchanged browser responsiveness checks.
+All other bands and sample requirements remain unchanged; archived reports keep
+their original acceptance bands, raw timings and verdicts.
 The fifth-shot metric covers opportunities after all third-shot drives, with
 the blocked-drive subset reported separately. Acceptance bands are not silently
 changed to hide a conflict with fixed physics.

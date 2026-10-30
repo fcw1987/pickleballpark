@@ -322,7 +322,7 @@ export function evaluateCalibrationV2(summary, { style, expectedRallies = 300, m
     ['dinksWhileOpponentBack', m.dinksWhileOpponentNotUp, bands.dinkBack], ['lineDrivesWithoutAttackableBall', m.lineDrivesWithoutAttackableBall, bands.lineDrive], ['serveFaults', m.serveFaults, bands.serve],
   ]) add(name, metric, band);
   add('longestDinkRunMedian', m.longestDinkRunAmongLineRallies, bands.dink, { field: 'median' });
-  add('twelveContactGenerationMedianMs', m.generationTiming.natural.twelveContacts, [0, 20, true], { min: minPerformanceSamples, field: 'median' });
+  add('twelveContactGenerationMedianMs', m.generationTiming.natural.twelveContacts, [0, 50, true], { min: minPerformanceSamples, field: 'median' });
   add('twelveContactGenerationP95Ms', m.generationTiming.natural.twelveContacts, [0, 100, true], { min: minPerformanceSamples, field: 'p95' });
   return { status: gates.some(gate => gate.status === 'FAIL') ? 'FAIL' : gates.some(gate => gate.status === 'INSUFFICIENT_SAMPLE') ? 'INSUFFICIENT_SAMPLE' : 'PASS', style,
     policy: { expectedRallies, minConditionalSamples, minPerformanceSamples, naturalUnconditionedOnly: true }, gates,

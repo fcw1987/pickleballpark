@@ -50,10 +50,26 @@ Development remains the original 0–59 seeds per core style.
 
 The holdout retains every attempted result and the independent completeness,
 physical validity, generator support and calibration verdicts. All existing
-numeric bands, conditional denominators and minimum counts of **10** remain
-unchanged. Sparse line-drive evidence remains insufficient; the action
+numeric bands apart from the owner-approved latency revision below, conditional
+denominators and minimum counts of **10** remain unchanged. Sparse line-drive
+evidence remains insufficient; the action
 diagnostics below do not broaden that gate. Exactly-12 timing still requires
 natural complete points and does not substitute capped prefixes.
+
+## Approved latency acceptance
+
+On October 30, 2026, the owner approved a **median below 50 ms**, replacing the
+20 ms generation target, while retaining **p95 below 100 ms**, at least **10**
+eligible observations per style, and the existing browser responsiveness checks.
+Only natural, complete, exactly-12-contact points enter this performance gate.
+The full generation await includes search, real yields and final validation.
+Conditioned points, capped prefixes and repeated inputs do not replace that
+denominator. This approval does not change any realism band or physical check.
+
+Preserve old reports, their explicit 20 ms bands and original raw timings.
+Observation semantics remain `rally-realism-v2`; each evaluation records its own
+acceptance band and source/collector identity. Do not rewrite old verdicts as
+though they had originally used the new target.
 
 ## Additive action diagnostics
 
@@ -118,7 +134,7 @@ gate and has not been run:
   12 accepted contacts enters the work-size timing cohort, including an honestly
   labelled censored prefix. Report the other lengths and statuses separately.
 - Retain a predeclared minimum of 10 eligible observations per style and the
-  requested median below 20 ms / p95 below 100 ms numerical targets.
+  approved median below 50 ms / p95 below 100 ms numerical targets.
 
 This would measure **12-contact construction plus final validation**, not natural
 exactly-12 complete-point performance. Natural exactly-12 timings must still be

@@ -124,6 +124,35 @@ test('unmeasured conditional and performance gates stay insufficient rather than
   assert.equal(evaluateCalibrationV2(summary, { style: 'beginner' }).status, 'NOT_APPLICABLE');
 });
 
+test('approved 50 ms median retains strict p95, sample minimums and every other calibration gate', () => {
+  // Isolate the acceptance contract on supplied aggregate measurements; this
+  // does not generate a point or claim a new performance observation.
+  const summary = summarizeObservationsV2(Array.from({ length: 10 }, () => observed('net').row));
+  const evaluate = ({ median, p95, n }) => {
+    const candidate = copy(summary);
+    candidate.metrics.generationTiming.natural.twelveContacts = { median, p95, n };
+    return evaluateCalibrationV2(candidate, { style: 'pro', expectedRallies: 10 }).gates;
+  };
+  const baseline = evaluate({ median: 49.999, p95: 99.999, n: 10 });
+  const otherGates = gates => gates.filter(gate => !gate.name.startsWith('twelveContactGeneration'));
+  for (const [values, medianStatus, p95Status] of [
+    [{ median: 49.999, p95: 99.999, n: 10 }, 'PASS', 'PASS'],
+    [{ median: 50, p95: 99.999, n: 10 }, 'FAIL', 'PASS'],
+    [{ median: 49.999, p95: 100, n: 10 }, 'PASS', 'FAIL'],
+    [{ median: 1, p95: 2, n: 9 }, 'INSUFFICIENT_SAMPLE', 'INSUFFICIENT_SAMPLE'],
+  ]) {
+    const gates = evaluate(values), median = gates.find(gate => gate.name === 'twelveContactGenerationMedianMs');
+    const p95 = gates.find(gate => gate.name === 'twelveContactGenerationP95Ms');
+    assert.equal(median.status, medianStatus);
+    assert.equal(p95.status, p95Status);
+    assert.equal(median.minimumSamples, 10);
+    assert.equal(p95.minimumSamples, 10);
+    assert.deepEqual(median.band, { minimum: 0, maximum: 50, exclusiveMaximum: true });
+    assert.deepEqual(p95.band, { minimum: 0, maximum: 100, exclusiveMaximum: true });
+    assert.deepEqual(otherGates(gates), otherGates(baseline));
+  }
+});
+
 test('development and qualification schedules are disjoint, frozen and balanced across serving team/court', () => {
   assert.equal(DEVELOPMENT_SEEDS.length, 60); assert.equal(QUALIFICATION_SEEDS.length, 300);
   assert.equal(DEVELOPMENT_SEEDS.some(seed => QUALIFICATION_SEEDS.includes(seed)), false);
