@@ -2,10 +2,9 @@
 // construction as compilation; the driver independently validates final source.
 import { createEngineDriverV1 } from './rally-engine-driver.js';
 import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS } from './rally-recipe.js';
-import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPendingLegV2, inspectPlanningTrialEventsV2, inspectPlanningTrialSafetyV2, finishPlanningV2, replacePendingMovementV2 } from './play-planning-v2.js';
+import { createGenerationPlanningSessionV2, observeGenerationPlanningSessionV2, probeGenerationIncomingV2, probeGenerationReplyV2, commitGenerationRecipeV2, inspectGenerationPendingLegV2, finishGenerationPlanningV2, replaceGenerationPendingMovementV2 } from './play-planning-v2.js';
 import { interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { planRallyFlightV1, FLIGHT_PLANNER_VERSION } from './rally-flight-planner.js';
-import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
 import { eligibleHitters, contactRequiresBounce, resolveServiceContext, teamForPlayer } from './rally-state.js';
 import { REACH_MODEL } from './rally-tactics.js';
 import { createSituationV1, rankContactPairsV1, rankContactCandidatesV2, listIntentCandidatesV1, chooseIntentV1 } from './rally-policy.js';
@@ -23,6 +22,7 @@ import { STROKE_PROFILES } from './three-d-core.js';
 export { RALLY_ENGINE_VERSION } from './rally-recipe.js';
 export const RALLY_ENGINE_LIMITS = Object.freeze({ maxShots: 99, targetsPerIntent: 8, maxContactPairs: 4, groundedContactHeightFeet: GROUNDED_CONTACT_HEIGHT_FEET });
 const IDS = RALLY_PLAYER_IDS;
+const planningView = observeGenerationPlanningSessionV2;
 const clone = value => structuredClone(value);
 const xy = value => ({ x: value.x, y: value.y });
 const hold = () => ({ intent: 'hold', pinned: false });
@@ -78,10 +78,10 @@ function baseRecipe(id, index, pair, target, family = index === 0 ? 'serve' : in
 
 // The previous leg is the only mutable tail. Its new hitter ends at explicit
 // contact feet; all four destinations use the original tactical goals.
-function repairPendingMovement(input, state, pair, durationSeconds = state.pendingSegment?.contactTime + pair?.time) {
-    if (!state.pendingRecipe) return undefined;
-    const recipe = clone(state.pendingRecipe);
-    const movement = replanMovementV1({ plan: pendingMovementPlans.get(state), segment: state.pendingSegment,
+function repairPendingMovement(input, state, pair, durationSeconds = planningView(state).pendingSegment?.contactTime + pair?.time) {
+    if (!planningView(state).pendingRecipe) return undefined;
+    const recipe = clone(planningView(state).pendingRecipe);
+    const movement = replanMovementV1({ plan: pendingMovementPlans.get(state), segment: planningView(state).pendingSegment,
         players: input.players, durationSeconds, ...(pair ? { arrival: { id: pair.id, stance: pair.feet.stance } } : {}), peakFeetPerSecond: 17.95 });
     if (!movement.ok) return null;
     recipe.movement = generatedV1(movement.movement);
@@ -147,10 +147,10 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
             sampleTimeSeconds: 0, contactTimeSeconds: STROKE_PROFILES.serve.duration * STROKE_PROFILES.serve.contactRatio };
         return;
     }
-    const incoming = state.solved.at(-1), previous = state.pendingRecipe;
+    const incoming = planningView(state).solved.at(-1), previous = planningView(state).pendingRecipe;
     if (incoming.obstruction) return;
-    const service = resolveServiceContext(state.play), eligible = eligibleHitters({ players: input.players, service, contactIndex: index, previousHitter: previous.hitter });
-    const origins = state.pendingSegment.previous.positions, endpoints = state.steps.at(-1).positions, pairs = [];
+    const service = resolveServiceContext(planningView(state).play), eligible = eligibleHitters({ players: input.players, service, contactIndex: index, previousHitter: previous.hitter });
+    const origins = planningView(state).pendingSegment.previous.positions, endpoints = planningView(state).steps.at(-1).positions, pairs = [];
     for (const id of eligible) {
         const team = input.players[id].team;
         const post = incoming.stages.find(stage => stage.phase === 'post-bounce');
@@ -227,9 +227,9 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
     }
     if (input.options.signatureShots) {
         await checkpoint({ shots: index, workDelta: 1 });
-        const signatures = probeSignatureCandidatesV1({ incomingFlight: incoming, pendingSegment: state.pendingSegment,
+        const signatures = probeSignatureCandidatesV1({ incomingFlight: incoming, pendingSegment: planningView(state).pendingSegment,
             pendingRecipe: previous, players: input.players, positions: origins,
-            footState: sampleFeetStateV1(state.pendingSegment, 0), service, contactIndex: index, eligibleIds: eligible });
+            footState: sampleFeetStateV1(planningView(state).pendingSegment, 0), service, contactIndex: index, eligibleIds: eligible });
         await checkpoint({ shots: index, workDelta: signatures.work.contactTrials + signatures.work.launchTrials + signatures.work.routeTrials + (signatures.work.targetTrials ?? 0) });
         for (const candidate of signatures.candidates) pairs.push({ id: candidate.playerId, kind: candidate.kind,
             contactStyle: candidate.contactStyle, delay: candidate.recipe.contactTiming?.afterBounceSeconds,
@@ -318,9 +318,8 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                 const pendingRecipe = repairPendingMovement(input, state, pair);
                 if (!pendingRecipe) { diagnostics.excludedContacts++; continue; }
                 const probe = baseRecipe('shot-' + (index + 1), index, pair, { x: 10, y: team === 'green' ? 30 : 14 });
-                const trial = trialRecipeV2(state, probe, { pendingRecipe, capturePreviousInspection: true });
-                const movement = trial.resolvedPrevious ? inspectGeneratedMovementV1(trial.resolvedPrevious) : null;
-                const spacing = trial.resolvedPrevious ? inspectGeneratedSpacingV1(trial.resolvedPrevious) : null;
+                const trial = probeGenerationIncomingV2(state, probe, { pendingRecipe });
+                const movement = trial.movement, spacing = trial.spacing;
                 if (!trial.ok || !movement?.valid || !spacing?.valid) {
                     diagnostics.excludedContacts++;
                     diagnostics.contactExclusions.push({ actor: pair.id, kind: pair.kind, delay: pair.delay ?? null,
@@ -328,10 +327,10 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                     if (diagnostics.contactExclusions.length > 8) diagnostics.contactExclusions.shift();
                     continue;
                 }
-                pair.pendingRecipe = pendingRecipe; pair.probeTrial = trial;
-                pair.positions = generatedV1(Object.fromEntries(IDS.map(id => [id, sampleActorBoardPositionV2(trial.resolvedPrevious, id, trial.resolvedPrevious.duration)])));
-                pair.footState = generatedV1(sampleFeetStateV1(trial.resolvedPrevious, trial.resolvedPrevious.duration));
-                pair.sampleTimeSeconds = numberV1(trial.resolvedPrevious.endTime); pair.contactTimeSeconds = pair.sampleTimeSeconds;
+                pair.pendingRecipe = pendingRecipe; pair.incomingProbe = trial.handle;
+                pair.positions = generatedV1(trial.positions);
+                pair.footState = generatedV1(trial.footState);
+                pair.sampleTimeSeconds = numberV1(trial.sampleTimeSeconds); pair.contactTimeSeconds = pair.sampleTimeSeconds;
                 const supported = [], exclusions = [];
                 for (const reply of source.replySupport.probes) {
                     await checkpoint({ shots: index, workDelta: 1 });
@@ -381,7 +380,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
 }
 
 function situationFor(input, state, index, pair, decisions) {
-    const previous = state.pendingRecipe;
+    const previous = planningView(state).pendingRecipe;
     const support = pair.replySupport ?? contactReplySupportV1(input, pair);
     const attacking = support.drive;
     const incoming = previous ? { family: previous.family, intent: previous.intent, pace: previous.pace, hitter: previous.hitter, contactKind: pair.kind } : {};
@@ -393,14 +392,14 @@ function situationFor(input, state, index, pair, decisions) {
             attack: support.attacking,
             overhead: support.ids.includes('overhead'), volley: pair.kind === 'volley', bounced: pair.kind !== 'volley', lob: true,
             erne: pair.signature?.intent === 'erne', aroundPost: pair.signature?.intent === 'around-the-post', letGo: false } });
-    const origin = state.pendingSegment?.previous.positions[pair.id] ?? input.layout[pair.id];
+    const origin = planningView(state).pendingSegment?.previous.positions[pair.id] ?? input.layout[pair.id];
     return { ...snapshot, sampleTimeSeconds: pair.sampleTimeSeconds, contactTimeSeconds: pair.contactTimeSeconds,
         contactSelection: { version: 'rally-contact-selection-v1', strategy: pair.selectionStrategy ?? 'initial-serve',
             evidence: pair.selectionEvidence ? generatedV1(pair.selectionEvidence) : null,
             ...(pair.outgoingSafety ? { outgoingSafety: generatedV1(pair.outgoingSafety) } : {}) },
         service: clone(input.service), pressure: generatedV1(assessPressureV1({ contact: pair.contact, position: origin,
-        availableSeconds: pair.availableSeconds, incomingFlight: state.solved.at(-1),
-        incomingContactVelocity: index > 0 ? sampleFlightVelocityV2(state.solved.at(-1), pair.time) : undefined, incomingIntent: previous?.intent, selfPaced: index === 0,
+        availableSeconds: pair.availableSeconds, incomingFlight: planningView(state).solved.at(-1),
+        incomingContactVelocity: index > 0 ? sampleFlightVelocityV2(planningView(state).solved.at(-1), pair.time) : undefined, incomingIntent: previous?.intent, selfPaced: index === 0,
         ownFormation: snapshot.ownFormation, opponentFormation: snapshot.opponentFormation,
         movementSpeedFeetPerSecond: pair.time > 0 ? distance(origin, pair.feet.stance) / pair.time : 0 })) };
 }
@@ -410,7 +409,7 @@ function addMovement(input, state, index, pair, recipe, flight) {
         plan: { diagnostics: { goals: Object.fromEntries(IDS.map(id => [id, xy(input.layout[id])])) } } };
     const movement = planMovementV1({ positions: pair.positions, players: input.players, hitter: pair.id, contact: pair.contact, target: recipe.target,
         durationSeconds: flight.firstLandingTime, contactTime: 0, index, service: input.service, intent: recipe.intent, family: recipe.family,
-        incomingFamily: state.pendingRecipe?.family, kind: pair.kind, feetState: pair.footState, contactFeet: pair.feet,
+        incomingFamily: planningView(state).pendingRecipe?.family, kind: pair.kind, feetState: pair.footState, contactFeet: pair.feet,
         quality: recipe.quality, pace: recipe.pace, peakFeetPerSecond: 17.95 });
     if (!movement.ok) throw new RangeError(movement.reason);
     return { recipe: { ...recipe, movement: generatedV1(movement.movement), playerMovement: generatedV1(movement.playerMovement) }, plan: movement };
@@ -420,46 +419,28 @@ function friendlyActors(input, hitter) {
     return IDS.filter(id => input.players[id].team === input.players[hitter].team);
 }
 
-function checkFriendlyTrial(input, state, pair, trial) {
-    const actors = friendlyActors(input, pair.id);
-    const { contact, bodyEvents } = inspectPlanningTrialSafetyV2(state, trial, { actors });
-    const contactFindings = [...contact.violations, ...contact.physicalCandidates, ...contact.momentumCandidates];
-    if (contactFindings.length) {
-        const error = new RangeError('The nominal reply contact does not pass independent model-2 contact rules.');
-        error.contactFindings = contactFindings; throw error;
-    }
-    if (bodyEvents.length) {
-        const error = new RangeError('The nominal outgoing flight intersects the planted hitter or partner.');
-        error.bodyEvents = bodyEvents; throw error;
-    }
-    return { version: 'rally-outgoing-safety-v1', checkedActors: actors,
-        representedFlightSeconds: numberV1(trial.flight.totalDuration), clear: true };
-}
-
-// Check the actual nominal target and all four planned routes before applying
-// an execution perturbation. The body's shared sweep keeps its original proxy
-// and initial-contact clearing; no hitter is exempt from the physical path.
+// Nominal checks observe private geometry; no discarded public next-state graph
+// or source proof escapes the session. Returned evidence is detached.
 function checkNominalReply(input, state, index, pair, reply, { record = false } = {}) {
     let recipe = pair.signature?.intent === reply.id ? { ...clone(pair.signature.recipe), id: `shot-${index + 1}` }
         : baseRecipe(`shot-${index + 1}`, index, pair, reply.target, reply.family);
     recipe = { ...recipe, intent: reply.id, quality: 'neutral', pace: reply.pace ?? 'medium', arc: reply.arc ?? 'medium',
         physics: clone(reply.physics) };
     recipe = generatedV1(addMovement(input, state, index, pair, recipe, reply.flight).recipe);
-    const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial,
-        capturePendingEvents: true });
-    if (!trial.ok || !trial.previousInspectionReused && !routeValid(trial.resolvedPrevious)) throw new RangeError(trial.reason || 'The nominal reply has an infeasible incoming route.');
-    const safety = checkFriendlyTrial(input, state, pair, trial);
-    if (record) {
-        const segment = trial.pendingSegment;
-        safety.nominal = { contact: generatedV1(trial.contact), family: recipe.family, quality: recipe.quality,
-            target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, arc: recipe.arc,
-            actorRoute: { startTime: segment.startTime, duration: segment.duration, originalDuration: segment.originalDuration,
-                contactTime: segment.contactTime, hitter: segment.shotSemantics.playerId,
-                feet: clone(segment.shotSemantics.contact.feet), previousPositions: clone(segment.previous.positions),
-                positions: clone(segment.step.positions), momentum: clone(segment.model2Momentum),
-                endTimeSeconds: segment.step.shot.physicsV2.endTimeSeconds } };
+    const actors = friendlyActors(input, pair.id);
+    const checked = probeGenerationReplyV2(state, recipe, { pendingRecipe: pair.pendingRecipe, incoming: pair.incomingProbe, actors, record });
+    if (!checked.ok || !checked.previousInspectionReused && !checked.routeValid) throw new RangeError(checked.reason || 'The nominal reply has an infeasible incoming route.');
+    if (checked.contactFindings.length) {
+        const error = new RangeError('The nominal reply contact does not pass independent model-2 contact rules.');
+        error.contactFindings = checked.contactFindings; throw error;
     }
-    return safety;
+    if (checked.bodyEvents.length) {
+        const error = new RangeError('The nominal outgoing flight intersects the planted hitter or partner.');
+        error.bodyEvents = checked.bodyEvents; throw error;
+    }
+    return { version: 'rally-outgoing-safety-v1', checkedActors: actors,
+        representedFlightSeconds: numberV1(checked.representedFlightSeconds), clear: true,
+        ...(record ? { nominal: { ...checked.nominal, contact: generatedV1(checked.nominal.contact) } } : {}) };
 }
 
 function signatureFlight(input, pair, materialization = 'all') {
@@ -488,17 +469,17 @@ function candidateFlight(input, pair, candidate, situation, draws, materializati
 
 function finishAttempt(input, state, document, decisions, diagnostics, censored) {
     const ending = censored ? 'stop' : 'winner';
-    let finished = finishPlanningV2(state, { ending });
+    let finished = finishGenerationPlanningV2(state, { ending });
     // The final tail has no next contact. Bound its source commands by the
     // actual dead event (or stop bounce), retaining shared terminal sampling.
-    for (let repair = 0; state.pendingRecipe && repair < 8; repair++) {
+    for (let repair = 0; planningView(state).pendingRecipe && repair < 8; repair++) {
         const segment = finished.rawSegments.at(-1), decision = finished.decision;
         const duration = censored ? segment.duration : Math.max(segment.contactTime,
             (decision?.physicalDeadTime ?? decision?.evidenceObservedTime ?? decision?.time ?? segment.endTime) - segment.startTime);
         const recipe = repairPendingMovement(input, state, null, duration);
         if (!recipe) throw new RangeError('The actual terminal movement is infeasible.');
-        replacePendingMovementV2(state, recipe);
-        const next = finishPlanningV2(state, { ending });
+        replaceGenerationPendingMovementV2(state, recipe);
+        const next = finishGenerationPlanningV2(state, { ending });
         const nextDecision = next.decision;
         const nextDead = nextDecision?.physicalDeadTime ?? nextDecision?.evidenceObservedTime ?? nextDecision?.time;
         const priorDead = decision?.physicalDeadTime ?? decision?.evidenceObservedTime ?? decision?.time;
@@ -510,12 +491,12 @@ function finishAttempt(input, state, document, decisions, diagnostics, censored)
     const outcome = censored ? null : generatedV1(finished.derivedOutcome);
     if (!censored && !outcome) return { status: 'failed', document: null, outcome: null, decisions, stats: null,
         diagnostics: { ...diagnostics, code: 'no-physical-outcome' }, outcomeClassification: null };
-    document.shots = clone(state.recipes);
+    document.shots = clone(finished.recipes);
     document.ending = censored ? 'stop' : finished.play.ending;
     if (outcome) document.outcome = clone(outcome); else delete document.outcome;
     const last = decisions.find(decision => decision.shotId === outcome?.shotId) ?? decisions.at(-1);
     if (last && ['long', 'wide'].includes(outcome?.reason)) {
-        const shotIndex = decisions.indexOf(last), flight = state.solved[shotIndex];
+        const shotIndex = decisions.indexOf(last), flight = planningView(state).solved[shotIndex];
         // Leaving a forecast out ball is a defensive decision on this incoming
         // solution. It adds no paddle event or synthetic opponent contact.
         last.resolution.defensiveDecision = { version: 'rally-defence-v1', action: 'let-go', addsContact: false,
@@ -542,7 +523,7 @@ function finishAttempt(input, state, document, decisions, diagnostics, censored)
 }
 
 export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, random, checkpoint }) {
-    const document = headerFor(input, attemptIndex, attemptSeed), state = createPlanningStateV2(document), decisions = [];
+    const document = headerFor(input, attemptIndex, attemptSeed), state = createGenerationPlanningSessionV2(document), decisions = [];
     const diagnostics = { code: 'planning', flightPlannerVersion: FLIGHT_PLANNER_VERSION, rejections: 0, targetRepairs: 0, excludedContacts: 0, contactExclusions: [], failures: [] };
     try {
     for (let index = 0; index < input.options.maxShots; index++) {
@@ -658,15 +639,13 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         }
                         recipe = generatedV1(recipe);
                         recipe.authoring = automaticOwnership([...owned, 'contactOverride'].filter(field => Object.hasOwn(recipe, field)));
-                        const trial = trialRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, reusePreviousTrial: pair.probeTrial,
-                            capturePendingEvents: true });
-                        if (!trial.ok || !trial.previousInspectionReused && !routeValid(trial.resolvedPrevious)) throw new RangeError(trial.reason || 'The actual resolved movement or spacing is infeasible.');
+                        const trial = commitGenerationRecipeV2(state, recipe, { pendingRecipe: pair.pendingRecipe, incoming: pair.incomingProbe });
+                        if (!trial.ok || !trial.routeValid) throw new RangeError(trial.reason || 'The actual resolved movement or spacing is infeasible.');
                         // Actual physical events are outcomes, not a filter on the fixed
                         // execution draw. Inspect the guarded trial once before committing.
-                        const inspection = inspectPlanningTrialEventsV2(state, trial);
+                        const inspection = trial.inspection;
                         if (inspection.violations.length || inspection.physicalCandidates.some(candidate => candidate.unsupportedReason))
                             throw new RangeError('The delivered flight has unsupported model-2 geometry.');
-                        commitPlanningTrialV2(state, trial);
                         pendingMovementPlans.set(state, movement.plan);
                         committed = true;
                         decisions.push({ id: `decision-${index + 1}`, shotId: recipe.id, situation, candidates: preCandidates, excluded: preExcluded,
@@ -707,11 +686,11 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
             if (accepted) break;
         }
         if (!foundPair) {
-            const inspection = inspectPendingLegV2(state, { terminal: true });
+            const inspection = inspectGenerationPendingLegV2(state, { terminal: true });
             if (inspection.derivedOutcome && inspection.derivedOutcome.reason !== 'second-bounce') return finishAttempt(input, state, document, decisions, diagnostics, false);
             return { status: 'failed', document: null, outcome: null, decisions, stats: null,
                 diagnostics: { ...diagnostics, code: 'no-feasible-contact', contactIndex: index,
-                    pending: { recipe: clone(state.pendingRecipe), origins: clone(state.pendingSegment?.previous.positions), endpoints: clone(state.pendingSegment?.step.positions), physical: inspection.derivedOutcome } }, outcomeClassification: null };
+                    pending: { recipe: clone(planningView(state).pendingRecipe), origins: clone(planningView(state).pendingSegment?.previous.positions), endpoints: clone(planningView(state).pendingSegment?.step.positions), physical: inspection.derivedOutcome } }, outcomeClassification: null };
         }
         if (!accepted) return { status: 'failed', document: null, outcome: null, decisions, stats: null,
             diagnostics: { ...diagnostics, code: 'bounded-feasible-intents-exhausted', contactIndex: index }, outcomeClassification: null };

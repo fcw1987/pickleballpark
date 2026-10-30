@@ -250,7 +250,12 @@ export function flightReachCriticalTimesV2(flight,origin,reachModel){
 export function compileSolvedLegV2(shot){
   const spec=shot.physicsV2;
   if(!spec||spec.physicsVersion!==PHYSICS_VERSION)throw new TypeError('Model 2 shots require shared-solver physicsV2 metadata.');
-  const solved=solveFlightV2(spec),endTime=spec.endTimeSeconds??solved.firstLandingTime;
+  return compileSolvedLegFromFlightV2(shot,solveFlightV2(spec));
+}
+
+// Internal planning adapter; public compilation still independently solves its source.
+export function compileSolvedLegFromFlightV2(shot,solved){
+  const spec=shot.physicsV2,endTime=spec.endTimeSeconds??solved.firstLandingTime;
   if(!Number.isFinite(endTime)||endTime<0||endTime>solved.totalDuration+EPS)throw new RangeError('Invalid model 2 leg endpoint time.');
   const bounces=solved.events.filter(e=>e.type==='bounce'&&e.time<=endTime+EPS).length,end=solved.sample(endTime),start=solved.sample(0);
   return Object.freeze({...solved,solved,start,landing:physicsBoardToWorld(solved.landing),end,bounceEnd:end,totalDuration:endTime,

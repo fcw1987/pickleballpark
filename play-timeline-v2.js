@@ -1,5 +1,5 @@
 // Opt-in timeline adapter. The legacy compiler/sampler retains its own path.
-import { PHYSICS_VERSION, compileSolvedLegV2, solveServePreparationV2, physicsBoardToWorld } from './play-physics-v2.js';
+import { PHYSICS_VERSION, compileSolvedLegV2, compileSolvedLegFromFlightV2, solveServePreparationV2, physicsBoardToWorld } from './play-physics-v2.js';
 import { analyzeModel2Outcome } from './play-outcome-v2.js';
 
 const EPS=1e-8;
@@ -11,12 +11,19 @@ const center=feet=>({x:(feet[0].x+feet[1].x)/2,y:(feet[0].y+feet[1].y)/2});
 // index is the one-based contact index, so first-contact preparation stays exact.
 export function createModel2SegmentV2({previous,step,nextStep,index,startTime=0,model2Momentum=[]},
   {resolveShotSemantics,boardToWorld}={}) {
+  return model2Segment({previous,step,nextStep,index,startTime,model2Momentum},{resolveShotSemantics,boardToWorld},compileSolvedLegV2);
+}
+
+export function createModel2SegmentFromSolvedV2(input,adapters,solved){
+  return model2Segment(input,adapters,shot=>compileSolvedLegFromFlightV2(shot,solved));
+}
+function model2Segment({previous,step,nextStep,index,startTime=0,model2Momentum=[]},{resolveShotSemantics,boardToWorld},compileLeg){
   if(!step?.shot||typeof resolveShotSemantics!=='function'||typeof boardToWorld!=='function')throw new TypeError('A model 2 shot and core semantics adapters are required.');
   const shotSemantics=resolveShotSemantics(step.shot,previous.positions);
   const nextShotSemantics=nextStep?.shot?resolveShotSemantics(nextStep.shot,step.positions):null;
   const servePreparation=step.shot.servePreparation?solveServePreparationV2({point:shotSemantics.contact.point,...step.shot.servePreparation}):null;
   const contactTime=servePreparation?.totalDuration??(index===1?shotSemantics.profile.duration*shotSemantics.profile.contactRatio:0);
-  const trajectory=compileSolvedLegV2(step.shot),duration=contactTime+trajectory.totalDuration;
+  const trajectory=compileLeg(step.shot),duration=contactTime+trajectory.totalDuration;
   return {modelVersion:2,index,previous,step,nextStep,trajectory,servePreparation,shotSemantics,nextShotSemantics,
     startTime,duration,originalDuration:duration,endTime:startTime+duration,contactTime,
     trajectoryStartTime:contactTime,trajectoryEndTime:duration,rallyLeg:index,
