@@ -1,4 +1,4 @@
-const REQUIRED_JOBS = Object.freeze(['checks', 'chromium', 'webkit', 'package']);
+const REQUIRED_JOBS = Object.freeze(['checks', 'chromium', 'webkit', 'package', 'rally-calibration']);
 
 export function qualityGateFailures(needs) {
   if (!needs || typeof needs !== 'object' || Array.isArray(needs)) {
@@ -26,7 +26,7 @@ function runCli() {
     throw new Error('QUALITY_NEEDS_JSON must be valid JSON');
   }
   assertQualityGate(needs);
-  console.log('Quality gate passed: checks, Chromium, WebKit, and package succeeded.');
+  console.log('Quality gate passed: checks, Chromium, WebKit, package, and rally physical regression succeeded.');
 }
 
 if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {

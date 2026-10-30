@@ -268,10 +268,52 @@ jobs:
           node tools/extract-pages-artifact.mjs "$RUNNER_TEMP/artifact.tar" verified-upload
           node tools/verify-deployment-artifact.mjs verified-upload "$GITHUB_SHA" --require-clean
 
+  rally-calibration:
+    name: Rally physical regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github
+            assets
+            icons
+            vendor
+            tests
+            tools
+            docs/builder/examples
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      # These fixed inputs were examined in Quality 40992222059.
+      # Required release acceptance does not assert unseen calibration success.
+      - name: Require all 3600 examined rallies, independent physics, determinism and hosted p95
+        run: >-
+          node tools/rally-regression-v1.mjs --require-clean
+          --output release-results/game-mode-m2/required-regression.json
+          --archive release-results/game-mode-m2/required-regression.jsonl
+      - name: Retain regression report and every attempted rally
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rally-regression-results
+          path: |
+            release-results/game-mode-m2/required-regression.json
+            release-results/game-mode-m2/required-regression.jsonl
+          if-no-files-found: error
+          retention-days: 7
+
   quality-gate:
     name: Quality gate
     if: always()
-    needs: [checks, chromium, webkit, package]
+    needs: [checks, chromium, webkit, package, rally-calibration]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

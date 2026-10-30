@@ -1,6 +1,8 @@
+import { validGeneratedRouteCertificateShapeV1 } from './generated-route-certificate-v1.js';
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 import { SERVICE_COURT_CONVENTION, resolveServiceContext } from './rally-state.js';
+import { validateGenerationRecipeV1 } from './rally-recipe.js';
 export const SCHEMA_VERSION = 1;
 // One shared bound for authored, imported, generated, and compiled rallies.
 // Keep this in the document contract so callers never need to duplicate the
@@ -18,6 +20,10 @@ const HANDS = Object.freeze(['right', 'left']);
 const SHOT_AUTHORING_FIELDS = Object.freeze([
   'family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 'pace',
   'movement', 'playerMovement', 'serveMethod'
+]);
+export const MODEL2_AUTHORING_FIELDS = Object.freeze([...SHOT_AUTHORING_FIELDS,
+  'intent', 'quality', 'narration', 'contactMode', 'contactTiming', 'physics',
+  'contactEvidence', 'contactOverride'
 ]);
 export const MODEL2_PHYSICS_VERSION = 'play-physics-v2';
 export const MODEL2_INTENTS = Object.freeze(['serve', 'deep-return', 'third-shot-drop', 'third-shot-drive', 'block', 'reset', 'cross-court-dink', 'middle-dink', 'straight-dink', 'backhand-dink', 'speed-up', 'counter', 'put-away', 'lob', 'overhead', 'erne', 'around-the-post', ...FAMILIES]);
@@ -66,6 +72,16 @@ function model2Point(value, path, height = false) {
   point(value, path, { offCourt: true });
   if (height) boundedNumber(value.heightFeet, 0, 30, `${path}.heightFeet`);
 }
+// Solved terminal evidence can continue beyond the authored 8-foot apron.
+// The supported solver's horizontal displacement multiplier is below 2436
+// over source spans of 36/60 ft; 200000 ft conservatively bounds both axes.
+// This arithmetic guard does not authorize contacts, targets or player travel.
+function model2TerminalEvidencePosition(value, path) {
+  keys(value, ['x', 'y', 'heightFeet'], path);
+  boundedNumber(value.x, -200000, 200000, `${path}.x`);
+  boundedNumber(value.y, -200000, 200000, `${path}.y`);
+  boundedNumber(value.heightFeet, 0, 30, `${path}.heightFeet`);
+}
 function model2Feet(value, path) {
   if (!Array.isArray(value) || value.length !== 2) fail(path, 'must describe exactly two feet.');
   value.forEach((foot, index) => model2Point(foot, `${path}[${index}]`));
@@ -98,10 +114,15 @@ function validateModel2Shot(shot, path) {
     model2Point(shot.contactOverride, `${path}.contactOverride`);
   }
   if (shot.contactTiming !== undefined) {
-    keys(shot.contactTiming, ['afterBounceSeconds'], `${path}.contactTiming`);
-    boundedNumber(shot.contactTiming.afterBounceSeconds, .001, 1.5, `${path}.contactTiming.afterBounceSeconds`);
+    keys(shot.contactTiming, ['afterBounceSeconds', 'beforeBounceSeconds'], `${path}.contactTiming`);
     const volley = shot.contactMode === 'volley' || (shot.contactMode === undefined && (['volley', 'overhead'].includes(shot.family) || (shot.family === 'reset' && shot.contactStyle !== 'short-hop')));
-    if (shot.family === 'serve' || volley) fail(`${path}.contactTiming`, 'is only supported for a bounced contact.');
+    if (shot.contactTiming.beforeBounceSeconds !== undefined) {
+      boundedNumber(shot.contactTiming.beforeBounceSeconds, .001, 5, `${path}.contactTiming.beforeBounceSeconds`);
+      if (!volley || shot.family === 'serve' || shot.contactOverride !== undefined || shot.contactTiming.afterBounceSeconds !== undefined) fail(`${path}.contactTiming`, 'requires an unambiguous non-serve volley before its incoming bounce.');
+    } else {
+      boundedNumber(shot.contactTiming.afterBounceSeconds, .001, 1.5, `${path}.contactTiming.afterBounceSeconds`);
+      if (shot.family === 'serve' || volley) fail(`${path}.contactTiming`, 'is only supported for a bounced contact.');
+    }
   }
   if (shot.physics !== undefined) {
     keys(shot.physics, ['apexFeet', 'launchVerticalFeetPerSecond'], `${path}.physics`);
@@ -123,8 +144,9 @@ function validateModel2Shot(shot, path) {
   }
 }
 function validateModel2Document(value) {
-  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome'], 'document');
+  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome', 'generation'], 'document');
   choice(value.physicsVersion, [MODEL2_PHYSICS_VERSION], 'physicsVersion');
+  if (value.generation !== undefined) validateGenerationRecipeV1(value.generation);
   keys(value.initialLayout, [...PLAYER_IDS, 'ball'], 'initialLayout');
   for (const [id, point] of Object.entries(value.initialLayout)) model2Point(point, `initialLayout.${id}`);
   keys(value.players, PLAYER_IDS, 'players');
@@ -157,8 +179,9 @@ function validateModel2Document(value) {
       && value.players[outcome.struckActor].team === value.players[receiver].team;
     if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam && !serveHitsReceivingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except the server or designated receiver on an applicable serve contact.');
   } else if (outcome.struckActor !== undefined) fail('outcome.struckActor', 'is only supported for a body contact.');
-  keys(outcome.evidence, ['position', 'afterContactSeconds'], 'outcome.evidence');
-  model2Point(outcome.evidence.position, 'outcome.evidence.position', true);
+  keys(outcome.evidence, ['position', 'afterContactSeconds', 'generatedRouteCertificate'], 'outcome.evidence');
+  if (outcome.evidence.generatedRouteCertificate !== undefined && (outcome.reason !== 'second-bounce' || outcome.type !== 'fault' || outcome.ruleRef !== '10.B.1' || !PLAYER_IDS.includes(outcome.faultingActor) || !validGeneratedRouteCertificateShapeV1(outcome.evidence.generatedRouteCertificate))) fail('outcome.evidence.generatedRouteCertificate', 'requires a supported versioned second-bounce fault certificate.');
+  model2TerminalEvidencePosition(outcome.evidence.position, 'outcome.evidence.position');
   boundedNumber(outcome.evidence.afterContactSeconds, 0, 30, 'outcome.evidence.afterContactSeconds');
 }
 
@@ -174,17 +197,18 @@ function validateMovement(value, path) {
   }
 }
 
-function validateShotMetadata(value, path) {
+function validateShotMetadata(value, path, modelVersion = 1) {
   if (value === undefined) return;
   object(value, path);
   const allowed = new Set(['ownership', 'fields']);
   for (const key of Object.keys(value)) if (!allowed.has(key)) fail(`${path}.${key}`, 'is not a supported authoring metadata field.');
   choice(value.ownership, ['automatic', 'authored'], `${path}.ownership`);
-  if (!Array.isArray(value.fields) || value.fields.length > SHOT_AUTHORING_FIELDS.length) fail(`${path}.fields`, `must contain at most ${SHOT_AUTHORING_FIELDS.length} top-level field names.`);
+  const fields = modelVersion === 2 ? MODEL2_AUTHORING_FIELDS : SHOT_AUTHORING_FIELDS;
+  if (!Array.isArray(value.fields) || value.fields.length > fields.length) fail(`${path}.fields`, `must contain at most ${fields.length} top-level field names.`);
   const seen = new Set();
   value.fields.forEach((field, index) => {
     string(field, `${path}.fields[${index}]`, 32);
-    if (!SHOT_AUTHORING_FIELDS.includes(field)) fail(`${path}.fields[${index}]`, `must name one of the supported shot fields: ${SHOT_AUTHORING_FIELDS.join(', ')}.`);
+    if (!fields.includes(field)) fail(`${path}.fields[${index}]`, `must name one of the supported shot fields: ${fields.join(', ')}.`);
     if (seen.has(field)) fail(`${path}.fields[${index}]`, 'must not contain duplicate field names.');
     seen.add(field);
   });
@@ -258,11 +282,14 @@ export function validateDocument(value) {
     if (shot.receiver !== 'auto') choice(shot.receiver, PLAYER_IDS, `${path}.receiver`);
     choice(shot.contactStyle, CONTACT_STYLES, `${path}.contactStyle`);
     point(shot.target, `${path}.target`, { offCourt: value.modelVersion === 2 });
-    if (value.modelVersion === 2) validateModel2Shot(shot, path);
+    if (value.modelVersion === 2) {
+      if (index === 0 && shot.contactTiming?.beforeBounceSeconds !== undefined) fail(`${path}.contactTiming`, 'requires a represented incoming leg before this volley.');
+      validateModel2Shot(shot, path);
+    }
     choice(shot.arc, ARCS, `${path}.arc`);
     choice(shot.pace, PACES, `${path}.pace`);
     validateMovement(shot.movement, `${path}.movement`);
-    validateShotMetadata(shot.authoring, `${path}.authoring`);
+    validateShotMetadata(shot.authoring, `${path}.authoring`, value.modelVersion);
     validateShotGeneration(shot.generation, `${path}.generation`);
     if (shot.playerMovement !== undefined) {
       object(shot.playerMovement, `${path}.playerMovement`);

@@ -1,0 +1,1228 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": 2,
+  "physicsVersion": "play-physics-v2",
+  "id": "rally-engine-eced8354-2",
+  "title": "Generated rally \u00b7 seed 2",
+  "players": {
+    "player1": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player2": {
+      "team": "green",
+      "handedness": "right"
+    },
+    "player3": {
+      "team": "orange",
+      "handedness": "right"
+    },
+    "player4": {
+      "team": "orange",
+      "handedness": "right"
+    }
+  },
+  "initialLayout": {
+    "player1": {
+      "x": 5,
+      "y": 2
+    },
+    "player2": {
+      "x": 15,
+      "y": 14
+    },
+    "player3": {
+      "x": 15,
+      "y": 45
+    },
+    "player4": {
+      "x": 5,
+      "y": 45
+    },
+    "ball": {
+      "x": 15.8,
+      "y": 44
+    }
+  },
+  "service": {
+    "server": "player3",
+    "receiver": "player1",
+    "court": "right",
+    "courtConvention": "server-perspective-v1"
+  },
+  "shots": [
+    {
+      "id": "shot-1",
+      "family": "serve",
+      "hitter": "player3",
+      "receiver": "player1",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 7.533487519,
+        "y": 6.286003445
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 15,
+          "y": 45
+        },
+        "pinned": false
+      },
+      "quality": "neutral",
+      "serveMethod": "volley",
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 14.58,
+            "y": 45
+          },
+          {
+            "x": 15.42,
+            "y": 45
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "serve",
+      "physics": {
+        "launchVerticalFeetPerSecond": 12.108013342
+      },
+      "narration": {
+        "label": "Serve",
+        "why": "Orange: place the serve and prepare for the return."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "serveMethod",
+          "intent",
+          "quality",
+          "narration",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 5,
+            "y": 2
+          },
+          "pinned": false
+        },
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 15,
+            "y": 14
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 5,
+            "y": 45
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-2",
+      "family": "return",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "backhand",
+      "target": {
+        "x": 13.059439585,
+        "y": 39.146705448
+      },
+      "arc": "high",
+      "pace": "medium",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 5.436044406,
+          "y": 11.699568665
+        },
+        "pinned": false
+      },
+      "quality": "neutral",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.16
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 5.42,
+            "y": 2
+          },
+          {
+            "x": 4.58,
+            "y": 2
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "deep-return",
+      "physics": {
+        "launchVerticalFeetPerSecond": 13.299893834
+      },
+      "narration": {
+        "label": "Deep return",
+        "why": "Green: send the return deep to buy time to approach."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 15.436044406,
+            "y": 14.197950381
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 15,
+            "y": 45
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 5,
+            "y": 45
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-3",
+      "family": "drive",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "backhand",
+      "target": {
+        "x": 6.843694221,
+        "y": 5.759073478
+      },
+      "arc": "low",
+      "pace": "firm",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 14.833319114,
+          "y": 40.525916678
+        },
+        "pinned": false
+      },
+      "quality": "neutral",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.28
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 14.58,
+            "y": 45
+          },
+          {
+            "x": 15.42,
+            "y": 45
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "third-shot-drive",
+      "physics": {
+        "launchVerticalFeetPerSecond": 11.555834341
+      },
+      "narration": {
+        "label": "Third-shot drive",
+        "why": "Orange: use pace to pressure the returning pair."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 8.402315649,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 14.116234382,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 4.833319114,
+            "y": 40.525916678
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-4",
+      "family": "reset",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "backhand",
+      "target": {
+        "x": 16.133063348,
+        "y": 37.812811221
+      },
+      "arc": "low",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 6.103951403,
+          "y": 14.25
+        },
+        "pinned": false
+      },
+      "quality": "excellent",
+      "contactMode": "volley",
+      "contactTiming": {
+        "beforeBounceSeconds": 0.234500477
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 8.822315649,
+            "y": 14.25
+          },
+          {
+            "x": 7.982315649,
+            "y": 14.25
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "block",
+      "physics": {
+        "launchVerticalFeetPerSecond": 5.567374229
+      },
+      "narration": {
+        "label": "Block",
+        "why": "Green: use a compact reply to soften the exchange."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 16.103951403,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 14.90525826,
+            "y": 37.717127171
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 6.717257737,
+            "y": 40.525916678
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-5",
+      "family": "drop",
+      "hitter": "player3",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 5.637152612,
+        "y": 17.59567032
+      },
+      "arc": "high",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 14.21468747,
+          "y": 29.75
+        },
+        "pinned": false
+      },
+      "quality": "neutral",
+      "contactMode": "volley",
+      "contactTiming": {
+        "beforeBounceSeconds": 0.094156502
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 14.48525826,
+            "y": 37.717127171
+          },
+          {
+            "x": 15.32525826,
+            "y": 37.717127171
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "drop",
+      "physics": {
+        "launchVerticalFeetPerSecond": 15.00686924
+      },
+      "narration": {
+        "label": "Drop",
+        "why": "Orange: use a soft landing to create time to advance."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 6.103951403,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 13.778402731,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 4.21468747,
+            "y": 29.75
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-6",
+      "family": "dink",
+      "hitter": "player1",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 2.71115565,
+        "y": 26.805027749
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 3.688008017,
+          "y": 14.25
+        },
+        "pinned": false
+      },
+      "quality": "neutral",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.28
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 6.523951403,
+            "y": 14.25
+          },
+          {
+            "x": 5.683951403,
+            "y": 14.25
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "straight-dink",
+      "physics": {
+        "launchVerticalFeetPerSecond": 10.238079195
+      },
+      "narration": {
+        "label": "Straight dink",
+        "why": "Green: keep the next dink in the same-side lane."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 13.688008017,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 13,
+            "y": 29.75
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 4.21468747,
+            "y": 29.75
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-7",
+      "family": "dink",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "backhand",
+      "target": {
+        "x": 18.592662042,
+        "y": 16.781440146
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 6.546679168,
+          "y": 29.75
+        },
+        "pinned": false
+      },
+      "quality": "excellent",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.28
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 3.79468747,
+            "y": 29.75
+          },
+          {
+            "x": 4.63468747,
+            "y": 29.75
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "cross-court-dink",
+      "physics": {
+        "launchVerticalFeetPerSecond": 10.78113318
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Orange: use the longer diagonal to keep the soft exchange going."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 7,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 17.668680452,
+            "y": 14.736251314
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 16.546679168,
+            "y": 29.75
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-8",
+      "family": "dink",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "backhand",
+      "target": {
+        "x": 10.637169679,
+        "y": 26.000104154
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 15.114690542,
+          "y": 14.25
+        },
+        "pinned": false
+      },
+      "quality": "low",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.141372
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 18.088680452,
+            "y": 14.736251314
+          },
+          {
+            "x": 17.248680452,
+            "y": 14.736251314
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "middle-dink",
+      "physics": {
+        "launchVerticalFeetPerSecond": 12.232596861
+      },
+      "narration": {
+        "label": "Middle dink",
+        "why": "Green: keep the soft ball central and stay balanced."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 5.114690542,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 15.17840751,
+            "y": 29.75
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 6.960742135,
+            "y": 29.406260094
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-9",
+      "family": "dink",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 11.909902168,
+        "y": 17.130514685
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 5.34378239,
+          "y": 29.75
+        },
+        "pinned": false
+      },
+      "quality": "low",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.16
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 6.540742135,
+            "y": 29.406260094
+          },
+          {
+            "x": 7.380742135,
+            "y": 29.406260094
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "cross-court-dink",
+      "physics": {
+        "launchVerticalFeetPerSecond": 11.081810347
+      },
+      "narration": {
+        "label": "Cross-court dink",
+        "why": "Orange: use the longer diagonal to keep the soft exchange going."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 5.534772607,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 14.999553741,
+            "y": 14.305559294
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 15.34378239,
+            "y": 29.75
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-10",
+      "family": "dink",
+      "hitter": "player2",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 8.963721025,
+        "y": 32.701154549
+      },
+      "arc": "medium",
+      "pace": "soft",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 14.813469785,
+          "y": 14.25
+        },
+        "pinned": false
+      },
+      "quality": "attackable",
+      "contactMode": "bounced",
+      "contactTiming": {
+        "afterBounceSeconds": 0.16
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 15.419553741,
+            "y": 14.305559294
+          },
+          {
+            "x": 14.579553741,
+            "y": 14.305559294
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "middle-dink",
+      "physics": {
+        "launchVerticalFeetPerSecond": 13.923047845
+      },
+      "narration": {
+        "label": "Middle dink",
+        "why": "Green: dink toward the middle to limit the reply angles."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 4.813469785,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 14.709841887,
+            "y": 29.75
+          },
+          "pinned": false
+        },
+        "player4": {
+          "intent": "manual",
+          "target": {
+            "x": 9.569432828,
+            "y": 29.75
+          },
+          "pinned": false
+        }
+      }
+    },
+    {
+      "id": "shot-11",
+      "family": "volley",
+      "hitter": "player4",
+      "receiver": "auto",
+      "contactStyle": "forehand",
+      "target": {
+        "x": 8.300613248,
+        "y": 2.107714536
+      },
+      "arc": "low",
+      "pace": "firm",
+      "movement": {
+        "intent": "manual",
+        "target": {
+          "x": 4.694110385,
+          "y": 29.75
+        },
+        "pinned": false
+      },
+      "quality": "excellent",
+      "contactMode": "volley",
+      "contactTiming": {
+        "beforeBounceSeconds": 0.324588028
+      },
+      "contactEvidence": {
+        "feet": [
+          {
+            "x": 9.149432828,
+            "y": 29.75
+          },
+          {
+            "x": 9.989432828,
+            "y": 29.75
+          }
+        ],
+        "feetEstablishedOutsideNVZ": true
+      },
+      "intent": "speed-up",
+      "physics": {
+        "launchVerticalFeetPerSecond": -4.131132316
+      },
+      "narration": {
+        "label": "Speed-up",
+        "why": "Orange: use the contact opportunity to start a faster exchange."
+      },
+      "generation": {
+        "seed": 2,
+        "generatorVersion": "rally-engine-v1"
+      },
+      "authoring": {
+        "ownership": "automatic",
+        "fields": [
+          "family",
+          "hitter",
+          "receiver",
+          "contactStyle",
+          "target",
+          "arc",
+          "pace",
+          "movement",
+          "playerMovement",
+          "intent",
+          "quality",
+          "narration",
+          "contactMode",
+          "contactTiming",
+          "physics",
+          "contactEvidence"
+        ]
+      },
+      "playerMovement": {
+        "player1": {
+          "intent": "manual",
+          "target": {
+            "x": 4.524171709,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player2": {
+          "intent": "manual",
+          "target": {
+            "x": 14.524171709,
+            "y": 14.25
+          },
+          "pinned": false
+        },
+        "player3": {
+          "intent": "manual",
+          "target": {
+            "x": 14.694110385,
+            "y": 29.75
+          },
+          "pinned": false
+        }
+      }
+    }
+  ],
+  "annotations": [],
+  "assistance": {
+    "autoShading": false,
+    "showGuides": false,
+    "team": "green"
+  },
+  "opening": "serve",
+  "ending": "winner",
+  "intentionalFault": false,
+  "generation": {
+    "mode": "engine",
+    "generatorVersion": "rally-engine-v1",
+    "policyVersion": "rally-policy-v1",
+    "physicsVersion": "play-physics-v2",
+    "seed": 2,
+    "input": {
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        }
+      },
+      "layout": {
+        "player1": {
+          "x": 5,
+          "y": 2
+        },
+        "player2": {
+          "x": 15,
+          "y": 14
+        },
+        "player3": {
+          "x": 15,
+          "y": 45
+        },
+        "player4": {
+          "x": 5,
+          "y": 45
+        },
+        "ball": {
+          "x": 15.8,
+          "y": 44
+        }
+      },
+      "service": {
+        "server": "player3",
+        "receiver": "player1",
+        "court": "right",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "selection": {
+      "attempts": 1,
+      "selectedAttempt": 0,
+      "selectedSeed": 2
+    }
+  },
+  "outcome": {
+    "winner": "orange",
+    "type": "winner",
+    "reason": "unreachable",
+    "shotId": "shot-11",
+    "ruleRef": "10.B.1",
+    "faultingActor": null,
+    "evidence": {
+      "position": {
+        "x": 5.894071424,
+        "y": -30.646674254,
+        "heightFeet": 0.121391076
+      },
+      "afterContactSeconds": 1.028979894
+    }
+  }
+}

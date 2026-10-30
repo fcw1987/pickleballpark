@@ -7,8 +7,22 @@ const blend = (a, b, t) => Object.freeze({ x: a.x + (b.x - a.x) * t, y: a.y + (b
 const center = feet => ({ x: (feet[0].x + feet[1].x) / 2, y: (feet[0].y + feet[1].y) / 2 });
 
 export function sampleMomentumV2(evidence, actor, absoluteTime) {
-  const candidates = (evidence || []).filter(item => item.actor === actor && item.contactTime <= absoluteTime + 1e-9);
-  const active = candidates.sort((a, b) => b.contactTime - a.contactTime)[0];
+  if (!evidence) return null;
+  let active;
+  if (Array.isArray(evidence) && evidence.constructor === Array && evidence.filter === Array.prototype.filter) {
+    // Stable sort selected the first equal-time entry. Keep that tie rule while
+    // scanning inert model evidence without allocating a filtered/sorted copy.
+    const length = evidence.length;
+    for (let index = 0; index < length; index++) {
+      if (!(index in evidence)) continue; // Array#filter skips sparse holes.
+      const item = evidence[index];
+      if (item.actor === actor && item.contactTime <= absoluteTime + 1e-9
+        && (!active || item.contactTime - active.contactTime > 0)) active = item;
+    }
+  } else {
+    const candidates = (evidence || []).filter(item => item.actor === actor && item.contactTime <= absoluteTime + 1e-9);
+    active = candidates.sort((a, b) => b.contactTime - a.contactTime)[0];
+  }
   if (!active) return null;
   const duration = active.time - active.contactTime;
   const progress = duration > 0 ? clamp((absoluteTime - active.contactTime) / duration) : 1;
@@ -37,7 +51,18 @@ export function sampleActorBoardPositionV2(segment, actor, localTime) {
 
 export function sampleActorFeetV2(segment, actor, localTime) {
   const absoluteTime = segment.startTime + localTime;
-  const active = [...(segment.model2Momentum || [])].reverse().find(item => item.actor === actor && item.contactTime <= absoluteTime + 1e-9);
+  const evidence = segment.model2Momentum;
+  let active;
+  if (Array.isArray(evidence) && evidence[Symbol.iterator] === Array.prototype[Symbol.iterator]) {
+    // Feet intentionally select the last active array entry, even when the
+    // entries are out of time order. This differs from position momentum.
+    for (let index = evidence.length - 1; index >= 0; index--) {
+      const item = evidence[index];
+      if (item.actor === actor && item.contactTime <= absoluteTime + 1e-9) { active = item; break; }
+    }
+  } else if (evidence) {
+    active = [...(segment.model2Momentum || [])].reverse().find(item => item.actor === actor && item.contactTime <= absoluteTime + 1e-9);
+  }
   if (active) {
     const progress = clamp((absoluteTime - active.contactTime) / Math.max(.001, active.time - active.contactTime));
     return active.fromFeet.map((foot, index) => blend(foot, active.feet[index], progress));

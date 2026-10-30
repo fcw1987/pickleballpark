@@ -1,0 +1,43 @@
+{
+  "version": "rally-holdout-v1",
+  "cohort": "m2-holdout-v1",
+  "baselineSourceRevision": "9493af303c181a91f74f0fed3bc4c121ad822072",
+  "seedStart": 50000,
+  "seedCountPerStyle": 1200,
+  "styles": [
+    "pro",
+    "advanced",
+    "intermediate"
+  ],
+  "flavour": "balanced",
+  "serviceRotation": [
+    {
+      "server": "player1",
+      "receiver": "player3",
+      "court": "right"
+    },
+    {
+      "server": "player1",
+      "receiver": "player3",
+      "court": "left"
+    },
+    {
+      "server": "player3",
+      "receiver": "player1",
+      "court": "right"
+    },
+    {
+      "server": "player3",
+      "receiver": "player1",
+      "court": "left"
+    }
+  ],
+  "options": {
+    "lengthFeel": "natural",
+    "winner": "either",
+    "signatureShots": true,
+    "maxShots": 99
+  },
+  "purpose": "Reserved before resumed tuning; run once on a frozen reviewed candidate. Do not extend after results.",
+  "status": "RESERVED_NOT_RUN"
+}

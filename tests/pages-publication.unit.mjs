@@ -31,12 +31,28 @@ test('rejects PR, fork, wrong workflow, wrong SHA, non-main and incomplete runs'
 });
 
 test('rejects failed, skipped, neutral, missing or duplicate required jobs', () => {
-  for (const conclusion of ['failure', 'skipped', 'neutral', 'cancelled']) {
-    const data = selection(); data.jobs[0].conclusion = conclusion; assert.throws(() => validatePublicationSelection(data), /Required Quality job/);
+  for (const name of QUALITY_JOBS) {
+    for (const conclusion of ['failure', 'skipped', 'neutral', 'cancelled']) {
+      const data = selection(); data.jobs.find(job => job.name === name).conclusion = conclusion;
+      assert.throws(() => validatePublicationSelection(data), /Required Quality job/);
+    }
+    const missing = selection(); missing.jobs = missing.jobs.filter(job => job.name !== name);
+    assert.throws(() => validatePublicationSelection(missing), /uniquely successful/);
+    const duplicate = selection(); duplicate.jobs.push({ ...duplicate.jobs.find(job => job.name === name) });
+    assert.throws(() => validatePublicationSelection(duplicate), /uniquely successful/);
   }
-  for (const change of [data => data.jobs.pop(), data => data.jobs.push({ ...data.jobs[0] })]) {
-    const data = selection(); change(data); assert.throws(() => validatePublicationSelection(data), /uniquely successful/);
-  }
+});
+
+test('deployment requires the actual completed physical regression job even if the Quality gate claims success', () => {
+  const data = selection();
+  data.jobs = data.jobs.filter(job => job.name !== 'Rally physical regression');
+  assert.throws(() => validatePublicationSelection(data), /uniquely successful: Rally physical regression/);
+});
+
+test('historical calibration success cannot substitute for the release regression contract', () => {
+  const data = selection();
+  data.jobs.find(job => job.name === 'Rally physical regression').name = 'Rally calibration';
+  assert.throws(() => validatePublicationSelection(data), /uniquely successful: Rally physical regression/);
 });
 
 test('rejects expired, ambiguous, wrong-run and digestless artifact metadata', () => {

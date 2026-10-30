@@ -1,0 +1,1086 @@
+{
+  "note": "Exact contacts, targets and old launch physics extracted read-only from preserved C archive; no regeneration. Expected planner statuses are asserted individually.",
+  "fixtures": [
+    {
+      "id": "advanced-1214-shot6",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "oldSpeedMph": 182.47977030152865,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": -46.18211806
+      },
+      "input": {
+        "from": {
+          "x": 11.41782852071753,
+          "y": 17.199999999397942,
+          "heightFeet": 4.229652240216385
+        },
+        "target": {
+          "x": 5.65488797,
+          "y": 39.224937546
+        },
+        "family": "drive",
+        "intent": "drive",
+        "quality": "low",
+        "style": "advanced",
+        "pace": "firm",
+        "arc": "low",
+        "preferred": {
+          "launchVerticalFeetPerSecond": -46.18211806
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "intermediate-1282-shot6",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "oldSpeedMph": 91.14800830336232,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": -16.108929814
+      },
+      "input": {
+        "from": {
+          "x": 9.488793775616191,
+          "y": 17.199999983638484,
+          "heightFeet": 3.9671145472142264
+        },
+        "target": {
+          "x": 13.818552759,
+          "y": 43.269707088
+        },
+        "family": "drive",
+        "intent": "drive",
+        "quality": "low",
+        "style": "intermediate",
+        "pace": "firm",
+        "arc": "low",
+        "preferred": {
+          "launchVerticalFeetPerSecond": -16.108929814
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "reset-nonerror",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1291",
+      "shotId": "shot-4",
+      "oldSpeedMph": 29.374152646,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 1.730345331
+      },
+      "input": {
+        "from": {
+          "x": 12.863834722,
+          "y": 17.199999993,
+          "heightFeet": 3.324152334
+        },
+        "target": {
+          "x": 6.895006113,
+          "y": 38.023065255
+        },
+        "family": "reset",
+        "intent": "block",
+        "style": "advanced",
+        "quality": "low",
+        "pace": "soft",
+        "arc": "low",
+        "errorReason": null,
+        "preferred": {
+          "launchVerticalFeetPerSecond": 1.730345331
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drop-nonerror",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1148",
+      "shotId": "shot-4",
+      "oldSpeedMph": 45.897842525,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": -18.318642584
+      },
+      "input": {
+        "from": {
+          "x": 10.339484353,
+          "y": 33.994172497,
+          "heightFeet": 8.499998999
+        },
+        "target": {
+          "x": 9.698306494,
+          "y": 11.339327679
+        },
+        "family": "drop",
+        "intent": "drop",
+        "style": "pro",
+        "quality": "attackable",
+        "pace": "soft",
+        "arc": "high",
+        "errorReason": null,
+        "preferred": {
+          "launchVerticalFeetPerSecond": -18.318642584
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "dink-nonerror",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1223",
+      "shotId": "shot-4",
+      "oldSpeedMph": 26.163508419,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 8.674224875
+      },
+      "input": {
+        "from": {
+          "x": 22.030178418,
+          "y": 12.041320039,
+          "heightFeet": 3.139232935
+        },
+        "target": {
+          "x": 2.224823905,
+          "y": 33.427332688
+        },
+        "family": "dink",
+        "intent": "backhand-dink",
+        "style": "intermediate",
+        "quality": "attackable",
+        "pace": "soft",
+        "arc": "medium",
+        "errorReason": null,
+        "preferred": {
+          "launchVerticalFeetPerSecond": 8.674224875
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "lob-nonerror",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1093",
+      "shotId": "shot-3",
+      "oldSpeedMph": 26.723893372,
+      "oldPhysics": {
+        "apexFeet": 18
+      },
+      "input": {
+        "from": {
+          "x": 18.662244796,
+          "y": -1.163439733,
+          "heightFeet": 1.344671383
+        },
+        "target": {
+          "x": 2.339737107,
+          "y": 40.397291991
+        },
+        "family": "lob",
+        "intent": "lob",
+        "style": "pro",
+        "quality": "neutral",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": null,
+        "preferred": {
+          "apexFeet": 18
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "reset-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1069",
+      "shotId": "shot-5",
+      "oldSpeedMph": 18.599443768,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 24.748587413
+      },
+      "input": {
+        "from": {
+          "x": 11.577968574,
+          "y": 4.63500909,
+          "heightFeet": 1.207594018
+        },
+        "target": {
+          "x": 9.046785273,
+          "y": 22.6
+        },
+        "family": "reset",
+        "intent": "reset",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "high",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 24.748587413
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "dink-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1250",
+      "shotId": "shot-30",
+      "oldSpeedMph": 34.186852727,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 4.532212079
+      },
+      "input": {
+        "from": {
+          "x": 9.195898079,
+          "y": 17.199999996,
+          "heightFeet": 3.452847504
+        },
+        "target": {
+          "x": 11.410596857,
+          "y": 47.942527451
+        },
+        "family": "dink",
+        "intent": "middle-dink",
+        "style": "pro",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "medium",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 4.532212079
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "dink-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1009",
+      "shotId": "shot-8",
+      "oldSpeedMph": 16.946235794,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 16.518162837
+      },
+      "input": {
+        "from": {
+          "x": -1.083078072,
+          "y": 29.892552281,
+          "heightFeet": 1.576005004
+        },
+        "target": {
+          "x": 17.667499578,
+          "y": 21.4
+        },
+        "family": "dink",
+        "intent": "cross-court-dink",
+        "style": "pro",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "medium",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 16.518162837
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "dink-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1281",
+      "shotId": "shot-10",
+      "oldSpeedMph": 21.060275956,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 12.057438585
+      },
+      "input": {
+        "from": {
+          "x": 1.2652089,
+          "y": 28.915119781,
+          "heightFeet": 1.427401055
+        },
+        "target": {
+          "x": 22.499421805,
+          "y": 17.633569402
+        },
+        "family": "dink",
+        "intent": "cross-court-dink",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "medium",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 12.057438585
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "lob-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1251",
+      "shotId": "shot-3",
+      "oldSpeedMph": 20.560633493,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 27.372143542
+      },
+      "input": {
+        "from": {
+          "x": 10.581977186,
+          "y": 43.520803266,
+          "heightFeet": 1.439806075
+        },
+        "target": {
+          "x": 10.196390919,
+          "y": 21.4
+        },
+        "family": "lob",
+        "intent": "lob",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 27.372143542
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drop-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1169",
+      "shotId": "shot-3",
+      "oldSpeedMph": 21.913778962,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 16.819032233
+      },
+      "input": {
+        "from": {
+          "x": 12.147978654,
+          "y": -0.218345502,
+          "heightFeet": 1.39263554
+        },
+        "target": {
+          "x": -1.009761192,
+          "y": 27.378773565
+        },
+        "family": "drop",
+        "intent": "third-shot-drop",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "high",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 16.819032233
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "reset-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1051",
+      "shotId": "shot-5",
+      "oldSpeedMph": 32.961825397,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 4.159887689
+      },
+      "input": {
+        "from": {
+          "x": 8.333659429,
+          "y": 26.799999994,
+          "heightFeet": 3.77418645
+        },
+        "target": {
+          "x": 9.420536426,
+          "y": -3.188662099
+        },
+        "family": "reset",
+        "intent": "reset",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "high",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 4.159887689
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "volley-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1127",
+      "shotId": "shot-7",
+      "oldSpeedMph": 39.788268458,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 1.147014844
+      },
+      "input": {
+        "from": {
+          "x": 9.888308998,
+          "y": 26.800000005,
+          "heightFeet": 3.601645184
+        },
+        "target": {
+          "x": 5.284006115,
+          "y": -2.133088456
+        },
+        "family": "volley",
+        "intent": "speed-up",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 1.147014844
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "volley-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1103",
+      "shotId": "shot-5",
+      "oldSpeedMph": 18.489863524,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 24.368315466
+      },
+      "input": {
+        "from": {
+          "x": 5.87722005,
+          "y": 38.970726407,
+          "heightFeet": 1.344379152
+        },
+        "target": {
+          "x": 11.990045825,
+          "y": 21.4
+        },
+        "family": "volley",
+        "intent": "volley",
+        "style": "pro",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 24.368315466
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "lob-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1109",
+      "shotId": "shot-9",
+      "oldSpeedMph": 24.144113936,
+      "oldPhysics": {
+        "apexFeet": 18
+      },
+      "input": {
+        "from": {
+          "x": 7.541137242,
+          "y": 12.831456723,
+          "heightFeet": 1.797112748
+        },
+        "target": {
+          "x": 21.05898663,
+          "y": 39.518746954
+        },
+        "family": "lob",
+        "intent": "lob",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "wide",
+        "preferred": {
+          "apexFeet": 18
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "reset-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1106",
+      "shotId": "shot-4",
+      "oldSpeedMph": 23.127321632,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 7.979614651
+      },
+      "input": {
+        "from": {
+          "x": 6.292728431,
+          "y": 17.200000018,
+          "heightFeet": 2.615438394
+        },
+        "target": {
+          "x": 22.100977314,
+          "y": 34.61267821
+        },
+        "family": "reset",
+        "intent": "block",
+        "style": "pro",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "low",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 7.979614651
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "overhead-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1040",
+      "shotId": "shot-9",
+      "oldSpeedMph": 13.196313541,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 15.106049064
+      },
+      "input": {
+        "from": {
+          "x": 10.704320859,
+          "y": 6.669656524,
+          "heightFeet": 8.499998999
+        },
+        "target": {
+          "x": 13.026472078,
+          "y": 22.6
+        },
+        "family": "overhead",
+        "intent": "overhead",
+        "style": "pro",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 15.106049064
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drive-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1215",
+      "shotId": "shot-3",
+      "oldSpeedMph": 22.331724058,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 29.022058451
+      },
+      "input": {
+        "from": {
+          "x": 0.976953861,
+          "y": 45.074486723,
+          "heightFeet": 1.363649632
+        },
+        "target": {
+          "x": 15.973189109,
+          "y": 21.4
+        },
+        "family": "drive",
+        "intent": "third-shot-drive",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 29.022058451
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drive-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1211",
+      "shotId": "shot-5",
+      "oldSpeedMph": 38.92198853,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 7.686427006
+      },
+      "input": {
+        "from": {
+          "x": 11.307217695,
+          "y": 42.734312422,
+          "heightFeet": 4.453999994
+        },
+        "target": {
+          "x": 6.530590415,
+          "y": -2.846444156
+        },
+        "family": "drive",
+        "intent": "drive",
+        "style": "pro",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 7.686427006
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drop-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1088",
+      "shotId": "shot-14",
+      "oldSpeedMph": 40.152599222,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": -1.392200341
+      },
+      "input": {
+        "from": {
+          "x": 9.836146418,
+          "y": 37.278060497,
+          "heightFeet": 8.499998999
+        },
+        "target": {
+          "x": 10.099371204,
+          "y": -2.738410089
+        },
+        "family": "drop",
+        "intent": "drop",
+        "style": "pro",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "high",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": -1.392200341
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drop-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1097",
+      "shotId": "shot-3",
+      "oldSpeedMph": 21.733299566,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 27.792335888
+      },
+      "input": {
+        "from": {
+          "x": 19.909529481,
+          "y": 1.388578523,
+          "heightFeet": 1.368525627
+        },
+        "target": {
+          "x": 2.173770198,
+          "y": 22.6
+        },
+        "family": "drop",
+        "intent": "third-shot-drop",
+        "style": "pro",
+        "quality": "error",
+        "pace": "soft",
+        "arc": "high",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 27.792335888
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "overhead-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1298",
+      "shotId": "shot-9",
+      "oldSpeedMph": 62.996844995,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": -12
+      },
+      "input": {
+        "from": {
+          "x": 8.497772804,
+          "y": 36.773263063,
+          "heightFeet": 8.499998999
+        },
+        "target": {
+          "x": 8.852752013,
+          "y": -3.479319769
+        },
+        "family": "overhead",
+        "intent": "overhead",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": -12
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "volley-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1265",
+      "shotId": "shot-5",
+      "oldSpeedMph": 34.174728103,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 9.49735009
+      },
+      "input": {
+        "from": {
+          "x": 14.447500442,
+          "y": 7.572167627,
+          "heightFeet": 2.081007367
+        },
+        "target": {
+          "x": -2.896599151,
+          "y": 40.282642603
+        },
+        "family": "volley",
+        "intent": "volley",
+        "style": "pro",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 9.49735009
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "overhead-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1162",
+      "shotId": "shot-16",
+      "oldSpeedMph": 50.515546042,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": -18
+      },
+      "input": {
+        "from": {
+          "x": 9.369969559,
+          "y": 8.309613951,
+          "heightFeet": 8.499998999
+        },
+        "target": {
+          "x": 22.63141243,
+          "y": 29.995077169
+        },
+        "family": "overhead",
+        "intent": "overhead",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": -18
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "lob-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1264",
+      "shotId": "shot-15",
+      "oldSpeedMph": 24.647476226,
+      "oldPhysics": {
+        "apexFeet": 18
+      },
+      "input": {
+        "from": {
+          "x": 9.377106645,
+          "y": 14.064576446,
+          "heightFeet": 1.693763835
+        },
+        "target": {
+          "x": 10.380037846,
+          "y": 47.123362165
+        },
+        "family": "lob",
+        "intent": "lob",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "long",
+        "preferred": {
+          "apexFeet": 18
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "return-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1195",
+      "shotId": "shot-2",
+      "oldSpeedMph": 23.059425535,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 29.929398596
+      },
+      "input": {
+        "from": {
+          "x": 19.410729475,
+          "y": -2.003023331,
+          "heightFeet": 1.504247335
+        },
+        "target": {
+          "x": 2.222226335,
+          "y": 22.6
+        },
+        "family": "return",
+        "intent": "deep-return",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 29.929398596
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "drive-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:pro:balanced:1271",
+      "shotId": "shot-3",
+      "oldSpeedMph": 33.017246913,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 13.048652155
+      },
+      "input": {
+        "from": {
+          "x": 1.509140775,
+          "y": 45.776868527,
+          "heightFeet": 1.469443438
+        },
+        "target": {
+          "x": 20.501409056,
+          "y": 8.148292179
+        },
+        "family": "drive",
+        "intent": "third-shot-drive",
+        "style": "pro",
+        "quality": "error",
+        "pace": "firm",
+        "arc": "low",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 13.048652155
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "return-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1111",
+      "shotId": "shot-2",
+      "oldSpeedMph": 34.787271514,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 13.363842679
+      },
+      "input": {
+        "from": {
+          "x": 18.072616578,
+          "y": -0.260168482,
+          "heightFeet": 1.518017939
+        },
+        "target": {
+          "x": -1.575068995,
+          "y": 40.810391883
+        },
+        "family": "return",
+        "intent": "deep-return",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 13.363842679
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "return-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1202",
+      "shotId": "shot-2",
+      "oldSpeedMph": 35.236063707,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 13.521168281
+      },
+      "input": {
+        "from": {
+          "x": 8.122219658,
+          "y": 1.436797173,
+          "heightFeet": 1.416084579
+        },
+        "target": {
+          "x": 8.468772273,
+          "y": 47.688358888
+        },
+        "family": "return",
+        "intent": "deep-return",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 13.521168281
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "serve-error-long",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1293",
+      "shotId": "shot-1",
+      "oldSpeedMph": 38.542224177,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 11.816210434
+      },
+      "input": {
+        "from": {
+          "x": 14.2,
+          "y": 0,
+          "heightFeet": 2.2
+        },
+        "target": {
+          "x": 2.890072513,
+          "y": 47.378976683
+        },
+        "family": "serve",
+        "intent": "serve",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "long",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 11.816210434
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "serve-error-net",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:advanced:balanced:1247",
+      "shotId": "shot-1",
+      "oldSpeedMph": 20.654883891,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 27.152074819
+      },
+      "input": {
+        "from": {
+          "x": 5.8,
+          "y": 44,
+          "heightFeet": 2.2
+        },
+        "target": {
+          "x": 12.803970871,
+          "y": 21.4
+        },
+        "family": "serve",
+        "intent": "serve",
+        "style": "advanced",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "net",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 27.152074819
+        }
+      },
+      "expectedStatus": "solved"
+    },
+    {
+      "id": "serve-error-wide",
+      "archive": "bounded-calibration-226895f/C-archive.jsonl",
+      "sourceRevision": "dd6c8f889c880f9cf44f375a3d80808846e1963c",
+      "jobId": "qualification:intermediate:balanced:1178",
+      "shotId": "shot-1",
+      "oldSpeedMph": 34.463763581,
+      "oldPhysics": {
+        "launchVerticalFeetPerSecond": 11.899203366
+      },
+      "input": {
+        "from": {
+          "x": 15.8,
+          "y": 44,
+          "heightFeet": 2.2
+        },
+        "target": {
+          "x": -2.526824594,
+          "y": 4.543094793
+        },
+        "family": "serve",
+        "intent": "serve",
+        "style": "intermediate",
+        "quality": "error",
+        "pace": "medium",
+        "arc": "high",
+        "errorReason": "wide",
+        "preferred": {
+          "launchVerticalFeetPerSecond": 11.899203366
+        }
+      },
+      "expectedStatus": "solved"
+    }
+  ]
+}

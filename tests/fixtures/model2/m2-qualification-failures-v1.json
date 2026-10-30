@@ -1,0 +1,465 @@
+[
+  {
+    "id": "holdout:pro:balanced:50132",
+    "input": {
+      "seed": 50132,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player1",
+        "receiver": "player3",
+        "court": "right",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "unsupported-execution",
+    "wide": {
+      "contactIndex": 9,
+      "chosenId": "straight-dink",
+      "executionDraws": {
+        "quality": 0.09314089035615325,
+        "error": 0.8472760086879134
+      },
+      "targetDraws": {
+        "lateral": 0.20626678224653006,
+        "depth": 0.9950645954813808
+      },
+      "perturbationDraws": {
+        "lateral": 0.7977281191851944,
+        "depth": 0.5543470913544297
+      },
+      "target": {
+        "x": -2.893184358,
+        "y": 18.036074566
+      }
+    }
+  },
+  {
+    "id": "holdout:pro:balanced:50439",
+    "input": {
+      "seed": 50439,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player3",
+        "receiver": "player1",
+        "court": "left",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "unsupported-execution",
+    "wide": {
+      "contactIndex": 8,
+      "chosenId": "middle-dink",
+      "executionDraws": {
+        "quality": 0.14022871991619468,
+        "error": 0.9580208386760205
+      },
+      "targetDraws": {
+        "lateral": 0.4522365038283169,
+        "depth": 0.9850746975280344
+      },
+      "perturbationDraws": {
+        "lateral": 0.8578820950351655,
+        "depth": 0.6429003432858735
+      },
+      "target": {
+        "x": -3.073646285,
+        "y": 18.091932321
+      }
+    }
+  },
+  {
+    "id": "holdout:pro:balanced:50538",
+    "input": {
+      "seed": 50538,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player3",
+        "receiver": "player1",
+        "court": "right",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "unsupported-execution",
+    "wide": {
+      "contactIndex": 23,
+      "chosenId": "middle-dink",
+      "executionDraws": {
+        "quality": 0.036719214636832476,
+        "error": 0.9972677666228265
+      },
+      "targetDraws": {
+        "lateral": 0.7678662887774408,
+        "depth": 0.9249125684145838
+      },
+      "perturbationDraws": {
+        "lateral": 0.8334019740577787,
+        "depth": 0.12405243539251387
+      },
+      "target": {
+        "x": 23.000205922,
+        "y": 25.811873096
+      }
+    }
+  },
+  {
+    "id": "holdout:pro:balanced:51127",
+    "input": {
+      "seed": 51127,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "pro",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player3",
+        "receiver": "player1",
+        "court": "left",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "attempt-exception",
+    "wide": null
+  },
+  {
+    "id": "holdout:advanced:balanced:50132",
+    "input": {
+      "seed": 50132,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "advanced",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "advanced",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "advanced",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "advanced",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player1",
+        "receiver": "player3",
+        "court": "right",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "unsupported-execution",
+    "wide": {
+      "contactIndex": 9,
+      "chosenId": "straight-dink",
+      "executionDraws": {
+        "quality": 0.09314089035615325,
+        "error": 0.8472760086879134
+      },
+      "targetDraws": {
+        "lateral": 0.20626678224653006,
+        "depth": 0.9950645954813808
+      },
+      "perturbationDraws": {
+        "lateral": 0.7977281191851944,
+        "depth": 0.5543470913544297
+      },
+      "target": {
+        "x": -2.893184358,
+        "y": 18.036074566
+      }
+    }
+  },
+  {
+    "id": "holdout:intermediate:balanced:50175",
+    "input": {
+      "seed": 50175,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player3",
+        "receiver": "player1",
+        "court": "left",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "attempt-exception",
+    "wide": null
+  },
+  {
+    "id": "holdout:intermediate:balanced:50439",
+    "input": {
+      "seed": 50439,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player3",
+        "receiver": "player1",
+        "court": "left",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "unsupported-execution",
+    "wide": {
+      "contactIndex": 8,
+      "chosenId": "middle-dink",
+      "executionDraws": {
+        "quality": 0.14022871991619468,
+        "error": 0.9580208386760205
+      },
+      "targetDraws": {
+        "lateral": 0.4522365038283169,
+        "depth": 0.9850746975280344
+      },
+      "perturbationDraws": {
+        "lateral": 0.8578820950351655,
+        "depth": 0.6429003432858735
+      },
+      "target": {
+        "x": -3.073646285,
+        "y": 18.091932321
+      }
+    }
+  },
+  {
+    "id": "holdout:intermediate:balanced:51077",
+    "input": {
+      "seed": 51077,
+      "players": {
+        "player1": {
+          "team": "green",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player2": {
+          "team": "green",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player3": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        },
+        "player4": {
+          "team": "orange",
+          "handedness": "right",
+          "style": "intermediate",
+          "flavour": "balanced"
+        }
+      },
+      "service": {
+        "server": "player1",
+        "receiver": "player3",
+        "court": "left",
+        "courtConvention": "server-perspective-v1"
+      },
+      "options": {
+        "lengthFeel": "natural",
+        "winner": "either",
+        "signatureShots": true,
+        "maxShots": 99
+      }
+    },
+    "originalFailure": "no-feasible-contact",
+    "wide": null
+  }
+]
