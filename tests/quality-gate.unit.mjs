@@ -45,18 +45,21 @@ test('quality gate reports every non-success conclusion together', () => {
   );
 });
 
-test('Quality runs the complete reserved holdout once and retains failure evidence', () => {
+test('Quality requires the complete examined regression contract and retains failure evidence', () => {
   const workflow = readFileSync(new URL('../.github/workflows/quality.yml', import.meta.url), 'utf8');
-  const calibration = workflow.match(/^  rally-calibration:\n([\s\S]*?)(?=^  [a-z][a-z-]*:|$(?![\s\S]))/m)?.[1];
-  assert.ok(calibration, 'The reserved holdout needs its own unsharded job');
-  assert.match(calibration, /^    name: Rally calibration$/m);
-  assert.doesNotMatch(calibration, /^    (?:strategy|continue-on-error):/m);
-  assert.equal(workflow.match(/node tools\/rally-realism-v2\.mjs/g)?.length, 1);
-  assert.match(calibration, /run: >-\n\s+node tools\/rally-realism-v2\.mjs --cohort holdout\n\s+--output release-results\/game-mode-m2\/holdout-v1\.json\n\s+--archive release-results\/game-mode-m2\/holdout-v1\.jsonl\n\s+--require-calibration --require-clean\n/);
-  assert.doesNotMatch(calibration, /--(?:styles|seeds|archive-input)\b/);
-  const retain = calibration.slice(calibration.indexOf('      - name: Retain calibration'));
+  const regression = workflow.match(/^  rally-calibration:\n([\s\S]*?)(?=^  [a-z][a-z-]*:|$(?![\s\S]))/m)?.[1];
+  assert.ok(regression, 'The regression keeps the stable required job ID');
+  assert.match(regression, /^    name: Rally physical regression$/m);
+  assert.doesNotMatch(regression, /(?:strategy|continue-on-error):/m);
+  assert.doesNotMatch(regression.slice(0, regression.indexOf('      - name: Retain regression')), /\n\s+if:/m);
+  assert.equal(workflow.match(/node tools\/rally-regression-v1\.mjs/g)?.length, 1);
+  assert.match(regression, /run: >-\n\s+node tools\/rally-regression-v1\.mjs --require-clean\n\s+--output release-results\/game-mode-m2\/required-regression\.json\n\s+--archive release-results\/game-mode-m2\/required-regression\.jsonl\n/);
+  assert.doesNotMatch(regression, /--(?:cohort|styles|seeds|archive-input|require-calibration)\b|rally-realism-v2\.mjs/);
+  const retain = regression.slice(regression.indexOf('      - name: Retain regression'));
   assert.match(retain, /\n        if: always\(\)\n/);
+  assert.match(retain, /\n          name: rally-regression-results\n/);
   assert.match(retain, /\n          if-no-files-found: error\n/);
-  assert.match(retain, /\n            release-results\/game-mode-m2\/holdout-v1\.json\n            release-results\/game-mode-m2\/holdout-v1\.jsonl\n/);
+  assert.match(retain, /\n          retention-days: 7\n/);
+  assert.match(retain, /\n            release-results\/game-mode-m2\/required-regression\.json\n            release-results\/game-mode-m2\/required-regression\.jsonl\n/);
   assert.match(workflow, /^    needs: \[checks, chromium, webkit, package, rally-calibration\]$/m);
 });

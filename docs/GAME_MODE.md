@@ -134,14 +134,42 @@ including no-document failures. Corpus completeness, physical validity and
 calibration have separate verdicts. Insufficient samples cannot pass. Timing
 includes search, yields and final validation; Natural and conditioned costs are
 separate, and a warmed compiler-only probe is not a CI generation benchmark.
-The owner approved a median generation target below 50 ms on October 30, 2026,
-replacing 20 ms. The p95 remains below 100 ms, with at least 10 natural complete
-exactly-12-contact points per style and unchanged browser responsiveness checks.
-All other bands and sample requirements remain unchanged; archived reports keep
-their original acceptance bands, raw timings and verdicts.
+The owner first approved a median generation target below 50 ms on October 30,
+2026, replacing 20 ms. Archived reports retain their original acceptance bands,
+raw timings and verdicts; that approval does not retrospectively pass them.
+
+On October 30, 2026, the owner explicitly approved the versioned
+`rally-release-acceptance-v1` contract. The Section 13 statistical bands are
+reported realism research goals, not release blockers. All six failed research
+bands remain **FAIL**; neither this contract nor a passing regression claims
+those realism goals were achieved. The median below 50 ms is a reference-device
+goal, reported separately rather than enforced as a universal host gate.
+
+Required Quality job `rally-calibration` (displayed as **Rally physical
+regression**) now invokes the fixed examined-input regression:
+
+```sh
+node tools/rally-regression-v1.mjs --require-clean \
+  --output release-results/game-mode-m2/required-regression.json \
+  --archive release-results/game-mode-m2/required-regression.jsonl
+```
+
+This requires all 3600 fixed examined inputs, independent physical validation
+of every point, and deterministic reproduction of every request. Hosted p95
+must remain below 100 ms on Natural complete exactly-12-contact points, with
+at least 10 qualifying points per style. Incomplete samples cannot pass. The
+report retains the original calibration verdict separately from release
+acceptance and the reference-device median goal. These inputs are consumed
+regression evidence, never a new or relabeled holdout. No point replacement,
+sample extension or numerical-failure retry is permitted.
+
+Browser responsiveness remains required. Actual phone responsiveness QA must
+also pass in the actual app interface; headless engine evidence cannot satisfy
+that later app requirement. All other Quality jobs and complete browser
+catalogs remain mandatory, without failure exceptions or protection bypasses.
 The fifth-shot metric covers opportunities after all third-shot drives, with
-the blocked-drive subset reported separately. Acceptance bands are not silently
-changed to hide a conflict with fixed physics.
+the blocked-drive subset reported separately. The new release contract changes
+no runtime policy, physics or research measurement definitions.
 
 ## Baseline tool
 

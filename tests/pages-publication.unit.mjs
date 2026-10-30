@@ -43,10 +43,16 @@ test('rejects failed, skipped, neutral, missing or duplicate required jobs', () 
   }
 });
 
-test('deployment requires the actual completed calibration job even if the Quality gate claims success', () => {
+test('deployment requires the actual completed physical regression job even if the Quality gate claims success', () => {
   const data = selection();
-  data.jobs = data.jobs.filter(job => job.name !== 'Rally calibration');
-  assert.throws(() => validatePublicationSelection(data), /uniquely successful: Rally calibration/);
+  data.jobs = data.jobs.filter(job => job.name !== 'Rally physical regression');
+  assert.throws(() => validatePublicationSelection(data), /uniquely successful: Rally physical regression/);
+});
+
+test('historical calibration success cannot substitute for the release regression contract', () => {
+  const data = selection();
+  data.jobs.find(job => job.name === 'Rally physical regression').name = 'Rally calibration';
+  assert.throws(() => validatePublicationSelection(data), /uniquely successful: Rally physical regression/);
 });
 
 test('rejects expired, ambiguous, wrong-run and digestless artifact metadata', () => {
