@@ -129,7 +129,7 @@ shot fields; they do not create new animation clocks or renderer-owned source:
 | `quality` | Optional `low`, `neutral`, `attackable`, `excellent` or `error`. It can select a flight profile; it does not assign the next hitter's contact height. |
 | `narration` | Optional `{ label, why }`, limited to 40 and 160 plain-text characters. Markup, controls and URLs are rejected. Compiled steps expose these as `label` and `description`. |
 | `contactMode` | Optional `bounced` or `volley`; serves infer their own contact kind and reject an override. A volley cannot combine with `short-hop`. This makes a transition volley explicit without changing family identity. |
-| `contactTiming` | Optional `{ afterBounceSeconds }`, finite from 0.001 through 1.5, for a bounced contact only. The incoming flight is sampled at that time. |
+| `contactTiming` | Exactly one incoming timing observation: `{ afterBounceSeconds }` (0.001–1.5) for a bounced contact, or `{ beforeBounceSeconds }` (0.001–5) for an ordinary volley. The latter permits a ball over the NVZ while represented grounded feet stay outside it. Timing cannot override a serve or combine with a signature contact override; the shared incoming flight and rule checks remain authoritative. |
 | `contactOverride` | Optional apron `{ x, y }` for `erne` or `around-the-post` intent only. It must agree with the incoming path; it is not permission to teleport the ball. |
 | `physics` | Optional object with exactly one input: `apexFeet` (finite 0.2–30) or `launchVerticalFeetPerSecond` (finite −80–80). These are mutually exclusive; physical feasibility and collision checks still apply. |
 | `contactEvidence` | Optional `{ feet: [point, point], feetEstablishedOutsideNVZ, momentum? }`. Feet are two apron points and the reset flag is boolean. Momentum is `{ afterContactSeconds, feet: [point, point], balanced: false }`, with an observation time from 0.001 through 5 seconds. This is a supported model window, not an official limit on momentum responsibility. |
@@ -139,9 +139,20 @@ An off-court target in an ordinary continuing leg is still an unexpected
 violation. Apron contact overrides are restricted to their applicable signature
 shots. No unrelated extra field bypasses the model 2 validator.
 An explicit model 2 service court requires `server-perspective-v1`; the unmarked
-legacy interpretation remains confined to model 1. Model 2 outcome positions
-use apron coordinates and a finite height from 0 through 30 ft. Their relative
-evidence times are finite from 0 through 30 seconds.
+legacy interpretation remains confined to model 1. Model 2 terminal
+`outcome.evidence.position` has exactly `{ x, y, heightFeet }`: finite horizontal
+coordinates with absolute values at most 200,000 ft and a finite height from
+0 through 30 ft. Its relative evidence time remains finite from 0 through
+30 seconds. The horizontal bound is an arithmetic guard for solved evidence,
+not an enlarged playing area. Under the supported source and launch domain,
+the horizontal displacement multiplier is below 2,436 over source spans of
+36 ft across and 60 ft deep, so 200,000 ft conservatively bounds both axes.
+A legal first landing can rebound beyond the apron before the terminal
+second bounce. Preserve that solved terminal position; do not replace it
+with the first landing or clamp the flight. Independent compilation and rule
+validation must still prove the declared position, time and earliest physical
+outcome. Contacts, feet, movement destinations, layouts and landing targets
+retain their existing 8-foot apron bounds.
 
 Foot evidence describes two represented grounded points. An Erne approach may
 pass through the kitchen before contact if both modeled feet re-establish
@@ -193,8 +204,9 @@ decision. They cannot force the flight to pass through a desired result.
 M1 does not introduce a policy that infers the tactical forced/unforced-error
 distinction from geometry. Its derived `outcome.type` is `winner` only for a
 modelled unreachable result and `fault` for the other physical reasons. The
-source enum retains `forced-error` and `unforced-error` for later policy; M1
-does not certify those tactical claims.
+source enum retains `forced-error` and `unforced-error` as reserved vocabulary;
+the physical validator does not certify those tactical claims. M2 retains this
+boundary and returns tactical causation outside the saved physical outcome.
 
 `outcome.shotId` identifies an existing shot. It need not be the last recipe:
 momentum from an earlier volley can decide the point after a later shot or dead
@@ -232,3 +244,84 @@ flight functions, lesson timings, legacy document fields, smart-rally versions,
 service markers or import/storage keys. The approved M0 fixture hashes and the
 contact/bounce/boundary function samples remain the compatibility evidence; do
 not replace them merely to pass a new model 2 test.
+
+## M2 engine provenance
+
+Only model 2 accepts this strict optional root `generation` field. Unknown keys
+and unsupported versions are rejected. Style/flavour settings live in the
+recorded input; saved `document.players` keeps team and handedness only.
+
+```js
+generation: {
+  mode: 'engine',
+  generatorVersion: 'rally-engine-v1',
+  policyVersion: 'rally-policy-v3',
+  flightPlannerVersion: 'rally-flight-planner-v2',
+  physicsVersion: 'play-physics-v2',
+  seed,                         // uint32 original request seed
+  input: {
+    players,                    // original teams, hands, styles and flavours
+    layout,                     // original five board-space points
+    service,                    // declared roles and server-perspective-v1 court
+    options                     // all normalized defaults recorded explicitly
+  },
+  selection: {
+    attempts,                   // 1–64
+    selectedAttempt,            // zero-based, smaller than attempts
+    selectedSeed                // uint32 selected simulation seed
+  }
+}
+```
+
+The current pair is strict: policy v3 requires planner v2 and identifies the
+dink-only popup depth/loft mapping. Historical policy-v2 records retain either
+planner v1 or v2; policy-v1 records retain their original fields without a planner
+marker. All remain valid origins; import/open/save never rewrites one version
+into another. The authoritative saved model2 equations are unchanged.
+
+Style IDs are `pro`, `advanced`, `intermediate` and `beginner`; flavour IDs are
+`balanced`, `bangers`, `kitchen-masters` and `lobbers`. Defaults are Advanced 4.0
+(`advanced`) and `balanced`. Supplied input player maps contain all four fixed
+team/handedness/style records; omitted flavour defaults to `balanced`. The player
+map defaults as a whole when absent.
+
+Normalized options are `lengthFeel: natural|short|long|epic`,
+`winner: either|green|orange`, boolean `signatureShots`, and integer `maxShots`
+from 1 through 99. Defaults are `natural`, `either`, `true` and 99. Service roles
+are explicit and on opposite teams, with `server-perspective-v1` court identity.
+Layout points contain finite `x`/`y` within the 8-foot supported apron. Origin
+settings never infer roles from nearest players or overwrite later tactical
+positions.
+
+Per-shot provenance retains `{ seed, generatorVersion }`. Fresh engine output
+uses the selected attempt's seed and `rally-engine-v1` on every represented
+contact. Model-2 automatic ownership additionally permits `intent`, `quality`,
+`narration`, `contactMode`, `contactTiming`, `physics`, `contactEvidence` and
+`contactOverride`; the engine marks only fields actually present. Model-1
+ownership validation is unchanged, and provenance grants no blanket editing
+permission.
+
+A selected `complete` or `censored` result has a recipe exactly equal to
+`document.generation`. No-document diagnostic requests instead use
+`selection: null`, deliberately invalid as a saved origin. This allows zero
+attempts for pre-start cancellation without inventing a selection. Detailed
+decisions, callback/clock values and RNG state do not belong in provenance.
+
+Importing, opening and saving validates and retains source data. None of those
+operations regenerates a recipe, replaces edited targets or silently repairs a
+document. The 99-shot, 10,000-value, depth and 512 KiB document/import bounds
+remain. A fully populated structural 99-record fixture fits these limits;
+physically generated 99-contact acceptance remains a separate engine test.
+
+M2-generated geometry/evidence uses versioned nine-decimal source precision.
+Original normalized input, integer seeds and exact unit RNG draws remain intact;
+the shared solver samples at full precision. Existing M1 and model-1 source is
+not rounded or migrated.
+
+`result.outcome` equals the independently validated physical source outcome.
+Separate returned/archive `outcomeClassification` uses `rally-causation-v1`,
+kind `winner|forced-error|unforced-error|rule-fault|unknown`, shot/actor identity,
+optional preceding pressure decision and bounded heuristic evidence. An error
+roll alone cannot certify forced causation. Insufficient evidence produces
+`unknown` and cannot waive a physical failure or invent a winner. See
+[Rally engine](RALLY_ENGINE.md).

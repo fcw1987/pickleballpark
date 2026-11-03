@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v40`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v41`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -31,8 +31,26 @@ const STATIC_ASSETS = [
   './play-document.js',
   './play-compiler.js',
   './play-compiler-v2.js',
+  './play-planning-v2.js',
+  './rally-engine.js',
+  './rally-engine-driver.js',
+  './rally-engine-worker.js',
+  './rally-engine-client.js',
+  './rally-flight-planner.js',
+  './rally-flight-audit.js',
+  './rally-recipe.js',
+  './rally-random.js',
+  './rally-policy.js',
+  './rally-contact-selection.js',
+  './rally-styles.js',
+  './rally-targets.js',
+  './rally-movement.js',
+  './rally-quality.js',
+  './rally-narration.js',
+  './rally-signatures.js',
   './play-physics-v2.js',
   './play-outcome-v2.js',
+  './generated-route-certificate-v1.js',
   './play-timeline-v2.js',
   './play-actors-v2.js',
   './terminal-cues.js',
