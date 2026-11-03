@@ -39,8 +39,20 @@ const owned = ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 
 // solver samples retain full precision. Integer seeds and exact unit RNG draws
 // are not rounded. This removes engine-specific libm tail bits from recipes.
 const numberV1 = value => Number.isInteger(value) ? value : Math.round(value * 1e9) / 1e9;
-const generatedV1 = value => typeof value === 'number' ? numberV1(value) : Array.isArray(value) ? value.map(generatedV1)
-    : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, generatedV1(item)])) : value;
+function generatedV1(value) {
+    if (typeof value === 'number') return numberV1(value);
+    if (Array.isArray(value)) return value.map(generatedV1);
+    if (!value || typeof value !== 'object') return value;
+    const result = {};
+    // Generated records are inert data. Preserve enumerable own-key order and
+    // Object.fromEntries' literal __proto__ semantics without entry/pair arrays.
+    for (const key of Object.keys(value)) {
+        const item = generatedV1(value[key]);
+        if (key === '__proto__') Object.defineProperty(result, key, { value: item, enumerable: true, configurable: true, writable: true });
+        else result[key] = item;
+    }
+    return result;
+}
 function generatedEvidenceV1(value, immutable = new WeakMap()) {
     if (typeof value === 'number') return numberV1(value);
     if (!value || typeof value !== 'object') return value;
@@ -48,8 +60,16 @@ function generatedEvidenceV1(value, immutable = new WeakMap()) {
     // keep their original semantics. The driver detaches the selected trace.
     const cacheable = Object.isFrozen(value);
     if (cacheable && immutable.has(value)) return immutable.get(value);
-    const result = Array.isArray(value) ? value.map(item => generatedEvidenceV1(item, immutable))
-        : Object.fromEntries(Object.entries(value).map(([key, item]) => [key, generatedEvidenceV1(item, immutable)]));
+    let result;
+    if (Array.isArray(value)) result = value.map(item => generatedEvidenceV1(item, immutable));
+    else {
+        result = {};
+        for (const key of Object.keys(value)) {
+            const item = generatedEvidenceV1(value[key], immutable);
+            if (key === '__proto__') Object.defineProperty(result, key, { value: item, enumerable: true, configurable: true, writable: true });
+            else result[key] = item;
+        }
+    }
     if (cacheable) { immutable.set(value, result); Object.freeze(result); }
     return result;
 }
@@ -81,7 +101,10 @@ function baseRecipe(id, index, pair, target, family = index === 0 ? 'serve' : in
 // contact feet; all four destinations use the original tactical goals.
 function repairPendingMovement(input, state, pair, durationSeconds = planningView(state).pendingSegment?.contactTime + pair?.time) {
     if (!planningView(state).pendingRecipe) return undefined;
-    const recipe = clone(planningView(state).pendingRecipe);
+    // The opaque session returns a recursively frozen owned view. Only these
+    // two movement branches are replaced; the planning boundary detaches the
+    // submitted repair before retaining it. Keep other fields read-only here.
+    const recipe = { ...planningView(state).pendingRecipe };
     const movement = replanMovementV1({ plan: pendingMovementPlans.get(state), segment: planningView(state).pendingSegment,
         players: input.players, durationSeconds, ...(pair ? { arrival: { id: pair.id, stance: pair.feet.stance } } : {}), peakFeetPerSecond: 17.95 });
     if (!movement.ok) return null;

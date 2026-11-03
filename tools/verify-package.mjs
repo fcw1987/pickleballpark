@@ -260,14 +260,33 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   expect(adds).toMatchObject({ shots: 5, valid: 5, playing: false });
   expect(new Set(adds.ids).size).toBe(5);
 
-  // Open Random Rally through Menu, enter the exact 99-hit boundary, and
-  // assert the old draft is retained in the local saved library.
+  // The visible Random Rally flow now creates a physically ended model2 point
+  // through its module worker, including when this owned server is stopped.
+  // Preserve the legacy exact-count boundary as a separate compatibility check.
   await openMainMenu();
   await page.locator('[data-action="random"]').click();
-  await page.locator('[data-action="random-count"]').fill('99');
-  await page.locator('[data-action="random-seed"]').fill('12648430');
+  await page.getByLabel('Rally length', { exact: true }).selectOption('natural');
+  await page.locator('[data-action="random-seed"]').fill('7');
   await page.locator('[data-action="random-rally"]').click();
   await expect(page.locator('dialog[open]')).toHaveCount(0, { timeout: 30_000 });
+  const engineRandom = await page.evaluate(key => {
+    const envelope = JSON.parse(localStorage.getItem(key));
+    return { modelVersion: playBuilder.document.modelVersion, physicsVersion: playBuilder.document.physicsVersion,
+      generation: playBuilder.document.generation, outcome: playBuilder.document.outcome,
+      shots: playBuilder.document.shots.length, valid: playBuilder.compiled.validShotCount,
+      errors: playBuilder.compiled.findings.filter(item => item.severity === 'error'),
+      savedExact: JSON.stringify(playBuilder.store.open(playBuilder.document.id)) === JSON.stringify(playBuilder.document),
+      oldBeforeSmart: envelope.drafts.some(draft => draft.id === window.__packageSmartBeforeId), playing: playBuilder.session.playing };
+  }, expectedSavedKey);
+  expect(engineRandom).toMatchObject({ modelVersion: 2, physicsVersion: 'play-physics-v2',
+    generation: { mode: 'engine', generatorVersion: 'rally-engine-v1', seed: 7,
+      input: { options: { lengthFeel: 'natural' } } },
+    valid: engineRandom.shots, errors: [], savedExact: true, oldBeforeSmart: true, playing: false });
+  expect(engineRandom.shots).toBeGreaterThan(0);
+  expect(engineRandom.outcome).toBeTruthy();
+
+  const legacyResult = await page.evaluate(() => playBuilder.action('randomRally', { count: 99, seed: 12648430 }));
+  expect(legacyResult.ok).toBe(true);
   await expect.poll(() => page.evaluate(() => playBuilder.document.shots.length), { timeout: 30_000 }).toBe(99);
   const random = await page.evaluate(key => {
     const envelope = JSON.parse(localStorage.getItem(key));
@@ -315,7 +334,7 @@ async function verifySmartRallyOffline(page, expectedSavedKey = 'pickleballpark-
   await page.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: expectedSavedKey, value: storageBefore });
   await page.reload();
   await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
-  return { adds, random, coach: { protectedKept: true, optionsShown: true, fixed: true, undoRestored: true }, restoredSavedLibrary: storageAfter !== storageBefore };
+  return { adds, engineRandom, random, coach: { protectedKept: true, optionsShown: true, fixed: true, undoRestored: true }, restoredSavedLibrary: storageAfter !== storageBefore };
 }
 
 async function verifyMigratedAuthoringOffline(page) {

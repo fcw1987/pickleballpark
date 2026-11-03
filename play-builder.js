@@ -13,6 +13,8 @@ import { proposeCoachFix, proposeCoachOptions } from './rally-coach.js';
 import { playerLabel } from './player-labels.js';
 import { resolveServiceContext, updateServiceFromShotEdit, updateServiceCourt } from './rally-state.js';
 import { createRallyCoverageProvider } from './rally-coverage-provider.js';
+import { simulateRallyInWorker } from './rally-engine-client.js';
+import { normalizeRallyInputV1 } from './rally-recipe.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
 function claimShotFields(shot, fields) {
@@ -38,6 +40,7 @@ export class PlayBuilder {
         this.busy = false; this.generation = 0; this.sourceIntent = 0; this.message = ''; this.saveStatus = 'Starter draft · not saved yet';
         this.proposalGeneration = 0; this.proposalBusy = false; this.proposalProgress = null;
         this.proposalController = null; this.pendingAddCount = 0; this.addQueue = Promise.resolve();
+        this.generateRally = simulateRallyInWorker;
         this.coachOptions = []; this.coachCandidates = new Map();
         try { this.store = new DraftStore({ validate: validateDocument }); }
         catch { this.store = new DraftStore({validate:validateDocument,storage:{getItem:()=>null,setItem:()=>{throw Error('Browser storage is unavailable');}}}); this.saveStatus='Browser storage unavailable. Export a backup.'; }
@@ -65,7 +68,7 @@ export class PlayBuilder {
                 ]))
             };
         });
-        this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value) });
+        this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value), onDestroy: () => this.cancelPendingProposals() });
         // A queued Add may commit between the next native press and release.
         // Keep its button attached through click dispatch; replacing it during
         // that gesture makes the browser drop the click entirely.
@@ -121,7 +124,7 @@ export class PlayBuilder {
         // Completed field edits are committed before backgrounding, never per frame.
         this.finishField=()=>{const field=globalThis.document.activeElement;if(this.ui.element.contains(field)&&field.matches('input:not([type=range]),textarea'))field.blur();};
         globalThis.document.addEventListener('visibilitychange',()=>{if(globalThis.document.hidden){this.finishField();this.courtTools.clear();}});
-        window.addEventListener('pagehide',this.finishField);
+        window.addEventListener('pagehide',()=>{this.finishField();this.cancelPendingProposals();});
         this.plannerSnapshot = board.captureBoardState(); this.savedPlayhead = 0;
         document = null;
         globalThis.document.body.classList.add('builder-workspace');
@@ -305,7 +308,64 @@ export class PlayBuilder {
         });
         this.addQueue=task;return task;
     }
-    async randomRally({count,seed}={}) {
+    async randomRally(options={}) {
+        // Exact-count callers retain the original compatibility API. The
+        // visible dialog sends lengthFeel and always uses the physical engine.
+        if(Object.hasOwn(options,'count')&&!Object.hasOwn(options,'lengthFeel'))return this.randomRallyLegacy(options);
+        this.cancelPendingProposals();this.pause();this.courtTools.clear();
+        let input;
+        try {
+            if(Object.keys(options).some(key=>!['lengthFeel','seed'].includes(key)))throw Error('Choose a rally length and an optional whole-number seed.');
+            const players=Object.fromEntries(Object.entries(this.document.players).map(([player,settings])=>[player,{team:settings.team,handedness:settings.handedness,style:'advanced',flavour:'balanced'}]));
+            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],options:{lengthFeel:options.lengthFeel??'natural'}});
+        } catch(error){this.message=error.message;this.render();return {ok:false,error:this.message};}
+        // The Create action is explicit acceptance of a fresh point. Preserve
+        // the current authored draft before starting; commit the new one only
+        // after validation and a successful atomic storage write.
+        if((this.hasUnsavedChanges||this.saveError)&&!this.save()){this.message='Keep this play first: retry saving, Save As a copy, or export a backup.';this.render();return {ok:false,error:this.message};}
+        const previousWasSaved=this.persistedSource!==null;
+        const generation=this.proposalGeneration,revision=this.sourceIntent,source=this.document,sourceIdentity=documentSourceIdentity(this.document);
+        const controller=this.proposalController=new AbortController();
+        const isCurrent=()=>!controller.signal.aborted&&generation===this.proposalGeneration&&revision===this.sourceIntent&&source===this.document;
+        this.proposalBusy=true;this.proposalProgress={label:'Building rally',completed:0};this.render();
+        try {
+            const result=await this.generateRally({...input,signal:controller.signal,onProgress:progress=>{
+                if(!isCurrent())return;
+                this.proposalProgress={label:progress.phase==='validating'?'Validating rally':`Building rally · attempt ${progress.attempt}`,completed:progress.shots};
+                this.scheduleRender();
+            }});
+            if(!isCurrent())return {ok:false,error:'Generation cancelled; the newer play was kept.'};
+            if(result?.status!=='complete'){
+                const messages={
+                    cancelled:'Generation cancelled. Your current play was kept.',
+                    censored:`This point reached the ${MAX_SHOTS}-contact safety limit without a supported ending. Your current play was kept. Try another seed.`,
+                    unsatisfied:'No complete rally matched that length within the bounded search. Your current play was kept. Choose Natural or try another seed.',
+                    failed:'The rally could not be constructed and validated. Your current play was kept. Try another seed.'
+                };
+                this.message=messages[result?.status]||'The rally worker returned an unsupported result. Your current play was kept.';
+                return {ok:false,error:this.message,status:result?.status||'failed'};
+            }
+            const candidate=copy(result.document);
+            if(candidate?.modelVersion!==2||candidate.physicsVersion!=='play-physics-v2'||candidate.generation?.mode!=='engine'
+                ||candidate.generation.seed!==input.seed||JSON.stringify(candidate.generation.input)!==JSON.stringify({players:input.players,layout:input.layout,service:input.service,options:input.options})
+                ||JSON.stringify(result.outcome)!==JSON.stringify(candidate.outcome)||!candidate.outcome)throw Error('The rally worker result did not match this request. Your current play was kept.');
+            const evaluated=evaluateFullCandidate(candidate);
+            if(!evaluated.ok||!evaluated.rules.expectedOutcomes?.some(outcome=>outcome.shotId===candidate.outcome.shotId&&outcome.reason===candidate.outcome.reason
+                &&outcome.winner===candidate.outcome.winner&&outcome.ruleRef===candidate.outcome.ruleRef&&outcome.faultingActor===candidate.outcome.faultingActor&&outcome.struckActor===candidate.outcome.struckActor))throw Error('The complete rally did not pass independent validation. Your current play was kept.');
+            if(!isCurrent())return {ok:false,error:'Generation cancelled; the newer play was kept.'};
+            if(sourceIdentity!==documentSourceIdentity(this.document))return {ok:false,error:'The source changed; your current play was kept.'};
+            candidate.id=id();
+            this.loadDocument(candidate);
+            const count=candidate.shots.length;
+            this.message=previousWasSaved?`New ${count}-contact point ready. The previous play remains in My Plays. Press Play when ready.`:`New ${count}-contact point saved in My Plays. Press Play when ready.`;
+            return {ok:true,status:'complete',shots:count};
+        } catch(error){
+            const message=controller.signal.aborted?'Generation cancelled. Your current play was kept.':`${error.message || 'The rally worker could not run.'} Your current play was kept. Retry generation when ready.`;
+            if(generation===this.proposalGeneration)this.message=message;
+            return {ok:false,error:message};
+        } finally {if(generation===this.proposalGeneration){this.proposalBusy=false;this.proposalProgress=null;this.proposalController=null;}this.render();}
+    }
+    async randomRallyLegacy({count,seed}={}) {
         this.cancelPendingProposals();this.pause();this.courtTools.clear();
         if(!Number.isInteger(count)||count<1||count>MAX_SHOTS){this.message=`Choose a whole number of hits from 1 to ${MAX_SHOTS}.`;this.render();return {ok:false,error:this.message};}
         // Claim no new draft until the current one is safely retained.
@@ -645,4 +705,4 @@ function initialize(){const board=window.pickleboard;if(!board?.plays||!board.th
         const button=document.createElement('button');button.type='button';button.className='menu-btn';button.textContent='Build a Play';button.addEventListener('click',start);document.querySelector('.menu-content').prepend(button);
     }else start();
 }
-if(window.pickleboard?.threeD)initialize();else window.addEventListener('pickleboard:ready',initialize,{once:true});
+if(typeof window!=='undefined'){if(window.pickleboard?.threeD)initialize();else window.addEventListener('pickleboard:ready',initialize,{once:true});}

@@ -487,15 +487,20 @@ function sessionRecord(session){
 function assertGenerationRevision(state,revision){
   if(state.revision!==revision)throw new TypeError('The generation session changed during this operation.');
 }
-function detachedGenerationData(value,seen=new Map()){
+function detachedGenerationData(value,seen){
   if(value===null||typeof value!=='object'){
     if(typeof value==='function')return generationSafeSamplers.get(value)||Object.freeze((...args)=>detachedGenerationData(value(...args)));
     return value;
   }
   if(ownedFlights.has(value))return generationFlightView(value);
+  seen??=new Map();
   if(seen.has(value))return seen.get(value);
   const result=Array.isArray(value)?[]:{};seen.set(value,result);
-  for(const [key,item]of Object.entries(value))result[key]=detachedGenerationData(item,seen);
+  for(const key of Object.keys(value)){
+    const item=detachedGenerationData(value[key],seen);
+    if(key==='__proto__')Object.defineProperty(result,key,{value:item,enumerable:true,configurable:true,writable:true});
+    else result[key]=item;
+  }
   return Object.freeze(result);
 }
 function generationFlightView(flight){
@@ -505,7 +510,7 @@ function generationFlightView(flight){
     // Their closures read immutable numeric stages, never mutable metadata.
     generationSafeSamplers.set(flight.sample,Object.freeze(seconds=>flight.sample(seconds)));
     generationSafeSamplers.set(flight.sampleBoard,Object.freeze(seconds=>flight.sampleBoard(seconds)));
-    const data={};for(const [key,value]of Object.entries(flight))data[key]=detachedGenerationData(value);
+    const data={};for(const key of Object.keys(flight))data[key]=detachedGenerationData(flight[key]);
     view=Object.freeze(data);generationFlightViews.set(flight,view);
   }
   return view;

@@ -1,10 +1,32 @@
-# Headless rally engine
+# Rally engine
 
-M2 adds `rally-engine-v1` beside model 1 and `smart-rally-v2/v3`, using M1's
-shared physics and terminal evidence. It adds no Game UI, scoring, new Builder
-workspace, highlight presentation or replacement of Random Rally/Smart Add.
-Calibration and CI performance qualification remain pending evidence. The
-implementation described here does not imply that acceptance gates passed.
+`rally-engine-v1` uses the shared model2 physics and terminal evidence beside
+model 1 and `smart-rally-v2/v3`. The existing Random Rally dialog now calls the
+engine in a module worker; Smart Add and existing saved plays keep their
+compatibility paths. There is no separate mode, workspace or score engine.
+Research realism goals remain reported separately from release acceptance;
+the mandatory hosted p95 requirement remains below 100 ms.
+
+## Random Rally in the app
+
+Menu → Random Rally starts one owned module worker. Natural is the default;
+Short, Long and Epic use the engine's bounded length search. The dialog keeps
+the current players' handedness and uses Advanced/balanced players with a fresh
+service layout. Seed plus the same player settings reproduces the physical
+point; each accepted point receives a separate saved-play identity.
+
+Create explicitly requests a new point. The current authored draft is retained
+first. A complete result must still match the request and pass independent
+source/compiler/rule validation before an atomic save and installation. Cancel,
+page exit, UI teardown or a newer edit/request invalidates the owned request.
+An old result cannot replace newer work or close a newly opened dialog.
+Failures, unmatched lengths and a censored prefix keep the current play and
+leave a useful retry message. There is no silent legacy fallback.
+
+The explicit `playBuilder.action('randomRally', { count, seed })` compatibility
+API retains legacy exact-count generation, including the 99-contact boundary.
+The dialog sends `lengthFeel` instead. Opening, importing, editing and restoring
+saved plays never regenerates their source or overwrites authored fields.
 
 ## API and normalized input
 
@@ -313,25 +335,29 @@ cannot imply calibration passed.
 Homogeneous Pro, Advanced and Intermediate Natural/either cohorts use development
 seeds 0–59. The preserved 900-point qualification archive at source `9493af3`
 is physically valid but failed calibration; its seeds 1000–1299 are now examined
-regression data. A new immutable holdout reserves 1200 seeds per style,
-50000–51199, balanced by serving team/court. Its first run requires a frozen,
-reviewed candidate. Do not tune with it, extend it after results, or describe
-examined results as unseen. See [measurement workflow](../tools/rally-realism-v2.md).
+regression data. The original immutable holdout used 1200 seeds per style,
+50000–51199, balanced by serving team/court. It is now consumed and examined;
+required regression reuses that fixed schedule and preserves its original
+failed report. Do not extend samples or describe examined results as unseen. See [measurement workflow](../tools/rally-realism-v2.md).
 Beginner/flavour cohorts have correctness and directional checks, not
 invented numerical bands. Per-game Erne/ATP rates stay `N/A` until games exist.
 Natural and conditioned costs are separate. The 12-contact performance target
 includes search, yields and final validation; warmed compiler-only probes do
 not satisfy it.
 
-The owner-approved October 30, 2026 latency revision requires a median below
-50 ms for natural complete exactly-12-contact points. The p95 limit stays below
-100 ms, with at least 10 eligible points per style and the same browser
-responsiveness checks. Every other calibration band and denominator is
-unchanged. Old reports retain their original 20 ms bands, timings and verdicts.
+The owner-approved October 30, 2026 release contract retains 50 ms median as
+a reference-device goal and requires hosted p95 below 100 ms for natural,
+complete exactly-12-contact points, with at least 10 eligible points per style.
+Browser responsiveness, physical validity, deterministic repeats and complete
+results remain mandatory. Research bands and denominators are unchanged;
+missed research goals are reported rather than claimed as passed. Old reports
+retain their original bands, timings and verdicts. See
+[release acceptance](GAME_MODE.md#m2-rally-policy-and-random-rally-integration).
 
 The source-compatible fifth-shot cohort covers all opportunities after a
 third-shot drive, with the blocked-drive subset separately reported. The PPA's
 66% drop / 31% firm-volley figures are not limited to fourth-shot blocks.
-Qualification needs the applicable original bands, sufficient samples, physical
-gates and measured CI performance. Pending evidence must remain visibly pending;
+Release acceptance needs complete physical and deterministic regression, trace
+integrity and measured CI performance. Research bands and sample sufficiency
+remain separately reported goals. Pending evidence must remain visibly pending;
 targets are not silently changed to obtain a passing report.

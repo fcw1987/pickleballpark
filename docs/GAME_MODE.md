@@ -5,14 +5,14 @@ players move, make tactical choices and reach physical endings. The app must
 not expose “Game Mode” as a label or frame this as a separate mode. This file
 and the milestone identifiers retain their internal brief references. Revisit
 any proposed later workspace entry with the architect before implementing UI;
-the current M2 work remains headless.
+the rally engine now enters through the existing Random Rally dialog.
 
 These foundations follow the owner brief dated October 28, 2026. M0 adds
 observation tools, compatibility fixtures and tests. M1 adds an opt-in model 2
 compiler and shared physics path. Neither milestone adds a game, rally policy,
 score engine or workspace.
 
-M2 adds a headless `rally-engine-v1` policy engine beside the legacy generator,
+M2 adds a `rally-engine-v1` policy engine beside the legacy generator,
 starting from verified M1 main `ce61e3b456fbc17670a855c5079d93de161a1599`.
 See [Rally engine](RALLY_ENGINE.md) for its API, recipe and bounded result states.
 Calibration and CI performance qualification remain pending; implementation is
@@ -65,7 +65,7 @@ returning empty derived coverage and a warning when requested. That preserves
 the feet, interceptions and outcome proof. The separate Coverage view remains
 available; this boundary does not add new positioning policy.
 
-## M2: headless policy and qualification
+## M2: rally policy and Random Rally integration
 
 `simulateRally` and `createRallySimulator` reuse M1's shared planning, flight,
 interception, actor and terminal-evidence paths. One pending leg is resolved by
@@ -96,8 +96,9 @@ causation is separate versioned heuristic analysis.
 
 The browser adapter owns one module worker per request and can terminate it
 during final synchronous validation. Generation does not install a point, mutate
-Builder or own a playback clock. M2 adds no Game UI, scoring, highlight
-presentation or replacement of the existing Random Rally/Smart Add controls.
+Builder or own a playback clock. The existing Random Rally dialog uses this worker with Natural, Short, Long
+and Epic lengths. No separate mode, scoring or highlight presentation is added.
+Smart Add and explicit count-based compatibility calls retain the legacy path.
 
 M0's archived `rally-realism-v1` policy below remains unchanged. M2 uses a new
 `rally-realism-v2` collector: source/compiled authoring intent, actual contact

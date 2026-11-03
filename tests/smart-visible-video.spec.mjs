@@ -18,10 +18,12 @@ test('ordinary phone workflow records Add, Random, then visible Coach repair', a
   await page.getByLabel('Menu', { exact: true }).click();
   await page.getByRole('button', { name: 'Random Rally', exact: true }).click();
   const random = page.getByRole('dialog', { name: 'Random rally' });
-  await random.getByLabel('Number of hits').fill('7');
+  await expect(random.getByLabel('Rally length')).toHaveValue('natural');
   await random.getByLabel('Random seed').fill('707');
   await random.getByRole('button', { name: 'Create rally', exact: true }).click();
   await expect(random).toBeHidden({ timeout: 30000 });
+  expect(await page.evaluate(() => ({ model: playBuilder.document.modelVersion, origin: playBuilder.document.generation?.generatorVersion, ending: Boolean(playBuilder.document.outcome) })))
+    .toEqual({ model: 2, origin: 'rally-engine-v1', ending: true });
 
   // This is a prearranged visible-import fixture so the clip can show a
   // deterministic Coach repair after the ordinary Random journey.

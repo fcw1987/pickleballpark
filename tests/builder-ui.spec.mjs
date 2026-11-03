@@ -32,9 +32,11 @@ test.describe('court first builder UI harness', () => {
       return page.getByRole('dialog', { name: 'Random rally', exact: true });
     };
     let dialog = await openRandom();
+    await expect(dialog.getByLabel('Rally length')).toHaveValue('natural');
+    await expect(dialog.getByLabel('Number of hits')).toHaveCount(0);
     const seed = dialog.getByLabel('Random seed');
     await expect(seed).toHaveAttribute('type', 'number');
-    await expect(seed).toHaveAccessibleDescription(/whole number from 0 to 4294967295/);
+    await expect(seed).toHaveAccessibleDescription(/same seed and player handedness to repeat a point/);
     for (const value of ['-1', '1.5', '4294967296']) {
       await seed.fill(value);
       await dialog.getByRole('button', { name: 'Create rally', exact: true }).click();
@@ -46,10 +48,16 @@ test.describe('court first builder UI harness', () => {
     await seed.fill('0');
     await dialog.getByRole('button', { name: 'Create rally', exact: true }).click();
     await expect(dialog).toBeHidden();
-    expect(await page.evaluate(() => window.__builderActions.at(-1))).toEqual({ type: 'randomRally', payload: { count: 7, seed: 0 } });
+    expect(await page.evaluate(() => window.__builderActions.at(-1))).toEqual({ type: 'randomRally', payload: { lengthFeel: 'natural', seed: 0 } });
     dialog = await openRandom();
     await dialog.getByRole('button', { name: 'Create rally', exact: true }).click();
-    expect(await page.evaluate(() => window.__builderActions.at(-1))).toEqual({ type: 'randomRally', payload: { count: 7 } });
+    expect(await page.evaluate(() => window.__builderActions.at(-1))).toEqual({ type: 'randomRally', payload: { lengthFeel: 'natural' } });
+    for (const lengthFeel of ['short', 'long', 'epic']) {
+      dialog = await openRandom();
+      await dialog.getByLabel('Rally length').selectOption(lengthFeel);
+      await dialog.getByRole('button', { name: 'Create rally', exact: true }).click();
+      expect(await page.evaluate(() => window.__builderActions.at(-1))).toEqual({ type: 'randomRally', payload: { lengthFeel } });
+    }
   });
 
   test('time-only updates preserve controls, typing and focus while the accessible timeline advances', async ({ page }) => {
