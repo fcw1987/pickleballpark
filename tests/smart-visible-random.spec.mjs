@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { settleBuilderStartup, openPlayFileMenu } from './helpers/builder-navigation.mjs';
+import { settleBuilderStartup, openPlayFileMenu, openIntentTab } from './helpers/builder-navigation.mjs';
 
 test.use({ serviceWorkers: 'block' });
 
@@ -122,6 +122,69 @@ test.describe('visible physically completed Random Rally', () => {
     expect(await page.evaluate(() => ({ title: playBuilder.document.title, origin: playBuilder.document.generation })))
       .toEqual({ title: 'An authored generated point', origin: second.generation });
     await page.screenshot({ path: testInfo.outputPath('desktop-random-point.png'), fullPage: true });
+  });
+
+  test('native Flight preset replaces generated physics, changes the real trajectory and restores exactly with Undo/Redo', async ({ page }, testInfo) => {
+    await freshBuilder(page, { width: 1440, height: 900 });
+    await createNatural(page, 7);
+    const physicalPoint = () => page.evaluate(async () => {
+      const { compileDocument } = await import('/play-compiler.js');
+      const { samplePlayBall } = await import('/three-d-core.js');
+      const source = structuredClone(playBuilder.document), compiled = compileDocument(source);
+      const segment = compiled.timeline.segments[0];
+      return {
+        source, duration: compiled.timeline.duration, firstSegmentDuration: segment.duration,
+        samples: [.1, .2, .3].map(seconds => samplePlayBall(compiled.timeline, segment.startTime + segment.contactTime + seconds)),
+        findings: compiled.findings, history: playBuilder.history.index,
+        saved: JSON.parse(localStorage.getItem('pickleballpark-builder-v1')).drafts.find(draft => draft.id === source.id)
+      };
+    });
+    const before = await physicalPoint();
+    expect(before.source.shots[0].physics).toBeDefined();
+    expect(before.source.shots[0].authoring.fields).toContain('physics');
+    await page.getByRole('button', { name: 'Edit shot', exact: true }).click();
+    await openIntentTab(page, 'Flight');
+    const flight = page.getByRole('combobox', { name: 'Flight', exact: true });
+    await expect(flight).toHaveAccessibleDescription(/custom.*flight.*replac|replace.*custom.*flight/i);
+    await flight.selectOption('low/firm');
+    const after = await physicalPoint();
+    expect(after.history).toBe(before.history + 1);
+    expect(after.source.shots[0]).not.toHaveProperty('physics');
+    for (const field of ['physics', 'arc', 'pace']) expect(after.source.shots[0].authoring.fields).not.toContain(field);
+    expect(after.samples).not.toEqual(before.samples);
+    expect(after.firstSegmentDuration).not.toBe(before.firstSegmentDuration);
+    expect(after.duration).not.toBe(before.duration);
+    expect(after.source.shots.slice(1)).toEqual(before.source.shots.slice(1));
+    expect(after.source.generation).toEqual(before.source.generation);
+    expect(after.source.outcome).toEqual(before.source.outcome);
+    const expected = structuredClone(before.source);
+    delete expected.shots[0].physics;
+    Object.assign(expected.shots[0], { arc: 'low', pace: 'firm' });
+    expected.shots[0].authoring.fields = expected.shots[0].authoring.fields.filter(field => !['physics', 'arc', 'pace'].includes(field));
+    expect(after.source).toEqual(expected);
+    expect(after.saved).toEqual(after.source);
+    expect(after.findings).toContainEqual(expect.objectContaining({ severity: 'error', message: expect.stringMatching(/terminal geometry.*match.*solved event/i) }));
+    const staleOutcome = page.locator('.builder-findings .builder-finding-row').filter({ hasText: /terminal geometry.*match.*solved event/i });
+    await staleOutcome.scrollIntoViewIfNeeded();
+    await expect(staleOutcome).toBeVisible();
+    await expect(staleOutcome).toContainText('Declared terminal geometry');
+    await page.screenshot({ path: testInfo.outputPath('native-flight-preset-stale-outcome.png'), fullPage: true });
+    await page.getByRole('button', { name: 'Undo authored edit', exact: true }).click();
+    const undone = await physicalPoint();
+    expect(undone.source).toEqual(before.source);
+    expect(undone.saved).toEqual(before.source);
+    expect(undone.samples).toEqual(before.samples);
+    expect(undone.duration).toBe(before.duration);
+    expect(undone.firstSegmentDuration).toBe(before.firstSegmentDuration);
+    expect(undone.findings).toEqual(before.findings);
+    await page.getByRole('button', { name: 'Redo authored edit', exact: true }).click();
+    const redone = await physicalPoint();
+    expect(redone.source).toEqual(after.source);
+    expect(redone.saved).toEqual(after.source);
+    expect(redone.samples).toEqual(after.samples);
+    expect(redone.duration).toBe(after.duration);
+    expect(redone.firstSegmentDuration).toBe(after.firstSegmentDuration);
+    expect(redone.findings).toEqual(after.findings);
   });
 
   test('Cancel stays actionable during generation and preserves exact work and saved bytes', async ({ page }, testInfo) => {

@@ -27,6 +27,11 @@ The explicit `playBuilder.action('randomRally', { count, seed })` compatibility
 API retains legacy exact-count generation, including the 99-contact boundary.
 The dialog sends `lengthFeel` instead. Opening, importing, editing and restoring
 saved plays never regenerates their source or overwrites authored fields.
+For model2 points, an explicit Flight, Arc or Pace choice replaces that shot's
+numeric launch override with the shared solver's selected profile. The UI
+explains this consequence; Undo restores the exact override. Other edits,
+imports and viewing preserve it. Existing terminal evidence is retained, so
+an edit that invalidates an ending still reports a validation error.
 
 ## API and normalized input
 

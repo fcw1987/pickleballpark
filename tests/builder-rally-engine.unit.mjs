@@ -182,3 +182,116 @@ test('unsaved work cannot be replaced when its preservation save fails', async (
   assert.equal(calls, 0);
   assert.equal(canonical(state.builder.document), before);
 });
+
+const flightEditPoint = await simulateRally({ seed: 7 });
+assert.equal(flightEditPoint.status, 'complete');
+const { compileDocument } = await import('../play-compiler.js');
+const physicalFlight = document => {
+  const compiled = compileDocument(document);
+  const trajectory = compiled.timeline.segments[0].trajectory;
+  return { launch: trajectory.metadata.launchVerticalFeetPerSecond,
+    samples: [.1, .2, .3].map(seconds => trajectory.sampleBoard(seconds)),
+    findings: compiled.findings };
+};
+function flightHarness(document = flightEditPoint.document) {
+  const state = harness();
+  state.builder.loadDocument(document, { persist: false });
+  return state;
+}
+
+for (const [name, action, value, claimed] of [
+  ['Flight preset', 'flight', { arc: 'low', pace: 'firm' }, ['arc', 'pace', 'physics']],
+  ['Arc', 'editShot', { field: 'arc', value: 'low' }, ['arc', 'physics']],
+  ['Pace', 'editShot', { field: 'pace', value: 'soft' }, ['pace', 'physics']]
+]) {
+  test(`${name} replaces the selected generated launch and changes actual public trajectory, with exact Undo/Redo`, async () => {
+    const { builder } = flightHarness();
+    const before = clone(builder.document), flightBefore = physicalFlight(before);
+    assert.ok(before.shots[0].authoring.fields.includes('physics'));
+    assert.equal((await builder.action(action, value)).ok, true);
+    const after = clone(builder.document), flightAfter = physicalFlight(after);
+    assert.equal(Object.hasOwn(after.shots[0], 'physics'), false);
+    for (const field of claimed) assert.equal(after.shots[0].authoring.fields.includes(field), false);
+    assert.notEqual(flightAfter.launch, flightBefore.launch);
+    assert.notDeepEqual(flightAfter.samples, flightBefore.samples, 'physical samples change, not just UI metadata');
+    assert.deepEqual(after.shots.slice(1), before.shots.slice(1), 'every unselected shot remains exact');
+    assert.deepEqual(after.generation, before.generation, 'origin recipe is not regenerated or rewritten');
+    assert.deepEqual(after.outcome, before.outcome, 'declared ending is not silently repaired');
+    assert.ok(flightAfter.findings.some(item => item.severity === 'error' && /terminal geometry/.test(item.message)), 'stale ending remains an actionable finding');
+    const expected = clone(before);
+    delete expected.shots[0].physics;
+    if (action === 'flight') Object.assign(expected.shots[0], value);
+    else expected.shots[0][value.field] = value.value;
+    expected.shots[0].authoring.fields = expected.shots[0].authoring.fields.filter(field => !claimed.includes(field));
+    assert.deepEqual(after, expected, 'flight edit has no unrelated source changes');
+    assert.equal((await builder.action('undo')).ok, true);
+    assert.deepEqual(builder.document, before);
+    assert.deepEqual(physicalFlight(builder.document), flightBefore);
+    assert.equal((await builder.action('redo')).ok, true);
+    assert.deepEqual(builder.document, after);
+    assert.deepEqual(physicalFlight(builder.document), flightAfter);
+  });
+}
+
+for (const [action, value] of [['flight', { arc: 'high', pace: 'soft' }], ['editShot', { field: 'arc', value: 'low' }], ['editShot', { field: 'pace', value: 'soft' }]]) {
+test(`imported manually owned numeric physics is retained until explicit ${action === 'flight' ? 'Flight' : value.field} edit`, async () => {
+  const source = clone(flightEditPoint.document);
+  source.shots[0].authoring.fields = source.shots[0].authoring.fields.filter(field => field !== 'physics');
+  source.shots[0].physics = { apexFeet: 5.75 };
+  const { builder } = flightHarness();
+  const backup = builder.store.exportJSON(source), imported = builder.store.importJSON(backup);
+  builder.loadDocument(imported, { persist: false });
+  const before = clone(builder.document), physicalBefore = physicalFlight(before);
+  assert.deepEqual(before.shots[0].physics, { apexFeet: 5.75 });
+  assert.deepEqual(physicalFlight(builder.document), physicalBefore, 'import/render preserve custom geometry');
+  assert.equal((await builder.action(action, value)).ok, true);
+  assert.equal(Object.hasOwn(builder.document.shots[0], 'physics'), false);
+  assert.notDeepEqual(physicalFlight(builder.document).samples, physicalBefore.samples);
+  assert.deepEqual(builder.document.shots.slice(1), before.shots.slice(1));
+  assert.deepEqual(builder.document.generation, before.generation);
+  assert.deepEqual(builder.document.outcome, before.outcome);
+  await builder.action('undo');
+  assert.deepEqual(builder.document, before);
+});
+}
+
+test('non-flight edits preserve explicit model 2 physics and its automatic ownership', async () => {
+  const { builder } = flightHarness();
+  const before = clone(builder.document);
+  await builder.action('title', 'Renamed generated point');
+  await builder.action('editShot', { field: 'target', value: { x: 12.5, y: 38 } });
+  await builder.action('editShot', { field: 'contactStyle', value: 'backhand' });
+  assert.deepEqual(builder.document.shots[0].physics, before.shots[0].physics);
+  assert.equal(builder.document.shots[0].authoring.fields.includes('physics'), true);
+  assert.deepEqual(builder.document.shots.slice(1), before.shots.slice(1));
+  assert.deepEqual(builder.document.generation, before.generation);
+  assert.deepEqual(builder.document.outcome, before.outcome);
+});
+
+test('legacy arc and pace edits retain their existing source contract', async () => {
+  const source = createStarterDocument();
+  const { builder } = flightHarness(source);
+  const expected = clone(source);
+  Object.assign(expected.shots[0], { arc: 'low', pace: 'firm' });
+  assert.equal((await builder.action('flight', { arc: 'low', pace: 'firm' })).ok, true);
+  assert.deepEqual(builder.document, expected);
+  expected.shots[0].arc = 'high';
+  assert.equal((await builder.action('editShot', { field: 'arc', value: 'high' })).ok, true);
+  assert.deepEqual(builder.document, expected);
+  expected.shots[0].pace = 'soft';
+  assert.equal((await builder.action('editShot', { field: 'pace', value: 'soft' })).ok, true);
+  assert.deepEqual(builder.document, expected);
+  await builder.action('undo'); await builder.action('undo'); await builder.action('undo');
+  assert.deepEqual(builder.document, source);
+});
+
+
+test('an explicit choice of the current flight profile still releases its numeric override', async () => {
+  const { builder } = flightHarness();
+  const before = clone(builder.document), shot = before.shots[0];
+  assert.equal((await builder.action('flight', { arc: shot.arc, pace: shot.pace })).ok, true);
+  assert.equal(Object.hasOwn(builder.document.shots[0], 'physics'), false);
+  assert.notDeepEqual(physicalFlight(builder.document).samples, physicalFlight(before).samples);
+  await builder.action('undo');
+  assert.deepEqual(builder.document, before);
+});

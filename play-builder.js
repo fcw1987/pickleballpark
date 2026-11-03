@@ -21,6 +21,14 @@ function claimShotFields(shot, fields) {
     if(Array.isArray(shot?.authoring?.fields))shot.authoring.fields=shot.authoring.fields.filter(field=>!fields.includes(field));
 }
 
+// An explicit flight choice replaces any numeric model 2 launch, whether
+// generated or manually authored. Other edits preserve that saved geometry.
+function releaseFlightOverride(document, shot) {
+    if(document.modelVersion!==2)return;
+    claimShotFields(shot,['physics']);
+    delete shot.physics;
+}
+
 // An explicit edit claims the changed field. A value matching a generated
 // default does not make it automatic again, including after export/import.
 function claimChangedShotFields(before, after) {
@@ -656,9 +664,9 @@ export class PlayBuilder {
                 else movement[value.field]=value.value;
                 if(movement.intent==='manual'&&!movement.target)movement.target=copy(doc.initialLayout[value.player]);
             });
-            else if(action==='flight')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);claimShotFields(shot,['arc','pace']);shot.arc=value.arc;shot.pace=value.pace;});
+            else if(action==='flight')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);claimShotFields(shot,['arc','pace']);releaseFlightOverride(doc,shot);shot.arc=value.arc;shot.pace=value.pace;});
             else if(action==='title')this.edit(doc=>{doc.title=String(value).slice(0,120);},{review:false});
-            else if(action==='editShot')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot)return;claimShotFields(shot,[value.field.split('.')[0]]);const parts=value.field.split('.');let cursor=shot;for(const part of parts.slice(0,-1)){if(['__proto__','constructor','prototype'].includes(part))throw Error('Invalid field');cursor=cursor[part]??={};}const key=parts.at(-1);if(value.field==='hitter'&&shot.hitter!==value.value){shot.playerMovement??={};shot.playerMovement[shot.hitter]=copy(shot.movement);shot.movement=shot.playerMovement[value.value]||{intent:'hold',pinned:false};delete shot.playerMovement[value.value];}if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid field');cursor[key]=value.value;updateServiceFromShotEdit(doc,shot,value.field);if(value.field==='family'){if(shot.family==='serve')shot.serveMethod='volley';else delete shot.serveMethod;}if(value.field==='movement.intent'&&value.value==='manual'&&!shot.movement.target)shot.movement.target=copy(doc.initialLayout[shot.hitter]);});
+            else if(action==='editShot')this.edit(doc=>{const shot=doc.shots.find(s=>s.id===this.selectedShotId);if(!shot)return;claimShotFields(shot,[value.field.split('.')[0]]);if(['arc','pace'].includes(value.field))releaseFlightOverride(doc,shot);const parts=value.field.split('.');let cursor=shot;for(const part of parts.slice(0,-1)){if(['__proto__','constructor','prototype'].includes(part))throw Error('Invalid field');cursor=cursor[part]??={};}const key=parts.at(-1);if(value.field==='hitter'&&shot.hitter!==value.value){shot.playerMovement??={};shot.playerMovement[shot.hitter]=copy(shot.movement);shot.movement=shot.playerMovement[value.value]||{intent:'hold',pinned:false};delete shot.playerMovement[value.value];}if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid field');cursor[key]=value.value;updateServiceFromShotEdit(doc,shot,value.field);if(value.field==='family'){if(shot.family==='serve')shot.serveMethod='volley';else delete shot.serveMethod;}if(value.field==='movement.intent'&&value.value==='manual'&&!shot.movement.target)shot.movement.target=copy(doc.initialLayout[shot.hitter]);});
             else if(action==='deleteShot')this.edit(doc=>{doc.shots=doc.shots.filter(s=>s.id!==(value||this.selectedShotId));});
             else if(action==='duplicateShot')this.edit(doc=>{if(doc.shots.length>=MAX_SHOTS)throw Error('Shot limit reached.');const i=doc.shots.findIndex(s=>s.id===(value||this.selectedShotId));if(i>=0){const shot=copy(doc.shots[i]);shot.id=id();delete shot.authoring;doc.shots.splice(i+1,0,shot);this.selectedShotId=shot.id;}});
             else if(action==='moveShot')this.edit(doc=>{const from=doc.shots.findIndex(s=>s.id===value.id),to=from+value.delta;if(from<0||to<0||to>=doc.shots.length)return;doc.shots.splice(to,0,doc.shots.splice(from,1)[0]);});
