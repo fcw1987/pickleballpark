@@ -294,7 +294,7 @@ jobs:
         run: npm ci
       # These fixed inputs were examined in Quality 40992222059.
       # Required release acceptance does not assert unseen calibration success.
-      - name: Require all 3600 examined rallies, independent physics, determinism and hosted p95
+      - name: Require all 3600 examined rallies, independent physics, determinism and truthful timing evidence
         run: >-
           node tools/rally-regression-v1.mjs --require-clean
           --output release-results/game-mode-m2/required-regression.json

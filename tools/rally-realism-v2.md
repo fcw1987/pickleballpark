@@ -117,10 +117,11 @@ this generator-only restriction. Retained provenance never causes an edited
 document to be regenerated or blocks its import. Existing
 calibration gates remain unchanged.
 
-## Proposed 12-contact performance cohort — AWAITING ASTRA REVIEW
+## Historical proposed 12-contact performance cohort — NOT ADOPTED
 
-The following is a proposal only. It is not wired into any calibration or CI
-gate and has not been run:
+The following historical proposal was not adopted or run. The November 3
+owner direction makes numerical latency advisory; it does not authorize this
+alternative workload or a new cohort:
 
 - Keep natural qualification seeds 1000–1299 per core style unchanged.
 - Predeclare a separate performance range 2000–2299 per core style, balanced
@@ -158,3 +159,20 @@ including archive replay without relabelling an old origin.
 Current generation records policy v2 and planner v1. Old policy-v1 documents
 remain importable and replay identically, even when this new analysis flags an
 unrealistic stored flight. The collector never repairs or regenerates them.
+
+## November 3 release acceptance
+
+The owner explicitly prioritized usable features over numerical efficiency
+thresholds. `rally-release-acceptance-v2` keeps the fixed examined 3600-input
+regression, complete physical validation, independent deterministic repeats,
+trace integrity, cancellation and truthful timing reports. Timing distributions
+are recomputed from actual finite samples with their unchanged counts and
+minimum evidence requirements. Median, p95 and maximum remain visible; 50 ms
+median and 100 ms p95 are advisory references rather than release blockers.
+
+The original v1 evaluator and failed qualification/regression archives are
+unchanged. Their failures are not retrospectively passed. Research bands and
+denominators, the end-to-end timer, default yields and independent final
+validation are unchanged. Full unit, browser, package/offline and worker
+responsiveness checks remain required. Simulated phone layouts are evidence
+for review, not physical-device QA or permission to publish.

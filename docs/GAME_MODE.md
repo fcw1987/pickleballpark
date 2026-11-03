@@ -155,12 +155,20 @@ node tools/rally-regression-v1.mjs --require-clean \
   --archive release-results/game-mode-m2/required-regression.jsonl
 ```
 
-This requires all 3600 fixed examined inputs, independent physical validation
-of every point, and deterministic reproduction of every request. Hosted p95
-must remain below 100 ms on Natural complete exactly-12-contact points, with
-at least 10 qualifying points per style. Incomplete samples cannot pass. The
-report retains the original calibration verdict separately from release
-acceptance and the reference-device median goal. These inputs are consumed
+The October 30 v1 contract required all 3600 fixed examined inputs, independent
+physical validation and deterministic reproduction, with hosted Natural
+exactly-12-contact p95 below 100 ms. Reports produced under that contract keep
+their original failed verdicts. The owner superseded its numerical latency
+blocker on November 3, 2026 to prioritize usable features over milliseconds.
+
+Current `rally-release-acceptance-v2` retains the complete fixed corpus,
+independent physical and deterministic checks, and truthful timing evidence.
+Timing samples must be finite, match the actual eligible rows and reported
+distribution, and retain at least 10 observations per style. Median, p95 and
+maximum are advisory measurements, with the original references shown. Neither
+slow measurements nor failed research goals are claimed as achieved targets.
+The report retains the original calibration verdict separately from current
+release acceptance. These inputs are consumed
 regression evidence, never a new or relabeled holdout. No point replacement,
 sample extension or numerical-failure retry is permitted.
 Every represented line-drive must retain matched pre-choice geometry and an

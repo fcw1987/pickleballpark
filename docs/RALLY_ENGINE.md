@@ -5,7 +5,9 @@ model 1 and `smart-rally-v2/v3`. The existing Random Rally dialog now calls the
 engine in a module worker; Smart Add and existing saved plays keep their
 compatibility paths. There is no separate mode, workspace or score engine.
 Research realism goals remain reported separately from release acceptance;
-the mandatory hosted p95 requirement remains below 100 ms.
+timing is measured and reported as advisory under the November 3 owner direction.
+Functional correctness, physical validity, cancellation and responsiveness
+remain required.
 
 ## Random Rally in the app
 
@@ -350,19 +352,22 @@ Natural and conditioned costs are separate. The 12-contact performance target
 includes search, yields and final validation; warmed compiler-only probes do
 not satisfy it.
 
-The owner-approved October 30, 2026 release contract retains 50 ms median as
-a reference-device goal and requires hosted p95 below 100 ms for natural,
-complete exactly-12-contact points, with at least 10 eligible points per style.
-Browser responsiveness, physical validity, deterministic repeats and complete
-results remain mandatory. Research bands and denominators are unchanged;
-missed research goals are reported rather than claimed as passed. Old reports
-retain their original bands, timings and verdicts. See
+The November 3, 2026 owner direction makes median and p95 latency advisory
+rather than release blockers. `rally-release-acceptance-v2` still requires the
+same complete physical/deterministic corpus and truthful finite timing evidence,
+including sample counts and distributions. Median, p95 and maximum latency are
+reported alongside the original 50/100 ms references; exceeding a reference is
+not relabeled as meeting it. Worker and UI responsiveness, cancellation,
+compatibility and offline checks remain required. Physical-phone QA is still
+needed before publication. Historical v1 reports retain their failed verdicts;
+research bands, denominators and timing boundaries are unchanged. See
 [release acceptance](GAME_MODE.md#m2-rally-policy-and-random-rally-integration).
 
 The source-compatible fifth-shot cohort covers all opportunities after a
 third-shot drive, with the blocked-drive subset separately reported. The PPA's
 66% drop / 31% firm-volley figures are not limited to fourth-shot blocks.
 Release acceptance needs complete physical and deterministic regression, trace
-integrity and measured CI performance. Research bands and sample sufficiency
+integrity and faithful timing reports, together with the required browser
+responsiveness checks. Research bands and sample sufficiency
 remain separately reported goals. Pending evidence must remain visibly pending;
 targets are not silently changed to obtain a passing report.

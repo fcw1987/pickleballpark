@@ -9,7 +9,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setImmediate as yieldTurn } from 'node:timers/promises';
 import { createCohortSchedule, runRealismV2 } from './rally-realism-v2.mjs';
-import { evaluateRallyReleaseAcceptanceV1 } from './rally-release-acceptance-v1.mjs';
+import { evaluateRallyReleaseAcceptanceV2, RALLY_RELEASE_ACCEPTANCE_VERSION_V2 } from './rally-release-acceptance-v2.mjs';
 
 export const EXAMINED_REGRESSION_VERSION = 'rally-examined-regression-v1';
 export const EXAMINED_REGRESSION_DEFINITION = Object.freeze({
@@ -98,7 +98,7 @@ export async function finalizeRegressionReportV1(report, { signal, hashArchive, 
 export async function persistRegressionInterruptionV1({ output, archive, sourceRevision, persistedRecords, error, outputCreated }) {
   const interrupted = { status: 'INTERRUPTED', sourceRevision, persistedRecords,
     interruption: { phase: error.phase ?? 'collection', message: error.message },
-    releaseAcceptance: { contractVersion: 'rally-release-acceptance-v1', status: 'FAIL',
+    releaseAcceptance: { contractVersion: RALLY_RELEASE_ACCEPTANCE_VERSION_V2, status: 'FAIL',
       requiredChecks: [{ name: 'uninterruptedCompletion', status: 'FAIL' }] },
     archive: { path: archive, evidence: 'Partial records retained unchanged; no successful completion claimed.' } };
   // Only a report successfully created by this run may be replaced. Existing
@@ -143,7 +143,7 @@ export async function runRequiredRegressionV1({ output, archive, requireClean = 
       examinationState: 'CONSUMED_AND_EXAMINED', unseenClaim: 'NOT_ASSERTED', definition: clone(EXAMINED_REGRESSION_DEFINITION),
       note: 'The original qualification archive and its failed verdict are immutable. This required regression does not reserve, consume or renew a holdout.' };
     report.determinism = determinism;
-    report.releaseAcceptance = evaluateRallyReleaseAcceptanceV1(report, { determinism });
+    report.releaseAcceptance = evaluateRallyReleaseAcceptanceV2(report, { determinism });
     report.provenance = { sourceRevision, sourceState, node: process.version, platform: process.platform,
       architecture: process.arch, cpuModel: cpus()[0]?.model ?? null, availableParallelism: availableParallelism(),
       measurementNote: 'First-run end-to-end Natural generation includes default real yields and independent final validation. The separate independent determinism repeat is not included in that latency observation.' };
