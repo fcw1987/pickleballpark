@@ -19,7 +19,8 @@ test('installed coverage shares seed-2 service roles, bounce facts and world sam
       builder.seek(time); view.renderSessionSample();
       const context = { timeSeconds: builder.session.clock.elapsed, ball: view.sampleBall(time), samples: view.coverageSamples };
       const snapshot = pickleboard.coverageSnapshotProvider(context);
-      const expectedDirections = Object.fromEntries(snapshot.players.map(player => [player.id, coverageDirection(player, snapshot.ball)]));
+      const expectedDirections = Object.fromEntries(snapshot.players.map(player => [player.id,
+        coverageDirection(player, snapshot.ball, snapshot.players.find(partner => partner.id !== player.id && partner.team === player.team))]));
       return { snapshot, expectedDirections, overlay: structuredClone(view.playerCoverage.getDiagnostics()),
         actors: [...view.playerObjects].map(([id, actor]) => ({ id, position: worldToBoard(actor.position) })),
         ball: { ...worldToBoard(view.ballObject.position), heightFeet: view.ballObject.position.y / FEET_TO_METERS } };

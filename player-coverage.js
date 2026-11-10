@@ -2,9 +2,9 @@
  * Coordinates are court feet (+y toward the orange baseline), never screen axes.
  * The angle and radius are design choices, not measured athletic capabilities.
  */
-export const COVERAGE_MODEL = Object.freeze({ version: 2, angleDegrees: 116, radiusFeet: 9, featherFeet: 1.8, maxTurnDegrees: 28 });
+export const COVERAGE_MODEL = Object.freeze({ version: 3, angleDegrees: 116, radiusFeet: 9, featherFeet: 1.8, maxTurnDegrees: 28, pairBlend: .25 });
 // Teammate colours, not jersey colours. Their equal linear-light mix is violet.
-export const COVERAGE_COLORS = Object.freeze({ rose: '#ff6a80', blue: '#69a9ff', shared: '#c68ed0' });
+export const COVERAGE_COLORS = Object.freeze({ rose: '#ff3f7d', blue: '#3a9fff', shared: '#bf7bcc' });
 export const COVERAGE_PREFERENCE_KEY = 'pickleboard-player-coverage-v1';
 const finitePoint = p => p && Number.isFinite(p.x) && Number.isFinite(p.y);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -21,14 +21,26 @@ export function unitDirection(value, fallback = { x: 0, y: 1 }) {
  * easing at contact avoids a sudden turn as the ball crosses the player's feet.
  * No state => reverse seeks, camera orbit and side flips agree.
  */
-export function coverageDirection(player, ball) {
+export function coverageDirection(player, ball, partner = null) {
   const forward = player.position.y < 22 ? 1 : -1;
   const net = { x: 0, y: forward };
   const delta = finitePoint(ball) ? { x: ball.x - player.position.x, y: ball.y - player.position.y } : null;
   const distance = delta ? Math.hypot(delta.x, delta.y) : Infinity;
   const desired = finitePoint(player.coverageFacing) && Math.hypot(player.coverageFacing.x, player.coverageFacing.y) > 1e-8
     ? player.coverageFacing : delta || player.facing;
-  const target = unitDirection(desired, net);
+  let target = unitDirection(desired, net);
+  if (finitePoint(ball) && finitePoint(partner?.position) && partner.id !== player.id && partner.team === player.team
+    && (partner.position.y < 22) === (player.position.y < 22)) {
+    // A gentle common bearing illustrates moving as a pair toward an opponent's
+    // ball. 25% is a drawing choice, not a measured tactical/reach model. Fade
+    // through net crossings and aligned/crossing partners rather than flipping.
+    const blend = COVERAGE_MODEL.pairBlend * clamp(forward * (ball.y - 22) / 1.5, 0, 1)
+      * clamp(Math.abs(partner.position.x - player.position.x) / 1.5, 0, 1);
+    const pairBearing = unitDirection({ x: ball.x - (player.position.x + partner.position.x) / 2,
+      y: ball.y - (player.position.y + partner.position.y) / 2 }, net);
+    target = unitDirection({ x: target.x * (1 - blend) + pairBearing.x * blend,
+      y: target.y * (1 - blend) + pairBearing.y * blend }, net);
+  }
   const limit = COVERAGE_MODEL.maxTurnDegrees * Math.PI / 180;
   const turn = clamp(Math.atan2(target.x, Math.max(.35, forward * target.y)), -limit, limit)
     * clamp(distance / 1.5, 0, 1);
@@ -50,13 +62,16 @@ export function coverageSectors(snapshot) {
   // camera changes and providers that return players in a different order.
   const teammates = team => snapshot.players.filter(p => p.team === team).map(p => p.id).sort();
   const slots = Object.fromEntries(['green', 'orange'].flatMap(team => teammates(team).map((id, i) => [id, i % 2])));
-  return snapshot.players.map(player => ({
-    id: player.id, team: player.team, colorSlot: slots[player.id],
-    color: slots[player.id] === 0 ? COVERAGE_COLORS.rose : COVERAGE_COLORS.blue, position: { ...player.position },
-    direction: coverageDirection(player, snapshot.ball), handedness: player.handedness,
-    halfAngle: COVERAGE_MODEL.angleDegrees * Math.PI / 360, radius: COVERAGE_MODEL.radiusFeet,
-    legalReceiver: player.legalReceiver ?? null, priority: player.coveragePriority ?? null
-  }));
+  return snapshot.players.map(player => {
+    const partners = snapshot.players.filter(p => p.id !== player.id && p.team === player.team);
+    return {
+      id: player.id, team: player.team, colorSlot: slots[player.id],
+      color: slots[player.id] === 0 ? COVERAGE_COLORS.rose : COVERAGE_COLORS.blue, position: { ...player.position },
+      direction: coverageDirection(player, snapshot.ball, partners.length === 1 ? partners[0] : null), handedness: player.handedness,
+      halfAngle: COVERAGE_MODEL.angleDegrees * Math.PI / 360, radius: COVERAGE_MODEL.radiusFeet,
+      legalReceiver: player.legalReceiver ?? null, priority: player.coveragePriority ?? null
+    };
+  });
 }
 
 export function coverageWeight(sector, point) {

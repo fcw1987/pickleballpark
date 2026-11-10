@@ -89,7 +89,7 @@ async function openWorld(page, viewport) {
   });
 }
 
-test('legacy 3D compatibility: reference world has original alpha artwork, solid paddles, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
+test('legacy 3D compatibility: reference world has closed pixel volumes, solid paddles, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
   await openWorld(page, { width: 1280, height: 800 });
   const world = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, garden = viewer.world;
@@ -101,7 +101,7 @@ test('legacy 3D compatibility: reference world has original alpha artwork, solid
       root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
       const audit=window.__athleteAudit(root),body=root.userData.body,face=root.userData.paddle.children[1];
       return { reference: root.userData.referenceAthlete, positiveScale: root.scale.toArray().every(n => n > 0),
-        originalArtwork: window.__referenceRigContract.artwork(root), alphaTest: body.material.alphaTest,
+        dimensionalArtwork: window.__referenceRigContract.volumetricArtwork(root), solids:audit.solids,
         artworkError:audit.artworkError(),
         solidPaddle:face.geometry.attributes.position.count>0&&!face.material.transparent&&face.material.opacity===1,
         depthTested: meshes.every(mesh => mesh.material.depthTest && mesh.material.depthWrite),
@@ -124,8 +124,10 @@ test('legacy 3D compatibility: reference world has original alpha artwork, solid
   expect(world.paintedTextures).toBeGreaterThan(0);
   expect(world.players).toHaveLength(4);
   for (const player of world.players) {
-    expect(player).toMatchObject({ reference: true, positiveScale: true, alphaTest: .08, solidPaddle: true, depthTested: true, owned: true });
-    expect(player.originalArtwork).toEqual({ sourceLoaded: true, dimensions: true, identity: true, visibleOriginalPixels: true });
+    expect(player).toMatchObject({ reference: true, positiveScale: true, solidPaddle: true, depthTested: true, owned: true });
+    expect(player.dimensionalArtwork).toEqual({ volumetric:true,opaque:true,owned:true,rendered:true,anatomy:true });
+    expect(player.solids.length).toBeGreaterThan(30);
+    for(const solid of player.solids){expect(solid.closed,solid.name).toBe(true);expect(solid.volume,solid.name).toBeGreaterThan(1e-8);}
     expect(player.artworkError).toBeLessThanOrEqual(1e-6);
     for (const bottom of player.shoeBottoms) expect(Math.abs(bottom)).toBeLessThanOrEqual(0.01);
   }

@@ -4,6 +4,7 @@ import {REFERENCE_SLEEVE_REGIONS,partitionReferenceAtlas,ReferenceAthleteResourc
 import {readReferenceAtlasPixels,referenceAthleteGeometryKernel} from './helpers/reference-athlete-geometry.mjs';
 import {pixelAuthoringCases,pixelTacticalBoundaryCases} from './fixtures/pixel-authoring-cases.mjs';
 import {compileEffectiveCandidate} from '../rally-proposals.js';import {sampleActorPresentation} from '../three-d-presentation.js';
+import {assertReferenceRig,referenceBoneLength} from './helpers/reference-rig-assertions.mjs';
 const metadata=JSON.parse(readFileSync(new URL('../assets/reference-athletes/metadata-v2.json',import.meta.url))),measurements=JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-measurements.json',import.meta.url))),pixels=await readReferenceAtlasPixels(new URL('../assets/source/reference-athletes/athletes-armless-v2.png',import.meta.url));
 const preservedHair=JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-preserved-hair.json',import.meta.url)));
 const resources=()=>new ReferenceAthleteResources({metadata,image:pixels}),paintedAudit=referenceAthleteGeometryKernel(THREE);
@@ -36,22 +37,52 @@ test('overhead jump rises, peaks at exact contact, lands during recovery and rev
  }}finally{r.dispose();}assert.equal(samples,1344);
 });
 test('dense every-family arm motion converges with finer sampling and never stretches its fixed bones or drops the grip',t=>{
- const r=resources(),results=[];let samples=0;try{for(const steps of [120,240]){let maximum=0;for(const [caseIndex,item] of [...pixelAuthoringCases(),...pixelTacticalBoundaryCases()].entries()){
+ const r=resources(),results=[],worst=[];let samples=0;try{for(const steps of [120,240]){let maximum=0,worstCase;for(const [caseIndex,item] of [...pixelAuthoringCases(),...pixelTacticalBoundaryCases()].entries()){
   const {timeline}=compileEffectiveCandidate(item.document),segment=timeline.segments.find(s=>s.shotSemantics),player=caseIndex%4,actor=createReferenceAthlete(r,player<2?'team1':'team2',item.handedness,player%2);
   for(let sector=0;sector<8;sector++)for(const elevation of [20,38,75]){const camera=cameraAt(sector,elevation),sample=sampleActorPresentation({instructionalMovement:true,segment,timeline,playerId:segment.shotSemantics.playerId,localTime:segment.contactTime,handedness:item.handedness,cameraPosition:camera.position});let previous=null;
-   for(let i=0;i<=steps;i++){const time=sample.profile.duration*i/steps,delta=time-sample.profile.duration*sample.profile.contactRatio,t=Math.max(0,1-Math.abs(delta)/(delta<0?.18:.22));updateReferenceAthlete(actor,{...sample,strokeTime:time},camera,t*t*(3-2*t));const d=actor.userData,elbow=new THREE.Vector3(0,.5,0).applyMatrix4(d.arms[0].parts[0].outer.matrixWorld),wrist=d.arms[0].hand.getWorldPosition(new THREE.Vector3()),grip=d.paddle.children[2].getWorldPosition(new THREE.Vector3());assert.ok(d.rigPose.wristReach<=.8400001,`${item.id}: dense fixed reach ${d.rigPose.wristReach}`);assert.ok(wrist.distanceTo(grip)<.006);if(previous)maximum=Math.max(maximum,elbow.distanceTo(previous));previous=elbow;samples++;}
+   for(let i=0;i<=steps;i++){const time=sample.profile.duration*i/steps,delta=time-sample.profile.duration*sample.profile.contactRatio,t=Math.max(0,1-Math.abs(delta)/(delta<0?.18:.22));updateReferenceAthlete(actor,{...sample,strokeTime:time},camera,t*t*(3-2*t));const d=actor.userData,elbow=new THREE.Vector3(0,.5,0).applyMatrix4(d.arms[0].parts[0].outer.matrixWorld),wrist=d.arms[0].hand.getWorldPosition(new THREE.Vector3()),grip=d.paddle.children[2].getWorldPosition(new THREE.Vector3());assert.ok(d.rigPose.wristReach<=2*referenceBoneLength+1e-7,`${item.id}: dense fixed reach ${d.rigPose.wristReach}`);assert.ok(wrist.distanceTo(grip)<.006);if(previous){const displacement=elbow.distanceTo(previous);if(displacement>maximum){maximum=displacement;worstCase={id:item.id,sector,elevation,time,steps,index:i};}}previous=elbow;samples++;}
   }
- }results.push(maximum);}}finally{r.dispose();}
- t.diagnostic(JSON.stringify({samples,maximumElbowDisplacement:results,steps:[120,240]}));
+ }results.push(maximum);worst.push(worstCase);}}finally{r.dispose();}
+ t.diagnostic(JSON.stringify({samples,maximumElbowDisplacement:results,worst,steps:[120,240]}));
  assert.equal(samples,851424);assert.ok(results[1]<.08,`240-step maximum elbow movement ${results}`);assert.ok(results[1]<results[0]*.65,`elbow displacement must converge with sample time, not flip (${results})`);
 });
 
-test('source arm ownership follows the actual world handedness through all eight views, including the mirrored near/far side',async()=>{
+test('solid anatomical arm ownership and actual full world pose remain invariant through all eight camera sectors',async()=>{
  const {selectCameraRelativeDirection}=await import('../three-d-presentation.js'),r=resources();let count=0;try{for(let player=0;player<4;player++)for(const hand of ['left','right'])for(let sector=0;sector<8;sector++){
-  const camera=cameraAt(sector,38),direction=selectCameraRelativeDirection({x:0,z:1},{x:0,z:0},camera.position,{x:0,y:.6,z:0}),actor=createReferenceAthlete(r,player<2?'team1':'team2',hand,player%2);updateReferenceAthlete(actor,{worldPosition:{x:0,y:0,z:0},bodyFacing:{x:0,z:1},viewDirection:direction,action:'ready'},camera);const d=actor.userData,physical=new THREE.Vector3(hand==='right'?-.25:.25,.95,0),center=new THREE.Vector3(0,.95,0),physicalX=physical.clone().project(camera).x-center.clone().project(camera).x;
-  if(d.animation.frame===2){const other=new THREE.Vector3(-physical.x,.95,0),near=physical.distanceTo(camera.position)<other.distanceTo(camera.position);assert.equal(d.sleeves[d.rigPose.workingSide].visible,near,`${player}/${hand}/${direction}: physical near arm owns the visible sleeve`);}
-  else{const cuffs=measurements[player][d.animation.frame].map(c=>d.body.localToWorld(new THREE.Vector3(c.uv[0]-.5,c.uv[1]-.5,0)).project(camera).x),mean=(cuffs[0]+cuffs[1])/2;assert.ok((cuffs[d.rigPose.workingSide]-mean)*physicalX>0,`${player}/${hand}/${direction}: projected anatomical arm owns correct source sleeve`);}count++;
+  const camera=cameraAt(sector,38),direction=selectCameraRelativeDirection({x:0,z:1},{x:0,z:0},camera.position,{x:0,y:.6,z:0}),actor=createReferenceAthlete(r,player<2?'team1':'team2',hand,player%2),sample={worldPosition:{x:0,y:0,z:0},bodyFacing:{x:0,z:1},viewDirection:direction,action:'ready'};
+  updateReferenceAthlete(actor,sample,camera);const d=actor.userData,side=hand==='right'?0:1;
+  assert.equal(d.rigPose.workingSide,side);assert.ok(d.sleeves.every(s=>s.visible||d.bodyBatch.parts.some(p=>p.source===s)),'both real sleeves are rendered, independent of source near/far alpha');
+  const snapshot=()=>{const points=paintedAudit(actor).vertices;return [...d.visual.matrixWorld.elements,...d.paddle.matrixWorld.elements,...points.flatMap(p=>p.toArray())];},before=snapshot();
+  const reverse=cameraAt((sector+4)%8,75),reverseDirection=selectCameraRelativeDirection(sample.bodyFacing,sample.worldPosition,reverse.position,{x:0,y:.6,z:0});
+  updateReferenceAthlete(actor,{...sample,viewDirection:reverseDirection},reverse);const after=snapshot();assert.equal(after.length,before.length);after.forEach((value,i)=>assert.ok(Math.abs(value-before[i])<1e-7,`${player}/${hand}/${sector}: orbit cannot rotate, flatten, or detach actual world geometry`));
+  const facing=new THREE.Vector3(0,0,1).applyQuaternion(d.visual.quaternion);assert.ok(facing.distanceTo(new THREE.Vector3(0,0,1))<1e-8,'visual follows tactical facing, never camera');count++;
  }}finally{r.dispose();}assert.equal(count,64);
+});
+
+test('actual paddle face/rim clear closed head volumes and exposed forearms stay outside the jersey through every stroke family',t=>{
+ const r=resources(),failures=[];let samples=0;
+ try{for(const item of [...pixelAuthoringCases(),...pixelTacticalBoundaryCases()])for(let player=0;player<4;player++){
+  const {timeline}=compileEffectiveCandidate(item.document),segment=timeline.segments.find(s=>s.shotSemantics),camera=cameraAt(player*2,38),actor=createReferenceAthlete(r,player<2?'team1':'team2',item.handedness,player%2),sample=sampleActorPresentation({instructionalMovement:true,segment,timeline,playerId:segment.shotSemantics.playerId,localTime:segment.contactTime,handedness:item.handedness,cameraPosition:camera.position});
+  for(const phase of [0,.25,.45,.7,1,1.25,1.5,1.75,2,2.5,3]){
+   const p=sample.profile,c=p.contactRatio,f=p.recoverRatio,ratio=phase<=1?phase*c:phase<=2?c+(phase-1)*(f-c):f+(phase-2)*(1-f),localTime=Math.max(0,Math.min(segment.duration,segment.contactTime+(ratio-c)*p.duration)),delta=localTime-segment.contactTime,weight=Math.max(0,1-Math.abs(delta)/(delta<0?.18:.22));
+   const current=sampleActorPresentation({instructionalMovement:true,segment,timeline,playerId:segment.shotSemantics.playerId,localTime,handedness:item.handedness,cameraPosition:camera.position});
+   updateReferenceAthlete(actor,current,camera,weight*weight*(3-2*weight));assertReferenceRig(actor,`${item.id}/${player}/${phase}: real clock`,camera);const audit=paintedAudit(actor),head=audit.paddleHeadPenetrations,jersey=audit.armTorsoPenetrations;
+   if(head.length||jersey.length)failures.push({id:item.id,player,phase,head,jersey});samples++;
+  }
+ }}finally{r.dispose();}
+ t.diagnostic(JSON.stringify({samples,failureCount:failures.length,headFailures:failures.filter(f=>f.head.length).length,jerseyFailures:failures.filter(f=>f.jersey.length).length,firstHeadFailures:failures.filter(f=>f.head.length).slice(0,6),firstFailures:failures.slice(0,8)}));assert.equal(samples,4312);assert.equal(failures.length,0,'actual submitted closed surfaces must not self-penetrate');
+});
+
+test('validated SAT and exact nonconvex fallback prove head/paddle clearance through 61 critical serve and overhead phases',t=>{
+ const r=resources(),failures=[];let samples=0;
+ try{for(const item of pixelAuthoringCases().filter(c=>['serve','overhead'].includes(c.family)&&['forehand','backhand'].includes(c.contactStyle)))for(let player=0;player<4;player++){
+  const {timeline}=compileEffectiveCandidate(item.document),segment=timeline.segments.find(s=>s.shotSemantics),camera=cameraAt(player*2,38),actor=createReferenceAthlete(r,player<2?'team1':'team2',item.handedness,player%2),profile=segment.shotSemantics.profile;
+  for(let frame=0;frame<=60;frame++){
+   const phase=frame/20,c=profile.contactRatio,f=profile.recoverRatio,ratio=phase<=1?phase*c:phase<=2?c+(phase-1)*(f-c):f+(phase-2)*(1-f),localTime=Math.max(0,Math.min(segment.duration,segment.contactTime+(ratio-c)*profile.duration)),delta=localTime-segment.contactTime,weight=Math.max(0,1-Math.abs(delta)/(delta<0?.18:.22)),sample=sampleActorPresentation({instructionalMovement:true,segment,timeline,playerId:segment.shotSemantics.playerId,localTime,handedness:item.handedness,cameraPosition:camera.position});
+   updateReferenceAthlete(actor,sample,camera,weight*weight*(3-2*weight));const result=paintedAudit(actor).convexPaddleHead;if(result.nonConvex.length!==result.exactFallbacks.length||result.intersections.length)failures.push({id:item.id,player,phase,...result});samples++;
+  }
+ }}finally{r.dispose();}
+ t.diagnostic(JSON.stringify({samples,failureCount:failures.length,firstFailures:failures.slice(0,8)}));assert.equal(samples,2928);assert.equal(failures.length,0,'convex validation and full SAT axes must reject head/paddle edge crossings');
 });
 test('actual presentation turns and canonical ready handoffs keep paddle paths continuous within and across production segments',t=>{
  const r=resources(),selected=[...pixelAuthoringCases().filter(c=>['forehand','backhand'].includes(c.contactStyle)),...pixelTacticalBoundaryCases()],maximums=[];let crossings=0,samples=0,boundaries=0;

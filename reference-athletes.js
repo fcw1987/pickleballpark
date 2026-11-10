@@ -48,103 +48,184 @@ export function loadReferenceAthleteAssets({signal}={}){
 export class ReferenceAthleteResources{
  constructor(assets){this.assets=assets;this.source=new THREE.Source(assets.image);this.sleeveSources=(assets.sleeves||[assets.image,assets.image]).map(im=>new THREE.Source(im));this.disposed=false;this.textures=new Map();this.materials=new Set();this.geometries=new Set();}
  texture(player,direction,part=-1){if(this.disposed)throw new Error('Reference athlete resources are disposed');const key=`${player}/${direction}/${part}`;if(!this.textures.has(key)){const image=this.assets.image,texture=new THREE.Texture();texture.source=part<0?this.source:this.sleeveSources[part];texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;const [x,y,w,h]=this.assets.metadata.frames[player][direction].rect;texture.repeat.set(w/image.width,h/image.height);texture.offset.set(x/image.width,1-(y+h)/image.height);texture.needsUpdate=true;this.textures.set(key,texture);}return this.textures.get(key);}
- dispose(){if(this.disposed)return;this.disposed=true;for(const t of this.textures.values())t.dispose();for(const m of this.materials)m.dispose();for(const g of this.geometries)g.dispose();this.textures.clear();this.materials.clear();this.geometries.clear();}
+ dispose(){if(this.disposed)return;this.disposed=true;for(const t of this.textures.values())t.dispose();for(const m of this.materials)m.dispose();for(const g of this.geometries)g.dispose();this.textures.clear();this.materials.clear();this.geometries.clear();this.pixelGeometryCache?.clear();this.pixelMaterial=null;}
 }
-// Transparent source rows beneath each painted shoe, measured at alphaTest .08.
-// Register the stance sole without changing the approved atlas or its UVs.
-const SOLE_ROWS=[[[0,0],[0,0],[0,0],[0,0]],[[0,0],[0,1],[0,2],[0,0]],[[0,0],[0,0],[0,2],[0,0]],[[0,0],[0,1],[0,3],[0,0]]];
-const CUFF_UV=[[[[0.20661646046261434,0.4079750574335411],[0.7893644816721739,0.40902058230578087]],[[0.21448087431693988,0.43068009782228955],[0.6453341740226985,0.4191891141349625]],[[0.28039532069382817,0.4276280468162783],[0.5540540540540541,0.4276280468162783]],[[0.21723737053477069,0.41665083285831905],[0.8034108264042084,0.41978949509330343]]],[[[0.22558691308691306,0.4206718548355559],[0.7743093358737071,0.4191936411873761]],[[0.2340716019417476,0.4426943468980238],[0.6503396739130435,0.42853839037927843]],[[0.28316036570298986,0.4424383178503646],[0.5447368421052632,0.4424383178503646]],[[0.23467094703049762,0.41681832568444377],[0.7809294320137693,0.4152596300695741]]],[[[0.3273038842345773,0.42909055827116027],[0.8046063752716736,0.4301873453517143]],[[0.3395464829288359,0.44802567037279273],[0.693923723335488,0.4384106160449792]],[[0.4032446241425784,0.44678289746782895],[0.6321585903083701,0.44678289746782895]],[[0.16959706959706958,0.42743496264290215],[0.6600798403193613,0.428263039139113]]],[[[0.21982235044032797,0.43568041725936457],[0.7818608588579344,0.43554434030281186]],[[0.2269520602853936,0.4417072826163735],[0.6522314239705544,0.4325782912739434]],[[0.2557283359914939,0.44245913078149923],[0.5583333333333333,0.44245913078149923]],[[0.23158240568954855,0.43017696589125154],[0.7830209563164108,0.4299337026609753]]]];
+// Original dimensional pixel athletes. Local +Z is forward, never camera-facing.
+// Closed chamfered contours, stepped hair and a small palette carry the handheld
+// pixel-art language in real geometry. The atlas API above remains compatible
+// with saved artwork tools, but none of the actor surfaces are sprite planes.
 const v=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
-function material(r,color){const m=new THREE.MeshBasicMaterial({color,toneMapped:false});r.materials.add(m);return m;}
-function mesh(r,g,m){r.geometries.add(g);return new THREE.Mesh(g,m);}
-function arm(r,skin){const group=new THREE.Group(),parts=[];for(let i=0;i<2;i++){const outer=mesh(r,new THREE.CylinderGeometry(.058,.054,1,10),material(r,'#2b2631')),inner=mesh(r,new THREE.CylinderGeometry(.044,.041,1,10),material(r,skin));outer.material.side=THREE.BackSide;group.add(outer,inner);parts.push({outer,inner});}const hand=mesh(r,new THREE.SphereGeometry(.065,12,8),material(r,skin));group.add(hand);return {group,parts,hand};}
-function segment(part,a,b,eye){const delta=b.clone().sub(a),length=delta.length(),direction=delta.clone().normalize();for(const [key,z] of [['outer',0],['inner',.035]]){const m=part[key];m.position.copy(a).add(b).multiplyScalar(.5);if(z)m.position.addScaledVector(eye.clone().sub(m.position).normalize(),z);m.scale.y=length;m.quaternion.setFromUnitVectors(v(0,1),direction);}}
+const UP=v(0,1,0),INK='#28313d';
+const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
+const smooth=n=>{const t=clamp(n);return t*t*(3-2*t);};
+const PALETTES=[
+ {shirt:'#3c9d79',light:'#a7d4a2',dark:'#286a59',skin:'#edb28a',hair:'#5b3d35',cap:'#f2d58f'},
+ {shirt:'#3c9d79',light:'#a7d4a2',dark:'#286a59',skin:'#aa6d48',hair:'#34303a',cap:'#e7ece0'},
+ {shirt:'#e98557',light:'#f8d58b',dark:'#a94c43',skin:'#edb28a',hair:'#6b4938',cap:'#eee8d5'},
+ {shirt:'#e98557',light:'#f8d58b',dark:'#a94c43',skin:'#aa6d48',hair:'#34303a',cap:'#e7ece0'}
+];
+// An eight-sided rectangle has broad pixel-like front/side planes rather than
+// cylinder facets. Repeated ring heights form genuine horizontal cloth ledges.
+function pixelVolume(rings,color,{outline=.012,chamfer=.20}={}){
+ const c=chamfer,shape=[[-.5+c,-.5],[.5-c,-.5],[.5,-.5+c],[.5,.5-c],[.5-c,.5],[-.5+c,.5],[-.5,.5-c],[-.5,-.5+c]],positions=[],normals=[],colors=[];
+ const base=new THREE.Color(color),ink=new THREE.Color(INK),a=v(),b=v(),n=v();
+ const points=rings.flatMap(([y,w,d])=>shape.map(([x,z])=>v(x*w,y,z*d)));
+ const triangle=(ia,ib,ic,hull=false)=>{
+  const ps=[points[ia],points[ib],points[ic]];n.crossVectors(a.subVectors(ps[1],ps[0]),b.subVectors(ps[2],ps[0])).normalize();
+  const shade=n.y>.45?1.07:n.y<-.45?.67:n.z>.45?1:n.x<-.45?.83:.90,tint=hull?ink:base.clone().multiplyScalar(shade);
+  for(const p of ps){positions.push(p.x+(hull?Math.sign(p.x)*outline:0),p.y+(hull?(p.y>(rings[0][0]+rings.at(-1)[0])/2?outline:-outline):0),p.z+(hull?Math.sign(p.z)*outline:0));normals.push(n.x,n.y,n.z);colors.push(tint.r,tint.g,tint.b);}
+ };
+ const emit=(i,j,k)=>{triangle(i,k,j);if(outline)triangle(j,k,i,true);};
+ for(let r=0;r<rings.length-1;r++)for(let i=0;i<8;i++){const a=r*8+i,b=r*8+(i+1)%8,c=b+8,d=a+8;emit(a,b,d);emit(b,c,d);}
+ for(let i=1;i<7;i++){emit(0,i+1,i);const top=(rings.length-1)*8;emit(top,top+i,top+i+1);}
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.computeBoundingBox();return geometry;
+}
+function vertexMaterial(r){if(!r.pixelMaterial){r.pixelMaterial=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});r.materials.add(r.pixelMaterial);}return r.pixelMaterial;}
+function volume(r,parent,name,color,rings,position=[0,0,0],options={}){
+ r.pixelGeometryCache??=new Map();const key=JSON.stringify([color,rings,options]);let geometry=r.pixelGeometryCache.get(key);if(!geometry){geometry=pixelVolume(rings,color,options);r.pixelGeometryCache.set(key,geometry);r.geometries.add(geometry);}
+ const mesh=new THREE.Mesh(geometry,vertexMaterial(r));mesh.name=name;mesh.position.set(...position);parent.add(mesh);return mesh;
+}
+function block(r,parent,name,color,size,position,outline=.006){const [w,h,d]=size;return volume(r,parent,name,color,[[-h/2,w,d],[h/2,w,d]],position,{outline,chamfer:.04});}
+function segment(object,a,b){object.position.copy(a).add(b).multiplyScalar(.5);object.scale.y=a.distanceTo(b);object.quaternion.setFromUnitVectors(UP,b.clone().sub(a).normalize());}
+function limb(r,parent,name,color,width,depth=width){return volume(r,parent,name,color,[[-.5,width*.88,depth*.88],[.5,width,depth]],undefined,{outline:.009,chamfer:.22});}
+function makeArm(r,parent,name,c){
+ const group=new THREE.Group();group.name=name;parent.add(group);const parts=[0,1].map(i=>{const outer=limb(r,group,`${name}${i?'Forearm':'UpperArm'}`,c.skin,i?.105:.125);return {outer,inner:outer};});
+ const sleeve=limb(r,group,`${name}Sleeve`,c.shirt,.205,.23),cuff=limb(r,group,`${name}Cuff`,'#f5edda',.209,.235);
+ const hand=new THREE.Group();hand.name=`${name}Hand`;group.add(hand);
+ volume(r,hand,`${name}Palm`,c.skin,[[-.063,.105,.09],[.050,.118,.10]],undefined,{outline:.009,chamfer:.23});
+ // Thumb and knuckle blocks wrap a real grip instead of ending beside it.
+ block(r,hand,`${name}Thumb`,c.skin,[.052,.065,.055],[.052,-.005,.027],.005);
+ return {group,parts,hand,sleeve,cuff};
+}
+function makeLeg(r,parent,name,c){
+ const thigh=limb(r,parent,`${name}Thigh`,c.skin,.16,.17),shorts=limb(r,parent,`${name}Shorts`,'#354452',.235,.25),shin=limb(r,parent,`${name}Shin`,c.skin,.115,.12),sock=limb(r,parent,`${name}Sock`,'#f5edda',.125,.13),foot=new THREE.Group();foot.name=`${name}Foot`;parent.add(foot);
+ // Bottom vertices are symmetric about the authored sole target. A shoe's toe
+ // extends forward above this contact patch, not by moving its ground anchor.
+ const sole=volume(r,foot,`${name}Sole`,INK,[[0,.19,.30],[.035,.19,.30]],undefined,{outline:0,chamfer:.12});
+ volume(r,foot,`${name}Sneaker`,'#f5edda',[[.032,.18,.29],[.080,.18,.29],[.135,.145,.20]],undefined,{outline:.006,chamfer:.18});
+ block(r,foot,`${name}ShoeStripe`,c.shirt,[.192,.025,.11],[0,.069,-.015],0);
+ block(r,foot,`${name}Laces`,'#e0dacb',[.08,.012,.09],[0,.132,.014],0);
+ return {thigh,shorts,shin,sock,foot,sole,hip:v(),knee:v(),ankle:v(),thighLength:.32,shinLength:.31};
+}
+// One dynamic vertex-color body draw. Hidden originals are semantic geometry
+// handles and test sources, never contact-only or camera-dependent substitutes.
+function batchBody(r,visual){
+ const sources=[];visual.traverse(o=>{if(o.isMesh)sources.push(o);});const positions=[],normals=[],colors=[],parts=[];
+ for(const source of sources){const p=source.geometry.attributes.position,n=source.geometry.attributes.normal,c=source.geometry.attributes.color,start=positions.length/3;positions.push(...p.array);normals.push(...n.array);colors.push(...c.array);parts.push({source,start,count:p.count,positions:Float32Array.from(p.array),normals:Float32Array.from(n.array),matrix:new THREE.Matrix4()});source.visible=false;}
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3).setUsage(THREE.DynamicDrawUsage));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3).setUsage(THREE.DynamicDrawUsage));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));r.geometries.add(geometry);const batch=new THREE.Mesh(geometry,vertexMaterial(r));batch.name='DimensionalPixelAthlete';batch.frustumCulled=false;visual.add(batch);return {batch,parts,inverse:new THREE.Matrix4()};
+}
+function updateBodyBatch(body,visual){
+ const p=body.batch.geometry.attributes.position,n=body.batch.geometry.attributes.normal;body.inverse.copy(visual.matrixWorld).invert();
+ for(const part of body.parts){part.matrix.multiplyMatrices(body.inverse,part.source.matrixWorld);const m=part.matrix.elements,s=part.positions,normal=part.normals;let at=part.start*3;
+  // Vertex colors already contain discrete local-space shade bands. Normals
+  // remain authored for geometric audits; no per-frame normal recomputation.
+  for(let i=0;i<s.length;i+=3,at+=3){const x=s[i],y=s[i+1],z=s[i+2];p.array[at]=m[0]*x+m[4]*y+m[8]*z+m[12];p.array[at+1]=m[1]*x+m[5]*y+m[9]*z+m[13];p.array[at+2]=m[2]*x+m[6]*y+m[10]*z+m[14];n.array[at]=normal[i];n.array[at+1]=normal[i+1];n.array[at+2]=normal[i+2];}
+ }p.needsUpdate=true;
+}
 export function createReferenceAthlete(resources,team,handedness,index=0){
- const root=new THREE.Group(),visual=new THREE.Group(),geometry=new THREE.PlaneGeometry(1,1,12,28),mat=new THREE.MeshBasicMaterial({transparent:true,alphaTest:.08,depthWrite:true,side:THREE.DoubleSide,toneMapped:false});resources.materials.add(mat);resources.geometries.add(geometry);
- const body=new THREE.Mesh(geometry,mat);body.name='OriginalDetailedAthlete';visual.add(body);const sleeves=[0,1].map(()=>{const g=geometry.clone(),m=mat.clone(),s=new THREE.Mesh(g,m);resources.geometries.add(g);resources.materials.add(m);visual.add(s);return s;});root.add(visual);
- const player=(team==='team1'||team==='green'?0:2)+(index%2),skin=['#efae70','#b96c35','#efa16a','#a9653c'][player],arms=[arm(resources,skin),arm(resources,skin)];for(const a of arms)visual.add(a.group);
- const paddle=new THREE.Group(),rim=mesh(resources,new THREE.CylinderGeometry(.19,.19,.046,24),material(resources,'#192d39')),face=mesh(resources,new THREE.CylinderGeometry(.167,.167,.05,24),material(resources,team==='team1'?'#3f8994':'#e7ad67'));rim.rotation.x=face.rotation.x=Math.PI/2;rim.scale.y=face.scale.y=1.2;paddle.add(rim,face);
- const grip=mesh(resources,new THREE.CylinderGeometry(.032,.028,.24,10),material(resources,'#cfa572'));grip.position.y=-.24;paddle.add(grip);visual.add(paddle);
- root.userData={team,handedness,player,resources,visual,body,sleeves,arms,paddle,baseVertices:Float32Array.from(geometry.attributes.position.array),paddleFaceWorld:v(),referenceAthlete:true};return root;
+ if(resources.disposed)throw new Error('Reference athlete resources are disposed');
+ const r=resources,root=new THREE.Group(),visual=new THREE.Group(),upper=new THREE.Group(),head=new THREE.Group(),player=(team==='team1'||team==='green'?0:2)+(index%2),c=PALETTES[player],alternate=player%2!==0;
+ root.name=`PixelAthlete-${team}-${handedness}`;visual.name='WorldFacingPixelAthlete';upper.name='PixelAthleteTorso';head.name='PixelAthleteHead';root.add(visual);visual.add(upper);upper.add(head);
+ const body=volume(r,upper,'PixelJersey',c.shirt,[[.69,.37,.30],[.73,.41,.31],[1.02,.45,.32],[1.13,.50,.32],[1.18,.40,.28]]);
+ volume(r,upper,'JerseyHem',c.dark,[[.69,.38,.31],[.75,.42,.32]],undefined,{outline:0});
+ volume(r,upper,'PixelShorts','#354452',[[.57,.38,.29],[.71,.39,.30]]);
+ // Small stepped collar and a clean continuous chest stripe wrap both sides.
+ volume(r,upper,'Collar',c.dark,[[1.14,.23,.20],[1.19,.22,.20]],undefined,{outline:.004});
+ block(r,upper,'FrontShirtStripe',c.light,[.41,.068,.016],[0,1.005,.163],0);
+ block(r,upper,'BackShirtStripe',c.light,[.41,.068,.016],[0,1.005,-.163],0);
+ for(const side of [-1,1])block(r,upper,'SideShirtStripe',c.light,[.014,.068,.28],[side*.224,1.005,0],0);
+ block(r,upper,'ClubBadge','#f5edda',[.07,.08,.018],[-.123,1.09,.164],0);
+ block(r,upper,'BadgePixel',c.dark,[.027,.045,.022],[-.132,1.09,.166],0);
+ volume(r,upper,'Neck',c.skin,[[1.16,.16,.16],[1.29,.17,.17]],undefined,{outline:.008});
+ const face=volume(r,head,'PixelHead',c.skin,[[1.22,.35,.33],[1.27,.46,.40],[1.34,.51,.43],[1.58,.54,.43],[1.69,.46,.39]],undefined,{outline:.014,chamfer:.19});
+ // Hair is a solid cap with stepped edge, back and side locks. No rear face art.
+ volume(r,head,'HairCrown',c.hair,[[1.56,.55,.45],[1.68,.57,.47],[1.75,.47,.40],[1.78,.34,.31]],undefined,{outline:.011,chamfer:.17});
+ for(const side of [-1,1]){
+  block(r,head,'Ear',c.skin,[.065,.115,.12],[side*.263,1.415,-.005],.006);
+  block(r,head,'Sideburn',c.hair,[.075,.16,.13],[side*.247,1.54,-.04],.006);
+  block(r,head,'EyeWhite','#f9f4dd',[.072,.075,.018],[side*.115,1.46,.217],0);
+  block(r,head,'EyePixel',INK,[.037,.065,.022],[side*.107,1.457,.229],0);
+  block(r,head,'Eyebrow',c.hair,[.075,.022,.026],[side*.115,1.526,.222],0);
+ }
+ block(r,head,'NosePixel',c.skin,[.037,.04,.018],[0,1.407,.224],0);
+ block(r,head,'MouthPixel','#8b5749',[.058,.014,.016],[0,1.346,.207],0);
+ if(alternate){
+  // A recognisable ponytail is three joined stepped volumes, readable in back.
+  volume(r,head,'PonytailRoot',c.hair,[[1.43,.20,.19],[1.64,.22,.20]],[0,0,-.27],{outline:.01});
+  volume(r,head,'Ponytail',c.hair,[[1.10,.15,.19],[1.20,.21,.23],[1.47,.23,.24]],[0,0,-.31],{outline:.01});
+  block(r,head,'HairTie',c.light,[.20,.06,.205],[0,1.47,-.285],.002);
+  block(r,head,'FringeLeft',c.hair,[.23,.09,.075],[-.12,1.58,.20],.004);
+  block(r,head,'FringeStep',c.hair,[.12,.055,.07],[.04,1.608,.21],.004);
+  block(r,head,'FringeLock',c.hair,[.08,.065,.05],[-.04,1.548,.218],.003);
+ }else{
+  volume(r,head,'Cap',c.cap,[[1.64,.57,.47],[1.74,.57,.47],[1.81,.44,.38]],undefined,{outline:.011,chamfer:.16});
+  volume(r,head,'CapBand',c.dark,[[1.628,.574,.477],[1.668,.574,.477]],undefined,{outline:.004,chamfer:.16});
+  volume(r,head,'CapVisor',c.cap,[[-.029,.58,.23],[.029,.58,.23]],[0,1.654,.275],{outline:.008,chamfer:.18});
+  block(r,head,'CapBadge',c.shirt,[.075,.065,.02],[0,1.732,.244],0);
+ }
+ const legs={left:makeLeg(r,visual,'Left',c),right:makeLeg(r,visual,'Right',c)},arms=[makeArm(r,visual,'Working',c),makeArm(r,visual,'Support',c)],bodyBatch=batchBody(r,visual);
+ const paddle=new THREE.Group();paddle.name='PixelPaddle';
+ const rim=volume(r,paddle,'PaddleRim',INK,[[-.026,.345,.43],[.026,.345,.43]],undefined,{outline:0,chamfer:.23});rim.rotation.x=Math.PI/2;
+ const paddleFace=volume(r,paddle,'PaddleFace',c.light,[[-.029,.305,.38],[.029,.305,.38]],undefined,{outline:0,chamfer:.23});paddleFace.rotation.x=Math.PI/2;
+ const grip=volume(r,paddle,'PaddleGrip','#b88b65',[[-.12,.06,.065],[.12,.06,.065]],[0,-.235,0],{outline:.004,chamfer:.1});
+ // Visible face seam and handle cap keep the equipment readable at court scale.
+ block(r,paddle,'PaddleFaceMark',c.dark,[.035,.20,.005],[0,0,.031],0);
+ block(r,paddle,'PaddleButt',INK,[.075,.035,.078],[0,-.34,0],0);
+ visual.add(paddle);
+ root.userData={team,handedness,player,resources:r,visual,upper,head,face,body,sleeves:handedness==='left'?[arms[1].sleeve,arms[0].sleeve]:arms.map(a=>a.sleeve),arms,legs,paddle,bodyBatch,baseVertices:Float32Array.from(body.geometry.attributes.position.array),paddleFaceWorld:v(),referenceAthlete:true,volumetric:true};
+ return root;
 }
-const directionFrame=direction=>({front:[0,1],'front-right':[1,1],right:[2,1],'back-right':[3,1],back:[3,1],'back-left':[3,-1],left:[2,-1],'front-left':[1,-1]})[direction]||[0,1];
 function strokePhase(s){if(!s.profile)return 3;const t=s.strokeTime/s.profile.duration,c=s.profile.contactRatio,f=s.profile.recoverRatio||.8;return t<=c?t/c:t<=f?1+(t-c)/(f-c):2+(t-f)/(1-f);}
-const physicalSoleSources=new WeakMap();
-function model2SoleWeights(d,frame){
- // Each anchor is the mean bottom opaque-pixel edge of one painted shoe.
- // Cache source UVs, then their actual triangle weights; no root substitute.
- let frames=physicalSoleSources.get(d.resources.assets);if(!frames){frames=new Map();physicalSoleSources.set(d.resources.assets,frames);}
- const key=`${d.player}/${frame}`;let source=frames.get(key);
- if(!source){const [ox,oy,w,h]=d.resources.assets.metadata.frames[d.player][frame].rect,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(d.resources.assets.image,ox,oy,w,h,0,0,w,h);const pixels=ctx.getImageData(0,0,w,h).data,threshold=Math.ceil(d.body.material.alphaTest*255);source=[[],[]];
-  for(let side=0;side<2;side++)for(let y=h-1;y>=h*.7;y--){for(let x=0;x<w;x++)if((x<w/2?0:1)===side&&pixels[(y*w+x)*4+3]>=threshold)source[side].push({u:(x+.5)/w,v:1-(y+1)/h});if(source[side].length)break;}
-  if(source.some(points=>!points.length))throw Error('Model 2 requires two measurable painted shoe anchors.');frames.set(key,source);}
- d.model2SoleWeights??=new Map();if(d.model2SoleWeights.has(key))return d.model2SoleWeights.get(key);
- const geometry=d.body.geometry,uv=geometry.attributes.uv,index=geometry.index,triangle=new THREE.Triangle(),p=v(),bary=v(),weights=source.map(points=>{
-  const mean=new Float64Array(geometry.attributes.position.count);
-  for(const point of points){p.set(point.u,point.v,0);let found=false;for(let at=0;at<index.count;at+=3){const ids=[0,1,2].map(c=>index.getX(at+c));for(let c=0;c<3;c++)[triangle.a,triangle.b,triangle.c][c].set(uv.getX(ids[c]),uv.getY(ids[c]),0);triangle.getBarycoord(p,bary);if(bary.x>=-1e-7&&bary.y>=-1e-7&&bary.z>=-1e-7){for(let c=0;c<3;c++)mean[ids[c]]+=bary.getComponent(c)/points.length;found=true;break;}}
-   if(!found)throw Error('Painted shoe anchor must lie on an actual body triangle.');}
-  return mean;
- });d.model2SoleWeights.set(key,weights);return weights;
+function bendPoint(shoulder,wrist,side){
+ const delta=wrist.clone().sub(shoulder),length=Math.max(1e-9,delta.length()),axis=delta.clone().divideScalar(length);
+ // A front/outward elbow plane is independent of camera projection. The
+ // authored 3D wrist envelope stays clear of this anatomical pole, including
+ // cross-body backhands, without choosing a different bend on reverse seek.
+ const pole=v(side*.65,.1,.70),bend=pole.addScaledVector(axis,-pole.dot(axis)).normalize();
+ return shoulder.clone().addScaledVector(delta,.5).addScaledVector(bend,Math.sqrt(Math.max(0,.34*.34-length*length/4)));
 }
-function alignModel2Soles(root,sample,frame){
- const d=root.userData,targets=Object.values(sample.footTargets||{});if(sample.modelVersion!==2||targets.length!==2)return;
- const weights=model2SoleWeights(d,frame),pos=d.body.geometry.attributes.position,base=d.baseVertices;
- const basis=Array.from({length:pos.count},(_,i)=>{const leg=Math.max(0,Math.min(1,(-base[i*3+1]-.19)/.22)),right=Math.max(0,Math.min(1,(base[i*3]+.08)/.16));return[leg*(1-right),leg*right];});
- const current=weights.map(mean=>{const point=v();for(let i=0;i<pos.count;i++)if(mean[i])point.addScaledVector(v(pos.getX(i),pos.getY(i),pos.getZ(i)),mean[i]);return point;});
- const world=current.map(point=>d.body.localToWorld(point.clone())),wanted=targets.map(point=>v(point.x,point.y,point.z));
- if(world[0].distanceToSquared(wanted[1])+world[1].distanceToSquared(wanted[0])<world[0].distanceToSquared(wanted[0])+world[1].distanceToSquared(wanted[1]))wanted.reverse();
- const delta=wanted.map((point,i)=>d.body.worldToLocal(point.clone()).sub(current[i])),matrix=weights.map(mean=>basis.reduce((sum,b,i)=>[sum[0]+mean[i]*b[0],sum[1]+mean[i]*b[1]],[0,0])),[[a,b],[c,e]]=matrix,det=a*e-b*c;
- if(Math.abs(det)<1e-8)throw Error('Painted shoes cannot be aligned independently for model 2.');
- const left=delta[0].clone().multiplyScalar(e).addScaledVector(delta[1],-b).divideScalar(det),right=delta[1].clone().multiplyScalar(a).addScaledVector(delta[0],-c).divideScalar(det);
- for(let i=0;i<pos.count;i++){const [l,r]=basis[i];if(l||r)pos.setXYZ(i,pos.getX(i)+left.x*l+right.x*r,pos.getY(i)+left.y*l+right.y*r,pos.getZ(i)+left.z*l+right.z*r);}pos.needsUpdate=true;
+function poseArm(arm,shoulder,wrist,side,paddleQuaternion){
+ const elbow=bendPoint(shoulder,wrist,side),cuffFraction=.35,skinStart=shoulder.clone().lerp(elbow,cuffFraction),cuffStart=shoulder.clone().lerp(elbow,cuffFraction-.07);
+ segment(arm.parts[0].outer,skinStart,elbow);segment(arm.parts[1].outer,elbow,wrist);segment(arm.sleeve,shoulder,skinStart);segment(arm.cuff,cuffStart,skinStart);arm.hand.position.copy(wrist);arm.hand.quaternion.copy(paddleQuaternion||arm.parts[1].outer.quaternion);
+ return {shoulder:shoulder.clone(),sleeveAnchor:shoulder.clone(),skinStart,elbow,wrist:wrist.clone(),cuffAnchor:skinStart.clone(),cuffFraction,upperArmLength:.34,forearmLength:.34,wristReach:shoulder.distanceTo(wrist),sleeveHeight:shoulder.y};
 }
 export function updateReferenceAthlete(root,sample,camera,contactWeight=0){
- const d=root.userData;root.position.set(sample.worldPosition.x,sample.worldPosition.y||0,sample.worldPosition.z);const cameraFacing=new THREE.Euler().setFromQuaternion(camera.quaternion,'YXZ');cameraFacing.x=Math.max(-20*Math.PI/180,Math.min(20*Math.PI/180,cameraFacing.x));d.visual.quaternion.setFromEuler(cameraFacing);
- const [frame,mirror]=directionFrame(sample.viewDirection),meta=d.resources.assets.metadata.frames[d.player][frame],h=meta.heightMeters,w=h*meta.rect[2]/meta.rect[3];d.body.material.map=d.resources.texture(d.player,frame);d.body.scale.set(w*mirror,h,1);
- const moving=(sample.travelSpeed||0)>.05,phase=strokePhase(sample),family=['ready','shuffle'].includes(sample.action)?'ready':((sample.action==='short-hop'||sample.shotType==='short-hop')&&!['serve','overhead'].includes(sample.instructionalFamily)?'short-hop':sample.instructionalFamily||sample.shotType)||sample.action||'ready',pose=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase,facing:'front',moving,time:sample.timeSeconds||0,planted:sample.planted});
- // Begin and finish every stroke at the same handed ready pose. The windup,
- // strike and follow-through keep the original family-specific choreography.
- const ready=computePixelStroke({type:'ready',strokeSide:'forehand',handedness:d.handedness,phase:3,facing:'front'}),keys=family==='ready'?[ready,ready,ready,ready,ready]:[ready,...[0,1,2].map(key=>computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase:key,facing:'front'})),ready],times=[0,.45,1,2,3],interval=phase<.45?0:phase<1?1:phase<2?2:3,keyT=Math.max(0,Math.min(1,(phase-times[interval])/(times[interval+1]-times[interval]))),keyBlend=keyT*keyT*(3-2*keyT);
- pose.paddle={x:keys[interval].paddle.x+(keys[interval+1].paddle.x-keys[interval].paddle.x)*keyBlend,y:keys[interval].paddle.y+(keys[interval+1].paddle.y-keys[interval].paddle.y)*keyBlend};pose.torsoOffset={x:0,y:0};
- const groundedModel2=sample.modelVersion===2&&sample.footTargets&&Object.values(sample.footTargets).every(point=>Math.abs(point.y)<1e-8);
- const jump=!groundedModel2&&family==='overhead'&&phase>=0&&phase<=2?.4*Math.sin(Math.PI*phase/2)**2:0;root.position.y=(sample.worldPosition.y||0)+jump;
- const gait=moving&&!sample.planted?Math.sin(sample.travelPhase??(sample.timeSeconds||0)*12):0;
- // Correct each source shoe's transparent bottom rows in the leg deformation.
- // A planted card has two grounded painted soles; gait then lifts one foot.
- const soleGaps=SOLE_ROWS[d.player][frame].map(rows=>rows/meta.rect[3]);
- d.body.position.set(pose.torsoOffset.x*.018*mirror,h/2,0);d.body.rotation.z=(pose.torsoOffset.x*.006*mirror);
- // Low-shot posture comes from its distinct arm profile. Keep the original
- // card soles on the ground instead of translating the whole athlete downward.
- // Deform the existing richly drawn legs around their hips; shoes keep their artwork.
- const pos=d.body.geometry.attributes.position,base=d.baseVertices;for(let i=0;i<pos.count;i++){const x=base[i*3],y=base[i*3+1],leg=Math.max(0,Math.min(1,(-y-.19)/.31)),side=x<0?-1:1,gap=soleGaps[side<0?0:1],registration=gap/Math.max(.01,1-gap/.31);pos.setXYZ(i,x+leg*gait*.025*side,y+leg*(Math.max(0,gait*side)*.045-registration),base[i*3+2]);}pos.needsUpdate=true;
+ const d=root.userData,{visual,upper,legs,paddle}=d,moving=(sample.travelSpeed||0)>.05,phase=strokePhase(sample),family=['ready','shuffle'].includes(sample.action)?'ready':((sample.action==='short-hop'||sample.shotType==='short-hop')&&!['serve','overhead'].includes(sample.instructionalFamily)?'short-hop':sample.instructionalFamily||sample.shotType)||sample.action||'ready',hand=d.handedness==='left'?1:-1;
+ const facing=v(sample.bodyFacing?.x||0,0,sample.bodyFacing?.z??(d.team==='team1'?1:-1)).normalize();root.position.set(sample.worldPosition.x,sample.worldPosition.y||0,sample.worldPosition.z);visual.rotation.set(0,Math.atan2(facing.x,facing.z),0);
+ const groundedModel2=sample.modelVersion===2&&sample.footTargets&&Object.values(sample.footTargets).every(point=>Math.abs(point.y)<1e-8),jump=!groundedModel2&&family==='overhead'&&phase>=0&&phase<=2?.4*Math.sin(Math.PI*phase/2)**2:0;root.position.y+=jump;
+ // Entire gestures are authored in world-oriented 3D metres. Only the contact
+ // key comes from the ball; prepare/follow/recovery are free to route around the
+ // actual head and shirt. The old sprite X/Y keypaths are not physical anatomy.
+ const pose=computePixelStroke({type:family,strokeSide:sample.strokeSide,handedness:d.handedness,phase,facing:'front',moving,time:sample.timeSeconds||0,planted:sample.planted}),strokeSide=hand*(pose.backhand?-1:1),compactStroke=['drop','dink','short-hop','volley','block','reset'].includes(family),times=[0,.45,1,2,3],interval=phase<.45?0:phase<1?1:phase<2?2:3,blend=smooth((phase-times[interval])/(times[interval+1]-times[interval])),court=v(0,0,sample.worldPosition.z<0?1:-1),target=sample.paddle?.worldContactTarget;
+ const ready=v(hand*.18,.98,.36),soft=['drop','dink','short-hop'].includes(family),compact=['volley','block','reset'].includes(family);
+ const prepare=family==='overhead'?v(hand*(pose.backhand?.18:.30),1.80,.52):family==='lob'?v(strokeSide*.35,.56,.38):soft?v(strokeSide*.30,family==='short-hop'?.48:.58,.38):compact?v(strokeSide*.26,1.0,.40):family==='serve'?v(strokeSide*(pose.backhand?.32:.45),.70,.43):v(strokeSide*.50,.98,.38);
+ const follow=family==='overhead'?v(strokeSide*.32,1.02,.50):family==='lob'?v(strokeSide*.15,1.43,.55):soft?v(strokeSide*.18,family==='short-hop'?.77:.92,.45):compact?v(strokeSide*.20,1.08,.48):v(-strokeSide*(family==='serve'?.22:.32),family==='serve'?1.15:1.18,.50);
  root.updateMatrixWorld(true);
- if(sample.modelVersion===2&&sample.footTargets)alignModel2Soles(root,sample,frame);
- const scale=.063,facing=v(sample.bodyFacing?.x||0,0,sample.bodyFacing?.z??1).normalize(),court=v(0,0,sample.worldPosition.z<0?1:-1),fromPose=(p,basis=facing)=>d.visual.worldToLocal(root.position.clone().addScaledVector(v(basis.z,0,-basis.x),p.x*scale).addScaledVector(basis,.09).add(v(0,-p.y*scale,0))),paddle=fromPose(keys[interval].paddle,interval===0?court:facing).lerp(fromPose(keys[interval+1].paddle,interval===3?court:facing),keyBlend),target=sample.paddle?.worldContactTarget;
- if(family==='short-hop'&&phase>1&&phase<3)paddle.add(v(0,.063*Math.sin((phase-1)*Math.PI/2),0).applyQuaternion(d.visual.quaternion.clone().invert()));
- // The free stroke follows continuous world body-facing, independently of the
- // eight discrete atlas views. Recovery turns must not flip paddle/grip sides.
- // Contact target is the authored ball location; preserve the swing arc around it.
- if(target&&contactWeight>0){const local=d.visual.worldToLocal(v(target.x,target.y,target.z)),contact=keys[2];local.add(paddle.clone().sub(fromPose(contact.paddle)));paddle.lerp(local,Math.min(1,contactWeight));}
- // The artwork is a camera-facing card. Put the articulated shoulders at
- // the nearest point along the exact camera-to-sleeve rays: this keeps
- // their visible attachments on the drawn sleeves without stretching the shirt
- // when a high contact is far in front of that card at an elevated camera angle.
- const handSide=(d.handedness==='left'?-1:1)*(frame===3?1:-1);
- const cameraLocal=d.visual.worldToLocal(camera.getWorldPosition(v()));
- const sleeve=side=>{const uv=CUFF_UV[d.player][frame][side*mirror<0?0:1],anchor=v(uv[0]-.5,uv[1]-.5,0);d.body.localToWorld(anchor);return d.visual.worldToLocal(anchor);};
- const workingSide=handSide*mirror<0?0:1,restCuff=sleeve(handSide),offSleeveAnchor=sleeve(-handSide),cuffUV=CUFF_UV[d.player][frame][workingSide],pivotUV=SLEEVE_META[d.player][frame][workingSide].pivotUV,pivot=v(pivotUV[0]-.5,pivotUV[1]-.5,0);d.body.localToWorld(pivot);d.visual.worldToLocal(pivot);const sleeveAnchor=pivot.clone(),sleeveHeight=pivot.y;
- const ray=sleeveAnchor.clone().sub(cameraLocal),faceShoulder=cameraLocal.clone().addScaledVector(ray,paddle.clone().sub(cameraLocal).dot(ray)/Math.max(1e-9,ray.lengthSq())),raw=paddle.clone().sub(faceShoulder),eyeNormal=cameraLocal.clone().sub(faceShoulder).normalize();
- // The face-to-shoulder vector is perpendicular to this eye ray. A small,
- // fixed depth component therefore prevents its zero-length grip singularity
- // without changing hand/grip attachment or introducing a history filter.
- const radial=raw.addScaledVector(eyeNormal,.16).normalize(),wrist=paddle.clone().addScaledVector(radial,-.235),shoulder=cameraLocal.clone().addScaledVector(ray,wrist.clone().sub(cameraLocal).dot(ray)/Math.max(1e-9,ray.lengthSq()));
- const delta=wrist.clone().sub(shoulder),len=delta.length(),mid=shoulder.clone().add(wrist).multiplyScalar(.5),bone=.42,bend=Math.sqrt(Math.max(0,bone*bone-Math.min(len,2*bone)**2/4)),bendT=Math.min(1,len/.25),screenBend=bendT*bendT*(3-2*bendT),preferred=cameraLocal.clone().sub(shoulder).normalize().multiplyScalar(.9).addScaledVector(v(handSide*.18,-.13,0),screenBend),elbowDirection=preferred.addScaledVector(delta,-preferred.dot(delta)/Math.max(1e-18,len*len)).normalize(),elbow=mid.add(elbowDirection.multiplyScalar(bend));
- const cuffFraction=Math.min(.72,restCuff.distanceTo(pivot)/bone),skinStart=shoulder.clone().lerp(elbow,cuffFraction),eye=cameraLocal.clone(),rayToCuff=skinStart.clone().sub(eye),onCard=eye.clone().addScaledVector(rayToCuff,(.002-eye.z)/rayToCuff.z),cardCuff=d.body.worldToLocal(d.visual.localToWorld(onCard)),rest=v(cuffUV[0]-pivotUV[0],cuffUV[1]-pivotUV[1],0),desired=v(cardCuff.x-(pivotUV[0]-.5),cardCuff.y-(pivotUV[1]-.5),0),den=rest.lengthSq(),real=desired.dot(rest)/den,imag=(rest.x*desired.y-rest.y*desired.x)/den;
- for(const [side,s]of d.sleeves.entries()){s.material.map=d.resources.texture(d.player,frame,side);s.visible=SLEEVE_META[d.player][frame][side].visible;s.position.copy(d.body.position);s.position.z+=.002;s.rotation.copy(d.body.rotation);s.scale.copy(d.body.scale);const attr=s.geometry.attributes.position,original=d.baseVertices;for(let i=0;i<attr.count;i++){const bx=original[i*3],by=original[i*3+1],dx=bx+.5-pivotUV[0],dy=by+.5-pivotUV[1];attr.setXYZ(i,side===workingSide?pivotUV[0]-.5+real*dx-imag*dy:bx,side===workingSide?pivotUV[1]-.5+imag*dx+real*dy:by,0);}attr.needsUpdate=true;}
- segment(d.arms[0].parts[0],skinStart,elbow,cameraLocal);segment(d.arms[0].parts[1],elbow,wrist,cameraLocal);d.arms[0].hand.position.copy(wrist);
- d.arms[1].group.visible=SLEEVE_META[d.player][frame][1-workingSide].visible;const off=offSleeveAnchor,offElbow=off.clone().add(v(-handSide*.09,-.20,0)),offHand=off.clone().add(v(handSide*.02,-.27,.07));segment(d.arms[1].parts[0],off,offElbow,cameraLocal);segment(d.arms[1].parts[1],offElbow,offHand,cameraLocal);d.arms[1].hand.position.copy(offHand);
- d.rigPose={sleeveAnchor:sleeveAnchor.clone(),shoulder:shoulder.clone(),offSleeveAnchor:offSleeveAnchor.clone(),skinStart:skinStart.clone(),cuffAnchor:onCard.clone(),elbow:elbow.clone(),wrist:wrist.clone(),workingSide,cuffFraction,sourcePivotUV:[...pivotUV],sourceCuffUV:[...cuffUV],restCuff:restCuff.clone(),upperArmLength:bone,forearmLength:bone,wristReach:len,sleeveHeight};
- d.paddle.position.copy(paddle);d.paddle.quaternion.setFromUnitVectors(v(0,1),radial);d.paddle.rotateY(sample.strokeSide==='backhand'?-.22:.22);root.updateMatrixWorld(true);d.paddle.getWorldPosition(d.paddleFaceWorld);d.animation={phase:sample.phase,action:sample.action,bodyFacing:sample.bodyFacing?{...sample.bodyFacing}:null,viewDirection:sample.viewDirection,source:'original-imagegen-articulated-v2',jumpHeight:jump,frame,mirror,contactWeight,backhand:pose.backhand,planted:pose.planted,family:pose.family};
+ const fromPose=(p,basis=facing)=>visual.worldToLocal(root.position.clone().addScaledVector(v(basis.z,0,-basis.x),p.x).addScaledVector(basis,p.z).add(v(0,p.y,0))),contact=target?visual.worldToLocal(v(target.x,target.y,target.z)):fromPose(v(strokeSide*.30,family==='overhead'?1.80:.8,.35)),keys=family==='ready'?[fromPose(ready,court),fromPose(ready,court),fromPose(ready,court),fromPose(ready,court),fromPose(ready,court)]:[fromPose(ready,court),fromPose(prepare),contact,fromPose(follow),fromPose(ready,court)],face=keys[interval].clone().lerp(keys[interval+1],blend);
+ const activity=family==='ready'?0:Math.sin(Math.PI*clamp(phase/3))**2,low=target?Math.max(0,.67-target.y):0;
+ const overheadLoad=family==='overhead'&&phase<=2?Math.sin(Math.PI*phase/2)**2:0,pelvis=v(0,.65,0),neck=v(0,1.25,0);
+ upper.rotation.set(-.22*overheadLoad,0,0);upper.position.copy(pelvis).sub(pelvis.clone().applyEuler(upper.rotation)).add(v(0,-Math.min(.17,low*.4)*activity,0));
+ d.head.rotation.set(-.42*overheadLoad,0,0);d.head.position.copy(neck).sub(neck.clone().applyEuler(d.head.rotation));
+ root.updateMatrixWorld(true);
+ const shoulder=visual.worldToLocal(upper.localToWorld(v(hand*.265,1.13,.08)));
+ // Equipment rotates in a real stroke plane. Low contacts put the face below
+ // the grip in front of the shirt; a radial shoulder ray would pull that wrist
+ // backwards through the body. Signed angle keys stay continuous on reverse seek.
+ const strokeSign=hand*(pose.backhand?-1:1),angles=family==='overhead'?[0,strokeSign*.35,strokeSign*.15,strokeSign*2.3,0]:family==='lob'?[0,strokeSign*2.4,strokeSign*2.15,strokeSign*.3,0]:compactStroke?[0,strokeSign*2.0,strokeSign*2.25,strokeSign*1.8,0]:[0,strokeSign*1.8,strokeSign*2.25,-strokeSign*1.0,0],angle=family==='ready'?0:angles[interval]+(angles[interval+1]-angles[interval])*blend,axisWeight=family==='ready'?0:phase<.45?smooth(phase/.45):phase>2?smooth(3-phase):1,open=(family==='lob'?.45:compactStroke?.12:.035)*axisWeight,paddleNormal=v(0,open,1).normalize(),radial=v(Math.sin(angle),Math.cos(angle),-open*Math.cos(angle)).normalize(),wrist=face.clone().addScaledVector(radial,-.235);
+ if(shoulder.distanceTo(wrist)>.679999){
+  // Chibi shoulder load is carried by the real torso and head, not a detached
+  // joint. This is only needed for extreme legacy windups, never shifts feet.
+  const delta=wrist.clone().sub(shoulder),shift=delta.clone().multiplyScalar((delta.length()-.679999)/delta.length());upper.position.add(shift);root.updateMatrixWorld(true);shoulder.add(shift);
+ }
+ for(const [name,side]of [['left',1],['right',-1]]){
+  const leg=legs[name],gait=moving&&!sample.planted?Math.sin(sample.travelPhase??(sample.timeSeconds||0)*12)*side:0,footTarget=sample.footTargets?.[name],ankle=footTarget?visual.worldToLocal(v(footTarget.x,footTarget.y+(sample.modelVersion===2?0:jump),footTarget.z)):v(side*.205,Math.max(0,gait)*.07,gait*.10),hip=visual.worldToLocal(upper.localToWorld(v(side*.125,.65,0))),shinEnd=ankle.clone().add(v(0,.135,0)),delta=shinEnd.clone().sub(hip),axis=delta.clone().normalize(),length=Math.max(.001,delta.length()),a=leg.thighLength,b=leg.shinLength,reach=clamp(length,Math.abs(a-b)+1e-6,a+b-1e-6),along=(a*a-b*b+reach*reach)/(2*reach),pole=v(0,0,1).addScaledVector(axis,-axis.z).normalize(),knee=hip.clone().addScaledVector(axis,along).addScaledVector(pole,Math.sqrt(Math.max(0,a*a-along*along)));
+  segment(leg.thigh,hip,knee);segment(leg.shorts,hip,hip.clone().lerp(knee,.55));segment(leg.shin,knee,shinEnd);segment(leg.sock,ankle.clone().add(v(0,.105,0)),ankle.clone().add(v(0,.23,0)));leg.foot.position.copy(ankle);leg.foot.rotation.set(0,sample.footTargets?(sample.worldPosition.z<0?0:Math.PI)-visual.rotation.y:0,0);leg.hip.copy(hip);leg.knee.copy(knee);leg.ankle.copy(ankle);
+ }
+ const normal=paddleNormal;const x=v().crossVectors(radial,normal).normalize();normal.crossVectors(x,radial).normalize();paddle.position.copy(face);paddle.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,radial,normal));
+ const rig=poseArm(d.arms[0],shoulder,wrist,hand,paddle.quaternion),offShoulder=visual.worldToLocal(upper.localToWorld(v(-hand*.265,1.13,.08))),offWrist=offShoulder.clone().add(v(hand*.22,-.25,.30));poseArm(d.arms[1],offShoulder,offWrist,-hand,null);
+ d.sleeves=d.handedness==='left'?[d.arms[1].sleeve,d.arms[0].sleeve]:d.arms.map(a=>a.sleeve);
+ d.rigPose={...rig,workingSide:d.handedness==='left'?1:0,offSleeveAnchor:offShoulder.clone(),restCuff:rig.skinStart.clone()};root.updateMatrixWorld(true);updateBodyBatch(d.bodyBatch,visual);paddle.getWorldPosition(d.paddleFaceWorld);
+ d.animation={phase:sample.phase,action:sample.action,bodyFacing:sample.bodyFacing?{...sample.bodyFacing}:null,viewDirection:sample.viewDirection,source:'dimensional-pixel-athletes-v1',volumetric:true,bodyYaw:visual.rotation.y,jumpHeight:jump,torsoLean:upper.rotation.x,headTilt:d.head.rotation.x,frame:0,mirror:1,contactWeight,backhand:pose.backhand,planted:pose.planted,family:pose.family};
 }
 export const loadDetailedAthleteAssets=loadReferenceAthleteAssets;
 export const DetailedAthleteResources=ReferenceAthleteResources;

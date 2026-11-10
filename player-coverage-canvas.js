@@ -1,5 +1,6 @@
 import { coverageSectors, coverageWeight, getCoveragePreference, sectorOutline } from './player-coverage.js';
 import { readCoverageSnapshot } from './player-coverage-snapshot.js';
+import { updatePlayerCoverageContext } from './player-coverage-ui.js';
 
 // The retained planner is already a quarter-foot pixel canvas. Cache a small
 // field at that density; mix pigments once per pixel before compositing onto
@@ -35,7 +36,7 @@ function coverageField(ctx, sectors) {
     data[at] = weight ? srgb(red / weight) : 0;
     data[at + 1] = weight ? srgb(green / weight) : 0;
     data[at + 2] = weight ? srgb(blue / weight) : 0;
-    data[at + 3] = Math.round(255 * Math.min(.82, maximum * .60 + overlap * (.12 + hatch * .10)));
+    data[at + 3] = Math.round(255 * Math.min(.88, maximum * .70 + overlap * (.10 + hatch * .08)));
   }
   field.paint.putImageData(field.pixels, 0, 0); field.key = key;
   return field.canvas;
@@ -44,9 +45,10 @@ function coverageField(ctx, sectors) {
 /** Same world-space sectors for the retained Canvas2D planner. Draw before
  * regulation lines, net, players and ball; never over their visible pixels. */
 export function drawPlayerCoverage(ctx, board, point) {
-  if (!getCoveragePreference().enabled) return;
+  if (!getCoveragePreference().enabled) { updatePlayerCoverageContext([]); return; }
   const snapshot = readCoverageSnapshot({ board, timeSeconds: board.plays?.session?.clock.elapsed || 0, samples: board.pixelSamples || {} });
   const sectors = coverageSectors(snapshot).sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  updatePlayerCoverageContext(sectors);
   const path = sector => {
     ctx.beginPath(); sectorOutline(sector).forEach((p, i) => { const v = point(p.x, p.y); if (i) ctx.lineTo(v.x, v.y); else ctx.moveTo(v.x, v.y); }); ctx.closePath();
   };
@@ -61,9 +63,10 @@ export function drawPlayerCoverage(ctx, board, point) {
   for (const sector of sectors) {
     ctx.save(); clipHome(sector);
     const at = point(sector.position.x, sector.position.y);
-    path(sector); ctx.strokeStyle = `${sector.color}bb`; ctx.lineWidth = .7; ctx.setLineDash(sector.team === 'orange' ? [2, 2] : []); ctx.stroke();
+    path(sector); ctx.strokeStyle = `${sector.color}e6`; ctx.lineWidth = .9; ctx.setLineDash(sector.team === 'orange' ? [2, 2] : []); ctx.stroke();
     const direction = Math.atan2(sector.direction.y, sector.direction.x), hand = sector.handedness === 'right' ? 1 : -1;
-    ctx.setLineDash([]); ctx.beginPath(); ctx.arc(at.x, at.y, 2.6 * 4, direction + hand * .58 - .12, direction + hand * .58 + .12); ctx.stroke();
+    ctx.setLineDash([]); ctx.strokeStyle = '#fff7fc'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(at.x, at.y, 2.6 * 4, direction + hand * .58 - .14, direction + hand * .58 + .14); ctx.stroke();
     ctx.restore();
   }
   ctx.restore();

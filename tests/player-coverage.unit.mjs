@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { COVERAGE_MODEL, COVERAGE_COLORS, COVERAGE_PREFERENCE_KEY, sectorOutline, coverageDirection, coverageSectors, coverageWeight, sharedCoverageAt, createCoveragePreference, isCoverageSnapshot } from '../player-coverage.js';
 import { readCoverageSnapshot } from '../player-coverage-snapshot.js';
+import { coverageMiddleDescription } from '../player-coverage-ui.js';
 
 const player = (id, team, x, y, extra = {}) => ({ id, team, position: { x, y }, facing: { x: 0, y: y < 22 ? 1 : -1 }, handedness: 'right', ...extra });
 const snapshot = () => ({ version: 1, timeSeconds: 2.5, phase: 'flight', ball: { x: 10, y: 22, heightFeet: 3 },
@@ -107,9 +108,70 @@ test('direction mirrors under end changes and lateral reflection, with a continu
 });
 
 test('teammate colours are distinct and follow identity through reorder, crossings and end changes', () => {
+  assert.deepEqual(COVERAGE_COLORS, { rose: '#ff3f7d', blue: '#3a9fff', shared: '#bf7bcc' });
   const input = snapshot(); const before = coverageSectors(input);
   for (const team of ['green', 'orange']) assert.deepEqual(before.filter(s => s.team === team).map(s => s.color), [COVERAGE_COLORS.rose, COVERAGE_COLORS.blue]);
   input.players.reverse();
   for (const p of input.players) p.position = { x: 20 - p.position.x, y: 44 - p.position.y };
   for (const sector of coverageSectors(input)) assert.equal(sector.color, before.find(s => s.id === sector.id).color);
+});
+
+test('opponent-ball pair bearing is a normalized 25 percent visual blend, not a receiver or reach decision', () => {
+  const a = player('a', 'green', 6, 14, { coverageFacing: { x: 30, y: 40 }, legalReceiver: false, coveragePriority: 2 });
+  const b = player('b', 'green', 14, 14), ball = { x: 10, y: 30 };
+  const input = { ...snapshot(), players: [a, b], ball }, before = structuredClone(input);
+  const sectors = coverageSectors(input), expectedLength = Math.hypot(.6 * .75, .8 * .75 + .25);
+  assert.equal(COVERAGE_MODEL.pairBlend, .25);
+  assert.ok(Math.abs(sectors[0].direction.x - .45 / expectedLength) < 1e-12);
+  assert.ok(Math.abs(sectors[0].direction.y - .85 / expectedLength) < 1e-12);
+  assert.equal(sectors[0].legalReceiver, false); assert.equal(sectors[0].priority, 2); assert.equal(sectors[0].radius, 9);
+  assert.deepEqual(input, before);
+  assert.deepEqual(coverageDirection({ ...a, coverageFacing: { x: .6, y: .8 } }, ball, b), sectors[0].direction);
+  // Do not invent a pair from solo players, opposite physical ends or another team.
+  for (const partner of [null, { ...b, team: 'orange' }, { ...b, position: { x: 14, y: 30 } }, a]) {
+    assert.deepEqual(coverageDirection(a, ball, partner), coverageDirection(a, ball));
+  }
+  assert.deepEqual(coverageSectors({ ...input, players: [a] })[0].direction, coverageDirection(a, ball));
+  assert.deepEqual(coverageSectors({ ...input, players: [a, b, player('c', 'green', 10, 14)] })[0].direction, coverageDirection(a, ball));
+});
+
+test('pair tracking is continuous at the net, contact and crossing partners, and mirrors under end changes', () => {
+  const a = player('a', 'green', 6, 14), b = player('b', 'green', 14, 15);
+  for (const ball of [{ x: 20, y: 22 }, { x: 6, y: 14 }, { x: 6, y: 3 }]) {
+    assert.deepEqual(coverageDirection(a, ball, b), coverageDirection(a, ball), 'home-half balls retain individual tracking');
+  }
+  const leftNet = coverageDirection(a, { x: 12, y: 22 - 1e-6 }, b);
+  const rightNet = coverageDirection(a, { x: 12, y: 22 + 1e-6 }, b);
+  assert.ok(Math.hypot(leftNet.x - rightNet.x, leftNet.y - rightNet.y) < 1e-6);
+  const crossed = [-1e-6, 0, 1e-6].map(dx => coverageDirection(a, { x: 8, y: 30 }, { ...b, position: { x: a.position.x + dx, y: 19 } }));
+  assert.ok(Math.hypot(crossed[0].x - crossed[2].x, crossed[0].y - crossed[2].y) < 1e-6);
+  assert.deepEqual(crossed[1], coverageDirection(a, { x: 8, y: 30 }));
+  for (let x = -10; x <= 30; x += 4) for (let y = -5; y <= 49; y += 3) {
+    const direction = coverageDirection(a, { x, y }, b);
+    const flip = p => ({ ...p, position: { x: p.position.x, y: 44 - p.position.y } });
+    const reflect = p => ({ ...p, position: { x: 20 - p.position.x, y: p.position.y } });
+    const end = coverageDirection(flip(a), { x, y: 44 - y }, flip(b));
+    const lateral = coverageDirection(reflect(a), { x: 20 - x, y }, reflect(b));
+    assert.ok(Math.abs(direction.x - end.x) < 1e-12 && Math.abs(direction.y + end.y) < 1e-12);
+    assert.ok(Math.abs(direction.x + lateral.x) < 1e-12 && Math.abs(direction.y - lateral.y) < 1e-12);
+    assert.ok(direction.y >= Math.cos(28 * Math.PI / 180) - 1e-12);
+  }
+});
+
+test('middle context describes current net-facing left/right hands, never identity-based ownership', () => {
+  const input = snapshot(), before = structuredClone(input);
+  const describe = () => coverageMiddleDescription(coverageSectors(input));
+  assert.equal(describe(), "Green middle: left player's forehand side, right player's backhand side. Orange middle: left player's forehand side, right player's backhand side.");
+  input.players.reverse(); assert.equal(describe(), coverageMiddleDescription(coverageSectors(before)));
+  input.players.find(p => p.id === 'player1').handedness = 'left';
+  assert.ok(describe().startsWith("Green middle: left player's forehand side, right player's forehand side."));
+  for (const p of input.players.filter(p => p.team === 'green')) p.position.x = 20 - p.position.x;
+  assert.ok(describe().startsWith("Green middle: left player's backhand side, right player's backhand side."));
+  for (const p of input.players.filter(p => p.team === 'green')) p.position.y = 44 - p.position.y;
+  assert.ok(describe().startsWith("Green middle: left player's forehand side, right player's forehand side."));
+  input.players.find(p => p.id === 'player1').position.x = input.players.find(p => p.id === 'player2').position.x;
+  assert.ok(describe().startsWith('Green: partners are aligned; call the middle.'));
+  assert.equal(coverageMiddleDescription([]), 'Pair positions are unavailable; watch the ball and communicate through the middle.');
+  assert.equal(coverageMiddleDescription(coverageSectors({ ...before, players: [{ ...before.players[0], position: { x: 5, y: 30 } }, before.players[1]] })), coverageMiddleDescription([]));
+  assert.deepEqual(snapshot(), before);
 });

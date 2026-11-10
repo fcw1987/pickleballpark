@@ -33,6 +33,10 @@ export function referenceRigBrowserContract(calibration = { cuffs: null, hair: [
       return phase >= 0 && phase <= 2 ? .4 * Math.sin(phase * Math.PI / 2) ** 2 : 0;
     },
     cameraAlignment(root, camera) {
+      if(root.userData.volumetric){
+        const visual=root.userData.visual,axis=(x,y,z)=>visual.position.clone().set(x,y,z).applyQuaternion(visual.quaternion),facing=root.userData.animation.bodyFacing||{x:0,z:1},heading=visual.position.clone().set(facing.x,0,facing.z).normalize(),forward=axis(0,0,1),right=heading.clone().set(heading.z,0,-heading.x);
+        return{forwardError:forward.distanceTo(heading),headingError:forward.clone().setY(0).normalize().distanceTo(heading),rollError:axis(1,0,0).distanceTo(right),elevation:Math.atan2(forward.y,Math.hypot(forward.x,forward.z)),expectedElevation:0};
+      }
       // Compare actual transformed axes with a horizontally aligned card whose
       // elevation is independently limited to 20 degrees. A level right axis
       // additionally rejects roll, including rotations that preserve forward.
@@ -47,6 +51,13 @@ export function referenceRigBrowserContract(calibration = { cuffs: null, hair: [
         headingError: actualForward.clone().setY(0).normalize().distanceTo(heading),
         rollError: axis(root.userData.visual, 1, 0, 0).distanceTo(expectedRight),
         elevation: Math.atan2(actualForward.y, Math.hypot(actualForward.x, actualForward.z)), expectedElevation };
+    },
+    volumetricArtwork(root) {
+      const d=root.userData,batch=d.bodyBatch,position=batch?.batch.geometry.attributes.position;
+      if(!d.volumetric||!position||!batch.parts.length)return{volumetric:false,opaque:false,owned:false,rendered:false,anatomy:false};
+      const visible=[];root.traverse(mesh=>{if(!mesh.isMesh||mesh.name==='AthleteContactShadow')return;for(let p=mesh;p;p=p.parent)if(!p.visible)return;visible.push(mesh);});
+      const body=d.body.geometry.attributes.position,depth=Math.max(...Array.from({length:body.count},(_,i)=>body.getZ(i)))-Math.min(...Array.from({length:body.count},(_,i)=>body.getZ(i)));
+      return{volumetric:true,opaque:visible.every(mesh=>!mesh.material.transparent&&mesh.material.opacity===1&&mesh.material.depthTest&&mesh.material.depthWrite),owned:visible.every(mesh=>d.resources.geometries.has(mesh.geometry)&&d.resources.materials.has(mesh.material)),rendered:batch.batch.visible&&position.array.every(Number.isFinite),anatomy:depth>.18&&['left','right'].every(side=>batch.parts.some(part=>part.source===d.legs[side].sole))&&d.sleeves.every(s=>batch.parts.some(part=>part.source===s))};
     },
     artwork(root) {
       const data = root.userData, { assets } = data.resources, source = assets.sourceImage;

@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-const measured=JSON.parse(readFileSync(new URL('../fixtures/reference-sleeve-measurements.json',import.meta.url)));
 import * as THREE from '../../vendor/three.module.min.js';
-export const referenceBoneLength=.42;
+// Intentional compact chibi anatomy, independently measured from the mesh.
+export const referenceBoneLength=.34;
 export const rigEndpoints=part=>[-.5,.5].map(y=>new THREE.Vector3(0,y,0).applyMatrix4(part.outer.matrixWorld));
 export function sourcePoint(mesh,[u,v]){
  const uv=mesh.geometry.attributes.uv,pos=mesh.geometry.attributes.position,index=mesh.geometry.index,point=new THREE.Vector3(u,v,0),triangle=new THREE.Triangle(),weights=new THREE.Vector3();
@@ -19,23 +18,31 @@ export function assertReferenceRig(actor,label,camera){
  assert.ok(fore[1].distanceTo(working.hand.getWorldPosition(new THREE.Vector3()))<1e-8,`${label}: actual working hand connection`);
  assert.ok(working.hand.getWorldPosition(new THREE.Vector3()).distanceTo(d.paddle.children[2].getWorldPosition(new THREE.Vector3()))<.006,`${label}: hand holds actual grip center`);
  assert.ok(rig.wristReach<=2*referenceBoneLength+1e-8,`${label}: no bone extension (${rig.wristReach})`);
- const expectedSide=((d.handedness==='left'?-1:1)*(d.animation.frame===3?1:-1)*d.animation.mirror)<0?0:1,source=measured[d.player][d.animation.frame][expectedSide];
- assert.equal(rig.workingSide,expectedSide,`${label}: correct original source arm for handedness and view`);assert.deepEqual(rig.sourceCuffUV,source.uv,`${label}: measured source cuff, not cheek/neck substitute`);
- assert.equal(d.sleeves[expectedSide].visible,source.visible,`${label}: preserve source near/far sleeve visibility`);
+ assert.equal(d.volumetric,true,`${label}: render actual world-facing volumes`);
+ const expectedSide=d.handedness==='left'?1:0;
+ assert.equal(rig.workingSide,expectedSide,`${label}: anatomical working side cannot switch with camera view`);
+ assert.ok(d.sleeves.every(s=>s.visible||d.bodyBatch.parts.some(p=>p.source===s)),`${label}: both solid sleeves are actually rendered through the full orbit`);
  const off=d.arms[1],oa=rigEndpoints(off.parts[0]),ob=rigEndpoints(off.parts[1]);
- assert.ok(Math.abs(oa[0].distanceTo(oa[1])-Math.hypot(.09,.20))<1e-8,`${label}: fixed offhand upper arm`);
- assert.ok(Math.abs(ob[0].distanceTo(ob[1])-Math.hypot(.11,.07,.07))<1e-8,`${label}: fixed offhand forearm`);
+ assert.ok(Math.abs(world(rig.offSleeveAnchor).distanceTo(oa[1])-referenceBoneLength)<1e-8,`${label}: both arms share the same fixed anatomical upper bone`);
+ assert.ok(Math.abs(ob[0].distanceTo(ob[1])-referenceBoneLength)<1e-8,`${label}: fixed offhand forearm`);
  assert.ok(oa[1].distanceTo(ob[0])<1e-8&&ob[1].distanceTo(off.hand.getWorldPosition(new THREE.Vector3()))<1e-8,`${label}: actual offhand joints`);
- if(camera){
-  const cuff=sourcePoint(d.sleeves[rig.workingSide],rig.sourceCuffUV).project(camera),skin=upper[0].clone().project(camera);
-  // Float32 UV and position interpolation remains within .005px at 1000px.
-  assert.ok(Math.hypot(cuff.x-skin.x,cuff.y-skin.y)<1e-5,`${label}: original moving white cuff meets actual skin in projection (${Math.hypot(cuff.x-skin.x,cuff.y-skin.y)} visible=${d.sleeves[rig.workingSide].visible})`);
-  const pivot=world(rig.sleeveAnchor).project(camera),shoulder=world(rig.shoulder).project(camera);
-  assert.ok(Math.hypot(pivot.x-shoulder.x,pivot.y-shoulder.y)<1e-8,`${label}: anatomical shoulder remains sewn to source shoulder`);
+ const sleeve=d.sleeves[rig.workingSide],cuff=new THREE.Vector3(0,.5,0).applyMatrix4(sleeve.matrixWorld),pivot=new THREE.Vector3(0,-.5,0).applyMatrix4(sleeve.matrixWorld);
+ assert.ok(cuff.distanceTo(upper[0])<1e-8,`${label}: actual solid white cuff meets actual skin in 3D`);
+ assert.ok(pivot.distanceTo(world(rig.shoulder))<1e-8&&world(rig.sleeveAnchor).distanceTo(world(rig.shoulder))<1e-8,`${label}: physical sleeve remains sewn to anatomical shoulder`);
+ for(const arm of d.arms)for(const part of arm.parts){
+  assert.ok(part.outer.material.depthTest&&part.outer.material.depthWrite,`${label}: solid limb participates in depth occlusion`);
+  assert.ok(part.inner.position.distanceTo(part.outer.position)<1e-8,`${label}: limb color cannot slide toward camera`);
  }
- for(const arm of d.arms)for(const part of arm.parts){assert.equal(part.outer.material.side,THREE.BackSide,`${label}: ink hull cannot cover skin with front cap`);assert.ok(part.inner.position.distanceTo(part.outer.position)>.0349,`${label}: skin stays on view-facing surface`);}
  const position=d.body.geometry.attributes.position,base=d.baseVertices;
- for(let n=0;n<position.count;n++)if(base[n*3+1]>-.19)for(let k=0;k<3;k++)assert.ok(position.array[n*3+k]===base[n*3+k],`${label}: original head and torso geometry unchanged`);
+ assert.deepEqual(position.array,base,`${label}: rigid torso volume must not stretch to reach contact`);
  assert.ok(position.array.every(Number.isFinite)&&d.sleeves.every(s=>s.geometry.attributes.position.array.every(Number.isFinite)),`${label}: finite body and sleeve geometry`);
  assert.ok(d.paddle.getWorldPosition(new THREE.Vector3()).distanceTo(d.paddleFaceWorld)<1e-10,`${label}: contact diagnostic is the actual paddle mesh`);
+ for(const [name,side]of [['left',1],['right',-1]]){
+  const leg=d.legs[name],hip=d.upper.localToWorld(new THREE.Vector3(side*.125,.65,0)),actual=world(leg.hip);
+  assert.ok(actual.distanceTo(hip)<1e-8,`${label}: ${name} hip remains sewn to the real shifted torso`);
+  const thigh=[-.5,.5].map(y=>new THREE.Vector3(0,y,0).applyMatrix4(leg.thigh.matrixWorld)),shin=[-.5,.5].map(y=>new THREE.Vector3(0,y,0).applyMatrix4(leg.shin.matrixWorld));
+  assert.ok(thigh[0].distanceTo(hip)<1e-8&&thigh[1].distanceTo(shin[0])<1e-8,`${label}: actual thigh and shin meet at fixed connected joints`);
+  assert.ok(Math.abs(thigh[0].distanceTo(thigh[1])-.32)<1e-8,`${label}: ${name} actual thigh retains its fixed .32m length`);
+  assert.ok(Math.abs(shin[0].distanceTo(shin[1])-.31)<1e-8,`${label}: ${name} actual shin retains its fixed .31m length`);
+ }
 }

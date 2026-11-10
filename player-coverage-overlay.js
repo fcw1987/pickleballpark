@@ -2,6 +2,7 @@ import { COVERAGE_MODEL, coverageSectors, getCoveragePreference } from './player
 import { readCoverageSnapshot } from './player-coverage-snapshot.js';
 import { FEET_TO_METERS } from './three-d-core.js';
 import { COURT_LINES } from './court-geometry.js';
+import { updatePlayerCoverageContext } from './player-coverage-ui.js';
 
 // One ground plane / one draw call. Uniforms change with the shared playhead;
 // no textures, raster uploads, independent clock, or camera-relative geometry.
@@ -45,7 +46,7 @@ export function createPlayerCoverageOverlay(THREE) {
           float side=(1.-smoothstep(.018,.04,abs(angle-(halfAngle-.025))))*smoothstep(.6,1.3,distance)*(1.-smoothstep(radius-1.7,radius,distance));
           edges=max(edges,max(rim*.55,side*.35)*home);
           float hand=dot(delta,vec2(-facing.y,facing.x))*directions[i].w;
-          float tick=(1.-smoothstep(.06,.16,abs(distance-2.6)))*(1.-smoothstep(.12,.24,abs(angle-.58)))*step(.1,hand);
+          float tick=(1.-smoothstep(.08,.21,abs(distance-2.6)))*(1.-smoothstep(.14,.27,abs(angle-.58)))*step(.1,hand);
           ticks=max(ticks,tick*home);
         }
         float overlap=max(overlapA,overlapB);
@@ -55,8 +56,8 @@ export function createPlayerCoverageOverlay(THREE) {
         // Order-independent mixing: rose + blue makes violet, never white.
         // Hatching remains a second cue for shared space without colour vision.
         vec3 tint=pigment/max(weight,.001);
-        tint=mix(tint,vec3(.94,.96,1.),clamp(edges*.35+ticks*.5,0.,.45));
-        float alpha=field*.60+overlap*(.12+hatch*.10)+edges*.40+ticks*.42;
+        tint=mix(tint,vec3(.98,.97,1.),clamp(edges*.25+ticks*.65,0.,.65));
+        float alpha=field*.70+overlap*(.10+hatch*.08)+edges*.40+ticks*.48;
         // Preserve the ball's ground marker and prevent a floor mask beyond apron.
         alpha*=smoothstep(.32,.75,length(courtPoint-ballGround));
         alpha*=smoothstep(-4.,-3.,courtPoint.x)*(1.-smoothstep(23.,24.,courtPoint.x));
@@ -68,7 +69,7 @@ export function createPlayerCoverageOverlay(THREE) {
           vec2 nearest=a+ab*clamp(dot(courtPoint-a,ab)/dot(ab,ab),0.,1.);
           alpha*=smoothstep(.16,.25,length(courtPoint-nearest));
         }
-        if(alpha<.002)discard;gl_FragColor=vec4(tint,min(.82,alpha));
+        if(alpha<.002)discard;gl_FragColor=vec4(tint,min(.88,alpha));
         #include <colorspace_fragment>
       }`
   });
@@ -83,9 +84,10 @@ export function createPlayerCoverageOverlay(THREE) {
     update(context) {
       if (disposed) return;
       mesh.visible = getCoveragePreference().enabled;
-      if (!mesh.visible) { diagnostics = { enabled: false, sectors: [], source: null }; return; }
+      if (!mesh.visible) { diagnostics = { enabled: false, sectors: [], source: null }; updatePlayerCoverageContext([]); return; }
       const snapshot = readCoverageSnapshot(context), sectors = coverageSectors(snapshot);
       mesh.visible = sectors.length > 0;
+      updatePlayerCoverageContext(sectors);
       for (let i = 0; i < 4; i++) {
         const sector = sectors[i];
         if (!sector) { uniforms.origins.value[i].w = 0; continue; }
