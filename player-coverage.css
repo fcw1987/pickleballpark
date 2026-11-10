@@ -33,8 +33,8 @@ body[data-theme="dark"] .player-coverage-explanation .player-coverage-context { 
 @media(max-width:700px) {
  .builder-camera-bar { flex-wrap:wrap; }
  .player-coverage-control { width:100%; gap:6px; margin:2px 0 4px; }
- /* Let the legend wrap inside the row instead of pushing Guide below it. */
- .player-coverage-legend { flex:1 1 0; min-width:0; font-size:.6875rem; }
+ /* Wrap inside the row, keeping even three text lines within its 44px controls. */
+ .player-coverage-legend { flex:1 1 0; min-width:0; font-size:.6875rem; line-height:1.3; }
  .player-coverage-legend-full { display:none; }
  .player-coverage-legend-compact { display:inline; }
  .player-coverage-help { margin-left:auto; }

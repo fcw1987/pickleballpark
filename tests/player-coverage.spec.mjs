@@ -135,12 +135,14 @@ for (const [width, height] of [[320, 780], [390, 844], [844, 390], [1440, 900]])
   await page.evaluate(() => { document.body.dataset.theme = 'dark'; }); await expect(toggle(page)).toBeVisible();
 });
 
-test('320px coverage row stays stable across wider text metrics and repeated toggles', async ({ page }) => {
+for (const threeLineLegend of [false, true]) test(`320px coverage row stays stable across wider text metrics and repeated toggles${threeLineLegend ? ' with a three-line legend' : ''}`, async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 780 }); await open(page);
   await page.evaluate(() => document.fonts.ready);
   // Exercise the small width differences between platform system fonts without
   // relying on the host font to trigger the narrow-phone wrapping regression.
   await page.addStyleTag({ content: '.player-coverage-control { letter-spacing:1px; }' });
+  // Some platform fonts need three lines. Force that case on every host too.
+  if (threeLineLegend) await page.addStyleTag({ content: '.player-coverage-legend-compact { max-width:3em; }' });
   const dock = page.locator('.builder-reference-dock'), control = page.locator('.player-coverage-control');
   const dockHeight = (await dock.boundingBox()).height, rowHeight = (await control.boundingBox()).height;
   for (const enabled of [true, false, true, false]) {
@@ -151,7 +153,9 @@ test('320px coverage row stays stable across wider text metrics and repeated tog
     expect(guide.y).toBe(button.y); expect(button.height).toBeGreaterThanOrEqual(44);
     if (enabled) {
       const legend = page.locator('.player-coverage-legend'); await expect(legend).toBeVisible();
-      const label = await legend.boundingBox(), text = await page.locator('.player-coverage-legend-compact').boundingBox();
+      const compact = page.locator('.player-coverage-legend-compact');
+      const label = await legend.boundingBox(), text = await compact.boundingBox();
+      if (threeLineLegend) expect(text.height / await compact.evaluate(node => parseFloat(getComputedStyle(node).lineHeight))).toBeCloseTo(3, 1);
       expect(label.x).toBeGreaterThanOrEqual(button.x + button.width);
       expect(label.x + label.width).toBeLessThanOrEqual(guide.x);
       expect(text.x + text.width).toBeLessThanOrEqual(label.x + label.width);
