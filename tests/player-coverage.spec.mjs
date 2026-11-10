@@ -135,6 +135,32 @@ for (const [width, height] of [[320, 780], [390, 844], [844, 390], [1440, 900]])
   await page.evaluate(() => { document.body.dataset.theme = 'dark'; }); await expect(toggle(page)).toBeVisible();
 });
 
+test('320px coverage row stays stable across wider text metrics and repeated toggles', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 780 }); await open(page);
+  await page.evaluate(() => document.fonts.ready);
+  // Exercise the small width differences between platform system fonts without
+  // relying on the host font to trigger the narrow-phone wrapping regression.
+  await page.addStyleTag({ content: '.player-coverage-control { letter-spacing:1px; }' });
+  const dock = page.locator('.builder-reference-dock'), control = page.locator('.player-coverage-control');
+  const dockHeight = (await dock.boundingBox()).height, rowHeight = (await control.boundingBox()).height;
+  for (const enabled of [true, false, true, false]) {
+    await toggle(page).click(); await expect(toggle(page)).toHaveAttribute('aria-pressed', String(enabled));
+    expect((await dock.boundingBox()).height).toBe(dockHeight);
+    expect((await control.boundingBox()).height).toBe(rowHeight);
+    const button = await toggle(page).boundingBox(), guide = await page.getByLabel('About player coverage', { exact: true }).boundingBox();
+    expect(guide.y).toBe(button.y); expect(button.height).toBeGreaterThanOrEqual(44);
+    if (enabled) {
+      const legend = page.locator('.player-coverage-legend'); await expect(legend).toBeVisible();
+      const label = await legend.boundingBox(), text = await page.locator('.player-coverage-legend-compact').boundingBox();
+      expect(label.x).toBeGreaterThanOrEqual(button.x + button.width);
+      expect(label.x + label.width).toBeLessThanOrEqual(guide.x);
+      expect(text.x + text.width).toBeLessThanOrEqual(label.x + label.width);
+      expect(text.y).toBeGreaterThanOrEqual(button.y);
+      expect(text.y + text.height).toBeLessThanOrEqual(button.y + button.height);
+    }
+  }
+});
+
 for (const width of [320, 390]) test(`200 percent text keeps the coverage toggle and guide inside ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 844 }); await open(page); await toggle(page).click();
   await page.addStyleTag({ content: 'html{font-size:200%}' });

@@ -1,22 +1,39 @@
 // Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import {test,expect} from './helpers/offline-app.mjs';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 import { PICKLEBOARD_PLAYS } from '../play-catalog.js';
 async function open(page){await page.goto('/?workspace=planner');await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);}
 
-// Inspect the actual CanvasImageSource used by every live athlete, rather than
-// requiring HTMLImageElement-only naturalWidth on generated partition canvases.
-async function expectDecodedReferenceArtwork(page){
+// The approved renderer uses an opaque vertex-color body batch, not an atlas
+// card. Inspect the visible triangles and resource ownership in both fallback
+// and stopped-server offline flows; original atlas preservation has its own test.
+async function expectDimensionalAthletes(page){
  await page.waitForFunction(()=>pickleboard.threeD.active&&pickleboard.threeD.renderer?.info.render.calls>0);
+ await installDimensionalAudit(page);
+ await installReferenceRigContract(page);
  const result=await page.evaluate(()=>{
-  const v=pickleboard.threeD,countFrame=(image,rect)=>{const [x,y,w,h]=rect,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,x,y,w,h,0,0,w,h);const pixels=ctx.getImageData(0,0,w,h).data,bands=[0,0,0];for(let row=0;row<h;row++)for(let col=0;col<w;col++)if(pixels[(row*w+col)*4+3]>=21)bands[row<h*.45?0:row<h*.66?1:2]++;return bands;};
+  const v=pickleboard.threeD;
   return {renderCalls:v.renderer.info.render.calls,athletes:[...v.playerObjects.values()].map(actor=>{
-   const d=actor.userData,assets=d.resources.assets,image=d.body.material.map.image,source=assets.sourceImage,rect=assets.metadata.frames[d.player][d.animation.frame].rect,validSize=image.width>0&&image.height>0&&image.width===source?.naturalWidth&&image.height===source?.naturalHeight,partitionCanvas=typeof image.getContext==='function';
-   return {player:d.player,visible:actor.visible&&d.body.visible,reference:d.referenceAthlete,sourceLoaded:source instanceof HTMLImageElement&&source.complete&&source.naturalWidth>0&&source.naturalHeight>0&&new URL(source.currentSrc||source.src).pathname.endsWith('/assets/reference-athletes/athletes-armless-v2.webp'),validSize,partitionCanvas,bodyBands:partitionCanvas?countFrame(image,rect):[0,0,0],sleeves:d.sleeves.map((mesh,side)=>({visible:mesh.visible,sourceMatches:mesh.material.map.image===assets.sleeves[side],validSize:assets.sleeves[side].width===image.width&&assets.sleeves[side].height===image.height,opaque:countFrame(mesh.material.map.image,rect).reduce((a,b)=>a+b,0)})),paddleVertices:d.paddle.children[1].geometry.attributes.position.count};
+   const d=actor.userData,audit=__athleteAudit(actor),batch=d.bodyBatch.batch;
+   return {visible:actor.visible&&batch.visible,reference:d.referenceAthlete,
+    artwork:__referenceRigContract.volumetricArtwork(actor),solids:audit.solids,
+    artworkError:audit.artworkError(),vertices:batch.geometry.attributes.position.count,
+    vertexColors:batch.material.vertexColors,untextured:batch.material.map===null,
+    colorsFinite:batch.geometry.attributes.color.array.every(Number.isFinite),
+    paddleVertices:d.paddle.children[1].geometry.attributes.position.count};
   })};
  });
  expect(result.renderCalls).toBeGreaterThan(0);expect(result.athletes).toHaveLength(4);
- for(const actor of result.athletes){expect(actor).toMatchObject({visible:true,reference:true,sourceLoaded:true,validSize:true,partitionCanvas:true});for(const band of actor.bodyBands)expect(band,'nonblank original head, torso and shoes').toBeGreaterThan(1000);expect(actor.paddleVertices).toBeGreaterThan(0);for(const sleeve of actor.sleeves){expect(sleeve.sourceMatches&&sleeve.validSize).toBe(true);if(sleeve.visible)expect(sleeve.opaque,'original sleeve patch has actual alpha pixels').toBeGreaterThan(200);else expect(sleeve.opaque).toBe(0);}}
+ for(const actor of result.athletes){
+  expect(actor).toMatchObject({visible:true,reference:true,vertexColors:true,untextured:true,colorsFinite:true});
+  expect(actor.artwork).toEqual({volumetric:true,opaque:true,owned:true,rendered:true,anatomy:true});
+  expect(actor.vertices).toBeGreaterThan(0);expect(actor.vertices).toBeLessThan(10000);
+  expect(actor.solids.length).toBeGreaterThan(30);
+  for(const solid of actor.solids){expect(solid.closed,solid.name).toBe(true);expect(solid.volume,solid.name).toBeGreaterThan(1e-8);}
+  expect(actor.artworkError).toBeLessThanOrEqual(1e-6);
+  expect(actor.paddleVertices).toBeGreaterThan(0);
+ }
 }
 
 test('legacy 3D compatibility: actual opaque paddle triangles meet the unchanged ball for both hands in every Play and camera',async({page})=>{
@@ -69,7 +86,7 @@ test('legacy 3D compatibility: dimensional replay opens when raster replay asset
  await page.route('**/assets/replay/**',route=>route.abort());
  await open(page);await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
  expect(await page.evaluate(()=>Boolean(pickleboard.threeD.pixelAssets))).toBe(false);
- await expectDecodedReferenceArtwork(page);
+ await expectDimensionalAthletes(page);
  await context.close();
 });
 
@@ -83,6 +100,6 @@ test('legacy 3D compatibility: fresh cached installation opens all four solid at
  const context=await browser.newContext({serviceWorkers:'allow'}),page=await context.newPage();
  await page.goto(`${offlineApp.url}/?workspace=planner`);await page.waitForFunction(()=>navigator.serviceWorker.controller);await offlineApp.stop();await page.reload();
  await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);
- await expectDecodedReferenceArtwork(page);
+ await expectDimensionalAthletes(page);
  await page.locator('#threeDExit').click();await page.locator('#playExit').click();await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);await context.close();
 });

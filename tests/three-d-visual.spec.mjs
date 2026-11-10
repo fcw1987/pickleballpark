@@ -1,6 +1,7 @@
 // Legacy 3D compatibility coverage enters through the retained API; public UI defaults to pixel Canvas2D.
 import { expect, test } from '@playwright/test';
 import { COURT_DIMENSIONS } from '../court-geometry.js';
+import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 
 async function open3d(page) {
   await page.goto('/index.html?workspace=planner&three-d-visual=1');
@@ -11,18 +12,19 @@ async function open3d(page) {
   await expect(page.locator('#threeDViewer')).toBeVisible();
 }
 
-test('legacy 3D compatibility: visible athletes combine directional artwork with solid articulated arms and physical handedness', async ({ page }) => {
+test('legacy 3D compatibility: visible dimensional athletes use opaque batched anatomy and physical handedness', async ({ page }) => {
   await page.goto('/index.html?workspace=planner&three-d-visual-hands=1');
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => { window.pickleboard.tokens.player2.handedness = 'left'; window.pickleboard.plays.load('third-shot-drop'); });
   await page.evaluate(() => { void pickleboard.threeD.enter(); });
   await expect(page.locator('#threeDCanvas canvas')).toHaveCount(1);
+  await installReferenceRigContract(page);
   const players = await page.evaluate(() => Object.fromEntries([...window.pickleboard.threeD.playerObjects].map(([id, root]) => {
     const meshes = [];
     root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
     return [id, {
       reference: root.userData.referenceAthlete,
-      artwork: Boolean(root.userData.body.material.map && root.userData.body.material.transparent && root.userData.body.material.alphaTest > 0),
+      artwork: __referenceRigContract.volumetricArtwork(root),
       solidParts: meshes.filter(mesh => {
         mesh.geometry.computeBoundingBox(); const b = mesh.geometry.boundingBox;
         return b.max.x > b.min.x && b.max.y > b.min.y && b.max.z > b.min.z;
@@ -35,9 +37,10 @@ test('legacy 3D compatibility: visible athletes combine directional artwork with
     }];
   })));
   for (const player of Object.values(players)) {
-    expect(player).toMatchObject({ reference: true, artwork: true, worldY: 0, phase: 'ready' });
-    expect(player.meshCount).toBe(16); // Body, two original-art sleeve planes, ten arm pieces and three paddle pieces.
-    expect(player.solidParts).toBe(13);
+    expect(player).toMatchObject({ reference: true, worldY: 0, phase: 'ready' });
+    expect(player.artwork).toEqual({ volumetric:true,opaque:true,owned:true,rendered:true,anatomy:true });
+    expect(player.meshCount).toBe(6); // One dimensional body batch and five solid paddle pieces.
+    expect(player.solidParts).toBe(6);
     expect([0, 1, 2, 3]).toContain(player.frame);
     expect([-1, 1]).toContain(player.mirror);
   }
