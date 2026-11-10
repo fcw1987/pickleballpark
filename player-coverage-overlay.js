@@ -1,4 +1,4 @@
-import { COVERAGE_MODEL, COVERAGE_COLORS, coverageSectors, getCoveragePreference } from './player-coverage.js';
+import { COVERAGE_MODEL, coverageSectors, getCoveragePreference } from './player-coverage.js';
 import { readCoverageSnapshot } from './player-coverage-snapshot.js';
 import { FEET_TO_METERS } from './three-d-core.js';
 import { COURT_LINES } from './court-geometry.js';
@@ -9,9 +9,7 @@ export function createPlayerCoverageOverlay(THREE) {
   const uniforms = {
     origins: { value: Array.from({ length: 4 }, () => new THREE.Vector4()) },
     directions: { value: Array.from({ length: 4 }, () => new THREE.Vector4()) },
-    green: { value: new THREE.Color(COVERAGE_COLORS.green) },
-    orange: { value: new THREE.Color(COVERAGE_COLORS.orange) },
-    shared: { value: new THREE.Color(COVERAGE_COLORS.shared) },
+    colors: { value: Array.from({ length: 4 }, () => new THREE.Color()) },
     ballGround: { value: new THREE.Vector2() },
     courtLines: { value: COURT_LINES.map(line => new THREE.Vector4(line.from.x, line.from.y, line.to.x, line.to.y)) },
     halfAngle: { value: COVERAGE_MODEL.angleDegrees * Math.PI / 360 }
@@ -22,14 +20,15 @@ export function createPlayerCoverageOverlay(THREE) {
     vertexShader: `varying vec2 courtPoint;
       void main(){vec4 world=modelMatrix*vec4(position,1.);courtPoint=world.xz/${FEET_TO_METERS}+vec2(10.,22.);gl_Position=projectionMatrix*viewMatrix*world;}`,
     fragmentShader: `
-      uniform vec4 origins[4]; uniform vec4 directions[4]; uniform vec3 green,orange,shared;
+      uniform vec4 origins[4]; uniform vec4 directions[4]; uniform vec3 colors[4];
       uniform vec2 ballGround; uniform float halfAngle; uniform vec4 courtLines[${COURT_LINES.length}]; varying vec2 courtPoint;
       float sector(vec2 delta,vec2 facing,float radius){
         float distance=length(delta);float angle=acos(clamp(dot(delta/max(distance,.001),facing),-1.,1.));
         return (1.-smoothstep(radius-1.8,radius,distance))*(1.-smoothstep(halfAngle-.07,halfAngle,angle))*smoothstep(.16,.46,distance);
       }
       void main(){
-        float teamA=0.,teamB=0.,overlapA=0.,overlapB=0.,edges=0.,ticks=0.;
+        float teamA=0.,teamB=0.,overlapA=0.,overlapB=0.,edges=0.,ticks=0.,weight=0.;
+        vec3 pigment=vec3(0.);
         for(int i=0;i<4;i++){
           vec4 origin=origins[i];if(origin.w<.5)continue;
           vec2 delta=courtPoint-origin.xy;vec2 facing=directions[i].xy;
@@ -37,6 +36,7 @@ export function createPlayerCoverageOverlay(THREE) {
           float angle=acos(clamp(dot(delta/max(distance,.001),facing),-1.,1.));
           float home=origin.y<22. ? 1.-smoothstep(21.8,22.,courtPoint.y) : smoothstep(22.,22.2,courtPoint.y);
           float field=sector(delta,facing,radius)*home;
+          pigment+=colors[i]*field;weight+=field;
           if(origin.z<.5){overlapA=max(overlapA,min(teamA,field));teamA=max(teamA,field);}
           else{overlapB=max(overlapB,min(teamB,field));teamB=max(teamB,field);}
           float rim=(1.-smoothstep(.045,.13,abs(distance-(radius-.48))))*(1.-smoothstep(halfAngle-.06,halfAngle,angle));
@@ -52,9 +52,11 @@ export function createPlayerCoverageOverlay(THREE) {
         float field=max(teamA,teamB);
         // Fixed world hatching makes shared coverage legible without colour.
         float hatch=1.-smoothstep(.07,.14,abs(fract((courtPoint.x+courtPoint.y)/.85)-.5));
-        vec3 tint=mix(green,orange,teamB/max(teamA+teamB,.001));
-        tint=mix(tint,shared,clamp(overlap*.62+edges+ticks,0.,1.));
-        float alpha=field*.28+overlap*(.08+hatch*.22)+edges*.52+ticks*.48;
+        // Order-independent mixing: rose + blue makes violet, never white.
+        // Hatching remains a second cue for shared space without colour vision.
+        vec3 tint=pigment/max(weight,.001);
+        tint=mix(tint,vec3(.94,.96,1.),clamp(edges*.35+ticks*.5,0.,.45));
+        float alpha=field*.60+overlap*(.12+hatch*.10)+edges*.40+ticks*.42;
         // Preserve the ball's ground marker and prevent a floor mask beyond apron.
         alpha*=smoothstep(.32,.75,length(courtPoint-ballGround));
         alpha*=smoothstep(-4.,-3.,courtPoint.x)*(1.-smoothstep(23.,24.,courtPoint.x));
@@ -66,7 +68,7 @@ export function createPlayerCoverageOverlay(THREE) {
           vec2 nearest=a+ab*clamp(dot(courtPoint-a,ab)/dot(ab,ab),0.,1.);
           alpha*=smoothstep(.16,.25,length(courtPoint-nearest));
         }
-        if(alpha<.002)discard;gl_FragColor=vec4(tint,min(.58,alpha));
+        if(alpha<.002)discard;gl_FragColor=vec4(tint,min(.82,alpha));
         #include <colorspace_fragment>
       }`
   });
@@ -87,6 +89,7 @@ export function createPlayerCoverageOverlay(THREE) {
       for (let i = 0; i < 4; i++) {
         const sector = sectors[i];
         if (!sector) { uniforms.origins.value[i].w = 0; continue; }
+        uniforms.colors.value[i].set(sector.color);
         uniforms.origins.value[i].set(sector.position.x, sector.position.y, sector.team === 'orange' ? 1 : 0, 1);
         uniforms.directions.value[i].set(sector.direction.x, sector.direction.y, sector.radius, sector.handedness === 'right' ? 1 : -1);
       }

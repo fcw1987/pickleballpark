@@ -2,8 +2,9 @@
  * Coordinates are court feet (+y toward the orange baseline), never screen axes.
  * The angle and radius are design choices, not measured athletic capabilities.
  */
-export const COVERAGE_MODEL = Object.freeze({ version: 1, angleDegrees: 116, radiusFeet: 9, featherFeet: 1.8 });
-export const COVERAGE_COLORS = Object.freeze({ green: '#96f0db', orange: '#ffd49b', shared: '#fff8e4' });
+export const COVERAGE_MODEL = Object.freeze({ version: 2, angleDegrees: 116, radiusFeet: 9, featherFeet: 1.8, maxTurnDegrees: 28 });
+// Teammate colours, not jersey colours. Their equal linear-light mix is violet.
+export const COVERAGE_COLORS = Object.freeze({ rose: '#ff6a80', blue: '#69a9ff', shared: '#c68ed0' });
 export const COVERAGE_PREFERENCE_KEY = 'pickleboard-player-coverage-v1';
 const finitePoint = p => p && Number.isFinite(p.x) && Number.isFinite(p.y);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -13,22 +14,25 @@ export function unitDirection(value, fallback = { x: 0, y: 1 }) {
   return length > 1e-8 ? { x: value.x / length, y: value.y / length } : { ...fallback };
 }
 
-/** Turn gently toward the actual ball from strategic facing. A nearby contact
- * cannot flip the guide behind the player. Stateless => reverse seeks agree.
- * A future provider may supply an already ball-aware coverageFacing directly.
+/** Ball-aware, but always net-facing on the player's physical court half.
+ * Provider facing is a desired direction, never permission to turn sideways.
+ * 28° turn + 58° half-width keeps the entire fan in front (at most 86°).
+ * A positive forward floor avoids a discontinuity at a directly rearward ball;
+ * easing at contact avoids a sudden turn as the ball crosses the player's feet.
+ * No state => reverse seeks, camera orbit and side flips agree.
  */
 export function coverageDirection(player, ball) {
-  const base = unitDirection(player.facing, { x: 0, y: player.position.y < 22 ? 1 : -1 });
-  if (finitePoint(player.coverageFacing)) return unitDirection(player.coverageFacing, base);
-  if (!finitePoint(ball)) return base;
-  const delta = { x: ball.x - player.position.x, y: ball.y - player.position.y };
-  const distance = Math.hypot(delta.x, delta.y);
-  if (distance < .01) return base;
-  const target = unitDirection(delta);
-  // A ball passing directly behind the player must not jump between ±pi.
-  const angle = Math.atan2(base.x * target.y - base.y * target.x, Math.max(.35, base.x * target.x + base.y * target.y));
-  const turn = clamp(angle, -Math.PI / 5, Math.PI / 5) * .62 * clamp(distance / 3, 0, 1);
-  return { x: base.x * Math.cos(turn) - base.y * Math.sin(turn), y: base.x * Math.sin(turn) + base.y * Math.cos(turn) };
+  const forward = player.position.y < 22 ? 1 : -1;
+  const net = { x: 0, y: forward };
+  const delta = finitePoint(ball) ? { x: ball.x - player.position.x, y: ball.y - player.position.y } : null;
+  const distance = delta ? Math.hypot(delta.x, delta.y) : Infinity;
+  const desired = finitePoint(player.coverageFacing) && Math.hypot(player.coverageFacing.x, player.coverageFacing.y) > 1e-8
+    ? player.coverageFacing : delta || player.facing;
+  const target = unitDirection(desired, net);
+  const limit = COVERAGE_MODEL.maxTurnDegrees * Math.PI / 180;
+  const turn = clamp(Math.atan2(target.x, Math.max(.35, forward * target.y)), -limit, limit)
+    * clamp(distance / 1.5, 0, 1);
+  return { x: Math.sin(turn), y: forward * Math.cos(turn) };
 }
 
 /** Validate the versioned read-only seam. Unknown versions fail closed. */
@@ -42,8 +46,13 @@ export function isCoverageSnapshot(snapshot) {
 
 export function coverageSectors(snapshot) {
   if (!isCoverageSnapshot(snapshot)) return [];
+  // Stable identity ordering keeps colours with players through crossing,
+  // camera changes and providers that return players in a different order.
+  const teammates = team => snapshot.players.filter(p => p.team === team).map(p => p.id).sort();
+  const slots = Object.fromEntries(['green', 'orange'].flatMap(team => teammates(team).map((id, i) => [id, i % 2])));
   return snapshot.players.map(player => ({
-    id: player.id, team: player.team, position: { ...player.position },
+    id: player.id, team: player.team, colorSlot: slots[player.id],
+    color: slots[player.id] === 0 ? COVERAGE_COLORS.rose : COVERAGE_COLORS.blue, position: { ...player.position },
     direction: coverageDirection(player, snapshot.ball), handedness: player.handedness,
     halfAngle: COVERAGE_MODEL.angleDegrees * Math.PI / 360, radius: COVERAGE_MODEL.radiusFeet,
     legalReceiver: player.legalReceiver ?? null, priority: player.coveragePriority ?? null

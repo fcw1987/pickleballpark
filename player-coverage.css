@@ -6,7 +6,7 @@
 .player-coverage-state { font-size:.6875rem; text-transform:uppercase; letter-spacing:.05em; font-weight:750; }
 .player-coverage-legend { display:flex; align-items:center; gap:7px; color:#4b5e63; }
 .player-coverage-legend[hidden] { display:none; }
-.player-coverage-legend::before,.player-coverage-key-shared::before { content:''; width:19px; height:14px; border:1px solid #879b91; background:repeating-linear-gradient(135deg,#faf4db 0 3px,#93aa9d 3px 4px); border-radius:3px; }
+.player-coverage-legend::before,.player-coverage-key-shared::before { content:''; width:19px; height:14px; border:1px solid #9070ae; background:repeating-linear-gradient(135deg,#c68ed0 0 3px,#8661a0 3px 4px); border-radius:3px; }
 .player-coverage-help { position:relative; }
 .player-coverage-help>summary { display:flex; align-items:center; min-height:44px; padding:6px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; list-style:none; }
 .player-coverage-explanation { position:absolute; z-index:150; bottom:calc(100% + 10px); left:0; width:min(340px,calc(100vw - 48px)); max-height:min(460px,60vh); overflow:auto; padding:16px; border:1px solid #748b91; border-radius:12px; background:#fffdf2; color:#283f50; box-shadow:0 8px 30px #172a3e30; font-size:.8125rem; line-height:1.5; }
@@ -15,8 +15,8 @@
 .player-coverage-explanation small { display:block; color:#53676b; line-height:1.4; }
 .player-coverage-key { display:flex; flex-wrap:wrap; gap:8px 14px; margin:12px 0; }
 .player-coverage-key>span { display:flex; align-items:center; gap:6px; white-space:nowrap; }
-.player-coverage-key-green::before,.player-coverage-key-orange::before { content:''; width:19px; height:14px; border:2px solid #378a78; border-radius:3px; background:#d1eee1; }
-.player-coverage-key-orange::before { border-color:#a46c37; border-style:dashed; background:#ffedcf; }
+.player-coverage-key-rose::before,.player-coverage-key-blue::before { content:''; width:19px; height:14px; border:1px solid #bd4c78; border-radius:3px; background:#ff6a80; }
+.player-coverage-key-blue::before { border-color:#497ec4; background:#69a9ff; }
 body[data-theme="dark"] .player-coverage-control { color:#e0eade; }
 body[data-theme="dark"] .player-coverage-toggle { background:#29434a; color:#f1f4e7; border-color:#66868b; }
 body[data-theme="dark"] .player-coverage-toggle[aria-pressed="true"] { background:#315f59; border-color:#8ac9b6; }

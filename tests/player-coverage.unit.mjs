@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { COVERAGE_MODEL, COVERAGE_PREFERENCE_KEY, coverageDirection, coverageSectors, coverageWeight, sharedCoverageAt, createCoveragePreference, isCoverageSnapshot } from '../player-coverage.js';
+import { COVERAGE_MODEL, COVERAGE_COLORS, COVERAGE_PREFERENCE_KEY, sectorOutline, coverageDirection, coverageSectors, coverageWeight, sharedCoverageAt, createCoveragePreference, isCoverageSnapshot } from '../player-coverage.js';
 import { readCoverageSnapshot } from '../player-coverage-snapshot.js';
 
 const player = (id, team, x, y, extra = {}) => ({ id, team, position: { x, y }, facing: { x: 0, y: y < 22 ? 1 : -1 }, handedness: 'right', ...extra });
@@ -20,15 +20,16 @@ test('116 degree pedagogical sectors are deterministic, finite and never mutate 
   assert.equal(left.handedness, 'left'); assert.deepEqual(left.direction, sectors[0].direction); assert.equal(left.radius, sectors[0].radius);
 });
 
-test('ball tracking is bounded by strategic facing and continuous behind a player', () => {
+test('ball tracking stays net-facing, including provider overrides and rear balls', () => {
   const p = player('a', 'green', 10, 10);
   assert.ok(coverageDirection(p, { x: 20, y: 20 }).x > 0);
   assert.ok(coverageDirection(p, { x: 0, y: 20 }).x < 0);
   assert.deepEqual(coverageDirection(p, p.position), p.facing);
-  for (let x = -30; x <= 50; x += 5) for (let y = -30; y <= 50; y += 5) assert.ok(coverageDirection(p, { x, y }).y > .9);
+  for (let x = -30; x <= 50; x += 5) for (let y = -30; y <= 50; y += 5) assert.ok(coverageDirection(p, { x, y }).y >= Math.cos(28 * Math.PI / 180) - 1e-12);
   const a = coverageDirection(p, { x: 9.999, y: 0 }), b = coverageDirection(p, { x: 10.001, y: 0 });
   assert.ok(Math.hypot(a.x - b.x, a.y - b.y) < .001);
-  assert.deepEqual(coverageDirection({ ...p, coverageFacing: { x: 1, y: 0 } }, { x: 0, y: 0 }), { x: 1, y: 0 });
+  const overridden = coverageDirection({ ...p, coverageFacing: { x: 1, y: 0 } }, { x: 0, y: 0 });
+  assert.ok(overridden.x > 0 && overridden.y > .88);
 });
 
 test('shared coverage requires two same-team sectors; overlap is not a receiver assignment', () => {
@@ -71,4 +72,44 @@ test('snapshot adapter samples live physical world coordinates without guessing 
   board.coverageSnapshotProvider = () => snapshot(); assert.deepEqual(readCoverageSnapshot(input), snapshot());
   board.coverageSnapshotProvider = () => ({ ...snapshot(), version: 99 }); assert.equal(readCoverageSnapshot(input), null);
   board.coverageSnapshotProvider = () => { throw Error('unavailable'); }; assert.equal(readCoverageSnapshot(input), null);
+});
+
+
+test('all facing sources are bounded and the entire fan stays in front on both physical sides', () => {
+  for (const y of [-2, 1, 14, 21.99, 22.01, 30, 43, 46]) {
+    const p = player('a', y < 22 ? 'orange' : 'green', 5, y); // Teams may have swapped ends.
+    const forward = y < 22 ? 1 : -1;
+    for (const facing of [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -forward }, { x: 0, y: 0 }]) {
+      for (const ball of [{ x: 15, y }, { x: -8, y: 22 }, { x: 28, y: 22 }, { x: 5, y: y - forward * 5 }, p.position]) {
+        for (const extra of [{ facing }, { coverageFacing: facing }]) {
+          const input = { ...snapshot(), players: [{ ...p, ...extra }], ball };
+          const sector = coverageSectors(input)[0];
+          assert.ok(forward * sector.direction.y >= Math.cos(28 * Math.PI / 180) - 1e-12);
+          for (const point of sectorOutline(sector)) assert.ok(forward * (point.y - y) >= -1e-12);
+          assert.equal(coverageWeight(sector, { x: 15, y }), 0, 'no cone aimed along the teammate line');
+        }
+      }
+    }
+  }
+});
+
+test('direction mirrors under end changes and lateral reflection, with a continuous contact transition', () => {
+  const p = player('a', 'green', 6, 14);
+  for (let x = -10; x <= 30; x += 2) for (let y = -5; y <= 49; y += 3) {
+    const a = coverageDirection(p, { x, y });
+    const flip = coverageDirection({ ...p, position: { x: 6, y: 30 } }, { x, y: 44 - y });
+    const lateral = coverageDirection({ ...p, position: { x: 14, y: 14 } }, { x: 20 - x, y });
+    assert.ok(Math.abs(a.x - flip.x) < 1e-12 && Math.abs(a.y + flip.y) < 1e-12);
+    assert.ok(Math.abs(a.x + lateral.x) < 1e-12 && Math.abs(a.y - lateral.y) < 1e-12);
+  }
+  const left = coverageDirection(p, { x: 5.99999, y: 14 }), right = coverageDirection(p, { x: 6.00001, y: 14 });
+  assert.ok(Math.hypot(left.x - right.x, left.y - right.y) < .0001);
+});
+
+test('teammate colours are distinct and follow identity through reorder, crossings and end changes', () => {
+  const input = snapshot(); const before = coverageSectors(input);
+  for (const team of ['green', 'orange']) assert.deepEqual(before.filter(s => s.team === team).map(s => s.color), [COVERAGE_COLORS.rose, COVERAGE_COLORS.blue]);
+  input.players.reverse();
+  for (const p of input.players) p.position = { x: 20 - p.position.x, y: 44 - p.position.y };
+  for (const sector of coverageSectors(input)) assert.equal(sector.color, before.find(s => s.id === sector.id).color);
 });

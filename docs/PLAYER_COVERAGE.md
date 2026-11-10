@@ -6,9 +6,13 @@ Coverage Guides: it never changes a player route, authored position, manual
 pin, saved document, import/export payload, or undo history.
 
 Four translucent 116-degree sectors originate at the actual rendered players.
-Each begins from world-space strategic facing and turns gently toward the
-current ball. The outer edge fades, green has a solid perimeter, orange a
-broken perimeter, and same-team intersections use fixed diagonal hatching.
+Each tracks the ball with a maximum 28-degree turn from the net-facing axis
+on its physical court half. Together with the 58-degree half-width, that keeps
+the entire fan in front, even when a provider faces sideways or rearward.
+Teammates have stable rose and blue colours; their overlap mixes to violet
+in linear light, independent of draw order. The outer edge fades, green jerseys
+have a solid perimeter, orange jerseys a broken perimeter, and same-team
+intersections retain fixed diagonal hatching as a non-colour cue.
 The hatching means **shared space — call the ball**, not both players should
 chase it. A short inner mark indicates the paddle-hand side; left-handedness
 mirrors that mark without claiming a universal backhand disadvantage.
@@ -19,8 +23,9 @@ Court markings are masked out. The depth-tested floor sits below visible
 athletes and the ball, with an additional clear area around the ball's ground
 position. One plane and one shader draw all four sectors and both overlaps.
 There are no coverage textures, offscreen render passes, or per-frame GPU
-allocations. The retained Canvas2D planner draws equivalent sectors before
-court lines and actors.
+allocations. The retained Canvas2D planner caches a small quarter-foot pixel field with
+the same palette and weighted mixing, then draws its sectors before court lines
+and actors. The cache is reused until sector geometry or metadata changes.
 
 ## Meaning and evidence
 
@@ -84,15 +89,16 @@ There are at most four unique player IDs. `version`, finite sample time, ball
 and player coordinates, team and handedness are validated. Missing/invalid
 provider output, unknown versions and provider exceptions hide coverage for
 that sample and do not interrupt the app. Provider facts are not mutated.
-`coverageFacing`, when provided, bypasses the visual ball-facing blend. This
-allows the engine to own the final ball-aware direction. Legality and priority
+`coverageFacing`, when provided, supplies the desired ball-aware direction.
+The view still applies its net-facing limit and a short contact-distance ease;
+it never uses provider facing as an unrestricted visual direction. Legality and priority
 are retained as separate metadata; sector membership never assigns a receiver.
 
 The builder installs `createRallyCoverageProvider` with a live getter for its
 current document and the board's installed play/timeline. Actual rendered actor
 samples override token positions. This follows imports, edits, Undo and reloads
-without retaining a stale source, and uses the engine's final ball-aware facing
-without a second visual turn. Leaving the builder returns no tactical snapshot
+without retaining a stale source, and bounds the engine's desired ball-aware facing
+without modifying the tactical snapshot. Leaving the builder returns no tactical snapshot
 for the unrelated planner state; returning resumes the current builder source.
 
 When no provider is installed, the adapter reads already-rendered positions,
@@ -140,3 +146,9 @@ and compares real framebuffer pixels at court-marking, player and ball probes
 with coverage off/on. Screenshots and clips are ignored build evidence, not
 publication assets. Full combined-branch Quality checks remain an integration
 gate, independent of this track's focused results.
+
+## Coverage colour and facing revision
+
+The colour/facing revision advances the source cache from v41 to v42. It does
+not change the snapshot v1 contract, player routes, team assignments, actor
+facing, legal receivers, or saved play data. The drawing model is version 2.

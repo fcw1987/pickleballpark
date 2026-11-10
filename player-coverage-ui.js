@@ -18,13 +18,13 @@ export function createPlayerCoverageControl() {
   const panel = document.createElement('div'); panel.className = 'player-coverage-explanation';
   const title = document.createElement('strong'); title.textContent = 'Room to respond';
   const description = document.createElement('p'); description.id = 'playerCoverageDescription';
-  description.textContent = 'The sectors follow each player’s position, facing and the ball. They suggest space to cover, not a guaranteed reach or a legal shot.';
+  description.textContent = 'The sectors follow each player and the ball, with a limited turn toward the net. They suggest space to cover, not a guaranteed reach or a legal shot.';
   const key = document.createElement('div'); key.className = 'player-coverage-key';
-  for (const [team, text] of [['green', 'Green · solid edge'], ['orange', 'Orange · broken edge'], ['shared', 'Shared · call it']]) {
+  for (const [team, text] of [['rose', 'Teammate 1 · rose'], ['blue', 'Teammate 2 · blue'], ['shared', 'Violet · shared area']]) {
     const item = document.createElement('span'); item.className = `player-coverage-key-${team}`; item.textContent = text; key.append(item);
   }
-  const note = document.createElement('p'); note.textContent = 'The faded edge needs more movement and time. The small inner mark shows the paddle-hand side; backhands remain available. In shared space, one player takes the ball while the partner covers.';
-  const scope = document.createElement('small'); scope.textContent = 'Illustrative 116° / 9 ft guide. Ball height, pace, balance and bounce / kitchen rules still matter.';
+  const note = document.createElement('p'); note.textContent = 'Rose and blue blend to violet where teammates overlap. Green jerseys have solid edges; orange jerseys have broken edges. The faded edge needs more movement and time. The small inner mark shows the paddle-hand side; backhands remain available. In shared space, one player takes the ball while the partner covers.';
+  const scope = document.createElement('small'); scope.textContent = 'Illustrative 116° / 9 ft guide, turning at most 28° from net-facing. Ball height, pace, balance and bounce / kitchen rules still matter.';
   panel.append(title, description, key, note, scope); help.append(summary, panel); root.append(button, legend, help);
   const sync = () => { button.setAttribute('aria-pressed', String(preference.enabled)); state.textContent = preference.enabled ? 'On' : 'Off'; legend.hidden = !preference.enabled; root.dataset.enabled = String(preference.enabled); };
   button.addEventListener('click', event => {
