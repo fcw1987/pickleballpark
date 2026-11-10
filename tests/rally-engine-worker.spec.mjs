@@ -62,7 +62,11 @@ test('module-worker points match Node and repeat independently of progress obser
         ['advanced', { seed: 7 }],
         ['pro-orange-left', { seed: 19, players: players('pro', true), service: { server: 'player3', receiver: 'player1', court: 'left' } }],
         ['intermediate-green-left', { seed: 31, players: players('intermediate', false), service: { server: 'player1', receiver: 'player3', court: 'left' } }],
-        ['dink-popup-volley', { seed: 1074, players: rightPlayers('advanced'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 6 } }],
+        // Movement v2 preserves this seed as a transition reset after a weak
+        // drive. Keep its parity coverage and use an independently reviewed
+        // current popup for the separate volley opportunity assertion.
+        ['transition-reset', { seed: 1074, players: rightPlayers('advanced'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 6 } }],
+        ['dink-popup-volley', { seed: 1136, players: rightPlayers('pro'), service: { server: 'player1', receiver: 'player3', court: 'right' }, options: { maxShots: 25 } }],
         ['dink-popup-groundstroke', { seed: 1002, players: rightPlayers('pro'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 15 } }]
     ];
     for (const [label, input] of inputs) {
@@ -70,8 +74,22 @@ test('module-worker points match Node and repeat independently of progress obser
         if (label.startsWith('dink-popup-')) {
             const contact = expected.result.decisions.at(-1).situation;
             expect(contact.attackable).toBe(true);
+            expect(contact.affordances.attack).toBe(true);
+            expect(contact.contactSelection.evidence.chosen.audit).toMatchObject({ legal: true, routeValid: true, feetValid: true });
+            expect(expected.result.decisions.at(-2).resolution.physicalTransformation.dinkPopup.receiverOpportunity)
+                .toMatchObject({ status: 'unestablished', scope: 'at-delivery' });
             expect(contact.contactKind).toBe(label === 'dink-popup-volley' ? 'volley' : 'groundstroke');
             expect(expected.result.document.generation.policyVersion).toBe('rally-policy-v3');
+        }
+        if (label === 'transition-reset') {
+            const previous = expected.result.decisions.at(-3), reset = expected.result.decisions.at(-2), next = expected.result.decisions.at(-1);
+            expect(previous.chosen.family).toBe('drive');
+            expect(previous.execution.quality).toBe('attackable');
+            expect(reset.situation.opponentFormation).toBe('split');
+            expect(reset.chosen.family).toBe('reset');
+            expect(reset.resolution.physicalTransformation.dinkPopup).toBeUndefined();
+            expect(next.situation.attackable).toBe(false);
+            expect(next.situation.contactSelection.evidence.chosen.audit).toMatchObject({ legal: true, routeValid: true, feetValid: true });
         }
         const { createRallySimulator } = await import('../rally-engine.js');
         let denseYields = 0, sparseYields = 0;
