@@ -254,13 +254,13 @@ export function resolveDeliveredFlightV1({ candidate, contact, team, execution, 
   if (!['green', 'orange'].includes(team) || !candidate?.family || !['error', 'attackable', 'excellent', 'low', 'neutral'].includes(execution?.quality)) throw new TypeError('Delivered flight requires a candidate, team and execution quality.');
   const preferred = applied.preferredFlight ?? Object.fromEntries(['speedMph', 'apexFeet', 'launchVerticalFeetPerSecond']
     .filter(key => Number.isFinite(applied.physics?.[key])).map(key => [key, applied.physics[key]]));
-  // A fixed wide execution can miss outside a post without becoming an ATP
+  // A fixed long or wide execution can miss outside a post without becoming an ATP
   // tactical selection. Nominal route admission remains strict; only delivered
   // geometry follows the exact sampled contact-to-target chord.
   const errorReason = execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null;
   const fraction = (22 - contact.y) / (applied.target.y - contact.y);
   const netX = contact.x + (applied.target.x - contact.x) * fraction;
-  const incidentalAroundPost = route === 'over-net' && errorReason === 'wide' && fraction > 0 && fraction < 1
+  const incidentalAroundPost = route === 'over-net' && ['long', 'wide'].includes(errorReason) && fraction > 0 && fraction < 1
     && (netX < -1.25 - PHYSICS_V2.ballRadiusFeet || netX > 21.25 + PHYSICS_V2.ballRadiusFeet);
   const deliveredRoute = incidentalAroundPost ? 'around-the-post' : route;
   const planner = planRallyFlightV1({ from: contact, target: applied.target, family: candidate.family, intent, style,

@@ -81,7 +81,7 @@ test('historical automatic advances and authored movement retain their existing 
 });
 
 test('Auto Shading preserves generated doubles spacing and repeats from the base plan without compounding', async () => {
-  let safeShadingApplied = false, fallbackUsed = false;
+  let safeShadingApplied = false;
   for (const length of [7, 60, 99]) for (const seed of [0, 42, 1234]) {
     const proposal = await proposeRandomRally({length, seed});
     assert.equal(proposal.ok, true, proposal.reason);
@@ -118,7 +118,6 @@ test('Auto Shading preserves generated doubles spacing and repeats from the base
       }
     }
     if (assisted.findings.some(item=>item.message.startsWith('Suggested coverage was not applied'))) {
-      fallbackUsed = true;
       assert.deepEqual(assisted.play.steps, base.play.steps, 'unsafe extra shading keeps the original recovery');
       assert.ok(assisted.coverage.every(item=>item.explanation.includes('Suggested coverage only') && !item.explanation.includes('Applied to')));
     } else if (JSON.stringify(assisted.play.steps)!==JSON.stringify(base.play.steps)) safeShadingApplied = true;
@@ -127,7 +126,9 @@ test('Auto Shading preserves generated doubles spacing and repeats from the base
       for (const id of ids) assert.equal(assisted.play.steps[index].positions[id].y,base.play.steps[index].positions[id].y);
     }
   }
-  assert.equal(fallbackUsed,true,'unsafe extra coverage falls back to guides');
+  // Coverage-positioning's explicit unsafe authored route verifies compiler
+  // fallback independently of suggestion pre-clamping. This safe corpus need
+  // not produce a rejected adjustment after the coverage heuristic improves.
   assert.equal(safeShadingApplied,true,'safe lateral shading remains available');
 });
 

@@ -16,7 +16,7 @@ function segment({ from = positions, to = positions, hitter = 'player1', feet = 
     shotSemantics: { playerId: hitter, contact: { feet } }, model2Momentum: momentum };
 }
 
-test('a later real contact extends all unpinned tactical routes from retained goals and pins the exact arriving hitter', () => {
+test('a later real contact extends permitted tactical approaches, holds defensive depth and pins the exact arriving hitter', () => {
   const from = structuredClone(positions); from.player4.y = 41;
   const feet = [{ x: 4.58, y: 3 }, { x: 5.42, y: 3 }];
   const plan = planMovementV1({ positions: from, players, hitter: 'player1', contact: from.player1, target: { x: 10, y: 35 },
@@ -27,11 +27,12 @@ test('a later real contact extends all unpinned tactical routes from retained go
   const arrival = { id: 'player3', stance: { x: 5.2, y: 40.5 } };
   const longer = replanMovementV1({ plan, segment: pending, players, durationSeconds: 1.5, arrival });
   assert.equal(longer.ok, true);
-  for (const id of ['player1', 'player2', 'player4']) {
+  for (const id of ['player1', 'player2']) {
     assert.ok(distance(from[id], longer.positions[id]) > distance(from[id], plan.positions[id]) + 1);
     assert.ok(distance(longer.positions[id], plan.diagnostics.goals[id]) < distance(plan.positions[id], plan.diagnostics.goals[id]));
   }
   assert.deepEqual(longer.positions.player3, arrival.stance);
+  assert.deepEqual(longer.positions.player4, from.player4, 'a longer incoming drive is not itself an approach opportunity');
   const actual = segment({ from, to: longer.positions, feet, duration: 1.5 });
   assert.equal(inspectGeneratedMovementV1(actual).valid, true);
   assert.equal(inspectGeneratedSpacingV1(actual).valid, true);
@@ -48,7 +49,8 @@ test('an earlier real contact shrinks the retained tactical routes while impossi
   const shorter = replanMovementV1({ plan, segment: pending, players, durationSeconds: .25,
     arrival: { id: 'player3', stance: { x: 5, y: 40.5 } } });
   assert.equal(shorter.ok, true);
-  for (const id of ['player1', 'player2', 'player4']) assert.ok(distance(from[id], shorter.positions[id]) < distance(from[id], plan.positions[id]));
+  for (const id of ['player1', 'player2']) assert.ok(distance(from[id], shorter.positions[id]) < distance(from[id], plan.positions[id]));
+  assert.deepEqual(shorter.positions.player4, from.player4, 'defensive depth stays ready rather than inheriting an opening return role');
   const actual = segment({ from, to: shorter.positions, feet, duration: .25 });
   assert.equal(inspectGeneratedMovementV1(actual).valid, true);
   assert.equal(inspectGeneratedSpacingV1(actual).valid, true);

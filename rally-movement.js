@@ -3,7 +3,7 @@
 import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
 import { teamForPlayer } from './rally-state.js';
 
-export const MOVEMENT_VERSION = 'rally-movement-v1';
+export const MOVEMENT_VERSION = 'rally-movement-v2';
 // Supported grounded paddle reach for this generator, not an official rule.
 export const GROUNDED_CONTACT_HEIGHT_FEET = 8.5;
 export const GENERATOR_MOVEMENT = Object.freeze({ peakFeetPerSecond: 18, halfStanceFeet: .42, lineOffsetFeet: .75 });
@@ -193,23 +193,37 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
   if (distance(stance, contact) > 3 + EPS) return freeze({ ok: false, reason: 'The explicit contact stance exceeds paddle reach.' });
   const origins = Object.fromEntries(IDS.map(id => [id, id === hitter ? stance : xy(positions[id])]));
   const goals = {}, durations = {}, destinations = {}, diagnostics = [];
-  const softAdvance = ['drop', 'third-shot-drop', 'reset', 'block', 'cross-court-dink', 'middle-dink', 'straight-dink', 'backhand-dink', 'dink'].includes(intent || family);
+  const softAdvance = ['drop', 'reset', 'dink'].includes(family) || !family
+    && ['drop', 'third-shot-drop', 'reset', 'block', 'cross-court-dink', 'middle-dink', 'straight-dink', 'backhand-dink', 'dink'].includes(intent);
   // A controlled drive can create an approach opportunity too. This is a
   // paired tactical goal, not a forced line position or a fifth-shot choice.
   const controlled = quality !== 'error' && quality !== 'attackable';
   const driveAdvance = controlled && (family === 'drive' || ['drive', 'third-shot-drive'].includes(intent));
   const firmVolleyAdvance = controlled && pace === 'firm' && (family === 'volley' || ['volley', 'firm-volley'].includes(intent));
+  const openRally = opening === 'midrally' || index >= 2;
   for (const team of ['green', 'orange']) {
     const pair = IDS.filter(id => teamForPlayer(id, players) === team).sort((a, b) => positions[a].x - positions[b].x || a.localeCompare(b));
     const shift = clamp((target.x - 10) * (team === hittingTeam ? .18 : .28), -2, 2);
-    const controlledApproach = team === hittingTeam && index >= 2 && (driveAdvance || firmVolleyAdvance);
+    const pairInTransition = pair.some(id => team === 'green' ? origins[id].y < 12.25 : origins[id].y > 31.75);
+    const controlledApproach = team === hittingTeam && openRally && (driveAdvance || firmVolleyAdvance);
     if (controlledApproach) diagnostics.push({ code: driveAdvance ? 'controlled-drive-approach' : 'firm-volley-approach', team });
     for (const [lane, id] of pair.entries()) {
       const from = origins[id], near = team === 'green', waiting = opening === 'serve' && index < 2 && team === servingTeam;
       const receiverWaiting = opening === 'serve' && index === 0 && id === service.receiver;
-      const receivingApproach = team !== servingTeam && index >= 1;
-      const ownApproach = team === hittingTeam && quality !== 'error' && (receivingApproach || index >= 2 && (controlled && softAdvance || driveAdvance || firmVolleyAdvance));
-      const shouldAdvance = !waiting && !receiverWaiting && (ownApproach || team !== hittingTeam && receivingApproach || id !== service.receiver && index === 0 && team !== servingTeam);
+      // Receiving is an opening role, not a permanent right to advance. Once
+      // the return is over, either pair earns progress behind its own controlled
+      // shot. A defender may close behind an observed soft incoming ball, but
+      // holds ready depth against a fast attack. The contact planner still
+      // independently finds the actual ball. This also makes midrally starts
+      // behave like an open rally from their first represented contact.
+      const returningNow = opening === 'serve' && index === 1 && team !== servingTeam;
+      const ownApproach = team === hittingTeam && quality !== 'error' && (returningNow
+        || openRally && (controlled && softAdvance || driveAdvance || firmVolleyAdvance));
+      const receiverPartnerSetup = opening === 'serve' && index === 0 && team !== servingTeam && id !== service.receiver;
+      // An established kitchen pair stays balanced rather than creeping to an
+      // exact coordinate on every dink. Only a transitional pair needs to close.
+      const incomingSoftApproach = team !== hittingTeam && pairInTransition && openRally && softAdvance && quality !== 'error';
+      const shouldAdvance = !waiting && !receiverWaiting && (ownApproach || incomingSoftApproach || receiverPartnerSetup);
       const lineY = near ? 14.25 : 29.75;
       let y = shouldAdvance ? lineY : from.y;
       if (family === 'lob' && team !== hittingTeam) y = near ? Math.min(from.y, 9) : Math.max(from.y, 35);

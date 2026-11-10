@@ -427,27 +427,25 @@ export function recompileAssistedDocument(document, compiled, assistedPlay, cove
       }
     }
     const recipe = document.shots.find(shot => shot.id === segment.step.id);
-    if (automaticTactics(recipe)) {
-      const original = compiled.timeline.segments.find(item => item.step.id === segment.step.id);
-      for (const id of PLAYER_IDS) {
-        const peak = automaticActorPeakSpeed(segment, id, document.players[id].handedness);
-        const originalPeak = automaticActorPeakSpeed(original, id, document.players[id].handedness);
-        if (peak > 18 + 1e-8 && peak > originalPeak + 1e-9) {
-          findings.push(finding('feasibility', 'warning', recipe.id, 'Suggested coverage was not applied because it would exceed the automatic footwork limit of 18 ft/s during eased playback.'));
-          return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because it would exceed the automatic footwork limit of 18 ft/s during eased playback.'}))) });
-        }
+    const original = compiled.timeline.segments.find(item => item.step.id === segment.step.id);
+    for (const id of PLAYER_IDS) {
+      const peak = automaticActorPeakSpeed(segment, id, document.players[id].handedness);
+      const originalPeak = automaticActorPeakSpeed(original, id, document.players[id].handedness);
+      if (peak > 18 + 1e-8 && peak > originalPeak + 1e-9) {
+        findings.push(finding('feasibility', 'warning', recipe?.id ?? segment.step.id, 'Suggested coverage was not applied because it would exceed the assisted footwork limit of 18 ft/s during eased playback.'));
+        return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because it would exceed the assisted footwork limit of 18 ft/s during eased playback.'}))) });
       }
-      for (const team of ['green', 'orange']) {
-        const pair = PLAYER_IDS.filter(id => document.players[id].team === team);
-        const spacing = minimumPairSpacing(segment, pair);
-        const bodySpacing = automaticActorPairSpacing(segment, pair, document.players);
-        // Automatic recovery already owns pair lanes. An extra lateral hint
-        // must not collapse those lanes or worsen intentionally close setup.
-        if ((spacing < 2.5 - 1e-9 && spacing < minimumPairSpacing(original, pair) - 1e-9) ||
-          (bodySpacing < 2.5 - 1e-9 && bodySpacing < automaticActorPairSpacing(original, pair, document.players) - 1e-9)) {
-          findings.push(finding('feasibility', 'warning', recipe.id, 'Suggested coverage was not applied because it would reduce doubles partner spacing below 2.5 ft.'));
-          return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because it would reduce doubles partner spacing below 2.5 ft.'}))) });
-        }
+    }
+    for (const team of ['green', 'orange']) {
+      const pair = PLAYER_IDS.filter(id => document.players[id].team === team);
+      const spacing = minimumPairSpacing(segment, pair);
+      const bodySpacing = automaticActorPairSpacing(segment, pair, document.players);
+      // Assistance must not crowd any pair, including authored movement.
+      // Compare with the base route rather than repairing authored geometry.
+      if ((spacing < 2.5 - 1e-9 && spacing < minimumPairSpacing(original, pair) - 1e-9) ||
+        (bodySpacing < 2.5 - 1e-9 && bodySpacing < automaticActorPairSpacing(original, pair, document.players) - 1e-9)) {
+        findings.push(finding('feasibility', 'warning', recipe?.id ?? segment.step.id, 'Suggested coverage was not applied because it would reduce doubles partner spacing below 2.5 ft.'));
+        return Object.freeze({ ...compiled, findings: Object.freeze(findings), coverage: Object.freeze(copy(coverage).map(guide => ({...guide, explanation:'Suggested coverage only — movement was not applied because it would reduce doubles partner spacing below 2.5 ft.'}))) });
       }
     }
   }

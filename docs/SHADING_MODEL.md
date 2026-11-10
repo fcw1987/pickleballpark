@@ -1,13 +1,56 @@
-# Suggested Coverage model
+# Optional authored-play shading
 
-“Shading” in the builder means approximate doubles coverage. It does not refer to visual material shading. The initial model supports ordinary lateral coordination and uses the visible opponent contact origin for the current rally leg. It never reads a future authored landing target to give defenders advance knowledge.
+Coverage suggestions are illustrative coaching guidance, not rules, measured
+reach envelopes, or claims that a particular player must take the ball.
 
-The model follows the coaching idea described by PrimeTime Pickleball: the defender nearer the likely attack origin shades toward the relevant sideline while the partner narrows the seam. This is an instructional approximation with tradeoffs, not measured strategy, predictive coaching, or an official rule. The current implementation does not model stacking, switches, poaches, detailed reach, or different depth formations.
+The legacy authored-play helper uses the visible opponent contact origin, not
+an outgoing target or future opponent shot. The pair's physical left/right
+ordering determines lanes. A normalized origin s in [-1,1] gives pair center
+10 + 3s and half-width 5 - s², in court feet. Each suggestion moves 25% toward
+its lane. These deliberately modest design constants produce a neutral center
+and continuous, mirror-symmetric shifts toward either sideline. Equal-x pairs
+hold instead of choosing a direction from player identity.
 
-`applyCoverageAssistance(play, document, timeline)` is a pure post-compile pass. It returns a cloned derived play and coverage records for renderer overlays. It does not change the authored document, shot origin or target, hitter, contact metadata, timing, feet, or timeline. Suggestions retain each player's compiler-selected depth and only adjust lateral court `x` within 1–19 feet. Applied travel is limited by the rally-leg duration at an illustrative maximum of 13 feet per second. That reachability bound is a product heuristic, not a USA Pickleball rule.
+The same-side defender protects the line and the other closes toward the middle.
+This is a default, not a forehand-always-takes-middle rule. Guides preserve
+reserved next-contact players and authored movement protection. Assistance is
+lateral only; the compiler owns depth, contact geometry, and timing. With no
+next receiver, both unprotected players may receive a small adjustment.
 
-The canonical document controls are `assistance.autoShading`, `assistance.showGuides`, and `assistance.team`. Auto Shading and Show Coverage Guides are independent. With Auto Shading off, guides can still show positions labeled “Suggested Coverage,” and the derived player positions stay unchanged. Team selection can apply to green, orange, or both teams. The current hitter, the next authored receiver, and every player whose authored shot has `movement.pinned: true` are preserved throughout the rally. A pin belongs to that shot's `hitter`; the coverage pass does not add another movement owner field. If those constraints leave nobody eligible, the guide remains visible and explains that no movement was applied. The pass never changes the chosen hitter or invents player swaps.
+Pair adjustment is stopped at a 2.5-foot clearance circle; an already-close
+formation is not made closer. The full compiler separately compares assisted
+linear and sampled actor routes against their unassisted routes, for authored
+as well as generated plays. Unsafe assistance falls back to the original play
+with a warning. Assistance also may not increase an actor route above an
+illustrative eased peak of 18 feet per second; an already-fast authored base
+route remains unchanged. This never repairs or rewrites saved authored geometry.
+Guide-only, disabled, and selected-team modes remain independent. Model 2
+physical points still disable this legacy assistance and retain their warning.
 
-Movement is lateral in every phase, including the opening serve and return. It cannot advance the serving team toward the non-volley zone, and it makes no claim that entering that zone is generally illegal. Opening-bounce legality, volley footing and momentum, court boundaries, and terminal faults remain responsibilities of the separate rules validator and compiler.
+These limits are model choices, not USA Pickleball faults. Mandatory opening
+bounces, correct service roles, and NVZ restrictions belong to rules validation.
+Recovery while following an already-hit ball may reasonably follow its flight;
+that is different from knowing an opponent's unplayed shot.
 
-Primary coaching reference: [PrimeTime Pickleball, “The Number 1 Forehand Strategy Mistake”](https://primetimepickleball.com/the-number-1-forehand-strategy-mistake/). Initial rules reference: [USA Pickleball Official Rulebook and summary](https://usapickleball.org/rules/), consulted for the distinction between tactical guidance and enforceable rules. Source references should be rechecked when the model or supported rules subset changes.
+## Integration contract
+
+`applyCoverageAssistance(play, document, timeline)` is a pure post-compile pass
+returning a cloned derived play and coverage records. It does not change the
+source document, shot facts, hitter, contact metadata, or depth. The effective
+compiler rebuilds the timeline from permitted derived positions and can reject
+unsafe assistance. Suggested x is bounded to 1–19 feet and applied lateral
+adjustment to an illustrative 13 feet per second of leg duration.
+
+The canonical controls are `assistance.autoShading`, `assistance.showGuides`,
+and `assistance.team` (green, orange, or both). Movement protection comes from
+the existing document ownership/pin model, including partner commands. No new
+movement owner or player swap is introduced. This helper does not model
+stacking, poaching, switches, or measured reach. Lateral guidance alone cannot
+advance the serving team toward the NVZ. Entering the NVZ is not itself illegal.
+
+## Sources
+
+- PrimeTime Pickleball, [shading and middle responsibility](https://primetimepickleball.com/the-number-1-forehand-strategy-mistake/).
+- USA Pickleball, [positioning and transition guidance](https://usapickleball.org/pickleball-skills/level-two/pickleball-basics-positioning-tips/).
+- USA Pickleball, [split-step timing](https://usapickleball.org/pickleball-skills/level-four/how-to-master-the-split-step-for-faster-reactions/).
+- USA Pickleball, [rules summary](https://usapickleball.org/rules/summary/).
