@@ -5,7 +5,7 @@ import { installReferenceRigContract } from './helpers/reference-rig-browser-con
 const cuffs = JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-measurements.json', import.meta.url), 'utf8'));
 const hair = JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-preserved-hair.json', import.meta.url), 'utf8'));
 
-test('original artwork contract preserves all atlas frames and rejects changed pixels, holes, hair transfer and UVs', async ({ page }, testInfo) => {
+test('legacy atlas preservation keeps all original frames and rejects changed pixels, holes, hair transfer and UVs', async ({ page }, testInfo) => {
   await page.goto('/index.html?workspace=planner&original-artwork-contract=1');
   await page.waitForFunction(() => Boolean(window.pickleboard?.threeD));
   await page.evaluate(async () => {
@@ -19,7 +19,12 @@ test('original artwork contract preserves all atlas frames and rejects changed p
     const failures = [], positives = [], counts = { color: 0, alpha: 0, missingPixel: 0, uv: 0, hairTransfer: 0 };
     const valid = value => Object.values(value).every(Boolean);
     const check = (condition, label, value) => { if (!condition) failures.push({ label, value }); };
-    for (const root of pickleboard.threeD.playerObjects.values()) {
+    for (const actor of pickleboard.threeD.playerObjects.values()) {
+      // These retained source assets are historical provenance, not the live
+      // volumetric body's material. Isolate all fixture state from production
+      // meshes, whose opaque vertex-color material may legitimately be shared.
+      const runtime=actor.userData,fixtureParts=[-1,0,1].map(part=>({visible:true,material:{map:runtime.resources.texture(runtime.player,0,part),alphaTest:.08}}));
+      const root={userData:{...runtime,animation:{...runtime.animation},body:fixtureParts[0],sleeves:fixtureParts.slice(1)}};
       const d = root.userData, parts = [d.body, ...d.sleeves], savedFrame = d.animation.frame;
       const savedMaps = parts.map(part => part.material.map), savedVisibility = parts.map(part => part.visible);
       for (let frame = 0; frame < 4; frame++) {

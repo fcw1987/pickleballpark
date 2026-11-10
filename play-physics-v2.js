@@ -20,7 +20,7 @@ const event=(type,time,position,details={})=>Object.freeze({type,time,position:O
 // Apex is an input. Launch/average speeds are derived, not independent and
 // potentially incompatible constraints. Restitution approximates surface losses;
 // aerodynamic drag and spin forces are deliberately outside this model version.
-export function solveFlightV2(input){
+export function solveFlightLaunchV2(input){
   if(input.physicsVersion!==undefined&&input.physicsVersion!==PHYSICS_VERSION)throw new RangeError('Unsupported physics version.');
   const from=point(input.from||{}),target={...input.target};
   for(const[name,n]of Object.entries(from))finite(n,`from.${name}`);
@@ -45,8 +45,8 @@ export function solveFlightV2(input){
   const flightDuration=(vy+Math.sqrt(vy*vy+2*G*(from.heightFeet-R)))/G;
   if(!(flightDuration>.001))throw new RangeError('A positive flight time is required.');
   const vx=(target.x-from.x)/flightDuration,vz=(target.y-from.y)/flightDuration;
-  const first=stage(from,vx,vy,vz,0,flightDuration,'flight'),stages=[],events=[];
-  let obstruction=null,netTime=null,netPoint=null,terminal=null;
+  const first=stage(from,vx,vy,vz,0,flightDuration,'flight'),events=[];
+  let obstruction=null,netTime=null,netPoint=null;
   if((from.y-22)*(target.y-22)<0){
     netTime=(22-from.y)/vz;netPoint=sampleStage(first,netTime);
     const x=netPoint.x,tape=localNetHeightFeet(x),bottom=tape-2.5;
@@ -59,6 +59,20 @@ export function solveFlightV2(input){
     else if(!around&&Math.abs(netPoint.heightFeet-R-tape)<=EPS)events.push(event('net-touch',netTime,netPoint,{remainsLive:true}));
     if(!obstruction)events.push(event('net-crossing',netTime,netPoint,{aroundPost:around}));
   }
+  const launchSpeedMph=Math.hypot(vx,vy,vz)/(22/15),horizontalAverageSpeedMph=Math.hypot(target.x-from.x,target.y-from.y)/flightDuration/(22/15);
+  return Object.freeze({from:Object.freeze(from),target:Object.freeze(target),apexFeet,vy,flightDuration,vx,vz,first,
+    netTime,netPoint:netPoint&&Object.freeze(netPoint),
+    obstruction:obstruction&&Object.freeze({...obstruction,position:Object.freeze(point(obstruction.position))}),
+    events:Object.freeze(events),launchSpeedMph,horizontalAverageSpeedMph});
+}
+
+export function solveFlightV2(input){
+  const launch=solveFlightLaunchV2(input);
+  const {from,target,apexFeet,vy,flightDuration,vx,vz,first,launchSpeedMph,horizontalAverageSpeedMph}=launch;
+  let netTime=launch.netTime,netPoint=launch.netPoint&&point(launch.netPoint);
+  const obstruction=launch.obstruction&&{...launch.obstruction,position:netPoint};
+  const stages=[],events=[...launch.events];
+  let terminal=null;
   let firstLandingTime,landing,secondBounceTime=null;
   if(obstruction?.kind==='net'){
     const direction=Math.sign(vz),t=Math.max(0,(22-direction*(R+.01)-from.y)/vz),hit=sampleStage(first,t);
@@ -78,27 +92,58 @@ export function solveFlightV2(input){
     events.push(event('second-bounce',secondBounceTime,sampleStage(rebound,secondBounceTime)));
   }
   const totalDuration=stages.at(-1).endTime;
-  const sampleBoard=seconds=>{finite(seconds,'seconds');const t=clamp(seconds,0,totalDuration),selected=stages.find(s=>t<s.endTime-EPS)||stages.at(-1),at=sampleStage(selected,t);
-    const bounce=events.find(e=>e.type==='bounce'&&Math.abs(e.time-t)<EPS);
-    return Object.freeze({...at,phase:bounce?'bounce':t>=totalDuration-EPS?(terminal?'dead':'second-bounce'):selected.phase,bounced:t>=firstLandingTime-EPS});};
-  const launchSpeedMph=Math.hypot(vx,vy,vz)/(22/15),horizontalAverageSpeedMph=Math.hypot(target.x-from.x,target.y-from.y)/flightDuration/(22/15);
+  // Every solved flight has its incoming stage followed by rebound or net
+  // drop. Cache their immutable boundaries and construct the public sample
+  // directly, retaining the exact arithmetic and EPS comparisons below.
+  const firstStage=stages[0],lastStage=stages.at(-1),stageBoundary=firstStage.endTime-EPS;
+  const endBoundary=totalDuration-EPS,bounceBoundary=firstLandingTime-EPS;
+  const sampleBoard=seconds=>{finite(seconds,'seconds');const t=clamp(seconds,0,totalDuration),selected=t<stageBoundary?firstStage:lastStage;
+    const local=clamp(t-selected.startTime,0,selected.duration),bounce=Math.abs(firstLandingTime-t)<EPS;
+    return Object.freeze({x:selected.from.x+selected.vx*local,y:selected.from.y+selected.vz*local,
+      heightFeet:Math.max(R,selected.from.heightFeet+selected.vy*local-.5*G*local*local),
+      phase:bounce?'bounce':t>=endBoundary?(terminal?'dead':'second-bounce'):selected.phase,bounced:t>=bounceBoundary});};
   const metadata=Object.freeze({physicsVersion:PHYSICS_VERSION,type:input.family,from:{x:from.x,y:from.y},to:target,
     contactHeightFeet:from.heightFeet,apexFeet,speedMph:launchSpeedMph,launchSpeedMph,launchVerticalFeetPerSecond:vy,horizontalAverageSpeedMph,
     netClearanceInches:netPoint?(netPoint.heightFeet-R-localNetHeightFeet(netPoint.x))*12:null,
     spin:Object.freeze({type:'flat',rpm:0}),bounce:Object.freeze({enabled:true,heightFeet:Math.pow(Math.sqrt(vy*vy+2*G*(from.heightFeet-R))*PHYSICS_V2.restitution,2)/(2*G)})});
-  const sample=seconds=>{const p=sampleBoard(seconds);return Object.freeze({...physicsBoardToWorld(p),phase:p.phase,bounced:p.bounced});};
+  const sample=seconds=>{const p=sampleBoard(seconds);return Object.freeze({x:(p.x-10)*.3048,y:p.heightFeet*.3048,z:(p.y-22)*.3048,phase:p.phase,bounced:p.bounced});};
   return Object.freeze({physicsVersion:PHYSICS_VERSION,metadata,from:Object.freeze(from),target:Object.freeze(target),stages:Object.freeze(stages),events:Object.freeze(events.sort((a,b)=>a.time-b.time)),
     firstLandingTime,flightDuration:firstLandingTime,landing:Object.freeze(landing),secondBounceTime,totalDuration,netTime,netPoint,
     obstruction:obstruction&&Object.freeze(obstruction),terminal:terminal&&Object.freeze(terminal),launchSpeedMph,horizontalAverageSpeedMph,sampleBoard,sample});
 }
 
+// Inverse of this same constant-gravity solver. Policy can choose a landing
+// and ball-surface clearance without approximating a separate flight or also
+// imposing an incompatible mph/apex. The returned flight remains authoritative.
+export function solveFlightForClearanceV2(input,clearanceFeet){
+  if(input.physics!==undefined)throw new TypeError('Choose a clearance or explicit launch physics, not both.');
+  finite(clearanceFeet,'clearanceFeet');
+  if(clearanceFeet< -2||clearanceFeet>24)throw new RangeError('Clearance must be between -2 and 24 feet.');
+  const from=input.from||{},target=input.target||{};
+  for(const[name,n]of Object.entries({x:from.x,y:from.y,heightFeet:from.heightFeet,targetX:target.x,targetY:target.y}))finite(n,name);
+  const fraction=(22-from.y)/(target.y-from.y);
+  if(!(fraction>0&&fraction<1))throw new RangeError('A clearance flight must cross the net plane.');
+  const x=from.x+(target.x-from.x)*fraction;
+  if(x<0||x>20)throw new RangeError('Use explicit launch physics outside the net sidelines.');
+  const height=localNetHeightFeet(x)+R+clearanceFeet;
+  const durationSquared=2*(height-from.heightFeet*(1-fraction)-R*fraction)/(G*fraction*(1-fraction));
+  if(!(durationSquared>0))throw new RangeError('The requested clearance lies below the coherent ballistic flight.');
+  const duration=Math.sqrt(durationSquared);
+  const launch=(R-from.heightFeet+.5*G*durationSquared)/duration;
+  return solveFlightV2({...input,physics:{launchVerticalFeetPerSecond:launch}});
+}
+
 // Every subsequent contact is sampled from the actual incoming solution.
-export function interceptFlightV2(flight,{kind,stance,contactOverride,afterBounceSeconds}){
+export function interceptFlightV2(flight,{kind,stance,contactOverride,afterBounceSeconds,beforeBounceSeconds}){
   let time;
+  if(beforeBounceSeconds!==undefined){
+    finite(beforeBounceSeconds,'beforeBounceSeconds');
+    if(kind!=='volley'||contactOverride||afterBounceSeconds!==undefined||beforeBounceSeconds<.001||beforeBounceSeconds>5)throw new RangeError('A bounded pre-bounce time requires an unambiguous volley contact.');
+  }
   if(kind==='volley'){
     const y=contactOverride?.y??(stance.y<22?Math.min(14.75,stance.y):Math.max(29.25,stance.y)),first=flight.stages[0];
     if(Math.abs(first.vz)<EPS)throw new RangeError('A volley requires an incoming depth crossing.');
-    time=(y-flight.from.y)/first.vz;
+    time=beforeBounceSeconds===undefined?(y-flight.from.y)/first.vz:flight.firstLandingTime-beforeBounceSeconds;
     if(time<=EPS||time>=flight.firstLandingTime-EPS||flight.obstruction)throw new RangeError('A volley must intercept a live flight before its first bounce.');
   }else{
     if(flight.obstruction)throw new RangeError('A blocked flight cannot produce a subsequent rally contact.');
@@ -110,11 +155,107 @@ export function interceptFlightV2(flight,{kind,stance,contactOverride,afterBounc
   return Object.freeze({time,point:Object.freeze(point(at)),bounces:kind==='volley'?0:1});
 }
 
+// Analytic derivative of the same solved stages used for position samples.
+// Pressure observes the incoming speed at interception, including bounce loss,
+// rather than treating its launch speed as the later contact speed.
+export function sampleFlightVelocityV2(flight,seconds){
+  if(flight?.physicsVersion!==PHYSICS_VERSION||!Array.isArray(flight.stages)||!flight.stages.length)throw new TypeError('A supported solved flight is required.');
+  finite(seconds,'seconds');
+  if(seconds<0||seconds>flight.totalDuration+EPS)throw new RangeError('Velocity time must lie inside the solved flight.');
+  const time=clamp(seconds,0,flight.totalDuration),selected=flight.stages.find(s=>time<s.endTime-EPS)||flight.stages.at(-1);
+  const local=clamp(time-selected.startTime,0,selected.duration);
+  const x=selected.vx,y=selected.vz,height=selected.vy-G*local;
+  return Object.freeze({version:'play-velocity-v2',timeSeconds:time,phase:selected.phase,
+    xFeetPerSecond:x,yFeetPerSecond:y,heightFeetPerSecond:height,
+    speedMph:Math.hypot(x,y,height)/(22/15)});
+}
+
+// Stable real roots on a normalized finite interval. This is only an analytic
+// sampling aid; interception, feet and actual routes still decide feasibility.
+function reachBoundaryRoots(a,b,c){
+  const scale=Math.max(Math.abs(a),Math.abs(b),Math.abs(c),1);a/=scale;b/=scale;c/=scale;
+  const tolerance=32*Number.EPSILON;
+  if(Math.abs(a)<=tolerance)return Math.abs(b)<=tolerance?[]:[-c/b];
+  let discriminant=b*b-4*a*c;
+  if(discriminant<0&&discriminant>=-tolerance*(b*b+Math.abs(4*a*c)))discriminant=0;
+  if(discriminant<0)return[];
+  const root=Math.sqrt(discriminant),q=-.5*(b+(b<0?-root:root));
+  return q===0?[-b/(2*a)]:[q/a,c/q];
+}
+
+/**
+ * Absolute candidate times from the actual solved horizontal stages. Minima
+ * of distance minus reaction-adjusted reach, reach-boundary roots and interior
+ * midpoints expose narrow windows without uniform time sampling. No time is a
+ * claim of a legal paddle contact. The caller supplies its existing reach model.
+ */
+export function flightReachCriticalTimesV2(flight,origin,reachModel){
+  if(flight?.physicsVersion!==PHYSICS_VERSION||!Array.isArray(flight.stages)||!flight.stages.length)throw new TypeError('A supported solved flight is required.');
+  finite(origin?.x,'origin.x');finite(origin?.y,'origin.y');
+  const reaction=finite(reachModel?.reactionSeconds,'reactionSeconds'),speed=finite(reachModel?.speedFeetPerSecond,'speedFeetPerSecond'),paddle=finite(reachModel?.paddleReachFeet,'paddleReachFeet');
+  if(reaction<0||speed<0||paddle<0||!Number.isFinite(speed*speed))throw new RangeError('A finite nonnegative reach model is required.');
+  finite(flight.totalDuration,'totalDuration');
+  if(!(flight.totalDuration>0))throw new RangeError('A positive solved flight duration is required.');
+  let physicalEnd=flight.totalDuration;
+  for(const boundary of [flight.terminal,flight.obstruction])if(boundary){
+    finite(boundary.time,'physical end time');
+    if(boundary.time<0)throw new RangeError('A physical end time must be nonnegative.');
+    physicalEnd=Math.min(physicalEnd,boundary.time);
+  }
+  const times=[],add=time=>{if(Number.isFinite(time)&&time>0&&time<physicalEnd)times.push(time);};
+  let priorEnd=0;
+  for(const current of flight.stages){
+    for(const[name,value]of Object.entries({x:current?.from?.x,y:current?.from?.y,vx:current?.vx,vz:current?.vz,startTime:current?.startTime,duration:current?.duration,endTime:current?.endTime}))finite(value,`stage.${name}`);
+    if(current.startTime<0||current.duration<=0||current.startTime<priorEnd-EPS||Math.abs(current.endTime-current.startTime-current.duration)>EPS)throw new RangeError('Ordered positive solved stages are required.');
+    priorEnd=current.endTime;
+    const start=current.startTime,end=Math.min(current.endTime,physicalEnd);
+    if(!(end>start))continue;
+    const dx=current.from.x-origin.x,dy=current.from.y-origin.y,vx=current.vx,vz=current.vz;
+    const horizontal=Math.hypot(vx,vz),squared=horizontal*horizontal,dot=dx*vx+dy*vz;
+    if(![dx,dy,squared,dot].every(Number.isFinite))throw new RangeError('Finite horizontal reach geometry is required.');
+    const localEnd=end-start,cuts=[0,localEnd];
+    if(reaction>start&&reaction<end)cuts.push(reaction-start);
+    cuts.sort((a,b)=>a-b);
+    const closest=squared>0?-dot/squared:null;
+    // For |v| > running speed, the sole post-reaction stationary minimum is
+    // after closest approach. The cross product gives perpendicular distance
+    // without subtracting nearly equal squared distances.
+    const perpendicular=horizontal>0?Math.abs(dx*(vz/horizontal)-dy*(vx/horizontal)):0;
+    const stationary=speed===0?closest:horizontal>speed&&squared>0
+      ?closest+speed*perpendicular/(horizontal*Math.sqrt((horizontal-speed)*(horizontal+speed))):null;
+    const edgeInset=Math.min(1e-7,localEnd/4);
+    add(start+edgeInset);add(end-edgeInset);
+    if(reaction>start&&reaction<end)add(reaction);
+    if(closest!==null&&closest>=0&&closest<=localEnd)add(start+closest);
+    if(stationary!==null&&start+stationary>=reaction&&stationary>=0&&stationary<=localEnd)add(start+stationary);
+    for(let index=1;index<cuts.length;index++){
+      const low=cuts[index-1],high=cuts[index],width=high-low;
+      const running=start+(low+high)/2>=reaction?speed:0;
+      const radius=paddle+speed*Math.max(0,start+low-reaction),x=dx+vx*low,y=dy+vz*low;
+      const a=(squared-running*running)*width*width,b=2*(x*vx+y*vz-radius*running)*width,c=x*x+y*y-radius*radius;
+      if(![a,b,c].every(Number.isFinite))throw new RangeError('Finite reach-boundary coefficients are required.');
+      const roots=reachBoundaryRoots(a,b,c).filter(root=>Number.isFinite(root)&&root>=0&&root<=1).map(root=>low+root*width).sort((a,b)=>a-b);
+      const intervals=[low,...roots,high];
+      for(const root of roots)add(start+root);
+      for(let part=1;part<intervals.length;part++)if(intervals[part]>intervals[part-1]){
+        const middle=(intervals[part-1]+intervals[part])/2,radiusAtMiddle=paddle+speed*Math.max(0,start+middle-reaction);
+        if(Math.hypot(dx+vx*middle,dy+vz*middle)<=radiusAtMiddle)add(start+middle);
+      }
+    }
+  }
+  return Object.freeze([...new Set(times)].sort((a,b)=>a-b));
+}
+
 // Inert JSON is sufficient to reconstruct physics after a GuidedPlayEngine clone.
 export function compileSolvedLegV2(shot){
   const spec=shot.physicsV2;
   if(!spec||spec.physicsVersion!==PHYSICS_VERSION)throw new TypeError('Model 2 shots require shared-solver physicsV2 metadata.');
-  const solved=solveFlightV2(spec),endTime=spec.endTimeSeconds??solved.firstLandingTime;
+  return compileSolvedLegFromFlightV2(shot,solveFlightV2(spec));
+}
+
+// Internal planning adapter; public compilation still independently solves its source.
+export function compileSolvedLegFromFlightV2(shot,solved){
+  const spec=shot.physicsV2,endTime=spec.endTimeSeconds??solved.firstLandingTime;
   if(!Number.isFinite(endTime)||endTime<0||endTime>solved.totalDuration+EPS)throw new RangeError('Invalid model 2 leg endpoint time.');
   const bounces=solved.events.filter(e=>e.type==='bounce'&&e.time<=endTime+EPS).length,end=solved.sample(endTime),start=solved.sample(0);
   return Object.freeze({...solved,solved,start,landing:physicsBoardToWorld(solved.landing),end,bounceEnd:end,totalDuration:endTime,

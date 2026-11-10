@@ -166,7 +166,7 @@ export function downloadPlayBackup(raw, title) {
   try { link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
 }
 
-export function mountBuilderUI({ onAction = () => {} } = {}) {
+export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {}) {
   const root = el('section', 'builder-ui');
   root.setAttribute('aria-label', 'Build a Play');
   document.body.appendChild(root);
@@ -205,6 +205,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
   // value must not win when the choice itself triggers a rerender.
   let preserveFamilyPickerState = false;
   let importFileGeneration = 0;
+  let randomRequestGeneration = 0;
   let pendingField = false;
   let exportedBackup = '';
   let timelineControl = null;
@@ -249,23 +250,25 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     if (!importDialog.open) importDialog.showModal();
   }
   function openRandomDialog() {
+    randomRequestGeneration++;
     timelineControl?.cancel?.();
-    const count = el('input'); count.type = 'number'; count.min = '1'; count.max = String(UI_MAX_SHOTS); count.step = '1'; count.value = '7'; count.inputMode = 'numeric'; count.dataset.action = 'random-count'; count.setAttribute('aria-label', 'Number of hits');
+    const length = select('Rally length', 'random-length', [['natural','Natural'],['short','Short (3–6 contacts)'],['long','Long (12–20 contacts)'],['epic','Epic (25 or more contacts)']]);
     const seed = el('input'); seed.type = 'number'; seed.min = '0'; seed.max = '4294967295'; seed.step = '1'; seed.inputMode = 'numeric'; seed.placeholder = 'Optional number'; seed.dataset.action = 'random-seed'; seed.setAttribute('aria-label', 'Random seed'); seed.setAttribute('aria-describedby', 'builder-random-seed-help');
-    const seedHelp = el('p', 'builder-dialog-copy', 'Optional whole number from 0 to 4294967295. Reuse a number to repeat a rally, or leave it blank for a new one.'); seedHelp.id = 'builder-random-seed-help';
+    const seedHelp = el('p', 'builder-dialog-copy', 'Use the same seed and player handedness to repeat a point. Leave blank for a new one.'); seedHelp.id = 'builder-random-seed-help';
     randomDialog.replaceChildren(
       el('h2', '', 'Random Rally'),
-      el('p', 'builder-dialog-copy', `Create a fresh playable rally with exactly the requested number of paddle contacts (1–${UI_MAX_SHOTS}). Your current play stays safe until you choose to use the result.`),
-      labelled('Hits', count),
+      el('p', 'builder-dialog-copy', 'Create a point with Advanced players and your current handedness. Natural lets play decide the length; other lengths may find no match. Your current play stays safe until the new point is validated and saved.'),
+      length,
       labelled('Seed', seed),
       seedHelp,
       el('p', 'builder-dialog-copy builder-proposal-status', current.proposalBusy ? (typeof current.proposalProgress === 'object' && current.proposalProgress ? `${current.proposalProgress.label || 'Building rally'}${Number.isFinite(current.proposalProgress.completed) && Number.isFinite(current.proposalProgress.total) ? ` · ${current.proposalProgress.completed}/${current.proposalProgress.total}` : '…'}` : 'Building rally…') : ''),
       (() => { const actions = el('div', 'builder-dialog-actions'); const cancel = button('Cancel', 'cancel-proposal', 'builder-button'); const create = button('Create rally', 'random-rally', 'builder-button builder-button-primary'); create.disabled = Boolean(current.proposalBusy); actions.append(cancel, create); return actions; })()
     );
     if (!randomDialog.open) randomDialog.showModal();
-    randomDialog.querySelector('[data-action="random-count"]')?.focus({ preventScroll: true });
+    const progress=randomDialog.querySelector('.builder-proposal-status');progress?.setAttribute('role','status');progress?.setAttribute('aria-live','polite');
+    randomDialog.querySelector('[data-action="random-length"]')?.focus({ preventScroll: true });
   }
-  const cancelRandomDialog = () => { closeDialog(randomDialog); rerenderAction('cancelProposal'); };
+  const cancelRandomDialog = () => { randomRequestGeneration++; closeDialog(randomDialog); rerenderAction('cancelProposal'); };
   randomDialog.addEventListener('cancel', event => { event.preventDefault(); cancelRandomDialog(); });
   randomDialog.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
@@ -496,7 +499,9 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
       const targetRow = el('div', 'builder-target-row'); targetRow.append(el('div', 'builder-target-readout', 'Drag the target ring to adjust')); targetGroup.append(targetRow);
       const presets = el('div', 'builder-presets'); presets.append(el('span', 'builder-field-label', 'Quick target · green side')); [['wide', 3], ['middle', 10], ['centerline', 10]].forEach(([label, x]) => { const b = button(label, 'target-preset', 'builder-chip'); b.dataset.x = x; b.dataset.y = selected.target?.y || 20; b.dataset.direction = label; presets.appendChild(b); }); targetGroup.append(presets); details.appendChild(targetGroup);
       const flightGroup = el('section', 'builder-control-group builder-group-flight'); flightGroup.dataset.detailGroup = 'flight'; flightGroup.setAttribute('role', 'tabpanel'); flightGroup.setAttribute('aria-label', 'Flight settings'); flightGroup.classList.toggle('is-active', detailGroup === 'flight'); flightGroup.append(el('h3', '', 'Flight'), flight);
-      const tuning = el('div', 'builder-grid-fields'); const arc = select('Arc', 'edit-arc', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']]); const pace = select('Pace', 'edit-pace', [['soft', 'Soft'], ['medium', 'Medium'], ['firm', 'Firm']]); arc.querySelector('select').value = selected.arc || 'medium'; pace.querySelector('select').value = selected.pace || 'medium'; tuning.append(arc, pace); flightGroup.append(tuning); details.appendChild(flightGroup);
+      const customFlight=doc.modelVersion===2&&selected.physics!==undefined;
+      if(customFlight){const note=el('p','builder-selected-summary','This shot has a custom flight. Choosing Flight, Arc or Pace replaces it. Undo restores the original flight.');note.id='builder-flight-override-note';flight.querySelector('select').setAttribute('aria-describedby',note.id);flightGroup.append(note);}
+      const tuning = el('div', 'builder-grid-fields'); const arc = select('Arc', 'edit-arc', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']]); const pace = select('Pace', 'edit-pace', [['soft', 'Soft'], ['medium', 'Medium'], ['firm', 'Firm']]); arc.querySelector('select').value = selected.arc || 'medium'; pace.querySelector('select').value = selected.pace || 'medium'; if(customFlight)for(const control of [arc,pace])control.querySelector('select').setAttribute('aria-describedby','builder-flight-override-note'); tuning.append(arc, pace); flightGroup.append(tuning); details.appendChild(flightGroup);
       const playersGroup = el('section', 'builder-control-group builder-group-players'); playersGroup.dataset.detailGroup = 'players'; playersGroup.setAttribute('role', 'tabpanel'); playersGroup.setAttribute('aria-label', 'Players settings'); playersGroup.classList.toggle('is-active', detailGroup === 'players'); playersGroup.append(el('h3', '', 'Players'));
       const receiver = select('Receiver', 'edit-receiver', [['auto', 'Automatic'], ...players]); receiver.querySelector('select').value = selected.receiver || 'auto'; playersGroup.append(receiver);
       const contactStyle = select('Contact style', 'edit-contactStyle', [['auto', 'Automatic'], ['forehand', 'Forehand'], ['backhand', 'Backhand'], ['short-hop', 'Short hop']]); contactStyle.querySelector('select').value = selected.contactStyle || 'auto'; playersGroup.append(contactStyle);
@@ -617,8 +622,9 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     if (randomDialog.open) {
       const progress = randomDialog.querySelector('.builder-proposal-status');
       const info = current.proposalProgress;
-      if (progress) progress.textContent = current.proposalBusy ? (typeof info === 'object' && info ? `${info.label || 'Building rally'}${Number.isFinite(info.completed) && Number.isFinite(info.total) ? ` · ${info.completed}/${info.total}` : '…'}` : 'Building rally…') : (typeof info === 'string' ? info : '');
+      if (progress) progress.textContent = current.proposalBusy ? (typeof info === 'object' && info ? `${info.label || 'Building rally'}${Number.isFinite(info.completed) && Number.isFinite(info.total) ? ` · ${info.completed}/${info.total}` : Number.isFinite(info.completed) ? ` · ${info.completed} contacts` : '…'}` : 'Building rally…') : (typeof info === 'string' ? info : '');
       const create = randomDialog.querySelector('[data-action="random-rally"]'); if (create) create.disabled = Boolean(current.proposalBusy);
+      for(const field of randomDialog.querySelectorAll('[data-action="random-length"],[data-action="random-seed"]'))field.disabled=Boolean(current.proposalBusy);
     }
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
     root.scrollTop=oldRootScroll;
@@ -751,26 +757,27 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     else if (action === 'import-export') openImportDialog();
     else if (action === 'random') openRandomDialog();
     else if (action === 'random-rally') {
-      const countField = randomDialog.querySelector('[data-action="random-count"]');
+      const lengthField = randomDialog.querySelector('[data-action="random-length"]');
       const seedField = randomDialog.querySelector('[data-action="random-seed"]');
-      const count = Number(countField.value);
+      const lengthFeel = lengthField.value;
       const seed = seedField.value.trim() === '' ? undefined : Number(seedField.value);
-      if (!countField.checkValidity() || !Number.isInteger(count) || count < 1 || count > UI_MAX_SHOTS) {
-        markInvalidField(countField, `Enter a whole number of hits from 1 to ${UI_MAX_SHOTS}.`); countField.focus(); return;
-      }
-      clearInvalidField(countField);
+      if(!['natural','short','long','epic'].includes(lengthFeel)){markInvalidField(lengthField,'Choose Natural, Short, Long or Epic.');lengthField.focus();return;}
+      clearInvalidField(lengthField);
       if (!seedField.checkValidity() || (seed !== undefined && (!Number.isInteger(seed) || seed < 0 || seed > 4294967295))) {
         markInvalidField(seedField, 'Enter a whole number from 0 to 4294967295, or leave the seed blank.'); seedField.focus(); return;
       }
       clearInvalidField(seedField);
-      const result = await rerenderAction('randomRally', { count, ...(seed !== undefined ? { seed } : {}) });
+      const requestGeneration=++randomRequestGeneration;
+      const progress=randomDialog.querySelector('.builder-proposal-status');progress?.setAttribute('role','status');progress?.setAttribute('aria-live','polite');
+      const result = await rerenderAction('randomRally', { lengthFeel, ...(seed !== undefined ? { seed } : {}) });
+      if(destroyed||requestGeneration!==randomRequestGeneration||!randomDialog.open)return;
       if (!result || result.ok !== false) closeDialog(randomDialog);
       else {
         const status = randomDialog.querySelector('.builder-proposal-status');
         if (status) { status.textContent = result.error || 'Rally generation could not complete. Your current play was kept.'; status.setAttribute('role', 'alert'); status.setAttribute('aria-live', 'assertive'); }
       }
     }
-    else if (action === 'cancel-proposal') { closeDialog(randomDialog); rerenderAction('cancelProposal'); }
+    else if (action === 'cancel-proposal') cancelRandomDialog();
     else if (action === 'import-json') { const area = importDialog.querySelector('textarea'); const result = await rerenderAction('import', area?.value || ''); if (!result || result.ok !== false) { importFileGeneration += 1; closeDialog(importDialog); } else { const status = importDialog.querySelector('.builder-import-status') || el('p', 'builder-import-status'); status.textContent = result.error || 'Import could not be completed. Check the JSON and try again.'; importDialog.insertBefore(status, importDialog.querySelector('.builder-dialog-actions')); } }
     else if (action === 'export') rerenderAction('export');
     else if (action === 'buildDiagnostics') rerenderAction('buildDiagnostics');
@@ -915,7 +922,7 @@ export function mountBuilderUI({ onAction = () => {} } = {}) {
     return plannerConfirmation;
   };
   render();
-  return { render, showExport, confirmPlanner, destroy() { globalThis.removeEventListener('pickleboard:camera-ready',onCameraReady); destroyed = true; importFileGeneration += 1; timelineControl?.cancel?.(); timelineControl?.destroy?.(); root.remove(); document.body.classList.remove('builder-workspace', 'planner-workspace'); }, element: root };
+  return { render, showExport, confirmPlanner, destroy() { globalThis.removeEventListener('pickleboard:camera-ready',onCameraReady); destroyed = true; randomRequestGeneration++; onDestroy(); importFileGeneration += 1; timelineControl?.cancel?.(); timelineControl?.destroy?.(); root.remove(); document.body.classList.remove('builder-workspace', 'planner-workspace'); }, element: root };
 }
 
 export { FAMILIES };

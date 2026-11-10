@@ -35,7 +35,7 @@ test('legacy 3D compatibility: 3D renderer uses antialiasing and native DPR up t
   await context.close();
 });
 
-test('legacy 3D compatibility: directional artwork and solid athlete meshes own and release every resource on exit', async ({ page }) => {
+test('legacy 3D compatibility: dimensional pixel athletes own and release every solid resource on exit', async ({ page }) => {
   await openViewer(page);
   const result = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, resources = viewer.actorResources;
@@ -44,17 +44,19 @@ test('legacy 3D compatibility: directional artwork and solid athlete meshes own 
     const ownedGeometry = meshes.every(mesh => resources.geometries.has(mesh.geometry));
     const ownedMaterial = meshes.every(mesh => [...resources.materials].includes(mesh.material));
     const materials = meshes.every(mesh => mesh.material.type === 'MeshBasicMaterial' && mesh.material.depthTest && mesh.material.depthWrite);
-    const artwork = [...viewer.playerObjects.values()].map(root => window.__referenceRigContract.artwork(root));
+    const artwork = [...viewer.playerObjects.values()].map(root => window.__referenceRigContract.volumetricArtwork(root));
+    const meshCounts=[...viewer.playerObjects.values()].map(root=>{let n=0;root.traverse(mesh=>{if(mesh.isMesh&&mesh.visible&&mesh.name!=='AthleteContactShadow')n++;});return n;});
     const tracked = [...resources.geometries, ...resources.materials, ...resources.textures.values()];
     const counts = tracked.map(() => 0);
     tracked.forEach((resource, i) => resource.addEventListener('dispose', () => counts[i]++));
     viewer.exit();
     resources.dispose(); // A second lifecycle cleanup must not redispose released GPU resources.
-    return { ownedGeometry, ownedMaterial, materials, artwork, meshCount: meshes.length, counts, remaining: resources.geometries.size + resources.materials.size + resources.textures.size };
+    return { ownedGeometry, ownedMaterial, materials, artwork, meshCount: meshes.length, meshCounts, counts, remaining: resources.geometries.size + resources.materials.size + resources.textures.size };
   });
   expect(result).toMatchObject({ ownedGeometry: true, ownedMaterial: true, materials: true, remaining: 0 });
-  expect(result.meshCount).toBe(64); // Body, two original-art sleeve planes, ten arm pieces and three paddle pieces per athlete.
-  for (const artwork of result.artwork) expect(artwork).toEqual({ sourceLoaded: true, dimensions: true, identity: true, visibleOriginalPixels: true });
+  expect(result.meshCounts).toEqual([6,6,6,6]); // One batched anatomical draw plus five real paddle surfaces per athlete.
+  expect(result.meshCount).toBe(24);
+  for (const artwork of result.artwork) expect(artwork).toEqual({ volumetric:true,opaque:true,owned:true,rendered:true,anatomy:true });
   expect(result.counts.every(count => count === 1)).toBe(true);
 });
 

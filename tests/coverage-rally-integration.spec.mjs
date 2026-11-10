@@ -13,11 +13,15 @@ test('installed coverage shares seed-2 service roles, bounce facts and world sam
   await page.getByRole('button', { name: 'Player coverage', exact: true }).click();
   const result = await page.evaluate(async () => {
     const { worldToBoard, FEET_TO_METERS } = await import('/three-d-core.js');
+    const { coverageDirection } = await import('/player-coverage.js');
     const builder = playBuilder, view = pickleboard.threeD, source = JSON.stringify(builder.document);
     const sample = time => {
       builder.seek(time); view.renderSessionSample();
       const context = { timeSeconds: builder.session.clock.elapsed, ball: view.sampleBall(time), samples: view.coverageSamples };
-      return { snapshot: pickleboard.coverageSnapshotProvider(context), overlay: structuredClone(view.playerCoverage.getDiagnostics()),
+      const snapshot = pickleboard.coverageSnapshotProvider(context);
+      const expectedDirections = Object.fromEntries(snapshot.players.map(player => [player.id,
+        coverageDirection(player, snapshot.ball, snapshot.players.find(partner => partner.id !== player.id && partner.team === player.team))]));
+      return { snapshot, expectedDirections, overlay: structuredClone(view.playerCoverage.getDiagnostics()),
         actors: [...view.playerObjects].map(([id, actor]) => ({ id, position: worldToBoard(actor.position) })),
         ball: { ...worldToBoard(view.ballObject.position), heightFeet: view.ballObject.position.y / FEET_TO_METERS } };
     };
@@ -50,8 +54,8 @@ test('installed coverage shares seed-2 service roles, bounce facts and world sam
       const sector = sample.overlay.sectors.find(sector => sector.id === actor.id);
       const tactical = sample.snapshot.players.find(player => player.id === actor.id);
       expect(sector.position).toEqual(actor.position);
-      expect(sector.direction.x).toBeCloseTo(tactical.coverageFacing.x, 12);
-      expect(sector.direction.y).toBeCloseTo(tactical.coverageFacing.y, 12);
+      expect(sector.direction.x).toBeCloseTo(sample.expectedDirections[actor.id].x, 12);
+      expect(sector.direction.y).toBeCloseTo(sample.expectedDirections[actor.id].y, 12);
       expect(sector.legalReceiver).toBe(tactical.legalReceiver);
     }
     for (const coordinate of ['x', 'y', 'heightFeet']) expect(sample.overlay.ball[coordinate]).toBeCloseTo(sample.ball[coordinate], 9);

@@ -3,23 +3,23 @@ import {boardToWorld} from './three-d-core.js';
 import {sampleActorWorldPosition} from './three-d-presentation.js';
 const radians=degrees=>degrees*Math.PI/180;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const MIN_DISTANCE=7,MAX_MANUAL_DISTANCE=40,MAX_FIT_DISTANCE=55,FIT_FILL=.96;
 
 /** A camera gesture never consumes a target or athlete gesture. Camera state is
  * independent of the play clock; orbiting does not seek or rewrite authored data. */
 export class DepthCameraControls{
  constructor(viewer){
   this.viewer=viewer;this.surface=viewer.renderer.domElement;this.pointers=new Map();this.mode='orbit';this.autoFit=true;
-  this.state={azimuth:0,elevation:50,distance:this.defaultDistance(),target:{x:0,y:.3,z:0}};
+  this.state={azimuth:0,elevation:50,distance:MIN_DISTANCE,target:{x:0,y:.3,z:0}};
   this.handlers={pointerdown:e=>this.down(e),pointermove:e=>this.move(e),pointerup:e=>this.up(e),pointercancel:()=>this.cancel(),lostpointercapture:e=>{if(this.pointers.has(e.pointerId))this.cancel();},wheel:e=>{e.preventDefault();this.zoomBy(Math.exp(e.deltaY*.001));},contextmenu:e=>e.preventDefault()};
   this.surface.style.touchAction='none';for(const[type,handler]of Object.entries(this.handlers))this.surface.addEventListener(type,handler,{passive:false});
   this.apply();window.dispatchEvent(new CustomEvent('pickleboard:camera-ready',{detail:this}));
  }
  getState(){return{...this.state,target:{...this.state.target},mode:this.mode,pointerCount:this.pointers.size,autoFit:this.autoFit};}
  // Preserve a necessary narrow-screen preset fit; manual zoom-out cannot enlarge it.
- setState(next={}){const distanceLimit=Math.max(40,this.state.distance);this.autoFit=false;this.state={...this.state,...next,target:{...this.state.target,...next.target}};this.state.elevation=clamp(this.state.elevation,20,75);this.state.distance=clamp(this.state.distance,7,distanceLimit);this.apply();return this.getState();}
+ setState(next={}){const distanceLimit=Math.max(MAX_MANUAL_DISTANCE,this.state.distance);this.autoFit=false;this.state={...this.state,...next,target:{...this.state.target,...next.target}};this.state.elevation=clamp(this.state.elevation,20,75);this.state.distance=clamp(this.state.distance,MIN_DISTANCE,distanceLimit);this.apply();return this.getState();}
  setMode(mode){if(!['orbit','pan'].includes(mode))throw new TypeError('Camera mode must be orbit or pan');this.mode=mode;return this.getState();}
- defaultDistance(){return this.surface.clientWidth<600?27:29;}
- reset(preset='overhead'){const azimuth=preset==='sideline'?Math.PI/2:preset==='behind-green'?Math.PI:0;this.autoFit=true;this.state={azimuth,elevation:preset==='overhead'?50:38,distance:this.defaultDistance(),target:{x:0,y:.3,z:0}};this.apply();return this.getState();}
+ reset(preset='overhead'){const azimuth=preset==='sideline'?Math.PI/2:preset==='behind-green'?Math.PI:0;this.autoFit=true;this.state={azimuth,elevation:preset==='overhead'?50:38,distance:MIN_DISTANCE,target:{x:0,y:.3,z:0}};this.apply();return this.getState();}
  zoomBy(factor){return this.setState({distance:this.state.distance*factor});}
  envelope(){
   const v=this.viewer;if(this.envelopePlay===v.currentPlay&&this.envelopeTimeline===v.timeline)return this.envelopePoints;
@@ -39,15 +39,17 @@ export class DepthCameraControls{
   c.clearViewOffset();c.aspect=width/height;c.fov=38;
   if(this.autoFit){
    const outward=new THREE.Vector3(Math.sin(s.azimuth)*Math.cos(e),Math.sin(e),Math.cos(s.azimuth)*Math.cos(e)),right=new THREE.Vector3(Math.cos(s.azimuth),0,-Math.sin(s.azimuth)),up=new THREE.Vector3(-Math.sin(s.azimuth)*Math.sin(e),Math.cos(e),-Math.cos(s.azimuth)*Math.sin(e)),target=new THREE.Vector3(s.target.x,s.target.y,s.target.z),tanY=Math.tan(radians(c.fov)/2),tanX=tanY*c.aspect;
-   let distance=this.defaultDistance();
-   for(const point of this.envelope()){const delta=point.clone().sub(target),depth=delta.dot(outward);distance=Math.max(distance,depth+Math.abs(delta.dot(right))/(tanX*.94),depth+Math.abs(delta.dot(up))/(tanY*(1-reserved/height)*.94));}
-   s.distance=clamp(distance,7,55);
+   // Fit the complete authored action, not a fixed far-away park overview.
+   // Keep a small breathing room inside the usable court area above the HUD.
+   let distance=MIN_DISTANCE;
+   for(const point of this.envelope()){const delta=point.clone().sub(target),depth=delta.dot(outward);distance=Math.max(distance,depth+Math.abs(delta.dot(right))/(tanX*FIT_FILL),depth+Math.abs(delta.dot(up))/(tanY*(1-reserved/height)*FIT_FILL));}
+   s.distance=clamp(distance,MIN_DISTANCE,MAX_FIT_DISTANCE);
   }
   const horizontal=Math.cos(e)*s.distance;
   c.position.set(s.target.x+Math.sin(s.azimuth)*horizontal,s.target.y+Math.sin(e)*s.distance,s.target.z+Math.cos(s.azimuth)*horizontal);c.lookAt(s.target.x,s.target.y,s.target.z);
   if(reserved)c.setViewOffset(width,height,0,reserved/2,width,height);
   c.updateProjectionMatrix();c.updateMatrixWorld(true);v.cameraTarget={...s.target};
-  v.cameraFraming={aspect:c.aspect,usableAspect:width/Math.max(1,height-reserved),reservedPixels:reserved,distanceScale:s.distance/this.defaultDistance(),position:c.position.toArray(),target:[s.target.x,s.target.y,s.target.z],fov:c.fov,autoFit:this.autoFit};
+  v.cameraFraming={aspect:c.aspect,usableAspect:width/Math.max(1,height-reserved),reservedPixels:reserved,distanceScale:s.distance/(width<600?27:29),position:c.position.toArray(),target:[s.target.x,s.target.y,s.target.z],fov:c.fov,autoFit:this.autoFit};
   v.world?.updateCamera?.(c);if(v.currentPlay&&v.ballObject)v.applyAtTime(v.clock.elapsed);if(v.active)v.startRenderLoop();window.playBuilder?.courtTools?.render();
  }
 

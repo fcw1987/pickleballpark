@@ -43,7 +43,7 @@ test.describe('fresh visible builder correction review', () => {
   test('Escape cancels a random proposal and dialog fields do not mark the draft editing', async ({ page }) => {
     await page.getByLabel('Menu', { exact: true }).click();
     await page.getByRole('button', { name: 'Random Rally', exact: true }).click();
-    await page.getByLabel('Number of hits', { exact: true }).fill('8');
+    await page.getByLabel('Rally length', { exact: true }).selectOption('long');
     await expect(page.locator('[data-ui="save-pill"]')).not.toHaveText('Editing');
     await page.keyboard.press('Escape');
     await expect(page.locator('.builder-random-dialog')).toBeHidden();

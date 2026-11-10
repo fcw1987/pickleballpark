@@ -1,4 +1,4 @@
-# Pickleboard state ownership
+# Pickleball Park state ownership
 
 Audited from the recoverable engine checkpoint `13758356d65f154b19ca631e6ecb9bdb8afd875b` on 2026-09-14. This map records the runtime that exists; it does not propose another document, compiler, clock, renderer, or persistence architecture.
 
@@ -51,7 +51,7 @@ workspace or clock. The legacy ownership table above remains in force.
 | Concern | Authoritative owner | Acceptance rule |
 | --- | --- | --- |
 | Model selection | Document `modelVersion` and model 2 `physicsVersion` | Validation selects the explicit versioned path. Compiled Play definitions and GuidedPlayEngine clones retain both values; a model 2 definition must not silently compile as model 1. |
-| Physical flight and incoming contact | Pure `play-physics-v2.js` | The compiler and a future generator use this same solver. Response contact position, time and height derive from the incoming solved path. Camera, quality labels, cue text and renderer geometry cannot replace those values. |
+| Physical flight and incoming contact | Pure `play-physics-v2.js` | The compiler and M2 engine use this same solver. Response contact position, time and height derive from the incoming solved path. Camera, quality labels, cue text and renderer geometry cannot replace those values. |
 | Model 2 actor and foot positions | Shared `play-actors-v2.js` | Logical sampling, 3D presentation and independent body collision checks use the same actor positions. Planned routes retain `originalDuration` when the ball dies early. Momentum interpolates each foot from contact to the globally timed observation, then holds it; its observation time is not automatically the first NVZ entry. Rendered/source foot anchors project these points without certifying whole-shoe edge contact. |
 | Position assistance for model 2 | `compileEffectiveCandidate` version boundary | M1 bypasses legacy position suggestions/Auto Shading, preserves physical geometry and returns empty derived coverage. Requesting assistance produces an explicit warning; the independent Coverage view remains a presentation sampler. |
 | Completed point declaration | Document `outcome`, including actors and point/time evidence | Source claims must agree with independently solved geometry, chronology and rule facts. A declaration cannot make its own fault expected. Ordinary completed points keep `intentionalFault: false`. |
@@ -69,5 +69,31 @@ both modeled feet re-establish outside. A reset flag alone cannot override the
 shared grounded contact feet to manufacture rule 11.A.3 evidence; unsupported
 reset history remains an unexpected finding, with the source retained.
 
-Game scoring, rally policy, asynchronous point generation and hold/advance
-between points are later milestones. M1 adds none of those owners.
+M1 adds no policy, generation, scoring or hold/advance owner. M2 adds only the
+headless owners below; scoring, Game UI and between-point playback remain later
+milestones.
+
+## M2 headless rally generation
+
+The engine owns a detached request and result, never the live Builder or clock.
+The M1 physical and synchronous Builder compilation boundaries remain in force.
+
+| Concern | Authoritative owner | Acceptance rule |
+| --- | --- | --- |
+| Request/origin | `rally-recipe.js` | Fixed versions, bounded settings and explicit defaults become serializable origin data. Saved players keep team/handedness only. Import/save never regenerates or overwrites authored edits. |
+| Tactical choice | Request-local engine, policy and style modules | Establish legal role/reach candidates and feasible actions before drawing intent. Pre-choice situation/candidates remain separate from execution and outcome resolution. The corrected M2 ranker does not change legacy selection. |
+| Random draws | Request-local `rally-random-v1` streams | Intent, target, execution and narration are independent. Versions, stable order and numerical precision reproduce output across observers, yield schedules and concurrent requests. No wall clock supplies decisions. |
+| Pending physical leg | `play-planning-v2.js`, shared with the compiler | A trial replaces only the bounded pending tail; the next actual contact resolves stance and actor routes before commit. The finalized prefix is not rebuilt per candidate. M1's solver/sampler and outcome evidence remain authoritative. |
+| Movement/feet | `rally-movement.js` plus exact shared-sampler inspection | Paired goals yield to available time, complementary lanes and opening/NVZ rules. Fresh contacts supply explicit grounded feet/reset state. Generated actor/foot peak is at most 18 ft/s and partner spacing at least 2.5 ft; M1 tolerance is not extra travel. |
+| Execution/causation | `rally-quality.js` | Execution modifies supported physical inputs, never unrelated next-contact heights. `rally-causation-v1` is heuristic returned analysis; a quality roll alone cannot prove forced causation or waive physical validation. |
+| Attempts/final gate | `rally-engine-driver.js` | Natural/either has one attempt; conditioned selection has at most 64. Checkpoints bound/yield work, observers do not alter draws, and cancellation surrounds final public validation. Invariant failure stops search rather than hiding behind later selection. |
+| Browser lifetime | Client owns one module worker per request | It can terminate the worker during synchronous validation and releases listeners/resources at settlement. Aborted/settled requests cannot emit late progress or install a result. Neither worker nor client touches Builder. |
+| Returned state | Driver result | `complete` has matching independent ending evidence; `censored` reaches the cap with a valid stop prefix and no winner. Other statuses have no selected document and retain a request recipe with `selection: null`. |
+| Observation | Versioned `rally-realism-v2` tools | Read accepted production contacts/positions and validated outcomes, including earlier-shot momentum. Completeness, validity and calibration are separate; failures/censoring and insufficient denominators remain visible. M0's policy is unchanged. |
+
+Detailed traces and deterministic work counts remain outside saved documents.
+Performance is measured outside generation. Narration and heuristic excitement
+have no authority over tactical weights, geometry, rules or point winners.
+M2 does not replace Random Rally/Smart Add, own score state or create another
+`CoachingSession`. Later integration must use the existing source/history/session
+transaction, never install a result merely because its worker finished.
