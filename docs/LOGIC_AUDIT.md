@@ -185,8 +185,9 @@ full-extension contact without widening the human rig or moving authored feet.
 A rushed contact also receives a timing-derived intermediate stance when the
 comfortable radius cannot fit but a maximum stretch could. An exact mixed-hand
 Pro/lobbers regression retains all ten original draw objects and now finds the
-previously missed legal reset. Its whole 19-contact rally passes the unchanged
-speed, acceleration, spacing and trainer gates.
+previously missed legal reset. Its current 32-contact rally passes the unchanged
+speed, acceleration, spacing and trainer gates; the earlier 19-contact output is
+retained separately as historical evidence.
 
 The stricter movement policy can expose a real second bounce that the older,
 broader speed-only reach envelope could not exclude. A separately versioned v2
@@ -283,3 +284,12 @@ facing remains unchanged. The reviewed real-contact witnesses and preserved
 historical uncertain prefixes distinguish a supported retrieval from a claim
 that a failed finite search proves a winning ball. Full current-candidate gates
 remain separate from these focused regression checks.
+
+The final physical-regression review also identified two search omissions.
+Genuinely above-head contacts now have two closer under-ball plant proposals,
+without changing lower-contact or authored feet. The fallback also checks the
+ordinary lob when another reply flight exists but no supported grounded pose
+can play it. Actual routes, soles, selected-hand poses and fixed delivered
+flights still decide admission. The regression tests preserve earlier decisions,
+exact quality/error pairs and the distinction between fewer nominal target
+attempts and unchanged execution sampling.

@@ -19,7 +19,7 @@ for (const team of ['green', 'orange']) for (const handedness of ['left', 'right
       availableSeconds: 1, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1 };
     const before = JSON.stringify(args), candidates = contactFeetCandidatesV1(args);
     assert.ok(candidates.length <= 8);
-    assert.ok(candidates.some(row => row.routeReachable && Math.abs(row.bodyClearanceFeet - .95) < 1e-7), 'compact support must not be crowded out by wider angle proposals');
+    assert.ok(candidates.some(row => row.routeReachable && Math.abs(row.bodyClearanceFeet - .6) < 1e-7), 'compact support must not be crowded out by wider angle proposals');
     for (const row of candidates.filter(row => row.reachable && row.legalVolleyFeet)) {
       assert.ok(row.bodyClearanceFeet <= generatedContactRadiusFeetV1(contact.heightFeet) + 1e-7);
       assert.ok(row.feet.every(groundedSoleClearsNVZV1));

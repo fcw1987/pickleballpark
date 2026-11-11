@@ -159,7 +159,9 @@ function contactReplySupportV1(input, pair, { diverse = false } = {}) {
         if (probe.id === 'drive') drive = true;
         if (result.attacking || probe.id === 'overhead' && result.flight.launchSpeedMph >= 22) attacking = true;
     } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; countPlanner(error.plannerDiagnostics); }
-    if (!ids.length) try {
+    // A constructible reset flight may still have no supported grounded pose.
+    // The bounded fallback also checks the existing lob alternative.
+    if (!ids.length || diverse) try {
         const probe = { id: 'lob', family: 'lob', pace: 'medium', arc: 'high', target: { x: 10, y: team === 'green' ? 40 : 4 } };
         const result = resolveFlightParametersV1({ candidate: { ...probe, intent: 'lob' }, contact: pair.contact, target: probe.target, team, style: input.players[pair.id].style, materialization: 'first' });
         countPlanner(result.planner.diagnostics);

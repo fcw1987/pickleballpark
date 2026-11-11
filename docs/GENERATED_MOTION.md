@@ -165,19 +165,29 @@ excluded merely because it differs from the normal balanced recovery location.
 ## Compact high-ball contact proposals
 
 For new marked generation, an above-shoulder contact reserves two compact
-0.95 ft radial proposals before wider angle samples fill the existing eight
-candidate slots: one follows the chosen outgoing direction, and one keeps the
-ball in front of a court-facing plant. They use the same anatomical hand/side,
-actual incoming time, whole-sole bounds and adult-width feet as every other
-candidate. A nearer proposal is not automatically reachable or legal; incoming
-motion, spacing, selected-hand trainer support and the fixed delivered result
-must all pass independently.
+radial proposals before wider angle samples fill the existing eight candidate
+slots: one follows the chosen outgoing direction, and one keeps the ball in
+front of a court-facing plant. Their radius is 0.95 ft below seven feet and
+0.60 ft at or above seven feet, where the ball is above the instructional adult
+head. Only those two high proposals can pass inside the ordinary 0.9 ft torso
+clearance proxy. The nearest-origin plant and every lower-contact proposal keep
+their existing clearance. This is not a general body-collision exemption.
+
+They use the same anatomical hand/side, actual incoming time, whole-sole bounds
+and adult-width feet as every other candidate. A nearer proposal is not
+automatically reachable or legal; incoming motion, spacing, selected-hand trainer
+support and the fixed delivered result must all pass independently.
 
 This does not move explicit feet, an initial serve layout, or unmarked legacy
 helper results. It gives the player a chance to get under a high ball instead
 of forcing the edge of a horizontal reach cylinder. Five captured high-contact
 regressions now complete with actual compact plants and exactly two execution
 random draws per contact; no future error was inspected to choose those feet.
+The additional above-head witnesses retain all earlier decisions and the next
+quality/error pair. More feasible nominal plants can exhaust fewer target
+attempts before execution, so the later target-stream perturbation pair and
+resulting target can differ. Tests preserve that distinction instead of claiming
+that every random-stream position is unchanged.
 
 ## Narrow fallback retrievals
 
@@ -189,6 +199,13 @@ and returns at most four new proposals. Cancellation and work-budget guards run
 before and after the synchronous bounded search. Each resulting contact still
 requires independent incoming movement, spacing, actual grounded soles, selected
 hand/side support and outgoing flight admission.
+
+A constructible reply flight is not proof that its grounded pose is supported.
+The bounded fallback checks the existing central lob alternative even when a
+reset flight was found, rather than allowing that unsupported reset to hide a
+playable lob. This uses the existing time, stance, work and planner limits.
+The ordinary nominal policy still chooses and draws any eventual lob target;
+it does not become a fixed emergency target merely because the fallback found it.
 
 A non-attackable low ball is not automatically unplayable. If all ordinary
 nominal choices fail, a physically supported emergency drive may use an explicit

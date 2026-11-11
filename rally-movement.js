@@ -161,9 +161,9 @@ function ordinaryContactFeetCandidatesV1(args = {}) {
   const paddleRadius = supportedPaddleRadius(contact);
   if (paddleRadius < CONTACT_BODY_CLEARANCE) return freeze(candidates);
   const seen = new Set([`${first.stance.x.toFixed(8)},${first.stance.y.toFixed(8)}`]);
-  const add = stance => {
+  const add = (stance, minimumClearance = CONTACT_BODY_CLEARANCE) => {
     const radius = distance(stance, contact);
-    if (radius < CONTACT_BODY_CLEARANCE - EPS || radius > paddleRadius + EPS
+    if (radius < minimumClearance - EPS || radius > paddleRadius + EPS
       || bodySide * (stance.x - contact.x) < CONTACT_SIDE_CLEARANCE - EPS
       || stance.x < x0 || stance.x > x1 || stance.y < -7.5 || stance.y > 51.5
       || (team === 'green' ? stance.y > 21.99 : stance.y < 22.01)) return;
@@ -219,11 +219,15 @@ function ordinaryContactFeetCandidatesV1(args = {}) {
   // grid consumes the eight-proposal budget. These are new-generation plants,
   // not changes to explicit authored feet or a guarantee of anatomical reach.
   if (defaultFootState !== undefined && contact.heightFeet > GENERATED_CONTACT_SUPPORT_V1.maximumShoulderHeightMetres / .3048) {
+    // At 7 ft the ball is above the adult head, so these two generated
+    // proposals can move under it. All ordinary torso-clearance plants stay
+    // unchanged; selected-hand pose, sole and route checks still admit the reply.
+    const compactRadius = contact.heightFeet >= 7 ? .6 : .95;
     const courtTarget = { x: contact.x, y: contact.y + (team === 'green' ? 10 : -10) };
     for (const target of [args.target, courtTarget]) {
       const natural = contactFeetV1({ ...args, target, position: undefined, availableSeconds: undefined }).stance;
       const dx = natural.x - contact.x, dy = natural.y - contact.y, length = Math.hypot(dx, dy);
-      if (length > 0) add({ x: contact.x + dx * .95 / length, y: contact.y + dy * .95 / length });
+      if (length > 0) add({ x: contact.x + dx * compactRadius / length, y: contact.y + dy * compactRadius / length }, Math.min(CONTACT_BODY_CLEARANCE, compactRadius));
     }
   }
   for (const radius of [...new Set([Math.min(2.9, paddleRadius), Math.min(1.8, paddleRadius), .95])].filter(r => r <= paddleRadius)) {

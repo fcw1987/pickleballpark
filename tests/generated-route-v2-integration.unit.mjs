@@ -63,10 +63,10 @@ test('current wide-foot generation preserves the overhead delivery and v2 fault 
   assert.deepEqual(result.document.defaultFootState, {version: 'generated-ready-stance-v1'});
   assert.equal(executionCalls, 2 * result.decisions.length, 'nominal refinement never draws and discards an execution');
   assertFixedExecutionPairs(result); assertFreshPhysicalResult(result);
-  // The final overhead uses the reviewed compact plant, 0.18 ft closer to the
+  // The final overhead uses the reviewed above-head plant, 0.60 ft from the
   // same ball. Its fixed contact, hand, flight and v2 ending proof do not change.
   // All earlier contact roots still equal the immutable narrow-foot source.
-  const overheadRoot = {x: 8.734421043, y: 37.418117224};
+  const overheadRoot = {x: 8.986851591, y: 37.175673791};
   for (const [index, shot] of result.document.shots.entries()) {
     const {feet, ...evidence} = shot.contactEvidence, {feet: oldFeet, ...oldEvidence} = fixture.document.shots[index].contactEvidence;
     assert.deepEqual(evidence, oldEvidence);
