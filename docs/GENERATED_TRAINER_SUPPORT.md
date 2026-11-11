@@ -8,7 +8,8 @@ represent the contact with its fixed bones and actual grounded feet.
 
 `trainer-contact-support.js` is the pure numeric module shared with the renderer,
 frozen at SHA-256
-`5bca9a3854b52a51908de7d592385bed9708e9caec7f69142deaa5367d6c991c`.
+`c24161585dca175007313e92b36fa677e2e85687f6a63653f1ada3b690470b9d`
+with explicit revision `trainer-contact-support-v3`.
 It depends only on the shared versioned human profile. Its bounded alternating
 arm/pelvis solve is not a proof of global physiological reachability. The original
 renderer integration was compared against actual mesh, wrist, leg and sole
@@ -42,3 +43,42 @@ spacing and generated-flight checks, preserving their fail-first diagnostics.
 It reports `unsupported-trainer-context` separately from
 `unsupported-grounded-trainer-pose`. Producer-supplied success metadata cannot
 satisfy either audit, and failed source is never repaired or relabeled a winner.
+
+## Shared posture revision 2
+
+The coordinated pure module revision `trainer-contact-support-v2` keeps all
+adult-profile dimensions and hard arm, leg and hip limits unchanged. After the
+original solve, it softly prefers a 0.56 m arm extension when the pelvis has room
+to move toward the same authored wrist. The preference fades continuously to
+zero within 1 cm of the existing hard bounds and is analytically clipped against
+those bounds. Root, sole targets, desired wrist and paddle face do not move.
+The adapter records the exact module revision and SHA256 in its provenance.
+
+An independent matched development review retained all 114 accepted selected-hand
+contacts (maximum paddle-face difference 1.67e-16 m) and all 11 captured rejected
+fixed deliveries with unchanged residual errors. Sixty accepted postures gained
+elbow bend. This is a posture preference, not wider anatomy or a claim that the
+bounded solver proves every possible human contact reachable or unreachable.
+
+## Shared posture revision 3
+
+Low Model-2 contacts can face the actual ball more directly rather than following
+a distant outgoing target. A smooth preference applies to ordinary low-contact
+families below 0.80 m, reaches full weight below 0.30 m, and fades near the root
+and toward the rearward bearing seam. Serve, lob and overhead are excluded.
+Both target and original posture keep the existing plus-or-minus 75-degree
+court-facing turn limit. This is not a feasibility-triggered fallback or an
+expanded arm, leg, hip or foot allowance.
+
+The preference requires explicit Model 2 and finite contact height. Legacy,
+missing-context and planar facing callers retain revision-2 behavior. The
+renderer forwards the model version; the generation evaluator already requires
+a stationary grounded Model-2 contact. Existing exactly-rear and close-contact
+ambiguities remain outside this preference rather than being called globally
+continuous. Tests cover the added blend boundaries and both handed/court mirrors.
+
+Fixed contact witnesses preserve the exact source feet, hand and desired ball
+contact. Three historical failed prefixes also remain uncertain under all three
+route-certificate versions; the new engine must establish a real supported
+return, retain all earlier random draws and independently pass public physics.
+A bounded pose-search failure still cannot certify human impossibility.

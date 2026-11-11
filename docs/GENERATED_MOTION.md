@@ -178,3 +178,29 @@ helper results. It gives the player a chance to get under a high ball instead
 of forcing the edge of a horizontal reach cylinder. Five captured high-contact
 regressions now complete with actual compact plants and exactly two execution
 random draws per contact; no future error was inspected to choose those feet.
+
+## Narrow fallback retrievals
+
+Only after ordinary nominal opportunities have been exhausted, the existing
+second time pass can refine the intersection of the unchanged travel allowance
+and paddle-reach region. The finite proposal search accepts at most 256 coarse
+pairs, retains four seeds, uses at most 48 iterations of ten directions per seed,
+and returns at most four new proposals. Cancellation and work-budget guards run
+before and after the synchronous bounded search. Each resulting contact still
+requires independent incoming movement, spacing, actual grounded soles, selected
+hand/side support and outgoing flight admission.
+
+A non-attackable low ball is not automatically unplayable. If all ordinary
+nominal choices fail, a physically supported emergency drive may use an explicit
+defensive deep-court target: lateral 0.8–19.2 ft and baseline depth 3–8 ft. This
+is not the ordinary attacking drive's target policy and does not make the ball
+attackable. The fallback picks the first supported target from its finite
+symmetric probe set; it records a null nominal target draw and an explicit
+fixed-target selection. It then consumes one ordinary quality/error pair and
+one ordinary perturbation pair. A failed delivered execution ends the attempt;
+there is no replanting, quality reroll, or retry toward a favorable outcome.
+
+This search supplies real contact witnesses, not a theorem of human reach.
+Failure still reports an unsupported/uncertain point unless independent
+physical evidence establishes a legal ending. It cannot invent a second bounce
+winner merely because finite samples did not find a reply.

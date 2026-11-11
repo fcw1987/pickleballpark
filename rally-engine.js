@@ -1,3 +1,4 @@
+import { refineGeneratedContactProposalsV1, generatedRetrievalProbeTargetsV1 } from './generated-contact-refinement.js';
 // Headless versioned policy. Planning uses the same contact, actor and flight
 // construction as compilation; the driver independently validates final source.
 import { createEngineDriverV1 } from './rally-engine-driver.js';
@@ -128,11 +129,13 @@ function routeValid(segment) {
 // Small shared-solver reply probes establish opportunity support before an
 // outgoing policy choice. These are physical possibilities, not future intent,
 // execution quality, movement destinations or outcome evidence.
-function contactReplySupportV1(input, pair) {
+function contactReplySupportV1(input, pair, { diverse = false } = {}) {
     const team = input.players[pair.id].team, ids = [], solvedProbes = [], probes = [
         { id: 'drive', family: 'drive', pace: 'firm', target: { x: 10, y: team === 'green' ? 41 : 3 } },
         { id: 'reset', family: 'reset', pace: 'soft', target: { x: 10, y: team === 'green' ? 27 : 17 } }
     ];
+    if (diverse) for (const target of generatedRetrievalProbeTargetsV1(team))
+        if (target.x !== 10 || target.y !== (team === 'green' ? 41 : 3)) probes.push({ id: 'drive', family: 'drive', pace: 'firm', target });
     if (pair.contact.heightFeet >= 7) probes.push({ id: 'overhead', family: 'overhead', pace: 'firm', target: { x: 10, y: team === 'green' ? 31 : 13 } });
     let drive = false, attacking = false, solverCalls = 0, launchSolverCalls = 0, workUnits = 0;
     const countPlanner = diagnostics => {
@@ -256,6 +259,18 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
             }
         }
     }
+    if (refinementPass) {
+        // Both guards propagate cancellation and work exhaustion. The refiner
+        // itself has fixed input, stencil and iteration limits and reads no RNG.
+        await checkpoint({ shots: index, workDelta: 1, contactRefinement: 'before' });
+        const refined = refineGeneratedContactProposalsV1({ input, pairs, incoming, origins,
+            defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1 });
+        await checkpoint({ shots: index, workDelta: refined.work, contactRefinement: 'after' });
+        (diagnostics.angularRefinements ??= []).push({ contactIndex: index, ...refined,
+            pairs: refined.pairs.map(pair => ({ id: pair.id, time: pair.time, stance: pair.feet.stance,
+                target: pair.refinementTarget, error: pair.refinementError })) });
+        pairs.push(...refined.pairs);
+    }
     // A point/time is one opportunity for the whole eligible team, even when
     // one actor's reach minimum or current depth proposed it first.
     const opportunities = new Map(pairs.map(pair => [[pair.kind, numberV1(pair.time), pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':'), pair]));
@@ -296,7 +311,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
         const supportKey = [pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
         const replyKey = [supportKey, input.players[pair.id].style, pair.signature?.intent ?? '', pair.signature?.target.x ?? '', pair.signature?.target.y ?? ''].join(':');
         if (!replyCache.has(replyKey)) {
-            const support = contactReplySupportV1(input, pair);
+            const support = contactReplySupportV1(input, pair, { diverse: refinementPass });
             replyCache.set(replyKey, support);
             await checkpoint({ shots: index, workDelta: support.workUnits });
         }
@@ -304,10 +319,10 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
         if (!pair.replySupport.ids.length) continue;
         const team = input.players[pair.id].team;
         const stanceKey = [pair.id, pair.kind, supportKey, pair.contactStyle].join(':');
-        if (!stanceCache.has(stanceKey)) stanceCache.set(stanceKey, pair.signature ? [pair.feet] : generatedV1(contactFeetCandidatesV1({
+        if (!stanceCache.has(stanceKey)) stanceCache.set(stanceKey, pair.refinedStance ? [generatedV1(pair.refinedStance)] : pair.signature ? [pair.feet] : generatedV1(contactFeetCandidatesV1({
             contact: pair.contact, target: { x: 10, y: team === 'green' ? 36 : 8 }, team,
             handedness: input.players[pair.id].handedness, contactStyle: pair.contactStyle, kind: pair.kind,
-            position: origins[pair.id], availableSeconds: pair.time, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1
+            position: origins[pair.id], availableSeconds: pair.time, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1, refineAngular: refinementPass
         })).filter(feet => feet.reachable && feet.legalVolleyFeet));
         pair.stanceOptions = stanceCache.get(stanceKey).map((feet, stanceIndex) => ({ feet, stanceIndex, opportunityId: key,
             preference: contactOpportunityPreferenceV1({ contact: pair.contact, stance: feet.stance,
@@ -328,6 +343,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
         preference: [...group.proposals].sort(compareContactOpportunityPreferencesV1)[0].preference
     })).sort(compareContactOpportunityPreferencesV1);
     let cursor = 0, emitted = 0, facts = [];
+    const emergency = [];
     while (cursor < proposals.length || facts.length) {
         const accepted = rankContactOpportunitiesV1({ players: input.players, positions: origins, eligible, candidates: facts });
         const next = proposals[cursor];
@@ -342,7 +358,23 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
                 remainingProposals: proposals.slice(cursor, cursor + 4).map(group => ({ opportunityId: group.opportunityId,
                     preference: group.preference, auditStatus: 'not-inspected',
                     reason: 'The selected feasible preference meets or exceeds this optimistic proposal bound.' })) };
-            yield { ...pair, selectionStrategy: accepted.strategy, selectionEvidence: evidence };
+            const selectedPair = { ...pair, selectionStrategy: accepted.strategy, selectionEvidence: evidence };
+            yield selectedPair;
+            if (refinementPass && !pair.replySupport.attacking) {
+                const team = input.players[pair.id].team;
+                const reply = pair.replySupport.probes.find(candidate => {
+                    const depth = team === 'green' ? 44 - candidate.target.y : candidate.target.y;
+                    return candidate.family === 'drive' && candidate.target.x >= .8 && candidate.target.x <= 19.2
+                        && depth >= 3 && depth <= 8;
+                });
+                if (reply) emergency.push({ ...selectedPair, emergencyRetrieval: {
+                    version: 'generated-emergency-retrieval-v1', trigger: 'ordinary-bounded-nominal-options-exhausted',
+                    attackable: false, family: 'drive', target: xy(reply.target),
+                    targetRegion: { name: 'defensive-deep-court', minimumX: .8, maximumX: 19.2,
+                        minimumBaselineDepth: 3, maximumBaselineDepth: 8 },
+                    selection: 'first-supported-in-region-probe',
+                } });
+            }
             emitted++;
             if (emitted >= RALLY_ENGINE_LIMITS.maxContactPairs) break;
             facts = facts.filter(row => row.opportunityId !== selected.opportunityId);
@@ -396,7 +428,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
                     if (diagnostics.contactExclusions.length > 8) diagnostics.contactExclusions.shift();
                     continue;
                 }
-                pair.replySupport = { ids: supported.map(reply => reply.id), probes: supported,
+                pair.replySupport = { ids: [...new Set(supported.map(reply => reply.id))], probes: supported,
                     drive: supported.some(reply => reply.id === 'drive'),
                     attacking: supported.some(reply => reply.attacking || reply.id === 'overhead' && reply.flight.launchSpeedMph >= 22)
                         && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
@@ -424,6 +456,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
             break;
         }
     }
+    if (refinementPass) for (const pair of emergency) yield pair;
     // Resuming a yielded pair means the caller exhausted nominal choices.
     // A committed contact closes this generator; an execution failure returns
     // immediately from the attempt. Thus this second bounded pass never
@@ -531,6 +564,11 @@ function signatureFlight(input, pair, materialization = 'all') {
 }
 
 function candidateFlight(input, pair, candidate, situation, draws, materialization = 'all') {
+    if (pair.emergencyRetrieval) {
+        const target = xy(pair.emergencyRetrieval.target);
+        return { target, parameters: resolveFlightParametersV1({ candidate, contact: pair.contact, target,
+            team: input.players[pair.id].team, style: input.players[pair.id].style, materialization }) };
+    }
     if (pair.signature?.intent === candidate.intent) {
         const planner = signatureFlight(input, pair, materialization);
         if (planner.status !== 'solved') {
@@ -610,7 +648,15 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
         for await (const pair of contactPairs(input, state, index, checkpoint, diagnostics)) {
             foundPair = true;
             const situation = situationFor(input, state, index, pair, decisions), player = input.players[pair.id], profile = resolveStyle(player.style, player.flavour);
-            const sourceCandidates = listIntentCandidatesV1(situation, { profile, signatureShots: input.options.signatureShots });
+            const ordinaryCandidates = listIntentCandidatesV1(situation, { profile, signatureShots: input.options.signatureShots });
+            if (pair.emergencyRetrieval && situation.attackable) throw new Error('Emergency retrieval cannot become an attack.');
+            const sourceCandidates = pair.emergencyRetrieval ? {
+                context: 'emergency-retrieval',
+                candidates: [{ id: 'emergency-retrieval', intent: 'drive', family: 'drive',
+                    targetRegion: 'defensive-deep-court', pace: 'firm', arc: 'medium', weight: 1, probability: 1,
+                    addsContact: true, reasons: ['ordinary-bounded-nominal-options-exhausted', 'actual-supported-defensive-target'] }],
+                excluded: ordinaryCandidates.excluded,
+            } : ordinaryCandidates;
             const feasible = [], excluded = [...sourceCandidates.excluded];
             for (const candidate of sourceCandidates.candidates) {
                 if (!candidate.addsContact) continue;
@@ -636,9 +682,9 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                 // Target and friendly-route feasibility precede every execution
                 // draw. A bounded second supported target can improve a soft
                 // flight's preferred speed without changing its intended region.
-                for (let repair = 0; repair < RALLY_ENGINE_LIMITS.targetsPerIntent; repair++) {
+                for (let repair = 0; repair < (pair.emergencyRetrieval ? 1 : RALLY_ENGINE_LIMITS.targetsPerIntent); repair++) {
                     await checkpoint({ shots: index, workDelta: 1 });
-                    const targetDraws = { lateral: random.target(), depth: random.target() };
+                    const targetDraws = pair.emergencyRetrieval ? null : { lateral: random.target(), depth: random.target() };
                     try {
                         const { target, parameters } = candidateFlight(input, pair, chosen, situation, targetDraws);
                         await checkpoint({ shots: index, workDelta: parameters.planner?.diagnostics.workUnits ?? parameters.planner?.diagnostics.solverCalls ?? 0 });
@@ -730,11 +776,12 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         pendingMovementPlans.set(state, movement.plan);
                         committed = true;
                         decisions.push({ id: `decision-${index + 1}`, shotId: recipe.id, situation, candidates: preCandidates, excluded: preExcluded,
-                            policyContext: { context: sourceCandidates.context, ...(sourceCandidates.conditioning ? { conditioning: clone(sourceCandidates.conditioning) } : {}) },
+                            policyContext: { context: sourceCandidates.context, ...(pair.emergencyRetrieval ? { emergencyRetrieval: generatedV1(pair.emergencyRetrieval) } : {}), ...(sourceCandidates.conditioning ? { conditioning: clone(sourceCandidates.conditioning) } : {}) },
                             chosen: { id: chosen.id, intent: chosen.intent, family: chosen.family }, draws: { intent: intentDraw, execution: executionDraws, target: targetDraws, perturbation: perturbationDraws, narration: narrationDraw }, execution,
                             resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair, solutionIndex,
                                 flightPlannerVersion: FLIGHT_PLANNER_VERSION,
-                                nominalSafety: generatedV1(nominalSafety), trainerSupport: generatedV1(trainerSupport), deliveredGuidance: generatedEvidenceV1(deliveredGuidance),
+                                nominalSafety: generatedV1(nominalSafety), ...(pair.emergencyRetrieval ? { nominalTargetSelection: { mode: 'fixed-supported-emergency-target',
+                                    target: xy(target), targetDrawsUsed: false } } : {}), trainerSupport: generatedV1(trainerSupport), deliveredGuidance: generatedEvidenceV1(deliveredGuidance),
                                 ...(applied.physicalTransformation ? { physicalTransformation: generatedV1(applied.physicalTransformation) } : {}),
                                 ...(parameters.guidance ? { flightGuidance: generatedEvidenceV1(parameters.guidance) } : {}),
                                 actualContact: generatedV1(trial.contact), actualFeet: generatedV1(trial.feet), intendedError: execution.errorReason, choiceAttempts } });

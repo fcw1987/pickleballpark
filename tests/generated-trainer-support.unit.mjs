@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { assessGeneratedTrainerSupportV1, inspectGeneratedTrainerSupportV1, GENERATED_TRAINER_SUPPORT_V1 } from '../generated-trainer-support.js';
-import { evaluateTrainerContactSupport } from '../trainer-contact-support.js';
+import { evaluateTrainerContactSupport, TRAINER_CONTACT_SUPPORT_REVISION } from '../trainer-contact-support.js';
 import { inspectGeneratedContactSupportV1 } from '../generated-contact-support.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
 import { sampleActorBoardPositionV2, sampleActorFeetV2 } from '../play-actors-v2.js';
@@ -55,6 +55,8 @@ function provisional(document) {
 test('the generation adapter uses the reviewed frozen pure trainer module without renderer or Three imports', () => {
   const module = readFileSync(new URL('../trainer-contact-support.js', import.meta.url));
   assert.equal(createHash('sha256').update(module).digest('hex'), GENERATED_TRAINER_SUPPORT_V1.supportModuleSha256);
+  assert.equal(TRAINER_CONTACT_SUPPORT_REVISION, 'trainer-contact-support-v3');
+  assert.equal(GENERATED_TRAINER_SUPPORT_V1.supportRevision, TRAINER_CONTACT_SUPPORT_REVISION);
   const adapter = readFileSync(new URL('../generated-trainer-support.js', import.meta.url), 'utf8');
   for (const text of [module.toString(), adapter]) assert.doesNotMatch(text, /from ['"][^'"]*(?:three[.]module|reference-athletes|three-d-presentation|three-d-playback)/);
 });
@@ -106,7 +108,9 @@ test('pre-execution incoming velocity uses the actual selected contact time, not
 });
 
 test('a more favorable counterfactual hand cannot stand in for the selected physical hand', () => {
-  const contact = {x: 7, y: 14, heightFeet: 1}, stance = {x: 4.5, y: 13};
+  // Above the low-contact facing blend, the same explicit forehand remains
+  // supported only by the counterfactual hand. The old 1 ft case supports both.
+  const contact = {x: 7, y: 14, heightFeet: 3}, stance = {x: 4.5, y: 13};
   const args = {contact, stance, feet: [{x: 4.08, y: 13}, {x: 4.92, y: 13}], kind: 'volley', family: 'volley',
     strokeSide: 'forehand', nearCourt: true, outgoingFlight: solveFlightV2({from: contact, target: {x: 7, y: 30}, family: 'volley', physics: {apexFeet: 4}})};
   const right = assessGeneratedTrainerSupportV1({...args, handedness: 'right'}), left = assessGeneratedTrainerSupportV1({...args, handedness: 'left'});

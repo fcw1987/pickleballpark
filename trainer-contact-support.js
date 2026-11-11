@@ -1,5 +1,7 @@
 import {HUMAN_ATHLETE_PROFILE_V1 as HUMAN} from './human-athlete-profile.js';
 
+export const TRAINER_CONTACT_SUPPORT_REVISION = 'trainer-contact-support-v3';
+
 // Numeric geometry for the active instructional trainer, not a physiological
 // reach test, pickleball rule check, or permission to alter an authored contact.
 // All vectors are plain {x,y,z} values. No input is changed and no mesh is made.
@@ -82,6 +84,21 @@ export function solveTrainerSupport({pelvis,shoulderOffset,wrist,ankles,hipOffse
   point=legProjection(point,centres[0],centres[1],L.maximumLegReach);
   iterations++;
  }
+ // Prefer an unlocked elbow without changing hard radii or the authored wrist.
+ // Fade the preference to zero at every leg/hip bound so outside-to-inside
+ // transitions and tangential constraint directions cannot introduce a snap.
+ const preferredReach=.56,deltaPreferred=sub(armCentre,point),dPreferred=length(deltaPreferred),excess=Math.max(0,dPreferred-preferredReach);
+ if(excess>0){
+  const direction=unit(deltaPreferred);const boundClearance=Math.min(L.maximumHipHorizontalOffset-Math.hypot(point.x,point.z),point.y-L.minimumHipHeight,L.maximumHipHeight-point.y,...centres.map(c=>L.maximumLegReach-distance(point,c))),boundWeight=smooth(boundClearance/.01);let step=excess*smooth(excess/.06)*boundWeight;
+  const withinSphere=(origin,centre,radius,dir)=>{const rel=sub(origin,centre),b=dot(rel,dir),c=radius*radius-dot(rel,rel);return Math.max(0,-b+Math.sqrt(Math.max(0,b*b+c)));};
+  for(const centre of centres)step=Math.min(step,withinSphere(point,centre,L.maximumLegReach,direction));
+  if(direction.y>1e-12)step=Math.min(step,(L.maximumHipHeight-point.y)/direction.y);
+  if(direction.y< -1e-12)step=Math.min(step,(L.minimumHipHeight-point.y)/direction.y);
+  const horizontalSpeed=Math.hypot(direction.x,direction.z);
+  if(horizontalSpeed>1e-12)step=Math.min(step,withinSphere(v(point.x,0,point.z),v(),L.maximumHipHorizontalOffset,v(direction.x/horizontalSpeed,0,direction.z/horizontalSpeed))/horizontalSpeed);
+  point=addScaled(point,direction,Math.max(0,step));
+ }
+
  const shoulder=add(point,shoulderOffset),reach=sub(wrist,shoulder),desiredArmReach=length(reach);
  const solvedWrist=desiredArmReach>L.maximumArmReach||desiredArmReach<L.minimumArmReach
   ?addScaled(shoulder,unit(reach),clamp(desiredArmReach,L.minimumArmReach,L.maximumArmReach)):copy(wrist);
@@ -103,22 +120,36 @@ export function solveTrainerSupport({pelvis,shoulderOffset,wrist,ankles,hipOffse
   :boundsError>1e-7?'stance exceeds bounded pelvis support'
   :armError>1e-7?'degenerate arm support'
   :reachError>1e-5?'contact exceeds this grounded pose':null;
- return {pelvis:point,shoulder,wrist:solvedWrist,desiredWrist,reachCorrection,reachError,legError,feasible:reason===null,reason,
+ return {supportRevision:TRAINER_CONTACT_SUPPORT_REVISION,pelvis:point,shoulder,wrist:solvedWrist,desiredWrist,reachCorrection,reachError,legError,feasible:reason===null,reason,
   diagnostics:{iterations,desiredArmReach,armReach,armError,legDistances,legErrors,legIntersectionError,boundsError}};
 }
 
 // The same forward-sector adjustment and +/-75-degree stance turn used by
 // production. This is contact-facing only, before preparation/recovery blends.
-export function trainerContactFacing({rawFacing,root,contact,family,strokeSide}) {
+export function trainerContactFacing({rawFacing,root,contact,family,strokeSide,modelVersion}) {
  const net=root.z<0?1:-1;
  const facing=unit(v(rawFacing?.x||0,0,rawFacing?.z??net));
  if(family==='ready'||!contact)return facing;
- const dx=contact.x-root.x,dz=contact.z-root.z;
- if(Math.hypot(dx,dz)<=.10)return facing;
+ const dx=contact.x-root.x,dz=contact.z-root.z,distance=Math.hypot(dx,dz);
+ if(distance<=.10)return facing;
  const rawYaw=Math.atan2(facing.x,facing.z),bearing=Math.atan2(dx,dz),delta=angleDelta(bearing-rawYaw);
  const turned=rawYaw+Math.sign(delta)*Math.max(0,Math.abs(delta)-(strokeSide==='backhand'?Math.PI/6:Math.PI/3));
  const courtYaw=net===1?0:Math.PI,yaw=courtYaw+clamp(angleDelta(turned-courtYaw),-Math.PI*5/12,Math.PI*5/12);
- return v(Math.sin(yaw),0,Math.cos(yaw));
+ // Low Model-2 contacts orient the body toward the actual ball rather than
+ // the eventual landing, which may differ sharply after a wide mishit. This
+ // is a continuous posture preference, never an unsupported-pose fallback.
+ // Legacy and planar callers retain the previous facing exactly.
+ const height=contact.y-(root.y||0);
+ const lowFamilies=['drop','dink','reset','drive','volley','block','return','short-hop','forehand','backhand'];
+ const lowContact=modelVersion===2&&Number.isFinite(height)&&lowFamilies.includes(family)?smooth((.80-height)/.50):0;
+ const proximity=smooth((distance-.10)/.20);
+ // Permit front and lateral retrievals, but remove the preference before the
+ // directly-behind bearing seam. Both candidate yaws retain the same stance
+ // clamp, so their convex blend cannot enlarge the allowed torso turn.
+ const forwardSector=smooth((net*dz/distance+.8)/.6);
+ const targetYaw=courtYaw+clamp(angleDelta(bearing-courtYaw),-Math.PI*5/12,Math.PI*5/12);
+ const preferredYaw=yaw+(targetYaw-yaw)*lowContact*proximity*forwardSector;
+ return v(Math.sin(preferredYaw),0,Math.cos(preferredYaw));
 }
 
 const FAMILIES=new Set(['serve','return','forehand','backhand','drive','drop','dink','volley','block','reset','short-hop','lob','overhead']);
@@ -127,7 +158,7 @@ const FAMILIES=new Set(['serve','return','forehand','backhand','drive','drop','d
 const WRIST_X=.056+.045/Math.sqrt(1+.12**2);
 const WRIST_Y=-.011-.045*.12/Math.sqrt(1+.12**2);
 const WRIST_Z=.029,GRIP_TO_FACE=.2025;
-const unsupported=reason=>({supported:false,feasible:null,reason,profileVersion:HUMAN.version});
+const unsupported=reason=>({supported:false,feasible:null,reason,profileVersion:HUMAN.version,supportRevision:TRAINER_CONTACT_SUPPORT_REVISION});
 
 // Evaluate one impact (phase 1) with stationary Model-2 plant loading. World
 // feet are LEFT/RIGHT sole targets in metres, not rule-space board coordinates.
@@ -151,7 +182,7 @@ export function evaluateTrainerContactSupport(options={}) {
  }
  if((outgoingVelocity&&!finite(outgoingVelocity))||(incomingVelocity&&!finite(incomingVelocity))||(!outgoingVelocity&&incomingVelocity))return unsupported('finite outgoing velocity is required when flight kinematics are supplied');
  const hand=handedness==='left'?1:-1,backhand=strokeSide==='backhand'||family==='backhand',strokeSign=hand*(backhand?-1:1);
- const facing=trainerContactFacing({rawFacing:bodyFacing,root,contact,family,strokeSide}),yaw=Math.atan2(facing.x,facing.z);
+ const facing=trainerContactFacing({rawFacing:bodyFacing,root,contact,family,strokeSide,modelVersion:2}),yaw=Math.atan2(facing.x,facing.z);
  const origin=v(root.x,root.y||0,root.z),toLocal=p=>rotateY(sub(p,origin),-yaw),toWorld=p=>add(rotateY(p,yaw),origin);
  const face=toLocal(contact),compact=['drop','dink','short-hop','volley','block','reset'].includes(family);
  const low=Math.max(0,1.03-contact.y),activity=Math.sin(Math.PI/3)**2;
@@ -181,7 +212,7 @@ export function evaluateTrainerContactSupport(options={}) {
  const wrist=add(addScaled(face,radial,-GRIP_TO_FACE),wristOffset);
  const support=solveTrainerSupport({pelvis,shoulderOffset,wrist,ankles,hipOffsets});
  const solvedFace=add(face,support.reachCorrection);
- return {supported:true,feasible:support.feasible,reason:support.reason,profileVersion:HUMAN.version,facing,yaw,torsoLean,pelvisTurn,
+ return {supported:true,supportRevision:TRAINER_CONTACT_SUPPORT_REVISION,feasible:support.feasible,reason:support.reason,profileVersion:HUMAN.version,facing,yaw,torsoLean,pelvisTurn,
   reachError:support.reachError,legError:support.legError,diagnostics:support.diagnostics,
   local:{...support,face:solvedFace,desiredFace:face,ankles,hipOffsets,shoulderOffset,paddleX,paddleRadial:radial,paddleNormal:normal},
   world:{pelvis:toWorld(support.pelvis),shoulder:toWorld(support.shoulder),wrist:toWorld(support.wrist),desiredWrist:toWorld(support.desiredWrist),face:toWorld(solvedFace),desiredFace:copy(contact)}};

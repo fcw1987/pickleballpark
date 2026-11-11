@@ -229,7 +229,7 @@ test('soft popups retain their intended NVZ target while reported shape is measu
     const dink=family==='dink';
     near(result.applied.target.y,team==='green'?(dink?28.825:28.2):(dink?15.175:15.8));
     assert.equal(result.applied.physicalTransformation.kind,dink?'dink-popup':'soft-popup');
-    assert.equal(result.applied.physicalTransformation.version,'rally-execution-physical-v3');
+    assert.equal(result.applied.physicalTransformation.version,'rally-execution-physical-v4');
     if(dink){assert.equal(result.applied.physicalTransformation.dinkPopup.version,'rally-dink-popup-v1');near(result.flight.metadata.apexFeet,6.4);}
     assert.ok(result.applied.target.y>=15&&result.applied.target.y<=29);
     assert.equal(JSON.stringify(input),before);

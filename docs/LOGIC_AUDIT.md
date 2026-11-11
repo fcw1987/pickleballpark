@@ -258,3 +258,28 @@ physics simulation. Model 2 physical overheads do not receive that notice.
 Calibration remains a separate model-development issue. Correct line recovery
 is not suppressed merely to fit an all-up percentage ceiling, and error priors
 or acceptance thresholds are not lowered to turn an examined cohort green.
+
+### Error direction and narrowly supported retrieval
+
+New physical transformation revision 4 preserves a net miss's selected
+horizontal direction. The previous mapping shortened target depth while keeping
+the distant lateral target, which could abruptly rotate the stroke toward the
+sideline. The corrected mapping intersects the original horizontal ray with the
+same draw-derived near-net depth, retaining the same error, clearance request
+and random draw count. Actual solver collision remains authoritative. A malformed
+or unsupported chord is not redirected to manufacture a mesh hit. Existing
+serialized authored physics is unchanged.
+
+The contact fallback can also refine a narrow timing/stance window and admit a
+clearly labeled defensive deep-court retrieval after ordinary choices fail.
+It preserves actual hand, stroke side, feet, flight and execution evidence.
+No search failure is promoted to an unsupported winner. See the finite bounds
+and explicit random-stream contract in [generated movement](GENERATED_MOTION.md).
+
+A coordinated Model-2 posture correction makes low contacts face the actual ball
+rather than a far-away outgoing target. Its smooth preference keeps all existing
+human dimensions, hard support bounds, planted feet and selected hand. Legacy
+facing remains unchanged. The reviewed real-contact witnesses and preserved
+historical uncertain prefixes distinguish a supported retrieval from a claim
+that a failed finite search proves a winning ball. Full current-candidate gates
+remain separate from these focused regression checks.

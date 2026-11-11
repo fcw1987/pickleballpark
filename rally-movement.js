@@ -144,7 +144,7 @@ export function contactFeetV1({ contact, target, team, handedness = 'right', con
 /** Bounded outgoing-aware alternatives. The established nearest pose stays first;
  * every alternative reports travel from the actual supplied player position.
  * Flight clearance and the sampled incoming route remain the caller's audit. */
-export function contactFeetCandidatesV1(args = {}) {
+function ordinaryContactFeetCandidatesV1(args = {}) {
   const first = contactFeetV1(args), candidates = [first];
   const { contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds, defaultFootState } = args;
   const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
@@ -683,4 +683,56 @@ export function inspectGeneratedMovementV1(timelineOrSegment, { maxPeakFeetPerSe
     }
   }
   return freeze({ valid: true, maxPeakFeetPerSecond: maximum, byActor, boundFeetPerSecond: maxPeakFeetPerSecond, ...dynamicsDiagnostics() });
+}
+
+/** Fallback-only boundary proposals in the intersection of the selected travel
+ * disk and unchanged paddle-reach disk. Ordinary calls retain their exact set. */
+export function contactFeetCandidatesV1(args = {}) {
+  const ordinary = ordinaryContactFeetCandidatesV1(args);
+  if (!args.refineAngular || args.kind === 'serve' || !args.position || !(args.availableSeconds > 0)) return ordinary;
+  const { contact, position, team, handedness = 'right', contactStyle = 'forehand',
+    kind = 'groundstroke', defaultFootState } = args;
+  const radiusMax = supportedPaddleRadius(contact);
+  const budget = generationDistanceBudgetV1(args.availableSeconds) * (1 - 1e-7);
+  const d = distance(contact, position), radiusMin = Math.max(CONTACT_BODY_CLEARANCE + 1e-5, d - budget + 1e-6);
+  if (!(radiusMin > 1.8 && radiusMin < radiusMax && d > 0)) return ordinary;
+  const half = defaultFootHalfWidthFeetV1(defaultFootState), leftSign = team === 'green' ? 1 : -1;
+  const hand = (handedness === 'right' ? 1 : -1) * (contactStyle === 'backhand' ? -1 : 1);
+  const bodySide = (team === 'green' ? 1 : -1) * hand;
+  const base = Math.atan2(position.y - contact.y, position.x - contact.x), result = [...ordinary];
+  const seen = new Set(ordinary.map(feet => feet.stance.x.toFixed(8) + ',' + feet.stance.y.toFixed(8)));
+  const sole = defaultFootState ? GENERATED_GROUNDED_SOLE_V1 : null;
+  const sideHalf = half + (sole?.halfWidthFeet ?? 0);
+  const depthMargin = sole ? sole.halfDepthFeet + 1e-5 : .75;
+  for (const fraction of [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1]) {
+    const radius = radiusMin + (radiusMax - radiusMin) * fraction;
+    const cap = Math.acos(clamp((d * d + radius * radius - budget * budget) / (2 * d * radius), -1, 1));
+    for (const sign of [-1, 1]) {
+      const angle = base + sign * cap;
+      const stance = { x: contact.x + radius * Math.cos(angle), y: contact.y + radius * Math.sin(angle) };
+      if (bodySide * (stance.x - contact.x) < CONTACT_SIDE_CLEARANCE - EPS
+        || stance.x < Math.max(-7.5, -8 + half) || stance.x > Math.min(27.5, 28 - half)
+        || stance.y < -7.5 || stance.y > 51.5 || (team === 'green' ? stance.y > 21.99 : stance.y < 22.01)) continue;
+      const feet = [
+        { x: stance.x + leftSign * half, y: stance.y },
+        { x: stance.x - leftSign * half, y: stance.y },
+      ];
+      const established = feet.every(foot => outsideContactNVZ(foot, defaultFootState));
+      const travel = distance(position, stance);
+      const besideZone = stance.x < -sideHalf - 1e-5 || stance.x > 20 + sideHalf + 1e-5;
+      const withinDepth = team === 'green' ? stance.y <= 15 - depthMargin : stance.y >= 29 + depthMargin;
+      if (travel > generationDistanceBudgetV1(args.availableSeconds) + EPS
+        || kind === 'volley' && (!established || (!besideZone && !withinDepth))) continue;
+      const key = stance.x.toFixed(8) + ',' + stance.y.toFixed(8);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(freeze({
+        feet, stance, grounded: true, reachable: true, legalVolleyFeet: kind !== 'volley' || established,
+        feetEstablishedOutsideNVZ: established, originUsed: true, stanceFeasible: true,
+        travelFeet: travel, bodyClearanceFeet: radius, routeReachable: true,
+        arrivalPeakFeetPerSecond: 2 * travel / args.availableSeconds,
+      }));
+    }
+  }
+  return freeze(result);
 }

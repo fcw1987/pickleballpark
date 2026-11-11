@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "scope": "Reviewed current generation after high returns, balanced recovery, paired shading, generated acceleration and exact trainer support. Historical causal sources remain separate and unchanged.",
-  "sourceRevision": "a4b6b823f4da8178106fe0c84f3261fc5b49d01f",
+  "scope": "Reviewed CURRENT generation with whole-sole-safe compact plants, bounded nominal refinement, exact shared trainer support v3 and horizontal-heading-preserving net errors v4. Historical source and causal replay fixtures remain separate and unchanged.",
+  "sourceRevision": "df67b450df84a991c40ec4b3e2f411f099f8e365",
   "sourceState": "dirty audit/pickleball-positioning",
-  "startedAt": "2026-11-11T02:07:05.757Z",
-  "completedAt": "2026-11-11T02:07:06.831Z",
+  "startedAt": "2026-11-11T07:46:36.292Z",
+  "completedAt": "2026-11-11T07:46:37.521Z",
   "runtimeSha256": {
     "board-projection.js": "3aba2d8cdb7c461a65f69e8783fe0e6225456c406dbfa6dc5a0d077e0e42c46e",
     "build-diagnostics-ui.js": "99270a7764a4e13026a0369dec575e6f4baa5a635c7983e763237b7d60106130",
@@ -22,12 +22,16 @@
     "coverage-assistance.js": "27819d18e7ee34300d6fe5212775c7236e23a1bdf6f63739797f12038027039c",
     "depth-camera.js": "3d1d9153e94b899a4fe6e39f3f16ac30c26697886cfaf6bf3f796b2c4bf7f9da",
     "depth-park-environment.js": "4b2eef68a721f53efbbed4d75829af985eb8496d0d0a83dc3b11f2ee5cfb6cd5",
+    "generated-contact-refinement.js": "d3466305eed90b20d9406a73fb0d159ade0cf7ec13e5df29729e6a5f90d0a2f6",
     "generated-contact-support.js": "cc5bd81dba9cda401469d5653c121fec220e8c87d76dd2352b4c28c18134bd11",
+    "generated-foot-state.js": "a28daec57c3b31753861542ba2646cb103e87b24bd766738ee9a2ea5015192fc",
+    "generated-grounded-sole.js": "c964a91aa718ac03882d590967842d48a8bebfd57fa8a6b81aa5efc662068973",
     "generated-motion-limits.js": "c2448f80b01dc21c1aadc11516a5433f6eb58750e850f0de8384a15c91f52071",
     "generated-route-certificate-v1.js": "2e0b28b927e6f9232f7a57162c1cbe5b787af28e15f9a4b200c22a84e8a64a95",
-    "generated-route-certificate-v2.js": "c7aa7e3258b2b890130814e538de0975fc25b07362551a6503b631102000684a",
-    "generated-route-certificates.js": "aa7aa303919e451f1abc57293d2f3479242587ac060c9eb3b404449812091632",
-    "generated-trainer-support.js": "f1f39f647bcc24bbc7afe226ed6d8ea5f2e982ef34a04c4833fae27fb2c18f7a",
+    "generated-route-certificate-v2.js": "91f4d18bb321f2c5ae2a2cae8b3bed8fd86cb0c315da91e56a9b41a9abd1cdc6",
+    "generated-route-certificate-v3.js": "6aba52f02c6592f7456bc0e40092a595725a92f8e395e0335227db3476705b6e",
+    "generated-route-certificates.js": "f1b8e92b1c3682fd3497f29468cc0c455a32b3afdec24113c8065dad8ce27cdf",
+    "generated-trainer-support.js": "7064db2c68e45d8ea861cfb48203209ec2a45b1e98675b50cac17187f8fffbe2",
     "guided-pixel-actors.js": "45b39bc8227e1169711653a939cf55c77603b1cac0d8cf71e3485742869fdc0e",
     "guided-plays.js": "027cdbc353a7e8e2c968115232834c57cafa4fb225698cad75875944cfc75970",
     "human-athlete-profile.js": "e2b1cec13c7db1e00dc8712a8f4644423921a1cfe0ab6738c9fa327a24b294ec",
@@ -39,16 +43,16 @@
     "pixel-court-renderer.js": "42b0041c057405468ac956fd7104b343ddba4f94ff145bacd929020e23b3ade7",
     "pixel-environment.js": "d1275b5fe86a3b631711210577589fffda062b7d1217583968b79a5f168125ee",
     "pixel-strokes.js": "15de1eacd96664bc28959ec412d3950427c9170817fdaecb998a7182cbd9d20b",
-    "play-actors-v2.js": "8d0fd8eac1725e08e336deb5f353515fba14db13cee9af1434d13bdca7b66f5b",
+    "play-actors-v2.js": "9fcbbdb1c7e33e016e02816eab6d7f2c8f0c087477905eefe2b15310a59fe28f",
     "play-builder.js": "40790f2a769bf38146819b3eea6785d345f95d496a2490f8d3d10e5e192c5250",
     "play-catalog.js": "62e5897fc1652c8dbf76afb17ec434dcf6e3e3ab6aa007f756db185d4a947f98",
     "play-compiler-v2.js": "43d3c1e95d2d7f462b23da1e02cbbef246234c342e4bf220053cfd7d190beb49",
     "play-compiler.js": "2674e0e4cbdfc0d386107be014c73f7a6745b76ef9b0e7a856fdd51b02392e2c",
-    "play-document.js": "17ebadbdb90f563893e927da3997fe67737600bec2d03baad62370a2f2b2a04b",
+    "play-document.js": "2b5a728c1d5f46cb1619df1c77300b2fafeacae2f7a566132cd90b8b496365fb",
     "play-outcome-v2.js": "e1549c8ac4f0d7ce56e09e8e026bad88d87b81acdc1d67ff5271e9e5e401ae67",
     "play-physics-v2.js": "ea0505c9197939654aac33e2dc95e909d438ffacc20bebdeae1723b14658973d",
-    "play-planning-v2.js": "8e40325968434797414f9c851cc80d8f19cae46c5bdc5cfda8f847f97d889193",
-    "play-timeline-v2.js": "57ec4b845b835b1197fbb13793be8b91c426b7c97eba418a2a3327ad2cfc8560",
+    "play-planning-v2.js": "d702b0a9aa64692708d256c9aad7677f3afaac5ab5fcf74ffe8269342e72ecee",
+    "play-timeline-v2.js": "a688b55674b8509436d34b7c990d5d53fc2b6faf99d9ae077fc1d2bb1027c5dc",
     "player-coverage-canvas.js": "019710a45be82b65278de4e89c2561dc281fa58c4d8f8e6e0289e7306f0e211d",
     "player-coverage-overlay.js": "4e1c0c485870daa7bac8a79dc8f077354044c91b9c64198aba012553bb07769c",
     "player-coverage-snapshot.js": "e1c5a094583e53c3c8cd25b1979bc1e52ddd44cfca738359da9426b6c07fd8e6",
@@ -59,20 +63,20 @@
     "rally-contact-selection.js": "d6a5de4e6e51459eaf7506d87a6471a9adf2d09dc99b79f0b1e4aea08d4d9d7c",
     "rally-coverage-provider.js": "76f85d9ca3ae9e00961b7dd76764f4850fb9daf8feb7c4291d7eea8e78197e0d",
     "rally-engine-client.js": "6d17ce896529f7b007bb3d40381b0acf5b8e8161673112bb76d0a402efb3780c",
-    "rally-engine-driver.js": "db4068290c1d071adc600493356b3f3f9bf510bb1fbcfd4a2a550fb43d3a7908",
+    "rally-engine-driver.js": "54bfaee9b8aa835f7df25119414ff32dbffa4260ac527ae23d951f7a2a72d856",
     "rally-engine-worker.js": "50a6fdad0af1a28199bdc286e1aaed9b1a17b2f75054a23bace6bbca3adb8f4d",
-    "rally-engine.js": "dbeee12e39eae56c26f723b4ff002c335bec79c4ad735c708bec888a772814a3",
+    "rally-engine.js": "339533065116592790f2a2cd15ae7b33192765cad081c9be8575524a8b4ba298",
     "rally-flight-audit.js": "4d208ca462c4244e2b9e9babd0708c6c194478a18a40dc1efa932f4b3bc7cffc",
     "rally-flight-planner.js": "dee0445ce3f3bce10494f7316aced865e7e6f196dcad3fac4dae5bf103bb44b4",
-    "rally-movement.js": "023ea2b6a469db05573d5740aa813c826497139602f7b6d7afa7dcc2adbb0384",
+    "rally-movement.js": "8ea14ad298a140b665d847476d34704bc634f675b2b4225c0a9580e8371cfda6",
     "rally-narration.js": "88589f76b6e3101e795ec733f08ea491d6459d41c7848e8669ad6a6df65575ba",
     "rally-policy.js": "8485f656321d821143ebffccfb9d3d994e75ca0fe16afac0de0999c4873e1735",
     "rally-proposals.js": "f4a39a5df2803bf7159c5bd4d5985c95be1b8d429d48ce8de981320fc5a5426c",
-    "rally-quality.js": "a0ee4c276b726b0fd70734a6beb88389763f186cf0035ff089229c3defd6e0e6",
+    "rally-quality.js": "3d7dbd1a246efcb6a33a21251869cb94489d6099d5a65e1fa905b38eb3bbb0f1",
     "rally-random.js": "2229cc30ec03de148a1b3818459527c0c30c828e8c7dbbd8846bcc0a13530797",
     "rally-recipe.js": "d0ab85e2b21b71866a762f7d077c13c71f6a27dde78d04048045914997badb1f",
     "rally-rules.js": "771a712f0de8cd9e4c786e7e9864f38a8d7b367f50d52d17a4bdf263a7c94632",
-    "rally-signatures.js": "afc25593ebdbcfbf45b3208d81169a1e7db150075c3898b30225f25a05183140",
+    "rally-signatures.js": "0acba75081602e7c66ff95a0fdbc7aca58bb117eb2bc007a70b69a278d8ce5be",
     "rally-stacking.js": "c5087c8b391a33f21f594503819d3e04128e25485521177be6f0647db01f83ed",
     "rally-state.js": "942693077df5f0053593992f9f01fa28a6472953e7c79a05f36405ca0fe60690",
     "rally-styles.js": "5b914fccd42067adb4de2e1461710a6e724f3056d160c05d5f9f1c6136ef0857",
@@ -84,7 +88,7 @@
     "shot-chapters.js": "7344c71cf31d7c1702b17d7353d30a761873132bec16d82d30b0c76831825a6d",
     "shot-timeline.js": "9896d04fba7dc60bf132a34f6c23bef5a01b1e36adcde74684fcdde1297a6c1b",
     "smart-rally-generator.js": "301ab435476981e04362aaf08208a0be9057ff8858b6d29286bed4d47eb48b07",
-    "sw.js": "763ab31af1fb05ee6f92aba92821a91fdcd6e9c9b780cddcb16cd87abf22750f",
+    "sw.js": "f5f4584ab7751b287e4cf11711d22355da7cf7b105017c651ea615ff4e44df28",
     "terminal-cues.js": "b9aca0eebb14b21bfd89e7f701e4173ef89c60913dd24320b06b2dea013bdd51",
     "three-d-animation.js": "eda72a24ee5f9abcdb2265f5a984471d1e731f6fda3d88c9ec9b2049378902ae",
     "three-d-athletes.js": "64a50b1cf029d07817c6260a9c579fef1c5f8b378b6e080d67e721dea48bb9ea",
@@ -95,7 +99,7 @@
     "three-d-playback.js": "b545c51456377a020120c49ae43838a6534a68da6681d9b23dabef1f37bf0173",
     "three-d-presentation.js": "e7efc745c17716081b78266b84a950499ee4c2c1c945d2c6edf067a1b6582df9",
     "three-d-world.js": "5301da366fea27ecaca956f5638d1a31ff790b4e849c09e6d0d469dbea0333f4",
-    "trainer-contact-support.js": "5bca9a3854b52a51908de7d592385bed9708e9caec7f69142deaa5367d6c991c",
+    "trainer-contact-support.js": "c24161585dca175007313e92b36fa677e2e85687f6a63653f1ada3b690470b9d",
     "visual-theme.js": "034a4bf462eb97ab93a94e44b3428ba8239655a2c52ef4a1b6b8eb17cb85fb49"
   },
   "cases": [
@@ -550,20 +554,20 @@
               "quality": "low",
               "errorReason": null,
               "probabilities": {
-                "error": 0.11762431350000001,
+                "error": 0.11855221725000001,
                 "attackable": 0.12,
                 "excellent": 0.1,
                 "low": 0.2,
-                "neutral": 0.4623756865
+                "neutral": 0.46144778275000004
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.070497254,
+                "score": 0.074208869,
                 "reachMarginFeet": 10.034871338,
                 "distanceFeet": 2.138489051,
                 "reachable": true,
                 "availableSeconds": 0.775240028,
-                "movementSpeedFeetPerSecond": 0.588079491,
+                "movementSpeedFeetPerSecond": 0.847892487,
                 "contactHeightFeet": 1.672129526,
                 "incomingSpeedMph": 27.419223781,
                 "incomingIntent": "third-shot-drive",
@@ -587,7 +591,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.042005678,
+                  "movementLoad": 0.060563749,
                   "speedLoad": 0.413974126,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -600,7 +604,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.1,
                 "baseErrorProbability": 0.1,
-                "pressureErrorAddition": 0.0176243135,
+                "pressureErrorAddition": 0.01855221725,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
@@ -4233,20 +4237,20 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.119943824,
+                "error": 0.119680507,
                 "attackable": 0.12,
                 "excellent": 0.1,
                 "low": 0.2,
-                "neutral": 0.460056176
+                "neutral": 0.460319493
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.079775296,
+                "score": 0.078722028,
                 "reachMarginFeet": 7.996561092,
                 "distanceFeet": 1.289830246,
                 "reachable": true,
                 "availableSeconds": 0.569027953,
-                "movementSpeedFeetPerSecond": 0.356354471,
+                "movementSpeedFeetPerSecond": 0.282625725,
                 "contactHeightFeet": 1.476029063,
                 "incomingSpeedMph": 23.459139739,
                 "incomingIntent": "drive",
@@ -4270,7 +4274,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0.161944095,
-                  "movementLoad": 0.025453891,
+                  "movementLoad": 0.020187552,
                   "speedLoad": 0.281971325,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -4283,7 +4287,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.1,
                 "baseErrorProbability": 0.1,
-                "pressureErrorAddition": 0.019943824,
+                "pressureErrorAddition": 0.019680507,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
@@ -7055,20 +7059,20 @@
               "quality": "excellent",
               "errorReason": null,
               "probabilities": {
-                "error": 0.17480442334000001,
+                "error": 0.17558386249,
                 "attackable": 0.16,
                 "excellent": 0.08,
                 "low": 0.18,
-                "neutral": 0.40519557666
+                "neutral": 0.40441613751
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.070497254,
+                "score": 0.074208869,
                 "reachMarginFeet": 10.034871338,
                 "distanceFeet": 2.138489051,
                 "reachable": true,
                 "availableSeconds": 0.775240028,
-                "movementSpeedFeetPerSecond": 0.588079491,
+                "movementSpeedFeetPerSecond": 0.847892487,
                 "contactHeightFeet": 1.672129526,
                 "incomingSpeedMph": 27.419223781,
                 "incomingIntent": "third-shot-drive",
@@ -7092,7 +7096,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.042005678,
+                  "movementLoad": 0.060563749,
                   "speedLoad": 0.413974126,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -7105,7 +7109,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.16,
                 "baseErrorProbability": 0.16,
-                "pressureErrorAddition": 0.01480442334,
+                "pressureErrorAddition": 0.01558386249,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
@@ -7793,20 +7797,20 @@
               "quality": "error",
               "errorReason": "wide",
               "probabilities": {
-                "error": 0.22516649203,
+                "error": 0.2252460205,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.38483350796999993
+                "neutral": 0.3847539795
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.024602343,
+                "score": 0.02498105,
                 "reachMarginFeet": 11.984870601,
                 "distanceFeet": 3.505176873,
                 "reachable": true,
                 "availableSeconds": 1.012146248,
-                "movementSpeedFeetPerSecond": 1.722163983,
+                "movementSpeedFeetPerSecond": 1.748673533,
                 "contactHeightFeet": 3.139236362,
                 "incomingSpeedMph": 15.785773985,
                 "incomingIntent": "cross-court-dink",
@@ -7830,7 +7834,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.123011713,
+                  "movementLoad": 0.124905252,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -7844,7 +7848,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.22,
-                "pressureErrorAddition": 0.00516649203,
+                "pressureErrorAddition": 0.0052460205,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -7948,11 +7952,11 @@
           "faultingActor": "player3",
           "evidence": {
             "position": {
-              "x": 8.805225646,
+              "x": 8.01099854,
               "y": 22.131391076,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 1.689928203
+            "afterContactSeconds": 1.692673122
           }
         },
         "decisions": [
@@ -8554,7 +8558,7 @@
               "beforeBounceSeconds": 0.107414583
             },
             "target": {
-              "x": 8.959198425,
+              "x": 8.122105247,
               "y": 21.535881263
             },
             "solutionIndex": 0,
@@ -8621,11 +8625,11 @@
           "faultingActor": "player1",
           "evidence": {
             "position": {
-              "x": 4.277282,
+              "x": 5.073791591,
               "y": 47.74595327,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 0.71439414
+            "afterContactSeconds": 0.712490262
           }
         },
         "decisions": [
@@ -10124,20 +10128,20 @@
               "quality": "attackable",
               "errorReason": null,
               "probabilities": {
-                "error": 0.2969316771,
+                "error": 0.29690759308000003,
                 "attackable": 0.2,
                 "excellent": 0.05,
                 "low": 0.14,
-                "neutral": 0.3130683228999999
+                "neutral": 0.31309240692
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.08911409,
+                "score": 0.088987332,
                 "reachMarginFeet": 7.699197802,
                 "distanceFeet": 1.170123202,
                 "reachable": true,
                 "availableSeconds": 0.539237215,
-                "movementSpeedFeetPerSecond": 0.173569938,
+                "movementSpeedFeetPerSecond": 0.164696906,
                 "contactHeightFeet": 1.485716334,
                 "incomingSpeedMph": 23.465880966,
                 "incomingIntent": "drive",
@@ -10161,7 +10165,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0.221525571,
-                  "movementLoad": 0.012397853,
+                  "movementLoad": 0.011764065,
                   "speedLoad": 0.282196032,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -10174,7 +10178,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.28,
                 "baseErrorProbability": 0.28,
-                "pressureErrorAddition": 0.0169316771,
+                "pressureErrorAddition": 0.01690759308,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -10233,8 +10237,8 @@
                 "error": 0.7270902737509459
               },
               "target": {
-                "lateral": 0.015801028115674853,
-                "depth": 0.2658982540015131
+                "lateral": 0.24337519705295563,
+                "depth": 0.5721325420308858
               },
               "perturbation": {
                 "lateral": 0.8084597697015852,
@@ -10335,7 +10339,7 @@
               "afterBounceSeconds": 0.42
             },
             "target": {
-              "x": 4.277282,
+              "x": 5.073791591,
               "y": 47.74595327
             },
             "solutionIndex": 0,
@@ -12095,11 +12099,11 @@
           "faultingActor": "player1",
           "evidence": {
             "position": {
-              "x": 9.781236645,
+              "x": 10.118668932,
               "y": 21.868608924,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 1.619566629
+            "afterContactSeconds": 1.61952079
           }
         },
         "decisions": [
@@ -14423,7 +14427,7 @@
               "afterBounceSeconds": 0.28
             },
             "target": {
-              "x": 9.72504091,
+              "x": 10.084848598,
               "y": 22.320306587
             },
             "solutionIndex": 0,
@@ -14480,21 +14484,21 @@
       "controls": null,
       "expected": {
         "status": "complete",
-        "shots": 25,
+        "shots": 12,
         "outcome": {
-          "winner": "orange",
+          "winner": "green",
           "type": "fault",
           "reason": "net",
-          "shotId": "shot-25",
+          "shotId": "shot-12",
           "ruleRef": "10.C.2",
-          "faultingActor": "player2",
+          "faultingActor": "player3",
           "evidence": {
             "position": {
-              "x": 8.749102943,
-              "y": 21.868608924,
+              "x": 10.51802052,
+              "y": 22.131391076,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 0.68004146
+            "afterContactSeconds": 1.333158533
           }
         },
         "decisions": [
@@ -14885,33 +14889,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.12541177050000002,
+                "error": 0.125713194,
                 "attackable": 0.12,
                 "excellent": 0.1,
                 "low": 0.2,
-                "neutral": 0.45458822950000005
+                "neutral": 0.454286806
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.101647082,
-                "reachMarginFeet": 8.842290201,
-                "distanceFeet": 3.294115532,
+                "score": 0.102852776,
+                "reachMarginFeet": 9.137682215,
+                "distanceFeet": 3.083406536,
                 "reachable": true,
-                "availableSeconds": 0.77260041,
-                "movementSpeedFeetPerSecond": 2.467765623,
-                "contactHeightFeet": 1.64583272,
-                "incomingSpeedMph": 28.27865744,
+                "availableSeconds": 0.778649197,
+                "movementSpeedFeetPerSecond": 2.536134905,
+                "contactHeightFeet": 1.559173347,
+                "incomingSpeedMph": 28.324455538,
                 "incomingIntent": "third-shot-drive",
                 "incomingLaunchSpeedMph": 27.533031987,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "flight",
-                  "timeSeconds": 0.77260041,
+                  "timeSeconds": 0.778649197,
                   "xFeetPerSecond": 5.599546598,
                   "yFeetPerSecond": 38.5535247,
-                  "heightFeetPerSecond": -14.229429026,
-                  "speedMph": 28.27865744
+                  "heightFeetPerSecond": -14.424042699,
+                  "speedMph": 28.324455538
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -14922,8 +14926,8 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.176268973,
-                  "speedLoad": 0.442621915,
+                  "movementLoad": 0.181152493,
+                  "speedLoad": 0.444148518,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
@@ -14935,7 +14939,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.1,
                 "baseErrorProbability": 0.1,
-                "pressureErrorAddition": 0.0254117705,
+                "pressureErrorAddition": 0.025713194,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
@@ -14959,17 +14963,17 @@
                   "actualSoftSpeed": false
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 28.27865744
+                "incomingSpeedMph": 28.324455538
               }
             },
             "contact": {
-              "x": 12.848339183,
-              "y": 28.615616674,
-              "heightFeet": 1.64583272
+              "x": 12.882209648,
+              "y": 28.848818733,
+              "heightFeet": 1.559173347
             },
             "contactKind": "volley",
             "contactTiming": {
-              "beforeBounceSeconds": 0.096586272
+              "beforeBounceSeconds": 0.090537485
             },
             "target": {
               "x": 8.093928935,
@@ -15008,33 +15012,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.17184107775000002,
+                "error": 0.17276795300000003,
                 "attackable": 0.11,
                 "excellent": 0.12,
                 "low": 0.18,
-                "neutral": 0.41815892225
+                "neutral": 0.417232047
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.127364311,
-                "reachMarginFeet": 6.070279769,
-                "distanceFeet": 13.284587183,
+                "score": 0.131071812,
+                "reachMarginFeet": 5.958629346,
+                "distanceFeet": 13.322810458,
                 "reachable": true,
-                "availableSeconds": 1.288204782,
-                "movementSpeedFeetPerSecond": 8.915501753,
-                "contactHeightFeet": 1.774037474,
-                "incomingSpeedMph": 6.784739087,
+                "availableSeconds": 1.282959986,
+                "movementSpeedFeetPerSecond": 8.981963783,
+                "contactHeightFeet": 1.828255762,
+                "incomingSpeedMph": 6.736632071,
                 "incomingIntent": "reset",
-                "incomingLaunchSpeedMph": 12.287160935,
+                "incomingLaunchSpeedMph": 12.470737616,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.288204782,
-                  "xFeetPerSecond": -3.942820229,
-                  "yFeetPerSecond": -8.689866484,
-                  "heightFeetPerSecond": -2.821667624,
-                  "speedMph": 6.784739087
+                  "timeSeconds": 1.282959986,
+                  "xFeetPerSecond": -3.923296973,
+                  "yFeetPerSecond": -8.776748389,
+                  "heightFeetPerSecond": -2.280045683,
+                  "speedMph": 6.736632071
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15043,9 +15047,9 @@
                   "pressureLoad": 0
                 },
                 "factors": {
-                  "reachLoad": 0,
+                  "reachLoad": 0.006895109,
                   "shortTime": 0,
-                  "movementLoad": 0.636821554,
+                  "movementLoad": 0.641568842,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -15058,7 +15062,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.14,
                 "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.03184107775,
+                "pressureErrorAddition": 0.032767953,
                 "choice": {
                   "family": "drop",
                   "pace": "soft",
@@ -15082,20 +15086,20 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 6.784739087
+                "incomingSpeedMph": 6.736632071
               }
             },
             "contact": {
-              "x": 6.437944439,
-              "y": 14.487284363,
-              "heightFeet": 1.774037474
+              "x": 6.508058019,
+              "y": 14.589300417,
+              "heightFeet": 1.828255762
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.42
+              "afterBounceSeconds": 0.404218933
             },
             "target": {
-              "x": 14.155257763,
+              "x": 14.085144183,
               "y": 27.701860502
             },
             "solutionIndex": 0,
@@ -15131,33 +15135,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.081054522,
+                "error": 0.0846991995,
                 "attackable": 0.11,
                 "excellent": 0.12,
                 "low": 0.18,
-                "neutral": 0.508945478
+                "neutral": 0.5053008004999999
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.004218088,
-                "reachMarginFeet": 14.674794637,
-                "distanceFeet": 0.605569793,
+                "score": 0.018796798,
+                "reachMarginFeet": 14.636620611,
+                "distanceFeet": 0.529679396,
                 "reachable": true,
-                "availableSeconds": 0.997168888,
-                "movementSpeedFeetPerSecond": 0.295266139,
-                "contactHeightFeet": 1.389612731,
-                "incomingSpeedMph": 9.687256234,
+                "availableSeconds": 0.989021429,
+                "movementSpeedFeetPerSecond": 1.315775865,
+                "contactHeightFeet": 1.373313048,
+                "incomingSpeedMph": 9.675980793,
                 "incomingIntent": "drop",
-                "incomingLaunchSpeedMph": 14.722195667,
+                "incomingLaunchSpeedMph": 14.620139419,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 0.997168888,
-                  "xFeetPerSecond": 6.637209856,
-                  "yFeetPerSecond": 11.365084105,
-                  "heightFeetPerSecond": 5.352465342,
-                  "speedMph": 9.687256234
+                  "timeSeconds": 0.989021429,
+                  "xFeetPerSecond": 6.557877832,
+                  "yFeetPerSecond": 11.348764583,
+                  "heightFeetPerSecond": 5.440285598,
+                  "speedMph": 9.675980793
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15168,7 +15172,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.021090438,
+                  "movementLoad": 0.09398399,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -15181,7 +15185,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.14,
                 "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.001054522,
+                "pressureErrorAddition": 0.0046991995,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -15205,20 +15209,20 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 9.687256234
+                "incomingSpeedMph": 9.675980793
               }
             },
             "contact": {
-              "x": 15.21721134,
-              "y": 29.520273959,
-              "heightFeet": 1.389612731
+              "x": 15.11552385,
+              "y": 29.484988607,
+              "heightFeet": 1.373313048
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "afterBounceSeconds": 0.1571209
             },
             "target": {
-              "x": 15.737368734,
+              "x": 15.635681244,
               "y": 17.46245028
             },
             "solutionIndex": 0,
@@ -15254,33 +15258,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.080318629,
+                "error": 0.080430681,
                 "attackable": 0.11,
                 "excellent": 0.12,
                 "low": 0.18,
-                "neutral": 0.5096813710000001
+                "neutral": 0.5095693190000001
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.001274516,
-                "reachMarginFeet": 13.824114908,
-                "distanceFeet": 1.570372598,
+                "score": 0.001722724,
+                "reachMarginFeet": 13.820783575,
+                "distanceFeet": 1.574378971,
                 "reachable": true,
-                "availableSeconds": 1.005320536,
-                "movementSpeedFeetPerSecond": 0.089216109,
-                "contactHeightFeet": 1.352330331,
-                "incomingSpeedMph": 7.830010313,
+                "availableSeconds": 1.005368753,
+                "movementSpeedFeetPerSecond": 0.120590702,
+                "contactHeightFeet": 1.350307624,
+                "incomingSpeedMph": 7.807485557,
                 "incomingIntent": "straight-dink",
-                "incomingLaunchSpeedMph": 12.759605328,
+                "incomingLaunchSpeedMph": 12.746401943,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.005320536,
-                  "xFeetPerSecond": 0.443042973,
-                  "yFeetPerSecond": -10.270226118,
-                  "heightFeetPerSecond": 5.119450343,
-                  "speedMph": 7.830010313
+                  "timeSeconds": 1.005368753,
+                  "xFeetPerSecond": 0.443017703,
+                  "yFeetPerSecond": -10.239587827,
+                  "heightFeetPerSecond": 5.106808427,
+                  "speedMph": 7.807485557
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15291,7 +15295,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.006372579,
+                  "movementLoad": 0.008613622,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -15304,7 +15308,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.14,
                 "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.000318629,
+                "pressureErrorAddition": 0.000430681,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -15328,20 +15332,20 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 7.830010313
+                "incomingSpeedMph": 7.807485557
               }
             },
             "contact": {
-              "x": 15.80825561,
-              "y": 15.819214101,
-              "heightFeet": 1.352330331
+              "x": 15.706564077,
+              "y": 15.824116228,
+              "heightFeet": 1.350307624
             },
             "contactKind": "groundstroke",
             "contactTiming": {
               "afterBounceSeconds": 0.16
             },
             "target": {
-              "x": 4.070058677,
+              "x": 4.17175021,
               "y": 25.986174187
             },
             "solutionIndex": 0,
@@ -15377,33 +15381,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.15380227875000002,
+                "error": 0.15410472425000002,
                 "attackable": 0.11,
                 "excellent": 0.12,
                 "low": 0.18,
-                "neutral": 0.43619772125000006
+                "neutral": 0.43589527575000003
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.055209115,
-                "reachMarginFeet": 12.325580334,
-                "distanceFeet": 5.394201428,
+                "score": 0.056418897,
+                "reachMarginFeet": 12.39860856,
+                "distanceFeet": 5.074259366,
                 "reachable": true,
-                "availableSeconds": 1.171412983,
-                "movementSpeedFeetPerSecond": 3.864638029,
-                "contactHeightFeet": 1.722101579,
-                "incomingSpeedMph": 9.106482805,
+                "availableSeconds": 1.15377628,
+                "movementSpeedFeetPerSecond": 3.949322756,
+                "contactHeightFeet": 1.726577363,
+                "incomingSpeedMph": 9.006615242,
                 "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 15.057753258,
+                "incomingLaunchSpeedMph": 14.951982647,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.171412983,
-                  "xFeetPerSecond": -10.086660599,
-                  "yFeetPerSecond": 8.736493032,
-                  "heightFeetPerSecond": -0.566014329,
-                  "speedMph": 9.106482805
+                  "timeSeconds": 1.15377628,
+                  "xFeetPerSecond": -9.911833053,
+                  "yFeetPerSecond": 8.73222777,
+                  "heightFeetPerSecond": -6e-9,
+                  "speedMph": 9.006615242
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15414,7 +15418,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.276045574,
+                  "movementLoad": 0.282094483,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -15427,7 +15431,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.14,
                 "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.01380227875,
+                "pressureErrorAddition": 0.01410472425,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -15451,17 +15455,17 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 9.106482805
+                "incomingSpeedMph": 9.006615242
               }
             },
             "contact": {
-              "x": 0.705915287,
-              "y": 28.900004289,
-              "heightFeet": 1.722101579
+              "x": 1.040778321,
+              "y": 28.744529733,
+              "heightFeet": 1.726577363
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.333524
+              "afterBounceSeconds": 0.315882226
             },
             "target": {
               "x": 1.732239915,
@@ -15500,33 +15504,33 @@
               "quality": "attackable",
               "errorReason": null,
               "probabilities": {
-                "error": 0.0809409085,
+                "error": 0.08555951275,
                 "attackable": 0.11,
                 "excellent": 0.12,
                 "low": 0.18,
-                "neutral": 0.5090590915
+                "neutral": 0.5044404872500001
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.003763634,
-                "reachMarginFeet": 12.829955666,
-                "distanceFeet": 2.055272758,
+                "score": 0.022238051,
+                "reachMarginFeet": 12.717042579,
+                "distanceFeet": 2.121329787,
                 "reachable": true,
-                "availableSeconds": 0.968944887,
-                "movementSpeedFeetPerSecond": 0.263454363,
-                "contactHeightFeet": 1.340721738,
-                "incomingSpeedMph": 8.499786209,
+                "availableSeconds": 0.965598026,
+                "movementSpeedFeetPerSecond": 1.556663576,
+                "contactHeightFeet": 1.33636274,
+                "incomingSpeedMph": 8.422775856,
                 "incomingIntent": "straight-dink",
-                "incomingLaunchSpeedMph": 13.157834455,
+                "incomingLaunchSpeedMph": 13.044885107,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 0.968944887,
-                  "xFeetPerSecond": 0.913478462,
-                  "yFeetPerSecond": -11.362409568,
-                  "heightFeetPerSecond": 5.046896639,
-                  "speedMph": 8.499786209
+                  "timeSeconds": 0.965598026,
+                  "xFeetPerSecond": 0.617991022,
+                  "yFeetPerSecond": -11.270659999,
+                  "heightFeetPerSecond": 5.0196529,
+                  "speedMph": 8.422775856
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15537,7 +15541,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.018818169,
+                  "movementLoad": 0.111190255,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -15550,7 +15554,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.14,
                 "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.0009409085,
+                "pressureErrorAddition": 0.00555951275,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -15574,13 +15578,13 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.499786209
+                "incomingSpeedMph": 8.422775856
               }
             },
             "contact": {
-              "x": 1.878396469,
-              "y": 14.315958857,
-              "heightFeet": 1.340721738
+              "x": 1.831118479,
+              "y": 14.330638788,
+              "heightFeet": 1.33636274
             },
             "contactKind": "groundstroke",
             "contactTiming": {
@@ -15598,9 +15602,9 @@
           {
             "shotId": "shot-10",
             "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
+              "id": "speed-up",
+              "intent": "speed-up",
+              "family": "volley"
             },
             "draws": {
               "intent": 0.6295981428120285,
@@ -15609,8 +15613,8 @@
                 "error": 0.9138613196555525
               },
               "target": {
-                "lateral": 0.2366406919900328,
-                "depth": 0.31475608539767563
+                "lateral": 0.03216930292546749,
+                "depth": 0.25273544853553176
               },
               "perturbation": {
                 "lateral": 0.7159305086825043,
@@ -15623,33 +15627,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.15437077775000002,
+                "error": 0.14691867,
                 "attackable": 0.11,
                 "excellent": 0.12,
                 "low": 0.18,
-                "neutral": 0.43562922224999995
+                "neutral": 0.44308133
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.057483111,
-                "reachMarginFeet": 14.068215347,
-                "distanceFeet": 6.08921874,
+                "score": 0.02767468,
+                "reachMarginFeet": 11.658213546,
+                "distanceFeet": 3.772479708,
                 "reachable": true,
-                "availableSeconds": 1.345531006,
-                "movementSpeedFeetPerSecond": 4.023817747,
-                "contactHeightFeet": 1.896459917,
-                "incomingSpeedMph": 10.687398544,
+                "availableSeconds": 1.007906661,
+                "movementSpeedFeetPerSecond": 1.937227614,
+                "contactHeightFeet": 3.187588807,
+                "incomingSpeedMph": 15.862869404,
                 "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 17.509301855,
+                "incomingLaunchSpeedMph": 17.521641236,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.345531006,
-                  "xFeetPerSecond": 9.802014668,
-                  "yFeetPerSecond": 8.776481849,
-                  "heightFeetPerSecond": 8.520260258,
-                  "speedMph": 10.687398544
+                  "phase": "flight",
+                  "timeSeconds": 1.007906661,
+                  "xFeetPerSecond": 13.651007224,
+                  "yFeetPerSecond": 12.174695117,
+                  "heightFeetPerSecond": -14.377490583,
+                  "speedMph": 15.862869404
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15660,7 +15664,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.287415553,
+                  "movementLoad": 0.138373401,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -15673,11 +15677,11 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.14,
                 "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.01437077775,
+                "pressureErrorAddition": 0.00691867,
                 "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
+                  "family": "volley",
+                  "pace": "firm",
+                  "intent": "speed-up"
                 },
                 "conditions": {
                   "profilePrior": true,
@@ -15687,31 +15691,31 @@
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
                   "actualOutsideFeet": true,
-                  "notAttackable": true,
+                  "notAttackable": false,
                   "incomingSoft": true,
-                  "selectedSoft": true,
+                  "selectedSoft": false,
                   "lowPressure": true,
                   "adequateTime": true,
                   "reachMargin": true,
-                  "settledMovement": false,
+                  "settledMovement": true,
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 10.687398544
+                "incomingSpeedMph": 15.862869404
               }
             },
             "contact": {
-              "x": 19.586430362,
-              "y": 30.171295061,
-              "heightFeet": 1.896459917
+              "x": 15.590059589,
+              "y": 26.601595092,
+              "heightFeet": 3.187588807
             },
-            "contactKind": "groundstroke",
+            "contactKind": "volley",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "beforeBounceSeconds": 0.177865881
             },
             "target": {
-              "x": 9.119307175,
-              "y": 16.590169015
+              "x": 5.680342456,
+              "y": 7.643202778
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -15721,9 +15725,9 @@
           {
             "shotId": "shot-11",
             "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
+              "id": "counter",
+              "intent": "counter",
+              "family": "volley"
             },
             "draws": {
               "intent": 0.8114407805260271,
@@ -15732,47 +15736,47 @@
                 "error": 0.7704613020177931
               },
               "target": {
-                "lateral": 0.5451928386464715,
-                "depth": 0.23900436889380217
-              },
-              "perturbation": {
                 "lateral": 0.5952995223924518,
                 "depth": 0.875243674730882
+              },
+              "perturbation": {
+                "lateral": 0.8808559901081026,
+                "depth": 0.5742695764638484
               },
               "narration": 0.018293311586603522
             },
             "execution": {
               "version": "rally-quality-v1",
-              "quality": "low",
+              "quality": "attackable",
               "errorReason": null,
               "probabilities": {
-                "error": 0.08,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.51
+                "error": 0.2436229865,
+                "attackable": 0.15,
+                "excellent": 0.13,
+                "low": 0.05,
+                "neutral": 0.42637701349999996
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0,
-                "reachMarginFeet": 13.708772533,
-                "distanceFeet": 1.266497551,
+                "score": 0.254491946,
+                "reachMarginFeet": 4.69785136,
+                "distanceFeet": 2.314497203,
                 "reachable": true,
-                "availableSeconds": 0.975376435,
-                "movementSpeedFeetPerSecond": 0,
-                "contactHeightFeet": 1.373546046,
-                "incomingSpeedMph": 10.92682387,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 16.162210672,
+                "availableSeconds": 0.406596326,
+                "movementSpeedFeetPerSecond": 1.265375927,
+                "contactHeightFeet": 2.271484432,
+                "incomingSpeedMph": 25.448753679,
+                "incomingIntent": "speed-up",
+                "incomingLaunchSpeedMph": 24.904514879,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.975376435,
-                  "xFeetPerSecond": -9.24276,
-                  "yFeetPerSecond": -11.992510867,
-                  "heightFeetPerSecond": 5.252048561,
-                  "speedMph": 10.92682387
+                  "phase": "flight",
+                  "timeSeconds": 0.406596326,
+                  "xFeetPerSecond": -16.803651452,
+                  "yFeetPerSecond": -32.147256301,
+                  "heightFeetPerSecond": -8.794020489,
+                  "speedMph": 25.448753679
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15781,10 +15785,10 @@
                   "pressureLoad": 0
                 },
                 "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0,
-                  "speedLoad": 0,
+                  "reachLoad": 0.217024773,
+                  "shortTime": 0.486807348,
+                  "movementLoad": 0.090383995,
+                  "speedLoad": 0.348291789,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
@@ -15792,49 +15796,49 @@
               "draw": 0.3634413154795766,
               "riskContext": {
                 "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0,
+                "kind": "phase-default",
+                "phase": "hands",
+                "phaseBaseErrorProbability": 0.18,
+                "baseErrorProbability": 0.18,
+                "pressureErrorAddition": 0.0636229865,
                 "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
+                  "family": "volley",
+                  "pace": "firm",
+                  "intent": "counter"
                 },
                 "conditions": {
                   "profilePrior": true,
-                  "kitchen": true,
+                  "kitchen": false,
                   "allFourUp": true,
                   "grounded": true,
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
                   "actualOutsideFeet": true,
                   "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
+                  "incomingSoft": false,
+                  "selectedSoft": false,
+                  "lowPressure": false,
+                  "adequateTime": false,
                   "reachMargin": true,
                   "settledMovement": true,
-                  "actualSoftSpeed": true
+                  "actualSoftSpeed": false
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 10.92682387
+                "incomingSpeedMph": 25.448753679
               }
             },
             "contact": {
-              "x": 7.640465575,
-              "y": 14.671367276,
-              "heightFeet": 1.373546046
+              "x": 8.757756646,
+              "y": 13.530638792,
+              "heightFeet": 2.271484432
             },
-            "contactKind": "groundstroke",
+            "contactKind": "volley",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "beforeBounceSeconds": 0.183139611
             },
             "target": {
-              "x": 10.218891164,
-              "y": 27.291590917
+              "x": 15.658396497,
+              "y": 36.441895335
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -15844,9 +15848,9 @@
           {
             "shotId": "shot-12",
             "chosen": {
-              "id": "backhand-dink",
-              "intent": "backhand-dink",
-              "family": "dink"
+              "id": "block",
+              "intent": "block",
+              "family": "reset"
             },
             "draws": {
               "intent": 0.03600074863061309,
@@ -15855,47 +15859,47 @@
                 "error": 0.054203892359510064
               },
               "target": {
-                "lateral": 0.8808559901081026,
-                "depth": 0.5742695764638484
-              },
-              "perturbation": {
                 "lateral": 0.6017614929005504,
                 "depth": 0.15485030901618302
+              },
+              "perturbation": {
+                "lateral": 0.9421845532488078,
+                "depth": 0.24635975062847137
               },
               "narration": 0.7014531004242599
             },
             "execution": {
               "version": "rally-quality-v1",
-              "quality": "attackable",
-              "errorReason": null,
+              "quality": "error",
+              "errorReason": "net",
               "probabilities": {
-                "error": 0.15276258625,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.4372374137500001
+                "error": 0.23089392225,
+                "attackable": 0.15,
+                "excellent": 0.13,
+                "low": 0.05,
+                "neutral": 0.43910607775000005
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.051050345,
-                "reachMarginFeet": 10.466307803,
-                "distanceFeet": 4.299700209,
+                "score": 0.203575689,
+                "reachMarginFeet": 5.225430252,
+                "distanceFeet": 2.769896979,
                 "reachable": true,
-                "availableSeconds": 0.960429144,
-                "movementSpeedFeetPerSecond": 3.573524172,
-                "contactHeightFeet": 1.280729246,
-                "incomingSpeedMph": 8.518003112,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 13.411801851,
+                "availableSeconds": 0.476809088,
+                "movementSpeedFeetPerSecond": 3.576064467,
+                "contactHeightFeet": 3.263457472,
+                "incomingSpeedMph": 21.314941104,
+                "incomingIntent": "counter",
+                "incomingLaunchSpeedMph": 22.00001,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.960429144,
-                  "xFeetPerSecond": 2.319338868,
-                  "yFeetPerSecond": 11.352111668,
-                  "heightFeetPerSecond": 4.671943563,
-                  "speedMph": 8.518003112
+                  "phase": "flight",
+                  "timeSeconds": 0.476809088,
+                  "xFeetPerSecond": 8.870414467,
+                  "yFeetPerSecond": 29.451231464,
+                  "heightFeetPerSecond": -5.589987081,
+                  "speedMph": 21.314941104
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -15904,1659 +15908,61 @@
                   "pressureLoad": 0
                 },
                 "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.255251727,
-                  "speedLoad": 0,
+                  "reachLoad": 0.129094958,
+                  "shortTime": 0.346381824,
+                  "movementLoad": 0.255433176,
+                  "speedLoad": 0.210498037,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
               },
               "draw": 0.16070160456001759,
+              "errorDraw": 0.054203892359510064,
               "riskContext": {
                 "version": "rally-execution-risk-v1",
                 "kind": "phase-default",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.01276258625,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "backhand-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": false,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.518003112
-              }
-            },
-            "contact": {
-              "x": 10.589985383,
-              "y": 29.107928784,
-              "heightFeet": 1.280729246
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.16
-            },
-            "target": {
-              "x": 8.453754629,
-              "y": 15.088712577
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-13",
-            "chosen": {
-              "id": "drive",
-              "intent": "drive",
-              "family": "drive"
-            },
-            "draws": {
-              "intent": 0.6773820410016924,
-              "execution": {
-                "quality": 0.3408996050711721,
-                "error": 0.31592182582244277
-              },
-              "target": {
-                "lateral": 0.4781041669193655,
-                "depth": 0.6624995404854417
-              },
-              "perturbation": {
-                "lateral": 0.5235382753890008,
-                "depth": 0.8593098495621234
-              },
-              "narration": 0.15110809355974197
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "excellent",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.13887101925,
-                "attackable": 0.12,
-                "excellent": 0.1,
-                "low": 0.2,
-                "neutral": 0.44112898075
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.155484077,
-                "reachMarginFeet": 19.883982706,
-                "distanceFeet": 3.959863496,
-                "reachable": true,
-                "availableSeconds": 1.608846157,
-                "movementSpeedFeetPerSecond": 2.483885381,
-                "contactHeightFeet": 3.024246384,
-                "incomingSpeedMph": 5.85671705,
-                "incomingIntent": "backhand-dink",
-                "incomingLaunchSpeedMph": 14.808201225,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.608846157,
-                  "xFeetPerSecond": -1.293763817,
-                  "yFeetPerSecond": -8.490447319,
-                  "heightFeetPerSecond": 0.155020258,
-                  "speedMph": 5.85671705
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "split",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0.12
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.177420384,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0.12
-                }
-              },
-              "draw": 0.3408996050711721,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "transition",
-                "phaseBaseErrorProbability": 0.1,
-                "baseErrorProbability": 0.1,
-                "pressureErrorAddition": 0.03887101925,
-                "choice": {
-                  "family": "drive",
-                  "pace": "firm",
-                  "intent": "drive"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": false,
-                  "allFourUp": false,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": false,
-                  "incomingSoft": true,
-                  "selectedSoft": false,
-                  "lowPressure": false,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 5.85671705
-              }
-            },
-            "contact": {
-              "x": 7.910373826,
-              "y": 11.522724703,
-              "heightFeet": 3.024246384
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.42
-            },
-            "target": {
-              "x": 14.6521019,
-              "y": 31.48680675
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-14",
-            "chosen": {
-              "id": "reset",
-              "intent": "reset",
-              "family": "reset"
-            },
-            "draws": {
-              "intent": 0.36984066455625,
-              "execution": {
-                "quality": 0.1543758155312389,
-                "error": 0.30142383137717843
-              },
-              "target": {
-                "lateral": 0.7740272569935769,
-                "depth": 0.36545106372796
-              },
-              "perturbation": {
-                "lateral": 0.5659584903623909,
-                "depth": 0.9191297544166446
-              },
-              "narration": 0.513501628767699
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "attackable",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.12039034125,
-                "attackable": 0.12,
-                "excellent": 0.1,
-                "low": 0.2,
-                "neutral": 0.45960965875
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.081561365,
-                "reachMarginFeet": 7.483465142,
-                "distanceFeet": 1.763191534,
-                "reachable": true,
-                "availableSeconds": 0.566189763,
-                "movementSpeedFeetPerSecond": 0.550541528,
-                "contactHeightFeet": 1.466882288,
-                "incomingSpeedMph": 23.03447818,
-                "incomingIntent": "drive",
-                "incomingLaunchSpeedMph": 22.000009999,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "flight",
-                  "timeSeconds": 0.566189763,
-                  "xFeetPerSecond": 10.121109999,
-                  "yFeetPerSecond": 29.971346842,
-                  "heightFeetPerSecond": -11.858899189,
-                  "speedMph": 23.03447818
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "split",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0.167620475,
-                  "movementLoad": 0.039324395,
-                  "speedLoad": 0.267815939,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.1543758155312389,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "transition",
-                "phaseBaseErrorProbability": 0.1,
-                "baseErrorProbability": 0.1,
-                "pressureErrorAddition": 0.02039034125,
+                "phase": "hands",
+                "phaseBaseErrorProbability": 0.18,
+                "baseErrorProbability": 0.18,
+                "pressureErrorAddition": 0.05089392225,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
-                  "intent": "reset"
+                  "intent": "block"
                 },
                 "conditions": {
                   "profilePrior": true,
                   "kitchen": false,
-                  "allFourUp": false,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": false,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": false
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 23.03447818
-              }
-            },
-            "contact": {
-              "x": 13.640842693,
-              "y": 28.492194454,
-              "heightFeet": 1.466882288
-            },
-            "contactKind": "volley",
-            "contactTiming": {
-              "beforeBounceSeconds": 0.09991584
-            },
-            "target": {
-              "x": 11.195046764,
-              "y": 16.302955705
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-15",
-            "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.8088596034795046,
-              "execution": {
-                "quality": 0.30619632825255394,
-                "error": 0.23230579146184027
-              },
-              "target": {
-                "lateral": 0.2743727923370898,
-                "depth": 0.005610344931483269
-              },
-              "perturbation": {
-                "lateral": 0.4612345886416733,
-                "depth": 0.5930871008895338
-              },
-              "narration": 0.6145239619072527
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "excellent",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.08757699000000001,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.50242301
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.03030796,
-                "reachMarginFeet": 13.812851273,
-                "distanceFeet": 4.352784214,
-                "reachable": true,
-                "availableSeconds": 1.203259678,
-                "movementSpeedFeetPerSecond": 2.121557185,
-                "contactHeightFeet": 1.965557222,
-                "incomingSpeedMph": 6.761053536,
-                "incomingIntent": "reset",
-                "incomingLaunchSpeedMph": 12.950076572,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.203259678,
-                  "xFeetPerSecond": -1.907343201,
-                  "yFeetPerSecond": -9.505724242,
-                  "heightFeetPerSecond": 2.081947662,
-                  "speedMph": 6.761053536
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.151539799,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.30619632825255394,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.00757699,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
                   "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 6.761053536
-              }
-            },
-            "contact": {
-              "x": 10.660990668,
-              "y": 13.641352917,
-              "heightFeet": 1.965557222
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.28
-            },
-            "target": {
-              "x": 9.085861546,
-              "y": 27.519510613
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-16",
-            "chosen": {
-              "id": "cross-court-dink",
-              "intent": "cross-court-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.4502315502613783,
-              "execution": {
-                "quality": 0.4402156996075064,
-                "error": 0.852993892505765
-              },
-              "target": {
-                "lateral": 0.4871499417349696,
-                "depth": 0.7667969046160579
-              },
-              "perturbation": {
-                "lateral": 0.3725756846833974,
-                "depth": 0.3306774140801281
-              },
-              "narration": 0.5954730922821909
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "low",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.15077614900000003,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.439223851
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.043104596,
-                "reachMarginFeet": 10.917437183,
-                "distanceFeet": 3.645147646,
-                "reachable": true,
-                "availableSeconds": 0.945898916,
-                "movementSpeedFeetPerSecond": 3.017321752,
-                "contactHeightFeet": 1.340402437,
-                "incomingSpeedMph": 9.378177932,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 14.004142303,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.945898916,
-                  "xFeetPerSecond": -1.443051955,
-                  "yFeetPerSecond": 12.714451354,
-                  "heightFeetPerSecond": 5.044901006,
-                  "speedMph": 9.378177932
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.215522982,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.4402156996075064,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.010776149,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "cross-court-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": false,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 9.378177932
-              }
-            },
-            "contact": {
-              "x": 8.854973233,
-              "y": 29.55382283,
-              "heightFeet": 1.340402437
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.16
-            },
-            "target": {
-              "x": 11.055506866,
-              "y": 17.582466323
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-17",
-            "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.7887002516072243,
-              "execution": {
-                "quality": 0.6493784093763679,
-                "error": 0.6651615642476827
-              },
-              "target": {
-                "lateral": 0.3912503893952817,
-                "depth": 0.13084380142390728
-              },
-              "perturbation": {
-                "lateral": 0.16522397752851248,
-                "depth": 0.5703125419095159
-              },
-              "narration": 0.01897887629456818
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "neutral",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.088427284,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.5015727160000001
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.033709136,
-                "reachMarginFeet": 12.865307821,
-                "distanceFeet": 3.430598022,
-                "reachable": true,
-                "availableSeconds": 1.06970756,
-                "movementSpeedFeetPerSecond": 2.359639493,
-                "contactHeightFeet": 1.612836913,
-                "incomingSpeedMph": 7.376556622,
-                "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 12.868705393,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.06970756,
-                  "xFeetPerSecond": 1.907720845,
-                  "yFeetPerSecond": -10.378394592,
-                  "heightFeetPerSecond": 2.387299675,
-                  "speedMph": 7.376556622
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.168545678,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.6493784093763679,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.008427284,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 7.376556622
-              }
-            },
-            "contact": {
-              "x": 11.511826061,
-              "y": 15.09999585,
-              "heightFeet": 1.612836913
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.239196
-            },
-            "target": {
-              "x": 9.29718074,
-              "y": 27.359984331
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-18",
-            "chosen": {
-              "id": "backhand-dink",
-              "intent": "backhand-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.029191660229116678,
-              "execution": {
-                "quality": 0.5711203387472779,
-                "error": 0.21327900676988065
-              },
-              "target": {
-                "lateral": 0.5759520989377052,
-                "depth": 0.4081338851246983
-              },
-              "perturbation": {
-                "lateral": 0.3312117434106767,
-                "depth": 0.9792633142787963
-              },
-              "narration": 0.12065982888452709
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "neutral",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.15150258675,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.4384974132500001
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.046010347,
-                "reachMarginFeet": 10.566190316,
-                "distanceFeet": 3.922213043,
-                "reachable": true,
-                "availableSeconds": 0.94060024,
-                "movementSpeedFeetPerSecond": 3.220724288,
-                "contactHeightFeet": 1.208371845,
-                "incomingSpeedMph": 8.517200758,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 12.998609336,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.94060024,
-                  "xFeetPerSecond": -1.990997561,
-                  "yFeetPerSecond": 11.021903565,
-                  "heightFeetPerSecond": 5.531816822,
-                  "speedMph": 8.517200758
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.230051735,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.5711203387472779,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.01150258675,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "backhand-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": false,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.517200758
-              }
-            },
-            "contact": {
-              "x": 9.018992588,
-              "y": 28.899997763,
-              "heightFeet": 1.208371845
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.139723
-            },
-            "target": {
-              "x": 17.390366126,
-              "y": 17.495611479
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-19",
-            "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.5615735980682075,
-              "execution": {
-                "quality": 0.4048493979498744,
-                "error": 0.7185096426401287
-              },
-              "target": {
-                "lateral": 0.8164772680029273,
-                "depth": 0.8268328132107854
-              },
-              "perturbation": {
-                "lateral": 0.05789385689422488,
-                "depth": 0.3617984333541244
-              },
-              "narration": 0.8791558835655451
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "low",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.15143138875,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.43856861124999996
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.045725555,
-                "reachMarginFeet": 12.163531567,
-                "distanceFeet": 4.359048117,
-                "reachable": true,
-                "availableSeconds": 1.085898549,
-                "movementSpeedFeetPerSecond": 3.200788819,
-                "contactHeightFeet": 1.624749613,
-                "incomingSpeedMph": 8.394631913,
-                "incomingIntent": "backhand-dink",
-                "incomingLaunchSpeedMph": 14.184346494,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.085898549,
-                  "xFeetPerSecond": 7.169995494,
-                  "yFeetPerSecond": -9.767739774,
-                  "heightFeetPerSecond": 2.184236895,
-                  "speedMph": 8.394631913
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.228627773,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.4048493979498744,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.01143138875,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": false,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.394631913
-              }
-            },
-            "contact": {
-              "x": 19.148864881,
-              "y": 15.099995158,
-              "heightFeet": 1.624749613
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.245258
-            },
-            "target": {
-              "x": 11.089066615,
-              "y": 26.204470154
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-20",
-            "chosen": {
-              "id": "straight-dink",
-              "intent": "straight-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.9135610533412546,
-              "execution": {
-                "quality": 0.43495197291485965,
-                "error": 0.6400079182349145
-              },
-              "target": {
-                "lateral": 0.30093421251513064,
-                "depth": 0.6521324594505131
-              },
-              "perturbation": {
-                "lateral": 0.39731419389136136,
-                "depth": 0.6786031869705766
-              },
-              "narration": 0.23669132217764854
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "low",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.08640203675000001,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.5035979632500001
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.025608147,
-                "reachMarginFeet": 13.734902874,
-                "distanceFeet": 2.866783237,
-                "reachable": true,
-                "availableSeconds": 1.091549008,
-                "movementSpeedFeetPerSecond": 1.792570317,
-                "contactHeightFeet": 1.698623875,
-                "incomingSpeedMph": 8.335565795,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 13.828713501,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.091549008,
-                  "xFeetPerSecond": -7.150590654,
-                  "yFeetPerSecond": 9.851804289,
-                  "heightFeetPerSecond": 1.128614281,
-                  "speedMph": 8.335565795
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.128040737,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.43495197291485965,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.00640203675,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "straight-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.335565795
-              }
-            },
-            "contact": {
-              "x": 9.086901232,
-              "y": 28.962975355,
-              "heightFeet": 1.698623875
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.28
-            },
-            "target": {
-              "x": 8.448629547,
-              "y": 17.549639964
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-21",
-            "chosen": {
-              "id": "cross-court-dink",
-              "intent": "cross-court-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.2659243035595864,
-              "execution": {
-                "quality": 0.49195596808567643,
-                "error": 0.1330799872521311
-              },
-              "target": {
-                "lateral": 0.7896885336376727,
-                "depth": 0.48728127335198224
-              },
-              "perturbation": {
-                "lateral": 0.08668367797508836,
-                "depth": 0.8417705248575658
-              },
-              "narration": 0.4322284450754523
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "low",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.0841041495,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.5058958505
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.016416598,
-                "reachMarginFeet": 13.755637767,
-                "distanceFeet": 3.072994939,
-                "reachable": true,
-                "availableSeconds": 1.107759479,
-                "movementSpeedFeetPerSecond": 1.149161856,
-                "contactHeightFeet": 1.690866703,
-                "incomingSpeedMph": 7.055052568,
-                "incomingIntent": "straight-dink",
-                "incomingLaunchSpeedMph": 12.26240284,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.107759479,
-                  "xFeetPerSecond": -0.577758874,
-                  "yFeetPerSecond": -10.331267945,
-                  "heightFeetPerSecond": 1e-9,
-                  "speedMph": 7.055052568
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.08208299,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.49195596808567643,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.0041041495,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "cross-court-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 7.055052568
-              }
-            },
-            "contact": {
-              "x": 8.268167291,
-              "y": 14.322681449,
-              "heightFeet": 1.690866703
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.312348739
-            },
-            "target": {
-              "x": 12.435571781,
-              "y": 26.9057863
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-22",
-            "chosen": {
-              "id": "cross-court-dink",
-              "intent": "cross-court-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.2956748360302299,
-              "execution": {
-                "quality": 0.211258432129398,
-                "error": 0.6606410152744502
-              },
-              "target": {
-                "lateral": 0.7259115208871663,
-                "depth": 0.779284690041095
-              },
-              "perturbation": {
-                "lateral": 0.002243699971586466,
-                "depth": 0.0704485906753689
-              },
-              "narration": 0.06157365394756198
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "excellent",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.0830395965,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.5069604034999999
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.012158386,
-                "reachMarginFeet": 13.077496277,
-                "distanceFeet": 1.833631014,
-                "reachable": true,
-                "availableSeconds": 0.970794806,
-                "movementSpeedFeetPerSecond": 0.851087046,
-                "contactHeightFeet": 1.387234696,
-                "incomingSpeedMph": 8.713594834,
-                "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 13.546868697,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.970794806,
-                  "xFeetPerSecond": 3.771132776,
-                  "yFeetPerSecond": 11.38659788,
-                  "heightFeetPerSecond": 4.410304914,
-                  "speedMph": 8.713594834
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.060791932,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.211258432129398,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0.0030395965,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "cross-court-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.713594834
-              }
-            },
-            "contact": {
-              "x": 13.096036662,
-              "y": 28.900000893,
-              "heightFeet": 1.387234696
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.175137
-            },
-            "target": {
-              "x": 7.432371011,
-              "y": 17.540061612
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-23",
-            "chosen": {
-              "id": "cross-court-dink",
-              "intent": "cross-court-dink",
-              "family": "dink"
-            },
-            "draws": {
-              "intent": 0.19827703782357275,
-              "execution": {
-                "quality": 0.3507039591204375,
-                "error": 0.511793056037277
-              },
-              "target": {
-                "lateral": 0.052067835815250874,
-                "depth": 0.2752632754854858
-              },
-              "perturbation": {
-                "lateral": 0.31189942895434797,
-                "depth": 0.18119241506792605
-              },
-              "narration": 0.806648506084457
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "low",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.08,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.51
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0,
-                "reachMarginFeet": 15.179677195,
-                "distanceFeet": 1.151914738,
-                "reachable": true,
-                "availableSeconds": 1.072256567,
-                "movementSpeedFeetPerSecond": 0,
-                "contactHeightFeet": 1.627545155,
-                "incomingSpeedMph": 7.686186531,
-                "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 13.192183435,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.072256567,
-                  "xFeetPerSecond": -4.937595242,
-                  "yFeetPerSecond": -9.903618187,
-                  "heightFeetPerSecond": 2.149578545,
-                  "speedMph": 7.686186531
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.3507039591204375,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.08,
-                "pressureErrorAddition": 0,
-                "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "cross-court-dink"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 7.686186531
-              }
-            },
-            "contact": {
-              "x": 6.215841358,
-              "y": 15.099998259,
-              "heightFeet": 1.627545155
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.246381
-            },
-            "target": {
-              "x": 12.365121921,
-              "y": 26.959582053
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-24",
-            "chosen": {
-              "id": "lob",
-              "intent": "lob",
-              "family": "lob"
-            },
-            "draws": {
-              "intent": 0.5394005314446986,
-              "execution": {
-                "quality": 0.4870349890552461,
-                "error": 0.10092395171523094
-              },
-              "target": {
-                "lateral": 0.43943724082782865,
-                "depth": 0.7403867531102151
-              },
-              "perturbation": {
-                "lateral": 0.18738207640126348,
-                "depth": 0.7302754812408239
-              },
-              "narration": 0.14848319045268
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "low",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.14,
-                "attackable": 0.11,
-                "excellent": 0.12,
-                "low": 0.18,
-                "neutral": 0.45
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0,
-                "reachMarginFeet": 13.340451435,
-                "distanceFeet": 1.443410069,
-                "reachable": true,
-                "availableSeconds": 0.961704393,
-                "movementSpeedFeetPerSecond": 0,
-                "contactHeightFeet": 1.370503638,
-                "incomingSpeedMph": 8.834199045,
-                "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 13.717498459,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.961704393,
-                  "xFeetPerSecond": 5.64996929,
-                  "yFeetPerSecond": 10.89660547,
-                  "heightFeetPerSecond": 4.149838216,
-                  "speedMph": 8.834199045
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "up",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0
-                }
-              },
-              "draw": 0.4870349890552461,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.14,
-                "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0,
-                "choice": {
-                  "family": "lob",
-                  "pace": "medium",
-                  "intent": "lob"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
-                  "grounded": true,
-                  "outsideNVZ": true,
-                  "establishedOutsideNVZ": true,
-                  "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": false,
-                  "lowPressure": true,
-                  "adequateTime": true,
-                  "reachMargin": true,
-                  "settledMovement": true,
-                  "actualSoftSpeed": true
-                },
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.834199045
-              }
-            },
-            "contact": {
-              "x": 13.371240202,
-              "y": 28.899995072,
-              "heightFeet": 1.370503638
-            },
-            "contactKind": "groundstroke",
-            "contactTiming": {
-              "afterBounceSeconds": 0.178075
-            },
-            "target": {
-              "x": 6.200898833,
-              "y": 4.572883699
-            },
-            "solutionIndex": 0,
-            "nominalRoute": "over-net",
-            "deliveredRoute": "over-net",
-            "incidentalAroundPost": false
-          },
-          {
-            "shotId": "shot-25",
-            "chosen": {
-              "id": "overhead",
-              "intent": "overhead",
-              "family": "overhead"
-            },
-            "draws": {
-              "intent": 0.6061408817768097,
-              "execution": {
-                "quality": 0.2516831513494253,
-                "error": 0.6250462967436761
-              },
-              "target": {
-                "lateral": 0.5835158508270979,
-                "depth": 0.9839246575720608
-              },
-              "perturbation": {
-                "lateral": 0.30313746887259185,
-                "depth": 0.06915775104425848
-              },
-              "narration": 0.15294854203239083
-            },
-            "execution": {
-              "version": "rally-quality-v1",
-              "quality": "attackable",
-              "errorReason": null,
-              "probabilities": {
-                "error": 0.20347630649999998,
-                "attackable": 0.17,
-                "excellent": 0.07,
-                "low": 0.12,
-                "neutral": 0.4365236935
-              },
-              "pressure": {
-                "version": "rally-quality-v1",
-                "score": 0.333905226,
-                "reachMarginFeet": 16.089336745,
-                "distanceFeet": 10.775352374,
-                "reachable": true,
-                "availableSeconds": 1.824620651,
-                "movementSpeedFeetPerSecond": 5.873365819,
-                "contactHeightFeet": 7.499998992,
-                "incomingSpeedMph": 19.59123561,
-                "incomingIntent": "lob",
-                "incomingLaunchSpeedMph": 23.81539994,
-                "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingContactVelocity": {
-                  "version": "play-velocity-v2",
-                  "phase": "flight",
-                  "timeSeconds": 1.824620651,
-                  "xFeetPerSecond": -3.462365993,
-                  "yFeetPerSecond": -11.74691117,
-                  "heightFeetPerSecond": -25.99334655,
-                  "speedMph": 19.59123561
-                },
-                "formation": {
-                  "version": "rally-formation-pressure-v1",
-                  "ownFormation": "back",
-                  "opponentFormation": "up",
-                  "pressureLoad": 0.25
-                },
-                "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.41952613,
-                  "speedLoad": 0,
-                  "lowLoad": 0,
-                  "formationLoad": 0.25
-                }
-              },
-              "draw": 0.2516831513494253,
-              "riskContext": {
-                "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
-                "phase": "scramble",
-                "phaseBaseErrorProbability": 0.12,
-                "baseErrorProbability": 0.12,
-                "pressureErrorAddition": 0.0834763065,
-                "choice": {
-                  "family": "overhead",
-                  "pace": "firm",
-                  "intent": "overhead"
-                },
-                "conditions": {
-                  "profilePrior": true,
-                  "kitchen": false,
-                  "allFourUp": false,
                   "grounded": true,
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
                   "actualOutsideFeet": true,
                   "notAttackable": false,
                   "incomingSoft": false,
-                  "selectedSoft": false,
+                  "selectedSoft": true,
                   "lowPressure": false,
-                  "adequateTime": true,
+                  "adequateTime": false,
                   "reachMargin": true,
                   "settledMovement": false,
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 19.59123561
+                "incomingSpeedMph": 21.314941104
               }
             },
             "contact": {
-              "x": 7.053735709,
-              "y": 7.466338361,
-              "heightFeet": 7.499998992
+              "x": 12.987250877,
+              "y": 27.573253603,
+              "heightFeet": 3.263457472
             },
             "contactKind": "volley",
             "contactTiming": {
-              "beforeBounceSeconds": 0.246316212
+              "beforeBounceSeconds": 0.301129742
             },
             "target": {
-              "x": 9.521963098,
-              "y": 28.434113339
+              "x": 10.288742469,
+              "y": 21.626092075
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -17622,11 +16028,11 @@
           "faultingActor": "player3",
           "evidence": {
             "position": {
-              "x": 8.447834052,
+              "x": 10.797115958,
               "y": 22.131391076,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 1.591467122
+            "afterContactSeconds": 1.339411903
           }
         },
         "decisions": [
@@ -18017,33 +16423,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.17888245681,
+                "error": 0.17794473772,
                 "attackable": 0.16,
                 "excellent": 0.08,
                 "low": 0.18,
-                "neutral": 0.40111754319
+                "neutral": 0.40205526228000005
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.089916461,
-                "reachMarginFeet": 9.082383741,
-                "distanceFeet": 3.088401011,
+                "score": 0.085451132,
+                "reachMarginFeet": 9.343998962,
+                "distanceFeet": 2.904695539,
                 "reachable": true,
-                "availableSeconds": 0.775056054,
-                "movementSpeedFeetPerSecond": 1.944476617,
-                "contactHeightFeet": 1.616316815,
-                "incomingSpeedMph": 27.427644725,
+                "availableSeconds": 0.780621036,
+                "movementSpeedFeetPerSecond": 1.616523127,
+                "contactHeightFeet": 1.535668402,
+                "incomingSpeedMph": 27.471588945,
                 "incomingIntent": "third-shot-drive",
                 "incomingLaunchSpeedMph": 26.597551269,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "flight",
-                  "timeSeconds": 0.775056054,
+                  "timeSeconds": 0.780621036,
                   "xFeetPerSecond": 5.487481102,
                   "yFeetPerSecond": 37.15751938,
-                  "heightFeetPerSecond": -14.402600848,
-                  "speedMph": 27.427644725
+                  "heightFeetPerSecond": -14.581648578,
+                  "speedMph": 27.471588945
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18054,8 +16460,8 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.138891187,
-                  "speedLoad": 0.414254824,
+                  "movementLoad": 0.115465938,
+                  "speedLoad": 0.415719631,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
@@ -18067,7 +16473,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.16,
                 "baseErrorProbability": 0.16,
-                "pressureErrorAddition": 0.01888245681,
+                "pressureErrorAddition": 0.01794473772,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
@@ -18091,17 +16497,17 @@
                   "actualSoftSpeed": false
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 27.427644725
+                "incomingSpeedMph": 27.471588945
               }
             },
             "contact": {
-              "x": 12.93084253,
-              "y": 28.36553428,
-              "heightFeet": 1.616316815
+              "x": 12.961380264,
+              "y": 28.572315207,
+              "heightFeet": 1.535668402
             },
             "contactKind": "volley",
             "contactTiming": {
-              "beforeBounceSeconds": 0.093938972
+              "beforeBounceSeconds": 0.08837399
             },
             "target": {
               "x": 8.093928935,
@@ -18140,33 +16546,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.24633880837,
+                "error": 0.24594394516,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.36366119163
+                "neutral": 0.3640560548399999
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.125422897,
-                "reachMarginFeet": 7.235463215,
-                "distanceFeet": 12.060023565,
+                "score": 0.123542596,
+                "reachMarginFeet": 7.456585528,
+                "distanceFeet": 11.972673205,
                 "reachable": true,
-                "availableSeconds": 1.283963341,
-                "movementSpeedFeetPerSecond": 8.779602817,
-                "contactHeightFeet": 1.747255206,
-                "incomingSpeedMph": 6.723249864,
+                "availableSeconds": 1.293518481,
+                "movementSpeedFeetPerSecond": 8.647981749,
+                "contactHeightFeet": 1.759381859,
+                "incomingSpeedMph": 6.757873182,
                 "incomingIntent": "reset",
-                "incomingLaunchSpeedMph": 12.188598707,
+                "incomingLaunchSpeedMph": 12.354809981,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.283963341,
-                  "xFeetPerSecond": -4.030932358,
-                  "yFeetPerSecond": -8.524116665,
-                  "heightFeetPerSecond": -2.885434928,
-                  "speedMph": 6.723249864
+                  "timeSeconds": 1.293518481,
+                  "xFeetPerSecond": -4.012010087,
+                  "yFeetPerSecond": -8.601313821,
+                  "heightFeetPerSecond": -2.856561946,
+                  "speedMph": 6.757873182
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18177,7 +16583,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.627114487,
+                  "movementLoad": 0.617712982,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -18190,7 +16596,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.22,
-                "pressureErrorAddition": 0.02633880837,
+                "pressureErrorAddition": 0.02594394516,
                 "choice": {
                   "family": "drop",
                   "pace": "soft",
@@ -18214,20 +16620,20 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 6.723249864
+                "incomingSpeedMph": 6.757873182
               }
             },
             "contact": {
-              "x": 6.400937345,
-              "y": 14.556899287,
-              "heightFeet": 1.747255206
+              "x": 6.408884698,
+              "y": 14.524476481,
+              "heightFeet": 1.759381859
             },
             "contactKind": "groundstroke",
             "contactTiming": {
               "afterBounceSeconds": 0.42
             },
             "target": {
-              "x": 14.192264857,
+              "x": 14.184317504,
               "y": 27.701860502
             },
             "solutionIndex": 0,
@@ -18263,33 +16669,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.12074354217,
+                "error": 0.12077672028,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.48925645782999994
+                "neutral": 0.48922327972
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.003540677,
-                "reachMarginFeet": 14.634814225,
-                "distanceFeet": 0.652727262,
+                "score": 0.003698668,
+                "reachMarginFeet": 14.642733296,
+                "distanceFeet": 0.641750033,
                 "reachable": true,
-                "availableSeconds": 0.997681535,
-                "movementSpeedFeetPerSecond": 0.247847364,
-                "contactHeightFeet": 1.386900014,
-                "incomingSpeedMph": 9.665617948,
+                "availableSeconds": 0.997463095,
+                "movementSpeedFeetPerSecond": 0.258906789,
+                "contactHeightFeet": 1.388148216,
+                "incomingSpeedMph": 9.680546056,
                 "incomingIntent": "drop",
-                "incomingLaunchSpeedMph": 14.715340102,
+                "incomingLaunchSpeedMph": 14.724991623,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 0.997681535,
-                  "xFeetPerSecond": 6.696764314,
-                  "yFeetPerSecond": 11.298293781,
-                  "heightFeetPerSecond": 5.335510864,
-                  "speedMph": 9.665617948
+                  "timeSeconds": 0.997463095,
+                  "xFeetPerSecond": 6.684845761,
+                  "yFeetPerSecond": 11.329115936,
+                  "heightFeetPerSecond": 5.343312123,
+                  "speedMph": 9.680546056
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18300,7 +16706,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.017703383,
+                  "movementLoad": 0.018493342,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -18313,7 +16719,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.12,
-                "pressureErrorAddition": 0.00074354217,
+                "pressureErrorAddition": 0.00077672028,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -18337,20 +16743,20 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 9.665617948
+                "incomingSpeedMph": 9.680546056
               }
             },
             "contact": {
-              "x": 15.263747147,
-              "y": 29.509587507,
-              "heightFeet": 1.386900014
+              "x": 15.253892826,
+              "y": 29.514519052,
+              "heightFeet": 1.388148216
             },
             "contactKind": "groundstroke",
             "contactTiming": {
               "afterBounceSeconds": 0.16
             },
             "target": {
-              "x": 15.783904541,
+              "x": 15.77405022,
               "y": 17.46245028
             },
             "solutionIndex": 0,
@@ -18386,33 +16792,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.12014866823999999,
+                "error": 0.1201738023,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.48985133175999995
+                "neutral": 0.4898261977
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.000707944,
-                "reachMarginFeet": 13.821844298,
-                "distanceFeet": 1.574057511,
+                "score": 0.00082763,
+                "reachMarginFeet": 13.822871298,
+                "distanceFeet": 1.572847771,
                 "reachable": true,
-                "availableSeconds": 1.005421558,
-                "movementSpeedFeetPerSecond": 0.049556057,
-                "contactHeightFeet": 1.352138533,
-                "incomingSpeedMph": 7.823347222,
+                "availableSeconds": 1.005408505,
+                "movementSpeedFeetPerSecond": 0.057934094,
+                "contactHeightFeet": 1.352278839,
+                "incomingSpeedMph": 7.826271287,
                 "incomingIntent": "straight-dink",
-                "incomingLaunchSpeedMph": 12.754361593,
+                "incomingLaunchSpeedMph": 12.756752152,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.005421558,
-                  "xFeetPerSecond": 0.442990033,
-                  "yFeetPerSecond": -10.259897826,
-                  "heightFeetPerSecond": 5.118251604,
-                  "speedMph": 7.823347222
+                  "timeSeconds": 1.005408505,
+                  "xFeetPerSecond": 0.442996873,
+                  "yFeetPerSecond": -10.264256232,
+                  "heightFeetPerSecond": 5.119128517,
+                  "speedMph": 7.826271287
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18423,7 +16829,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.003539718,
+                  "movementLoad": 0.00413815,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -18436,7 +16842,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.12,
-                "pressureErrorAddition": 0.00014866823999999998,
+                "pressureErrorAddition": 0.0001738023,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -18460,20 +16866,20 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 7.823347222
+                "incomingSpeedMph": 7.826271287
               }
             },
             "contact": {
-              "x": 15.854782946,
-              "y": 15.820866628,
-              "heightFeet": 1.352138533
+              "x": 15.84492972,
+              "y": 15.820169283,
+              "heightFeet": 1.352278839
             },
             "contactKind": "groundstroke",
             "contactTiming": {
               "afterBounceSeconds": 0.16
             },
             "target": {
-              "x": 4.023531341,
+              "x": 4.033384567,
               "y": 25.986174187
             },
             "solutionIndex": 0,
@@ -18509,33 +16915,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.23180393074,
+                "error": 0.23175926038,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.37819606926000005
+                "neutral": 0.37824073961999993
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.056209194,
-                "reachMarginFeet": 12.244852833,
-                "distanceFeet": 5.475308854,
+                "score": 0.055996478,
+                "reachMarginFeet": 12.261938428,
+                "distanceFeet": 5.458019895,
                 "reachable": true,
-                "availableSeconds": 1.171440121,
-                "movementSpeedFeetPerSecond": 3.934643607,
-                "contactHeightFeet": 1.721962258,
-                "incomingSpeedMph": 9.147353692,
+                "availableSeconds": 1.171425594,
+                "movementSpeedFeetPerSecond": 3.919753432,
+                "contactHeightFeet": 1.722029386,
+                "incomingSpeedMph": 9.138790398,
                 "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 15.105364022,
+                "incomingLaunchSpeedMph": 15.095363677,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.171440121,
-                  "xFeetPerSecond": -10.166851577,
-                  "yFeetPerSecond": 8.73526966,
-                  "heightFeetPerSecond": -0.567833843,
-                  "speedMph": 9.147353692
+                  "timeSeconds": 1.171425594,
+                  "xFeetPerSecond": -10.149851083,
+                  "yFeetPerSecond": 8.735811831,
+                  "heightFeetPerSecond": -0.567023139,
+                  "speedMph": 9.138790398
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18546,7 +16952,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.281045972,
+                  "movementLoad": 0.279982388,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -18559,7 +16965,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.22,
-                "pressureErrorAddition": 0.01180393074,
+                "pressureErrorAddition": 0.01175926038,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -18583,17 +16989,17 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 9.147353692
+                "incomingSpeedMph": 9.138790398
               }
             },
             "contact": {
-              "x": 0.632174661,
-              "y": 28.899998087,
-              "heightFeet": 1.721962258
+              "x": 0.647901738,
+              "y": 28.900004223,
+              "heightFeet": 1.722029386
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.33357
+              "afterBounceSeconds": 0.33355
             },
             "target": {
               "x": 1.732239915,
@@ -18632,33 +17038,33 @@
               "quality": "attackable",
               "errorReason": null,
               "probabilities": {
-                "error": 0.12073196108999999,
+                "error": 0.12445883465999999,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.48926803891000004
+                "neutral": 0.48554116534
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.003485529,
-                "reachMarginFeet": 12.850972546,
-                "distanceFeet": 2.036448175,
+                "score": 0.021232546,
+                "reachMarginFeet": 12.84646807,
+                "distanceFeet": 2.040449347,
                 "reachable": true,
-                "availableSeconds": 0.96910148,
-                "movementSpeedFeetPerSecond": 0.243987013,
-                "contactHeightFeet": 1.340935416,
-                "incomingSpeedMph": 8.502171368,
+                "availableSeconds": 0.96906553,
+                "movementSpeedFeetPerSecond": 1.486278202,
+                "contactHeightFeet": 1.340891084,
+                "incomingSpeedMph": 8.501670347,
                 "incomingIntent": "straight-dink",
-                "incomingLaunchSpeedMph": 13.161545833,
+                "incomingLaunchSpeedMph": 13.160724719,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 0.96910148,
-                  "xFeetPerSecond": 0.978921684,
-                  "yFeetPerSecond": -11.36020498,
-                  "heightFeetPerSecond": 5.048232122,
-                  "speedMph": 8.502171368
+                  "timeSeconds": 0.96906553,
+                  "xFeetPerSecond": 0.96496941,
+                  "yFeetPerSecond": -11.360715224,
+                  "heightFeetPerSecond": 5.047955048,
+                  "speedMph": 8.501670347
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18669,7 +17075,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.017427644,
+                  "movementLoad": 0.106162729,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -18682,7 +17088,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.12,
-                "pressureErrorAddition": 0.0007319610899999999,
+                "pressureErrorAddition": 0.00445883466,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -18706,13 +17112,13 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.502171368
+                "incomingSpeedMph": 8.501670347
               }
             },
             "contact": {
-              "x": 1.888867384,
-              "y": 14.316311591,
-              "heightFeet": 1.340935416
+              "x": 1.886635021,
+              "y": 14.316229952,
+              "heightFeet": 1.340891084
             },
             "contactKind": "groundstroke",
             "contactTiming": {
@@ -18730,9 +17136,9 @@
           {
             "shotId": "shot-10",
             "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
+              "id": "speed-up",
+              "intent": "speed-up",
+              "family": "volley"
             },
             "draws": {
               "intent": 0.6295981428120285,
@@ -18741,8 +17147,8 @@
                 "error": 0.9138613196555525
               },
               "target": {
-                "lateral": 0.2366406919900328,
-                "depth": 0.31475608539767563
+                "lateral": 0.03216930292546749,
+                "depth": 0.25273544853553176
               },
               "perturbation": {
                 "lateral": 0.7159305086825043,
@@ -18755,33 +17161,33 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.23206937326,
+                "error": 0.22583739667,
                 "attackable": 0.15,
                 "excellent": 0.08,
                 "low": 0.16,
-                "neutral": 0.37793062674
+                "neutral": 0.38416260332999996
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.057473206,
-                "reachMarginFeet": 14.069050367,
-                "distanceFeet": 6.088217921,
+                "score": 0.027797127,
+                "reachMarginFeet": 11.648831804,
+                "distanceFeet": 3.778875481,
                 "reachable": true,
-                "availableSeconds": 1.345519163,
-                "movementSpeedFeetPerSecond": 4.023124402,
-                "contactHeightFeet": 1.896459917,
-                "incomingSpeedMph": 10.684681116,
+                "availableSeconds": 1.007693378,
+                "movementSpeedFeetPerSecond": 1.945798885,
+                "contactHeightFeet": 3.187047644,
+                "incomingSpeedMph": 15.85108435,
                 "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 17.505919802,
+                "incomingLaunchSpeedMph": 17.506641955,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.345519163,
-                  "xFeetPerSecond": 9.795753297,
-                  "yFeetPerSecond": 8.776355296,
-                  "heightFeetPerSecond": 8.520260257,
-                  "speedMph": 10.684681116
+                  "phase": "flight",
+                  "timeSeconds": 1.007693378,
+                  "xFeetPerSecond": 13.607067737,
+                  "yFeetPerSecond": 12.189425956,
+                  "heightFeetPerSecond": -14.378701547,
+                  "speedMph": 15.85108435
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18792,7 +17198,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.287366029,
+                  "movementLoad": 0.138985635,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -18805,11 +17211,11 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.22,
                 "baseErrorProbability": 0.22,
-                "pressureErrorAddition": 0.012069373259999999,
+                "pressureErrorAddition": 0.00583739667,
                 "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
+                  "family": "volley",
+                  "pace": "firm",
+                  "intent": "speed-up"
                 },
                 "conditions": {
                   "profilePrior": true,
@@ -18819,31 +17225,31 @@
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
                   "actualOutsideFeet": true,
-                  "notAttackable": true,
+                  "notAttackable": false,
                   "incomingSoft": true,
-                  "selectedSoft": true,
+                  "selectedSoft": false,
                   "lowPressure": true,
                   "adequateTime": true,
                   "reachMargin": true,
-                  "settledMovement": false,
+                  "settledMovement": true,
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 10.684681116
+                "incomingSpeedMph": 15.85108435
               }
             },
             "contact": {
-              "x": 19.585428543,
-              "y": 30.171274812,
-              "heightFeet": 1.896459917
+              "x": 15.598387067,
+              "y": 26.599433764,
+              "heightFeet": 3.187047644
             },
-            "contactKind": "groundstroke",
+            "contactKind": "volley",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "beforeBounceSeconds": 0.177828243
             },
             "target": {
-              "x": 9.119307175,
-              "y": 16.590169015
+              "x": 5.680342456,
+              "y": 7.628793942
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -18853,9 +17259,9 @@
           {
             "shotId": "shot-11",
             "chosen": {
-              "id": "middle-dink",
-              "intent": "middle-dink",
-              "family": "dink"
+              "id": "counter",
+              "intent": "counter",
+              "family": "volley"
             },
             "draws": {
               "intent": 0.8114407805260271,
@@ -18864,47 +17270,47 @@
                 "error": 0.7704613020177931
               },
               "target": {
-                "lateral": 0.5451928386464715,
-                "depth": 0.23900436889380217
-              },
-              "perturbation": {
                 "lateral": 0.5952995223924518,
                 "depth": 0.875243674730882
+              },
+              "perturbation": {
+                "lateral": 0.8808559901081026,
+                "depth": 0.5742695764638484
               },
               "narration": 0.018293311586603522
             },
             "execution": {
               "version": "rally-quality-v1",
-              "quality": "low",
+              "quality": "attackable",
               "errorReason": null,
               "probabilities": {
-                "error": 0.12,
-                "attackable": 0.15,
-                "excellent": 0.08,
-                "low": 0.16,
-                "neutral": 0.49
+                "error": 0.31041004341,
+                "attackable": 0.18,
+                "excellent": 0.1,
+                "low": 0.05,
+                "neutral": 0.35958995659
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0,
-                "reachMarginFeet": 13.708465199,
-                "distanceFeet": 1.266790676,
+                "score": 0.335285921,
+                "reachMarginFeet": 3.899081109,
+                "distanceFeet": 2.796693324,
                 "reachable": true,
-                "availableSeconds": 0.97537542,
-                "movementSpeedFeetPerSecond": 0,
-                "contactHeightFeet": 1.373544564,
-                "incomingSpeedMph": 10.926476966,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 16.161754965,
+                "availableSeconds": 0.383983888,
+                "movementSpeedFeetPerSecond": 2.59566444,
+                "contactHeightFeet": 2.463097285,
+                "incomingSpeedMph": 25.347459247,
+                "incomingIntent": "speed-up",
+                "incomingLaunchSpeedMph": 24.916611987,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.97537542,
-                  "xFeetPerSecond": -9.241886869,
-                  "yFeetPerSecond": -11.992507915,
-                  "heightFeetPerSecond": 5.252039301,
-                  "speedMph": 10.926476966
+                  "phase": "flight",
+                  "timeSeconds": 0.383983888,
+                  "xFeetPerSecond": -16.814274059,
+                  "yFeetPerSecond": -32.161333162,
+                  "heightFeetPerSecond": -8.062515307,
+                  "speedMph": 25.347459247
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -18913,10 +17319,10 @@
                   "pressureLoad": 0
                 },
                 "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0,
-                  "speedLoad": 0,
+                  "reachLoad": 0.350153149,
+                  "shortTime": 0.532032224,
+                  "movementLoad": 0.185404603,
+                  "speedLoad": 0.344915308,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
@@ -18924,49 +17330,49 @@
               "draw": 0.3634413154795766,
               "riskContext": {
                 "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.22,
-                "baseErrorProbability": 0.12,
-                "pressureErrorAddition": 0,
+                "kind": "phase-default",
+                "phase": "hands",
+                "phaseBaseErrorProbability": 0.24,
+                "baseErrorProbability": 0.24,
+                "pressureErrorAddition": 0.07041004341,
                 "choice": {
-                  "family": "dink",
-                  "pace": "soft",
-                  "intent": "middle-dink"
+                  "family": "volley",
+                  "pace": "firm",
+                  "intent": "counter"
                 },
                 "conditions": {
                   "profilePrior": true,
-                  "kitchen": true,
+                  "kitchen": false,
                   "allFourUp": true,
                   "grounded": true,
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
                   "actualOutsideFeet": true,
                   "notAttackable": true,
-                  "incomingSoft": true,
-                  "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
+                  "incomingSoft": false,
+                  "selectedSoft": false,
+                  "lowPressure": false,
+                  "adequateTime": false,
                   "reachMargin": true,
                   "settledMovement": true,
-                  "actualSoftSpeed": true
+                  "actualSoftSpeed": false
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 10.926476966
+                "incomingSpeedMph": 25.347459247
               }
             },
             "contact": {
-              "x": 7.640605276,
-              "y": 14.671367749,
-              "heightFeet": 1.373544564
+              "x": 9.141976739,
+              "y": 14.250000013,
+              "heightFeet": 2.463097285
             },
-            "contactKind": "groundstroke",
+            "contactKind": "volley",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "beforeBounceSeconds": 0.205874739
             },
             "target": {
-              "x": 10.218891164,
-              "y": 27.291590917
+              "x": 15.72218369,
+              "y": 36.427072159
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -18976,9 +17382,9 @@
           {
             "shotId": "shot-12",
             "chosen": {
-              "id": "backhand-dink",
-              "intent": "backhand-dink",
-              "family": "dink"
+              "id": "block",
+              "intent": "block",
+              "family": "reset"
             },
             "draws": {
               "intent": 0.03600074863061309,
@@ -18987,12 +17393,12 @@
                 "error": 0.054203892359510064
               },
               "target": {
-                "lateral": 0.8808559901081026,
-                "depth": 0.5742695764638484
-              },
-              "perturbation": {
                 "lateral": 0.6017614929005504,
                 "depth": 0.15485030901618302
+              },
+              "perturbation": {
+                "lateral": 0.9421845532488078,
+                "depth": 0.24635975062847137
               },
               "narration": 0.7014531004242599
             },
@@ -19001,33 +17407,33 @@
               "quality": "error",
               "errorReason": "net",
               "probabilities": {
-                "error": 0.23072063692,
-                "attackable": 0.15,
-                "excellent": 0.08,
-                "low": 0.16,
-                "neutral": 0.37927936308
+                "error": 0.28901462811,
+                "attackable": 0.18,
+                "excellent": 0.1,
+                "low": 0.05,
+                "neutral": 0.38098537189
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.051050652,
-                "reachMarginFeet": 10.46628877,
-                "distanceFeet": 4.299720151,
+                "score": 0.233402991,
+                "reachMarginFeet": 4.913303393,
+                "distanceFeet": 2.694492566,
                 "reachable": true,
-                "availableSeconds": 0.960429209,
-                "movementSpeedFeetPerSecond": 3.573545674,
-                "contactHeightFeet": 1.280729145,
-                "incomingSpeedMph": 8.517986186,
-                "incomingIntent": "middle-dink",
-                "incomingLaunchSpeedMph": 13.411782498,
+                "availableSeconds": 0.449128283,
+                "movementSpeedFeetPerSecond": 3.368452742,
+                "contactHeightFeet": 3.19390568,
+                "incomingSpeedMph": 21.497421996,
+                "incomingIntent": "counter",
+                "incomingLaunchSpeedMph": 22.000010001,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 0.960429209,
-                  "xFeetPerSecond": 2.319213017,
-                  "yFeetPerSecond": 11.352110322,
-                  "heightFeetPerSecond": 4.671942928,
-                  "speedMph": 8.517986186
+                  "phase": "flight",
+                  "timeSeconds": 0.449128283,
+                  "xFeetPerSecond": 8.826241738,
+                  "yFeetPerSecond": 29.746815151,
+                  "heightFeetPerSecond": -5.597955957,
+                  "speedMph": 21.497421996
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -19036,10 +17442,10 @@
                   "pressureLoad": 0
                 },
                 "factors": {
-                  "reachLoad": 0,
-                  "shortTime": 0,
-                  "movementLoad": 0.255253262,
-                  "speedLoad": 0,
+                  "reachLoad": 0.181116101,
+                  "shortTime": 0.401743434,
+                  "movementLoad": 0.240603767,
+                  "speedLoad": 0.216580733,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
@@ -19049,48 +17455,48 @@
               "riskContext": {
                 "version": "rally-execution-risk-v1",
                 "kind": "phase-default",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.22,
-                "baseErrorProbability": 0.22,
-                "pressureErrorAddition": 0.01072063692,
+                "phase": "hands",
+                "phaseBaseErrorProbability": 0.24,
+                "baseErrorProbability": 0.24,
+                "pressureErrorAddition": 0.04901462811,
                 "choice": {
-                  "family": "dink",
+                  "family": "reset",
                   "pace": "soft",
-                  "intent": "backhand-dink"
+                  "intent": "block"
                 },
                 "conditions": {
                   "profilePrior": true,
-                  "kitchen": true,
+                  "kitchen": false,
                   "allFourUp": true,
                   "grounded": true,
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
                   "actualOutsideFeet": true,
-                  "notAttackable": true,
-                  "incomingSoft": true,
+                  "notAttackable": false,
+                  "incomingSoft": false,
                   "selectedSoft": true,
-                  "lowPressure": true,
-                  "adequateTime": true,
+                  "lowPressure": false,
+                  "adequateTime": false,
                   "reachMargin": true,
                   "settledMovement": false,
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.517986186
+                "incomingSpeedMph": 21.497421996
               }
             },
             "contact": {
-              "x": 10.589965247,
-              "y": 29.107928569,
-              "heightFeet": 1.280729145
+              "x": 13.106091535,
+              "y": 27.610136019,
+              "heightFeet": 3.19390568
             },
-            "contactKind": "groundstroke",
+            "contactKind": "volley",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "beforeBounceSeconds": 0.296399332
             },
             "target": {
-              "x": 8.301112389,
-              "y": 21.653544907
+              "x": 10.58416152,
+              "y": 21.626092075
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -20469,11 +18875,11 @@
           "faultingActor": "player1",
           "evidence": {
             "position": {
-              "x": 12.783006807,
+              "x": 10.965381343,
               "y": 21.868608924,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 1.240276262
+            "afterContactSeconds": 1.234320741
           }
         },
         "decisions": [
@@ -22059,7 +20465,7 @@
               "afterBounceSeconds": 0.197832
             },
             "target": {
-              "x": 13.360417768,
+              "x": 11.346751774,
               "y": 22.598639197
             },
             "solutionIndex": 0,
@@ -22528,20 +20934,20 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.116202472,
+                "error": 0.1158875345,
                 "attackable": 0.12,
                 "excellent": 0.1,
                 "low": 0.2,
-                "neutral": 0.463797528
+                "neutral": 0.4641124655
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.064809888,
+                "score": 0.063550138,
                 "reachMarginFeet": 11.395377016,
                 "distanceFeet": 1.809026254,
                 "reachable": true,
                 "availableSeconds": 0.848885948,
-                "movementSpeedFeetPerSecond": 0.098815583,
+                "movementSpeedFeetPerSecond": 0.010633059,
                 "contactHeightFeet": 1.458695008,
                 "incomingSpeedMph": 27.679647363,
                 "incomingIntent": "third-shot-drive",
@@ -22565,7 +20971,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.007058256,
+                  "movementLoad": 0.000759504,
                   "speedLoad": 0.422654912,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -22578,7 +20984,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.1,
                 "baseErrorProbability": 0.1,
-                "pressureErrorAddition": 0.016202472,
+                "pressureErrorAddition": 0.0158875345,
                 "choice": {
                   "family": "volley",
                   "pace": "firm",
@@ -24057,11 +22463,11 @@
           "faultingActor": "player3",
           "evidence": {
             "position": {
-              "x": 8.923948335,
+              "x": 9.42851834,
               "y": 22.131391076,
               "heightFeet": 0.121391076
             },
-            "afterContactSeconds": 1.290596158
+            "afterContactSeconds": 1.289857232
           }
         },
         "decisions": [
@@ -27000,7 +25406,7 @@
               "afterBounceSeconds": 0.179944
             },
             "target": {
-              "x": 8.790907081,
+              "x": 9.345734532,
               "y": 21.457207544
             },
             "solutionIndex": 0,
@@ -28287,45 +26693,45 @@
               "quality": "low",
               "errorReason": null,
               "probabilities": {
-                "error": 0.2035046986,
+                "error": 0.20086236764999998,
                 "attackable": 0.19,
                 "excellent": 0.05,
                 "low": 0.15,
-                "neutral": 0.4064953014
+                "neutral": 0.4091376323499999
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.12370894,
-                "reachMarginFeet": 9.186601182,
-                "distanceFeet": 6.276723191,
+                "score": 0.109801935,
+                "reachMarginFeet": 8.954780466,
+                "distanceFeet": 2.965991635,
                 "reachable": true,
-                "availableSeconds": 1.010237455,
-                "movementSpeedFeetPerSecond": 6.885245981,
-                "contactHeightFeet": 1.570796637,
-                "incomingSpeedMph": 20.069656584,
+                "availableSeconds": 0.757198007,
+                "movementSpeedFeetPerSecond": 2.841343288,
+                "contactHeightFeet": 1.573754831,
+                "incomingSpeedMph": 28.842263402,
                 "incomingIntent": "third-shot-drive",
                 "incomingLaunchSpeedMph": 28.073215263,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "post-bounce",
-                  "timeSeconds": 1.010237455,
-                  "xFeetPerSecond": 6.631546201,
-                  "yFeetPerSecond": 27.935954751,
-                  "heightFeetPerSecond": 6.484864754,
-                  "speedMph": 20.069656584
+                  "phase": "flight",
+                  "timeSeconds": 0.757198007,
+                  "xFeetPerSecond": 9.210480835,
+                  "yFeetPerSecond": 38.799937154,
+                  "heightFeetPerSecond": -14.113467557,
+                  "speedMph": 28.842263402
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
-                  "ownFormation": "split",
+                  "ownFormation": "up",
                   "opponentFormation": "back",
                   "pressureLoad": 0
                 },
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.491803284,
-                  "speedLoad": 0.168988553,
+                  "movementLoad": 0.202953092,
+                  "speedLoad": 0.46140878,
                   "lowLoad": 0,
                   "formationLoad": 0
                 }
@@ -28337,7 +26743,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.18,
                 "baseErrorProbability": 0.18,
-                "pressureErrorAddition": 0.023504698600000002,
+                "pressureErrorAddition": 0.02086236765,
                 "choice": {
                   "family": "reset",
                   "pace": "soft",
@@ -28357,24 +26763,24 @@
                   "lowPressure": true,
                   "adequateTime": true,
                   "reachMargin": true,
-                  "settledMovement": false,
-                  "actualSoftSpeed": true
+                  "settledMovement": true,
+                  "actualSoftSpeed": false
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 20.069656584
+                "incomingSpeedMph": 28.842263402
               }
             },
             "contact": {
-              "x": 14.063806568,
-              "y": 36.012253037,
-              "heightFeet": 1.570796637
+              "x": 12.145821123,
+              "y": 27.932575542,
+              "heightFeet": 1.573754831
             },
-            "contactKind": "groundstroke",
+            "contactKind": "volley",
             "contactTiming": {
-              "afterBounceSeconds": 0.16
+              "beforeBounceSeconds": 0.093039448
             },
             "target": {
-              "x": 5.710796462,
+              "x": 5.48777559,
               "y": 6.184192288
             },
             "solutionIndex": 0,
@@ -28410,47 +26816,47 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.19697692674,
+                "error": 0.2324785529,
                 "attackable": 0.19,
                 "excellent": 0.05,
                 "low": 0.15,
-                "neutral": 0.4130230732599999
+                "neutral": 0.3775214471
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.089352246,
-                "reachMarginFeet": 6.868570333,
-                "distanceFeet": 6.264152149,
+                "score": 0.27620291,
+                "reachMarginFeet": 12.772985831,
+                "distanceFeet": 2.217575999,
                 "reachable": true,
-                "availableSeconds": 0.843765892,
-                "movementSpeedFeetPerSecond": 6.254657208,
-                "contactHeightFeet": 1.841158455,
-                "incomingSpeedMph": 23.830903445,
+                "availableSeconds": 0.976468702,
+                "movementSpeedFeetPerSecond": 1.834203678,
+                "contactHeightFeet": 1.332138294,
+                "incomingSpeedMph": 14.092860319,
                 "incomingIntent": "block",
-                "incomingLaunchSpeedMph": 23.99999,
+                "incomingLaunchSpeedMph": 20.511142686,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
-                  "phase": "flight",
-                  "timeSeconds": 0.843765892,
-                  "xFeetPerSecond": -8.72143918,
-                  "yFeetPerSecond": -31.143697225,
-                  "heightFeetPerSecond": -13.253239112,
-                  "speedMph": 23.830903445
+                  "phase": "post-bounce",
+                  "timeSeconds": 0.976468702,
+                  "xFeetPerSecond": -5.871373601,
+                  "yFeetPerSecond": -19.17873386,
+                  "heightFeetPerSecond": 4.993250109,
+                  "speedMph": 14.092860319
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
                   "ownFormation": "back",
-                  "opponentFormation": "split",
-                  "pressureLoad": 0
+                  "opponentFormation": "up",
+                  "pressureLoad": 0.25
                 },
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.446761229,
+                  "movementLoad": 0.131014548,
                   "speedLoad": 0,
                   "lowLoad": 0,
-                  "formationLoad": 0
+                  "formationLoad": 0.25
                 }
               },
               "draw": 0.8031995308119804,
@@ -28460,7 +26866,7 @@
                 "phase": "transition",
                 "phaseBaseErrorProbability": 0.18,
                 "baseErrorProbability": 0.18,
-                "pressureErrorAddition": 0.01697692674,
+                "pressureErrorAddition": 0.0524785529,
                 "choice": {
                   "family": "drop",
                   "pace": "soft",
@@ -28477,27 +26883,27 @@
                   "notAttackable": true,
                   "incomingSoft": true,
                   "selectedSoft": true,
-                  "lowPressure": true,
+                  "lowPressure": false,
                   "adequateTime": true,
                   "reachMargin": true,
-                  "settledMovement": false,
-                  "actualSoftSpeed": false
+                  "settledMovement": true,
+                  "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 23.830903445
+                "incomingSpeedMph": 14.092860319
               }
             },
             "contact": {
-              "x": 6.704953663,
-              "y": 9.73426358,
-              "heightFeet": 1.841158455
+              "x": 4.548355814,
+              "y": 3.11559487,
+              "heightFeet": 1.332138294
             },
-            "contactKind": "volley",
+            "contactKind": "groundstroke",
             "contactTiming": {
-              "beforeBounceSeconds": 0.11399004
+              "afterBounceSeconds": 0.16
             },
             "target": {
-              "x": 14.266733965,
+              "x": 16.423331814,
               "y": 27.06331483
             },
             "solutionIndex": 0,
@@ -28508,9 +26914,9 @@
           {
             "shotId": "shot-6",
             "chosen": {
-              "id": "cross-court-dink",
-              "intent": "cross-court-dink",
-              "family": "dink"
+              "id": "reset",
+              "intent": "reset",
+              "family": "reset"
             },
             "draws": {
               "intent": 0.09946464630775154,
@@ -28519,12 +26925,12 @@
                 "error": 0.36655103298835456
               },
               "target": {
-                "lateral": 0.323737547500059,
-                "depth": 0.9649386492092162
+                "lateral": 0.07493878901004791,
+                "depth": 0.5331740735564381
               },
               "perturbation": {
-                "lateral": 0.4359698125626892,
-                "depth": 0.4996148005593568
+                "lateral": 0.323737547500059,
+                "depth": 0.9649386492092162
               },
               "narration": 0.7961007277481258
             },
@@ -28533,44 +26939,44 @@
               "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.14777682635,
-                "attackable": 0.2,
+                "error": 0.18525394003999998,
+                "attackable": 0.19,
                 "excellent": 0.05,
-                "low": 0.14,
-                "neutral": 0.4622231736499999
+                "low": 0.15,
+                "neutral": 0.42474605996000003
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.040930665,
-                "reachMarginFeet": 12.529833189,
-                "distanceFeet": 3.916738788,
+                "score": 0.027652316,
+                "reachMarginFeet": 15.034721802,
+                "distanceFeet": 3.259087683,
                 "reachable": true,
-                "availableSeconds": 1.080469427,
-                "movementSpeedFeetPerSecond": 2.865146536,
-                "contactHeightFeet": 1.412727852,
-                "incomingSpeedMph": 10.974843378,
+                "availableSeconds": 1.212414963,
+                "movementSpeedFeetPerSecond": 1.935662116,
+                "contactHeightFeet": 1.388905348,
+                "incomingSpeedMph": 13.451092838,
                 "incomingIntent": "drop",
-                "incomingLaunchSpeedMph": 16.428293447,
+                "incomingLaunchSpeedMph": 20.088868029,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.080469427,
-                  "xFeetPerSecond": 5.780769855,
-                  "yFeetPerSecond": 13.247575714,
-                  "heightFeetPerSecond": 7.083764551,
-                  "speedMph": 10.974843378
+                  "timeSeconds": 1.212414963,
+                  "xFeetPerSecond": 7.803222425,
+                  "yFeetPerSecond": 15.736401102,
+                  "heightFeetPerSecond": 8.982205601,
+                  "speedMph": 13.451092838
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
                   "ownFormation": "up",
-                  "opponentFormation": "up",
+                  "opponentFormation": "split",
                   "pressureLoad": 0
                 },
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.204653324,
+                  "movementLoad": 0.13826158,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -28579,20 +26985,20 @@
               "draw": 0.7290150697808713,
               "riskContext": {
                 "version": "rally-execution-risk-v1",
-                "kind": "settled-soft",
-                "phase": "kitchen",
-                "phaseBaseErrorProbability": 0.28,
-                "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.00777682635,
+                "kind": "phase-default",
+                "phase": "transition",
+                "phaseBaseErrorProbability": 0.18,
+                "baseErrorProbability": 0.18,
+                "pressureErrorAddition": 0.00525394004,
                 "choice": {
-                  "family": "dink",
+                  "family": "reset",
                   "pace": "soft",
-                  "intent": "cross-court-dink"
+                  "intent": "reset"
                 },
                 "conditions": {
                   "profilePrior": true,
-                  "kitchen": true,
-                  "allFourUp": true,
+                  "kitchen": false,
+                  "allFourUp": false,
                   "grounded": true,
                   "outsideNVZ": true,
                   "establishedOutsideNVZ": true,
@@ -28607,21 +27013,21 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 10.974843378
+                "incomingSpeedMph": 13.451092838
               }
             },
             "contact": {
-              "x": 15.06819724,
-              "y": 28.89999847,
-              "heightFeet": 1.412727852
+              "x": 17.334092723,
+              "y": 28.900004621,
+              "heightFeet": 1.388905348
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.138643
+              "afterBounceSeconds": 0.116716
             },
             "target": {
-              "x": 4.351791253,
-              "y": 17.947099814
+              "x": 8.158745194,
+              "y": 17.67171203
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -28646,8 +27052,8 @@
                 "depth": 0.7616329935844988
               },
               "perturbation": {
-                "lateral": 0.32808538898825645,
-                "depth": 0.12240269826725125
+                "lateral": 0.3927850443869829,
+                "depth": 0.8721979002002627
               },
               "narration": 0.6571512082591653
             },
@@ -28656,33 +27062,33 @@
               "quality": "low",
               "errorReason": null,
               "probabilities": {
-                "error": 0.14798126996000002,
+                "error": 0.14725324126,
                 "attackable": 0.2,
                 "excellent": 0.05,
                 "low": 0.14,
-                "neutral": 0.46201873003999994
+                "neutral": 0.46274675873999993
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.042006684,
-                "reachMarginFeet": 13.23148834,
-                "distanceFeet": 4.28695982,
+                "score": 0.038174954,
+                "reachMarginFeet": 13.50945712,
+                "distanceFeet": 3.893020767,
                 "reachable": true,
-                "availableSeconds": 1.157032011,
-                "movementSpeedFeetPerSecond": 2.940467849,
-                "contactHeightFeet": 1.777241512,
-                "incomingSpeedMph": 8.854187478,
-                "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 14.823737928,
+                "availableSeconds": 1.148748421,
+                "movementSpeedFeetPerSecond": 2.672246807,
+                "contactHeightFeet": 1.798911971,
+                "incomingSpeedMph": 8.256299695,
+                "incomingIntent": "reset",
+                "incomingLaunchSpeedMph": 14.224660673,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.157032011,
-                  "xFeetPerSecond": -9.076187493,
-                  "yFeetPerSecond": -9.276483358,
-                  "heightFeetPerSecond": 0.457768126,
-                  "speedMph": 8.854187478
+                  "timeSeconds": 1.148748421,
+                  "xFeetPerSecond": -7.604330626,
+                  "yFeetPerSecond": -9.305767325,
+                  "heightFeetPerSecond": 1.486786055,
+                  "speedMph": 8.256299695
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -28693,7 +27099,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.210033418,
+                  "movementLoad": 0.190874772,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -28706,7 +27112,7 @@
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.28,
                 "baseErrorProbability": 0.14,
-                "pressureErrorAddition": 0.00798126996,
+                "pressureErrorAddition": 0.0072532412599999995,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -28730,21 +27136,21 @@
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 8.854187478
+                "incomingSpeedMph": 8.256299695
               }
             },
             "contact": {
-              "x": 1.566164092,
-              "y": 15.099998648,
-              "heightFeet": 1.777241512
+              "x": 6.029532619,
+              "y": 15.066097179,
+              "heightFeet": 1.798911971
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.306916
+              "afterBounceSeconds": 0.28
             },
             "target": {
-              "x": 16.480277915,
-              "y": 26.206511589
+              "x": 12.776625158,
+              "y": 26.50642967
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -28769,43 +27175,43 @@
                 "depth": 0.17058764537796378
               },
               "perturbation": {
-                "lateral": 0.748100173426792,
-                "depth": 0.028387488098815084
+                "lateral": 0.07414039457216859,
+                "depth": 0.03858976252377033
               },
               "narration": 0.894312584772706
             },
             "execution": {
               "version": "rally-quality-v1",
-              "quality": "low",
+              "quality": "neutral",
               "errorReason": null,
               "probabilities": {
-                "error": 0.29352960151,
+                "error": 0.14,
                 "attackable": 0.2,
                 "excellent": 0.05,
                 "low": 0.14,
-                "neutral": 0.3164703984900001
+                "neutral": 0.46999999999999986
               },
               "pressure": {
                 "version": "rally-quality-v1",
-                "score": 0.071208429,
-                "reachMarginFeet": 10.072769918,
-                "distanceFeet": 6.172646452,
+                "score": 0,
+                "reachMarginFeet": 14.544738721,
+                "distanceFeet": 0.976314684,
                 "reachable": true,
-                "availableSeconds": 1.066101169,
-                "movementSpeedFeetPerSecond": 4.984590058,
-                "contactHeightFeet": 1.683261698,
-                "incomingSpeedMph": 11.491906698,
+                "availableSeconds": 1.014360958,
+                "movementSpeedFeetPerSecond": 0,
+                "contactHeightFeet": 1.577400523,
+                "incomingSpeedMph": 8.497590192,
                 "incomingIntent": "cross-court-dink",
-                "incomingLaunchSpeedMph": 17.507247066,
+                "incomingLaunchSpeedMph": 13.568207942,
                 "incomingSpeedBasis": "sampled-contact-velocity",
                 "incomingContactVelocity": {
                   "version": "play-velocity-v2",
                   "phase": "post-bounce",
-                  "timeSeconds": 1.066101169,
-                  "xFeetPerSecond": 13.464996511,
-                  "yFeetPerSecond": 10.027357963,
-                  "heightFeetPerSecond": 1.493360634,
-                  "speedMph": 11.491906698
+                  "timeSeconds": 1.014360958,
+                  "xFeetPerSecond": 6.180786889,
+                  "yFeetPerSecond": 10.480107789,
+                  "heightFeetPerSecond": 2.700903635,
+                  "speedMph": 8.497590192
                 },
                 "formation": {
                   "version": "rally-formation-pressure-v1",
@@ -28816,7 +27222,7 @@
                 "factors": {
                   "reachLoad": 0,
                   "shortTime": 0,
-                  "movementLoad": 0.356042147,
+                  "movementLoad": 0,
                   "speedLoad": 0,
                   "lowLoad": 0,
                   "formationLoad": 0
@@ -28825,11 +27231,11 @@
               "draw": 0.6354849031195045,
               "riskContext": {
                 "version": "rally-execution-risk-v1",
-                "kind": "phase-default",
+                "kind": "settled-soft",
                 "phase": "kitchen",
                 "phaseBaseErrorProbability": 0.28,
-                "baseErrorProbability": 0.28,
-                "pressureErrorAddition": 0.013529601510000001,
+                "baseErrorProbability": 0.14,
+                "pressureErrorAddition": 0,
                 "choice": {
                   "family": "dink",
                   "pace": "soft",
@@ -28849,25 +27255,25 @@
                   "lowPressure": true,
                   "adequateTime": true,
                   "reachMargin": true,
-                  "settledMovement": false,
+                  "settledMovement": true,
                   "actualSoftSpeed": true
                 },
                 "incomingSpeedBasis": "sampled-contact-velocity",
-                "incomingSpeedMph": 11.491906698
+                "incomingSpeedMph": 8.497590192
               }
             },
             "contact": {
-              "x": 20.097164488,
-              "y": 28.900000321,
-              "heightFeet": 1.683261698
+              "x": 14.188267437,
+              "y": 28.900002448,
+              "heightFeet": 1.577400523
             },
             "contactKind": "groundstroke",
             "contactTiming": {
-              "afterBounceSeconds": 0.268614
+              "afterBounceSeconds": 0.228392
             },
             "target": {
-              "x": 3.453781775,
-              "y": 16.567236463
+              "x": 6.525586584,
+              "y": 16.386753278
             },
             "solutionIndex": 0,
             "nominalRoute": "over-net",
@@ -29802,10 +28208,64 @@
       }
     }
   ],
-  "reviewChange": "Bounded timing-derived minimum-extension stances preserve the existing candidate cap and exact 18/30/trainer bounds. Advanced50132 now reaches an earlier legal volley. No execution draw changes.",
+  "reviewChange": "Reviewed 19 current cases and 219 contacts against unchanged public rules, 18 ft/s and 30 ft/s² movement limits, spacing, whole-sole clearance, flight envelopes and exact selected-hand trainer support. Updated only the 12 causally reviewed projections listed below; seven remain identical. Every common execution draw is unchanged. Historical source fixtures and prior-source causal assertions remain untouched.",
   "supersedes": {
     "manifest": "tests/fixtures/model2/procedural-current-policy-v3-audit-v1.json",
     "sha256": "f118d9dda942394caf1cd650077379a7484280f60a7515fcc85f1b20d9c0c401",
     "preservedEvidence": "release-results/logic-audit/procedural-regression-review/reviewed-current-manifest-before-timing-stance.json"
-  }
+  },
+  "previousCurrentReview": {
+    "sourceRevision": "a4b6b823f4da8178106fe0c84f3261fc5b49d01f",
+    "sha256": "74c5e3c6a4599620858a25dbb7c1251910cffe610a1a6880d29562f417f06b2b"
+  },
+  "reviewedChanges": [
+    {
+      "id": "holdout:pro:balanced:50132",
+      "reason": "Compact contact plant changes measured movement pressure only; same contact, draws, delivery and outcome."
+    },
+    {
+      "id": "holdout:pro:balanced:50538",
+      "reason": "Compact contact plant changes measured movement pressure only; same contact, draws, delivery and outcome."
+    },
+    {
+      "id": "holdout:advanced:balanced:50132",
+      "reason": "Compact plants change measured movement pressure at contacts 4 and 10 only; the execution interval and physical route remain unchanged."
+    },
+    {
+      "id": "holdout:intermediate:balanced:50175",
+      "reason": "Physical-v4 preserves the selected horizontal heading on the sampled terminal net error; only target x, impact x and impact time change."
+    },
+    {
+      "id": "holdout:intermediate:balanced:50439",
+      "reason": "Compact plant reduces movement pressure at contact 13. The changed pre-execution nominal route at contact 14 changes its target x and solved long-fault position/time; execution and perturbation draws remain unchanged."
+    },
+    {
+      "id": "pro-1177-full",
+      "reason": "Physical-v4 preserves the selected horizontal heading on the sampled terminal net error; only target x, impact x and impact time change."
+    },
+    {
+      "id": "pro-1032",
+      "reason": "Whole-sole-safe contact selection changes contact 4 and subsequent geometry. The popup receives a supported contact-10 volley attack, followed by a counter and a real contact-12 net fault. The original execution stream remains fixed."
+    },
+    {
+      "id": "advanced-1032",
+      "reason": "Whole-sole-safe contact selection changes contact 4 and subsequent geometry. A supported contact-10 volley attack leads to a real contact-12 net fault with the original execution stream."
+    },
+    {
+      "id": "neutral-reset-net",
+      "reason": "Physical-v4 changes only the terminal net target x, impact x and impact time; the earlier neutral reset and every draw remain unchanged."
+    },
+    {
+      "id": "pro-1002-14",
+      "reason": "Compact contact plant changes measured contact-4 movement pressure only; the later popup and supported attack remain intact."
+    },
+    {
+      "id": "pro-1136-24",
+      "reason": "Physical-v4 changes only the terminal net target x, impact x and impact time; contact 24 keeps its fixed sampled net error."
+    },
+    {
+      "id": "intermediate-1236-7",
+      "reason": "The admissible contact-4 volley replaces the old bounced retrieval and changes later geometry and phase pressure. Contact 7 remains a low settled dink with the original draw and no invented popup attack; contact 8 remains censored."
+    }
+  ]
 }

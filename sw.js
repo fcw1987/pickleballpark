@@ -59,6 +59,7 @@ const STATIC_ASSETS = [
   './generated-motion-limits.js',
   './generated-foot-state.js',
   './generated-grounded-sole.js',
+  './generated-contact-refinement.js',
   './generated-trainer-support.js',
   './trainer-contact-support.js',
   './human-athlete-profile.js',

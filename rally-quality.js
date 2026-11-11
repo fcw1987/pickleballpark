@@ -9,7 +9,7 @@ import { validGeneratedRouteCertificateShape, matchesGeneratedRouteCertificate }
 export const QUALITY_VERSION = 'rally-quality-v1';
 export const CAUSATION_VERSION = 'rally-causation-v1';
 export const FORMATION_PRESSURE_VERSION = 'rally-formation-pressure-v1';
-export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v3';
+export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v4';
 export const DINK_POPUP_VERSION = 'rally-dink-popup-v1';
 export const RISK_CONTEXT_VERSION = 'rally-execution-risk-v1';
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
@@ -158,10 +158,21 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
   let transformation = 'target-precision', requestedClearanceFeet = null, dinkPopup = null;
   if (execution.quality === 'error') {
     if (execution.errorReason === 'net') {
-      // One fixed draw-derived mesh endpoint permits a real collision even
-      // from a high contact. No clearance or endpoint retry cascade.
-      next.x = clamp(target.x, 2, 18);
-      next.y = 22 + (team === 'green' ? 1 : -1) * (.3 + .3 * depth);
+      // Place the near-net landing along the selected horizontal ray, rather
+      // than retaining the far target's x and rotating the stroke. The same depth
+      // draw and clearance hint still require an authoritative mesh collision.
+      const direction = team === 'green' ? 1 : -1;
+      if (!(direction * (22 - contact.y) > 0 && direction * (target.y - 22) > 0)) {
+        throw new RangeError('Net-error execution requires a forward target crossing from the team\'s contact end.');
+      }
+      next.y = 22 + direction * (.3 + .3 * depth);
+      const fraction = (next.y - contact.y) / (target.y - contact.y);
+      next.x = contact.x + (target.x - contact.x) * fraction;
+      if (!(Number.isFinite(fraction) && fraction > 0 && Number.isFinite(next.x))) {
+        throw new RangeError('Net-error execution requires a finite contact-to-target heading.');
+      }
+      // No x clamp: around-post, gap and infeasible paths must remain so.
+      // Delivery reports unavailable rather than redirecting them to the mesh.
       requestedClearanceFeet = -1.5;
       transformation = 'net-mesh';
     } else if (execution.errorReason === 'long') {

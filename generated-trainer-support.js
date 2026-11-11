@@ -1,12 +1,13 @@
 // Generation-only adapter for the active grounded trainer pose. It derives
 // exact impact inputs, not a physiological limit or a new authored rule.
-import { evaluateTrainerContactSupport } from './trainer-contact-support.js';
+import { evaluateTrainerContactSupport, TRAINER_CONTACT_SUPPORT_REVISION } from './trainer-contact-support.js';
 import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
 
 export const GENERATED_TRAINER_SUPPORT_V1 = Object.freeze({
   version: 'generated-trainer-support-v1',
   scope: 'selected-generation-trainer-model',
-  supportModuleSha256: '5bca9a3854b52a51908de7d592385bed9708e9caec7f69142deaa5367d6c991c',
+  supportRevision: TRAINER_CONTACT_SUPPORT_REVISION,
+  supportModuleSha256: 'c24161585dca175007313e92b36fa677e2e85687f6a63653f1ada3b690470b9d',
 });
 const METRES_PER_FOOT = .3048;
 const EPS = 1e-8;

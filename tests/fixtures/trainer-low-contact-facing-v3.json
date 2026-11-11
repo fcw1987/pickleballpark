@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Fixed source-preserving contact-pose witnesses, not a claim that finite search proves physical impossibility.",
+  "priorSupportRevision": "trainer-contact-support-v2",
+  "priorSupportSha256": "7a0a17577fd37cb88894be895eeb861f6003687c5bd7215b294ab1625affec4b",
+  "cases": [
+    {
+      "id": "left-low-wide-drop-9031",
+      "input": {
+        "root": {
+          "x": 0.9667282084752001,
+          "y": 0,
+          "z": 4.141662690902401
+        },
+        "contact": {
+          "x": 0.920315334372,
+          "y": 0.18966339532320003,
+          "z": 3.4161209722655994
+        },
+        "feet": {
+          "left": {
+            "x": 0.7472722084751999,
+            "y": 0,
+            "z": 4.141662690902401
+          },
+          "right": {
+            "x": 1.1861842084752,
+            "y": 0,
+            "z": 4.141662690902401
+          }
+        },
+        "handedness": "left",
+        "strokeSide": "forehand",
+        "family": "drop",
+        "bodyFacing": {
+          "x": -0.6984890566833162,
+          "z": -0.7156207359304587
+        },
+        "outgoingVelocity": {
+          "x": -4.967278505541017,
+          "y": 4.649696999596831,
+          "z": -5.089109794473856
+        },
+        "incomingVelocity": {
+          "x": 1.3695220317612564,
+          "y": -2.6870612362620188,
+          "z": 3.1084367657200445
+        },
+        "modelVersion": 2,
+        "phase": 1,
+        "grounded": true,
+        "planted": true,
+        "coachingFootwork": {
+          "mode": "plant",
+          "load": 0.5,
+          "feet": {
+            "left": {
+              "x": 0.7472722084751999,
+              "y": 0,
+              "z": 4.141662690902401
+            },
+            "right": {
+              "x": 1.1861842084752,
+              "y": 0,
+              "z": 4.141662690902401
+            }
+          },
+          "footYaw": {
+            "left": 3.141592653589793,
+            "right": 3.141592653589793
+          },
+          "footPitch": {
+            "left": 0,
+            "right": 0
+          },
+          "pelvisDrop": 0,
+          "splitStepLift": 0,
+          "splitLoad": 0
+        }
+      }
+    },
+    {
+      "id": "pro-51074",
+      "input": {
+        "root": {
+          "x": -1.1059037786575934,
+          "y": 0,
+          "z": -2.3558130876702217
+        },
+        "contact": {
+          "x": -0.1930824113505623,
+          "y": 0.20755987951051508,
+          "z": -2.3724573430380516
+        },
+        "feet": {
+          "left": {
+            "x": -0.8864477786575935,
+            "y": 0,
+            "z": -2.3558130876702217
+          },
+          "right": {
+            "x": -1.3253597786575932,
+            "y": 0,
+            "z": -2.3558130876702217
+          }
+        },
+        "handedness": "right",
+        "strokeSide": "backhand",
+        "family": "drive",
+        "bodyFacing": {
+          "x": 0.2872983255113501,
+          "z": 0.9578411518401025
+        },
+        "outgoingVelocity": {
+          "x": 3.00745643211503,
+          "y": 4.094915460952919,
+          "z": 10.026739724016132
+        },
+        "incomingVelocity": {
+          "x": -1.5920762471598549,
+          "y": -7.305285773790665,
+          "z": -17.686744669808967
+        },
+        "modelVersion": 2,
+        "phase": 1,
+        "grounded": true,
+        "planted": true,
+        "coachingFootwork": {
+          "mode": "plant",
+          "load": 0.5,
+          "feet": {
+            "left": {
+              "x": -0.8864477786575935,
+              "y": 0,
+              "z": -2.3558130876702217
+            },
+            "right": {
+              "x": -1.3253597786575932,
+              "y": 0,
+              "z": -2.3558130876702217
+            }
+          },
+          "footYaw": {
+            "left": 0,
+            "right": 0
+          },
+          "footPitch": {
+            "left": 0,
+            "right": 0
+          },
+          "pelvisDrop": 0,
+          "splitStepLift": 0,
+          "splitLoad": 0
+        }
+      }
+    },
+    {
+      "id": "advanced-50321",
+      "input": {
+        "root": {
+          "x": 1.3490817884636703,
+          "y": 0,
+          "z": 2.320098618133508
+        },
+        "contact": {
+          "x": 0.44096472159230476,
+          "y": 0.28717516522873987,
+          "z": 2.215825068755899
+        },
+        "feet": {
+          "left": {
+            "x": 1.12962578846367,
+            "y": 0,
+            "z": 2.320098618133508
+          },
+          "right": {
+            "x": 1.5685377884636704,
+            "y": 0,
+            "z": 2.320098618133508
+          }
+        },
+        "handedness": "right",
+        "strokeSide": "backhand",
+        "family": "drive",
+        "bodyFacing": {
+          "x": -0.05110915346323387,
+          "z": -0.998693073187289
+        },
+        "outgoingVelocity": {
+          "x": -0.5181683046456831,
+          "y": 3.878290474137458,
+          "z": -10.125213616873907
+        },
+        "incomingVelocity": {
+          "x": -1.0242165678027177,
+          "y": -6.9244877047543865,
+          "z": 17.340701528112092
+        },
+        "modelVersion": 2,
+        "phase": 1,
+        "grounded": true,
+        "planted": true,
+        "coachingFootwork": {
+          "mode": "plant",
+          "load": 0.5,
+          "feet": {
+            "left": {
+              "x": 1.12962578846367,
+              "y": 0,
+              "z": 2.320098618133508
+            },
+            "right": {
+              "x": 1.5685377884636704,
+              "y": 0,
+              "z": 2.320098618133508
+            }
+          },
+          "footYaw": {
+            "left": 3.141592653589793,
+            "right": 3.141592653589793
+          },
+          "footPitch": {
+            "left": 0,
+            "right": 0
+          },
+          "pelvisDrop": 0,
+          "splitStepLift": 0,
+          "splitLoad": 0
+        }
+      }
+    },
+    {
+      "id": "advanced-51074",
+      "input": {
+        "root": {
+          "x": -1.1091004974561038,
+          "y": 0,
+          "z": -2.3492397706822987
+        },
+        "contact": {
+          "x": -0.19521524267777554,
+          "y": 0.21081962525925607,
+          "z": -2.3645443599709273
+        },
+        "feet": {
+          "left": {
+            "x": -0.8896444974561039,
+            "y": 0,
+            "z": -2.3492397706822987
+          },
+          "right": {
+            "x": -1.3285564974561037,
+            "y": 0,
+            "z": -2.3492397706822987
+          }
+        },
+        "handedness": "right",
+        "strokeSide": "backhand",
+        "family": "drive",
+        "bodyFacing": {
+          "x": 0.28775001237555964,
+          "z": 0.9577055551566281
+        },
+        "outgoingVelocity": {
+          "x": 3.01269498675788,
+          "y": 4.0870162565329045,
+          "z": 10.027018595040182
+        },
+        "incomingVelocity": {
+          "x": -1.573125436743379,
+          "y": -7.301234695465091,
+          "z": -17.688321192734506
+        },
+        "modelVersion": 2,
+        "phase": 1,
+        "grounded": true,
+        "planted": true,
+        "coachingFootwork": {
+          "mode": "plant",
+          "load": 0.5,
+          "feet": {
+            "left": {
+              "x": -0.8896444974561039,
+              "y": 0,
+              "z": -2.3492397706822987
+            },
+            "right": {
+              "x": -1.3285564974561037,
+              "y": 0,
+              "z": -2.3492397706822987
+            }
+          },
+          "footYaw": {
+            "left": 0,
+            "right": 0
+          },
+          "footPitch": {
+            "left": 0,
+            "right": 0
+          },
+          "pelvisDrop": 0,
+          "splitStepLift": 0,
+          "splitLoad": 0
+        }
+      }
+    }
+  ]
+}
