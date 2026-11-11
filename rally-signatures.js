@@ -101,7 +101,7 @@ function prepareRoute({ pendingSegment, pendingRecipe, playerId, contact, feet, 
     contact: { kind, point: { ...contact }, heightFeet: contact.heightFeet, strokeSide: contactStyle, ...contactEvidence },
   } };
   const resolved = createModel2SegmentV2({ previous, step, nextStep, index: pendingSegment.index,
-    startTime: pendingSegment.startTime, model2Momentum: clone(pendingSegment.model2Momentum || []) }, { resolveShotSemantics, boardToWorld });
+    startTime: pendingSegment.startTime, ...(pendingSegment.defaultFootState ? { defaultFootState: clone(pendingSegment.defaultFootState) } : {}), model2Momentum: clone(pendingSegment.model2Momentum || []) }, { resolveShotSemantics, boardToWorld });
   const peak = inspectGeneratedMovementV1(resolved, { maxAccelerationFeetPerSecondSquared: GENERATION_MOTION_V1.accelerationFeetPerSecondSquared }), spacing = inspectGeneratedSpacingV1(resolved);
   if (!peak.valid || !spacing.valid) return null;
   return { resolved, peak, spacing, pendingMovement,
@@ -171,7 +171,7 @@ export function probeSignatureCandidatesV1({ incomingFlight, pendingSegment, pen
         const outgoing = outgoingFlight(intent, contact, player, work); if (!outgoing) continue;
         const contactStyle = strokeSide(player, origin, contact);
         const stances = contactFeetCandidatesV1({ contact, target: outgoing.target, team, handedness: player.handedness,
-          contactStyle, kind, position: origin, availableSeconds: pendingSegment.contactTime + intercept.time });
+          contactStyle, kind, position: origin, availableSeconds: pendingSegment.contactTime + intercept.time, defaultFootState: pendingSegment.defaultFootState });
         // A signature cannot keep a maximum-reach pose that the instructional
         // athlete cannot perform. Try the same bounded plants as ordinary play.
         for (const feet of stances.slice(0, SIGNATURE_LIMITS.maxStanceTrials)) {

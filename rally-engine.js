@@ -22,9 +22,10 @@ import { certifyGeneratedRouteExclusion } from './generated-route-certificates.j
 import { GENERATED_CONTACT_SUPPORT_V1 } from './generated-contact-support.js';
 import { GENERATION_MOTION_V1 } from './generated-motion-limits.js';
 import { assessGeneratedTrainerSupportV1 } from './generated-trainer-support.js';
+import { GENERATED_DEFAULT_FOOT_STATE_V1, defaultFeetAtV1 } from './generated-foot-state.js';
 
 export { RALLY_ENGINE_VERSION } from './rally-recipe.js';
-export const RALLY_ENGINE_LIMITS = Object.freeze({ maxShots: 99, targetsPerIntent: 8, maxContactPairs: 4, groundedContactHeightFeet: GROUNDED_CONTACT_HEIGHT_FEET });
+export const RALLY_ENGINE_LIMITS = Object.freeze({ maxShots: 99, targetsPerIntent: 8, maxContactPairs: 4, maxContactTimePasses: 2, fallbackContactTimeIntervals: 64, groundedContactHeightFeet: GROUNDED_CONTACT_HEIGHT_FEET });
 const IDS = RALLY_PLAYER_IDS;
 const planningView = observeGenerationPlanningSessionV2;
 const clone = value => structuredClone(value);
@@ -78,7 +79,7 @@ function generatedEvidenceV1(value, immutable = new WeakMap()) {
 }
 
 function headerFor(input, attemptIndex, attemptSeed) {
-    return { schemaVersion: 1, modelVersion: 2, physicsVersion: 'play-physics-v2',
+    return { schemaVersion: 1, modelVersion: 2, physicsVersion: 'play-physics-v2', defaultFootState: clone(GENERATED_DEFAULT_FOOT_STATE_V1),
         id: `rally-engine-${identity(input)}-${attemptSeed}`, title: `Generated rally · seed ${input.seed}`,
         players: Object.fromEntries(IDS.map(id => [id, { team: input.players[id].team, handedness: input.players[id].handedness }])),
         initialLayout: clone(input.layout), service: clone(input.service), shots: [], annotations: [],
@@ -90,7 +91,7 @@ function headerFor(input, attemptIndex, attemptSeed) {
 function fixedFeet(input, id, contact, kind, position, contactStyle = 'forehand') {
     const team = input.players[id].team;
     return contactFeetV1({ contact, target: { x: 10, y: team === 'green' ? 36 : 8 }, team,
-        handedness: input.players[id].handedness, contactStyle, kind, position });
+        handedness: input.players[id].handedness, contactStyle, kind, position, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1 });
 }
 
 function baseRecipe(id, index, pair, target, family = index === 0 ? 'serve' : index === 1 ? 'return' : 'dink') {
@@ -144,7 +145,7 @@ function contactReplySupportV1(input, pair) {
         countPlanner(result.planner.diagnostics);
         ids.push(probe.id);
         solvedProbes.push({ ...probe, ...result });
-        if (probe.id === 'drive') drive = result.attacking;
+        if (probe.id === 'drive') drive = true;
         if (result.attacking || probe.id === 'overhead' && result.flight.launchSpeedMph >= 22) attacking = true;
     } catch (error) { if (!(error instanceof TypeError || error instanceof RangeError)) throw error; countPlanner(error.plannerDiagnostics); }
     if (!ids.length) try {
@@ -168,12 +169,13 @@ function contactReplySupportV1(input, pair) {
         attacking: attacking && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
 }
 
-async function* contactPairs(input, state, index, checkpoint, diagnostics) {
+async function* contactPairs(input, state, index, checkpoint, diagnostics, refinementPass = false) {
     if (index === 0) {
         const id = input.service.server, contact = { ...input.layout.ball, heightFeet: 2.2 };
         const feet = fixedFeet(input, id, contact, 'serve', input.layout[id]);
         yield { id, kind: 'serve', contact, time: 0, feet, positions: input.layout,
-            footState: Object.fromEntries(IDS.map(actor => [actor, { feet: [{ x: input.layout[actor].x - .42, y: input.layout[actor].y }, { x: input.layout[actor].x + .42, y: input.layout[actor].y }], grounded: true, feetEstablishedOutsideNVZ: !isInNonVolleyZone(input.layout[actor]) }])), availableSeconds: STROKE_PROFILES.serve.duration * STROKE_PROFILES.serve.contactRatio,
+            footState: Object.fromEntries(IDS.map(actor => { const feet = defaultFeetAtV1(input.layout[actor], GENERATED_DEFAULT_FOOT_STATE_V1);
+                return [actor, { feet, grounded: true, feetEstablishedOutsideNVZ: feet.every(foot => !isInNonVolleyZone(foot)) }]; })), availableSeconds: STROKE_PROFILES.serve.duration * STROKE_PROFILES.serve.contactRatio,
             sampleTimeSeconds: 0, contactTimeSeconds: STROKE_PROFILES.serve.duration * STROKE_PROFILES.serve.contactRatio };
         return;
     }
@@ -220,6 +222,20 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
             }
             options.push({ kind: 'volley', depth: incoming.sampleBoard(high).y });
         }
+        if (refinementPass) {
+            // Only after the ordinary proposal set found no supported contact,
+            // inspect bounded interior times across each actual live phase.
+            // This is a search refinement, never a proof of completeness or
+            // permission to alter the incoming ball, feet, or execution draw.
+            options.length = 0;
+            const intervals = RALLY_ENGINE_LIMITS.fallbackContactTimeIntervals;
+            const postWindow = Math.min(1.5, Math.max(0, incoming.secondBounceTime - incoming.firstLandingTime));
+            for (let sample = 0; sample < intervals; sample++) {
+                const fraction = (sample + .5) / intervals;
+                if (!contactRequiresBounce(index)) options.push({ kind: 'volley', depth: incoming.sampleBoard(incoming.firstLandingTime * fraction).y });
+                if (postWindow > 0) options.push({ kind: 'groundstroke', delay: numberV1(postWindow * fraction) });
+            }
+        }
         for (const option of options) {
             await checkpoint({ shots: index, workDelta: 1 });
             try {
@@ -256,7 +272,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         pairs.push({ id, kind: pair.kind, contactStyle, delay: pair.delay, beforeBounceSeconds: pair.beforeBounceSeconds,
             contact: pair.contact, time: pair.time, feet, availableSeconds: pair.availableSeconds });
     }
-    if (input.options.signatureShots) {
+    if (input.options.signatureShots && !refinementPass) {
         await checkpoint({ shots: index, workDelta: 1 });
         const signatures = probeSignatureCandidatesV1({ incomingFlight: incoming, pendingSegment: planningView(state).pendingSegment,
             pendingRecipe: previous, players: input.players, positions: origins,
@@ -291,7 +307,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
         if (!stanceCache.has(stanceKey)) stanceCache.set(stanceKey, pair.signature ? [pair.feet] : generatedV1(contactFeetCandidatesV1({
             contact: pair.contact, target: { x: 10, y: team === 'green' ? 36 : 8 }, team,
             handedness: input.players[pair.id].handedness, contactStyle: pair.contactStyle, kind: pair.kind,
-            position: origins[pair.id], availableSeconds: pair.time
+            position: origins[pair.id], availableSeconds: pair.time, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1
         })).filter(feet => feet.reachable && feet.legalVolleyFeet));
         pair.stanceOptions = stanceCache.get(stanceKey).map((feet, stanceIndex) => ({ feet, stanceIndex, opportunityId: key,
             preference: contactOpportunityPreferenceV1({ contact: pair.contact, stance: feet.stance,
@@ -328,11 +344,11 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                     reason: 'The selected feasible preference meets or exceeds this optimistic proposal bound.' })) };
             yield { ...pair, selectionStrategy: accepted.strategy, selectionEvidence: evidence };
             emitted++;
-            if (emitted >= RALLY_ENGINE_LIMITS.maxContactPairs) return;
+            if (emitted >= RALLY_ENGINE_LIMITS.maxContactPairs) break;
             facts = facts.filter(row => row.opportunityId !== selected.opportunityId);
             continue;
         }
-        if (!next) return;
+        if (!next) break;
         cursor++;
         const opportunity = pairs[next.proposals[0].sourceIndex];
         const actorOrder = rankContactCandidatesV2({ players: input.players, positions: origins,
@@ -381,7 +397,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                     continue;
                 }
                 pair.replySupport = { ids: supported.map(reply => reply.id), probes: supported,
-                    drive: supported.some(reply => reply.id === 'drive' && reply.attacking),
+                    drive: supported.some(reply => reply.id === 'drive'),
                     attacking: supported.some(reply => reply.attacking || reply.id === 'overhead' && reply.flight.launchSpeedMph >= 22)
                         && pair.contact.heightFeet - PHYSICS_V2.ballRadiusFeet > localNetHeightFeet(pair.contact.x) };
                 pair.outgoingSafety = { version: 'rally-outgoing-safety-v1', stanceIndex: option.stanceIndex,
@@ -408,18 +424,29 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
             break;
         }
     }
+    // Resuming a yielded pair means the caller exhausted nominal choices.
+    // A committed contact closes this generator; an execution failure returns
+    // immediately from the attempt. Thus this second bounded pass never
+    // redraws an execution or retries a delivered outcome.
+    if (!refinementPass) {
+        (diagnostics.contactTimeRefinements ??= []).push({ contactIndex: index, intervalsPerPhase: RALLY_ENGINE_LIMITS.fallbackContactTimeIntervals,
+            trigger: emitted ? 'nominal-opportunities-exhausted' : 'no-supported-contact' });
+        yield* contactPairs(input, state, index, checkpoint, diagnostics, true);
+    }
 }
 
 function situationFor(input, state, index, pair, decisions) {
     const previous = planningView(state).pendingRecipe;
     const support = pair.replySupport ?? contactReplySupportV1(input, pair);
-    const attacking = support.drive;
+    // A constructible drive is not necessarily an attack. Preserve the
+    // separate facts so a defensive drive is not deleted by attack thresholds.
+    const canDrive = support.drive;
     const incoming = previous ? { family: previous.family, intent: previous.intent, pace: previous.pace, hitter: previous.hitter, contactKind: pair.kind } : {};
     const feet = Object.fromEntries(IDS.map(id => [id, pair.footState[id]?.feet ?? []]));
     feet[pair.id] = pair.feet.feet;
     const snapshot = createSituationV1({ players: input.players, positions: pair.positions, feet, footState: pair.footState,
         hitter: pair.id, contact: { ...pair.contact, kind: pair.kind }, contactIndex: index, service: input.service, incoming,
-        priorDecisions: decisions, affordances: { drive: attacking,
+        priorDecisions: decisions, affordances: { drive: canDrive,
             attack: support.attacking,
             overhead: support.ids.includes('overhead'), volley: pair.kind === 'volley', bounced: pair.kind !== 'volley', lob: true,
             erne: pair.signature?.intent === 'erne', aroundPost: pair.signature?.intent === 'around-the-post', letGo: false } });
@@ -442,7 +469,7 @@ function addMovement(input, state, index, pair, recipe, flight) {
     const movement = planMovementV1({ positions: pair.positions, players: input.players, hitter: pair.id, contact: pair.contact, target: recipe.target,
         durationSeconds: contactTime + flight.firstLandingTime, contactTime, index, service: input.service, stacking: input.stacking, intent: recipe.intent, family: recipe.family,
         incomingFamily: planningView(state).pendingRecipe?.family, kind: pair.kind, feetState: pair.footState, contactFeet: pair.feet,
-        quality: recipe.quality, pace: recipe.pace, peakFeetPerSecond: 17.95 });
+        quality: recipe.quality, pace: recipe.pace, peakFeetPerSecond: 17.95, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1 });
     if (!movement.ok) throw new RangeError(movement.reason);
     return { recipe: { ...recipe, movement: generatedV1(movement.movement), playerMovement: generatedV1(movement.playerMovement) }, plan: movement };
 }

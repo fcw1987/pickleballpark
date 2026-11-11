@@ -185,10 +185,35 @@ speed, acceleration, spacing and trainer gates.
 The stricter movement policy can expose a real second bounce that the older,
 broader speed-only reach envelope could not exclude. A separately versioned v2
 certificate proves exclusion only for the generated full eased-route class,
-including conservative between-sample bounds. The original v1 theorem remains
-unchanged; public validation recomputes whichever version the source declares.
-Failed search without either valid proof still fails rather than inventing a
-winner. Frozen historical source retains its original causal regression checks.
+including conservative between-sample bounds. A separate v3 proof adaptively
+refines that uncertainty without changing any physical allowance. Both older
+implementations remain unchanged; public validation recomputes whichever
+version the source declares. Failed search without a valid proof still fails
+rather than inventing a winner. Frozen historical source retains its original
+causal regression checks.
+
+### Adult-width neutral stance
+
+New generated documents explicitly select a 43.9 cm foot-center stance, close
+to the shared adult rig's shoulder breadth. Contacts and off-ball defaults use
+the same state across role changes. The absence of this new metadata preserves
+old replay behavior exactly, and explicit narrow or staggered authored feet
+remain authoritative. Mirrored Erne/ATP, both service ends, all four actor paths,
+side-NVZ legality and later apron boundaries have independent coverage. This is
+a neutral grounded coaching model, not a universal stance for every stroke.
+
+The full checkpoint regression also exposed contact-time windows missed by the
+ordinary proposal set. A bounded second time pass now finds real supported
+replies before any execution is sampled; direct random-call instrumentation
+proves it does not discard executions. Historical failures remain evidence,
+and a failed search still cannot manufacture an ending.
+
+A separate affordance bug equated a physically supported drive with an
+attackable ball. A lower, non-attacking drive can still be a legal useful reply.
+The engine now keeps those facts separate rather than removing every drive
+candidate before nominal evaluation. Two exact historical failures retain all
+six prior choice/draw objects and proceed through independently checked real
+contacts. This does not make the incoming ball attackable or reroll its quality.
 
 ### Handedness, stacking and historical source
 

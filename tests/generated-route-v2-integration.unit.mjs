@@ -1,13 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { simulateRally } from '../rally-engine.js';
+import { createHash } from 'node:crypto';
+import { simulateRally, runNaturalAttemptV1 } from '../rally-engine.js';
+import { createEngineDriverV1 } from '../rally-engine-driver.js';
 import { compileDocument } from '../play-compiler.js';
 import { validateDocument } from '../play-document.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { classifyOutcomeV1 } from '../rally-quality.js';
 import { certifyGeneratedRouteExclusion, validGeneratedRouteCertificateShape, matchesGeneratedRouteCertificate } from '../generated-route-certificates.js';
 import { certifyGeneratedRouteExclusionV1 } from '../generated-route-certificate-v1.js';
+import { certifyGeneratedRouteExclusionV2 } from '../generated-route-certificate-v2.js';
+import { sampleActorFeetV2 } from '../play-actors-v2.js';
+import { assertFreshPhysicalResult, assertFixedExecutionPairs } from './helpers/rally-procedural-proof.mjs';
 import { inspectGeneratedMovementV1 } from '../rally-movement.js';
 import { inspectGeneratedTrainerSupportV1 } from '../generated-trainer-support.js';
 import { solveFlightV2 } from '../play-physics-v2.js';
@@ -16,17 +21,62 @@ const fixture = JSON.parse(readFileSync(new URL('./fixtures/model2/generated-rou
 const input = () => ({ seed: fixture.document.generation.seed, ...structuredClone(fixture.document.generation.input),
   options: { ...fixture.document.generation.input.options, maxShots: 99 } });
 
-test('the exact failed overhead now ends only through an independently recomputed v2 second-bounce fault', async () => {
-  const request = input(), before = JSON.stringify(request), result = await simulateRally(request);
+test('the exact historical narrow-foot prefix retains its unchanged v2 second-bounce causality', () => {
+  const original = JSON.stringify(fixture), document = structuredClone(fixture.document);
+  assert.equal(createHash('sha256').update(JSON.stringify(document)).digest('hex'), fixture.provenance.documentSha256);
+  assert.equal(Object.hasOwn(document, 'defaultFootState'), false);
+  const prefix = compileDocument(document), segment = prefix.timeline.segments.at(-1), solved = solveFlightV2(segment.step.shot.physicsV2);
+  assert.equal(prefix.validShotCount, 14); assert.deepEqual(prefix.findings.filter(row => row.severity === 'error'), []);
+  const proof = certifyGeneratedRouteExclusionV2(prefix.play, segment, solved);
+  assert.ok(proof); assert.equal(certifyGeneratedRouteExclusionV1(prefix.play, segment, solved), null);
+  const end = solved.sampleBoard(solved.secondBounceTime);
+  document.ending = 'winner';
+  document.outcome = { winner: 'orange', type: 'fault', reason: 'second-bounce', shotId: 'shot-14', ruleRef: '10.B.1', faultingActor: 'player2',
+    evidence: { position: {x: end.x, y: end.y, heightFeet: end.heightFeet}, afterContactSeconds: solved.secondBounceTime, generatedRouteCertificate: proof } };
+  assert.deepEqual(document.shots, fixture.document.shots, 'a terminal proof may not rewrite any preserved contact or delivery');
+  const compiled = compileDocument(document), rules = validateRallyRules(compiled.play, compiled.timeline);
+  assert.equal(compiled.validShotCount, 14); assert.deepEqual(compiled.findings.filter(row => row.severity === 'error'), []);
+  assert.equal(rules.valid, true); assert.equal(rules.expectedOutcomes.length, 1);
+  assert.equal(matchesGeneratedRouteCertificate(proof, rules.expectedOutcomes[0].generatedRouteCertificate), true);
+  assert.equal(rules.expectedOutcomes[0].reach.unreachable, false);
+  assert.equal(classifyOutcomeV1({outcome: document.outcome, terminalEvidence: rules.expectedOutcomes[0]}).kind, 'rule-fault');
+  for (const shot of document.shots) {
+    const feet = shot.contactEvidence.feet;
+    assert.ok(Math.abs(Math.hypot(feet[0].x - feet[1].x, feet[0].y - feet[1].y) - .84) < 1e-8);
+  }
+  assert.equal(JSON.stringify(fixture), original);
+});
+
+test('current wide-foot generation preserves the overhead delivery and independently recomputes its v2 fault without rerolling', async () => {
+  let executionCalls = 0;
+  const simulate = createEngineDriverV1((normalized, controls) => runNaturalAttemptV1(normalized, {...controls,
+    random: {...controls.random, execution: () => { executionCalls++; return controls.random.execution(); }}}), {yieldControl: async () => {}});
+  const request = input(), before = JSON.stringify(request), result = await simulate(request);
   assert.equal(result.status, 'complete', JSON.stringify(result.diagnostics));
   assert.equal(result.document.shots.length, 14, 'the proof adds no invented interception');
   assert.equal(result.outcome.reason, 'second-bounce'); assert.equal(result.outcome.type, 'fault');
   assert.equal(result.outcome.faultingActor, 'player2'); assert.equal(result.outcome.ruleRef, '10.B.1');
   assert.equal(result.outcome.evidence.generatedRouteCertificate.version, 'generated-contact-endpoint-route-v2');
-  for (const [index, shot] of result.document.shots.entries()) for (const key of ['family', 'hitter', 'target', 'quality', 'contactEvidence', 'contactTiming', 'physics']) {
+  for (const [index, shot] of result.document.shots.entries()) for (const key of ['family', 'hitter', 'target', 'quality', 'contactTiming', 'physics']) {
     assert.deepEqual(shot[key], fixture.document.shots[index][key], `shot${index + 1}/${key}: certificate never changes the existing contact or sampled delivery`);
   }
+  assert.deepEqual(result.document.defaultFootState, {version: 'generated-ready-stance-v1'});
+  assert.equal(executionCalls, 2 * result.decisions.length, 'nominal refinement never draws and discards an execution');
+  assertFixedExecutionPairs(result); assertFreshPhysicalResult(result);
+  for (const [index, shot] of result.document.shots.entries()) {
+    const {feet, ...evidence} = shot.contactEvidence, {feet: oldFeet, ...oldEvidence} = fixture.document.shots[index].contactEvidence;
+    assert.deepEqual(evidence, oldEvidence);
+    assert.ok(Math.abs(Math.hypot(feet[0].x - feet[1].x, feet[0].y - feet[1].y) - 1.44) < 1e-8);
+    for (const axis of ['x', 'y']) assert.ok(Math.abs((feet[0][axis] + feet[1][axis] - oldFeet[0][axis] - oldFeet[1][axis]) / 2) < 1e-8,
+      `shot${index + 1}: the wider base preserves the reviewed contact root`);
+  }
   const compiled = compileDocument(result.document), rules = validateRallyRules(compiled.play, compiled.timeline);
+  for (const segment of compiled.timeline.segments) for (const actor of ['player1', 'player2', 'player3', 'player4']) {
+    for (const time of [0, segment.contactTime, segment.duration / 2, segment.duration]) {
+      const feet = sampleActorFeetV2(segment, actor, time);
+      assert.ok(Math.abs(Math.hypot(feet[0].x - feet[1].x, feet[0].y - feet[1].y) - 1.44) < 1e-8);
+    }
+  }
   assert.deepEqual(compiled.findings.filter(row => row.severity === 'error'), []); assert.equal(rules.valid, true);
   const terminal = rules.expectedOutcomes[0];
   assert.equal(terminal.reach.unreachable, false, 'the broader human-style reach model retains its uncertainty');

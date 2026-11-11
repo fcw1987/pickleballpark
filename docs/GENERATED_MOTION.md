@@ -57,8 +57,27 @@ that no route in the selected generated class can reach that actual ball. The
 terminal event remains the independently solved second-bounce rule fault. The
 public validator recomputes the exact declared certificate version from source;
 it cannot trust producer evidence or silently substitute a different version.
-Fresh generation tries unchanged v1 first, then v2. Neither version rescues a
-mere failed bounded search without a complete exclusion proof.
+Fresh generation tries unchanged v1 first, then v2, then the separate v3
+refinement below. No version rescues a mere failed bounded search without a
+complete exclusion proof.
+
+The v3 theorem covers the same route class and retains exactly the same speed,
+acceleration, reaction and paddle-reach limits. It refines only the conservative
+between-sample uncertainty. Starting with 32 intervals per affine stage, it
+evaluates each endpoint and midpoint and subtracts the Lipschitz constant times
+the outward-rounded cover radius. An uncertain interval is bisected to at most
+12 levels, within 8,192 interval evaluations per actor. Every accepted leaf must
+have a strictly positive conservative lower bound. A potentially reachable
+sample, exhausted budget, unsupported geometry or nonfinite arithmetic fails
+closed. Sample absence alone is never an ending proof.
+
+Relative affine displacements and conservative floating-point guards prevent
+large world-coordinate cancellation from fabricating a positive gap. The
+certificate records exact refinement work counters as well as the bound, and
+public compilation recomputes all of them from the declared version. Eight
+immutable source witnesses, their mirrored cases, a hidden between-node contact,
+resource-limit negatives and large-coordinate adversarial cases independently
+exercise the implementation. Historical v1 and v2 source bytes remain unchanged.
 
 ## Timing-derived contact plants
 
@@ -70,3 +89,50 @@ speed/acceleration budget. This avoids mistaking a coarse radius grid for an
 exhaustive search. Every such candidate still passes legal feet, exact route,
 spacing, necessary reach and selected-hand trainer-pose admission. No player
 speed, body reach or random execution draw is changed to make it succeed.
+
+## Explicit neutral foot state for new generation
+
+New Model-2 engine documents carry the exact optional source object
+`defaultFootState: { version: 'generated-ready-stance-v1' }`. It selects a
+0.72 ft half stance, or 43.8912 cm between foot centers, close to the shared
+adult rig's 44 cm shoulder breadth. The same width is used for new explicit
+contact feet and every otherwise unspecified off-ball stance. Batch and
+incremental compilation retain the marker, so becoming the hitter, next hitter
+or supporting partner cannot cause an instantaneous width change.
+
+Documents without the marker retain the original 0.42 ft half stance exactly.
+Explicit authored contact feet and momentum feet always take precedence,
+including deliberately narrow or staggered stances. The marker is not inferred
+from old generation metadata, and it is not a universal rule that every real
+stroke uses the same stance. Unknown versions, extra numeric knobs and use on
+Model 1 are rejected rather than silently interpreted.
+
+New contact search uses the actual wider feet for side-NVZ and apron clearance.
+A declared serve layout is never shifted to make its feet legal. After the
+independent strict movement audit, the final driver also checks actual feet at
+every represented phase endpoint against the existing apron. This catches an
+off-ball partner's unsupported initial or later foot position, not only the
+striker's contact. Continuous affine/eased phase geometry makes the endpoint
+checks sufficient; an unsafe source is rejected without clamping it.
+
+## Bounded contact-time refinement
+
+Ordinary contact planes, fixed bounce delays and reach-critical times remain the
+first search pass. If no supported contact remains, or all its nominal intent
+choices fail before any execution draw, a second bounded pass proposes the
+64 interior midpoint times of each actual live flight/bounce phase. Each pass
+emits at most four physically checked opportunities. Existing peak speed,
+acceleration, foot legality, spacing, reply flight and selected-hand pose checks
+apply unchanged. All work stays inside the existing attempt budget and yields
+through its ordinary cancellation checkpoints.
+
+A committed contact closes the proposal generator. A failed delivered execution
+ends the attempt immediately. Neither can trigger this refinement to obtain a
+new quality or error draw. Failed refinement is still only a search failure,
+not proof that a ball is unreachable. The exact five historical failure inputs
+in `generated-time-refinement-witnesses-v1.json` require a newly represented
+reply, unchanged earlier draws and exactly two actual execution RNG calls per
+committed contact. Two still require time refinement. Three now find their
+supported non-attacking drive in the ordinary first pass after the independent
+drive-affordance correction; the tests do not force an unnecessary second pass
+just to reproduce an obsolete diagnostic.

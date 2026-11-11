@@ -1,0 +1,660 @@
+{
+  "version": "generated-time-refinement-witnesses-v1",
+  "provenance": {
+    "description": "Failed explicit adult-stance inputs before bounded contact-time refinement. Failed evidence is retained, never relabeled successful. Runtime identity is provenance only.",
+    "reportSha256": "f378aa0e6f2ff5bbaea3ce599deaee7aa77c404c73bd7f8c8499abbeb3cf7590"
+  },
+  "cases": [
+    {
+      "id": "examined-regression:advanced:balanced:50293",
+      "input": {
+        "seed": 50293,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player1",
+          "receiver": "player3",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "originalCode": "no-feasible-contact",
+      "prefixDraws": [
+        {
+          "intent": 0.7525533665902913,
+          "execution": {
+            "quality": 0.06701630377210677,
+            "error": 0.5742512634024024
+          },
+          "target": {
+            "lateral": 0.42699382174760103,
+            "depth": 0.4953142190352082
+          },
+          "perturbation": {
+            "lateral": 0.3621340054087341,
+            "depth": 0.617546804016456
+          },
+          "narration": 0.6704265109729022
+        },
+        {
+          "intent": 0.5761290467344224,
+          "execution": {
+            "quality": 0.5350107364356518,
+            "error": 0.9917505909688771
+          },
+          "target": {
+            "lateral": 0.6813941721338779,
+            "depth": 0.1992325745522976
+          },
+          "perturbation": {
+            "lateral": 0.9792279431130737,
+            "depth": 0.5511267788242549
+          },
+          "narration": 0.358817980857566
+        },
+        {
+          "intent": 0.2664535460062325,
+          "execution": {
+            "quality": 0.43035179073922336,
+            "error": 0.8039414468221366
+          },
+          "target": {
+            "lateral": 0.33060520770959556,
+            "depth": 0.9125038411002606
+          },
+          "perturbation": {
+            "lateral": 0.5538823427632451,
+            "depth": 0.6677010694984347
+          },
+          "narration": 0.9237406209576875
+        },
+        {
+          "intent": 0.8988288282416761,
+          "execution": {
+            "quality": 0.554053719388321,
+            "error": 0.6994353150948882
+          },
+          "target": {
+            "lateral": 0.7211248436942697,
+            "depth": 0.9858245679643005
+          },
+          "perturbation": {
+            "lateral": 0.5057885078713298,
+            "depth": 0.22834174195304513
+          },
+          "narration": 0.5029767379164696
+        }
+      ]
+    },
+    {
+      "id": "examined-regression:advanced:balanced:50878",
+      "input": {
+        "seed": 50878,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player3",
+          "receiver": "player1",
+          "court": "right",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "originalCode": "bounded-feasible-intents-exhausted",
+      "prefixDraws": [
+        {
+          "intent": 0.5115109677426517,
+          "execution": {
+            "quality": 0.4194046452175826,
+            "error": 0.2872329514939338
+          },
+          "target": {
+            "lateral": 0.8612749660387635,
+            "depth": 0.8161252501886338
+          },
+          "perturbation": {
+            "lateral": 0.760038877138868,
+            "depth": 0.08175298920832574
+          },
+          "narration": 0.3699570563621819
+        },
+        {
+          "intent": 0.6253287298604846,
+          "execution": {
+            "quality": 0.15952748153358698,
+            "error": 0.17683235020376742
+          },
+          "target": {
+            "lateral": 0.4584868079982698,
+            "depth": 0.42429779027588665
+          },
+          "perturbation": {
+            "lateral": 0.06957126734778285,
+            "depth": 0.44137711846269667
+          },
+          "narration": 0.7223471829202026
+        },
+        {
+          "intent": 0.003713160753250122,
+          "execution": {
+            "quality": 0.5841237329877913,
+            "error": 0.8299386696889997
+          },
+          "target": {
+            "lateral": 0.33412119280546904,
+            "depth": 0.8947373086120933
+          },
+          "perturbation": {
+            "lateral": 0.7399885866325349,
+            "depth": 0.6798374690115452
+          },
+          "narration": 0.2022283838596195
+        },
+        {
+          "intent": 0.3841703098732978,
+          "execution": {
+            "quality": 0.6228696890175343,
+            "error": 0.29166846931912005
+          },
+          "target": {
+            "lateral": 0.1372830404434353,
+            "depth": 0.8804798650089651
+          },
+          "perturbation": {
+            "lateral": 0.0009694318287074566,
+            "depth": 0.34791183681227267
+          },
+          "narration": 0.3860146061051637
+        }
+      ]
+    },
+    {
+      "id": "examined-regression:intermediate:balanced:50293",
+      "input": {
+        "seed": 50293,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player1",
+          "receiver": "player3",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "originalCode": "no-feasible-contact",
+      "prefixDraws": [
+        {
+          "intent": 0.7525533665902913,
+          "execution": {
+            "quality": 0.06701630377210677,
+            "error": 0.5742512634024024
+          },
+          "target": {
+            "lateral": 0.42699382174760103,
+            "depth": 0.4953142190352082
+          },
+          "perturbation": {
+            "lateral": 0.3621340054087341,
+            "depth": 0.617546804016456
+          },
+          "narration": 0.6704265109729022
+        },
+        {
+          "intent": 0.5761290467344224,
+          "execution": {
+            "quality": 0.5350107364356518,
+            "error": 0.9917505909688771
+          },
+          "target": {
+            "lateral": 0.6813941721338779,
+            "depth": 0.1992325745522976
+          },
+          "perturbation": {
+            "lateral": 0.9792279431130737,
+            "depth": 0.5511267788242549
+          },
+          "narration": 0.358817980857566
+        },
+        {
+          "intent": 0.2664535460062325,
+          "execution": {
+            "quality": 0.43035179073922336,
+            "error": 0.8039414468221366
+          },
+          "target": {
+            "lateral": 0.33060520770959556,
+            "depth": 0.9125038411002606
+          },
+          "perturbation": {
+            "lateral": 0.5538823427632451,
+            "depth": 0.6677010694984347
+          },
+          "narration": 0.9237406209576875
+        },
+        {
+          "intent": 0.8988288282416761,
+          "execution": {
+            "quality": 0.554053719388321,
+            "error": 0.6994353150948882
+          },
+          "target": {
+            "lateral": 0.7211248436942697,
+            "depth": 0.9858245679643005
+          },
+          "perturbation": {
+            "lateral": 0.5057885078713298,
+            "depth": 0.22834174195304513
+          },
+          "narration": 0.5029767379164696
+        }
+      ]
+    },
+    {
+      "id": "examined-regression:intermediate:balanced:50803",
+      "input": {
+        "seed": 50803,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player3",
+          "receiver": "player1",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "originalCode": "bounded-feasible-intents-exhausted",
+      "prefixDraws": [
+        {
+          "intent": 0.059153266716748476,
+          "execution": {
+            "quality": 0.05114480969496071,
+            "error": 0.5737044443376362
+          },
+          "target": {
+            "lateral": 0.3820211838465184,
+            "depth": 0.6409887243062258
+          },
+          "perturbation": {
+            "lateral": 0.8496465825010091,
+            "depth": 0.670461384113878
+          },
+          "narration": 0.7513991207815707
+        },
+        {
+          "intent": 0.29889439581893384,
+          "execution": {
+            "quality": 0.18444588338024914,
+            "error": 0.6122348364442587
+          },
+          "target": {
+            "lateral": 0.769072868861258,
+            "depth": 0.409368080785498
+          },
+          "perturbation": {
+            "lateral": 0.9876753918360919,
+            "depth": 0.3942335210740566
+          },
+          "narration": 0.13393278024159372
+        },
+        {
+          "intent": 0.6973446141928434,
+          "execution": {
+            "quality": 0.2943674416746944,
+            "error": 0.27448499435558915
+          },
+          "target": {
+            "lateral": 0.5128639203030616,
+            "depth": 0.5887071662582457
+          },
+          "perturbation": {
+            "lateral": 0.6561252570245415,
+            "depth": 0.6535311916377395
+          },
+          "narration": 0.9746764055453241
+        },
+        {
+          "intent": 0.024014790542423725,
+          "execution": {
+            "quality": 0.5652688348200172,
+            "error": 0.16119566676206887
+          },
+          "target": {
+            "lateral": 0.1594112312886864,
+            "depth": 0.7399964490905404
+          },
+          "perturbation": {
+            "lateral": 0.010993878589943051,
+            "depth": 0.8722976127173752
+          },
+          "narration": 0.9784137103706598
+        },
+        {
+          "intent": 0.848471918143332,
+          "execution": {
+            "quality": 0.2336380670312792,
+            "error": 0.07438468397594988
+          },
+          "target": {
+            "lateral": 0.5050418770406395,
+            "depth": 0.5916089937090874
+          },
+          "perturbation": {
+            "lateral": 0.6426931233145297,
+            "depth": 0.004626601468771696
+          },
+          "narration": 0.4198422757908702
+        },
+        {
+          "intent": 0.604152244515717,
+          "execution": {
+            "quality": 0.8700343586970121,
+            "error": 0.732063764706254
+          },
+          "target": {
+            "lateral": 0.5405123753007501,
+            "depth": 0.34937972016632557
+          },
+          "perturbation": {
+            "lateral": 0.5227917192969471,
+            "depth": 0.8166851352434605
+          },
+          "narration": 0.253927766578272
+        },
+        {
+          "intent": 0.9071796485222876,
+          "execution": {
+            "quality": 0.36139587429352105,
+            "error": 0.9082008260302246
+          },
+          "target": {
+            "lateral": 0.4654944248031825,
+            "depth": 0.6861368047539145
+          },
+          "perturbation": {
+            "lateral": 0.27470808499492705,
+            "depth": 0.4792409974616021
+          },
+          "narration": 0.7294064722955227
+        },
+        {
+          "intent": 0.05604125023819506,
+          "execution": {
+            "quality": 0.9422610767651349,
+            "error": 0.271981485420838
+          },
+          "target": {
+            "lateral": 0.8870535010937601,
+            "depth": 0.8690883291419595
+          },
+          "perturbation": {
+            "lateral": 0.8540098781231791,
+            "depth": 0.7320838288869709
+          },
+          "narration": 0.3974949598778039
+        },
+        {
+          "intent": 0.7884710191283375,
+          "execution": {
+            "quality": 0.8460470954887569,
+            "error": 0.44249056559056044
+          },
+          "target": {
+            "lateral": 0.12465418456122279,
+            "depth": 0.47093526110984385
+          },
+          "perturbation": {
+            "lateral": 0.4292979713063687,
+            "depth": 0.3404052057303488
+          },
+          "narration": 0.14599991287104785
+        },
+        {
+          "intent": 0.326474379748106,
+          "execution": {
+            "quality": 0.9200248336419463,
+            "error": 0.5162800375837833
+          },
+          "target": {
+            "lateral": 0.5755659609567374,
+            "depth": 0.9947500135749578
+          },
+          "perturbation": {
+            "lateral": 0.9385142303071916,
+            "depth": 0.0983120733872056
+          },
+          "narration": 0.25254346150904894
+        }
+      ]
+    },
+    {
+      "id": "examined-regression:intermediate:balanced:50878",
+      "input": {
+        "seed": 50878,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player3",
+          "receiver": "player1",
+          "court": "right",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "originalCode": "bounded-feasible-intents-exhausted",
+      "prefixDraws": [
+        {
+          "intent": 0.5115109677426517,
+          "execution": {
+            "quality": 0.4194046452175826,
+            "error": 0.2872329514939338
+          },
+          "target": {
+            "lateral": 0.8612749660387635,
+            "depth": 0.8161252501886338
+          },
+          "perturbation": {
+            "lateral": 0.760038877138868,
+            "depth": 0.08175298920832574
+          },
+          "narration": 0.3699570563621819
+        },
+        {
+          "intent": 0.6253287298604846,
+          "execution": {
+            "quality": 0.15952748153358698,
+            "error": 0.17683235020376742
+          },
+          "target": {
+            "lateral": 0.4584868079982698,
+            "depth": 0.42429779027588665
+          },
+          "perturbation": {
+            "lateral": 0.06957126734778285,
+            "depth": 0.44137711846269667
+          },
+          "narration": 0.7223471829202026
+        },
+        {
+          "intent": 0.003713160753250122,
+          "execution": {
+            "quality": 0.5841237329877913,
+            "error": 0.8299386696889997
+          },
+          "target": {
+            "lateral": 0.33412119280546904,
+            "depth": 0.8947373086120933
+          },
+          "perturbation": {
+            "lateral": 0.7399885866325349,
+            "depth": 0.6798374690115452
+          },
+          "narration": 0.2022283838596195
+        },
+        {
+          "intent": 0.3841703098732978,
+          "execution": {
+            "quality": 0.6228696890175343,
+            "error": 0.29166846931912005
+          },
+          "target": {
+            "lateral": 0.1372830404434353,
+            "depth": 0.8804798650089651
+          },
+          "perturbation": {
+            "lateral": 0.0009694318287074566,
+            "depth": 0.34791183681227267
+          },
+          "narration": 0.3860146061051637
+        }
+      ]
+    }
+  ]
+}

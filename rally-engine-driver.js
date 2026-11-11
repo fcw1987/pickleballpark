@@ -10,6 +10,7 @@ import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1, GROUNDED_CONTACT
 import { inspectGeneratedContactSupportV1 } from './generated-contact-support.js';
 import { GENERATION_MOTION_V1 } from './generated-motion-limits.js';
 import { inspectGeneratedTrainerSupportV1 } from './generated-trainer-support.js';
+import { sampleActorFeetV2 } from './play-actors-v2.js';
 
 export const ENGINE_DRIVER_VERSION = 'rally-engine-driver-v1';
 export const ENGINE_DRIVER_LIMITS = Object.freeze({ maxAttempts: 64, maxWorkPerAttempt: 65536, maxWork: 64 * 65536 });
@@ -90,6 +91,30 @@ function lengthMatches(feel, shots) {
         || feel === 'long' && shots >= 12 && shots <= 20 || feel === 'epic' && shots >= 25;
 }
 
+// The selected neutral foot state must fit the represented apron for every
+// actor, including an off-ball partner in a user-supplied initial layout.
+// This runs after the strict continuous movement audit. The shared sampler is
+// monotone affine/eased on each contact, release and momentum phase, so each
+// coordinate extremum lies at a phase endpoint. No source feet are clamped.
+function inspectDefaultFootApron(timeline) {
+    const bounds = { minX: -8, maxX: 28, minY: -8, maxY: 52 };
+    for (const segment of timeline.segments) {
+        const original = segment.originalDuration ?? segment.duration;
+        const cuts = [0, segment.duration, original, segment.contactTime, Math.min(original, segment.contactTime + .12)];
+        for (const item of segment.model2Momentum || []) cuts.push(item.contactTime - segment.startTime, item.time - segment.startTime);
+        for (const time of new Set(cuts.filter(value => Number.isFinite(value) && value >= 0 && value <= segment.duration))) {
+            for (const actor of ['player1', 'player2', 'player3', 'player4']) {
+                const feet = sampleActorFeetV2(segment, actor, time);
+                if (feet.some(p => !Number.isFinite(p.x) || !Number.isFinite(p.y)
+                    || p.x < bounds.minX - 1e-7 || p.x > bounds.maxX + 1e-7 || p.y < bounds.minY - 1e-7 || p.y > bounds.maxY + 1e-7)) {
+                    return { valid: false, actor, shotId: segment.step.id, time, feet, bounds };
+                }
+            }
+        }
+    }
+    return { valid: true, bounds };
+}
+
 function validateAttemptDocument(provisional, normalized, recipe) {
     if (!plain(provisional) || !PROVISIONAL_STATUSES.includes(provisional.status)) throw new DriverFailure('attempt-status', 'Attempt returned an unsupported result status.');
     if (!provisional.document) throw new DriverFailure('attempt-document', 'A completed or censored attempt must supply its source document.');
@@ -132,6 +157,8 @@ function validateAttemptDocument(provisional, normalized, recipe) {
         'The generated contact exceeds the supported grounded generation envelope. This necessary bound is not a complete skeletal pose proof.', { contactSupport });
     const movement = inspectGeneratedMovementV1(compiled.timeline, { maxAccelerationFeetPerSecondSquared: GENERATION_MOTION_V1.accelerationFeetPerSecondSquared }), spacing = inspectGeneratedSpacingV1(compiled.timeline);
     if (!movement.valid || !spacing.valid) throw new DriverFailure('generated-movement', 'The final sampled paths exceed generated movement or spacing bounds.', { movement, spacing });
+    const footApron = document.defaultFootState ? inspectDefaultFootApron(compiled.timeline) : null;
+    if (footApron && !footApron.valid) throw new DriverFailure('generated-foot-apron', 'The actual generated feet extend beyond the supported apron; the declared layout is not repaired.', { footApron });
     const generatedFlightFeasibility = assessGeneratedFlightFeasibilityV1({ document, compiled });
     if (['rally-policy-v2', 'rally-policy-v3'].includes(recipe.policyVersion) && generatedFlightFeasibility.status !== 'PASS') {
         throw new DriverFailure('generated-flight-feasibility', 'The serialized generated flights exceed the supported generation envelope.', { generatedFlightFeasibility });
@@ -155,7 +182,7 @@ function validateAttemptDocument(provisional, normalized, recipe) {
     } else if (rules.expectedOutcomes?.length || compiled.timeline.outcome) throw new DriverFailure('censored-evidence', 'A censored prefix cannot conceal a decisive physical ending.');
     return { document, outcome: provisional.status === 'complete' ? clone(document.outcome) : null,
         validation: { sourceShots: document.shots.length, acceptedShots: compiled.validShotCount,
-            compilerErrors: 0, unexpectedViolations: 0, expectedOutcomes: rules.expectedOutcomes?.length ?? 0, contactSupport, movement, spacing, generatedFlightFeasibility, trainerSupport } };
+            compilerErrors: 0, unexpectedViolations: 0, expectedOutcomes: rules.expectedOutcomes?.length ?? 0, contactSupport, movement, spacing, ...(footApron ? { footApron } : {}), generatedFlightFeasibility, trainerSupport } };
 }
 
 export function createEngineDriverV1(runAttempt, config = {}) {

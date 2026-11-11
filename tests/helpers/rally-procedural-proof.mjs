@@ -38,8 +38,22 @@ export function assertFixedExecutionPairs(result, seed = result.document.generat
     assert.equal(decision.resolution.solutionIndex, 0, 'the first constructible delivery is not filtered for a better outcome');
   }
 }
+export function assertCurrentGeneratedFootState(document) {
+  // The current outcome projection remains exact without duplicating the old
+  // manifest. This is a separate new-generation source contract, not a rule
+  // retroactively imposed on historical or explicitly authored foot evidence.
+  assert.deepEqual(document.defaultFootState, {version: 'generated-ready-stance-v1'});
+  for (const shot of document.shots) {
+    const feet = shot.contactEvidence?.feet;
+    assert.equal(feet?.length, 2, `${shot.id}: explicit generated contact feet`);
+    assert.ok(feet.every(foot => Number.isFinite(foot.x) && Number.isFinite(foot.y)), shot.id);
+    assert.ok(Math.abs(Math.abs(feet[0].x - feet[1].x) - 1.44) < 1e-8, `${shot.id}: current ready-stance width`);
+    assert.ok(Math.abs(feet[0].y - feet[1].y) < 1e-8, `${shot.id}: current paired grounded stance`);
+  }
+}
 export function assertFreshPhysicalResult(result) {
   assert.ok(result.document, JSON.stringify(result.diagnostics));
+  assertCurrentGeneratedFootState(result.document);
   const compiled = compileDocument(result.document), rules = validateRallyRules(compiled.play, compiled.timeline);
   assert.equal(compiled.validShotCount, result.document.shots.length);
   assert.deepEqual(compiled.findings.filter(row => row.severity === 'error'), []);

@@ -1,6 +1,7 @@
 // Opt-in timeline adapter. The legacy compiler/sampler retains its own path.
 import { PHYSICS_VERSION, compileSolvedLegV2, compileSolvedLegFromFlightV2, solveServePreparationV2, physicsBoardToWorld } from './play-physics-v2.js';
 import { analyzeModel2Outcome } from './play-outcome-v2.js';
+import { validateDefaultFootStateV1 } from './generated-foot-state.js';
 
 const EPS=1e-8;
 const priority={'preparation-bounce':0,contact:1,'net-touch':2,'net-crossing':3,bounce:4,out:5,'second-bounce':6,body:7,fault:8,dead:9,end:10};
@@ -9,22 +10,24 @@ const center=feet=>({x:(feet[0].x+feet[1].x)/2,y:(feet[0].y+feet[1].y)/2});
 
 // Shared segment construction for the compiler and bounded incremental planner.
 // index is the one-based contact index, so first-contact preparation stays exact.
-export function createModel2SegmentV2({previous,step,nextStep,index,startTime=0,model2Momentum=[]},
+export function createModel2SegmentV2({previous,step,nextStep,index,startTime=0,model2Momentum=[],defaultFootState},
   {resolveShotSemantics,boardToWorld}={}) {
-  return model2Segment({previous,step,nextStep,index,startTime,model2Momentum},{resolveShotSemantics,boardToWorld},compileSolvedLegV2);
+  return model2Segment({previous,step,nextStep,index,startTime,model2Momentum,defaultFootState},{resolveShotSemantics,boardToWorld},compileSolvedLegV2);
 }
 
 export function createModel2SegmentFromSolvedV2(input,adapters,solved){
   return model2Segment(input,adapters,shot=>compileSolvedLegFromFlightV2(shot,solved));
 }
-function model2Segment({previous,step,nextStep,index,startTime=0,model2Momentum=[]},{resolveShotSemantics,boardToWorld},compileLeg){
+function model2Segment({previous,step,nextStep,index,startTime=0,model2Momentum=[],defaultFootState},{resolveShotSemantics,boardToWorld},compileLeg){
   if(!step?.shot||typeof resolveShotSemantics!=='function'||typeof boardToWorld!=='function')throw new TypeError('A model 2 shot and core semantics adapters are required.');
+  validateDefaultFootStateV1(defaultFootState);
   const shotSemantics=resolveShotSemantics(step.shot,previous.positions);
   const nextShotSemantics=nextStep?.shot?resolveShotSemantics(nextStep.shot,step.positions):null;
   const servePreparation=step.shot.servePreparation?solveServePreparationV2({point:shotSemantics.contact.point,...step.shot.servePreparation}):null;
   const contactTime=servePreparation?.totalDuration??(index===1?shotSemantics.profile.duration*shotSemantics.profile.contactRatio:0);
   const trajectory=compileLeg(step.shot),duration=contactTime+trajectory.totalDuration;
   return {modelVersion:2,index,previous,step,nextStep,trajectory,servePreparation,shotSemantics,nextShotSemantics,
+    ...(defaultFootState!==undefined?{defaultFootState:Object.freeze({...defaultFootState})}:{}),
     startTime,duration,originalDuration:duration,endTime:startTime+duration,contactTime,
     trajectoryStartTime:contactTime,trajectoryEndTime:duration,rallyLeg:index,
     endpoint:trajectory.endpoint,ballStart:servePreparation?.release||trajectory.start,ballEnd:trajectory.end,model2Momentum};
@@ -49,11 +52,12 @@ export function holdModel2TerminalSegmentV2(last,decision) {
 export function compilePlayTimelineV2(play,{resolveShotSemantics,boardToWorld}={}){
   if(play.modelVersion!==2||play.physicsVersion!==PHYSICS_VERSION)throw new TypeError('Unsupported model 2 timeline version.');
   if(!play.steps?.length||typeof resolveShotSemantics!=='function'||typeof boardToWorld!=='function')throw new TypeError('A model 2 Play and core semantics adapters are required.');
+  validateDefaultFootStateV1(play.defaultFootState);
   const segments=[],events=[],momentum=[];let cursor=0,rallyLeg=0;
   for(let index=1;index<play.steps.length;index++){
     const previous=play.steps[index-1],step=play.steps[index],nextStep=play.steps[index+1];
     if(!step.shot)throw new TypeError('Model 2 timelines require explicit shot stages.');
-    const segment=createModel2SegmentV2({previous,step,nextStep,index,startTime:cursor}, {resolveShotSemantics,boardToWorld});
+    const segment=createModel2SegmentV2({previous,step,nextStep,index,startTime:cursor,defaultFootState:play.defaultFootState}, {resolveShotSemantics,boardToWorld});
     const {shotSemantics,nextShotSemantics,servePreparation,contactTime,trajectory,duration}=segment;
     rallyLeg++;
     segments.push(segment);

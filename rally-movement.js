@@ -6,6 +6,7 @@ import { teamForPlayer } from './rally-state.js';
 import { stackingTeamPlanV1 } from './rally-stacking.js';
 import { generatedContactRadiusFeetV1 } from './generated-contact-support.js';
 import { GENERATION_MOTION_V1, generationDistanceBudgetV1 } from './generated-motion-limits.js';
+import { defaultFootHalfWidthFeetV1, defaultFeetAtV1 } from './generated-foot-state.js';
 
 export const MOVEMENT_VERSION = 'rally-movement-v2';
 export const GENERATOR_MOVEMENT = Object.freeze({ peakFeetPerSecond: 18, halfStanceFeet: .42, lineOffsetFeet: .75 });
@@ -19,9 +20,9 @@ const point = (p, name) => {
   return xy(p);
 };
 const outsideNVZ = p => p.x < 0 || p.x > 20 || p.y < 15 || p.y > 29;
-const stanceFeet = p => [{ x: p.x - .42, y: p.y }, { x: p.x + .42, y: p.y }];
-const needsGroundedExit = (from, goal, feet = stanceFeet(from)) => feet.some(p => !outsideNVZ(p))
-  && stanceFeet(goal).every(outsideNVZ);
+const stanceFeet = (p, defaultFootState) => defaultFeetAtV1(p, defaultFootState);
+const needsGroundedExit = (from, goal, feet, defaultFootState) => (feet ?? stanceFeet(from, defaultFootState)).some(p => !outsideNVZ(p))
+  && stanceFeet(goal, defaultFootState).every(outsideNVZ);
 const footCenter = feet => ({ x: (feet[0].x + feet[1].x) / 2, y: (feet[0].y + feet[1].y) / 2 });
 const command = p => ({ intent: 'manual', target: xy(p), pinned: false });
 const freeze = object => {
@@ -40,13 +41,14 @@ const CONTACT_BODY_CLEARANCE = .9, CONTACT_PADDLE_RADIUS = 3 - 1e-5, CONTACT_SID
 // Actual generation always supplies height and the driver checks it again.
 const supportedPaddleRadius = contact => contact.heightFeet === undefined ? CONTACT_PADDLE_RADIUS
   : Math.max(0, (generatedContactRadiusFeetV1(contact.heightFeet) ?? 0) - 1e-5);
-function closestOriginStance(contact, preferred, origin, { team, hand, kind, paddleRadius = CONTACT_PADDLE_RADIUS }) {
+function closestOriginStance(contact, preferred, origin, { team, hand, kind, paddleRadius = CONTACT_PADDLE_RADIUS, defaultFootState }) {
+  const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
   const ownY = team === 'green' ? [-7.5, 22 - .01] : [22 + .01, 51.5];
   const boxes = kind === 'volley' ? [
-    { x0: -7.5, x1: 27.5, y0: team === 'green' ? ownY[0] : 29.75, y1: team === 'green' ? 14.25 : ownY[1] },
-    { x0: -7.5, x1: -.42 - 1e-5, y0: ownY[0], y1: ownY[1] },
-    { x0: 20.42 + 1e-5, x1: 27.5, y0: ownY[0], y1: ownY[1] },
-  ] : [{ x0: -7.5, x1: 27.5, y0: ownY[0], y1: ownY[1] }];
+    { x0, x1, y0: team === 'green' ? ownY[0] : 29.75, y1: team === 'green' ? 14.25 : ownY[1] },
+    { x0, x1: -half - 1e-5, y0: ownY[0], y1: ownY[1] },
+    { x0: 20 + half + 1e-5, x1, y0: ownY[0], y1: ownY[1] },
+  ] : [{ x0, x1, y0: ownY[0], y1: ownY[1] }];
   const bodySide = (team === 'green' ? 1 : -1) * hand;
   let best = null;
   for (const originalBox of boxes) {
@@ -89,7 +91,8 @@ function closestOriginStance(contact, preferred, origin, { team, hand, kind, pad
 
 /** Source feet are explicit, grounded points. Their stance accounts for hand
  * and stroke side; anatomical left/right is independent of handedness. */
-export function contactFeetV1({ contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds } = {}) {
+export function contactFeetV1({ contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds, defaultFootState } = {}) {
+  const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
   point(contact, 'contact'); point(target, 'target');
   if (!['green', 'orange'].includes(team) || !['left', 'right'].includes(handedness)) throw new TypeError('A team and handedness are required.');
   if (availableSeconds !== undefined && (!Number.isFinite(availableSeconds) || availableSeconds < 0)) throw new TypeError('Available stance time must be finite and nonnegative.');
@@ -100,21 +103,21 @@ export function contactFeetV1({ contact, target, team, handedness = 'right', con
     x: contact.x - forward.x * .8 + forward.y * .8 * hand,
     y: contact.y - forward.y * .8 - forward.x * .8 * hand,
   };
-  if (!(kind === 'serve' && position)) stance = { x: clamp(stance.x, -7.5, 27.5), y: clamp(stance.y, -7.5, 51.5) };
-  if (kind === 'volley' && stance.x >= -.42 && stance.x <= 20.42) {
+  if (!(kind === 'serve' && position)) stance = { x: clamp(stance.x, x0, x1), y: clamp(stance.y, -7.5, 51.5) };
+  if (kind === 'volley' && stance.x >= -half && stance.x <= 20 + half) {
     stance.y = team === 'green' ? Math.min(14.25, stance.y) : Math.max(29.75, stance.y);
   }
   const paddleRadius = supportedPaddleRadius(contact);
   let originChoice = null;
   if (position && kind !== 'serve') {
     const origin = point(position, 'position');
-    originChoice = closestOriginStance(contact, stance, origin, { team, hand, kind, paddleRadius });
+    originChoice = closestOriginStance(contact, stance, origin, { team, hand, kind, paddleRadius, defaultFootState });
     if (originChoice) stance = originChoice.stance;
   }
   // First-contact serve positioning belongs to the declared layout. Do not
   // silently fix an illegal serve stance or move it to an inferred score slot.
   const leftSign = team === 'green' ? 1 : -1;
-  const feet = [{ x: stance.x + leftSign * .42, y: stance.y }, { x: stance.x - leftSign * .42, y: stance.y }];
+  const feet = [{ x: stance.x + leftSign * half, y: stance.y }, { x: stance.x - leftSign * half, y: stance.y }];
   const established = feet.every(outsideNVZ);
   return freeze({ feet, stance, grounded: true, feetEstablishedOutsideNVZ: established,
     reachable: paddleRadius > 0 && distance(stance, contact) <= paddleRadius + EPS && (!(position && kind !== 'serve') || !!originChoice),
@@ -135,7 +138,8 @@ export function contactFeetV1({ contact, target, team, handedness = 'right', con
  * Flight clearance and the sampled incoming route remain the caller's audit. */
 export function contactFeetCandidatesV1(args = {}) {
   const first = contactFeetV1(args), candidates = [first];
-  const { contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds } = args;
+  const { contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds, defaultFootState } = args;
+  const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
   // Serves retain their declared layout, including any existing illegality.
   if (kind === 'serve') return freeze(candidates);
   const origin = position ? point(position, 'position') : null;
@@ -150,12 +154,12 @@ export function contactFeetCandidatesV1(args = {}) {
     const radius = distance(stance, contact);
     if (radius < CONTACT_BODY_CLEARANCE - EPS || radius > paddleRadius + EPS
       || bodySide * (stance.x - contact.x) < CONTACT_SIDE_CLEARANCE - EPS
-      || stance.x < -7.5 || stance.x > 27.5 || stance.y < -7.5 || stance.y > 51.5
+      || stance.x < x0 || stance.x > x1 || stance.y < -7.5 || stance.y > 51.5
       || (team === 'green' ? stance.y > 21.99 : stance.y < 22.01)) return;
     const leftSign = team === 'green' ? 1 : -1;
-    const feet = [{ x: stance.x + leftSign * .42, y: stance.y }, { x: stance.x - leftSign * .42, y: stance.y }];
+    const feet = [{ x: stance.x + leftSign * half, y: stance.y }, { x: stance.x - leftSign * half, y: stance.y }];
     const established = feet.every(outsideNVZ);
-    if (kind === 'volley' && (!established || (stance.x >= -.42 - 1e-5 && stance.x <= 20.42 + 1e-5
+    if (kind === 'volley' && (!established || (stance.x >= -half - 1e-5 && stance.x <= 20 + half + 1e-5
       && (team === 'green' ? stance.y > 14.25 : stance.y < 29.75)))) return;
     const key = `${stance.x.toFixed(8)},${stance.y.toFixed(8)}`;
     if (seen.has(key)) return;
@@ -172,7 +176,7 @@ export function contactFeetCandidatesV1(args = {}) {
   // can shorten extension while keeping the same legal ready-line depth.
   if (origin) {
     const comfortable = closestOriginStance(contact, first.stance, origin,
-      { team, hand, kind, paddleRadius: Math.min(1.8, paddleRadius) });
+      { team, hand, kind, paddleRadius: Math.min(1.8, paddleRadius), defaultFootState });
     if (comfortable) add(comfortable.stance);
     // A fast ball may permit an intermediate extension that neither the
     // comfortable 1.8 ft nor emergency 3 ft radius grid represents. Reserve the
@@ -184,7 +188,7 @@ export function contactFeetCandidatesV1(args = {}) {
         let low = 1.8, high = paddleRadius, timed = { stance: first.stance };
         for (let iteration = 0; iteration < 20; iteration++) {
           const radius = (low + high) / 2;
-          const candidate = closestOriginStance(contact, first.stance, origin, { team, hand, kind, paddleRadius: radius });
+          const candidate = closestOriginStance(contact, first.stance, origin, { team, hand, kind, paddleRadius: radius, defaultFootState });
           if (candidate && candidate.travel <= budget) { high = radius; timed = candidate; }
           else low = radius;
         }
@@ -221,8 +225,8 @@ export function boundMovementV1(from, desired, seconds, peakFeetPerSecond = GENE
 // Recover legal ready depth before restoring a preferred lateral role. This
 // fallback leaves the other partner still, then undergoes the same continuous
 // spacing check. If even this path is unsafe, it is not declared a reset.
-function groundedExitOrHold(from, goal, seconds, peakFeetPerSecond, feet) {
-  return needsGroundedExit(from, goal, feet)
+function groundedExitOrHold(from, goal, seconds, peakFeetPerSecond, feet, defaultFootState) {
+  return needsGroundedExit(from, goal, feet, defaultFootState)
     ? boundMovementV1(from, { x: from.x, y: goal.y }, seconds, peakFeetPerSecond) : xy(from);
 }
 
@@ -230,7 +234,8 @@ function groundedExitOrHold(from, goal, seconds, peakFeetPerSecond, feet) {
  * endpoint is provisional until the pending leg gets its real next contact. */
 export function planMovementV1({ positions, players, hitter, contact, target, durationSeconds, seconds,
   contactTime = 0, index = 0, service = {}, stacking, intent = '', family = '', incomingFamily = '', quality = 'neutral', pace = 'medium',
-  opening = 'serve', kind = 'groundstroke', contactStyle = 'forehand', feetState = {}, contactFeet, peakFeetPerSecond = 18 } = {}) {
+  opening = 'serve', kind = 'groundstroke', contactStyle = 'forehand', feetState = {}, contactFeet, peakFeetPerSecond = 18, defaultFootState } = {}) {
+  defaultFootHalfWidthFeetV1(defaultFootState);
   const duration = durationSeconds ?? seconds;
   if (!['low', 'neutral', 'attackable', 'excellent', 'error'].includes(quality)) throw new TypeError('Movement needs a supported execution quality.');
   if (!['soft', 'medium', 'firm'].includes(pace)) throw new TypeError('Movement needs a supported pace.');
@@ -241,7 +246,7 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
   point(contact, 'contact'); point(target, 'target');
   const hittingTeam = teamForPlayer(hitter, players), servingTeam = service.servingTeam ?? teamForPlayer(service.server, players);
   const chosenFeet = contactFeet ?? contactFeetV1({ contact, target, team: hittingTeam,
-    handedness: players[hitter].handedness, kind, contactStyle, position: index === 0 ? positions[hitter] : undefined });
+    handedness: players[hitter].handedness, kind, contactStyle, defaultFootState, position: index === 0 ? positions[hitter] : undefined });
   const suppliedFeet = Array.isArray(chosenFeet) ? chosenFeet : chosenFeet.feet;
   if (suppliedFeet?.length !== 2) throw new TypeError('Two explicit grounded contact feet are required.');
   const feet = suppliedFeet.map(p => point(p, 'contact feet'));
@@ -289,7 +294,7 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
       if (family === 'lob' && team !== hittingTeam) y = near ? Math.min(from.y, 9) : Math.max(from.y, 35);
       // A grounded kitchen entry is followed by a bounded retreat. This goal
       // never claims reset until actual sampled feet have exited the zone.
-      if ((id === hitter ? feet : stanceFeet(from)).some(p => !outsideNVZ(p))) y = lineY;
+      if ((id === hitter ? feet : stanceFeet(from, defaultFootState)).some(p => !outsideNVZ(p))) y = lineY;
       // Stacking changes lateral preferences, never who serves/returns or the
       // two-bounce requirement. The serving partner holds the setup through
       // the serve; the server can unwind only after its sampled contact hold.
@@ -310,7 +315,7 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
     for (const id of pair) {
       const length = distance(origins[id], goals[id]);
       fractions[id] = length ? clamp(generationDistanceBudgetV1(durations[id], peakFeetPerSecond) / length, 0, 1) : 1;
-      exiting[id] = needsGroundedExit(origins[id], goals[id], id === hitter ? feet : undefined);
+      exiting[id] = needsGroundedExit(origins[id], goals[id], id === hitter ? feet : undefined, defaultFootState);
       if (!exiting[id]) progress = Math.min(progress, fractions[id]);
       else diagnostics.push({ code: 'independent-grounded-exit', actor: id });
     }
@@ -320,17 +325,17 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
     }
     const initialSeparation = distance(origins[pair[0]], origins[pair[1]]), finalSeparation = distance(destinations[pair[0]], destinations[pair[1]]);
     if (initialSeparation >= 2.5 && finalSeparation < 2.5) {
-      for (const id of pair) destinations[id] = groundedExitOrHold(origins[id], goals[id], durations[id], peakFeetPerSecond, id === hitter ? feet : undefined);
+      for (const id of pair) destinations[id] = groundedExitOrHold(origins[id], goals[id], durations[id], peakFeetPerSecond, id === hitter ? feet : undefined, defaultFootState);
       diagnostics.push({ code: 'pair-spacing-recovery', team });
     }
   }
-  const predicted = () => ({ modelVersion: 2, startTime: 0, endTime: duration, duration, originalDuration: duration, contactTime,
+  const predicted = () => ({ modelVersion: 2, ...(defaultFootState ? { defaultFootState } : {}), startTime: 0, endTime: duration, duration, originalDuration: duration, contactTime,
     previous: { positions: origins }, step: { id: 'planned-movement', positions: destinations },
     shotSemantics: { playerId: hitter, contact: { feet } }, model2Momentum: [] });
   for (const pair of [['player1', 'player2'], ['player3', 'player4']]) {
     const spacing = inspectGeneratedSpacingV1(predicted(), { pairs: [pair] });
     if (!spacing.valid) {
-      for (const id of pair) destinations[id] = groundedExitOrHold(origins[id], goals[id], durations[id], peakFeetPerSecond, id === hitter ? feet : undefined);
+      for (const id of pair) destinations[id] = groundedExitOrHold(origins[id], goals[id], durations[id], peakFeetPerSecond, id === hitter ? feet : undefined, defaultFootState);
       const recovered = pair.some(id => distance(destinations[id], origins[id]) > EPS);
       diagnostics.push({ code: recovered ? 'sampled-pair-spacing-grounded-exit' : 'sampled-pair-spacing-hold', team: teamForPlayer(pair[0], players) });
       if (!inspectGeneratedSpacingV1(predicted(), { pairs: [pair] }).valid) {
@@ -342,7 +347,7 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
   }
   const nextFeetState = {};
   for (const id of IDS) {
-    const endFeet = [{ x: destinations[id].x - .42, y: destinations[id].y }, { x: destinations[id].x + .42, y: destinations[id].y }];
+    const endFeet = stanceFeet(destinations[id], defaultFootState);
     nextFeetState[id] = { feet: endFeet, grounded: true, feetEstablishedOutsideNVZ: endFeet.every(outsideNVZ) };
     if (feetState[id]?.feetEstablishedOutsideNVZ === false && nextFeetState[id].feetEstablishedOutsideNVZ) diagnostics.push({ code: 'planned-grounded-reset', actor: id });
   }
@@ -364,7 +369,7 @@ export function replanMovementV1({ plan, segment, players, durationSeconds, arri
     || !Number.isFinite(peakFeetPerSecond) || peakFeetPerSecond <= 0 || peakFeetPerSecond > 18) {
     throw new TypeError('Pending movement needs actual duration and a peak speed in (0,18].');
   }
-  const hitter = segment.shotSemantics.playerId, feet = segment.shotSemantics.contact.feet;
+  const hitter = segment.shotSemantics.playerId, feet = segment.shotSemantics.contact.feet, defaultFootState = segment.defaultFootState;
   const origins = Object.fromEntries(IDS.map(id => [id, id === hitter ? footCenter(feet) : point(segment.previous.positions[id], id)]));
   const goals = Object.fromEntries(IDS.map(id => [id, point(plan.diagnostics.goals[id], `goal.${id}`)]));
   if (arrival && (!IDS.includes(arrival.id) || !arrival.stance)) throw new TypeError('An arrival needs a represented hitter and exact stance.');
@@ -401,7 +406,7 @@ export function replanMovementV1({ plan, segment, players, durationSeconds, arri
       const seconds = id === hitter ? Math.max(0, duration - segment.contactTime - .12) : duration;
       const length = distance(origins[id], goals[id]);
       fractions[id] = length ? clamp(generationDistanceBudgetV1(seconds, peakFeetPerSecond) / length, 0, 1) : 1;
-      exiting[id] = needsGroundedExit(origins[id], goals[id], id === hitter ? feet : undefined);
+      exiting[id] = needsGroundedExit(origins[id], goals[id], id === hitter ? feet : undefined, defaultFootState);
       if (!exiting[id]) progress = Math.min(progress, fractions[id]);
     }
     for (const id of pair) {
@@ -417,7 +422,7 @@ export function replanMovementV1({ plan, segment, players, durationSeconds, arri
     if (!inspectGeneratedSpacingV1(predicted(), { pairs: [pair] }).valid) {
       for (const id of pair) if (id !== arrival?.id) {
         const seconds = id === hitter ? Math.max(0, duration - segment.contactTime - .12) : duration;
-        destinations[id] = groundedExitOrHold(origins[id], goals[id], seconds, peakFeetPerSecond, id === hitter ? feet : undefined);
+        destinations[id] = groundedExitOrHold(origins[id], goals[id], seconds, peakFeetPerSecond, id === hitter ? feet : undefined, defaultFootState);
       }
       if (!inspectGeneratedSpacingV1(predicted(), { pairs: [pair] }).valid) {
         for (const id of pair) if (id !== arrival?.id) destinations[id] = xy(origins[id]);

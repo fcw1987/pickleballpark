@@ -4,6 +4,7 @@ import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 import { SERVICE_COURT_CONVENTION, resolveServiceContext } from './rally-state.js';
 import { validateGenerationRecipeV1 } from './rally-recipe.js';
 import { validateStackingV1 } from './rally-stacking.js';
+import { validateDefaultFootStateV1 } from './generated-foot-state.js';
 export const SCHEMA_VERSION = 1;
 // One shared bound for authored, imported, generated, and compiled rallies.
 // Keep this in the document contract so callers never need to duplicate the
@@ -145,7 +146,7 @@ function validateModel2Shot(shot, path) {
   }
 }
 function validateModel2Document(value) {
-  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome', 'generation', 'stacking'], 'document');
+  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome', 'generation', 'stacking', 'defaultFootState'], 'document');
   choice(value.physicsVersion, [MODEL2_PHYSICS_VERSION], 'physicsVersion');
   if (value.generation !== undefined) validateGenerationRecipeV1(value.generation);
   keys(value.initialLayout, [...PLAYER_IDS, 'ball'], 'initialLayout');
@@ -252,6 +253,13 @@ function validateTemplateSource(value) {
 }
 
 export function validateDocument(value) {
+  // Inspect the opt-in before generic JSON traversal can evaluate a getter.
+  if (value && typeof value === 'object' && 'defaultFootState' in value) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, 'defaultFootState');
+    if (!descriptor?.enumerable || !Object.hasOwn(descriptor, 'value') || descriptor.value === undefined) fail('defaultFootState', 'must be explicit inert JSON data.');
+    if (value.modelVersion !== 2) fail('defaultFootState', 'requires model 2.');
+    validateDefaultFootStateV1(descriptor.value);
+  }
   assertJsonBounds(value);
   object(value, 'document');
   if (value.schemaVersion !== SCHEMA_VERSION) fail('schemaVersion', `must be ${SCHEMA_VERSION}.`);

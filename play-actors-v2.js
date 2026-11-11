@@ -1,6 +1,7 @@
 // Shared logical actor geometry for model 2 collision checks and both views.
 // All times come from the CoachingSession timeline, including evidence observed
 // after the ball became dead. Legacy actor routes never enter this module.
+import { defaultFeetAtV1 } from './generated-foot-state.js';
 // Supported grounded paddle-contact ceiling, not an official rule or a
 // universal human reach measurement. Airborne contacts are not represented.
 export const GROUNDED_CONTACT_HEIGHT_FEET = 8.5;
@@ -73,7 +74,7 @@ export function sampleActorFeetV2(segment, actor, localTime) {
   const at = sampleActorBoardPositionV2(segment, actor, localTime);
   const feet = segment.shotSemantics?.playerId === actor ? segment.shotSemantics.contact.feet : segment.nextShotSemantics?.playerId === actor ? segment.nextShotSemantics.contact.feet : null;
   const origin = feet?.length === 2 ? center(feet) : at;
-  return (feet?.length === 2 ? feet : [{ x: at.x - .42, y: at.y }, { x: at.x + .42, y: at.y }]).map(foot => Object.freeze({ x: at.x + foot.x - origin.x, y: at.y + foot.y - origin.y }));
+  return (feet?.length === 2 ? feet : defaultFeetAtV1(at, segment.defaultFootState)).map(foot => Object.freeze({ x: at.x + foot.x - origin.x, y: at.y + foot.y - origin.y }));
 }
 
 // The movement allowance is continuous: any sampled interval may cover at most
