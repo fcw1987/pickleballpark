@@ -136,3 +136,45 @@ committed contact. Two still require time refinement. Three now find their
 supported non-attacking drive in the ordinary first pass after the independent
 drive-affordance correction; the tests do not force an unnecessary second pass
 just to reproduce an obsolete diagnostic.
+
+## Planted sole clearance and the preferred ready line
+
+New marked generation uses a separate `generated-grounded-sole-v1` contact
+check. The authoritative foot point is the bottom-sole center. The near-real
+court-facing planted sole fits inside a 0.105 m wide by 0.270 m deep rectangle,
+with zero pitch and yaw zero or pi. A volley must clear the closed NVZ with the
+whole rectangle, not only its center. A serve must clear the physical baseline
+and stay within the declared court's imaginary lateral extensions. Equality at
+those imaginary lateral extensions is permitted; baseline or NVZ contact is not.
+
+The final driver recomputes these bounds from actual serialized-source contact
+feet. An invalid explicit serve layout is rejected rather than shifted. Unknown
+moving or airborne sole orientation is not inferred from this planted model,
+and this check does not purport to establish volley-momentum or balance history.
+Public authored point-based rules and old unmarked helpers remain unchanged.
+
+The 0.75 ft ready-line offset remains the tactical recovery preference, not a
+hard legality rule. New contact search can use a legal closer plant, while keeping
+the 0.135 m front sole behind the NVZ and adding the separate 0.00001 ft proposal
+inset. Side-of-kitchen plants similarly include the 0.0525 m lateral sole half
+width. A fully compiled low volley at center y=14.489315802 still has 20.7 mm of
+front-sole clearance; forcing that same stance back to the preferred y=14.25
+creates a 10.76 mm paddle miss. A reachable emergency contact should not be
+excluded merely because it differs from the normal balanced recovery location.
+
+## Compact high-ball contact proposals
+
+For new marked generation, an above-shoulder contact reserves two compact
+0.95 ft radial proposals before wider angle samples fill the existing eight
+candidate slots: one follows the chosen outgoing direction, and one keeps the
+ball in front of a court-facing plant. They use the same anatomical hand/side,
+actual incoming time, whole-sole bounds and adult-width feet as every other
+candidate. A nearer proposal is not automatically reachable or legal; incoming
+motion, spacing, selected-hand trainer support and the fixed delivered result
+must all pass independently.
+
+This does not move explicit feet, an initial serve layout, or unmarked legacy
+helper results. It gives the player a chance to get under a high ball instead
+of forcing the edge of a horizontal reach cylinder. Five captured high-contact
+regressions now complete with actual compact plants and exactly two execution
+random draws per contact; no future error was inspected to choose those feet.

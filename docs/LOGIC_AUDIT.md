@@ -113,8 +113,9 @@ audit. No failure, retry, skip or calibration exception is added by this branch.
 
 ## Remaining model limits
 
-- Full sole, paddle/clothing-ground contact, balance recovery and adaptive play
-  are not represented; the existing NVZ uncertainty notices remain necessary.
+- Full moving-sole, paddle/clothing-ground contact, balance recovery and adaptive
+  play are not represented. New generated planted contacts receive a conservative
+  sole-enclosure check; the existing broader NVZ uncertainty notices remain necessary.
 - Contact and body geometry are approximations. Assisted legacy actor clearance
   is sampled, not a proof of all continuous anatomical positions.
 - There is no drag/spin calibration, full tactical opponent model or universal
@@ -176,6 +177,11 @@ driver recomputes it independently from serialized source. It cannot substitute
 a favorable opposite hand, stretch bones, move authored feet or reroll execution.
 See [grounded trainer support](GENERATED_TRAINER_SUPPORT.md).
 
+New generated high-ball contacts also reserve compact under-ball plants before
+the angle grid fills. The same real-time arrival, whole-sole and selected-hand
+checks decide whether those plants can be used. This removes unnecessary
+full-extension contact without widening the human rig or moving authored feet.
+
 A rushed contact also receives a timing-derived intermediate stance when the
 comfortable radius cannot fit but a maximum stretch could. An exact mixed-hand
 Pro/lobbers regression retains all ten original draw objects and now finds the
@@ -201,6 +207,13 @@ old replay behavior exactly, and explicit narrow or staggered authored feet
 remain authoritative. Mirrored Erne/ATP, both service ends, all four actor paths,
 side-NVZ legality and later apron boundaries have independent coverage. This is
 a neutral grounded coaching model, not a universal stance for every stroke.
+
+New generated volleys now check the whole planted sole at contact. This both
+prevents a side-NVZ shoe overlap when the center alone is outside, and permits a
+legal closer kitchen-line contact when the former nine-inch tactical recovery
+offset was unnecessarily used as a legality boundary. Normal balanced recovery
+still targets that ready line. Explicit authored feet and public point-based
+validation are unchanged.
 
 The full checkpoint regression also exposed contact-time windows missed by the
 ordinary proposal set. A bounded second time pass now finds real supported

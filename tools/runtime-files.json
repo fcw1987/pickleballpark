@@ -71,6 +71,7 @@
   "generated-contact-support.js",
   "generated-motion-limits.js",
   "generated-foot-state.js",
+  "generated-grounded-sole.js",
   "generated-route-certificate-v1.js",
   "generated-route-certificate-v2.js",
   "generated-route-certificate-v3.js",

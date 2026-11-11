@@ -4,9 +4,10 @@ import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.
 export { GROUNDED_CONTACT_HEIGHT_FEET } from './play-actors-v2.js';
 import { teamForPlayer } from './rally-state.js';
 import { stackingTeamPlanV1 } from './rally-stacking.js';
-import { generatedContactRadiusFeetV1 } from './generated-contact-support.js';
+import { generatedContactRadiusFeetV1, GENERATED_CONTACT_SUPPORT_V1 } from './generated-contact-support.js';
 import { GENERATION_MOTION_V1, generationDistanceBudgetV1 } from './generated-motion-limits.js';
 import { defaultFootHalfWidthFeetV1, defaultFeetAtV1 } from './generated-foot-state.js';
+import { GENERATED_GROUNDED_SOLE_V1, groundedSoleClearsNVZV1 } from './generated-grounded-sole.js';
 
 export const MOVEMENT_VERSION = 'rally-movement-v2';
 export const GENERATOR_MOVEMENT = Object.freeze({ peakFeetPerSecond: 18, halfStanceFeet: .42, lineOffsetFeet: .75 });
@@ -20,6 +21,7 @@ const point = (p, name) => {
   return xy(p);
 };
 const outsideNVZ = p => p.x < 0 || p.x > 20 || p.y < 15 || p.y > 29;
+const outsideContactNVZ = (p, defaultFootState) => defaultFootState === undefined ? outsideNVZ(p) : groundedSoleClearsNVZV1(p);
 const stanceFeet = (p, defaultFootState) => defaultFeetAtV1(p, defaultFootState);
 const needsGroundedExit = (from, goal, feet, defaultFootState) => (feet ?? stanceFeet(from, defaultFootState)).some(p => !outsideNVZ(p))
   && stanceFeet(goal, defaultFootState).every(outsideNVZ);
@@ -43,11 +45,14 @@ const supportedPaddleRadius = contact => contact.heightFeet === undefined ? CONT
   : Math.max(0, (generatedContactRadiusFeetV1(contact.heightFeet) ?? 0) - 1e-5);
 function closestOriginStance(contact, preferred, origin, { team, hand, kind, paddleRadius = CONTACT_PADDLE_RADIUS, defaultFootState }) {
   const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
+  const sole = defaultFootState === undefined ? null : GENERATED_GROUNDED_SOLE_V1;
+  const sideHalf = half + (sole?.halfWidthFeet ?? 0), inset = sole?.plannerInsetFeet ?? 1e-5;
+  const nearContactY = sole ? 15 - sole.halfDepthFeet - inset : 14.25, farContactY = sole ? 29 + sole.halfDepthFeet + inset : 29.75;
   const ownY = team === 'green' ? [-7.5, 22 - .01] : [22 + .01, 51.5];
   const boxes = kind === 'volley' ? [
-    { x0, x1, y0: team === 'green' ? ownY[0] : 29.75, y1: team === 'green' ? 14.25 : ownY[1] },
-    { x0, x1: -half - 1e-5, y0: ownY[0], y1: ownY[1] },
-    { x0: 20 + half + 1e-5, x1, y0: ownY[0], y1: ownY[1] },
+    { x0, x1, y0: team === 'green' ? ownY[0] : farContactY, y1: team === 'green' ? nearContactY : ownY[1] },
+    { x0, x1: -sideHalf - inset, y0: ownY[0], y1: ownY[1] },
+    { x0: 20 + sideHalf + inset, x1, y0: ownY[0], y1: ownY[1] },
   ] : [{ x0, x1, y0: ownY[0], y1: ownY[1] }];
   const bodySide = (team === 'green' ? 1 : -1) * hand;
   let best = null;
@@ -93,6 +98,9 @@ function closestOriginStance(contact, preferred, origin, { team, hand, kind, pad
  * and stroke side; anatomical left/right is independent of handedness. */
 export function contactFeetV1({ contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds, defaultFootState } = {}) {
   const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
+  const sole = defaultFootState === undefined ? null : GENERATED_GROUNDED_SOLE_V1;
+  const sideHalf = half + (sole?.halfWidthFeet ?? 0), inset = sole?.plannerInsetFeet ?? 0;
+  const nearContactY = sole ? 15 - sole.halfDepthFeet - inset : 14.25, farContactY = sole ? 29 + sole.halfDepthFeet + inset : 29.75;
   point(contact, 'contact'); point(target, 'target');
   if (!['green', 'orange'].includes(team) || !['left', 'right'].includes(handedness)) throw new TypeError('A team and handedness are required.');
   if (availableSeconds !== undefined && (!Number.isFinite(availableSeconds) || availableSeconds < 0)) throw new TypeError('Available stance time must be finite and nonnegative.');
@@ -104,8 +112,8 @@ export function contactFeetV1({ contact, target, team, handedness = 'right', con
     y: contact.y - forward.y * .8 - forward.x * .8 * hand,
   };
   if (!(kind === 'serve' && position)) stance = { x: clamp(stance.x, x0, x1), y: clamp(stance.y, -7.5, 51.5) };
-  if (kind === 'volley' && stance.x >= -half && stance.x <= 20 + half) {
-    stance.y = team === 'green' ? Math.min(14.25, stance.y) : Math.max(29.75, stance.y);
+  if (kind === 'volley' && stance.x >= -sideHalf - inset && stance.x <= 20 + sideHalf + inset) {
+    stance.y = team === 'green' ? Math.min(nearContactY, stance.y) : Math.max(farContactY, stance.y);
   }
   const paddleRadius = supportedPaddleRadius(contact);
   let originChoice = null;
@@ -118,7 +126,7 @@ export function contactFeetV1({ contact, target, team, handedness = 'right', con
   // silently fix an illegal serve stance or move it to an inferred score slot.
   const leftSign = team === 'green' ? 1 : -1;
   const feet = [{ x: stance.x + leftSign * half, y: stance.y }, { x: stance.x - leftSign * half, y: stance.y }];
-  const established = feet.every(outsideNVZ);
+  const established = feet.every(foot => outsideContactNVZ(foot, defaultFootState));
   return freeze({ feet, stance, grounded: true, feetEstablishedOutsideNVZ: established,
     reachable: paddleRadius > 0 && distance(stance, contact) <= paddleRadius + EPS && (!(position && kind !== 'serve') || !!originChoice),
     legalVolleyFeet: kind !== 'volley' || established,
@@ -140,6 +148,9 @@ export function contactFeetCandidatesV1(args = {}) {
   const first = contactFeetV1(args), candidates = [first];
   const { contact, target, team, handedness = 'right', contactStyle = 'forehand', kind = 'groundstroke', position, availableSeconds, defaultFootState } = args;
   const half = defaultFootHalfWidthFeetV1(defaultFootState), x0 = Math.max(-7.5, -8 + half), x1 = Math.min(27.5, 28 - half);
+  const sole = defaultFootState === undefined ? null : GENERATED_GROUNDED_SOLE_V1;
+  const sideHalf = half + (sole?.halfWidthFeet ?? 0), inset = sole?.plannerInsetFeet ?? 1e-5;
+  const nearContactY = sole ? 15 - sole.halfDepthFeet - inset : 14.25, farContactY = sole ? 29 + sole.halfDepthFeet + inset : 29.75;
   // Serves retain their declared layout, including any existing illegality.
   if (kind === 'serve') return freeze(candidates);
   const origin = position ? point(position, 'position') : null;
@@ -158,9 +169,10 @@ export function contactFeetCandidatesV1(args = {}) {
       || (team === 'green' ? stance.y > 21.99 : stance.y < 22.01)) return;
     const leftSign = team === 'green' ? 1 : -1;
     const feet = [{ x: stance.x + leftSign * half, y: stance.y }, { x: stance.x - leftSign * half, y: stance.y }];
-    const established = feet.every(outsideNVZ);
-    if (kind === 'volley' && (!established || (stance.x >= -half - 1e-5 && stance.x <= 20 + half + 1e-5
-      && (team === 'green' ? stance.y > 14.25 : stance.y < 29.75)))) return;
+    const established = feet.every(foot => outsideContactNVZ(foot, defaultFootState));
+    const besideZone = sole ? stance.x <= -sideHalf - inset || stance.x >= 20 + sideHalf + inset
+      : stance.x < -half - 1e-5 || stance.x > 20 + half + 1e-5;
+    if (kind === 'volley' && (!established || (!besideZone && (team === 'green' ? stance.y > nearContactY : stance.y < farContactY)))) return;
     const key = `${stance.x.toFixed(8)},${stance.y.toFixed(8)}`;
     if (seen.has(key)) return;
     seen.add(key);
@@ -202,6 +214,18 @@ export function contactFeetCandidatesV1(args = {}) {
   add(contactFeetV1({ ...args, target: { x: contact.x, y: contact.y + (team === 'green' ? 10 : -10) },
     position: undefined, availableSeconds: undefined }).stance);
   add(contactFeetV1({ ...args, position: undefined, availableSeconds: undefined }).stance);
+  // A high ball needs the player under it, not merely somewhere in the outer
+  // reach cylinder. Reserve the existing compact radius before the wider angle
+  // grid consumes the eight-proposal budget. These are new-generation plants,
+  // not changes to explicit authored feet or a guarantee of anatomical reach.
+  if (defaultFootState !== undefined && contact.heightFeet > GENERATED_CONTACT_SUPPORT_V1.maximumShoulderHeightMetres / .3048) {
+    const courtTarget = { x: contact.x, y: contact.y + (team === 'green' ? 10 : -10) };
+    for (const target of [args.target, courtTarget]) {
+      const natural = contactFeetV1({ ...args, target, position: undefined, availableSeconds: undefined }).stance;
+      const dx = natural.x - contact.x, dy = natural.y - contact.y, length = Math.hypot(dx, dy);
+      if (length > 0) add({ x: contact.x + dx * .95 / length, y: contact.y + dy * .95 / length });
+    }
+  }
   for (const radius of [...new Set([Math.min(2.9, paddleRadius), Math.min(1.8, paddleRadius), .95])].filter(r => r <= paddleRadius)) {
     for (const degrees of [90, -90, 135, -135, 180, 60, -60, 120, -120]) {
       const angle = degrees * Math.PI / 180;
@@ -250,7 +274,7 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
   const suppliedFeet = Array.isArray(chosenFeet) ? chosenFeet : chosenFeet.feet;
   if (suppliedFeet?.length !== 2) throw new TypeError('Two explicit grounded contact feet are required.');
   const feet = suppliedFeet.map(p => point(p, 'contact feet'));
-  const stance = footCenter(feet), established = feet.every(outsideNVZ);
+  const stance = footCenter(feet), established = feet.every(foot => outsideContactNVZ(foot, defaultFootState));
   if (kind === 'volley' && !established) return freeze({ ok: false, reason: 'A generated volley must establish both grounded feet outside the NVZ.' });
   if (distance(stance, contact) > 3 + EPS) return freeze({ ok: false, reason: 'The explicit contact stance exceeds paddle reach.' });
   const origins = Object.fromEntries(IDS.map(id => [id, id === hitter ? stance : xy(positions[id])]));
