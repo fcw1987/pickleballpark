@@ -7,6 +7,9 @@ import { compileDocument } from './play-compiler.js';
 import { validateRallyRules } from './rally-rules.js';
 import { assessGeneratedFlightFeasibilityV1 } from './rally-flight-audit.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1, GROUNDED_CONTACT_HEIGHT_FEET } from './rally-movement.js';
+import { inspectGeneratedContactSupportV1 } from './generated-contact-support.js';
+import { GENERATION_MOTION_V1 } from './generated-motion-limits.js';
+import { inspectGeneratedTrainerSupportV1 } from './generated-trainer-support.js';
 
 export const ENGINE_DRIVER_VERSION = 'rally-engine-driver-v1';
 export const ENGINE_DRIVER_LIMITS = Object.freeze({ maxAttempts: 64, maxWorkPerAttempt: 65536, maxWork: 64 * 65536 });
@@ -93,6 +96,7 @@ function validateAttemptDocument(provisional, normalized, recipe) {
     const document = clone(provisional.document);
     document.generation = recipe;
     validateDocument(document);
+    if (canonical(document.stacking) !== canonical(normalized.stacking)) throw new DriverFailure('attempt-stacking', 'The generated stacking settings must exactly match this request.');
     if (document.modelVersion !== 2 || document.physicsVersion !== 'play-physics-v2') throw new DriverFailure('attempt-version', 'An engine attempt requires the explicit model2 physics version.');
     for (const shot of document.shots) {
         if (!shot.contactEvidence || shot.contactEvidence.feet?.length !== 2 || typeof shot.contactEvidence.feetEstablishedOutsideNVZ !== 'boolean') throw new DriverFailure('engine-feet', 'Fresh engine contacts require explicit grounded foot evidence.');
@@ -123,12 +127,20 @@ function validateAttemptDocument(provisional, normalized, recipe) {
         shotId: unsupportedContact.step.id, heightFeet: unsupportedContact.shotSemantics.contact.point.heightFeet,
         maximumHeightFeet: GROUNDED_CONTACT_HEIGHT_FEET
     });
-    const movement = inspectGeneratedMovementV1(compiled.timeline), spacing = inspectGeneratedSpacingV1(compiled.timeline);
+    const contactSupport = inspectGeneratedContactSupportV1(compiled.timeline);
+    if (!contactSupport.valid) throw new DriverFailure('unsupported-grounded-pose',
+        'The generated contact exceeds the supported grounded generation envelope. This necessary bound is not a complete skeletal pose proof.', { contactSupport });
+    const movement = inspectGeneratedMovementV1(compiled.timeline, { maxAccelerationFeetPerSecondSquared: GENERATION_MOTION_V1.accelerationFeetPerSecondSquared }), spacing = inspectGeneratedSpacingV1(compiled.timeline);
     if (!movement.valid || !spacing.valid) throw new DriverFailure('generated-movement', 'The final sampled paths exceed generated movement or spacing bounds.', { movement, spacing });
     const generatedFlightFeasibility = assessGeneratedFlightFeasibilityV1({ document, compiled });
     if (['rally-policy-v2', 'rally-policy-v3'].includes(recipe.policyVersion) && generatedFlightFeasibility.status !== 'PASS') {
         throw new DriverFailure('generated-flight-feasibility', 'The serialized generated flights exceed the supported generation envelope.', { generatedFlightFeasibility });
     }
+    const trainerSupport = inspectGeneratedTrainerSupportV1({timeline: compiled.timeline, players: document.players});
+    if (!trainerSupport.supported) throw new DriverFailure('unsupported-trainer-context',
+        'The generated contact requires a trainer context outside the supported stationary grounded model.', {trainerSupport});
+    if (!trainerSupport.valid) throw new DriverFailure('unsupported-grounded-trainer-pose',
+        'The generated contact cannot be represented by the current grounded trainer pose. This is a model limit, not a universal human reach judgment.', {trainerSupport});
     if (provisional.status === 'complete') {
         const outcome = document.outcome;
         const match = rules.expectedOutcomes?.find(item => item.shotId === outcome.shotId && item.reason === outcome.reason
@@ -143,7 +155,7 @@ function validateAttemptDocument(provisional, normalized, recipe) {
     } else if (rules.expectedOutcomes?.length || compiled.timeline.outcome) throw new DriverFailure('censored-evidence', 'A censored prefix cannot conceal a decisive physical ending.');
     return { document, outcome: provisional.status === 'complete' ? clone(document.outcome) : null,
         validation: { sourceShots: document.shots.length, acceptedShots: compiled.validShotCount,
-            compilerErrors: 0, unexpectedViolations: 0, expectedOutcomes: rules.expectedOutcomes?.length ?? 0, movement, spacing, generatedFlightFeasibility } };
+            compilerErrors: 0, unexpectedViolations: 0, expectedOutcomes: rules.expectedOutcomes?.length ?? 0, contactSupport, movement, spacing, generatedFlightFeasibility, trainerSupport } };
 }
 
 export function createEngineDriverV1(runAttempt, config = {}) {

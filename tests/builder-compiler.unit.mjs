@@ -222,8 +222,8 @@ test('automatic stroke side uses handedness and the actor stance', () => {
   right.shots = [{ ...right.shots[2], id: 'auto-side', contactStyle: 'auto', target: { x: 12, y: 32 } }];
   const left = clone(right);
   left.players.player1.handedness = 'left';
-  assert.equal(compileDocument(right).play.steps[1].shot.contact.strokeSide, 'forehand');
-  assert.equal(compileDocument(left).play.steps[1].shot.contact.strokeSide, 'backhand');
+  assert.equal(compileDocument(right).play.steps[1].shot.contact.strokeSide, 'backhand');
+  assert.equal(compileDocument(left).play.steps[1].shot.contact.strokeSide, 'forehand');
 });
 
 test('winner and fault endings are visible terminal semantics', () => {

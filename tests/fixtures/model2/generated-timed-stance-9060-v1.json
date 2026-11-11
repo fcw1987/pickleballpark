@@ -1,0 +1,301 @@
+{
+  "version": "timed-stance-9060-v1",
+  "provenance": {
+    "status": "failed",
+    "code": "no-feasible-contact",
+    "contactCount": 10,
+    "description": "Immutable execution draws from the pre-refinement mixed-hand Pro/lobbers diagnostic. The failure is evidence of an incomplete stance grid, not a valid second-bounce exclusion. Runtime hashes are provenance, not an acceptance gate.",
+    "runtimeFiles": {
+      "board-projection.js": "3aba2d8cdb7c461a65f69e8783fe0e6225456c406dbfa6dc5a0d077e0e42c46e",
+      "build-diagnostics-ui.js": "99270a7764a4e13026a0369dec575e6f4baa5a635c7983e763237b7d60106130",
+      "build-diagnostics.js": "948cc62a6b0e579e96a9e2feca4c9b455de3d8393d1b85e80520bd9be716afc1",
+      "build-identity.js": "28683fc2c32703740b4b51ac051217ea7ba2199473304dad61e6ca57030b9cc4",
+      "build-metadata.js": "a5392901331b4e7ba3d0a4d1daebe622e57f6fdd403cb40d99695e61ae196926",
+      "builder-court-tools.js": "639970204d4739179486e44cc0d20e8951735b1aeccf7c5dbc2fbf1ed7317e19",
+      "builder-framing.js": "a75ff5c257894ecd59321f376f75e22947eda4662add1d455cd9ece256406214",
+      "builder-storage.js": "8ec8d92bec582ad007a9bc62317e1bb38996053ce44e5b75aa417ccb78f9eb17",
+      "builder-ui.js": "53446726cd190321c2bf46470247fd570c33d5c6c607996faa9acb4496d0902e",
+      "builder-waypoint-policy.js": "19f644878813b1813081bca325ddb328a24db065958a2341692705f8b677dcea",
+      "coaching-session.js": "7f8afd72689345ba2488a2511d714cad54299dbffd047c834bb038b8d03069f2",
+      "coaching-ui.js": "bd1fd2f181d2ec8b2b0ee9f261e54c048096c3afeed0d2cec0ac3b8365be68de",
+      "court-geometry.js": "b7db55f59459012441a1f30e9a92ee40514b67951ee7f7811ed8eeac2ca28149",
+      "coverage-assistance.js": "27819d18e7ee34300d6fe5212775c7236e23a1bdf6f63739797f12038027039c",
+      "depth-camera.js": "3d1d9153e94b899a4fe6e39f3f16ac30c26697886cfaf6bf3f796b2c4bf7f9da",
+      "depth-park-environment.js": "4b2eef68a721f53efbbed4d75829af985eb8496d0d0a83dc3b11f2ee5cfb6cd5",
+      "generated-contact-support.js": "cc5bd81dba9cda401469d5653c121fec220e8c87d76dd2352b4c28c18134bd11",
+      "generated-motion-limits.js": "c2448f80b01dc21c1aadc11516a5433f6eb58750e850f0de8384a15c91f52071",
+      "generated-route-certificate-v1.js": "2e0b28b927e6f9232f7a57162c1cbe5b787af28e15f9a4b200c22a84e8a64a95",
+      "generated-route-certificate-v2.js": "c7aa7e3258b2b890130814e538de0975fc25b07362551a6503b631102000684a",
+      "generated-route-certificates.js": "aa7aa303919e451f1abc57293d2f3479242587ac060c9eb3b404449812091632",
+      "generated-trainer-support.js": "f1f39f647bcc24bbc7afe226ed6d8ea5f2e982ef34a04c4833fae27fb2c18f7a",
+      "guided-pixel-actors.js": "45b39bc8227e1169711653a939cf55c77603b1cac0d8cf71e3485742869fdc0e",
+      "guided-plays.js": "027cdbc353a7e8e2c968115232834c57cafa4fb225698cad75875944cfc75970",
+      "human-athlete-profile.js": "e2b1cec13c7db1e00dc8712a8f4644423921a1cfe0ab6738c9fa327a24b294ec",
+      "keyboard-shortcuts.js": "a65f39ee3a9bd6533c70079680a330fe810cdbd7bc247096a0f852aa14dfc565",
+      "park-layout.js": "d565bcd3bb848fdc5211f5b5277034d319173e2890ed679dee79523614e8ff38",
+      "park-scene.js": "f83736f3de508afdf94f3a7897dd9efbe40bb0d6af1d023012064a142a3e7773",
+      "pixel-actor-assets.js": "78b2ca63f5fb0dd44f6fe1ab0a104f3afca6840fa02a8eef85953ed35cd1d8d8",
+      "pixel-athletes.js": "f3dc56ce66b73e72ea30cad0b281620026e33a24b22918dba88a3e8cad5dc6d7",
+      "pixel-court-renderer.js": "42b0041c057405468ac956fd7104b343ddba4f94ff145bacd929020e23b3ade7",
+      "pixel-environment.js": "d1275b5fe86a3b631711210577589fffda062b7d1217583968b79a5f168125ee",
+      "pixel-strokes.js": "15de1eacd96664bc28959ec412d3950427c9170817fdaecb998a7182cbd9d20b",
+      "play-actors-v2.js": "8d0fd8eac1725e08e336deb5f353515fba14db13cee9af1434d13bdca7b66f5b",
+      "play-builder.js": "40790f2a769bf38146819b3eea6785d345f95d496a2490f8d3d10e5e192c5250",
+      "play-catalog.js": "62e5897fc1652c8dbf76afb17ec434dcf6e3e3ab6aa007f756db185d4a947f98",
+      "play-compiler-v2.js": "43d3c1e95d2d7f462b23da1e02cbbef246234c342e4bf220053cfd7d190beb49",
+      "play-compiler.js": "2674e0e4cbdfc0d386107be014c73f7a6745b76ef9b0e7a856fdd51b02392e2c",
+      "play-document.js": "17ebadbdb90f563893e927da3997fe67737600bec2d03baad62370a2f2b2a04b",
+      "play-outcome-v2.js": "e1549c8ac4f0d7ce56e09e8e026bad88d87b81acdc1d67ff5271e9e5e401ae67",
+      "play-physics-v2.js": "ea0505c9197939654aac33e2dc95e909d438ffacc20bebdeae1723b14658973d",
+      "play-planning-v2.js": "8e40325968434797414f9c851cc80d8f19cae46c5bdc5cfda8f847f97d889193",
+      "play-timeline-v2.js": "57ec4b845b835b1197fbb13793be8b91c426b7c97eba418a2a3327ad2cfc8560",
+      "player-coverage-canvas.js": "019710a45be82b65278de4e89c2561dc281fa58c4d8f8e6e0289e7306f0e211d",
+      "player-coverage-overlay.js": "4e1c0c485870daa7bac8a79dc8f077354044c91b9c64198aba012553bb07769c",
+      "player-coverage-snapshot.js": "e1c5a094583e53c3c8cd25b1979bc1e52ddd44cfca738359da9426b6c07fd8e6",
+      "player-coverage-ui.js": "2a42d577cf705a27e51b4872aa80fe82e9aba96a59199eb21ac673221940afac",
+      "player-coverage.js": "5f60b80614588a1e6b65754a6fac4808174cc6a86e9f22bfaee77e71a8d336da",
+      "player-labels.js": "f2bc59c1e526a06762590277b844c2772a9a80914320c7d55cb4a171520fad26",
+      "rally-coach.js": "0e84921af19cbd041ff3e37e4e03ed7d0ff7989de61e73aafc8d19d0d49909ac",
+      "rally-contact-selection.js": "d6a5de4e6e51459eaf7506d87a6471a9adf2d09dc99b79f0b1e4aea08d4d9d7c",
+      "rally-coverage-provider.js": "76f85d9ca3ae9e00961b7dd76764f4850fb9daf8feb7c4291d7eea8e78197e0d",
+      "rally-engine-client.js": "6d17ce896529f7b007bb3d40381b0acf5b8e8161673112bb76d0a402efb3780c",
+      "rally-engine-driver.js": "db4068290c1d071adc600493356b3f3f9bf510bb1fbcfd4a2a550fb43d3a7908",
+      "rally-engine-worker.js": "50a6fdad0af1a28199bdc286e1aaed9b1a17b2f75054a23bace6bbca3adb8f4d",
+      "rally-engine.js": "dbeee12e39eae56c26f723b4ff002c335bec79c4ad735c708bec888a772814a3",
+      "rally-flight-audit.js": "4d208ca462c4244e2b9e9babd0708c6c194478a18a40dc1efa932f4b3bc7cffc",
+      "rally-flight-planner.js": "dee0445ce3f3bce10494f7316aced865e7e6f196dcad3fac4dae5bf103bb44b4",
+      "rally-movement.js": "e6b7e11f75dcc768b78daafdc2e38759a3bf59a4d362c257a52af43bc360302d",
+      "rally-narration.js": "88589f76b6e3101e795ec733f08ea491d6459d41c7848e8669ad6a6df65575ba",
+      "rally-policy.js": "8485f656321d821143ebffccfb9d3d994e75ca0fe16afac0de0999c4873e1735",
+      "rally-proposals.js": "f4a39a5df2803bf7159c5bd4d5985c95be1b8d429d48ce8de981320fc5a5426c",
+      "rally-quality.js": "a0ee4c276b726b0fd70734a6beb88389763f186cf0035ff089229c3defd6e0e6",
+      "rally-random.js": "2229cc30ec03de148a1b3818459527c0c30c828e8c7dbbd8846bcc0a13530797",
+      "rally-recipe.js": "d0ab85e2b21b71866a762f7d077c13c71f6a27dde78d04048045914997badb1f",
+      "rally-rules.js": "771a712f0de8cd9e4c786e7e9864f38a8d7b367f50d52d17a4bdf263a7c94632",
+      "rally-signatures.js": "afc25593ebdbcfbf45b3208d81169a1e7db150075c3898b30225f25a05183140",
+      "rally-stacking.js": "c5087c8b391a33f21f594503819d3e04128e25485521177be6f0647db01f83ed",
+      "rally-state.js": "942693077df5f0053593992f9f01fa28a6472953e7c79a05f36405ca0fe60690",
+      "rally-styles.js": "5b914fccd42067adb4de2e1461710a6e724f3056d160c05d5f9f1c6136ef0857",
+      "rally-tactics.js": "e690008bc697804c29dcd4bb9ae0bd913434fd7087e861fbe3dcc4864722deb5",
+      "rally-targets.js": "368300f9b1de402d2b6dcf93fce1a5635a0da737f74fbecbe662c9d979c29c57",
+      "reference-athletes.js": "a6b7a1a0f33eb2265b01e1af6a19febe92e80086404f420993fdd6c9032d633a",
+      "reference-world.js": "ca95a6021c29f3c79cc49c8338fd83dbb824704e09f8a256af9055535a47426e",
+      "script.js": "e8769682b9059377618e11bcb0f13e641cd3975d4eb4f1d187df656fd08165f2",
+      "shot-chapters.js": "7344c71cf31d7c1702b17d7353d30a761873132bec16d82d30b0c76831825a6d",
+      "shot-timeline.js": "9896d04fba7dc60bf132a34f6c23bef5a01b1e36adcde74684fcdde1297a6c1b",
+      "smart-rally-generator.js": "301ab435476981e04362aaf08208a0be9057ff8858b6d29286bed4d47eb48b07",
+      "sw.js": "763ab31af1fb05ee6f92aba92821a91fdcd6e9c9b780cddcb16cd87abf22750f",
+      "terminal-cues.js": "b9aca0eebb14b21bfd89e7f701e4173ef89c60913dd24320b06b2dea013bdd51",
+      "three-d-animation.js": "eda72a24ee5f9abcdb2265f5a984471d1e731f6fda3d88c9ec9b2049378902ae",
+      "three-d-athletes.js": "64a50b1cf029d07817c6260a9c579fef1c5f8b378b6e080d67e721dea48bb9ea",
+      "three-d-ball.js": "5b84f5be5f9e66f16b1afc0f096659845989e3219737c9ce8ec49bff4931e466",
+      "three-d-core.js": "a85c27eeb65525e55dee26ec887a5788b4252ae4c58d13fda5afde97aa4a6914",
+      "three-d-loader.js": "555830ece2e4b075dcd82a0a416fc7f5ecdb86001d91f7ea582eca9a30d6255e",
+      "three-d-pixel-actors.js": "5efe57c7345d021d33c3283abef057eaed79ff96d0bb35849166793d6cc52e4f",
+      "three-d-playback.js": "b545c51456377a020120c49ae43838a6534a68da6681d9b23dabef1f37bf0173",
+      "three-d-presentation.js": "e7efc745c17716081b78266b84a950499ee4c2c1c945d2c6edf067a1b6582df9",
+      "three-d-world.js": "5301da366fea27ecaca956f5638d1a31ff790b4e849c09e6d0d469dbea0333f4",
+      "trainer-contact-support.js": "5bca9a3854b52a51908de7d592385bed9708e9caec7f69142deaa5367d6c991c",
+      "visual-theme.js": "034a4bf462eb97ab93a94e44b3428ba8239655a2c52ef4a1b6b8eb17cb85fb49"
+    }
+  },
+  "input": {
+    "seed": 9060,
+    "players": {
+      "player1": {
+        "team": "green",
+        "handedness": "right",
+        "style": "pro",
+        "flavour": "lobbers"
+      },
+      "player2": {
+        "team": "green",
+        "handedness": "right",
+        "style": "pro",
+        "flavour": "lobbers"
+      },
+      "player3": {
+        "team": "orange",
+        "handedness": "left",
+        "style": "pro",
+        "flavour": "lobbers"
+      },
+      "player4": {
+        "team": "orange",
+        "handedness": "left",
+        "style": "pro",
+        "flavour": "lobbers"
+      }
+    },
+    "service": {
+      "server": "player1",
+      "receiver": "player3",
+      "court": "left"
+    },
+    "options": {
+      "maxShots": 99
+    }
+  },
+  "prefixDraws": [
+    {
+      "intent": 0.9067294932901859,
+      "execution": {
+        "quality": 0.8136530339252204,
+        "error": 0.7079636787530035
+      },
+      "target": {
+        "lateral": 0.9376459850464016,
+        "depth": 0.8190243220888078
+      },
+      "perturbation": {
+        "lateral": 0.2534126585815102,
+        "depth": 0.07756148441694677
+      },
+      "narration": 0.8922229071613401
+    },
+    {
+      "intent": 0.3022595380898565,
+      "execution": {
+        "quality": 0.7157928235828876,
+        "error": 0.5893284915946424
+      },
+      "target": {
+        "lateral": 0.07985837198793888,
+        "depth": 0.164413636084646
+      },
+      "perturbation": {
+        "lateral": 0.6439222067128867,
+        "depth": 0.5495221253950149
+      },
+      "narration": 0.9305039579048753
+    },
+    {
+      "intent": 0.8928944228682667,
+      "execution": {
+        "quality": 0.5793487229384482,
+        "error": 0.1678291300777346
+      },
+      "target": {
+        "lateral": 0.720432534115389,
+        "depth": 0.9559442480094731
+      },
+      "perturbation": {
+        "lateral": 0.9703474747948349,
+        "depth": 0.32413255679421127
+      },
+      "narration": 0.037785466061905026
+    },
+    {
+      "intent": 0.5724990351591259,
+      "execution": {
+        "quality": 0.45958446338772774,
+        "error": 0.4269952434115112
+      },
+      "target": {
+        "lateral": 0.5802834085188806,
+        "depth": 0.47215350763872266
+      },
+      "perturbation": {
+        "lateral": 0.8216086360625923,
+        "depth": 0.021086202934384346
+      },
+      "narration": 0.7963216612115502
+    },
+    {
+      "intent": 0.3512380651663989,
+      "execution": {
+        "quality": 0.6097784345038235,
+        "error": 0.699205003445968
+      },
+      "target": {
+        "lateral": 0.6932466682046652,
+        "depth": 0.49639665405265987
+      },
+      "perturbation": {
+        "lateral": 0.15643988992087543,
+        "depth": 0.9138464396819472
+      },
+      "narration": 0.43355255969800055
+    },
+    {
+      "intent": 0.7068218453787267,
+      "execution": {
+        "quality": 0.25635858764871955,
+        "error": 0.7826254649553448
+      },
+      "target": {
+        "lateral": 0.21438213298097253,
+        "depth": 0.7308204653672874
+      },
+      "perturbation": {
+        "lateral": 0.3190766244661063,
+        "depth": 0.6040099272504449
+      },
+      "narration": 0.5296190734952688
+    },
+    {
+      "intent": 0.8275323312263936,
+      "execution": {
+        "quality": 0.7068551576230675,
+        "error": 0.13030074117705226
+      },
+      "target": {
+        "lateral": 0.31508565647527575,
+        "depth": 0.03892489289864898
+      },
+      "perturbation": {
+        "lateral": 0.8534964502323419,
+        "depth": 0.10889105033129454
+      },
+      "narration": 0.4536915032658726
+    },
+    {
+      "intent": 0.3488542952109128,
+      "execution": {
+        "quality": 0.8077034852467477,
+        "error": 0.978306784061715
+      },
+      "target": {
+        "lateral": 0.8746306782122701,
+        "depth": 0.40372164617292583
+      },
+      "perturbation": {
+        "lateral": 0.592027455335483,
+        "depth": 0.5983856255188584
+      },
+      "narration": 0.8835581594612449
+    },
+    {
+      "intent": 0.514501305995509,
+      "execution": {
+        "quality": 0.7677781579550356,
+        "error": 0.15964652062393725
+      },
+      "target": {
+        "lateral": 0.5060511785559356,
+        "depth": 0.20925203897058964
+      },
+      "perturbation": {
+        "lateral": 0.9364078692160547,
+        "depth": 0.11426538857631385
+      },
+      "narration": 0.13060839823447168
+    },
+    {
+      "intent": 0.9880638513714075,
+      "execution": {
+        "quality": 0.9432708458043635,
+        "error": 0.9575318188872188
+      },
+      "target": {
+        "lateral": 0.31248280848376453,
+        "depth": 0.9230974353849888
+      },
+      "perturbation": {
+        "lateral": 0.7646127394400537,
+        "depth": 0.6647252577822655
+      },
+      "narration": 0.3370536824222654
+    }
+  ]
+}

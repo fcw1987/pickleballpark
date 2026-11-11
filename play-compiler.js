@@ -58,9 +58,9 @@ function relabelTimeline(timeline, shotIds) {
   return Object.freeze({ ...timeline, events: Object.freeze(events) });
 }
 
-function strokeFor(shot) {
+function strokeFor(shot, strokeSide) {
   if (shot.contactStyle === 'short-hop') return 'short-hop';
-  if (shot.family === 'return') return shot.contactStyle === 'backhand' ? 'backhand' : 'forehand';
+  if (shot.family === 'return') return strokeSide === 'backhand' ? 'backhand' : 'forehand';
   return shot.family;
 }
 
@@ -69,7 +69,8 @@ function autoStrokeSide(shot, contact, players, actorPosition) {
   const handedness = players[shot.hitter].handedness;
   const green = players[shot.hitter].team === 'green';
   const lateral = contact.x - actorPosition.x;
-  const paddleSide = (green ? 1 : -1) * (handedness === 'right' ? 1 : -1);
+  // Green faces world +z: its anatomical right is low board x.
+  const paddleSide = (green ? -1 : 1) * (handedness === 'right' ? 1 : -1);
   const forehandSide = Math.abs(lateral) < .15 || lateral * paddleSide >= 0;
   return forehandSide ? 'forehand' : 'backhand';
 }
@@ -277,7 +278,7 @@ function makePlay(document) {
     if (kind === 'volley' && isInNonVolleyZone(endPositions[recipe.hitter])) findings.push(finding('context', 'warning', recipe.id, `This volley is followed by movement into the non-volley zone. ${NVZ_MODEL_LIMITS_NOTE}`));
     const strokeSide = autoStrokeSide(recipe, contact, document.players, actorStance);
     const shot = {
-      from: copy(contact), to: actualTarget, intendedTarget: copy(recipe.target), type: strokeFor(recipe), stroke: strokeFor(recipe), playerId: recipe.hitter,
+      from: copy(contact), to: actualTarget, intendedTarget: copy(recipe.target), type: strokeFor(recipe, strokeSide), stroke: strokeFor(recipe, strokeSide), playerId: recipe.hitter,
       contact: { kind, heightFeet: recipe.family === 'overhead' ? 7 : kind === 'short-hop' ? .8 : kind === 'volley' ? 3 : recipe.family === 'serve' ? 2.8 : 2.2, strokeSide, feet: kind === 'serve' ? document.service ? declaredServeFeetAt(actorStance) : serveFeetAt(contact) : feetAt(contact), momentumEntersNonVolleyZone: false },
       flight: { bounces, ...metadata }, authoring: { recipeId: recipe.id, family: recipe.family, receiver: recipe.receiver, movement: copy(recipe.movement), serveMethod: recipe.serveMethod }
     };

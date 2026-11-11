@@ -139,3 +139,49 @@ test('an already-fast authored base remains untouched by the assistance speed gu
   assert.deepEqual(result.play,base.play);
   assert.deepEqual(result.findings,base.findings);
 });
+
+test('off-court coverage recovery respects elapsed time instead of snapping to the court inset', () => {
+  for (const x of [-5, 0, 20, 25]) for (const seconds of [0, .001, .02, .1]) {
+    const document = fixture();
+    const positions = structuredClone(document.initialLayout);
+    positions.player3 = { x, y: 30 }; positions.player4 = { x: 10, y: 34 };
+    const play = { steps: [{ id: 'a', positions, shot: { playerId: 'player1', from: { x: 10, y: 5 } } }] };
+    const result = applyCoverageAssistance(play, document, { segments: [{ index: 0, duration: seconds }] });
+    const actual = result.play.steps[0].positions.player3;
+    assert.ok(Math.abs(actual.x - x) <= 13 * seconds + 1e-9, `x=${x}, t=${seconds}: ${actual.x}`);
+    assert.equal(actual.y, 30);
+    if (seconds === 0) assert.deepEqual(actual, positions.player3);
+  }
+});
+
+test('seeded apron coverage preserves paired clearance, reflection, speed and source ownership', () => {
+  let seed = 0x5ad1;
+  const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 2 ** 32; };
+  for (let sample = 0; sample < 300; sample++) {
+    const document = fixture(), positions = structuredClone(document.initialLayout);
+    positions.player3 = { x: -7 + 34 * random(), y: 29.5 + 7 * random() };
+    positions.player4 = { x: -7 + 34 * random(), y: 29.5 + 7 * random() };
+    const origin = { x: -7 + 34 * random(), y: 5 }, seconds = sample % 11 === 0 ? 0 : random();
+    const play = { steps: [{ id: 'a', positions, shot: { playerId: 'player1', from: origin } }] };
+    const before = structuredClone(play), source = structuredClone(document);
+    const timeline = { segments: [{ index: 0, duration: seconds }] };
+    const result = applyCoverageAssistance(play, document, timeline);
+    const reflectedPlay = structuredClone(play);
+    for (const point of Object.values(reflectedPlay.steps[0].positions)) point.x = 20 - point.x;
+    reflectedPlay.steps[0].shot.from.x = 20 - origin.x;
+    const reflected = applyCoverageAssistance(reflectedPlay, document, timeline);
+    const at = result.play.steps[0].positions;
+    for (const id of ['player3', 'player4']) {
+      assert.ok(Math.abs(at[id].x - positions[id].x) <= 13 * seconds + 1e-8, `${sample}/${id}: speed`);
+      assert.equal(at[id].y, positions[id].y);
+      assert.ok(Math.abs(at[id].x + reflected.play.steps[0].positions[id].x - 20) < 1e-8, `${sample}/${id}: reflection`);
+    }
+    const minimum = Math.min(2.5, Math.hypot(positions.player3.x - positions.player4.x, positions.player3.y - positions.player4.y));
+    for (let k = 0; k <= 20; k++) {
+      const t = k / 20;
+      const dx = positions.player3.x - positions.player4.x + t * (at.player3.x - positions.player3.x - at.player4.x + positions.player4.x);
+      assert.ok(Math.hypot(dx, positions.player3.y - positions.player4.y) >= minimum - 1e-8, `${sample}: clearance`);
+    }
+    assert.deepEqual(play, before); assert.deepEqual(document, source);
+  }
+});

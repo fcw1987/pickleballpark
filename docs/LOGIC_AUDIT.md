@@ -117,8 +117,106 @@ audit. No failure, retry, skip or calibration exception is added by this branch.
   are not represented; the existing NVZ uncertainty notices remain necessary.
 - Contact and body geometry are approximations. Assisted legacy actor clearance
   is sampled, not a proof of all continuous anatomical positions.
-- There is no drag/spin calibration, full tactical opponent model, universal
-  optimal spacing, or comprehensive stacking/poaching policy.
+- There is no drag/spin calibration, full tactical opponent model or universal
+  optimal spacing. Opt-in stacking supplies declared side preferences and safe
+  opening transitions, not complete match scoring or automatic switching signals.
 - Headless Chromium/WebKit exercise browser behavior while the Mac is locked.
   Physical touch, native Safari, VoiceOver and real displayed frame rate require
   separate device validation.
+
+## Deeper positioning and realism pass (2026-11-11)
+
+This section describes the later candidate after the first audit checkpoint.
+Its focused evidence does not supersede required final-candidate release gates.
+
+### Kitchen approach and paired recovery
+
+The high-return intent was being flattened by a generic net-clearance hint.
+Honoring its selected arc buys the returner approach time without increasing
+player speed. A separate repair lets a player who legally entered the NVZ make
+an urgent grounded exit independently of a far-back partner's slower approach.
+The actual feet, not a provisional destination, determine when the exit occurred.
+A spacing conflict first tries a same-lane exit; if that path is unsafe, the
+player holds instead of receiving a false reset claim.
+
+On a soft kitchen exchange, an actual wide contact now draws the far partner
+toward the exposed middle. This response varies continuously with width, height
+and both players' line readiness. Repeated wide exchanges retain that support.
+Central poaches, deep defense, fast attacks and protected exact arrivals do not
+make both players chase the ball. Mirrored solved-flight tests verify the actual
+paths, not just the endpoint suggestions.
+
+### Balanced contacts and movement dynamics
+
+The old three-foot horizontal contact cylinder did not account for high contact
+height. New generation uses a coupled necessary grounded envelope derived from
+the shared instructional athlete dimensions. It searches actual descending
+ball times rather than lowering an already chosen contact. The necessary envelope
+is not a complete skeletal reach proof or a claim about every human athlete.
+
+Candidate search also reserves a comfortable, hand-correct plant and a plant
+behind the ball. Within a supported contact-height class, legal NVZ reset,
+front-of-body contact and avoiding unnecessary full extension precede an optional
+line gain. Once the contact is balanced, ready-line recovery remains preferred.
+A maximum-reach emergency plant stays available when time does not allow a more
+comfortable one. These preferences never certify an unaudited arrival.
+
+Short shuffles previously obeyed peak speed yet had implausible acceleration.
+New generation bounds the actual eased root and foot tracks by both 18 ft/s and
+30 ft/s², and rejects instantaneous velocity changes. These are explicit product
+policy limits, not universal human maxima. Contact holds cannot be borrowed as
+travel time, and exact required arrival feet cannot be moved to make a failed
+route pass. See [generated movement policy](GENERATED_MOTION.md).
+
+A second admission step uses the exact selected-hand grounded trainer pose,
+shared with the renderer through a pure numeric module. It checks actual feet,
+root, resolved stroke side and incoming/outgoing velocities both before choosing
+a nominal reply and before committing the fixed delivered result. The final
+driver recomputes it independently from serialized source. It cannot substitute
+a favorable opposite hand, stretch bones, move authored feet or reroll execution.
+See [grounded trainer support](GENERATED_TRAINER_SUPPORT.md).
+
+A rushed contact also receives a timing-derived intermediate stance when the
+comfortable radius cannot fit but a maximum stretch could. An exact mixed-hand
+Pro/lobbers regression retains all ten original draw objects and now finds the
+previously missed legal reset. Its whole 19-contact rally passes the unchanged
+speed, acceleration, spacing and trainer gates.
+
+The stricter movement policy can expose a real second bounce that the older,
+broader speed-only reach envelope could not exclude. A separately versioned v2
+certificate proves exclusion only for the generated full eased-route class,
+including conservative between-sample bounds. The original v1 theorem remains
+unchanged; public validation recomputes whichever version the source declares.
+Failed search without either valid proof still fails rather than inventing a
+winner. Frozen historical source retains its original causal regression checks.
+
+### Handedness, stacking and historical source
+
+Legacy automatic stroke-side inference and Model 2 default plants now use the
+same anatomical handedness. Explicit sides and feet remain authoritative. Five
+frozen legacy Smart fixtures change only compiled stroke-side/art metadata;
+a narrow reviewed correction manifest lists their exact old/new structural
+hashes, while the original source, sampled actor/ball paths and flight hashes
+remain checked unchanged. This does not assert unchanged opt-in planted
+presentation, which consumes the corrected side metadata.
+
+The opt-in [advanced stacking section](STACKING.md) distinguishes half and full
+stacking, correct service roles, side preferences and actual switching paths.
+Left and right are each team's view facing the net. Handedness can inform a
+user's choice but never silently assigns a side or universal middle ownership.
+Preferences persist through save/load/import/export/duplicate/Undo/Redo, while
+existing explicit source is not regenerated during editing or playback.
+
+Legacy overhead demonstrations retain their authored illustrative arcs. An editor
+notice explains that the ball may initially rise and is not a downward-smash
+physics simulation. Model 2 physical overheads do not receive that notice.
+
+### Additional coaching references
+
+- [USA Pickleball return of serve](https://usapickleball.org/pickleball-skills/level-three/return-of-serve-tips/)
+- [Kitchen partner spacing and wide coverage](https://www.thedinkpickleball.com/how-to-ensure-you-and-your-partner-always-have-proper-spacing-at-the-kitchen-line/)
+- [Pickleball Canada footwork](https://pickleballcanada.org/newsletter/better-footwork-a-three-part-series/)
+
+Calibration remains a separate model-development issue. Correct line recovery
+is not suppressed merely to fit an all-up percentage ceiling, and error priors
+or acceptance thresholds are not lowered to turn an examined cohort green.

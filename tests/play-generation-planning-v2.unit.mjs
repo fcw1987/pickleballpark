@@ -5,6 +5,7 @@ import {createPlanningStateV2,trialRecipeV2,commitPlanningTrialV2,inspectPlannin
   probeGenerationIncomingV2,probeGenerationReplyV2,commitGenerationRecipeV2,finishGenerationPlanningV2,
   replaceGenerationPendingMovementV2} from '../play-planning-v2.js';
 import {inspectGeneratedMovementV1,inspectGeneratedSpacingV1,sampleFeetStateV1} from '../rally-movement.js';
+import {GENERATION_MOTION_V1} from '../generated-motion-limits.js';
 import {sampleActorBoardPositionV2} from '../play-actors-v2.js';
 import {MODEL2_CASES,readModel2Fixture} from './fixtures/model2/cases.mjs';
 const json=JSON.stringify;
@@ -17,7 +18,7 @@ for(const {id} of MODEL2_CASES)test(`private generation session matches public $
     const probe=probeGenerationIncomingV2(session,recipe);
     assert.equal(probe.ok,publicTrial.ok);assert.equal(probe.reason,publicTrial.reason);
     if(publicTrial.resolvedPrevious){
-      assert.deepEqual(probe.movement,inspectGeneratedMovementV1(publicTrial.resolvedPrevious));
+      assert.deepEqual(probe.movement,inspectGeneratedMovementV1(publicTrial.resolvedPrevious,{maxAccelerationFeetPerSecondSquared:GENERATION_MOTION_V1.accelerationFeetPerSecondSquared}));
       assert.deepEqual(probe.spacing,inspectGeneratedSpacingV1(publicTrial.resolvedPrevious));
       assert.deepEqual(probe.footState,sampleFeetStateV1(publicTrial.resolvedPrevious,publicTrial.resolvedPrevious.duration));
       for(const actor of Object.keys(source.players))assert.deepEqual(probe.positions[actor],sampleActorBoardPositionV2(publicTrial.resolvedPrevious,actor,publicTrial.resolvedPrevious.duration));

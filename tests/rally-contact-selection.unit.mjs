@@ -54,7 +54,7 @@ test('a higher early reachable opportunity beats a late floor contact using prec
   assert.equal(result.chosen.preference.heightClass, 'neutral');
   assert.equal(result.ranked[1].preference.heightClass, 'low');
   assert.equal(result.comparisons[0].reason, 'better-supported-height-class');
-  assert.deepEqual(result.chosen.criterionVector, [1, -0, 2, -4.25, 2, 2.2, -.8]);
+  assert.deepEqual(result.chosen.criterionVector, [1, -0, -0, -0, 2, -4.25, 2, 2.2, -.8]);
 });
 
 test('actual peak, spacing, feet, route and legality failures discard an attractive early contact', () => {

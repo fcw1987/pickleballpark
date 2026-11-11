@@ -8,10 +8,13 @@ import { validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
+import { inspectGeneratedContactSupportV1 } from '../generated-contact-support.js';
 import { samplePlayState } from '../three-d-core.js';
 import { eligibleHitters, resolveServiceContext } from '../rally-state.js';
 import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
 import { isInNonVolleyZone } from '../court-geometry.js';
+
+import {assertCurrentProceduralResult,assertFreshPhysicalResult} from './helpers/rally-procedural-proof.mjs';
 
 const IDS=['player1','player2','player3','player4'];
 const clone=value=>structuredClone(value);
@@ -135,58 +138,51 @@ for(const team of ['green','orange'])for(const court of ['right','left'])for(con
   });
 }
 
-test('a real Pro lob probe contacts the descending ball within the grounded 8.5-foot cap',async()=>{
+test('a real Pro lob probe meets the actual descending ball at the supported 7.5-foot proposal',async()=>{
   const players=Object.fromEntries(IDS.map((id,index)=>[id,{team:index<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}]));
   const result=await simulateRally({seed:46,players,service:{server:'player3',receiver:'player1',court:'left',courtConvention:'server-perspective-v1'}});
   assert.equal(result.status,'complete',plain(result.diagnostics));
   const compiled=validateResult(result),segments=compiled.timeline.segments;
-  const tall=segments.findIndex((segment,index)=>index>0&&segment.shotSemantics.contact.point.heightFeet>=8.49);
-  assert.ok(tall>0,'the fixed probe must exercise the real grounded overhead boundary');
+  const tall=segments.findIndex((segment,index)=>index>0&&segment.shotSemantics.contact.point.heightFeet>=7.49);
+  assert.ok(tall>0,'the unchanged fixed probe must exercise the descending grounded-contact proposal');
   const contact=segments[tall].shotSemantics.contact.point;
-  assert.ok(contact.heightFeet<=8.5+1e-6);
-  const incoming=segments[tall-1].trajectory,t=incoming.totalDuration;
+  assert.ok(contact.heightFeet<=7.5+1e-6&&contact.heightFeet>=7.5-2e-6);
+  const support=inspectGeneratedContactSupportV1(compiled.timeline);
+  assert.equal(support.valid,true);assert.equal(support.necessaryOnly,true);
+  assert.equal(support.checkedContacts,result.document.shots.length);
+  assert.deepEqual(result.diagnostics.validation.contactSupport,support);
+  const incoming=segments[tall-1].trajectory,t=incoming.totalDuration,actual=incoming.solved.sampleBoard(t);
+  for(const axis of ['x','y','heightFeet'])close(actual[axis],contact[axis],`actual descending contact ${axis}`);
   assert.ok(incoming.solved.sampleBoard(t+1e-5).heightFeet<incoming.solved.sampleBoard(t-1e-5).heightFeet,'the incoming solver must reach that contact while descending');
 });
 
-test('a current-policy dink popup establishes a supported bounced attack through physical contact search',async()=>{
+test('the fixed controlled weakness follows measured movement pressure and terminates without an invented popup reply',async()=>{
   const players=Object.fromEntries(IDS.map((id,index)=>[id,{team:index<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}]));
-  // Keep a neutral middle exchange alive, then perturb one actual soft shot.
-  // This controlled geometry fixture is excluded from natural calibration.
-  // .15 lies in the Pro attackable interval for both ordinary and settled
-  // soft risk; the fixture still proves the resulting physical reply.
+  // Preserve the original controlled stream. The old successful popup source
+  // is replayed in rally-historical-causality; the new stance requires enough
+  // movement that this same .15 draw now belongs to the error interval.
   let executionDraw=0;
   const simulate=createEngineDriverV1((input,controls)=>runNaturalAttemptV1(input,{
     ...controls,random:{...controls.random,intent:()=>.65,target:()=>.5,
       execution:()=>executionDraw++===12?.15:.999}
   }),{yieldControl:async()=>{}});
   const result=await simulate({seed:0,players,options:{maxShots:8},service:{server:'player1',receiver:'player3',court:'right',courtConvention:'server-perspective-v1'}});
-  assert.equal(result.status,'censored',plain(result.diagnostics));
-  const compiled=validateResult(result);
-  const popup=result.decisions[6],reply=result.decisions[7],selection=reply.situation.contactSelection;
-  assert.equal(popup.resolution.physicalTransformation.kind,'dink-popup');
-  assert.equal(popup.resolution.physicalTransformation.dinkPopup.receiverOpportunity.status,'unestablished');
-  assert.equal(popup.resolution.physicalTransformation.dinkPopup.receiverOpportunity.scope,'at-delivery');
-  assert.equal(popup.draws.execution.quality,.15);assert.deepEqual(popup.draws.perturbation,{lateral:.5,depth:.5});
-  assert.equal(isInNonVolleyZone(result.document.shots[6].target),true,'a pop-up retains the short intended region');
-  close(reply.situation.contact.heightFeet,3.024246384,'actual bounced contact');
-  assert.equal(reply.situation.contactKind,'groundstroke');assert.equal(result.document.shots[7].contactMode,'bounced');
-  assert.equal(reply.situation.attackable,true);assert.equal(selection.evidence.chosen.preference.heightClass,'attack');
-  const contact=reply.situation.contact;
-  assert.ok(contact.heightFeet-PHYSICS_V2.ballRadiusFeet-localNetHeightFeet(contact.x)>.05,'the actual lower ball surface clears the local tape');
-  assert.deepEqual(selection.outgoingSafety.supportedReplyIds,['drive','reset']);
-  for(const key of ['legal','routeValid','feetValid'])assert.equal(selection.evidence.chosen.audit[key],true);
-  assert.ok(selection.evidence.chosen.audit.peakFeetPerSecond<=18);assert.ok(selection.evidence.chosen.audit.minimumSpacingFeet>=2.5);
-  assert.ok(reply.situation.feet.every(foot=>!isInNonVolleyZone(foot)));
-  close(compiled.timeline.segments[7].trajectory.solved.launchSpeedMph,26.309017541,'supported speed-up');
-  const contacts=compiled.timeline.segments.filter((segment,index)=>index>0&&segment.shotSemantics.contact.kind==='volley'
-    &&isInNonVolleyZone(segment.shotSemantics.contact.point)&&result.document.shots[index].contactTiming?.beforeBounceSeconds!==undefined);
-  assert.ok(contacts.length>0,'the fixed generated probe must include a genuine volley over the NVZ');
-  for(const segment of contacts){
-    assert.ok(segment.shotSemantics.contact.point.heightFeet>0);
-    assert.ok(segment.shotSemantics.contact.feet.every(foot=>!isInNonVolleyZone(foot)));
-    assert.equal(segment.step.shot.contact.feetEstablishedOutsideNVZ,true);
-    assert.ok(!['erne','around-the-post'].includes(segment.step.shot.authoring.intent),'ordinary volley geometry must not borrow a signature override');
-  }
+  assert.equal(result.status,'complete',plain(result.diagnostics));
+  const compiled=validateResult(result);assertFreshPhysicalResult(result);assertCurrentProceduralResult(result,'controlled-popup');
+  assert.equal(result.document.shots.length,7);assert.equal(executionDraw,14);
+  assert.equal(result.outcome.reason,'wide');assert.equal(result.outcome.shotId,'shot-7');
+  const last=result.decisions[6];
+  assert.deepEqual(last.draws.execution,{quality:.15,error:.999});assert.deepEqual(last.draws.perturbation,{lateral:.5,depth:.5});
+  assert.equal(last.execution.riskContext.conditions.settledMovement,false);
+  assert.ok(last.execution.pressure.movementSpeedFeetPerSecond>3);
+  assert.ok(last.draws.execution.quality<last.execution.probabilities.error);
+  assert.equal(last.execution.quality,'error');assert.equal(last.execution.errorReason,'wide');
+  assert.equal(last.resolution.physicalTransformation.kind,'error-target');
+  assert.equal(last.resolution.physicalTransformation.dinkPopup,undefined);
+  assert.equal(last.resolution.choiceAttempts.filter(attempt=>attempt.executionDraws).length,1);
+  assert.equal(last.resolution.solutionIndex,0);
+  assert.equal(result.decisions[7],undefined);
+  assert.equal(compiled.timeline.events.filter(event=>event.type==='contact').length,7);
 });
 
 test('explicit historical policy-v2 popup source replays its legal low volley unchanged',()=>{

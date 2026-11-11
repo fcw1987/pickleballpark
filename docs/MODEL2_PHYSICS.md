@@ -57,6 +57,22 @@ points in both views. These are point anchors, not full shoe-ground collision
 polygons. The alignment does not establish exact shoe-edge contact timing or
 anatomical mesh/collision identity.
 
+Inferred contact feet use the player's handedness and the declared forehand or
+backhand. Automatic side selection uses the actual incoming contact relative to
+explicit contact feet when supplied, or the current source stance otherwise.
+Offsets smaller than 0.15 ft retain a stable forehand convention. Explicit feet,
+first-contact layout and authored stroke choices are not replaced by inference.
+
+The default inferred foot-center span is 0.84 ft (0.256 m), with parallel
+lateral point anchors. This is a narrow, simplified stance, not a calibrated
+athletic ready position or a full shoe footprint. [Pickleball Canada's footwork
+guidance](https://pickleballcanada.org/newsletter/better-footwork-a-three-part-series/)
+describes a roughly shoulder-width ready stance with balanced stopping and
+lateral shuffling; it does not prescribe one width for every contact. Widening
+feet to match stylized artwork would change sideline/NVZ clearance and foot-route
+continuity. A richer context-dependent stance needs its own physical validation
+and must preserve saved explicit feet.
+
 An incoming flight supplies a response's contact position, time and height. A
 bounced contact samples the post-bounce path at its supported delay; a volley
 intercepts the incoming path at the hitter's depth. Transition volleys are not
@@ -65,6 +81,14 @@ the NVZ unless an explicitly represented NVZ fault is the point's result.
 `contactOverride` applies only to Erne/around-the-post geometry in the supported
 apron and must agree with the incoming trajectory. Quality labels are not a
 substitute for these physical intersections.
+
+All represented contacts share the generator's 8.5 ft grounded paddle-height
+ceiling. This is a supported-model feasibility bound, not a sport rule or a
+universal human reach limit. High lob flights remain supported, but an actor
+with grounded feet cannot intercept their 17 ft apex. An impossible incoming
+contact remains at its solved height and receives a finding; it is not moved
+down or silently delayed. An initial midrally short-hop may omit incoming
+bounce history, but its represented height must still be no more than 1.5 ft.
 
 The first recipe has no represented incoming path. Its contact uses the starting
 ball position and a declared model assumption: 2.2 ft ordinarily, 7.5 ft for an

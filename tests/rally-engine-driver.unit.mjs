@@ -7,6 +7,7 @@ import { previewDocumentV2 } from '../play-compiler-v2.js';
 import { MODEL2_AUTHORING_FIELDS } from '../play-document.js';
 import { classifyOutcomeV1 } from '../rally-quality.js';
 import { isInNonVolleyZone } from '../court-geometry.js';
+import { validateRallyRules } from '../rally-rules.js';
 import { readModel2Fixture } from './fixtures/model2/cases.mjs';
 import { model2Document, model2Shot } from './fixtures/model2/factories.mjs';
 
@@ -277,19 +278,56 @@ test('the default yield is a macroturn rather than an already-resolved promise',
   assert.deepEqual(order, ['micro1', 'micro2', 'yield']);
 });
 
-test('independent engine validation rejects unsupported grounded heights without changing M1 rule acceptance', async () => {
+test('independent engine validation rejects unsupported grounded heights already rejected by authored validation', async () => {
   const document = model2Document({ shots: [
     model2Shot({ id: 'lob', family: 'lob', intent: 'lob', hitter: 'player1', target: { x: 7, y: 40 }, physics: { apexFeet: 18 } }),
     model2Shot({ id: 'high-response', family: 'overhead', intent: 'overhead', hitter: 'player3', contactMode: 'volley', target: { x: 12, y: 4 } })
   ] });
-  const fixture = fixtureResult(document, 7);
-  const compiled = compileDocument(fixture.document);
+  const source = JSON.stringify(document), authored = compileDocument(document);
+  assert.equal(authored.validShotCount, 0);
+  assert.ok(authored.findings.some(item => item.kind === 'feasibility' && /grounded/i.test(item.message)));
+  assert.ok(validateRallyRules(authored.play, authored.timeline).violations.some(item => item.code === 'grounded-contact-height' && item.category === 'model'));
+  assert.equal(JSON.stringify(document), source, 'reject the impossible contact without changing the incoming ball or source');
+  // Deliberately invalid producer output. Do not use fixtureResult: its
+  // accepted-contact precondition is inappropriate for this independent gate.
+  const fixture = { status: 'censored', document: clone(document), outcome: null, outcomeClassification: null,
+    decisions: document.shots.map(shot => ({ shotId: shot.id })), stats: { shots: 2 } };
+  for (const [index, shot] of fixture.document.shots.entries()) {
+    const feet = clone(authored.timeline.segments[index].shotSemantics.contact.feet);
+    shot.contactEvidence = { feet, feetEstablishedOutsideNVZ: feet.every(foot => !isInNonVolleyZone(foot)) };
+    shot.generation = { seed: 7, generatorVersion: 'rally-engine-v1' };
+    shot.authoring = { ownership: 'automatic', fields: MODEL2_AUTHORING_FIELDS.filter(field => Object.hasOwn(shot, field)) };
+  }
+  const before = JSON.stringify(fixture), compiled = compileDocument(fixture.document);
   assert.ok(compiled.timeline.segments[1].shotSemantics.contact.point.heightFeet > 8.5);
   const result = await createEngineDriverV1(async () => fixture, { yieldControl: immediate })({ seed: 7, options: { maxShots: 2 } });
   assert.equal(result.status, 'failed');
-  assert.equal(result.diagnostics.code, 'engine-contact-height', JSON.stringify(result.diagnostics));
+  assert.equal(result.diagnostics.code, 'final-validation', JSON.stringify(result.diagnostics));
   assert.equal(result.document, null);
-  assert.equal(result.diagnostics.validation.maximumHeightFeet, 8.5);
+  assert.ok(result.diagnostics.validation.ruleViolations.some(item => item.code === 'grounded-contact-height'));
+  assert.equal(JSON.stringify(fixture), before);
+});
+
+test('fresh stacking provenance rejects missing or mismatched settings but ignores inert key order', async () => {
+  const stacking = { version: 'stacking-v1', teams: { green: { mode: 'serve-only', leftPlayer: 'player1' }, orange: { mode: 'full', leftPlayer: 'player3' } } };
+  for (const mutation of [doc => { delete doc.stacking; }, doc => { doc.stacking.teams.green.leftPlayer = 'player2'; }, doc => { doc.stacking.teams.orange.mode = 'serve-only'; }]) {
+    const source = net(7); source.document.stacking = clone(stacking); mutation(source.document);
+    const before = JSON.stringify(source), result = await createEngineDriverV1(async () => source, { yieldControl: immediate })({ seed: 7, stacking });
+    assert.equal(result.status, 'failed'); assert.equal(result.diagnostics.code, 'attempt-stacking');
+    assert.equal(result.document, null); assert.equal(result.recipe.selection, null); assert.equal(JSON.stringify(source), before);
+  }
+  const added = net(7); added.document.stacking = clone(stacking);
+  const unexpected = await createEngineDriverV1(async () => added, { yieldControl: immediate })({ seed: 7 });
+  assert.equal(unexpected.status, 'failed'); assert.equal(unexpected.diagnostics.code, 'attempt-stacking');
+  const reordered = net(7);
+  reordered.document.stacking = { teams: { orange: { leftPlayer: 'player3', mode: 'full' }, green: { leftPlayer: 'player1', mode: 'serve-only' } }, version: 'stacking-v1' };
+  const before = JSON.stringify(reordered);
+  const accepted = await createEngineDriverV1(async () => reordered, { yieldControl: immediate })({ seed: 7, stacking });
+  assert.equal(accepted.status, 'complete', JSON.stringify(accepted.diagnostics));
+  assert.deepEqual(accepted.recipe.input.stacking, stacking); assert.equal(JSON.stringify(reordered), before);
+  const unknown = net(7); unknown.document.stacking = { ...clone(stacking), version: 'stacking-v999' };
+  const rejected = await createEngineDriverV1(async () => unknown, { yieldControl: immediate })({ seed: 7, stacking });
+  assert.equal(rejected.status, 'failed'); assert.equal(rejected.document, null); assert.equal(rejected.recipe.selection, null);
 });
 
 test('fresh serialized envelope failure is explicit despite fabricated planner acceptance', async () => {

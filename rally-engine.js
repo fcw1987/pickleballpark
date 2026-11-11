@@ -18,7 +18,10 @@ import { probeSignatureCandidatesV1 } from './rally-signatures.js';
 import { automaticOwnership } from './rally-proposals.js';
 import { isInNonVolleyZone } from './court-geometry.js';
 import { STROKE_PROFILES } from './three-d-core.js';
-import { certifyGeneratedRouteExclusionV1 } from './generated-route-certificate-v1.js';
+import { certifyGeneratedRouteExclusion } from './generated-route-certificates.js';
+import { GENERATED_CONTACT_SUPPORT_V1 } from './generated-contact-support.js';
+import { GENERATION_MOTION_V1 } from './generated-motion-limits.js';
+import { assessGeneratedTrainerSupportV1 } from './generated-trainer-support.js';
 
 export { RALLY_ENGINE_VERSION } from './rally-recipe.js';
 export const RALLY_ENGINE_LIMITS = Object.freeze({ maxShots: 99, targetsPerIntent: 8, maxContactPairs: 4, groundedContactHeightFeet: GROUNDED_CONTACT_HEIGHT_FEET });
@@ -79,6 +82,7 @@ function headerFor(input, attemptIndex, attemptSeed) {
         id: `rally-engine-${identity(input)}-${attemptSeed}`, title: `Generated rally · seed ${input.seed}`,
         players: Object.fromEntries(IDS.map(id => [id, { team: input.players[id].team, handedness: input.players[id].handedness }])),
         initialLayout: clone(input.layout), service: clone(input.service), shots: [], annotations: [],
+        ...(input.stacking ? { stacking: clone(input.stacking) } : {}),
         assistance: { autoShading: false, showGuides: false, team: 'green' }, opening: 'serve', ending: 'winner', intentionalFault: false,
         generation: createGenerationRecipeV1(input, { attempts: attemptIndex + 1, selectedAttempt: attemptIndex, selectedSeed: attemptSeed }) };
 }
@@ -106,7 +110,7 @@ function repairPendingMovement(input, state, pair, durationSeconds = planningVie
     // submitted repair before retaining it. Keep other fields read-only here.
     const recipe = { ...planningView(state).pendingRecipe };
     const movement = replanMovementV1({ plan: pendingMovementPlans.get(state), segment: planningView(state).pendingSegment,
-        players: input.players, durationSeconds, ...(pair ? { arrival: { id: pair.id, stance: pair.feet.stance } } : {}), peakFeetPerSecond: 17.95 });
+        players: input.players, durationSeconds, ...(pair ? { arrival: { id: pair.id, stance: pair.feet.stance, contact: pair.contact } } : {}), peakFeetPerSecond: 17.95 });
     if (!movement.ok) return null;
     recipe.movement = generatedV1(movement.movement);
     recipe.playerMovement = generatedV1(movement.playerMovement);
@@ -117,7 +121,7 @@ function repairPendingMovement(input, state, pair, durationSeconds = planningVie
 }
 
 function routeValid(segment) {
-    return !segment || inspectGeneratedMovementV1(segment).valid && inspectGeneratedSpacingV1(segment).valid;
+    return !segment || inspectGeneratedMovementV1(segment, { maxAccelerationFeetPerSecondSquared: GENERATION_MOTION_V1.accelerationFeetPerSecondSquared }).valid && inspectGeneratedSpacingV1(segment).valid;
 }
 
 // Small shared-solver reply probes establish opportunity support before an
@@ -203,15 +207,16 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics) {
                 options.push({ kind: 'volley', depth: incoming.sampleBoard(time).y });
             }
         }
-        // A grounded paddle cannot intercept a lob at its 18-foot apex. Search
-        // the actual incoming solution's descending branch for the supported
-        // overhead ceiling, then let the same interceptor and route audit
-        // decide whether that contact is available to this player.
-        if (!contactRequiresBounce(index) && incoming.metadata.apexFeet > RALLY_ENGINE_LIMITS.groundedContactHeightFeet) {
+        // Propose actual descending contacts inside the generation envelope,
+        // rather than reaching for the authored model's separate 8.5ft ceiling.
+        // These are bounded search options, never a lowered/fabricated contact.
+        // Exact feet, support and route checks still decide availability.
+        if (!contactRequiresBounce(index)) for (const height of GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet) {
+            if (incoming.metadata.apexFeet <= height) continue;
             let low = Math.max(0, incoming.stages[0].vy / PHYSICS_V2.gravityFeetPerSecond2), high = incoming.firstLandingTime;
             for (let step = 0; step < 32; step++) {
                 const middle = (low + high) / 2;
-                if (incoming.sampleBoard(middle).heightFeet > RALLY_ENGINE_LIMITS.groundedContactHeightFeet - 1e-6) low = middle; else high = middle;
+                if (incoming.sampleBoard(middle).heightFeet > height - 1e-6) low = middle; else high = middle;
             }
             options.push({ kind: 'volley', depth: incoming.sampleBoard(high).y });
         }
@@ -431,10 +436,11 @@ function situationFor(input, state, index, pair, decisions) {
 }
 
 function addMovement(input, state, index, pair, recipe, flight) {
-    if (index === 0) return { recipe: { ...recipe, movement: hold(), playerMovement: Object.fromEntries(IDS.filter(id => id !== recipe.hitter).map(id => [id, hold()])) },
+    if (index === 0 && !input.stacking) return { recipe: { ...recipe, movement: hold(), playerMovement: Object.fromEntries(IDS.filter(id => id !== recipe.hitter).map(id => [id, hold()])) },
         plan: { diagnostics: { goals: Object.fromEntries(IDS.map(id => [id, xy(input.layout[id])])) } } };
+    const contactTime = index === 0 ? STROKE_PROFILES.serve.duration * STROKE_PROFILES.serve.contactRatio : 0;
     const movement = planMovementV1({ positions: pair.positions, players: input.players, hitter: pair.id, contact: pair.contact, target: recipe.target,
-        durationSeconds: flight.firstLandingTime, contactTime: 0, index, service: input.service, intent: recipe.intent, family: recipe.family,
+        durationSeconds: contactTime + flight.firstLandingTime, contactTime, index, service: input.service, stacking: input.stacking, intent: recipe.intent, family: recipe.family,
         incomingFamily: planningView(state).pendingRecipe?.family, kind: pair.kind, feetState: pair.footState, contactFeet: pair.feet,
         quality: recipe.quality, pace: recipe.pace, peakFeetPerSecond: 17.95 });
     if (!movement.ok) throw new RangeError(movement.reason);
@@ -445,6 +451,25 @@ function friendlyActors(input, hitter) {
     return IDS.filter(id => input.players[id].team === input.players[hitter].team);
 }
 
+// The selected instructional trainer must be able to place the paddle at the
+// real contact with its fixed grounded feet. This is a model-support check, not
+// a universal human reach claim. Outgoing impulse is part of the exact pose.
+function checkTrainerContact(input, state, pair, family, flight) {
+    const view = planningView(state), incoming = view.solved.at(-1) ?? null;
+    const origin = view.pendingSegment?.previous.positions[pair.id] ?? input.layout[pair.id];
+    const result = assessGeneratedTrainerSupportV1({ contact: pair.contact, feet: pair.feet.feet, stance: pair.feet.stance,
+        handedness: input.players[pair.id].handedness, strokeSide: pair.contactStyle ?? 'forehand', family, kind: pair.kind,
+        outgoingFlight: flight, incomingFlight: incoming, incomingTimeSeconds: incoming ? pair.time : null, nearCourt: origin.y < 22 });
+    const proof = { version: result.version, profileVersion: result.profileVersion ?? null, supported: result.supported,
+        feasible: result.feasible, reason: result.reason, code: result.code,
+        reachErrorMetres: result.reachError ?? null, legErrorMetres: result.legError ?? null };
+    if (!result.supported || !result.feasible) {
+        const error = new RangeError(`The grounded instructional trainer cannot represent this contact: ${result.reason}`);
+        error.trainerSupport = proof; throw error;
+    }
+    return proof;
+}
+
 // Nominal checks observe private geometry; no discarded public next-state graph
 // or source proof escapes the session. Returned evidence is detached.
 function checkNominalReply(input, state, index, pair, reply, { record = false } = {}) {
@@ -453,6 +478,7 @@ function checkNominalReply(input, state, index, pair, reply, { record = false } 
     recipe = { ...recipe, intent: reply.id, quality: 'neutral', pace: reply.pace ?? 'medium', arc: reply.arc ?? 'medium',
         physics: clone(reply.physics) };
     recipe = generatedV1(addMovement(input, state, index, pair, recipe, reply.flight).recipe);
+    const trainerSupport = checkTrainerContact(input, state, pair, recipe.family, reply.flight);
     const actors = friendlyActors(input, pair.id);
     const checked = probeGenerationReplyV2(state, recipe, { pendingRecipe: pair.pendingRecipe, incoming: pair.incomingProbe, actors, record });
     if (!checked.ok || !checked.previousInspectionReused && !checked.routeValid) throw new RangeError(checked.reason || 'The nominal reply has an infeasible incoming route.');
@@ -465,7 +491,7 @@ function checkNominalReply(input, state, index, pair, reply, { record = false } 
         error.bodyEvents = checked.bodyEvents; throw error;
     }
     return { version: 'rally-outgoing-safety-v1', checkedActors: actors,
-        representedFlightSeconds: numberV1(checked.representedFlightSeconds), clear: true,
+        representedFlightSeconds: numberV1(checked.representedFlightSeconds), clear: true, trainerSupport,
         ...(record ? { nominal: { ...checked.nominal, contact: generatedV1(checked.nominal.contact) } } : {}) };
 }
 
@@ -535,7 +561,7 @@ function finishAttempt(input, state, document, decisions, diagnostics, censored,
     }
     const classification = outcome ? classifyOutcomeV1({ outcome, pressure: last?.situation.pressure,
         pressureDecisionId: decisions[Math.max(0, decisions.indexOf(last) - 1)]?.id ?? null, execution: last?.execution,
-        previousIntent: last?.situation.incomingIntent }) : null;
+        previousIntent: last?.situation.incomingIntent, terminalEvidence: finished.decision }) : null;
     let run = 0, longestDinkRun = 0;
     for (const decision of decisions) { run = decision.chosen.family === 'dink' ? run + 1 : 0; longestDinkRun = Math.max(longestDinkRun, run); }
     const stats = { shots: decisions.length, firstAllFourUpShot: decisions.find(d => d.situation.allFourUp)?.situation.contactIndex + 1 || null,
@@ -602,6 +628,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                             } catch (error) {
                                 lastNominalError = error;
                                 choiceAttempt.repairs.push({ stage: 'nominal-route', repair, solutionIndex, targetDraws, reason: error.message,
+                                    ...(error.trainerSupport ? { trainerSupport: generatedV1(error.trainerSupport) } : {}),
                                     ...(error.contactFindings ? { contactFindings: generatedV1(error.contactFindings) } : {}),
                                     ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
                             }
@@ -652,6 +679,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                     await checkpoint({ shots: index, workDelta: 1 });
                     const { applied, flight, guidance: deliveredGuidance } = solution;
                     try {
+                        const trainerSupport = checkTrainerContact(input, state, pair, chosen.family, flight);
                         let recipe = { ...baseRecipe(`shot-${index + 1}`, index, pair, applied.target, chosen.family), intent: chosen.intent,
                             quality: execution.quality, pace: applied.pace, arc: applied.arc, physics: applied.physics,
                             ...(index === 0 ? { receiver: input.service.receiver } : {}),
@@ -679,7 +707,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                             chosen: { id: chosen.id, intent: chosen.intent, family: chosen.family }, draws: { intent: intentDraw, execution: executionDraws, target: targetDraws, perturbation: perturbationDraws, narration: narrationDraw }, execution,
                             resolution: { target: xy(recipe.target), physics: clone(recipe.physics), pace: recipe.pace, repairs: repair, solutionIndex,
                                 flightPlannerVersion: FLIGHT_PLANNER_VERSION,
-                                nominalSafety: generatedV1(nominalSafety), deliveredGuidance: generatedEvidenceV1(deliveredGuidance),
+                                nominalSafety: generatedV1(nominalSafety), trainerSupport: generatedV1(trainerSupport), deliveredGuidance: generatedEvidenceV1(deliveredGuidance),
                                 ...(applied.physicalTransformation ? { physicalTransformation: generatedV1(applied.physicalTransformation) } : {}),
                                 ...(parameters.guidance ? { flightGuidance: generatedEvidenceV1(parameters.guidance) } : {}),
                                 actualContact: generatedV1(trial.contact), actualFeet: generatedV1(trial.feet), intendedError: execution.errorReason, choiceAttempts } });
@@ -699,6 +727,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
                         if (committed) throw error;
                         diagnostics.rejections++;
                         choiceAttempt.repairs.push({ stage: 'execution-route', repair, solutionIndex, targetDraws, perturbationDraws, reason: error.message,
+                            ...(error.trainerSupport ? { trainerSupport: generatedV1(error.trainerSupport) } : {}),
                             ...(error.contactFindings ? { contactFindings: generatedV1(error.contactFindings) } : {}),
                             ...(error.bodyEvents ? { bodyEvents: generatedV1(error.bodyEvents) } : {}) });
                     }
@@ -720,7 +749,7 @@ export async function runNaturalAttemptV1(input, { attemptIndex, attemptSeed, ra
             // retains the broader reach uncertainty, and adjudicates the real
             // second bounce as a fault rather than an unreachable winner.
             if (inspection.derivedOutcome?.reason === 'second-bounce' && !inspection.violations.length) {
-                const certificate = certifyGeneratedRouteExclusionV1(planningView(state).play, inspection.segment, inspection.solved);
+                const certificate = certifyGeneratedRouteExclusion(planningView(state).play, inspection.segment, inspection.solved);
                 if (certificate) {
                     const defender = [...certificate.actors].sort((a, b) => a.continuousLowerBoundFeet - b.continuousLowerBoundFeet || a.actor.localeCompare(b.actor))[0].actor;
                     const outcome = { ...inspection.derivedOutcome, faultingActor: defender,

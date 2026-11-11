@@ -1,8 +1,9 @@
-import { validGeneratedRouteCertificateShapeV1 } from './generated-route-certificate-v1.js';
+import { validGeneratedRouteCertificateShape } from './generated-route-certificates.js';
 // Versioned, renderer-independent source data for the visual play builder.
 import { PICKLEBOARD_PLAYS } from './play-catalog.js';
 import { SERVICE_COURT_CONVENTION, resolveServiceContext } from './rally-state.js';
 import { validateGenerationRecipeV1 } from './rally-recipe.js';
+import { validateStackingV1 } from './rally-stacking.js';
 export const SCHEMA_VERSION = 1;
 // One shared bound for authored, imported, generated, and compiled rallies.
 // Keep this in the document contract so callers never need to duplicate the
@@ -144,7 +145,7 @@ function validateModel2Shot(shot, path) {
   }
 }
 function validateModel2Document(value) {
-  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome', 'generation'], 'document');
+  keys(value, ['schemaVersion', 'modelVersion', 'physicsVersion', 'id', 'title', 'initialLayout', 'players', 'shots', 'annotations', 'assistance', 'opening', 'ending', 'intentionalFault', 'service', 'outcome', 'generation', 'stacking'], 'document');
   choice(value.physicsVersion, [MODEL2_PHYSICS_VERSION], 'physicsVersion');
   if (value.generation !== undefined) validateGenerationRecipeV1(value.generation);
   keys(value.initialLayout, [...PLAYER_IDS, 'ball'], 'initialLayout');
@@ -180,7 +181,7 @@ function validateModel2Document(value) {
     if (outcome.struckActor !== outcome.faultingActor && !serveHitsServingTeam && !serveHitsReceivingTeam) fail('outcome.struckActor', 'must identify the player who faults on body contact, except the server or designated receiver on an applicable serve contact.');
   } else if (outcome.struckActor !== undefined) fail('outcome.struckActor', 'is only supported for a body contact.');
   keys(outcome.evidence, ['position', 'afterContactSeconds', 'generatedRouteCertificate'], 'outcome.evidence');
-  if (outcome.evidence.generatedRouteCertificate !== undefined && (outcome.reason !== 'second-bounce' || outcome.type !== 'fault' || outcome.ruleRef !== '10.B.1' || !PLAYER_IDS.includes(outcome.faultingActor) || !validGeneratedRouteCertificateShapeV1(outcome.evidence.generatedRouteCertificate))) fail('outcome.evidence.generatedRouteCertificate', 'requires a supported versioned second-bounce fault certificate.');
+  if (outcome.evidence.generatedRouteCertificate !== undefined && (outcome.reason !== 'second-bounce' || outcome.type !== 'fault' || outcome.ruleRef !== '10.B.1' || !PLAYER_IDS.includes(outcome.faultingActor) || !validGeneratedRouteCertificateShape(outcome.evidence.generatedRouteCertificate))) fail('outcome.evidence.generatedRouteCertificate', 'requires a supported versioned second-bounce fault certificate.');
   model2TerminalEvidencePosition(outcome.evidence.position, 'outcome.evidence.position');
   boundedNumber(outcome.evidence.afterContactSeconds, 0, 30, 'outcome.evidence.afterContactSeconds');
 }
@@ -311,6 +312,9 @@ export function validateDocument(value) {
   if (typeof value.assistance.autoShading !== 'boolean' || typeof value.assistance.showGuides !== 'boolean') fail('assistance', 'toggles must be boolean.');
   choice(value.assistance.team, ['both', ...TEAMS], 'assistance.team');
   choice(value.opening, ['serve', 'midrally'], 'opening');
+  // These preferences apply to new generated routes, never to authored pins
+  // or movement on load. Legacy documents can store them without conversion.
+  validateStackingV1(value.stacking, value.players);
   // Optional additive context. Legacy files keep their exact bytes and may
   // declare a receiver on the serve recipe; no position-based migration.
   if (value.service !== undefined) {

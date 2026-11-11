@@ -152,7 +152,11 @@ export function resolveFlightParametersV1({ candidate, contact, target, team, qu
   const ownContact = team === 'green' ? from.y + PHYSICS_V2.ballRadiusFeet <= 22 + EPS : from.y - PHYSICS_V2.ballRadiusFeet >= 22 - EPS;
   const opponentLanding = isOnCourt(landing) && (team === 'green' ? landing.y > 22 : landing.y < 22);
   if (!ownContact || !opponentLanding) throw new RangeError('A nominal flight needs a whole-ball own-side contact and opponent landing.');
-  const preferred = candidate.family === 'lob' ? { apexFeet: 18 }
+  // Deep return policy explicitly chooses a high arc to buy approach time.
+  // Honor the planner's existing 7 ft return apex plus its .6 ft high-arc
+  // preference instead of replacing that intent with the generic low clearance.
+  const preferred = candidate.family === 'return' && candidate.arc === 'high' ? { apexFeet: 7.6 }
+    : candidate.family === 'lob' ? { apexFeet: 18 }
     : candidate.family === 'overhead' ? { launchVerticalFeetPerSecond: -18, speedMph: 40 }
       : CLEARANCE_PRIORS_V1[candidate.family] === undefined ? {} : { clearanceFeet: CLEARANCE_PRIORS_V1[candidate.family] };
   const planner = planRallyFlightV1({ from, target: landing, family: candidate.family, intent: candidate.intent ?? null,

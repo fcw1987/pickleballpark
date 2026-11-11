@@ -11,6 +11,8 @@ import { compileDocument } from '../play-compiler.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { createPlanningStateV2, trialRecipeV2, commitPlanningTrialV2, inspectPlanningTrialEventsV2 } from '../play-planning-v2.js';
 
+import {assertCurrentProceduralResult,assertFixedExecutionPairs,assertFreshPhysicalResult} from './helpers/rally-procedural-proof.mjs';
+
 const input=(seed,maxShots)=>({seed,players:Object.fromEntries(['player1','player2','player3','player4'].map((id,i)=>[id,
   {team:i<2?'green':'orange',handedness:'right',style:'pro',flavour:'balanced'}])),
   service:{server:'player1',receiver:'player3',court:'left',courtConvention:'server-perspective-v1'},options:{maxShots}});
@@ -22,21 +24,18 @@ function independent(result) {
   return {compiled,rules};
 }
 
-test('fixed neutral delivery commits its first timing and early friendly body fault even at the shot limit',async()=>{
+test('corrected contact stance preserves the first neutral delivery without the historical body collision at the shot limit',async()=>{
   const result=await simulateRally(input(1177,8));
-  assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
-  assert.equal(result.document.shots.length,8);
-  assert.equal(result.outcome.reason,'body');assert.equal(result.outcome.struckActor,'player4');
-  assert.equal(result.outcome.shotId,'shot-8');
-  assert.ok(Math.abs(result.outcome.evidence.afterContactSeconds-.056527514)<1e-9);
+  assert.equal(result.status,'censored',JSON.stringify(result.diagnostics));
+  assert.equal(result.document.shots.length,8);assert.equal(result.outcome,null);
   const last=result.decisions.at(-1);
   assert.equal(last.execution.quality,'neutral');assert.equal(last.resolution.solutionIndex,0);
   assert.equal(last.resolution.nominalSafety.clear,true);
   assert.deepEqual(last.draws.execution,{quality:.6246410687454045,error:.8334799539297819});
   assert.equal(last.resolution.choiceAttempts.filter(x=>x.executionDraws).length,1);
   assert.deepEqual(last.resolution.choiceAttempts.at(-1).repairs,[]);
-  const {rules}=independent(result);
-  assert.ok(rules.expectedOutcomes.some(x=>x.reason==='body'&&x.struckActor==='player4'));
+  const {rules}=independent(result);assert.deepEqual(rules.expectedOutcomes,[]);
+  assertCurrentProceduralResult(result,'pro-1177-eight');assertFixedExecutionPairs(result);assertFreshPhysicalResult(result);
 });
 
 test('a projected later opponent body collision permits an earlier legal paddle interception',async()=>{
@@ -85,31 +84,27 @@ for(const row of archivedInputs) test(`${row.name} exact archived input complete
     assert.deepEqual(fixed[0].executionDraws,decision.draws.execution);
     assert.equal(fixed[0].repairs.some(repair=>repair.stage==='execution-route'),false,decision.shotId);
   }
-  if(row.name==='pro-1177') {
-    const last=result.decisions.at(-1);
-    assert.equal(result.outcome.reason,'body');assert.equal(result.outcome.struckActor,'player4');
-    assert.ok(Math.abs(result.outcome.evidence.afterContactSeconds-.056527514)<1e-9);
-    assert.equal(last.execution.quality,'neutral');assert.equal(last.resolution.solutionIndex,0);
-  }
+  assertCurrentProceduralResult(result,row.name==='pro-1177'?'pro-1177-full':row.name);
+  assertFixedExecutionPairs(result);assertFreshPhysicalResult(result);
 });
 
 
-test('a fixed neutral reset may hit the mesh within its shape cap without resampling or a fake error label',async()=>{
+test('the original fixed reset draw stays neutral on its changed route before a later genuine net fault',async()=>{
   const request=normalizeRallyInputV1({seed:22,options:{lengthFeel:'epic'}}),attemptSeed=1549107850;
   const result=await runNaturalAttemptV1(request,{attemptIndex:20,attemptSeed,random:createRallyRandomV1(attemptSeed),checkpoint:async()=>{}});
   assert.equal(result.status,'complete',JSON.stringify(result.diagnostics));
-  assert.equal(result.document.shots.length,7);assert.equal(result.outcome.reason,'net');
-  assert.equal(result.outcome.shotId,'shot-7');
+  assert.equal(result.document.shots.length,13);assert.equal(result.outcome.reason,'net');assert.equal(result.outcome.shotId,'shot-13');
   validateDocument(result.document);
-  const {compiled}=independent(result),last=result.decisions.at(-1),source=result.document.shots.at(-1);
-  assert.equal(last.chosen.family,'reset');assert.equal(last.execution.quality,'neutral');
-  assert.equal(last.execution.errorReason,null);assert.equal(source.quality,'neutral');
-  assert.deepEqual(last.draws.execution,{quality:.8444628245197237,error:.3883689953945577});
-  assert.equal(last.resolution.solutionIndex,0);
-  assert.equal(last.resolution.choiceAttempts.filter(x=>x.executionDraws).length,1);
-  assert.deepEqual(last.resolution.choiceAttempts.at(-1).repairs,[]);
-  const flight=compiled.timeline.segments.at(-1).trajectory.solved;
-  assert.equal(flight.obstruction.kind,'net');assert.ok(flight.launchSpeedMph<=24);
-  assert.ok(flight.metadata.apexFeet<=5.5);
+  const {compiled}=independent(result),originalDraw=result.decisions[6],source=result.document.shots[6];
+  assert.equal(originalDraw.chosen.family,'reset');assert.equal(originalDraw.execution.quality,'neutral');
+  assert.equal(originalDraw.execution.errorReason,null);assert.equal(source.quality,'neutral');
+  assert.deepEqual(originalDraw.draws.execution,{quality:.8444628245197237,error:.3883689953945577});
+  assert.equal(originalDraw.resolution.solutionIndex,0);
+  assert.equal(originalDraw.resolution.choiceAttempts.filter(x=>x.executionDraws).length,1);
+  assert.deepEqual(originalDraw.resolution.choiceAttempts.at(-1).repairs,[]);
+  const reset=compiled.timeline.segments[6].trajectory.solved;
+  assert.equal(reset.obstruction,null);assert.ok(reset.launchSpeedMph<=24);assert.ok(reset.metadata.apexFeet<=5.5);
+  assert.equal(compiled.timeline.segments.at(-1).trajectory.solved.obstruction.kind,'net');
   assert.equal(assessGeneratedFlightFeasibilityV1({document:result.document,compiled}).status,'PASS');
+  assertCurrentProceduralResult(result,'neutral-reset-net');assertFixedExecutionPairs(result,attemptSeed);assertFreshPhysicalResult(result);
 });

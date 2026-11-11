@@ -36,7 +36,8 @@ test('archived Pro 1043 return uses the actual extra .6 seconds to reach the lin
   const duration = original.resolvedPrevious.duration;
   assert.ok(Math.abs(duration - 1.73763576) < 1e-8);
   assert.ok(Math.abs(duration - state.solved[1].firstLandingTime - .6) < 1e-8);
-  assert.ok(Math.abs(plan.positions.player1.y - 11.133131803) < 1e-7);
+  assert.equal(archived.shots[1].movement.target.y,11.133131803,'historical source remains exact');
+  assert.ok(plan.positions.player1.y < 11.133131803,'the short provisional return phase now also respects acceleration');
   const replanned = replanMovementV1({ plan, segment: pending, players: archived.players, durationSeconds: duration,
     arrival: { id: third.hitter, stance: center(third.contactEvidence.feet) }, peakFeetPerSecond: 17.95 });
   assert.equal(replanned.ok,true);
@@ -48,7 +49,7 @@ test('archived Pro 1043 return uses the actual extra .6 seconds to reach the lin
   const segment = resolved.resolvedPrevious;
   assert.equal(sampleActorBoardPositionV2(segment,'player1',segment.duration).y,14.25);
   assert.deepEqual(sampleActorBoardPositionV2(segment,third.hitter,segment.duration),center(third.contactEvidence.feet));
-  assert.equal(inspectGeneratedMovementV1(segment).valid,true);
+  assert.equal(inspectGeneratedMovementV1(segment,{maxAccelerationFeetPerSecondSquared:30}).valid,true);
   assert.equal(inspectGeneratedSpacingV1(segment).valid,true);
   for (const id of ['player3','player4']) {
     if (id !== third.hitter) assert.deepEqual(replanned.positions[id],pending.previous.positions[id],'serving side still waits for the return bounce');

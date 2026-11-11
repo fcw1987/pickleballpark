@@ -6,14 +6,16 @@ import { resolveShotSemantics, boardToWorld } from './three-d-core.js';
 import { inspectModel2SegmentV2 } from './play-outcome-v2.js';
 import { eligibleHitters, contactRequiresBounce, teamForPlayer } from './rally-state.js';
 import { sampleActorFeetV2 } from './play-actors-v2.js';
-import { contactFeetV1, boundMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from './rally-movement.js';
+import { contactFeetCandidatesV1, boundMovementV1, sampleFeetStateV1, inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from './rally-movement.js';
 import { planRallyFlightV1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from './rally-flight-planner.js';
+import { GENERATION_MOTION_V1 } from './generated-motion-limits.js';
+import { assessGeneratedTrainerSupportV1 } from './generated-trainer-support.js';
 
 export const SIGNATURE_VERSION = 'rally-signatures-v2';
 export const SIGNATURE_LIMITS = Object.freeze({ volleyFractions: Object.freeze([.35, .5, .65, .8, .9, .95]),
   bounceDelays: Object.freeze([.03, .06, .12, .2, .28, .4, .6]), maxLaunchTrials: 8,
   maxTargetTrials: 8, maxSolverCallsPerTarget: MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET,
-  maximumContactHeightFeet: 6.5, peakFeetPerSecond: 17.95 });
+  maximumContactHeightFeet: 6.5, maxStanceTrials: 8, peakFeetPerSecond: 17.95 });
 const IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 const R = PHYSICS_V2.ballRadiusFeet, EPS = 1e-7;
 const clone = value => structuredClone(value);
@@ -100,7 +102,7 @@ function prepareRoute({ pendingSegment, pendingRecipe, playerId, contact, feet, 
   } };
   const resolved = createModel2SegmentV2({ previous, step, nextStep, index: pendingSegment.index,
     startTime: pendingSegment.startTime, model2Momentum: clone(pendingSegment.model2Momentum || []) }, { resolveShotSemantics, boardToWorld });
-  const peak = inspectGeneratedMovementV1(resolved), spacing = inspectGeneratedSpacingV1(resolved);
+  const peak = inspectGeneratedMovementV1(resolved, { maxAccelerationFeetPerSecondSquared: GENERATION_MOTION_V1.accelerationFeetPerSecondSquared }), spacing = inspectGeneratedSpacingV1(resolved);
   if (!peak.valid || !spacing.valid) return null;
   return { resolved, peak, spacing, pendingMovement,
     ...(pendingRecipe ? { pendingRecipe: { ...clone(pendingRecipe), ...clone(pendingMovement) } } : {}) };
@@ -168,8 +170,16 @@ export function probeSignatureCandidatesV1({ incomingFlight, pendingSegment, pen
           || !(contact.x < PHYSICS_V2.postInsideLeft - PHYSICS_V2.postDiameterFeet - R || contact.x > PHYSICS_V2.postInsideRight + PHYSICS_V2.postDiameterFeet + R))) continue;
         const outgoing = outgoingFlight(intent, contact, player, work); if (!outgoing) continue;
         const contactStyle = strokeSide(player, origin, contact);
-        const feet = contactFeetV1({ contact, target: outgoing.target, team, handedness: player.handedness, contactStyle, kind, position: origin });
-        if (!feet.reachable || !feet.legalVolleyFeet || intent === 'erne' && !feet.feet.every(p => outsideNVZ(p) && outsideSideline(p))) continue;
+        const stances = contactFeetCandidatesV1({ contact, target: outgoing.target, team, handedness: player.handedness,
+          contactStyle, kind, position: origin, availableSeconds: pendingSegment.contactTime + intercept.time });
+        // A signature cannot keep a maximum-reach pose that the instructional
+        // athlete cannot perform. Try the same bounded plants as ordinary play.
+        for (const feet of stances.slice(0, SIGNATURE_LIMITS.maxStanceTrials)) {
+        if (!feet.reachable || !feet.legalVolleyFeet || !feet.routeReachable || intent === 'erne' && !feet.feet.every(p => outsideNVZ(p) && outsideSideline(p))) continue;
+        const trainerSupport = assessGeneratedTrainerSupportV1({ contact, feet: feet.feet, stance: feet.stance, handedness: player.handedness,
+          strokeSide: contactStyle, family: outgoing.family, kind, outgoingFlight: outgoing.flight,
+          incomingFlight, incomingTimeSeconds: intercept.time, nearCourt: origin.y < 22 });
+        if (!trainerSupport.supported || !trainerSupport.feasible) continue;
         work.routeTrials++;
         const route = prepareRoute({ pendingSegment, pendingRecipe, playerId, contact, feet, outgoing, kind, contactStyle, time: intercept.time });
         if (!route) continue;
@@ -195,6 +205,8 @@ export function probeSignatureCandidatesV1({ incomingFlight, pendingSegment, pen
           route: { peak: route.peak, spacing: route.spacing, groundedResetVerified: intent !== 'erne' || contactEvidence.feetEstablishedOutsideNVZ },
           reason: intent === 'erne' ? 'A grounded route reaches the actual wide ball beside the NVZ before its bounce.' : 'The actual bounced ball is beyond the post and the solved return passes wholly outside it.' });
         accepted = true; break;
+        }
+        if (accepted) break;
       }
       if (!accepted) exclusions.push({ playerId, intent, code: 'no-supported-contact-and-route' });
     }

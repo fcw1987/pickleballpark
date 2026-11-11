@@ -1,6 +1,9 @@
 // Shared logical actor geometry for model 2 collision checks and both views.
 // All times come from the CoachingSession timeline, including evidence observed
 // after the ball became dead. Legacy actor routes never enter this module.
+// Supported grounded paddle-contact ceiling, not an official rule or a
+// universal human reach measurement. Airborne contacts are not represented.
+export const GROUNDED_CONTACT_HEIGHT_FEET = 8.5;
 const clamp = value => Math.max(0, Math.min(1, value));
 const ease = value => { const t = clamp(value); return t < .5 ? 2 * t * t : 1 - (1 - t) ** 2 * 2; };
 const blend = (a, b, t) => Object.freeze({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });

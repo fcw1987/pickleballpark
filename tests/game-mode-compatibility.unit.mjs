@@ -5,13 +5,27 @@ import { createStarterDocument } from '../play-document.js';
 import { compileEffectiveCandidate } from '../rally-proposals.js';
 import { captureCompatibility, captureCompiledSignature, COMPATIBILITY_VERSION } from '../tools/game-mode-compatibility.mjs';
 
-test('all eight lessons and supported saved model1/v2/v3 sources keep their structural and sampled contracts', () => {
+test('all lessons and saved sources keep exact contracts with only reviewed auto-handedness metadata corrections', () => {
   const baseline = JSON.parse(readFileSync(new URL('./fixtures/game-mode/compatibility.json', import.meta.url)));
   const actual = captureCompatibility();
   assert.equal(actual.version, COMPATIBILITY_VERSION);
   assert.equal(actual.epsilonSeconds, baseline.epsilonSeconds);
   assert.equal(actual.cases.filter(c => c.id.startsWith('lesson:')).length, 8);
-  assert.deepEqual(actual.cases, baseline.cases);
+  // Keep the original frozen baseline intact. These five exact structural
+  // pairs record the reviewed anatomy bug fix; every other field, including
+  // source bytes and default actor/ball/function samples, stays frozen.
+  const review = JSON.parse(readFileSync(new URL('./fixtures/game-mode/auto-handedness-corrections-v1.json', import.meta.url)));
+  assert.equal(review.version, 'auto-handedness-corrections-v1');
+  assert.equal(review.corrections.length, 5); assert.equal(new Set(review.corrections.map(row => row.id)).size, 5);
+  const expected = baseline.cases.map(row => {
+    const correction = review.corrections.find(item => item.id === row.id);
+    if (!correction) return row;
+    assert.deepEqual(Object.keys(correction.prior), ['compiledPlaySha256', 'timelineStructureSha256']);
+    assert.deepEqual(Object.keys(correction.corrected), Object.keys(correction.prior));
+    for (const key of Object.keys(correction.prior)) assert.equal(row[key], correction.prior[key]);
+    return { ...row, ...correction.corrected };
+  });
+  assert.deepEqual(actual.cases, expected);
 });
 
 test('changing an omitted trajectory closure is detected even when JSON structure is identical', () => {

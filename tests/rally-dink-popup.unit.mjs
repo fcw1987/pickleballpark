@@ -11,10 +11,11 @@ import { applyExecutionV1, resolveDeliveredFlightV1, DINK_POPUP_VERSION } from '
 import { simulateRally } from '../rally-engine.js';
 import { eligibleHitters } from '../rally-state.js';
 
+import {assertCurrentProceduralResult,assertFixedExecutionPairs,assertFreshPhysicalResult} from './helpers/rally-procedural-proof.mjs';
+
 const controls = JSON.parse(readFileSync(new URL('./fixtures/model2/dink-popup-attack-controls.json', import.meta.url), 'utf8'));
 const archived = JSON.parse(readFileSync(new URL('./fixtures/model2/dink-popup-archived.json', import.meta.url), 'utf8'));
 const clone = value => structuredClone(value);
-const round = value => Math.round(value * 1e9) / 1e9;
 const surfaceClearance = point => point.heightFeet - PHYSICS_V2.ballRadiusFeet - localNetHeightFeet(point.x);
 const exchangeIds = { player1: 'player3', player2: 'player4', player3: 'player1', player4: 'player2' };
 
@@ -108,39 +109,47 @@ for (const row of archived.rows) for (const [rotation, lateral] of [[false, fals
   });
 }
 
-// Movement v2 no longer advances the original receiving team after a weak
-// attack. Historical documents above stay frozen; these explicitly reviewed
-// current-generation expectations track the resulting positional choices.
-const movementExpectations = {
-  'pro-1136-24': {
-    draws: { intent: .12031104159541428, execution: { quality: .15117291663773358, error: .1903682027477771 },
-      target: { lateral: .7907168711535633, depth: .7805831038858742 },
-      perturbation: { lateral: .9605169373098761, depth: .3910994636826217 }, narration: .6104971736203879 },
-    target: { x: 3.862926019, y: 15.147774866 },
-    // The changed trajectory has a smaller, still positive local tape margin.
-    // Keep the exact reviewed contact instead of reducing every fixture's gate.
-    nextContact: { x: 6.008715909, y: 17.2, heightFeet: 2.999368281 }
-  },
-  'advanced-1074-5': { target: { x: 10.337264468, y: 16.354239708 }, family: 'reset' }
-};
+// Exact earlier procedural geometry now has an independent historical replay
+// fixture. This separate current snapshot includes the stronger trainer/motion
+// policy without changing the original execution stream or popup mapping.
 for (const row of archived.rows) test(`${row.name}: current contact search follows its positional phase with one fixed execution draw`, async () => {
   const index = row.shotNumber - 1;
   const request = { ...clone(row.input), seed: row.seed };
   request.options.maxShots = row.shotNumber + 1;
   const result = await simulateRally(request);
-  assert.ok(['complete', 'censored'].includes(result.status), JSON.stringify(result.diagnostics));
-  assert.equal(result.document.shots.length, row.shotNumber + 1);
+  assertCurrentProceduralResult(result,row.name);assertFixedExecutionPairs(result);assertFreshPhysicalResult(result);
   independentlyValid(result.document);
   const decision = result.decisions[index], next = result.decisions[index + 1];
-  const expected = movementExpectations[row.name] ?? {};
-  assert.deepEqual(decision.draws, expected.draws ?? row.draws, 'the reviewed current input uses one deterministic set of execution draws');
   assert.deepEqual(decision.draws.execution, row.draws.execution, 'quality is never redrawn to obtain a desirable opportunity');
-  assert.deepEqual(decision.resolution.target, expected.target ?? {
-    x: round(row.fixedMapping.target.x), y: round(row.fixedMapping.target.y)
-  });
+  if(row.name==='pro-1136-24'){
+    assert.equal(result.status,'complete');assert.equal(result.document.shots.length,24);
+    assert.equal(result.outcome.reason,'net');assert.equal(result.outcome.shotId,'shot-24');
+    assert.equal(decision.execution.quality,'error');assert.equal(decision.execution.errorReason,'net');
+    assert.equal(decision.execution.riskContext.kind,'phase-default');
+    assert.equal(decision.execution.riskContext.conditions.settledMovement,false);
+    assert.ok(decision.execution.pressure.movementSpeedFeetPerSecond>3);
+    assert.ok(decision.execution.draw<decision.execution.probabilities.error,'the unchanged draw falls below the newly measured error threshold');
+    assert.equal(decision.resolution.physicalTransformation.kind,'net-mesh');
+    assert.equal(next,undefined,'a real terminal net event cannot invent a popup reply');
+    return;
+  }
+  if(row.name==='intermediate-1236-7'){
+    assert.equal(result.status,'censored');assert.equal(result.document.shots.length,8);
+    assert.equal(decision.execution.riskContext.kind,'settled-soft');
+    assert.equal(decision.execution.riskContext.conditions.settledMovement,true);
+    assert.equal(decision.execution.quality,'low');assert.equal(decision.execution.errorReason,null);
+    const probabilities=decision.execution.probabilities,lowStart=probabilities.error+probabilities.attackable+probabilities.excellent;
+    assert.ok(decision.execution.draw>=lowStart&&decision.execution.draw<lowStart+probabilities.low,'the unchanged draw now occupies the measured settled-soft low interval');
+    assert.equal(decision.resolution.physicalTransformation.kind,'controlled-clearance');
+    assert.equal(decision.resolution.physicalTransformation.dinkPopup,undefined);
+    assert.equal(next.situation.attackable,false);assert.equal(next.situation.affordances.attack,false);
+    assert.ok(surfaceClearance(next.situation.contact)<0,'a low ordinary contact must not inherit a popup attack claim');
+    for(const key of ['legal','routeValid','feetValid'])assert.equal(next.situation.contactSelection.evidence.chosen.audit[key],true);
+    return;
+  }
   assert.equal(decision.execution.quality, 'attackable');
   assert.equal(decision.resolution.choiceAttempts.filter(attempt => attempt.executionDraws).length, 1);
-  if (expected.family === 'reset') {
+  if (row.name === 'advanced-1074-5') {
     assert.equal(result.decisions[index - 1].chosen.family, 'drive');
     assert.equal(result.decisions[index - 1].execution.quality, 'attackable');
     assert.equal(decision.situation.opponentFormation, 'split', 'a weak drive does not pull its former returning team to the line');
@@ -158,10 +167,7 @@ for (const row of archived.rows) test(`${row.name}: current contact search follo
   assert.equal(fact.receiverOpportunity.scope, 'at-delivery');
   assert.equal(next.situation.attackable, true);
   assert.equal(next.situation.affordances.attack, true);
-  if (expected.nextContact) {
-    assert.deepEqual(next.situation.contact, expected.nextContact);
-    assert.ok(surfaceClearance(next.situation.contact) > 0, 'the entire ball is above the local tape at the reviewed new contact');
-  } else assert.ok(surfaceClearance(next.situation.contact) > .05);
+  assert.ok(surfaceClearance(next.situation.contact) > .05);
   assert.equal(next.situation.contactSelection.evidence.chosen.audit.legal, true);
   assert.equal(next.situation.contactSelection.evidence.chosen.audit.routeValid, true);
   assert.equal(next.situation.contactSelection.evidence.chosen.audit.feetValid, true);

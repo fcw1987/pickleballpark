@@ -4,6 +4,7 @@ import { assessReach } from './rally-tactics.js';
 import { PHYSICS_V2, sampleFlightVelocityV2 } from './play-physics-v2.js';
 import { planRallyFlightV1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from './rally-flight-planner.js';
 import { isInNonVolleyZone } from './court-geometry.js';
+import { validGeneratedRouteCertificateShape, matchesGeneratedRouteCertificate } from './generated-route-certificates.js';
 
 export const QUALITY_VERSION = 'rally-quality-v1';
 export const CAUSATION_VERSION = 'rally-causation-v1';
@@ -204,6 +205,13 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
     preferredFlight.launchVerticalFeetPerSecond = clamp(preferredFlight.launchVerticalFeetPerSecond + 2, -80, 80);
     transformation = 'launch-loft';
   }
+  // A controlled high return keeps its selected loft. Excellent/low still
+  // tighten target precision; their generic clearance hint must not flatten
+  // the chosen return and take away the returner's approach time.
+  if (family === 'return' && arc === 'high' && ['excellent', 'low'].includes(execution.quality)) {
+    requestedClearanceFeet = null;
+    transformation = 'target-precision';
+  }
   if (requestedClearanceFeet !== null) {
     // The new quality hint supersedes the nominal vertical recipe rather than
     // imposing both constraints on the same landing.
@@ -292,8 +300,28 @@ export function resolveDeliveredFlightV1({ candidate, contact, team, execution, 
   return freeze({ ...solutions[0], solutions });
 }
 
+// A generated endpoint-route exclusion is narrower than universal human reach.
+// Keep its validated second bounce a rule fault, and require the independent
+// current decision rather than trusting a copied certificate on source data.
+function certifiedGeneratedSecondBounce(outcome, terminalEvidence) {
+  const certificate = outcome?.evidence?.generatedRouteCertificate;
+  const current = terminalEvidence?.generatedRouteCertificate;
+  const at = outcome?.evidence?.position, observed = terminalEvidence?.evidencePosition ?? terminalEvidence?.position;
+  return outcome?.type === 'fault' && outcome.reason === 'second-bounce'
+    && ['shotId', 'reason', 'winner', 'faultingActor', 'ruleRef'].every(key => outcome[key] === terminalEvidence?.[key])
+    && outcome.ruleRef === '10.B.1'
+    && validGeneratedRouteCertificateShape(certificate) && validGeneratedRouteCertificateShape(current)
+    && matchesGeneratedRouteCertificate(certificate, current)
+    && certificate.actors.some(row => row.actor === outcome.faultingActor)
+    && Number.isFinite(outcome.evidence.afterContactSeconds) && Number.isFinite(terminalEvidence.afterContactSeconds)
+    && Math.abs(outcome.evidence.afterContactSeconds - terminalEvidence.afterContactSeconds) <= 1e-6
+    && Math.abs(outcome.evidence.afterContactSeconds - certificate.throughSeconds) <= 1e-6
+    && ['x', 'y', 'heightFeet'].every(key => Number.isFinite(at?.[key]) && Number.isFinite(observed?.[key])
+      && Math.abs(at[key] - observed[key]) <= 1e-6);
+}
+
 export function classifyOutcomeV1({ outcome, pressure = null, pressureDecisionId = null, execution = null,
-  actor = outcome?.faultingActor ?? null, previousIntent = pressure?.incomingIntent } = {}) {
+  actor = outcome?.faultingActor ?? null, previousIntent = pressure?.incomingIntent, terminalEvidence = null } = {}) {
   if (!outcome || typeof outcome.shotId !== 'string') throw new TypeError('A physically validated outcome is required.');
   const facts = pressure ? {
     score: clamp(finite(pressure.score), 0, 1), reachMarginFeet: finite(pressure.reachMarginFeet, 999),
@@ -302,6 +330,7 @@ export function classifyOutcomeV1({ outcome, pressure = null, pressureDecisionId
   } : null;
   let kind = 'unknown', basis = 'insufficient represented tactical evidence';
   if (outcome.type === 'winner' && outcome.reason === 'unreachable') { kind = 'winner'; basis = 'independently validated unreachable result'; }
+  else if (certifiedGeneratedSecondBounce(outcome, terminalEvidence)) { kind = 'rule-fault'; basis = 'independently validated second bounce with generated-route exclusion, not universal unreachability'; }
   else if (['body', 'nvz-foot', 'nvz-momentum', 'two-bounce'].includes(outcome.reason)) { kind = 'rule-fault'; basis = 'independently validated rule ending'; }
   else if (['net', 'long', 'wide'].includes(outcome.reason) && facts) {
     const pressuredFacts = [facts.reachMarginFeet < 1.2, facts.availableSeconds < .45, facts.movementSpeedFeetPerSecond > 7, facts.incomingSpeedMph > 25, facts.contactHeightFeet < 1.2].filter(Boolean).length;

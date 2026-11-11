@@ -47,7 +47,9 @@ function legDuration(timeline, step, index) {
 
 function boundedMoveX(fromX, desiredX, seconds) {
   const maximum = MAX_LATERAL_SPEED_FPS * seconds;
-  return clamp(fromX + clamp(desiredX - fromX, -maximum, maximum), COURT_MIN_X, COURT_MAX_X);
+  // A valid authored player can begin on the apron. Bound the journey back
+  // toward the inset goal instead of teleporting that origin onto the court.
+  return fromX + clamp(desiredX - fromX, -maximum, maximum);
 }
 
 // Scale a simultaneous lateral adjustment before either partner enters the
