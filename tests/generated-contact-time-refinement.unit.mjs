@@ -20,7 +20,9 @@ for(const row of fixture.cases)test(`bounded contact search retains actual prior
   if(row.originalCode==='no-feasible-contact'){
     assert.ok(refinement,'the two between-sample contacts still require real time refinement');
     assert.equal(refinement.intervalsPerPhase,64);
-    assert.equal(refinement.trigger,'no-supported-contact');
+    // Current contact-facing support admits ordinary contact proposals first,
+    // but their nominal intents exhaust before this still-required time pass.
+    assert.equal(refinement.trigger,'nominal-opportunities-exhausted');
   }else{
     // These three historical nominal-exhaustion witnesses now have a supported
     // non-attacking drive in the first pass. Do not run an unnecessary fallback

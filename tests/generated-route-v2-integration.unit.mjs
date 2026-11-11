@@ -11,7 +11,7 @@ import { classifyOutcomeV1 } from '../rally-quality.js';
 import { certifyGeneratedRouteExclusion, validGeneratedRouteCertificateShape, matchesGeneratedRouteCertificate } from '../generated-route-certificates.js';
 import { certifyGeneratedRouteExclusionV1 } from '../generated-route-certificate-v1.js';
 import { certifyGeneratedRouteExclusionV2 } from '../generated-route-certificate-v2.js';
-import { sampleActorFeetV2 } from '../play-actors-v2.js';
+import { sampleActorFeetV2, sampleActorBoardPositionV2 } from '../play-actors-v2.js';
 import { assertFreshPhysicalResult, assertFixedExecutionPairs } from './helpers/rally-procedural-proof.mjs';
 import { inspectGeneratedMovementV1 } from '../rally-movement.js';
 import { inspectGeneratedTrainerSupportV1 } from '../generated-trainer-support.js';
@@ -47,7 +47,7 @@ test('the exact historical narrow-foot prefix retains its unchanged v2 second-bo
   assert.equal(JSON.stringify(fixture), original);
 });
 
-test('current wide-foot generation preserves the overhead delivery and independently recomputes its v2 fault without rerolling', async () => {
+test('current wide-foot generation preserves the overhead delivery and v2 fault with a compact high-contact plant', async () => {
   let executionCalls = 0;
   const simulate = createEngineDriverV1((normalized, controls) => runNaturalAttemptV1(normalized, {...controls,
     random: {...controls.random, execution: () => { executionCalls++; return controls.random.execution(); }}}), {yieldControl: async () => {}});
@@ -63,14 +63,24 @@ test('current wide-foot generation preserves the overhead delivery and independe
   assert.deepEqual(result.document.defaultFootState, {version: 'generated-ready-stance-v1'});
   assert.equal(executionCalls, 2 * result.decisions.length, 'nominal refinement never draws and discards an execution');
   assertFixedExecutionPairs(result); assertFreshPhysicalResult(result);
+  // The final overhead uses the reviewed compact plant, 0.18 ft closer to the
+  // same ball. Its fixed contact, hand, flight and v2 ending proof do not change.
+  // All earlier contact roots still equal the immutable narrow-foot source.
+  const overheadRoot = {x: 8.734421043, y: 37.418117224};
   for (const [index, shot] of result.document.shots.entries()) {
     const {feet, ...evidence} = shot.contactEvidence, {feet: oldFeet, ...oldEvidence} = fixture.document.shots[index].contactEvidence;
     assert.deepEqual(evidence, oldEvidence);
     assert.ok(Math.abs(Math.hypot(feet[0].x - feet[1].x, feet[0].y - feet[1].y) - 1.44) < 1e-8);
-    for (const axis of ['x', 'y']) assert.ok(Math.abs((feet[0][axis] + feet[1][axis] - oldFeet[0][axis] - oldFeet[1][axis]) / 2) < 1e-8,
-      `shot${index + 1}: the wider base preserves the reviewed contact root`);
+    for (const axis of ['x', 'y']) {
+      const expected = index === 13 ? overheadRoot[axis] : (oldFeet[0][axis] + oldFeet[1][axis]) / 2;
+      assert.ok(Math.abs((feet[0][axis] + feet[1][axis]) / 2 - expected) < 1e-8,
+        `shot${index + 1}: the planted feet match the reviewed current contact root`);
+    }
   }
   const compiled = compileDocument(result.document), rules = validateRallyRules(compiled.play, compiled.timeline);
+  const last = compiled.timeline.segments.at(-1);
+  const actualRoot = sampleActorBoardPositionV2(last, last.shotSemantics.playerId, last.contactTime);
+  for (const axis of ['x', 'y']) assert.ok(Math.abs(actualRoot[axis] - overheadRoot[axis]) < 1e-8);
   for (const segment of compiled.timeline.segments) for (const actor of ['player1', 'player2', 'player3', 'player4']) {
     for (const time of [0, segment.contactTime, segment.duration / 2, segment.duration]) {
       const feet = sampleActorFeetV2(segment, actor, time);

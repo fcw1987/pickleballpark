@@ -44,6 +44,14 @@ const owned = ['family', 'hitter', 'receiver', 'contactStyle', 'target', 'arc', 
 // solver samples retain full precision. Integer seeds and exact unit RNG draws
 // are not rounded. This removes engine-specific libm tail bits from recipes.
 const numberV1 = value => Number.isInteger(value) ? value : Math.round(value * 1e9) / 1e9;
+// Grouping retains the exact point/time key. Full-precision refined samples
+// can exceed the public identifier bound, so only those keys receive local
+// aliases. Their namespace cannot collide with a contact-kind-prefixed key.
+function contactOpportunityIdV1(key, aliases) {
+    if (key.length <= 80) return key;
+    if (!aliases.has(key)) aliases.set(key, 'refined-opportunity:' + aliases.size);
+    return aliases.get(key);
+}
 function generatedV1(value) {
     if (typeof value === 'number') return numberV1(value);
     if (Array.isArray(value)) return value.map(generatedV1);
@@ -304,10 +312,11 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
     // Only audited opportunities can be returned.
     const cheap = rankContactPairsV1({ pairs, eligible, positions: origins, players: input.players });
     const reachable = new Set(cheap.filter(row => row.reach.reachable).map(row => row.pairIndex));
-    const groups = new Map(), replyCache = new Map(), stanceCache = new Map();
+    const groups = new Map(), replyCache = new Map(), stanceCache = new Map(), opportunityAliases = new Map();
     for (const [sourceIndex, pair] of pairs.entries()) {
         if (!reachable.has(sourceIndex)) continue;
         const key = [pair.kind, numberV1(pair.time), pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
+        const opportunityId = contactOpportunityIdV1(key, opportunityAliases);
         const supportKey = [pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
         const replyKey = [supportKey, input.players[pair.id].style, pair.signature?.intent ?? '', pair.signature?.target.x ?? '', pair.signature?.target.y ?? ''].join(':');
         if (!replyCache.has(replyKey)) {
@@ -324,7 +333,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
             handedness: input.players[pair.id].handedness, contactStyle: pair.contactStyle, kind: pair.kind,
             position: origins[pair.id], availableSeconds: pair.time, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1, refineAngular: refinementPass
         })).filter(feet => feet.reachable && feet.legalVolleyFeet));
-        pair.stanceOptions = stanceCache.get(stanceKey).map((feet, stanceIndex) => ({ feet, stanceIndex, opportunityId: key,
+        pair.stanceOptions = stanceCache.get(stanceKey).map((feet, stanceIndex) => ({ feet, stanceIndex, opportunityId,
             preference: contactOpportunityPreferenceV1({ contact: pair.contact, stance: feet.stance,
                 contactFeet: feet.feet,
                 origin: origins[pair.id], team, feasibleReplyIds: pair.replySupport.ids,
@@ -334,8 +343,8 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
         // Every bounded stance contributes to the optimistic bound. A repaired
         // stance can improve forward position as well as outgoing clearance.
         const preference = pair.stanceOptions[0].preference;
-        const proposal = { opportunityId: key, preference, sourceIndex };
-        const group = groups.get(key) ?? { opportunityId: key, proposals: [] };
+        const proposal = { opportunityId, preference, sourceIndex };
+        const group = groups.get(key) ?? { opportunityId, proposals: [] };
         if (!group.proposals.some(item => pairs[item.sourceIndex].id === pair.id)) group.proposals.push(proposal);
         groups.set(key, group);
     }
