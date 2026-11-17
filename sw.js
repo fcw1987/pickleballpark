@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v43`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v44`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -45,12 +45,24 @@ const STATIC_ASSETS = [
   './rally-styles.js',
   './rally-targets.js',
   './rally-movement.js',
+  './rally-stacking.js',
   './rally-quality.js',
   './rally-narration.js',
   './rally-signatures.js',
   './play-physics-v2.js',
   './play-outcome-v2.js',
   './generated-route-certificate-v1.js',
+  './generated-route-certificate-v2.js',
+  './generated-route-certificate-v3.js',
+  './generated-route-certificates.js',
+  './generated-contact-support.js',
+  './generated-motion-limits.js',
+  './generated-foot-state.js',
+  './generated-grounded-sole.js',
+  './generated-contact-refinement.js',
+  './generated-trainer-support.js',
+  './trainer-contact-support.js',
+  './human-athlete-profile.js',
   './play-timeline-v2.js',
   './play-actors-v2.js',
   './terminal-cues.js',

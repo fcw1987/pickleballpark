@@ -443,30 +443,44 @@ test('grounded engine contact-height support is versioned, applies to every fami
   assert.equal(assessContactSupportV2([], { generated: true }).status, 'NOT_EVALUATED');
 });
 
-test('a real compiled high contact can pass M1 rules while failing grounded generator support', () => {
+test('a represented high contact fails independent grounded model validation without rewriting its geometry', () => {
   const document = unsupportedGroundedDocument(), source = JSON.stringify(document);
   const compiled = compileDocument(document), rules = validateRallyRules(compiled.play, compiled.timeline);
-  assert.equal(compiled.validShotCount, 2); assert.deepEqual(compiled.findings.filter(item => item.severity === 'error'), []);
-  assert.equal(rules.valid, true);
+  assert.equal(compiled.validShotCount, 0);
+  assert.equal(compiled.timeline.segments.length, 2, 'invalid source geometry remains inspectable');
+  const contact = compiled.timeline.segments[1].shotSemantics.contact.point;
+  assert.ok(contact.heightFeet > 16, 'the represented high contact is not lowered to pass');
+  assert.deepEqual(contact, previewDocumentV2(document).timeline.segments[1].shotSemantics.contact.point);
+  assert.equal(compiled.findings.filter(item => item.severity === 'error').length, 1);
+  assert.equal(compiled.findings[0].kind, 'feasibility');
+  assert.equal(rules.valid, false);
+  assert.deepEqual(rules.violations.map(item => [item.code, item.category, item.stepId]),
+    [['grounded-contact-height', 'model', 'support-high-contact']]);
   const row = observeRallyV2({ document, compiled, rules, result: resultFor(document), seed: 7 });
-  assert.equal(row.physicallyValid, true); assert.equal(row.accepted, true);
-  assert.equal(row.modelSupport.status, 'FAIL'); assert.equal(row.modelSupport.unsupportedContacts, 1);
-  assert.ok(row.modelSupport.violations[0].heightFeet > 16);
-  assert.equal(row.modelSupport.violations[0].shotId, 'support-high-contact');
-  assert.equal(JSON.stringify(document), source, 'a diagnostic cannot rewrite or reject source imports');
+  assert.equal(row.physicallyValid, false); assert.equal(row.accepted, false);
+  assert.equal(row.modelSupport.status, 'NOT_EVALUATED');
+  assert.equal(row.modelSupport.checkedContacts, 0, 'an invalid sequence cannot enter the accepted support denominator');
+  assert.equal(JSON.stringify(document), source, 'validation and observation preserve the authored source bytes');
   const manual = copy(document); delete manual.generation;
   validateDocument(manual);
-  assert.equal(observeRallyV2({ document: manual, compiled, rules, result: resultFor(manual), seed: 7 }).modelSupport.status, 'NOT_APPLICABLE');
+  const manualCompiled = compileDocument(manual), manualRules = validateRallyRules(manualCompiled.play, manualCompiled.timeline);
+  assert.equal(manualCompiled.validShotCount, 0, 'the grounded model limit is independent of generator provenance');
+  assert.deepEqual(manualCompiled.timeline.segments[1].shotSemantics.contact.point, contact);
+  assert.equal(observeRallyV2({ document: manual, compiled: manualCompiled, rules: manualRules, result: resultFor(manual), seed: 7 }).modelSupport.status, 'NOT_APPLICABLE');
 });
 
-test('runner distinguishes generator-model support failure from independent rule validity', async () => {
+test('runner reports independently invalid grounded contacts before generation-only support diagnostics', async () => {
   const jobs = createCohortSchedule({ cohort: 'custom', styles: ['advanced'], seeds: [7] });
   const report = await runRealismV2({ jobs, generate: async input => engineResultFor(input, unsupportedGroundedDocument()) });
-  assert.equal(report.status, 'MODEL_SUPPORT_FAIL');
-  assert.equal(report.physicalValidity.status, 'PASS');
-  assert.equal(report.modelSupport.status, 'FAIL');
-  assert.equal(report.modelSupport.unsupportedContacts, 1);
-  assert.equal(report.failures.length, 0, 'support failure is not fabricated as an official-rule or search failure');
+  assert.equal(report.status, 'INVALID');
+  assert.equal(report.physicalValidity.status, 'INVALID');
+  assert.equal(report.physicalValidity.invalidDocuments, 1);
+  assert.equal(report.modelSupport.status, 'NOT_EVALUATED');
+  assert.equal(report.modelSupport.checkedContacts, 0);
+  assert.equal(report.failures.length, 1);
+  assert.equal(report.failures[0].message, 'No fully validated selected document');
+  assert.deepEqual(report.observations[0].validation.ruleViolations.map(item => [item.code, item.category]),
+    [['grounded-contact-height', 'model']], 'model infeasibility must not be mislabeled as an official sport rule');
 });
 
 test('missing output audit stays unevaluated and all attempted statuses remain in original denominators', async () => {

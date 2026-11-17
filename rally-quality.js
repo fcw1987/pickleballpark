@@ -4,11 +4,12 @@ import { assessReach } from './rally-tactics.js';
 import { PHYSICS_V2, sampleFlightVelocityV2 } from './play-physics-v2.js';
 import { planRallyFlightV1, MAX_AUTHORITATIVE_SOLVER_CALLS_PER_TARGET } from './rally-flight-planner.js';
 import { isInNonVolleyZone } from './court-geometry.js';
+import { validGeneratedRouteCertificateShape, matchesGeneratedRouteCertificate } from './generated-route-certificates.js';
 
 export const QUALITY_VERSION = 'rally-quality-v1';
 export const CAUSATION_VERSION = 'rally-causation-v1';
 export const FORMATION_PRESSURE_VERSION = 'rally-formation-pressure-v1';
-export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v3';
+export const PHYSICAL_TRANSFORMATION_VERSION = 'rally-execution-physical-v4';
 export const DINK_POPUP_VERSION = 'rally-dink-popup-v1';
 export const RISK_CONTEXT_VERSION = 'rally-execution-risk-v1';
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
@@ -157,10 +158,21 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
   let transformation = 'target-precision', requestedClearanceFeet = null, dinkPopup = null;
   if (execution.quality === 'error') {
     if (execution.errorReason === 'net') {
-      // One fixed draw-derived mesh endpoint permits a real collision even
-      // from a high contact. No clearance or endpoint retry cascade.
-      next.x = clamp(target.x, 2, 18);
-      next.y = 22 + (team === 'green' ? 1 : -1) * (.3 + .3 * depth);
+      // Place the near-net landing along the selected horizontal ray, rather
+      // than retaining the far target's x and rotating the stroke. The same depth
+      // draw and clearance hint still require an authoritative mesh collision.
+      const direction = team === 'green' ? 1 : -1;
+      if (!(direction * (22 - contact.y) > 0 && direction * (target.y - 22) > 0)) {
+        throw new RangeError('Net-error execution requires a forward target crossing from the team\'s contact end.');
+      }
+      next.y = 22 + direction * (.3 + .3 * depth);
+      const fraction = (next.y - contact.y) / (target.y - contact.y);
+      next.x = contact.x + (target.x - contact.x) * fraction;
+      if (!(Number.isFinite(fraction) && fraction > 0 && Number.isFinite(next.x))) {
+        throw new RangeError('Net-error execution requires a finite contact-to-target heading.');
+      }
+      // No x clamp: around-post, gap and infeasible paths must remain so.
+      // Delivery reports unavailable rather than redirecting them to the mesh.
       requestedClearanceFeet = -1.5;
       transformation = 'net-mesh';
     } else if (execution.errorReason === 'long') {
@@ -203,6 +215,13 @@ export function applyExecutionV1({ execution, target, contact, team, physics, fa
   } else if (Number.isFinite(preferredFlight.launchVerticalFeetPerSecond) && execution.quality === 'attackable') {
     preferredFlight.launchVerticalFeetPerSecond = clamp(preferredFlight.launchVerticalFeetPerSecond + 2, -80, 80);
     transformation = 'launch-loft';
+  }
+  // A controlled high return keeps its selected loft. Excellent/low still
+  // tighten target precision; their generic clearance hint must not flatten
+  // the chosen return and take away the returner's approach time.
+  if (family === 'return' && arc === 'high' && ['excellent', 'low'].includes(execution.quality)) {
+    requestedClearanceFeet = null;
+    transformation = 'target-precision';
   }
   if (requestedClearanceFeet !== null) {
     // The new quality hint supersedes the nominal vertical recipe rather than
@@ -254,13 +273,13 @@ export function resolveDeliveredFlightV1({ candidate, contact, team, execution, 
   if (!['green', 'orange'].includes(team) || !candidate?.family || !['error', 'attackable', 'excellent', 'low', 'neutral'].includes(execution?.quality)) throw new TypeError('Delivered flight requires a candidate, team and execution quality.');
   const preferred = applied.preferredFlight ?? Object.fromEntries(['speedMph', 'apexFeet', 'launchVerticalFeetPerSecond']
     .filter(key => Number.isFinite(applied.physics?.[key])).map(key => [key, applied.physics[key]]));
-  // A fixed wide execution can miss outside a post without becoming an ATP
+  // A fixed long or wide execution can miss outside a post without becoming an ATP
   // tactical selection. Nominal route admission remains strict; only delivered
   // geometry follows the exact sampled contact-to-target chord.
   const errorReason = execution.quality === 'error' ? execution.errorReason ?? applied.intendedError ?? null : null;
   const fraction = (22 - contact.y) / (applied.target.y - contact.y);
   const netX = contact.x + (applied.target.x - contact.x) * fraction;
-  const incidentalAroundPost = route === 'over-net' && errorReason === 'wide' && fraction > 0 && fraction < 1
+  const incidentalAroundPost = route === 'over-net' && ['long', 'wide'].includes(errorReason) && fraction > 0 && fraction < 1
     && (netX < -1.25 - PHYSICS_V2.ballRadiusFeet || netX > 21.25 + PHYSICS_V2.ballRadiusFeet);
   const deliveredRoute = incidentalAroundPost ? 'around-the-post' : route;
   const planner = planRallyFlightV1({ from: contact, target: applied.target, family: candidate.family, intent, style,
@@ -292,8 +311,28 @@ export function resolveDeliveredFlightV1({ candidate, contact, team, execution, 
   return freeze({ ...solutions[0], solutions });
 }
 
+// A generated endpoint-route exclusion is narrower than universal human reach.
+// Keep its validated second bounce a rule fault, and require the independent
+// current decision rather than trusting a copied certificate on source data.
+function certifiedGeneratedSecondBounce(outcome, terminalEvidence) {
+  const certificate = outcome?.evidence?.generatedRouteCertificate;
+  const current = terminalEvidence?.generatedRouteCertificate;
+  const at = outcome?.evidence?.position, observed = terminalEvidence?.evidencePosition ?? terminalEvidence?.position;
+  return outcome?.type === 'fault' && outcome.reason === 'second-bounce'
+    && ['shotId', 'reason', 'winner', 'faultingActor', 'ruleRef'].every(key => outcome[key] === terminalEvidence?.[key])
+    && outcome.ruleRef === '10.B.1'
+    && validGeneratedRouteCertificateShape(certificate) && validGeneratedRouteCertificateShape(current)
+    && matchesGeneratedRouteCertificate(certificate, current)
+    && certificate.actors.some(row => row.actor === outcome.faultingActor)
+    && Number.isFinite(outcome.evidence.afterContactSeconds) && Number.isFinite(terminalEvidence.afterContactSeconds)
+    && Math.abs(outcome.evidence.afterContactSeconds - terminalEvidence.afterContactSeconds) <= 1e-6
+    && Math.abs(outcome.evidence.afterContactSeconds - certificate.throughSeconds) <= 1e-6
+    && ['x', 'y', 'heightFeet'].every(key => Number.isFinite(at?.[key]) && Number.isFinite(observed?.[key])
+      && Math.abs(at[key] - observed[key]) <= 1e-6);
+}
+
 export function classifyOutcomeV1({ outcome, pressure = null, pressureDecisionId = null, execution = null,
-  actor = outcome?.faultingActor ?? null, previousIntent = pressure?.incomingIntent } = {}) {
+  actor = outcome?.faultingActor ?? null, previousIntent = pressure?.incomingIntent, terminalEvidence = null } = {}) {
   if (!outcome || typeof outcome.shotId !== 'string') throw new TypeError('A physically validated outcome is required.');
   const facts = pressure ? {
     score: clamp(finite(pressure.score), 0, 1), reachMarginFeet: finite(pressure.reachMarginFeet, 999),
@@ -302,6 +341,7 @@ export function classifyOutcomeV1({ outcome, pressure = null, pressureDecisionId
   } : null;
   let kind = 'unknown', basis = 'insufficient represented tactical evidence';
   if (outcome.type === 'winner' && outcome.reason === 'unreachable') { kind = 'winner'; basis = 'independently validated unreachable result'; }
+  else if (certifiedGeneratedSecondBounce(outcome, terminalEvidence)) { kind = 'rule-fault'; basis = 'independently validated second bounce with generated-route exclusion, not universal unreachability'; }
   else if (['body', 'nvz-foot', 'nvz-momentum', 'two-bounce'].includes(outcome.reason)) { kind = 'rule-fault'; basis = 'independently validated rule ending'; }
   else if (['net', 'long', 'wide'].includes(outcome.reason) && facts) {
     const pressuredFacts = [facts.reachMarginFeet < 1.2, facts.availableSeconds < .45, facts.movementSpeedFeetPerSecond > 7, facts.incomingSpeedMph > 25, facts.contactHeightFeet < 1.2].filter(Boolean).length;

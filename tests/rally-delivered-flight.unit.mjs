@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveDeliveredFlightV1, applyExecutionV1 } from '../rally-quality.js';
 import { planRallyFlightV1 } from '../rally-flight-planner.js';
-import { solveFlightV2 } from '../play-physics-v2.js';
+import { solveFlightV2, PHYSICS_V2 } from '../play-physics-v2.js';
 // Actual contacts and delivered source recipes from development-63016b5.jsonl;
 // Pro 25 shot 13, Pro 50 shot 15, Advanced 50 shot 12. No archive runtime dependency.
 const fixtures = [
@@ -164,6 +164,43 @@ test('unsupported low-contact nominal attacks retain independently solved delive
   }
 });
 const families=['serve','return','drive','drop','reset','dink','lob','volley','overhead'];
+// Pro 51127's long miss crosses outside the post from an off-sideline
+// bounced contact. This remains a failed straight dink, not a selected ATP.
+for(const team of ['green','orange']) test(`fixed long execution follows its incidental post route without changing intent (${team})`,()=>{
+  const rotate=p=>team==='green'?{...p}:{...p,x:20-p.x,y:44-p.y};
+  const input={candidate:{id:'straight-dink',intent:'straight-dink',family:'dink',pace:'soft',arc:'medium'},
+    contact:rotate({x:22.057080824393623,y:14.26928084694913,heightFeet:1.5867317548114346}),team,
+    execution:{quality:'error',errorReason:'long',draw:.06621859758161008,errorDraw:.7321655189152807},
+    applied:{target:rotate({x:19.148894374,y:47.906907069}),quality:'error',intendedError:'long',
+      intent:'straight-dink',route:'over-net',pace:'soft',arc:'medium',
+      preferredFlight:{launchVerticalFeetPerSecond:11.773182554}},style:'pro'};
+  const before=JSON.stringify(input),result=resolveDeliveredFlightV1(input);
+  assert.equal(JSON.stringify(input),before);
+  assert.deepEqual(result.applied.target,input.applied.target);
+  assert.equal(result.applied.quality,'error');assert.equal(result.applied.intendedError,'long');
+  assert.equal(result.applied.intent,'straight-dink');assert.equal(result.applied.route,'over-net');
+  assert.equal(result.guidance.nominalRoute,'over-net');assert.equal(result.guidance.deliveredRoute,'around-the-post');
+  assert.equal(result.guidance.incidentalAroundPost,true);
+  const crossing=result.flight.events.find(e=>e.type==='net-crossing');
+  assert.equal(crossing.aroundPost,true);
+  assert.ok(team==='green'?crossing.position.x>21.25+PHYSICS_V2.ballRadiusFeet:crossing.position.x< -1.25-PHYSICS_V2.ballRadiusFeet);
+  assert.equal(result.flight.obstruction,null);assert.ok(result.flight.launchSpeedMph<=25);
+  assert.ok(result.guidance.trials.length<=6);
+  near(result.flight.landing.x,input.applied.target.x);near(result.flight.landing.y,input.applied.target.y);
+  assert.ok(team==='green'?result.flight.landing.y>44:result.flight.landing.y<0);
+  for(const execution of [{quality:'neutral',errorReason:null},{quality:'error',errorReason:'net'}]) {
+    const negative=structuredClone(input);negative.execution=execution;
+    negative.applied.quality=execution.quality;negative.applied.intendedError=execution.errorReason;
+    assert.throws(()=>resolveDeliveredFlightV1(negative),error=>{
+      assert.match(error.message,/around a post, not over the net/);
+      assert.equal(error.guidance.incidentalAroundPost,false);return true;
+    });
+  }
+  const nominal=planRallyFlightV1({from:input.contact,target:input.applied.target,family:'dink',intent:'straight-dink',
+    quality:'error',errorReason:'long',style:'pro',route:'over-net'});
+  assert.equal(nominal.status,'unavailable');assert.match(nominal.diagnostics.reason,/around a post, not over the net/);
+});
+
 function fixture(family,quality,errorReason,team) {
   const y=family==='lob'?3:family==='serve'?0:14;
   const destination=family==='lob'&&errorReason==='net'?23:family==='overhead'&&errorReason==='net'?24:['drop','reset','dink'].includes(family)?27:family==='overhead'?32:38;
@@ -192,7 +229,7 @@ test('soft popups retain their intended NVZ target while reported shape is measu
     const dink=family==='dink';
     near(result.applied.target.y,team==='green'?(dink?28.825:28.2):(dink?15.175:15.8));
     assert.equal(result.applied.physicalTransformation.kind,dink?'dink-popup':'soft-popup');
-    assert.equal(result.applied.physicalTransformation.version,'rally-execution-physical-v3');
+    assert.equal(result.applied.physicalTransformation.version,'rally-execution-physical-v4');
     if(dink){assert.equal(result.applied.physicalTransformation.dinkPopup.version,'rally-dink-popup-v1');near(result.flight.metadata.apexFeet,6.4);}
     assert.ok(result.applied.target.y>=15&&result.applied.target.y<=29);
     assert.equal(JSON.stringify(input),before);

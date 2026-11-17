@@ -141,6 +141,12 @@ M1 physical outcomes retain `winner`/`fault` semantics. Separate
 `unforced-error`, `rule-fault` or `unknown`, with shot/actor identity, a preceding
 pressure decision and bounded heuristic facts. A quality roll alone cannot prove
 forced causation. This classification cannot replace physical ending evidence.
+A stored second-bounce fault is classified as a rule fault only when its shot,
+actors, rule, time, position and complete generated-route certificate match the
+independently recomputed terminal evidence. That certificate excludes only the
+bounded generated eased routes, not every possible human contact. It does not
+turn the physical fault into a winner. Missing or mismatched proof retains the
+conservative unknown classification.
 
 ## Physical planning and browser lifetime
 
@@ -273,6 +279,21 @@ fifth opportunity after a third-shot drive, with no denominator substitution.
 The fourth-shot 85-percent soft response applies to a genuinely low, non-attackable
 drop. A supported attacking contact uses the existing high-ball policy and actual
 defender targets; a quality label alone cannot establish that opportunity.
+
+High deep returns retain the planner's existing 7.6 ft high-return apex
+preference, rather than a generic 1.2 ft clearance overriding the chosen arc.
+Excellent and low execution retain their tighter target precision without
+flattening that selected return; sampled errors and their fixed target/error
+construction remain authoritative. The physical solver still chooses the
+feasible trajectory and reports all speed/clearance departures. This follows
+[USA Pickleball's return guidance](https://usapickleball.org/pickleball-skills/level-three/return-of-serve-tips/):
+advance after the return, using more arc when needed to reach the line. It is
+not a guarantee of arriving at the line, a speed increase, a change to execution
+priors, or a calibration-band adjustment. Existing serialized flight physics
+retain their replay. More realistic return geometry can change subsequent
+contact opportunities and legitimate pre-execution nominal target searches;
+RNG algorithms and sampled-error handling are unchanged, not every later draw
+position. Aggregate calibration remains a separate measured verdict.
 
 Pressure records actual incoming contact velocity, retaining launch speed as a
 separate fact. Formation load is a bounded heuristic based on represented teams,

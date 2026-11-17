@@ -46,10 +46,17 @@ test('fixed wide delivery derives actual route in both directions without changi
   }
 });
 
-test('nominal over-net and non-wide deliveries do not gain incidental ATP admission', () => {
+test('nominal over-net routes and neutral or net-error deliveries do not gain incidental ATP admission', () => {
   const input = fixed();
-  assert.equal(planRallyFlightV1({ from: input.contact, target: input.applied.target, family: 'dink', quality: 'error', errorReason: 'wide' }).status, 'unavailable');
-  for (const execution of [{ quality: 'neutral' }, { quality: 'error', errorReason: 'long' }, { quality: 'error', errorReason: 'net' }]) {
+  for (const errorReason of ['wide', 'long']) {
+    const nominal = planRallyFlightV1({ from: input.contact, target: input.applied.target, family: 'dink', quality: 'error', errorReason, route: 'over-net' });
+    assert.equal(nominal.status, 'unavailable');
+    assert.match(nominal.diagnostics.reason, /around a post, not over the net/);
+  }
+  // Both long and wide misses may follow an incidental post route at delivery;
+  // the separate mirrored long fixtures cover that delivery without relaxing
+  // the planner's explicit nominal route or permitting a net-error bypass.
+  for (const execution of [{ quality: 'neutral' }, { quality: 'error', errorReason: 'net' }]) {
     assert.throws(() => resolveDeliveredFlightV1({ ...input, execution }), /Delivered flight unavailable/);
   }
   const nominalATP = { ...input, route: 'around-the-post', contact: { x: 10, y: 26.8, heightFeet: 1.62 }, applied: { ...input.applied, target: { x: 10, y: 18 } } };

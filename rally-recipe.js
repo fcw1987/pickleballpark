@@ -1,6 +1,7 @@
 // Serializable origin of an engine point. This module never regenerates a
 // document: authored edits remain independent of their recorded provenance.
 import { SERVICE_COURT_CONVENTION } from './rally-state.js';
+import { normalizeStackingV1, createDefaultStackingLayoutV1 } from './rally-stacking.js';
 
 export const RALLY_ENGINE_VERSION = 'rally-engine-v1';
 export const RALLY_POLICY_VERSION = 'rally-policy-v3';
@@ -11,7 +12,7 @@ export const RALLY_FLAVOUR_IDS = Object.freeze(['balanced', 'bangers', 'kitchen-
 export const RALLY_PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 export const RALLY_DEFAULT_OPTIONS = Object.freeze({ lengthFeel: 'natural', winner: 'either', signatureShots: true, maxShots: 99 });
 const TEAMS = ['green', 'orange'];
-const INPUT_KEYS = ['players', 'layout', 'service', 'seed', 'options', 'signal', 'onProgress'];
+const INPUT_KEYS = ['players', 'layout', 'service', 'seed', 'options', 'stacking', 'signal', 'onProgress'];
 const fail = (path, text) => { throw new TypeError(`${path} ${text}`); };
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
@@ -89,8 +90,11 @@ function defaultLayout(players, service) {
   const handSign = (near ? -1 : 1) * (players[service.server].handedness === 'right' ? 1 : -1);
   return { ...Object.fromEntries(RALLY_PLAYER_IDS.map(id => [id, positions[id]])), ball: { x: serverX + handSign * .8, y: near ? 0 : 44 } };
 }
-function normalizeLayout(value, players, service) {
-  if (value === undefined) value = defaultLayout(players, service);
+function normalizeLayout(value, players, service, stacking) {
+  if (value === undefined) {
+    value = defaultLayout(players, service);
+    if (stacking !== undefined) value = createDefaultStackingLayoutV1({ layout: value, players, service, stacking });
+  }
   object(value, 'layout', [...RALLY_PLAYER_IDS, 'ball']); required(value, [...RALLY_PLAYER_IDS, 'ball'], 'layout');
   return Object.fromEntries([...RALLY_PLAYER_IDS, 'ball'].map(id => [id, point(value[id], `layout.${id}`)]));
 }
@@ -109,7 +113,9 @@ export function normalizeRallyInputV1(value) {
   object(value, 'rally input', INPUT_KEYS);
   const seed = integer(value.seed, 0, 0xffffffff, 'seed');
   const players = normalizePlayers(value.players), service = normalizeService(value.service, players);
-  return freeze({ players, layout: normalizeLayout(value.layout, players, service), service, seed, options: normalizeOptions(value.options) });
+  const stacking = normalizeStackingV1(value.stacking, players);
+  return freeze({ players, layout: normalizeLayout(value.layout, players, service, stacking), service, seed, options: normalizeOptions(value.options),
+    ...(stacking !== undefined ? { stacking } : {}) });
 }
 
 /** Strict persisted model2 origin. Returned input is never applied to edited shots. */
@@ -126,10 +132,11 @@ export function validateGenerationRecipeV1(value) {
   } else if (own(value, 'flightPlannerVersion')) fail('generation.flightPlannerVersion', 'is unsupported for rally-policy-v1.');
   choice(value.physicsVersion, [RALLY_PHYSICS_VERSION], 'generation.physicsVersion');
   const seed = integer(value.seed, 0, 0xffffffff, 'generation.seed');
-  object(value.input, 'generation.input', ['players', 'layout', 'service', 'options']);
+  object(value.input, 'generation.input', ['players', 'layout', 'service', 'options', 'stacking']);
   required(value.input, ['players', 'layout', 'service', 'options'], 'generation.input');
   const normalized = normalizeRallyInputV1({ ...value.input, seed });
-  const normalizedInput = { players: normalized.players, layout: normalized.layout, service: normalized.service, options: normalized.options };
+  const normalizedInput = { players: normalized.players, layout: normalized.layout, service: normalized.service, options: normalized.options,
+    ...(normalized.stacking !== undefined ? { stacking: normalized.stacking } : {}) };
   if (canonical(value.input) !== canonical(normalizedInput)) fail('generation.input', 'must record all normalized settings explicitly.');
   object(value.selection, 'generation.selection', ['attempts', 'selectedAttempt', 'selectedSeed']);
   required(value.selection, ['attempts', 'selectedAttempt', 'selectedSeed'], 'generation.selection');
@@ -145,7 +152,8 @@ export function createRallyRequestRecipeV1(normalized) {
   const input = normalizeRallyInputV1(normalized);
   return freeze({ mode: 'engine', generatorVersion: RALLY_ENGINE_VERSION, policyVersion: RALLY_POLICY_VERSION,
     flightPlannerVersion: RALLY_FLIGHT_PLANNER_VERSION, physicsVersion: RALLY_PHYSICS_VERSION, seed: input.seed,
-    input: { players: input.players, layout: input.layout, service: input.service, options: input.options },
+    input: { players: input.players, layout: input.layout, service: input.service, options: input.options,
+      ...(input.stacking !== undefined ? { stacking: input.stacking } : {}) },
     selection: null });
 }
 

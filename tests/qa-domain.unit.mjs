@@ -119,8 +119,8 @@ test('block/reset, speedup, handedness, and formation mappings stay honest to mo
 
   const right = compileDocument(copyScenarioDocument('right-handed-auto-contact'));
   const left = compileDocument(copyScenarioDocument('left-handed-auto-contact'));
-  assert.equal(shotSegments(right)[0].shotSemantics.strokeSide, 'forehand');
-  assert.equal(shotSegments(left)[0].shotSemantics.strokeSide, 'backhand');
+  assert.equal(shotSegments(right)[0].shotSemantics.strokeSide, 'backhand');
+  assert.equal(shotSegments(left)[0].shotSemantics.strokeSide, 'forehand');
 
   const formation = compileDocument(copyScenarioDocument('transition-one-up-one-back'));
   assert.equal(formation.play.steps[0].positions.player1.y, 8);

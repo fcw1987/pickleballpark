@@ -157,10 +157,14 @@ function tacticalContinuity(compiled, document) {
       recipe.authoring?.ownership === 'automatic' && recipe.authoring.fields?.includes('movement');
     for (const id of PLAYER_IDS) {
       const from = segment.previous.positions[id], to = segment.step.positions[id];
-      // Bound the production actor route, including its preparation and plant
-      // holds. Legacy/manual movement retains its existing acceptance boundary.
-      if (automaticMovement ? automaticActorPeakSpeed(segment, id, document.players[id].handedness) > 18 + 1e-8
-        : Math.hypot(to.x - from.x, to.y - from.y) > segment.duration * 18 + .01) return false;
+      const logicalDistance = Math.hypot(to.x - from.x, to.y - from.y);
+      // Board playback eases between logical endpoints independently of the
+      // planted actor route. A contact offset can shorten that actor route, so
+      // both must fit the same peak-speed limit. Keep legacy/manual acceptance.
+      if (automaticMovement) {
+        if (2 * logicalDistance > segment.duration * 18 + 1e-8 ||
+          automaticActorPeakSpeed(segment, id, document.players[id].handedness) > 18 + 1e-8) return false;
+      } else if (logicalDistance > segment.duration * 18 + .01) return false;
     }
     for (const team of ['green', 'orange']) {
       const ids = PLAYER_IDS.filter(id => document.players[id].team === team);

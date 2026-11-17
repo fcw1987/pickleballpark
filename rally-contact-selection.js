@@ -69,6 +69,9 @@ export function contactOpportunityPreferenceV1({ contact, stance, contactFeet, o
   return freeze({ geometryHeightBand, heightClass, heightClassRank: { low: 0, neutral: 1, attack: 2 }[heightClass],
     contactHeightFeet: at.heightFeet, readyLineImprovementFeet: lineDistance(from, team) - lineDistance(feet, team),
     nvzResetCostFeet: nvzResetCost(groundedFeet, team),
+    // Comfort is a coaching preference, not a new physical reach exemption.
+    contactExtensionFeet: Math.max(0, Math.hypot(at.x - feet.x, at.y - feet.y) - 1.8),
+    contactBehindFeet: Math.max(0, depth(feet, team) - depth(at, team)),
     supportedReplyCount: replies.length, recoveryLineDistanceFeet: lineDistance(feet, team), availableSeconds: seconds });
 }
 
@@ -107,12 +110,14 @@ function exclusion(facts, eligible) {
 }
 
 // Geometry earns attack priority only with a shared-solver attacking reply.
-// Within a class, actual grounded reset cost and ready-line recovery precede
-// tiny height changes; advancing beyond the ready line earns no extra reward.
+// Within a class, legal reset and balanced front-of-body contact precede
+// optional line gains. Ready-line recovery then precedes tiny height changes; advancing beyond the ready line earns no extra reward.
 // These are explicit model preferences, not observed win probabilities.
 const criteria = [
   ['heightClassRank', 'better-supported-height-class', -1],
   ['nvzResetCostFeet', 'less-grounded-nvz-reset', 1],
+  ['contactBehindFeet', 'less-backward-contact-reach', 1],
+  ['contactExtensionFeet', 'less-contact-extension', 1],
   ['readyLineImprovementFeet', 'more-ready-line-improvement', -1],
   ['recoveryLineDistanceFeet', 'closer-recovery-to-line', 1],
   ['supportedReplyCount', 'more-supported-replies', -1],

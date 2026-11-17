@@ -1,0 +1,67 @@
+{
+  "version": "auto-handedness-corrections-v1",
+  "baseline": "compatibility.json",
+  "basis": "Corrected anatomical auto stroke side and derived artwork metadata. Original source, default actor/ball/function samples, findings, coverage and all other structural content remain exact. Does not assert unchanged opted-in instructional actor poses.",
+  "corrections": [
+    {
+      "id": "saved:smart-v2",
+      "prior": {
+        "compiledPlaySha256": "35e24ccbdd692b8c0e90dbc7fa4b5481c72bf02a5a48e9a63dd9fea33262e1f5",
+        "timelineStructureSha256": "e67049bda96ecf537f57650c62b75e8559a6e00b8018935bea7f0ea083662968"
+      },
+      "corrected": {
+        "compiledPlaySha256": "1fc1598fe9fc6f4396e37ac4c563c228be3ebb07beef9c5b7910d203dcbc9b4b",
+        "timelineStructureSha256": "f68725eac632f3fa2e151109a48bcd20a76a50fefd2bff1a0e469c95696a57c6"
+      },
+      "changedLeaves": 67
+    },
+    {
+      "id": "saved:smart-v3",
+      "prior": {
+        "compiledPlaySha256": "d5b68237f762a1c68972c56049e50eca5e8ca63cbb2fe0942f85a063514e8ada",
+        "timelineStructureSha256": "2029d47f80f38def9f4ec4558177ead59efa27b7ff18ce5000134134af368832"
+      },
+      "corrected": {
+        "compiledPlaySha256": "f46fcf1f9d39d2817317eb277e210c62c558632c67b3db89c73ec36d1ea49eec",
+        "timelineStructureSha256": "b137e61fe1d4ab4caca0e67b98f6cf57cdaa1395449d0664b3adf6a75cce4afb"
+      },
+      "changedLeaves": 67
+    },
+    {
+      "id": "saved:long-smart-v3",
+      "prior": {
+        "compiledPlaySha256": "92e0d227826db9216b3b68654b2323414de6512330abc5a2ab851629155e6c45",
+        "timelineStructureSha256": "51c4bdcf8ae4150db4a7965c15db43462442262503969fc9093badc142f9af1c"
+      },
+      "corrected": {
+        "compiledPlaySha256": "f42559b788e93c04e947b104b21b1448cac1f6ba690a938c7cae2ad68637d3b5",
+        "timelineStructureSha256": "53a06890f233bc28cfbfd27a077c5d5362c622ebe5d81c257ae7d6e176e1f1d1"
+      },
+      "changedLeaves": 998
+    },
+    {
+      "id": "saved:smart-v2-unmarked",
+      "prior": {
+        "compiledPlaySha256": "c550d0083d07c5c05011c5c4ec4b5419161dd9d673caf6d5ba54ddec3c63d977",
+        "timelineStructureSha256": "50e50f402dff04b6b0e2cf394e6789d9b1cc40bad8017c4377c8bfe9c314fc49"
+      },
+      "corrected": {
+        "compiledPlaySha256": "4c72a5efaa4637bbac1ecca73dba3f87fb2467b42063fc3b448d6cd78a61ef0b",
+        "timelineStructureSha256": "69a2a9513efdfa651f620496d325242c39d14251f368cd89a65970b6cc4893ad"
+      },
+      "changedLeaves": 67
+    },
+    {
+      "id": "saved:smart-v3-unmarked",
+      "prior": {
+        "compiledPlaySha256": "24aa59b1291a48cf0586280ffc4839fd9b395d58fc3e4d907efd2b2c7201d249",
+        "timelineStructureSha256": "5ed22238ee3aae809332fa00840e7c5e35b93d9731526c3f415daa43d1c665a4"
+      },
+      "corrected": {
+        "compiledPlaySha256": "829da1f5ba1c0e41c199f7ae652eb41722cb1f6c2d557ca9f371eab2dcf56442",
+        "timelineStructureSha256": "6f0e44b624f1f9ea464d633cdd428d4d371f662fd1b526a0fa7030839b84ea2a"
+      },
+      "changedLeaves": 67
+    }
+  ]
+}

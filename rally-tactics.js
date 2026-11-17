@@ -35,8 +35,10 @@ export function rankContactCandidates({ eligible, positions, contact, players, a
     const reach = assessReach(position, contact, availableSeconds);
     const crossesPartner = partnerPosition && (contact.x - partnerPosition.x) * (position.x - partnerPosition.x) < 0;
     const crowded = partnerPosition && distance(partnerPosition, contact) < 2.5;
-    const forehandDirection = (team === 'green' ? 1 : -1) * (players[id].handedness === 'left' ? -1 : 1);
-    const forehand = (contact.x - position.x) * forehandDirection >= 0;
+    // Board +y faces the far end, so Green's anatomical right is low x.
+    // Match the physical contact stance and model-2 tactical ranking.
+    const forehandDirection = (team === 'green' ? -1 : 1) * (players[id].handedness === 'left' ? -1 : 1);
+    const forehand = (contact.x - position.x) * forehandDirection > 1e-9;
     const score = reach.distanceFeet / Math.max(1, reach.radiusFeet) + (reach.reachable ? 0 : 10) + (crossesPartner ? .35 : 0) + (crowded ? .5 : 0) - (forehand ? .05 : 0);
     return { id, score, reach, reasons: [reach.reachable ? 'within-illustrative-reach' : 'outside-illustrative-reach', ...(crossesPartner ? ['partner-lane-crossing'] : []), ...(crowded ? ['partner-spacing'] : []), ...(forehand ? ['forehand-tiebreak'] : [])] };
   }).sort((a, b) => a.score - b.score || a.id.localeCompare(b.id));

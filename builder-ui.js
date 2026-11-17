@@ -12,6 +12,7 @@ import { MAX_SHOTS } from './play-document.js';
 import { getPlayerLabels, playerChoices, playerLabel as stablePlayerLabel } from './player-labels.js';
 import { NVZ_MODEL_LIMITS_NOTE } from './rally-rules.js';
 import { effectiveServiceCourt } from './rally-state.js';
+import { STACKING_VERSION } from './rally-stacking.js';
 
 const FAMILIES = [
   ['serve', 'Serve'], ['return', 'Return'], ['drive', 'Drive'], ['drop', 'Drop'],
@@ -64,6 +65,30 @@ const numberField = (label, action, value, min, max) => {
   const input = document.createElement('input'); input.type = 'number'; input.value = Number(Number(value).toFixed(3)); input.min = min; input.max = max; input.step = '0.1'; input.dataset.action = action; input.setAttribute('aria-label', label);
   return labelled(label, input);
 };
+
+function stackingControls(doc, prefix = 'stacking') {
+  const details = el('details', 'builder-stacking');
+  details.append(el('summary', '', 'Advanced stacking'));
+  details.append(el('p', 'builder-selected-summary', prefix === 'stacking'
+    ? 'Preferences for new Random Rallies. Existing starting positions, shots and pinned routes stay as authored.'
+    : 'Choose preferred sides for this new point. These settings do not change the play you are leaving.'));
+  const labels = getPlayerLabels(doc);
+  for (const team of ['green', 'orange']) {
+    const title = team === 'green' ? 'Green' : 'Orange', config = doc?.stacking?.teams?.[team];
+    const ids = Object.keys(doc?.players || {}).filter(id => (doc.players[id].team || (['player1', 'player2'].includes(id) ? 'green' : 'orange')) === team);
+    const mode = select(`${title} stacking`, `${prefix}-mode`, [['off', 'Off'], ['serve-only', 'Half stack: serving only'], ['full', 'Full stack: serve and return']]);
+    const modeControl = mode.querySelector('select'); modeControl.value = config?.mode || 'off'; modeControl.dataset.team = team;
+    const preferred = select(`${title} preferred left player`, `${prefix}-left`, ids.map(id => [id, `${labels[id]} · Player ${id.slice(-1)}`]));
+    const leftControl = preferred.querySelector('select'); leftControl.dataset.team = team;
+    leftControl.value = config?.leftPlayer || ids.find(id => labels[id] === `${title} Left`) || ids[0];
+    leftControl.disabled = !config;
+    details.append(mode, preferred);
+  }
+  details.append(el('p', 'builder-selected-summary', 'Left and right mean facing the net. Player names describe this play’s starting layout, not an assignment to the preferred side. Handedness does not choose sides for you.'));
+  details.append(el('p', 'builder-selected-summary', 'Half stacking unwinds sideways after serving while staying deep for the bounced return. Full stacking also switches after the designated return; a deep, controlled return buys time to approach the opposite kitchen lane.'));
+  details.append(el('p', 'builder-selected-summary', 'The legal server and returner do not change. Prefer sides to suit both partners, then cover the gap together. A poach is temporary, and the forehand does not automatically own every middle ball.'));
+  return details;
+}
 
 function shotLabel(shot, index) { return `${FAMILY_GLYPHS[shot?.family] || '◆'} ${index + 1}. ${FAMILIES.find(([id]) => id === shot?.family)?.[1] || 'Shot'}`; }
 
@@ -199,6 +224,7 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
   let familyTypeaheadTimer = null;
   let detailGroup = 'target';
   let handednessOpen = false;
+  let stackingOpen = false;
   let assistanceOpen = false;
   // A family choice is a controlled state transition. The native details
   // element is still allowed to open for browsing, but its stale DOM `open`
@@ -254,13 +280,14 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     timelineControl?.cancel?.();
     const length = select('Rally length', 'random-length', [['natural','Natural'],['short','Short (3–6 contacts)'],['long','Long (12–20 contacts)'],['epic','Epic (25 or more contacts)']]);
     const seed = el('input'); seed.type = 'number'; seed.min = '0'; seed.max = '4294967295'; seed.step = '1'; seed.inputMode = 'numeric'; seed.placeholder = 'Optional number'; seed.dataset.action = 'random-seed'; seed.setAttribute('aria-label', 'Random seed'); seed.setAttribute('aria-describedby', 'builder-random-seed-help');
-    const seedHelp = el('p', 'builder-dialog-copy', 'Use the same seed and player handedness to repeat a point. Leave blank for a new one.'); seedHelp.id = 'builder-random-seed-help';
+    const seedHelp = el('p', 'builder-dialog-copy', 'Use the same seed and player handedness to repeat a point; stacking settings must match too. Leave blank for a new one.'); seedHelp.id = 'builder-random-seed-help';
     randomDialog.replaceChildren(
       el('h2', '', 'Random Rally'),
       el('p', 'builder-dialog-copy', 'Create a point with Advanced players and your current handedness. Natural lets play decide the length; other lengths may find no match. Your current play stays safe until the new point is validated and saved.'),
       length,
       labelled('Seed', seed),
       seedHelp,
+      stackingControls(current.document, 'random-stacking'),
       el('p', 'builder-dialog-copy builder-proposal-status', current.proposalBusy ? (typeof current.proposalProgress === 'object' && current.proposalProgress ? `${current.proposalProgress.label || 'Building rally'}${Number.isFinite(current.proposalProgress.completed) && Number.isFinite(current.proposalProgress.total) ? ` · ${current.proposalProgress.completed}/${current.proposalProgress.total}` : '…'}` : 'Building rally…') : ''),
       (() => { const actions = el('div', 'builder-dialog-actions'); const cancel = button('Cancel', 'cancel-proposal', 'builder-button'); const create = button('Create rally', 'random-rally', 'builder-button builder-button-primary'); create.disabled = Boolean(current.proposalBusy); actions.append(cancel, create); return actions; })()
     );
@@ -362,12 +389,13 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     const oldFamilyPicker=root.querySelector('.builder-family-picker');if(oldFamilyPicker && !preserveFamilyPickerState)familyPickerOpen=oldFamilyPicker.open;
     preserveFamilyPickerState = false;
     const oldHanded=root.querySelector('.builder-handedness');if(oldHanded)handednessOpen=oldHanded.open;
+    const oldStacking=root.querySelector('.builder-group-coach .builder-stacking');if(oldStacking)stackingOpen=oldStacking.open;
     const oldAssistance=root.querySelector('.builder-assistance');if(oldAssistance)assistanceOpen=oldAssistance.open;
     const mainMenuOpen=Boolean(root.querySelector('.builder-main-menu')?.open);
     const documentMenuOpen=Boolean(root.querySelector('.builder-document-menu')?.open);
     const optionsMenuOpen=Boolean(root.querySelector('.builder-context-menu')?.open);
     const chaptersOpen=Boolean(root.querySelector('.builder-chapter-menu')?.open);
-    const focused=document.activeElement;const focusIdentity=root.contains(focused)?{action:focused.dataset.action,shotId:focused.dataset.shotId,label:focused.getAttribute('aria-label')}:null;
+    const focused=document.activeElement;const focusIdentity=root.contains(focused)?{action:focused.dataset.action,shotId:focused.dataset.shotId,team:focused.dataset.team,label:focused.getAttribute('aria-label')}:null;
     const oldInspectorScroll=root.querySelector('.builder-inspector')?.scrollTop || 0;
     // Enlarged controls scroll this root. Removing its children temporarily
     // collapses scrollHeight; preserve the user's viewport through a rebuild.
@@ -502,6 +530,12 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
       const customFlight=doc.modelVersion===2&&selected.physics!==undefined;
       if(customFlight){const note=el('p','builder-selected-summary','This shot has a custom flight. Choosing Flight, Arc or Pace replaces it. Undo restores the original flight.');note.id='builder-flight-override-note';flight.querySelector('select').setAttribute('aria-describedby',note.id);flightGroup.append(note);}
       const tuning = el('div', 'builder-grid-fields'); const arc = select('Arc', 'edit-arc', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']]); const pace = select('Pace', 'edit-pace', [['soft', 'Soft'], ['medium', 'Medium'], ['firm', 'Firm']]); arc.querySelector('select').value = selected.arc || 'medium'; pace.querySelector('select').value = selected.pace || 'medium'; if(customFlight)for(const control of [arc,pace])control.querySelector('select').setAttribute('aria-describedby','builder-flight-override-note'); tuning.append(arc, pace); flightGroup.append(tuning); details.appendChild(flightGroup);
+      if (doc.modelVersion !== 2 && selected.family === 'overhead') {
+        const note = el('p', 'builder-selected-summary', 'This overhead uses an illustrative arc that may rise after contact. It is not a physical downward-smash simulation.');
+        note.id = 'builder-legacy-overhead-note';
+        for (const control of [flight, arc, pace]) control.querySelector('select').setAttribute('aria-describedby', note.id);
+        flightGroup.append(note);
+      }
       const playersGroup = el('section', 'builder-control-group builder-group-players'); playersGroup.dataset.detailGroup = 'players'; playersGroup.setAttribute('role', 'tabpanel'); playersGroup.setAttribute('aria-label', 'Players settings'); playersGroup.classList.toggle('is-active', detailGroup === 'players'); playersGroup.append(el('h3', '', 'Players'));
       const receiver = select('Receiver', 'edit-receiver', [['auto', 'Automatic'], ...players]); receiver.querySelector('select').value = selected.receiver || 'auto'; playersGroup.append(receiver);
       const contactStyle = select('Contact style', 'edit-contactStyle', [['auto', 'Automatic'], ['forehand', 'Forehand'], ['backhand', 'Backhand'], ['short-hop', 'Short hop']]); contactStyle.querySelector('select').value = selected.contactStyle || 'auto'; playersGroup.append(contactStyle);
@@ -544,8 +578,9 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
       const fault = el('label', 'builder-switch'); const faultInput = el('input'); faultInput.type = 'checkbox'; faultInput.checked = Boolean(doc.intentionalFault); faultInput.dataset.action = 'intentionalFault'; fault.append(faultInput, el('span', '', 'Intentional coaching mistake'), el('small', '', 'Keep the rule warning visible at the terminal fault.')); advanced.append(fault);
       const scope = select('Shade team', 'shade-team', [['both', 'Both teams'], ['green', 'Green'], ['orange', 'Orange']]); scope.querySelector('select').value = doc.assistance?.team || 'both'; advanced.append(scope);
       const handed = el('details', 'builder-handedness'); handed.open = handednessOpen; handed.append(el('summary', '', 'Player handedness')); players.forEach(([id, name]) => { const value = doc.players?.[id]?.handedness || 'right'; const field = select(name, 'handedness', [['right', 'Right-handed'], ['left', 'Left-handed']]); const control = field.querySelector('select'); control.value = value; control.dataset.playerId = id; handed.append(field); });
+      const stacking = stackingControls(doc); stacking.open = stackingOpen;
       const assistance = el('details', 'builder-assistance'); assistance.open=assistanceOpen || detailGroup === 'coach'; assistance.append(el('summary', '', 'Shading & Guides')); [['autoShading', 'Auto Shading', 'Shading changes eligible movement'], ['showGuides', 'Position Guides', 'Suggested recovery positions; separate from Coverage zones']].forEach(([field, label, description]) => { const row = el('label', 'builder-switch'); const input = el('input'); input.type = 'checkbox'; input.checked = Boolean(doc.assistance?.[field]); input.dataset.assistance = field; input.setAttribute('aria-label', label); row.append(input, el('span', '', label), el('small', '', description)); assistance.append(row); });
-      const coachGroup = el('section', 'builder-control-group builder-group-coach'); coachGroup.dataset.detailGroup = 'coach'; coachGroup.setAttribute('role', 'tabpanel'); coachGroup.setAttribute('aria-label', 'Coach tools settings'); coachGroup.classList.toggle('is-active', detailGroup === 'coach'); coachGroup.append(el('h3', '', 'Coach tools'), advanced, handed, assistance); details.appendChild(coachGroup);
+      const coachGroup = el('section', 'builder-control-group builder-group-coach'); coachGroup.dataset.detailGroup = 'coach'; coachGroup.setAttribute('role', 'tabpanel'); coachGroup.setAttribute('aria-label', 'Coach tools settings'); coachGroup.classList.toggle('is-active', detailGroup === 'coach'); coachGroup.append(el('h3', '', 'Coach tools'), advanced, handed, stacking, assistance); details.appendChild(coachGroup);
       for (const panel of details.querySelectorAll('[role="tabpanel"]')) {
         panel.id = `builder-detail-panel-${panel.dataset.detailGroup}`;
         panel.setAttribute('aria-labelledby', `builder-detail-tab-${panel.dataset.detailGroup}`);
@@ -624,7 +659,8 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
       const info = current.proposalProgress;
       if (progress) progress.textContent = current.proposalBusy ? (typeof info === 'object' && info ? `${info.label || 'Building rally'}${Number.isFinite(info.completed) && Number.isFinite(info.total) ? ` · ${info.completed}/${info.total}` : Number.isFinite(info.completed) ? ` · ${info.completed} contacts` : '…'}` : 'Building rally…') : (typeof info === 'string' ? info : '');
       const create = randomDialog.querySelector('[data-action="random-rally"]'); if (create) create.disabled = Boolean(current.proposalBusy);
-      for(const field of randomDialog.querySelectorAll('[data-action="random-length"],[data-action="random-seed"]'))field.disabled=Boolean(current.proposalBusy);
+      for(const field of randomDialog.querySelectorAll('[data-action="random-length"],[data-action="random-seed"],[data-action^="random-stacking-"]'))field.disabled=Boolean(current.proposalBusy)
+        || field.dataset.action==='random-stacking-left' && randomDialog.querySelector(`[data-action="random-stacking-mode"][data-team="${field.dataset.team}"]`)?.value==='off';
     }
     const nextInspector=root.querySelector('.builder-inspector'); if(nextInspector) nextInspector.scrollTop=oldInspectorScroll;
     root.scrollTop=oldRootScroll;
@@ -632,7 +668,7 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     if(placementJustFinished){
       root.querySelector('.builder-inspector [data-action="collapse-inspector"]')?.focus({preventScroll:true});
     } else if(focusIdentity && document.activeElement===document.body){
-      const next=[...root.querySelectorAll('[data-action],[aria-label]')].find(n=>focusIdentity.shotId?n.dataset.shotId===focusIdentity.shotId:focusIdentity.action?n.dataset.action===focusIdentity.action:n.getAttribute('aria-label')===focusIdentity.label);
+      const next=[...root.querySelectorAll('[data-action],[aria-label]')].find(n=>focusIdentity.shotId?n.dataset.shotId===focusIdentity.shotId:focusIdentity.action?n.dataset.action===focusIdentity.action&&(!focusIdentity.team||n.dataset.team===focusIdentity.team):n.getAttribute('aria-label')===focusIdentity.label);
       if(next?.getClientRects().length)next.focus({preventScroll:true});
     }
   }
@@ -653,7 +689,7 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     const summary = event.target.closest('summary');
     if (!summary || !root.contains(summary)) return;
     const details = summary.closest('details');
-    if (details && !details.open && details.matches('.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-details,.builder-advanced,.builder-handedness,.builder-assistance')) cancelActivePlacement();
+    if (details && !details.open && details.matches('.builder-main-menu,.builder-context-menu,.builder-chapter-menu,.builder-shot-details,.builder-advanced,.builder-handedness,.builder-stacking,.builder-assistance')) cancelActivePlacement();
   }
   async function handleClick(event) {
     const target = event.target.closest('[data-action]'); if (!target || !root.contains(target)) return;
@@ -769,7 +805,15 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
       clearInvalidField(seedField);
       const requestGeneration=++randomRequestGeneration;
       const progress=randomDialog.querySelector('.builder-proposal-status');progress?.setAttribute('role','status');progress?.setAttribute('aria-live','polite');
-      const result = await rerenderAction('randomRally', { lengthFeel, ...(seed !== undefined ? { seed } : {}) });
+      const teams = {};
+      for (const team of ['green', 'orange']) {
+        const mode = randomDialog.querySelector(`[data-action="random-stacking-mode"][data-team="${team}"]`).value;
+        const leftPlayer = randomDialog.querySelector(`[data-action="random-stacking-left"][data-team="${team}"]`).value;
+        if (mode !== 'off') teams[team] = { mode, leftPlayer };
+      }
+      const stackingOverride = Object.keys(teams).length ? { stacking: { version: STACKING_VERSION, teams } }
+        : current.document?.stacking ? { stacking: null } : {};
+      const result = await rerenderAction('randomRally', { lengthFeel, ...stackingOverride, ...(seed !== undefined ? { seed } : {}) });
       if(destroyed||requestGeneration!==randomRequestGeneration||!randomDialog.open)return;
       if (!result || result.ok !== false) closeDialog(randomDialog);
       else {
@@ -802,6 +846,14 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     else if (target.dataset.action === 'rate') fire('rate', Number(target.value));
     else if (target.dataset.action === 'camera') fire('camera', target.value);
     else if (target.dataset.action === 'handedness') fire('handedness', { id: target.dataset.playerId, value: target.value });
+    else if (target.dataset.action === 'stacking-mode' || target.dataset.action === 'stacking-left') {
+      const scope = target.closest('.builder-stacking'), team = target.dataset.team;
+      fire('stacking', { team, mode: scope.querySelector(`[data-action="stacking-mode"][data-team="${team}"]`).value,
+        leftPlayer: scope.querySelector(`[data-action="stacking-left"][data-team="${team}"]`).value });
+    }
+    else if (target.dataset.action === 'random-stacking-mode') {
+      randomDialog.querySelector(`[data-action="random-stacking-left"][data-team="${target.dataset.team}"]`).disabled = target.value === 'off';
+    }
     else if (target.dataset.action === 'import-file') {
       const file = target.files?.[0]; const generation = ++importFileGeneration; if (file) { if (file.size > MAX_IMPORT_BYTES) { fire('message', `Import is limited to ${Math.round(MAX_IMPORT_BYTES / 1024)} KiB.`); return; } file.text().then(raw => { if (!importDialog.open || generation !== importFileGeneration) return; const area=importDialog.querySelector('textarea'); if(area)area.value=raw; }).catch(() => { if (generation === importFileGeneration) fire('message','The selected file could not be read. Try another JSON backup.'); });  }
     }

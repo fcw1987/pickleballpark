@@ -47,7 +47,30 @@ function legDuration(timeline, step, index) {
 
 function boundedMoveX(fromX, desiredX, seconds) {
   const maximum = MAX_LATERAL_SPEED_FPS * seconds;
-  return clamp(fromX + clamp(desiredX - fromX, -maximum, maximum), COURT_MIN_X, COURT_MAX_X);
+  // A valid authored player can begin on the apron. Bound the journey back
+  // toward the inset goal instead of teleporting that origin onto the court.
+  return fromX + clamp(desiredX - fromX, -maximum, maximum);
+}
+
+// Scale a simultaneous lateral adjustment before either partner enters the
+// other's clearance circle. Already-close authored geometry may not get worse.
+function safePairScale(defenders, positions, targets) {
+  const [a, b] = defenders.map(player => player.id);
+  const dx = positions[a].x - positions[b].x;
+  const dy = positions[a].y - positions[b].y;
+  const delta = targets[a].x - positions[a].x - (targets[b].x - positions[b].x);
+  const radius = Math.min(2.5, Math.hypot(dx, dy));
+  if (Math.abs(dy) >= radius || dx * delta >= 0) return 1;
+  const clearanceX = Math.sqrt(Math.max(0, radius * radius - dy * dy));
+  return clamp((Math.abs(dx) - clearanceX) / Math.abs(delta), 0, 1);
+}
+
+function limitPair(defenders, positions, targets) {
+  const scale = safePairScale(defenders, positions, targets);
+  return Object.fromEntries(defenders.map(({id}) => [id, {
+    x: positions[id].x + (targets[id].x - positions[id].x) * scale,
+    y: positions[id].y
+  }]));
 }
 
 /**
@@ -76,38 +99,41 @@ export function applyCoverageAssistance(play, document, timeline) {
     if (defenders.length !== 2) continue;
 
     const threat = { x: shot.from.x, y: shot.from.y };
-    const nearSideline = threat.x < 10 ? COURT_MIN_X : COURT_MAX_X;
-    const nearer = [...defenders].sort((a, b) => {
-      const distance = Math.abs(step.positions[a.id].x - threat.x) - Math.abs(step.positions[b.id].x - threat.x);
-      return distance || a.id.localeCompare(b.id);
-    })[0];
-    const partner = defenders.find(player => player.id !== nearer.id);
-    const suggested = {
-      [nearer.id]: {
-        x: clamp(step.positions[nearer.id].x + (nearSideline - step.positions[nearer.id].x) * 0.22, COURT_MIN_X, COURT_MAX_X),
-        y: step.positions[nearer.id].y
-      },
-      [partner.id]: {
-        x: clamp(step.positions[partner.id].x + (10 - step.positions[partner.id].x) * 0.32, COURT_MIN_X, COURT_MAX_X),
-        y: step.positions[partner.id].y
-      }
-    };
-
     const nextReceiverId = steps[index + 1]?.shot?.playerId;
     const protectedIds = new Set([hitterId, nextReceiverId, ...(protection.get(step.id) || [])]);
-    const receiverIsDefender = defenders.some(player => player.id === nextReceiverId);
-    const coveragePartner = receiverIsDefender
-      ? defenders.find(player => player.id !== nextReceiverId)
-      : partner;
-    const eligible = coveragePartner && !protectedIds.has(coveragePartner.id) ? [coveragePartner] : [];
+    const eligible = defenders.filter(player => !protectedIds.has(player.id));
+    const ordered = [...defenders].sort((a, b) => step.positions[a.id].x - step.positions[b.id].x);
+    // A coincident lateral pair has no observable left/right assignment. Hold
+    // rather than introducing an identity-dependent, non-mirrored tie break.
+    const distinctLanes = Math.abs(step.positions[ordered[0].id].x - step.positions[ordered[1].id].x) > 1e-9;
+    const side = clamp((threat.x - 10) / 10, -1, 1);
+    const center = 10 + 3 * side;
+    const halfWidth = 5 - side * side;
+    const targets = Object.fromEntries(ordered.map((player, slot) => {
+      const position = step.positions[player.id];
+      const lane = center + (slot ? halfWidth : -halfWidth);
+      return [player.id, {
+        x: distinctLanes && !protectedIds.has(player.id)
+          ? clamp(position.x + (lane - position.x) * .25, COURT_MIN_X, COURT_MAX_X) : position.x,
+        y: position.y
+      }];
+    }));
+    const suggested = limitPair(defenders, step.positions, targets);
+
     const applied = [];
     if (settings.auto) {
       const seconds = legDuration(timeline, step, index);
+      const bounded = Object.fromEntries(defenders.map(player => [player.id, {
+        x: protectedIds.has(player.id) ? step.positions[player.id].x
+          : boundedMoveX(step.positions[player.id].x, suggested[player.id].x, seconds),
+        y: step.positions[player.id].y
+      }]));
+      const safe = limitPair(defenders, step.positions, bounded);
       for (const player of eligible) {
         const position = step.positions[player.id];
-        position.x = boundedMoveX(position.x, suggested[player.id].x, seconds);
+        if (Math.abs(position.x - safe[player.id].x) > 1e-9) applied.push(player.id);
+        position.x = safe[player.id].x;
         // Coverage assistance is lateral only; depth stays compiler-owned.
-        applied.push(player.id);
       }
     }
 
@@ -115,7 +141,7 @@ export function applyCoverageAssistance(play, document, timeline) {
     let explanation = 'Suggested Coverage: lateral adjustment from the visible opponent contact origin.';
     if (settings.auto && applied.length) explanation += ` Applied to ${applied.join(', ')}.`;
     else if (!settings.auto) explanation += ' Guide only; Auto Shading is off.';
-    else explanation += ' No movement applied because eligible players are locked or reserved for contact.';
+    else explanation += ' No additional lateral movement was needed or permitted.';
     if (locked.length) explanation += ` Preserved ${locked.join(', ')}.`;
     coverage.push({ shotId: step.id, team: defendingTeam, threat, positions: suggested, explanation });
   }

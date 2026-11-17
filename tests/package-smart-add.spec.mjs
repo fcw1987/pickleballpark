@@ -11,20 +11,25 @@ test('package Add verification waits for a pending fifth proposal and retains th
     const seeds = [1027220423, 18026106, 1276464017, 4140339132, 3074369515];
     const add = playBuilder.queueSmartAdd.bind(playBuilder);
     playBuilder.queueSmartAdd = options => add({ ...options, seed: seeds.shift() });
-    const timer = window.setTimeout.bind(window);
+    const cancel = playBuilder.cancelPendingProposals;
     window.__delayedSmartTurn = false;
-    window.setTimeout = (callback, delay, ...args) => {
-      if (!window.__delayedSmartTurn && playBuilder.document.shots.length === 4 && delay === 0
-          && new Error().stack.includes('smart-rally-generator.js')) {
-        window.__delayedSmartTurn = true;
-        window.__pendingAddEvidence = { shots: playBuilder.document.shots.length,
-          pending: playBuilder.pendingAddCount, busy: playBuilder.proposalBusy,
-          source: structuredClone(playBuilder.document), saveError: playBuilder.saveError };
-        // Simulate a delayed cooperative generator turn beyond the previous
-        // count-only assertion's 5-second deadline, without burning CPU.
-        return timer(callback, 5500, ...args);
-      }
-      return timer(callback, delay, ...args);
+    playBuilder.cancelPendingProposals = function () {
+      cancel.call(this);
+      if (window.__delayedSmartTurn || this.document.shots.length !== 4) return;
+      this.cancelPendingProposals = cancel;
+      // Hold the fifth Add after its normal queue reset, independently of how
+      // many search attempts the real generator needs before finding a result.
+      this.addQueue = new Promise(resolve => {
+        queueMicrotask(() => {
+          window.__delayedSmartTurn = true;
+          window.__pendingAddEvidence = { shots: playBuilder.document.shots.length,
+            pending: playBuilder.pendingAddCount, busy: playBuilder.proposalBusy,
+            source: structuredClone(playBuilder.document), saveError: playBuilder.saveError };
+          // The real Add has now set its counters and queued its task. Keep it
+          // pending beyond the previous count-only assertion's 5-second deadline.
+          setTimeout(resolve, 5500);
+        });
+      });
     };
   });
   for (let count = 1; count <= 5; count++) await clickAndVerifySmartAdd(page, count);

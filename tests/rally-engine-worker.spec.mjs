@@ -5,6 +5,8 @@ import { compileDocument } from '../play-compiler.js';
 import { validateDocument } from '../play-document.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { samplePlayBall } from '../three-d-core.js';
+import { PHYSICS_V2, localNetHeightFeet } from '../play-physics-v2.js';
+import { groundedSoleClearsNVZV1 } from '../generated-grounded-sole.js';
 
 test.use({ serviceWorkers: 'block' });
 
@@ -58,20 +60,75 @@ test('module-worker points match Node and repeat independently of progress obser
         [id, { team: index < 2 ? 'green' : 'orange', handedness: mixedHands && index % 2 ? 'right' : 'left', style, flavour: 'balanced' }]));
     const rightPlayers = style => Object.fromEntries(['player1', 'player2', 'player3', 'player4'].map((id, index) =>
         [id, { team: index < 2 ? 'green' : 'orange', handedness: 'right', style, flavour: 'balanced' }]));
+    // Reuse an independently reviewed current case, not a replacement seed.
+    // Pro1136's original popup witness remains frozen in historical-causality.
+    const reviewed = JSON.parse(await readFile(new URL('./fixtures/model2/procedural-current-policy-v3-audit-v2.json', import.meta.url), 'utf8'));
+    const reviewedVolley = reviewed.cases.find(row => row.id === 'pro-1032');
+    expect(reviewedVolley.controls).toBeNull();
     const inputs = [
         ['advanced', { seed: 7 }],
         ['pro-orange-left', { seed: 19, players: players('pro', true), service: { server: 'player3', receiver: 'player1', court: 'left' } }],
         ['intermediate-green-left', { seed: 31, players: players('intermediate', false), service: { server: 'player1', receiver: 'player3', court: 'left' } }],
-        ['dink-popup-volley', { seed: 1074, players: rightPlayers('advanced'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 6 } }],
-        ['dink-popup-groundstroke', { seed: 1002, players: rightPlayers('pro'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 15 } }]
+        // Movement v2 preserves this seed as a transition reset after a weak
+        // drive. Keep its parity coverage and use an independently reviewed
+        // current popup for the separate volley opportunity assertion.
+        ['transition-reset', { seed: 1074, players: rightPlayers('advanced'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 6 } }],
+        ['historical-popup-now-net', { seed: 1136, players: rightPlayers('pro'), service: { server: 'player1', receiver: 'player3', court: 'right' }, options: { maxShots: 25 } }],
+        ['dink-popup-groundstroke', { seed: 1002, players: rightPlayers('pro'), service: { server: 'player3', receiver: 'player1', court: 'right' }, options: { maxShots: 15 } }],
+        ['reviewed-dink-popup-volley', structuredClone(reviewedVolley.input)]
     ];
     for (const [label, input] of inputs) {
         const expected = await nodeResult(input);
-        if (label.startsWith('dink-popup-')) {
-            const contact = expected.result.decisions.at(-1).situation;
+        // Pin actual adjacent delivery/reply pairs. A later terminal contact
+        // cannot stand in for the attacking opportunity created earlier.
+        const popupPairs = label === 'dink-popup-groundstroke' ? [[8, 9, 'groundstroke', 'drive'], [14, 15, 'groundstroke', 'drive']]
+            : label === 'reviewed-dink-popup-volley' ? [[9, 10, 'volley', 'speed-up']] : [];
+        for (const [deliveryNumber, replyNumber, kind, replyIntent] of popupPairs) {
+            const delivery = expected.result.decisions[deliveryNumber - 1], reply = expected.result.decisions[replyNumber - 1];
+            expect(delivery.shotId).toBe('shot-' + deliveryNumber); expect(reply.shotId).toBe('shot-' + replyNumber);
+            expect(delivery.chosen.family).toBe('dink'); expect(delivery.execution.quality).toBe('attackable');
+            expect(reply.chosen.intent).toBe(replyIntent);
+            const contact = reply.situation;
             expect(contact.attackable).toBe(true);
-            expect(contact.contactKind).toBe(label === 'dink-popup-volley' ? 'volley' : 'groundstroke');
+            expect(contact.affordances.attack).toBe(true);
+            expect(contact.contactSelection.evidence.chosen.audit).toMatchObject({ legal: true, routeValid: true, feetValid: true });
+            expect(delivery.resolution.physicalTransformation.dinkPopup.receiverOpportunity)
+                .toMatchObject({ status: 'unestablished', scope: 'at-delivery' });
+            expect(contact.contactKind).toBe(kind);
             expect(expected.result.document.generation.policyVersion).toBe('rally-policy-v3');
+            const incoming = expected.compiled.timeline.segments[deliveryNumber - 1], outgoing = expected.compiled.timeline.segments[replyNumber - 1];
+            const time = outgoing.startTime + outgoing.contactTime - incoming.startTime - incoming.contactTime;
+            const actual = incoming.trajectory.sampleBoard(time), point = outgoing.shotSemantics.contact.point;
+            expect(actual.bounced).toBe(kind === 'groundstroke');
+            for (const axis of ['x', 'y', 'heightFeet']) expect(Math.abs(actual[axis] - point[axis])).toBeLessThan(1e-6);
+            expect(point.heightFeet - PHYSICS_V2.ballRadiusFeet - localNetHeightFeet(point.x)).toBeGreaterThan(0);
+            if (kind === 'volley') expect(outgoing.shotSemantics.contact.feet.every(groundedSoleClearsNVZV1)).toBe(true);
+        }
+        if (label === 'historical-popup-now-net') {
+            // Measured movement pressure puts the unchanged shot-24 execution
+            // draw in the net-error interval. The old shot-25 volley is not a
+            // current reply and remains an explicit frozen historical witness.
+            expect(expected.result.status).toBe('complete');
+            expect(expected.result.decisions).toHaveLength(24);
+            expect(expected.result.outcome).toMatchObject({ reason: 'net', shotId: 'shot-24' });
+            const last = expected.result.decisions[23];
+            expect(last.chosen.family).toBe('dink');
+            expect(last.draws.execution).toEqual({ quality: .15117291663773358, error: .1903682027477771 });
+            expect(last.execution).toMatchObject({ quality: 'error', errorReason: 'net' });
+            expect(last.execution.riskContext.conditions.settledMovement).toBe(false);
+            expect(last.execution.pressure.movementSpeedFeetPerSecond).toBeGreaterThan(3);
+            expect(last.resolution.physicalTransformation.kind).toBe('net-mesh');
+            expect(last.resolution.physicalTransformation.dinkPopup).toBeUndefined();
+        }
+        if (label === 'transition-reset') {
+            const previous = expected.result.decisions.at(-3), reset = expected.result.decisions.at(-2), next = expected.result.decisions.at(-1);
+            expect(previous.chosen.family).toBe('drive');
+            expect(previous.execution.quality).toBe('attackable');
+            expect(reset.situation.opponentFormation).toBe('split');
+            expect(reset.chosen.family).toBe('reset');
+            expect(reset.resolution.physicalTransformation.dinkPopup).toBeUndefined();
+            expect(next.situation.attackable).toBe(false);
+            expect(next.situation.contactSelection.evidence.chosen.audit).toMatchObject({ legal: true, routeValid: true, feetValid: true });
         }
         const { createRallySimulator } = await import('../rally-engine.js');
         let denseYields = 0, sparseYields = 0;

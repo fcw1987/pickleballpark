@@ -16,7 +16,7 @@ function segment({ from = positions, to = positions, hitter = 'player1', feet = 
     shotSemantics: { playerId: hitter, contact: { feet } }, model2Momentum: momentum };
 }
 
-test('a later real contact extends all unpinned tactical routes from retained goals and pins the exact arriving hitter', () => {
+test('a later real contact extends permitted tactical approaches, holds defensive depth and pins the exact arriving hitter', () => {
   const from = structuredClone(positions); from.player4.y = 41;
   const feet = [{ x: 4.58, y: 3 }, { x: 5.42, y: 3 }];
   const plan = planMovementV1({ positions: from, players, hitter: 'player1', contact: from.player1, target: { x: 10, y: 35 },
@@ -27,11 +27,12 @@ test('a later real contact extends all unpinned tactical routes from retained go
   const arrival = { id: 'player3', stance: { x: 5.2, y: 40.5 } };
   const longer = replanMovementV1({ plan, segment: pending, players, durationSeconds: 1.5, arrival });
   assert.equal(longer.ok, true);
-  for (const id of ['player1', 'player2', 'player4']) {
+  for (const id of ['player1', 'player2']) {
     assert.ok(distance(from[id], longer.positions[id]) > distance(from[id], plan.positions[id]) + 1);
     assert.ok(distance(longer.positions[id], plan.diagnostics.goals[id]) < distance(plan.positions[id], plan.diagnostics.goals[id]));
   }
   assert.deepEqual(longer.positions.player3, arrival.stance);
+  assert.deepEqual(longer.positions.player4, from.player4, 'a longer incoming drive is not itself an approach opportunity');
   const actual = segment({ from, to: longer.positions, feet, duration: 1.5 });
   assert.equal(inspectGeneratedMovementV1(actual).valid, true);
   assert.equal(inspectGeneratedSpacingV1(actual).valid, true);
@@ -46,9 +47,12 @@ test('an earlier real contact shrinks the retained tactical routes while impossi
     family: 'drive', intent: 'third-shot-drive', pace: 'firm' });
   const pending = segment({ from, to: plan.positions, feet, duration: 1.5 });
   const shorter = replanMovementV1({ plan, segment: pending, players, durationSeconds: .25,
-    arrival: { id: 'player3', stance: { x: 5, y: 40.5 } } });
+    arrival: { id: 'player3', stance: { x: 5, y: 40.6 } } });
   assert.equal(shorter.ok, true);
-  for (const id of ['player1', 'player2', 'player4']) assert.ok(distance(from[id], shorter.positions[id]) < distance(from[id], plan.positions[id]));
+  assert.equal(replanMovementV1({ plan, segment: pending, players, durationSeconds: .25,
+    arrival: { id: 'player3', stance: { x: 5, y: 40.5 } } }).ok, false, 'the old half-foot arrival needs 32 ft/s² despite safe peak speed');
+  for (const id of ['player1', 'player2']) assert.ok(distance(from[id], shorter.positions[id]) < distance(from[id], plan.positions[id]));
+  assert.deepEqual(shorter.positions.player4, from.player4, 'defensive depth stays ready rather than inheriting an opening return role');
   const actual = segment({ from, to: shorter.positions, feet, duration: .25 });
   assert.equal(inspectGeneratedMovementV1(actual).valid, true);
   assert.equal(inspectGeneratedSpacingV1(actual).valid, true);
@@ -83,13 +87,13 @@ test('serve stance preserves the declared layout rather than silently repairing 
 });
 
 test('bounded ease endpoints produce an actual peak at the declared bound, with no distance tolerance', () => {
-  const from = { x: 0, y: 0 }, target = boundMovementV1(from, { x: 30, y: 0 }, 1);
-  assert.equal(target.x, 9);
+  const from = { x: 0, y: 0 }, target = boundMovementV1(from, { x: 30, y: 0 }, 2);
+  assert.equal(target.x, 18);
   const start = structuredClone(positions), end = structuredClone(positions); start.player4 = from; end.player4 = { ...target };
-  const result = inspectGeneratedMovementV1(segment({ from: start, to: end }));
+  const result = inspectGeneratedMovementV1(segment({ from: start, to: end, duration: 2 }), { maxAccelerationFeetPerSecondSquared: 30 });
   assert.equal(result.valid, true); assert.ok(Math.abs(result.byActor.player4 - 18) < 1e-7);
   end.player4.x += .001;
-  const rejected = inspectGeneratedMovementV1(segment({ from: start, to: end }));
+  const rejected = inspectGeneratedMovementV1(segment({ from: start, to: end, duration: 2 }), { maxAccelerationFeetPerSecondSquared: 30 });
   assert.equal(rejected.valid, false); assert.equal(rejected.actor, 'player4'); assert.ok(rejected.peakFeetPerSecond > 18);
 });
 
@@ -199,7 +203,7 @@ test('generator helpers cannot raise the 18 ft/s bound through a caller option',
 test('an actual response origin can keep a reachable stance instead of forcing the default short paddle plant', () => {
   const contact = { x: 9.763085, y: 29.75, heightFeet: 2.735 }, origin = { x: 5.399185, y: 29.75 };
   const result = contactFeetV1({ contact, target: { x: 10, y: 8 }, team: 'orange', handedness: 'right',
-    contactStyle: 'forehand', kind: 'volley', position: origin, availableSeconds: .28 });
+    contactStyle: 'forehand', kind: 'volley', position: origin, availableSeconds: .5 });
   assert.equal(result.reachable, true); assert.equal(result.legalVolleyFeet, true); assert.equal(result.routeReachable, true);
   assert.ok(result.travelFeet < 1.365); assert.ok(result.arrivalPeakFeetPerSecond < 9.75);
   assert.ok(result.bodyClearanceFeet >= .9 && result.bodyClearanceFeet <= 3);
@@ -207,8 +211,11 @@ test('an actual response origin can keep a reachable stance instead of forcing t
   const legacyPlant = contactFeetV1({ contact, target: { x: 10, y: 8 }, team: 'orange', handedness: 'right', kind: 'volley' });
   assert.ok(distance(origin, legacyPlant.stance) * 2 / .28 > 18, 'the old forced plant wastes the represented paddle reach');
   const from = structuredClone(positions), to = structuredClone(positions); from.player4 = origin; to.player4 = result.stance;
-  const actual = segment({ from, to, duration: .28 });
-  assert.equal(inspectGeneratedMovementV1(actual).valid, true);
+  const actual = segment({ from, to, duration: .5 });
+  assert.equal(inspectGeneratedMovementV1(actual, { maxAccelerationFeetPerSecondSquared: 30 }).valid, true);
+  const former = segment({ from, to, duration: .28 });
+  assert.equal(inspectGeneratedMovementV1(former).valid, true);
+  assert.equal(inspectGeneratedMovementV1(former, { maxAccelerationFeetPerSecondSquared: 30 }).valid, false);
 });
 
 test('origin-aware contacts mirror both teams, hands and stroke sides without changing their timed route bound', () => {
@@ -216,7 +223,7 @@ test('origin-aware contacts mirror both teams, hands and stroke sides without ch
     const side = (team === 'green' ? 1 : -1) * (handedness === 'right' ? 1 : -1) * (contactStyle === 'backhand' ? -1 : 1);
     const contact = { x: 10, y: team === 'green' ? 14.25 : 29.75, heightFeet: 2.7 }, origin = { x: 10 + side * 4.4, y: contact.y };
     const result = contactFeetV1({ contact, target: { x: 10, y: team === 'green' ? 30 : 14 }, team, handedness, contactStyle,
-      kind: 'volley', position: origin, availableSeconds: .28 });
+      kind: 'volley', position: origin, availableSeconds: .5 });
     assert.equal(result.reachable, true); assert.equal(result.routeReachable, true); assert.equal(result.legalVolleyFeet, true);
     assert.ok(side * (result.stance.x - contact.x) >= .15 - 1e-7);
     assert.ok(result.bodyClearanceFeet >= .9 - 1e-7 && result.bodyClearanceFeet <= 3);
@@ -237,7 +244,7 @@ test('a safe origin already inside paddle range stays put, but torso and NVZ cle
 
 test('origin-aware grounded Erne feet may stay beside the kitchen when both feet are outside the sideline', () => {
   const result = contactFeetV1({ contact: { x: -1.6, y: 20 }, target: { x: 7, y: 32 }, team: 'green',
-    kind: 'volley', position: { x: -1.5, y: 20 }, availableSeconds: .3 });
+    kind: 'volley', position: { x: -1.5, y: 20 }, availableSeconds: .4 });
   assert.equal(result.reachable, true); assert.equal(result.routeReachable, true); assert.equal(result.legalVolleyFeet, true);
   assert.ok(result.feet.every(p => p.x < 0)); assert.ok(result.stance.y > 15 && result.stance.y < 22);
 });

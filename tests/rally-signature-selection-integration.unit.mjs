@@ -10,6 +10,9 @@ import { compileDocument } from '../play-compiler.js';
 import { validateDocument } from '../play-document.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { resolveStyle } from '../rally-styles.js';
+import { GENERATED_DEFAULT_FOOT_STATE_V1, defaultFeetAtV1 } from '../generated-foot-state.js';
+import { groundedSoleClearsNVZV1 } from '../generated-grounded-sole.js';
+import { sampleFeetStateV1 } from '../rally-movement.js';
 
 // Exercise private production contact discovery and auditing without exposing
 // mutable planning sessions or a fixture-only entry point in the public API.
@@ -18,7 +21,8 @@ const source = (await readFile(engineURL, 'utf8')).replace(/from '(\.\/[^']+)'/g
   (_, path) => `from '${new URL(path, engineURL).href}'`);
 const { contactReplySupportV1, checkNominalReply, situationFor } = await import(`data:text/javascript;base64,${Buffer.from(source + '\nexport { contactReplySupportV1, checkNominalReply, situationFor };').toString('base64')}`);
 
-function feed(intent, far, right) {
+function feed(intent, far, right, generated = true) {
+  const marker = generated ? GENERATED_DEFAULT_FOOT_STATE_V1 : undefined;
   const mirror = p => ({ x: right ? 20 - p.x : p.x, y: far ? 44 - p.y : p.y });
   const map = id => far ? ({ player1: 'player3', player2: 'player4', player3: 'player1', player4: 'player2' })[id] : id;
   const hitter = map('player3');
@@ -29,9 +33,12 @@ function feed(intent, far, right) {
   initialLayout.ball = { ...initialLayout[hitter] };
   const first = model2Shot({ id: 'wide-feed', hitter, family: 'dink', intent: 'cross-court-dink',
     target: mirror(intent === 'erne' ? { x: -1.5, y: 17 } : { x: .1, y: 20 }), physics: { apexFeet: 6 },
-    contactEvidence: { feet: [{ x: initialLayout[hitter].x - .42, y: initialLayout[hitter].y },
-      { x: initialLayout[hitter].x + .42, y: initialLayout[hitter].y }], feetEstablishedOutsideNVZ: true } });
-  const document = model2Document({ initialLayout, shots: [first], ending: 'winner' });
+    contactEvidence: { feet: defaultFeetAtV1(initialLayout[hitter], marker), feetEstablishedOutsideNVZ: true } });
+  // This integration enters the current engine, whose new contacts use the
+  // explicit adult-width and whole-sole contract. Unmarked authored probes
+  // remain a separate preserved-source case below.
+  const document = model2Document({ initialLayout, shots: [first], ending: 'winner',
+    ...(marker ? { defaultFootState: structuredClone(marker) } : {}) });
   const state = createGenerationPlanningSessionV2(document);
   const trial = commitGenerationRecipeV2(state, first);
   assert.equal(trial.ok, true, trial.reason);
@@ -45,15 +52,13 @@ for (const intent of ['erne', 'around-the-post']) for (const far of [false, true
     const { input, state, document } = feed(intent, far, right);
     const view = observeGenerationPlanningSessionV2(state);
     const receiver = far ? 'player3' : 'player1';
-    const footState = Object.fromEntries(Object.entries(input.players).map(([id]) => [id, {
-      feet: [{ x: input.layout[id].x - .42, y: input.layout[id].y }, { x: input.layout[id].x + .42, y: input.layout[id].y }],
-      grounded: true, feetEstablishedOutsideNVZ: true
-    }]));
+    const footState = sampleFeetStateV1(view.pendingSegment, 0);
     const discovery = probeSignatureCandidatesV1({ incomingFlight: view.solved[0], pendingSegment: view.pendingSegment,
       pendingRecipe: view.pendingRecipe, players: input.players, positions: view.pendingSegment.previous.positions,
       footState, opening: 'midrally', contactIndex: 1, eligibleIds: [receiver] });
     const signature = discovery.candidates.find(candidate => candidate.intent === intent);
     assert.ok(signature, JSON.stringify(discovery));
+    if (intent === 'erne') assert.ok(signature.feet.feet.every(groundedSoleClearsNVZV1), 'the whole planted soles, not only their centers, clear the NVZ');
     const pair = { id: signature.playerId, kind: signature.kind, contactStyle: signature.contactStyle,
       contact: signature.contact, time: signature.time, feet: signature.feet, availableSeconds: signature.time,
       signature, pendingRecipe: signature.pendingRecipe };
@@ -108,5 +113,34 @@ for (const intent of ['erne', 'around-the-post']) for (const far of [false, true
     assert.equal(compiled.validShotCount, 2, JSON.stringify(compiled.findings));
     assert.deepEqual(compiled.findings.filter(finding => finding.severity === 'error'), []);
     assert.deepEqual(validateRallyRules(compiled.play, compiled.timeline).violations, []);
+  });
+}
+
+for (const far of [false, true]) for (const right of [false, true]) {
+  test(`unmarked authored Erne keeps point-based replay but cannot bypass current whole-sole generation (${far}/${right})`, () => {
+    const { input, state, document } = feed('erne', far, right, false), before = JSON.stringify(document);
+    const view = observeGenerationPlanningSessionV2(state), receiver = far ? 'player3' : 'player1';
+    const discovery = probeSignatureCandidatesV1({ incomingFlight: view.solved[0], pendingSegment: view.pendingSegment,
+      pendingRecipe: view.pendingRecipe, players: input.players, positions: view.pendingSegment.previous.positions,
+      footState: sampleFeetStateV1(view.pendingSegment, 0), opening: 'midrally', contactIndex: 1, eligibleIds: [receiver] });
+    const signature = discovery.candidates.find(candidate => candidate.intent === 'erne');
+    assert.ok(signature, JSON.stringify(discovery));
+    assert.ok(signature.feet.feet.every(foot => foot.x < 0 || foot.x > 20));
+    assert.ok(signature.feet.feet.some(foot => !groundedSoleClearsNVZV1(foot)), 'this preserved point-based stance overlaps the NVZ with an adult sole');
+    const incoming = probeGenerationIncomingV2(state, signature.recipe, { pendingRecipe: signature.pendingRecipe });
+    assert.equal(incoming.ok, true, incoming.reason);
+    const pair = { id: signature.playerId, kind: signature.kind, contactStyle: signature.contactStyle,
+      contact: signature.contact, time: signature.time, feet: signature.feet, availableSeconds: signature.time,
+      signature, pendingRecipe: signature.pendingRecipe, incomingProbe: incoming.handle,
+      positions: incoming.positions, footState: incoming.footState };
+    const reply = contactReplySupportV1(input, pair).probes.find(item => item.id === 'erne');
+    assert.ok(reply);
+    assert.throws(() => checkNominalReply(input, state, 1, pair, reply), /both grounded feet outside the NVZ/);
+    const completed = { ...document, ending: 'stop', shots: [signature.pendingRecipe, signature.recipe] };
+    const compiled = compileDocument(completed);
+    assert.equal(compiled.validShotCount, 2);
+    assert.deepEqual(compiled.findings.filter(item => item.severity === 'error'), []);
+    assert.equal(validateRallyRules(compiled.play, compiled.timeline).valid, true);
+    assert.equal(JSON.stringify(document), before, 'generation does not rewrite unmarked authored feet');
   });
 }

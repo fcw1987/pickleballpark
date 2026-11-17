@@ -6,6 +6,7 @@ import { validateDocument } from '../play-document.js';
 import { compileDocument } from '../play-compiler.js';
 import { validateRallyRules } from '../rally-rules.js';
 import { createEngineDriverV1 } from '../rally-engine-driver.js';
+import { assessGeneratedFlightFeasibilityV1 } from '../rally-flight-audit.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1 } from '../rally-movement.js';
 import { DraftStore, MAX_JSON_BYTES } from '../builder-storage.js';
 import { readModel2Fixture } from './fixtures/model2/cases.mjs';
@@ -72,8 +73,15 @@ for (const mirrored of [false, true]) test(`archived off-apron source is rejecte
   const document = mirrored ? mirror(fixture()) : fixture(), before = JSON.stringify(document);
   const result = await submitAsFreshGeneration(document);
   assert.equal(result.status, 'failed');assert.equal(result.document, null);assert.equal(result.outcome, null);
-  assert.equal(result.diagnostics.code, 'generated-flight-feasibility');
-  const violations = result.diagnostics.validation.generatedFlightFeasibility.violations;
+  assert.equal(result.diagnostics.code, 'generated-movement', 'new generation rejects the archived acceleration violation before its flight envelope');
+  const movement = result.diagnostics.validation.movement;
+  assert.equal(movement.valid, false); assert.equal(movement.boundAccelerationFeetPerSecondSquared, 30);
+  assert.ok(movement.accelerationFeetPerSecondSquared > 30);
+  // The independent flight regression still proves the same two exact old
+  // envelope failures. Fail-first driver ordering must not erase that evidence.
+  const flight = assessGeneratedFlightFeasibilityV1({ document, compiled: compileDocument(document) });
+  assert.equal(flight.status, 'FAIL');
+  const violations = flight.violations;
   assert.deepEqual(violations.map(({shotId,family,intent,code,maximumSpeedMph})=>({shotId,family,intent,code,maximumSpeedMph})), [
     {shotId:'shot-4',family:'reset',intent:'block',code:'launch-speed-above-envelope',maximumSpeedMph:24},
     {shotId:'shot-11',family:'volley',intent:'speed-up',code:'launch-speed-above-envelope',maximumSpeedMph:45}

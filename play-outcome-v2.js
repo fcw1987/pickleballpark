@@ -1,10 +1,10 @@
-import { certifyGeneratedRouteExclusionV1, matchesGeneratedRouteCertificateV1 } from './generated-route-certificate-v1.js';
+import { certifyGeneratedRouteExclusion, matchesGeneratedRouteCertificate } from './generated-route-certificates.js';
 // Geometry/evidence checks for opt-in model 2. Labels never establish a fault.
 import { isInNonVolleyZone, isInServiceBox } from './court-geometry.js';
 import { receivingServiceBox, resolveServiceContext, serviceIdentityIssues, teamForPlayer, oppositeTeam } from './rally-state.js';
 import { REACH_MODEL } from './rally-tactics.js';
 import { PHYSICS_VERSION, PHYSICS_V2, solveFlightV2 } from './play-physics-v2.js';
-import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
+import { sampleActorBoardPositionV2, sampleActorFeetV2, GROUNDED_CONTACT_HEIGHT_FEET } from './play-actors-v2.js';
 
 const EPS = 1e-7, EVIDENCE_EPS = 1e-6, PLAYERS = ['player1', 'player2', 'player3', 'player4'];
 const R = PHYSICS_V2.ballRadiusFeet;
@@ -169,8 +169,8 @@ function geometricCandidates(play, segment, solved, isLast) {
   if (isLast && play.ending !== 'stop' && solved.secondBounceTime !== null && solved.secondBounceTime <= end + EPS) {
     const reach = assessTerminalReach(play, segment, solved);
     const declaredCertificate=play.outcome?.shotId===segment.step.id?play.outcome?.evidence?.generatedRouteCertificate:null;
-    const generatedRouteCertificate=declaredCertificate?certifyGeneratedRouteExclusionV1(play,segment,solved):null;
-    const certified=matchesGeneratedRouteCertificateV1(declaredCertificate,generatedRouteCertificate);
+    const generatedRouteCertificate=declaredCertificate?certifyGeneratedRouteExclusion(play,segment,solved,{version:declaredCertificate.version}):null;
+    const certified=matchesGeneratedRouteCertificate(declaredCertificate,generatedRouteCertificate);
     const defender = [...reach.players].sort((a, b) => a.minSampledClearanceFeet - b.minSampledClearanceFeet || a.actor.localeCompare(b.actor))[0]?.actor;
     add(!certified && reach.unreachable ? 'unreachable' : 'second-bounce', solved.secondBounceTime, solved.sampleBoard(solved.secondBounceTime),
       !certified && reach.unreachable ? null : certified ? [...generatedRouteCertificate.actors].sort((a,b)=>a.continuousLowerBoundFeet-b.continuousLowerBoundFeet||a.actor.localeCompare(b.actor))[0].actor : defender, '10.B.1', { reach, ...(certified?{generatedRouteCertificate}:{}) });
@@ -218,6 +218,7 @@ function verifySegment(play, segment, solved, prior, index, violations) {
   if (recipe.quality !== shot.physicsV2.quality || recipe.arc !== shot.physicsV2.arc || recipe.pace !== shot.physicsV2.pace) add('profile-source-mismatch', 'Physics profile must preserve source arc, pace and quality.');
   if (JSON.stringify(recipe.physics || {}) !== JSON.stringify(shot.physicsV2.physics || {})) add('physics-source-mismatch', 'Compiled physics must retain the authored apex input.');
   if (!inApron(contact.point)) add('contact-apron', 'The represented contact is outside the supported apron.');
+  if (contact.point.heightFeet > GROUNDED_CONTACT_HEIGHT_FEET + EPS) add('grounded-contact-height', 'The represented contact exceeds the supported 8.5 ft grounded paddle height; airborne contacts are not represented.', 'model');
   if (!ballEntirelyInOwnEnd(contact.point, teamForPlayer(actor, play.players))) add('opponent-court-contact', 'The entire ball, including its radius, must cross the net plane to the hitter’s end before contact (13.F.1).');
   if (index === 0 && !play.rally?.openingBouncesSatisfied && contact.kind !== 'serve') add('opening-serve', 'A full rally begins with a serve.');
   if (index > 0 && contact.kind === 'serve') add('late-serve', 'A serve may only begin a rally.');
@@ -229,10 +230,15 @@ function verifySegment(play, segment, solved, prior, index, violations) {
     const bounces = incomingEnd >= prior.solved.firstLandingTime - EPS ? 1 : 0;
     if ((contact.kind === 'volley' && bounces !== 0) || (['groundstroke', 'short-hop'].includes(contact.kind) && bounces !== 1)) add('incoming-bounce-contact-kind', 'Contact kind must match the incoming first-bounce history.');
     if (prior.solved.secondBounceTime !== null && incomingEnd >= prior.solved.secondBounceTime - EPS) add('late-contact', 'Contact must occur before the second bounce.');
-    if (contact.kind === 'short-hop' && (incomingEnd - prior.solved.firstLandingTime > .35 + EPS || contact.point.heightFeet > 1.5 + EPS)) add('short-hop-contact', 'A short hop must occur within 0.35 s of its bounce and below 1.5 ft.', 'model');
     const receiver = recipeOf(prior.segment).receiver;
     if (receiver && receiver !== 'auto' && receiver !== actor) add('receiver-continuity', 'The actual next hitter must agree with the preceding declared receiver.');
   } else if (!onCourt(contact.point) && contact.kind !== 'serve' && !['erne', 'around-the-post'].includes(recipe.intent)) add('initial-apron-contact', 'An unrepresented initial apron contact requires applicable signature-shot geometry.');
+  // A midrally opening may omit its incoming bounce, but its represented
+  // height must still satisfy the short-hop model. Timing needs a prior leg.
+  if (contact.kind === 'short-hop' && (contact.point.heightFeet > 1.5 + EPS
+    || prior && prior.segment.step.shot.physicsV2.endTimeSeconds - prior.solved.firstLandingTime > .35 + EPS)) {
+    add('short-hop-contact', 'A short hop must occur within 0.35 s of its bounce and below 1.5 ft.', 'model');
+  }
   if (contact.feet?.length === 2) {
     if (contact.feet.some(p => !inApron(p))) add('foot-apron', 'Foot evidence must remain inside the supported apron.');
     if (distance(footCenter(contact.feet), contact.point) > 3 + EPS) add('contact-feet-reach', 'Foot evidence must support the paddle contact within the 3 ft reach model.', 'model');
@@ -279,7 +285,7 @@ function declarationMatches(play, decision, violations) {
   for (const key of ['reason', 'shotId', 'winner', 'faultingActor', 'ruleRef']) if (declared[key] !== decision[key]) add(`outcome-${key}`, `Declared outcome ${key} does not match the independently computed terminal event.`);
   if ((declared.struckActor ?? null) !== (decision.struckActor ?? null)) add('outcome-struckActor', 'The declared struck actor does not match the torso collision.');
   const evidence = declared.evidence;
-  if(evidence?.generatedRouteCertificate && !matchesGeneratedRouteCertificateV1(evidence.generatedRouteCertificate,decision.generatedRouteCertificate)) add('outcome-generated-route-certificate','Declared generated-route exclusion must match an independent proof from the current geometry.');
+  if(evidence?.generatedRouteCertificate && !matchesGeneratedRouteCertificate(evidence.generatedRouteCertificate,decision.generatedRouteCertificate)) add('outcome-generated-route-certificate','Declared generated-route exclusion must match an independent proof from the current geometry.');
   if (!finitePoint(evidence?.position) || distance(evidence.position, decision.position) > EVIDENCE_EPS || Math.abs(evidence.position.heightFeet - decision.position.heightFeet) > EVIDENCE_EPS || !Number.isFinite(evidence.afterContactSeconds) || Math.abs(evidence.afterContactSeconds - decision.afterContactSeconds) > EVIDENCE_EPS) add('outcome-evidence', 'Declared terminal geometry and contact-relative timing must match the solved event.');
   const finalHitter = play.steps.filter(s => s.shot).at(-1)?.shot.playerId;
   const finalWinner = teamForPlayer(finalHitter, play.players) === decision.winner;

@@ -8,6 +8,8 @@ import { inspectModel2SegmentV2, inspectModel2ContactV2, inspectBodyPathV2, reso
 import { teamForPlayer } from './rally-state.js';
 import { sampleActorBoardPositionV2 } from './play-actors-v2.js';
 import { inspectGeneratedMovementV1, inspectGeneratedSpacingV1, sampleFeetStateV1 } from './rally-movement.js';
+import { GENERATION_MOTION_V1 } from './generated-motion-limits.js';
+import { defaultFeetAtV1, validateDefaultFootStateV1 } from './generated-foot-state.js';
 
 export const PLANNING_VERSION = 'play-planning-v2';
 const copy=value=>structuredClone(value);
@@ -24,20 +26,27 @@ export function model2ContactKind(recipe){
   if(recipe.contactMode)return recipe.contactMode==='volley'?'volley':'groundstroke';
   return ['volley','overhead'].includes(recipe.family)||recipe.family==='reset'?'volley':'groundstroke';
 }
-function plant(point,target,side='forehand'){
+function plant(point,target,side='forehand',handedness='right'){
   const dx=target.x-point.x,dy=target.y-point.y,length=Math.hypot(dx,dy)||1,forward={x:dx/length,y:dy/length};
-  const hand=side==='backhand'?-1:1;
+  // Inferred feet follow the declared player's hitting hand. Explicit source
+  // feet and first-contact layout remain authoritative in prepareRecipe.
+  const hand=(handedness==='left'?-1:1)*(side==='backhand'?-1:1);
   return{x:point.x-forward.x*.8+forward.y*.8*hand,y:point.y-forward.y*.8-forward.x*.8*hand};
 }
 function footCenter(feet){return{x:(feet[0].x+feet[1].x)/2,y:(feet[0].y+feet[1].y)/2};}
-function feetAt(stance){return[{x:stance.x-.42,y:stance.y},{x:stance.x+.42,y:stance.y}];}
 function movementTarget(command,at){
   if(command.intent==='manual')return copy(command.target);
   if(command.intent==='advance')return{x:at.x,y:at.y<22?Math.min(14,at.y+4):Math.max(30,at.y-4)};
   if(command.intent==='recover')return{x:at.x+(10-at.x)*.25,y:at.y<22?Math.max(1,at.y-3):Math.min(43,at.y+3)};
   return xy(at);
 }
-function stroke(recipe){if(recipe.contactStyle==='short-hop')return'short-hop';if(recipe.family==='return')return recipe.contactStyle==='backhand'?'backhand':'forehand';return recipe.family;}
+function contactSide(recipe,contact,stance,player){
+  if(recipe.contactStyle!=='auto')return recipe.contactStyle==='backhand'?'backhand':'forehand';
+  const lateral=contact.x-stance.x;
+  const forehandDirection=(player.team==='green'?-1:1)*(player.handedness==='left'?-1:1);
+  return Math.abs(lateral)<.15||lateral*forehandDirection>=0?'forehand':'backhand';
+}
+function stroke(recipe,side=recipe.contactStyle){if(recipe.contactStyle==='short-hop')return'short-hop';if(recipe.family==='return')return side==='backhand'?'backhand':'forehand';return recipe.family;}
 
 
 function assertState(state) {
@@ -46,16 +55,21 @@ function assertState(state) {
 
 export function createPlanningStateV2(source) {
   if(source?.modelVersion!==2||source.physicsVersion!==PHYSICS_VERSION)throw new TypeError('Explicit model 2 and supported physics version required.');
+  validateDefaultFootStateV1(source.defaultFootState);
   // Header only: decision histories and an existing source prefix are not copied
   // for each trial. Authored compilation feeds its recipes through the same API.
   const document={id:source.id,title:source.title,modelVersion:2,physicsVersion:PHYSICS_VERSION,
     initialLayout:copy(source.initialLayout),players:copy(source.players),opening:source.opening,
     ending:source.ending??'winner',outcome:source.outcome?copy(source.outcome):null,
     intentionalFault:source.intentionalFault??false,assistance:copy(source.assistance),
-    ...(source.service?{service:copy(source.service)}:{})};
+    ...(source.service?{service:copy(source.service)}:{}),
+    ...(source.stacking?{stacking:copy(source.stacking)}:{}),
+    ...(source.defaultFootState!==undefined?{defaultFootState:copy(source.defaultFootState)}:{})};
   const steps=[{id:'setup',label:'Starting Positions',description:'Model 2 starting state.',durationMs:0,positions:copy(document.initialLayout)}];
   const play={id:document.id,name:document.title,description:'Model 2 physical play',mode:'doubles',modelVersion:2,physicsVersion:PHYSICS_VERSION,
     players:copy(document.players),rally:{openingBouncesSatisfied:document.opening==='midrally',...(document.service?{service:copy(document.service)}:{})},
+    ...(document.stacking?{stacking:copy(document.stacking)}:{}),
+    ...(document.defaultFootState!==undefined?{defaultFootState:copy(document.defaultFootState)}:{}),
     ending:document.ending,outcome:document.outcome?copy(document.outcome):null,intentionalFault:document.intentionalFault,assistance:copy(document.assistance),steps};
   const state={version:PLANNING_VERSION,document,play,steps,solved:[],locks:new Map(),findings:[],recipes:[],revision:0,
     finalizedSegments:[],finalizedInspections:[],cursor:0,momentum:[],pendingSegment:null,pendingRecipe:null,pendingLocksBefore:new Map()};
@@ -67,7 +81,7 @@ function prepareRecipe(state,recipe) {
   let previousResolved=null;
   try {
 
-      const kind=model2ContactKind(recipe),previous=copy(steps.at(-1)),side=recipe.contactStyle==='backhand'?'backhand':'forehand';
+      const kind=model2ContactKind(recipe),previous=copy(steps.at(-1));
       previousResolved=index?previous:null;
       let contact,incoming=null;
       if(index){
@@ -80,8 +94,10 @@ function prepareRecipe(state,recipe) {
         if(recipe.contactOverride&&distance(source,document.initialLayout.ball)>.025)throw new RangeError('The starting ball must coincide with the first contactOverride.');
         contact={...xy(source),heightFeet:recipe.family==='serve'&&recipe.serveMethod==='drop'?solveServePreparationV2({point:source}).contactHeightFeet:recipe.family==='overhead'?7.5:kind==='short-hop'?.8:2.2};
       }
-      const initialStance=index?plant(contact,recipe.target,side):xy(document.initialLayout[recipe.hitter]);
-      const feet=recipe.contactEvidence?.feet?copy(recipe.contactEvidence.feet):feetAt(initialStance),stance=footCenter(feet);
+      const sideOrigin=recipe.contactEvidence?.feet?footCenter(recipe.contactEvidence.feet):previous.positions[recipe.hitter];
+      const side=contactSide(recipe,contact,sideOrigin,document.players[recipe.hitter]);
+      const initialStance=index?plant(contact,recipe.target,side,document.players[recipe.hitter].handedness):xy(document.initialLayout[recipe.hitter]);
+      const feet=recipe.contactEvidence?.feet?copy(recipe.contactEvidence.feet):defaultFeetAtV1(initialStance,document.defaultFootState),stance=footCenter(feet);
       if(distance(stance,contact)>3+.001)findings.push(finding(recipe.id,'Both feet must support a contact within the 3 ft paddle reach model.','feasibility'));
       if(locks.has(recipe.hitter)&&distance(locks.get(recipe.hitter),stance)>.05)findings.push(finding(recipe.id,'The contact cannot move an actor away from an authored pin.','feasibility'));
       if(index){
@@ -90,7 +106,7 @@ function prepareRecipe(state,recipe) {
         // Endpoint stance, ball and the next stroke share one boundary.
         previous.positions[recipe.hitter]=xy(stance);
       }else{
-        const profile=STROKE_PROFILES[stroke(recipe)];
+        const profile=STROKE_PROFILES[stroke(recipe,side)];
         const available=recipe.family==='serve'&&recipe.serveMethod==='drop'
           ?solveServePreparationV2({point:contact}).totalDuration:profile.duration*profile.contactRatio;
         const travelBudget=Math.max(0,available-REACH_MODEL.reactionSeconds)*REACH_MODEL.speedFeetPerSecond+REACH_MODEL.paddleReachFeet;
@@ -118,7 +134,7 @@ function materializeRecipe(state,recipe,prepared) {
       const flight=solveFlightV2(spec);
       ownedFlights.set(flight,++nextOwnedFlight);
       spec.endTimeSeconds=document.ending==='stop'?flight.firstLandingTime:flight.totalDuration;spec.endpoint=document.ending==='stop'?'bounce':'terminal';
-      const shot={from:xy(contact),to:xy(flight.sampleBoard(spec.endTimeSeconds)),intendedTarget:copy(recipe.target),type:stroke(recipe),stroke:stroke(recipe),playerId:recipe.hitter,
+      const shot={from:xy(contact),to:xy(flight.sampleBoard(spec.endTimeSeconds)),intendedTarget:copy(recipe.target),type:stroke(recipe,side),stroke:stroke(recipe,side),playerId:recipe.hitter,
         contact:{kind,point:copy(contact),heightFeet:contact.heightFeet,strokeSide:side,feet,
           feetEstablishedOutsideNVZ:recipe.contactEvidence?.feetEstablishedOutsideNVZ??true,momentumEntersNonVolleyZone:Boolean(recipe.contactEvidence?.momentum)},
         ...(recipe.contactEvidence?{contactEvidence:copy(recipe.contactEvidence)}:{}),
@@ -166,8 +182,8 @@ function patchPendingMovement(state,pendingRecipe,{trialDraft=false}={}) {
   return {...state,steps,play:{...state.play,steps},locks,pendingRecipe:trialDraft?pendingRecipe:copy(pendingRecipe)};
 }
 
-function segmentFor(previous,step,nextStep,index,startTime,momentum) {
-  return createModel2SegmentV2({previous,step,nextStep,index,startTime,model2Momentum:momentum},adapters);
+function segmentFor(previous,step,nextStep,index,startTime,momentum,defaultFootState) {
+  return createModel2SegmentV2({previous,step,nextStep,index,startTime,model2Momentum:momentum,defaultFootState},adapters);
 }
 
 // Generator-only tail repair. Reuse the finalized prefix and flight solution;
@@ -176,7 +192,7 @@ export function replacePendingMovementV2(state,pendingRecipe) {
   assertState(state);
   const next=patchPendingMovement(state,pendingRecipe),index=state.solved.length;
   next.recipes=state.recipes.slice();next.recipes[index-1]=copy(pendingRecipe);
-  next.pendingSegment=segmentFor(next.steps[index-1],next.steps[index],null,index,state.cursor,state.momentum);
+  next.pendingSegment=segmentFor(next.steps[index-1],next.steps[index],null,index,state.cursor,state.momentum,state.play.defaultFootState);
   next.revision=state.revision+1;
   Object.assign(state,next);return state;
 }
@@ -322,7 +338,7 @@ export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly
     let cursor=working.cursor,inspection=null,previousAudit=null;
     const finalizedSegments=working.finalizedSegments.slice(),finalizedInspections=working.finalizedInspections.slice();
     if(index&&!buildOnly){
-      const segment=segmentFor(steps[index-1],steps[index],construction.step,index,cursor,working.momentum);
+      const segment=segmentFor(steps[index-1],steps[index],construction.step,index,cursor,working.momentum,working.play.defaultFootState);
       result.resolvedPrevious=segment;cursor=segment.endTime;finalizedSegments.push(segment);
       if(inspect){
         const prior=previousContext(working),solved=working.solved.at(-1);
@@ -343,7 +359,7 @@ export function trialRecipeV2(state,recipe,{pendingRecipe,inspect=true,buildOnly
       }
       finalizedInspections.push(inspection);
     }
-    const pending=buildOnly?null:segmentFor(steps.at(-2),construction.step,null,index+1,cursor,working.momentum);
+    const pending=buildOnly?null:segmentFor(steps.at(-2),construction.step,null,index+1,cursor,working.momentum,working.play.defaultFootState);
     const extra=pending?momentumFor(pending):null,momentum=extra?[...working.momentum,extra]:working.momentum;
     if(pending)pending.model2Momentum=momentum;result.pendingSegment=pending;
     // These two private fields may share a detached snapshot while a trial is
@@ -404,7 +420,7 @@ export function inspectPendingLegV2(state,{terminal=true,ending=terminal?'winner
 function inspectPendingLeg(state,{terminal,ending,outcome=null}) {
   if(!state.pendingSegment)return {decision:null,derivedOutcome:null,violations:[],physicalCandidates:[],momentumCandidates:[],segment:null};
   const play=planningPlay(state,{ending,outcome});
-  const index=state.solved.length,segment=segmentFor(play.steps[index-1],play.steps[index],null,index,state.cursor,state.momentum);
+  const index=state.solved.length,segment=segmentFor(play.steps[index-1],play.steps[index],null,index,state.cursor,state.momentum,play.defaultFootState);
   const inspection=inspectModel2SegmentV2(play,segment,{index:index-1,prior:previousContext(state),terminal,solved:state.solved.at(-1)});
   const history=state.finalizedInspections.filter(Boolean);
   const physicalCandidates=[...history.flatMap(item=>item.physicalCandidates),...inspection.physicalCandidates];
@@ -564,7 +580,7 @@ function generationRequestDependencies(state,recipe,pendingRecipe){
     if(!generationPlainData(pendingRecipe)||!generationPlainData(recipe.contactEvidence)||!generationPlainData(recipe.contactTiming)
       ||!generationPlainData(recipe.contactOverride)||!generationPlainData(recipe.target)
       ||Object.values(Object.getOwnPropertyDescriptors(recipe)).some(descriptor=>!Object.hasOwn(descriptor,'value')))return null;
-    const values=[recipe.id,model2ContactKind(recipe),recipe.hitter,recipe.contactStyle==='backhand'?'backhand':'forehand',
+    const values=[recipe.id,model2ContactKind(recipe),recipe.hitter,recipe.contactStyle,
       recipe.contactTiming?.afterBounceSeconds,recipe.contactTiming?.beforeBounceSeconds,
       recipe.contactOverride?.x,recipe.contactOverride?.y,Boolean(recipe.contactOverride),Boolean(pendingRecipe)];
     if(!state.solved.length)values.push(recipe.family,recipe.serveMethod,stroke(recipe));
@@ -622,7 +638,7 @@ function generationWorking(state,recipe,pendingRecipe,incomingHandle){
 
 function contactStep(recipe,prepared){
   const {contact,feet,kind,side}=prepared;
-  return {shot:{from:xy(contact),type:stroke(recipe),stroke:stroke(recipe),playerId:recipe.hitter,
+  return {shot:{from:xy(contact),type:stroke(recipe,side),stroke:stroke(recipe,side),playerId:recipe.hitter,
     contact:{kind,point:copy(contact),heightFeet:contact.heightFeet,strokeSide:side,feet,
       feetEstablishedOutsideNVZ:recipe.contactEvidence?.feetEstablishedOutsideNVZ??true,
       momentumEntersNonVolleyZone:Boolean(recipe.contactEvidence?.momentum)}}};
@@ -651,7 +667,8 @@ function generationPrevious(state,working,recipe,prepared,incomingHandle){
   if(!index)return {segment:null,inspection:null,reused:false,dependencies:null,cursor:working.cursor};
   const dependencies=incomingDependencies(recipe,prepared),prior=previousContext(working),solved=working.solved.at(-1);
   const segment=generationSegment({previous:working.steps[index-1],step:prepared.previousResolved,
-    nextStep:contactStep(recipe,prepared),index,startTime:working.cursor,model2Momentum:working.momentum},working.solved.at(-1));
+    nextStep:contactStep(recipe,prepared),index,startTime:working.cursor,model2Momentum:working.momentum,
+    defaultFootState:working.play.defaultFootState},working.solved.at(-1));
   const reused=Boolean(old&&old.solved===solved&&old.priorSolved===prior?.solved&&old.dependencies?.length===dependencies.length
     &&dependencies.every((value,index)=>Object.is(value,old.dependencies[index])));
   const inspection=reused?old.inspection:inspectModel2SegmentV2(working.play,segment,{index:index-1,prior,terminal:false,solved});
@@ -676,7 +693,7 @@ export function probeGenerationIncomingV2(session,recipe,{pendingRecipe}={}){
   if(prepared.built){
     previous=generationPrevious(state,working,recipe,prepared);
     appendGenerationInspection(prepared.findings,recipe,prepared,previous);
-    if(previous.segment){movement=inspectGeneratedMovementV1(previous.segment);spacing=inspectGeneratedSpacingV1(previous.segment);}
+    if(previous.segment){movement=inspectGeneratedMovementV1(previous.segment,{maxAccelerationFeetPerSecondSquared:GENERATION_MOTION_V1.accelerationFeetPerSecondSquared});spacing=inspectGeneratedSpacingV1(previous.segment);}
   }
   const handle=Object.freeze({}),requestDependencies=generationRequestDependencies(state,recipe,pendingRecipe);
   const segment=previous?.segment;
@@ -701,7 +718,8 @@ function generationReplyConstruction(session,recipe,{incoming,pendingRecipe}={})
   const previous=cachedPrevious||generationPrevious(state,working,recipe,prepared,incoming);
   appendGenerationInspection(construction.findings,recipe,prepared,previous);
   const index=working.solved.length,pending=generationSegment({previous:construction.previousResolved||working.steps.at(-1),
-    step:construction.step,nextStep:null,index:index+1,startTime:previous.cursor,model2Momentum:working.momentum},construction.flight);
+    step:construction.step,nextStep:null,index:index+1,startTime:previous.cursor,model2Momentum:working.momentum,
+    defaultFootState:working.play.defaultFootState},construction.flight);
   const extra=momentumFor(pending);if(extra)pending.model2Momentum=[...working.momentum,extra];
   assertGenerationRevision(state,revision);
   return {state,revision,working,construction,previous,pending};
@@ -722,6 +740,7 @@ export function probeGenerationReplyV2(session,recipe,{incoming,pendingRecipe,ac
     representedFlightSeconds:construction.flight?.totalDuration};
   if(record&&pending)result.nominal={contact:construction.contact,family:recipe.family,quality:recipe.quality,target:xy(recipe.target),physics:copy(recipe.physics),pace:recipe.pace,arc:recipe.arc,
     actorRoute:{startTime:pending.startTime,duration:pending.duration,originalDuration:pending.originalDuration,contactTime:pending.contactTime,
+      ...(pending.defaultFootState!==undefined?{defaultFootState:copy(pending.defaultFootState)}:{}),
       hitter:pending.shotSemantics.playerId,feet:pending.shotSemantics.contact.feet,previousPositions:pending.previous.positions,
       positions:pending.step.positions,momentum:pending.model2Momentum,endTimeSeconds:pending.step.shot.physicsV2.endTimeSeconds}};
   const detached=detachedGenerationData(result);
@@ -731,7 +750,7 @@ export function probeGenerationReplyV2(session,recipe,{incoming,pendingRecipe,ac
 function generationRouteValid(state,incoming,previous){
   const cached=previous?.reused?generationIncomingRecord(state,incoming):null;
   if(cached?.movement&&cached?.spacing)return cached.movement.valid&&cached.spacing.valid;
-  return previous?.segment?inspectGeneratedMovementV1(previous.segment).valid&&inspectGeneratedSpacingV1(previous.segment).valid:true;
+  return previous?.segment?inspectGeneratedMovementV1(previous.segment,{maxAccelerationFeetPerSecondSquared:GENERATION_MOTION_V1.accelerationFeetPerSecondSquared}).valid&&inspectGeneratedSpacingV1(previous.segment).valid:true;
 }
 export function commitGenerationRecipeV2(session,recipe,{incoming,pendingRecipe}={}){
   const {state,revision,working,construction,previous,pending}=generationReplyConstruction(session,recipe,{incoming,pendingRecipe});
@@ -773,7 +792,7 @@ export function replaceGenerationPendingMovementV2(session,pendingRecipe){
   const state=sessionRecord(session).state,revision=state.revision;
   const next=patchPendingMovement(state,pendingRecipe),index=state.solved.length;
   next.recipes=state.recipes.slice();next.recipes[index-1]=copy(pendingRecipe);
-  next.pendingSegment=segmentFor(next.steps[index-1],next.steps[index],null,index,state.cursor,state.momentum);
+  next.pendingSegment=segmentFor(next.steps[index-1],next.steps[index],null,index,state.cursor,state.momentum,state.play.defaultFootState);
   next.revision=revision+1;
   assertGenerationRevision(state,revision);
   Object.assign(state,next);

@@ -1,0 +1,1377 @@
+{
+  "version": "generated-above-head-stance-regression-v1",
+  "provenance": {
+    "sourceRevision": "ede6501",
+    "scope": "Historical failure inputs and current high-only candidate expectations; no historical fixture is overwritten.",
+    "movementSha256": "8ea14ad298a140b665d847476d34704bc634f675b2b4225c0a9580e8371cfda6",
+    "trainerSupportSha256": "c24161585dca175007313e92b36fa677e2e85687f6a63653f1ada3b690470b9d"
+  },
+  "cases": [
+    {
+      "id": "pro-50293",
+      "input": {
+        "seed": 50293,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player1",
+          "receiver": "player3",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "priorContacts": 6,
+      "priorDecisionsSha256": "e4c2f810f840b83e0f0a167b857c570da9ebdd19beefb221b256cc6a6bfaa448",
+      "original": {
+        "contact": {
+          "x": 11.744744788,
+          "y": 6.406508778,
+          "heightFeet": 7.499998992
+        },
+        "stance": {
+          "x": 12.454867611,
+          "y": 5.77545761
+        },
+        "feet": [
+          {
+            "x": 13.174867611,
+            "y": 5.77545761
+          },
+          {
+            "x": 11.734867611,
+            "y": 5.77545761
+          }
+        ],
+        "kind": "volley",
+        "handedness": "right",
+        "strokeSide": "forehand",
+        "nominalTarget": {
+          "x": 9.290753277175488,
+          "y": 27.26584084064234
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -3.95294843
+        },
+        "nominalInput": {
+          "root": {
+            "x": 0.7482436478327998,
+            "y": 0,
+            "z": -4.945240520472
+          },
+          "contact": {
+            "x": 0.5317982113824001,
+            "y": 2.2859996927616,
+            "z": -4.7528961244656
+          },
+          "feet": {
+            "left": {
+              "x": 0.9676996478327999,
+              "y": 0,
+              "z": -4.945240520472
+            },
+            "right": {
+              "x": 0.5287876478328001,
+              "y": 0,
+              "z": -4.945240520472
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": -0.1168390142797622,
+            "z": 0.9931508670600522
+          },
+          "outgoingVelocity": {
+            "x": -1.3228139447296616,
+            "y": -1.2053490132224454,
+            "z": 11.244136423638196
+          },
+          "incomingVelocity": {
+            "x": 0.611952928538729,
+            "y": -7.922281696509421,
+            "z": -4.0167955121810355
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": 0.9676996478327999,
+                "y": 0,
+                "z": -4.945240520472
+              },
+              "right": {
+                "x": 0.5287876478328001,
+                "y": 0,
+                "z": -4.945240520472
+              }
+            },
+            "footYaw": {
+              "left": 0,
+              "right": 0
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredInput": {
+          "root": {
+            "x": 0.7482436478327998,
+            "y": 0,
+            "z": -4.945240520472
+          },
+          "contact": {
+            "x": 0.5317982113824001,
+            "y": 2.2859996927616,
+            "z": -4.7528961244656
+          },
+          "feet": {
+            "left": {
+              "x": 0.9676996478327999,
+              "y": 0,
+              "z": -4.945240520472
+            },
+            "right": {
+              "x": 0.5287876478328001,
+              "y": 0,
+              "z": -4.945240520472
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": -0.5660474028671499,
+            "z": 0.8243726934508169
+          },
+          "outgoingVelocity": {
+            "x": -8.1756585291759,
+            "y": -1.5732626178532882,
+            "z": 11.906758353257274
+          },
+          "incomingVelocity": {
+            "x": 0.611952928538729,
+            "y": -7.922281696509421,
+            "z": -4.0167955121810355
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": 0.9676996478327999,
+                "y": 0,
+                "z": -4.945240520472
+              },
+              "right": {
+                "x": 0.5287876478328001,
+                "y": 0,
+                "z": -4.945240520472
+              }
+            },
+            "footYaw": {
+              "left": 0,
+              "right": 0
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredReachError": 0.001641001004742339,
+        "incoming": {
+          "from": {
+            "x": 8.096654498866224,
+            "y": 30.352194822300273,
+            "heightFeet": 1.6178242615024951
+          },
+          "target": {
+            "x": 12.23927867,
+            "y": 3.1604397
+          },
+          "family": "lob",
+          "physics": {
+            "launchVerticalFeetPerSecond": 32.467833996
+          }
+        },
+        "incomingTimeSeconds": 1.8170317817316946
+      },
+      "oldFailure": {
+        "executionDraws": {
+          "quality": 0.10536317760124803,
+          "error": 0.8029385027475655
+        },
+        "quality": "error",
+        "error": "wide",
+        "target": {
+          "x": -2.6217511454597116,
+          "y": 27.329397723567673
+        },
+        "perturbation": {
+          "lateral": 0.7072503818199039,
+          "depth": 0.5794461036566645
+        },
+        "targetDrawIndex": 42
+      },
+      "expected": {
+        "shots": 7,
+        "reason": "net",
+        "target": {
+          "x": -1.036250938,
+          "y": 27.236597348
+        },
+        "nominal": {
+          "x": 9.290753277,
+          "y": 27.265840841
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": 0
+        },
+        "perturbation": {
+          "lateral": 0.17875031265430152,
+          "depth": 0.46344563481397927
+        },
+        "targetDrawIndex": 38,
+        "stance": {
+          "x": 12.193243413000001,
+          "y": 6.007950146
+        },
+        "feet": [
+          {
+            "x": 12.913243413,
+            "y": 6.007950146
+          },
+          {
+            "x": 11.473243413,
+            "y": 6.007950146
+          }
+        ]
+      }
+    },
+    {
+      "id": "pro-50537",
+      "input": {
+        "seed": 50537,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "pro",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player1",
+          "receiver": "player3",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "priorContacts": 5,
+      "priorDecisionsSha256": "5b9d49c4f81e916414bc978f4a9cacf02f36ea2fb5f53be14fb0dedfdbbdc7f7",
+      "original": {
+        "contact": {
+          "x": 8.039075482,
+          "y": 37.480086638,
+          "heightFeet": 7.499998992
+        },
+        "stance": {
+          "x": 7.324220896,
+          "y": 38.105772598
+        },
+        "feet": [
+          {
+            "x": 6.604220896,
+            "y": 38.105772598
+          },
+          {
+            "x": 8.044220896,
+            "y": 38.105772598
+          }
+        ],
+        "kind": "volley",
+        "handedness": "right",
+        "strokeSide": "forehand",
+        "nominalTarget": {
+          "x": 10.816501175690108,
+          "y": 16.776611624867655
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -3.935861248
+        },
+        "nominalInput": {
+          "root": {
+            "x": -0.8155774708992001,
+            "y": 0,
+            "z": 4.909039487870401
+          },
+          "contact": {
+            "x": -0.5976897930864002,
+            "y": 2.2859996927616,
+            "z": 4.7183304072624015
+          },
+          "feet": {
+            "left": {
+              "x": -1.0350334708992,
+              "y": 0,
+              "z": 4.909039487870401
+            },
+            "right": {
+              "x": -0.5961214708991999,
+              "y": 0,
+              "z": 4.909039487870401
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": 0.13296151909698278,
+            "z": -0.9911212006810382
+          },
+          "outgoingVelocity": {
+            "x": 1.4960049778989237,
+            "y": -1.2001408401474123,
+            "z": -11.15151406205328
+          },
+          "incomingVelocity": {
+            "x": -0.44703033563080957,
+            "y": -7.922281696576034,
+            "z": 3.770166459027695
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": -1.0350334708992,
+                "y": 0,
+                "z": 4.909039487870401
+              },
+              "right": {
+                "x": -0.5961214708991999,
+                "y": 0,
+                "z": 4.909039487870401
+              }
+            },
+            "footYaw": {
+              "left": 3.141592653589793,
+              "right": 3.141592653589793
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredInput": {
+          "root": {
+            "x": -0.8155774708992001,
+            "y": 0,
+            "z": 4.909039487870401
+          },
+          "contact": {
+            "x": -0.5976897930864002,
+            "y": 2.2859996927616,
+            "z": 4.7183304072624015
+          },
+          "feet": {
+            "left": {
+              "x": -1.0350334708992,
+              "y": 0,
+              "z": 4.909039487870401
+            },
+            "right": {
+              "x": -0.5961214708991999,
+              "y": 0,
+              "z": 4.909039487870401
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": 0.07537061397338468,
+            "z": -0.9971555899403438
+          },
+          "outgoingVelocity": {
+            "x": 1.0879154315124318,
+            "y": 1.6546287955909733,
+            "z": -14.39315532573815
+          },
+          "incomingVelocity": {
+            "x": -0.44703033563080957,
+            "y": -7.922281696576034,
+            "z": 3.770166459027695
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": -1.0350334708992,
+                "y": 0,
+                "z": 4.909039487870401
+              },
+              "right": {
+                "x": -0.5961214708991999,
+                "y": 0,
+                "z": 4.909039487870401
+              }
+            },
+            "footYaw": {
+              "left": 3.141592653589793,
+              "right": 3.141592653589793
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredReachError": 0.00023049347914820618,
+        "incoming": {
+          "from": {
+            "x": 10.692691982887972,
+            "y": 15.100003831497393,
+            "heightFeet": 1.867152731607882
+          },
+          "target": {
+            "x": 7.677819514,
+            "y": 40.526848845
+          },
+          "family": "lob",
+          "physics": {
+            "launchVerticalFeetPerSecond": 32.219814649
+          }
+        },
+        "incomingTimeSeconds": 1.8093230931406539
+      },
+      "oldFailure": {
+        "executionDraws": {
+          "quality": 0.06389655475504696,
+          "error": 0.46175366058014333
+        },
+        "quality": "error",
+        "error": "long",
+        "target": {
+          "x": 11.132709034237676,
+          "y": -3.448782416060567
+        },
+        "perturbation": {
+          "lateral": 0.8952598231844604,
+          "depth": 0.8162608053535223
+        },
+        "targetDrawIndex": 52
+      },
+      "expected": {
+        "shots": 6,
+        "reason": "long",
+        "target": {
+          "x": 11.602661359,
+          "y": -3.239418022
+        },
+        "nominal": {
+          "x": 11.657657549,
+          "y": 17.236815468
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -2.069773289
+        },
+        "perturbation": {
+          "lateral": 0.4312547624576837,
+          "depth": 0.7464726739563048
+        },
+        "targetDrawIndex": 40,
+        "stance": {
+          "x": 7.587588375,
+          "y": 37.875256718
+        },
+        "feet": [
+          {
+            "x": 6.867588375,
+            "y": 37.875256718
+          },
+          {
+            "x": 8.307588375,
+            "y": 37.875256718
+          }
+        ]
+      }
+    },
+    {
+      "id": "advanced-50381",
+      "input": {
+        "seed": 50381,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player1",
+          "receiver": "player3",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "priorContacts": 5,
+      "priorDecisionsSha256": "b7ef07ee18be9b913f0c77b3f8feac30e0a2155a6d9c47f6b86a7abf332ff076",
+      "original": {
+        "contact": {
+          "x": 7.506540029,
+          "y": 36.433321798,
+          "heightFeet": 7.499998992
+        },
+        "stance": {
+          "x": 6.778672788,
+          "y": 37.043821003
+        },
+        "feet": [
+          {
+            "x": 6.058672788,
+            "y": 37.043821003
+          },
+          {
+            "x": 7.498672788,
+            "y": 37.043821003
+          }
+        ],
+        "kind": "volley",
+        "handedness": "right",
+        "strokeSide": "forehand",
+        "nominalTarget": {
+          "x": 11.821504105425,
+          "y": 16.74300351412967
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -5.240927568
+        },
+        "nominalInput": {
+          "root": {
+            "x": -0.9818605342176001,
+            "y": 0,
+            "z": 4.5853566417144
+          },
+          "contact": {
+            "x": -0.7600065991608,
+            "y": 2.2859996927616,
+            "z": 4.399276484030401
+          },
+          "feet": {
+            "left": {
+              "x": -1.2013165342176,
+              "y": 0,
+              "z": 4.5853566417144
+            },
+            "right": {
+              "x": -0.7624045342175999,
+              "y": 0,
+              "z": 4.5853566417144
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": 0.21406173943461793,
+            "z": -0.9768201327318279
+          },
+          "outgoingVelocity": {
+            "x": 2.4644369168635993,
+            "y": -1.597925054483973,
+            "z": -11.24587515078268
+          },
+          "incomingVelocity": {
+            "x": -0.9414403070341286,
+            "y": -7.9222816966826155,
+            "z": 3.658965879820689
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": -1.2013165342176,
+                "y": 0,
+                "z": 4.5853566417144
+              },
+              "right": {
+                "x": -0.7624045342175999,
+                "y": 0,
+                "z": 4.5853566417144
+              }
+            },
+            "footYaw": {
+              "left": 3.141592653589793,
+              "right": 3.141592653589793
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredInput": {
+          "root": {
+            "x": -0.9818605342176001,
+            "y": 0,
+            "z": 4.5853566417144
+          },
+          "contact": {
+            "x": -0.7600065991608,
+            "y": 2.2859996927616,
+            "z": 4.399276484030401
+          },
+          "feet": {
+            "left": {
+              "x": -1.2013165342176,
+              "y": 0,
+              "z": 4.5853566417144
+            },
+            "right": {
+              "x": -0.7624045342175999,
+              "y": 0,
+              "z": 4.5853566417144
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": 0.19176772129192007,
+            "z": -0.9814403400464566
+          },
+          "outgoingVelocity": {
+            "x": 2.21728264623966,
+            "y": -1.186813644551421,
+            "z": -11.347742047753684
+          },
+          "incomingVelocity": {
+            "x": -0.9414403070341286,
+            "y": -7.9222816966826155,
+            "z": 3.658965879820689
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": -1.2013165342176,
+                "y": 0,
+                "z": 4.5853566417144
+              },
+              "right": {
+                "x": -0.7624045342175999,
+                "y": 0,
+                "z": 4.5853566417144
+              }
+            },
+            "footYaw": {
+              "left": 3.141592653589793,
+              "right": 3.141592653589793
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredReachError": 0.000020525656301313867,
+        "incoming": {
+          "from": {
+            "x": 13.101542503208972,
+            "y": 14.68799923264027,
+            "heightFeet": 1.799075802262264
+          },
+          "target": {
+            "x": 6.74573947,
+            "y": 39.390220142
+          },
+          "family": "lob",
+          "physics": {
+            "launchVerticalFeetPerSecond": 32.287723213
+          }
+        },
+        "incomingTimeSeconds": 1.8114337590262823
+      },
+      "oldFailure": {
+        "executionDraws": {
+          "quality": 0.3443821668624878,
+          "error": 0.17246667621657252
+        },
+        "quality": "attackable",
+        "error": null,
+        "target": {
+          "x": 11.631200571854158,
+          "y": 15.323886808194219
+        },
+        "perturbation": {
+          "lateral": 0.37313097761943936,
+          "depth": 0.10323900682851672
+        },
+        "targetDrawIndex": 38
+      },
+      "expected": {
+        "shots": 8,
+        "reason": "wide",
+        "target": {
+          "x": 12.152457167,
+          "y": 15.394402811
+        },
+        "nominal": {
+          "x": 12.4884351,
+          "y": 17.374414583
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -2.84479038
+        },
+        "perturbation": {
+          "lateral": 0.2760147114749998,
+          "depth": 0.16200234275311232
+        },
+        "targetDrawIndex": 30,
+        "stance": {
+          "x": 7.046834403,
+          "y": 36.818900243
+        },
+        "feet": [
+          {
+            "x": 6.326834403,
+            "y": 36.818900243
+          },
+          {
+            "x": 7.766834403,
+            "y": 36.818900243
+          }
+        ]
+      }
+    },
+    {
+      "id": "intermediate-50381",
+      "input": {
+        "seed": 50381,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player1",
+          "receiver": "player3",
+          "court": "left",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      },
+      "priorContacts": 5,
+      "priorDecisionsSha256": "39e680dc3d5b468adc069a80530249a53ab89bf7631889d6e93baf822258aefe",
+      "original": {
+        "contact": {
+          "x": 7.506540029,
+          "y": 36.433321798,
+          "heightFeet": 7.499998992
+        },
+        "stance": {
+          "x": 6.778672788,
+          "y": 37.043821003
+        },
+        "feet": [
+          {
+            "x": 6.058672788,
+            "y": 37.043821003
+          },
+          {
+            "x": 7.498672788,
+            "y": 37.043821003
+          }
+        ],
+        "kind": "volley",
+        "handedness": "right",
+        "strokeSide": "forehand",
+        "nominalTarget": {
+          "x": 11.821504105425,
+          "y": 16.74300351412967
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -5.240927568
+        },
+        "nominalInput": {
+          "root": {
+            "x": -0.9818605342176001,
+            "y": 0,
+            "z": 4.5853566417144
+          },
+          "contact": {
+            "x": -0.7600065991608,
+            "y": 2.2859996927616,
+            "z": 4.399276484030401
+          },
+          "feet": {
+            "left": {
+              "x": -1.2013165342176,
+              "y": 0,
+              "z": 4.5853566417144
+            },
+            "right": {
+              "x": -0.7624045342175999,
+              "y": 0,
+              "z": 4.5853566417144
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": 0.21406173943461793,
+            "z": -0.9768201327318279
+          },
+          "outgoingVelocity": {
+            "x": 2.4644369168635993,
+            "y": -1.597925054483973,
+            "z": -11.24587515078268
+          },
+          "incomingVelocity": {
+            "x": -0.9414403070341286,
+            "y": -7.9222816966826155,
+            "z": 3.658965879820689
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": -1.2013165342176,
+                "y": 0,
+                "z": 4.5853566417144
+              },
+              "right": {
+                "x": -0.7624045342175999,
+                "y": 0,
+                "z": 4.5853566417144
+              }
+            },
+            "footYaw": {
+              "left": 3.141592653589793,
+              "right": 3.141592653589793
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredInput": {
+          "root": {
+            "x": -0.9818605342176001,
+            "y": 0,
+            "z": 4.5853566417144
+          },
+          "contact": {
+            "x": -0.7600065991608,
+            "y": 2.2859996927616,
+            "z": 4.399276484030401
+          },
+          "feet": {
+            "left": {
+              "x": -1.2013165342176,
+              "y": 0,
+              "z": 4.5853566417144
+            },
+            "right": {
+              "x": -0.7624045342175999,
+              "y": 0,
+              "z": 4.5853566417144
+            }
+          },
+          "handedness": "right",
+          "strokeSide": "forehand",
+          "family": "drop",
+          "bodyFacing": {
+            "x": 0.19176772129192007,
+            "z": -0.9814403400464566
+          },
+          "outgoingVelocity": {
+            "x": 2.21728264623966,
+            "y": -1.186813644551421,
+            "z": -11.347742047753684
+          },
+          "incomingVelocity": {
+            "x": -0.9414403070341286,
+            "y": -7.9222816966826155,
+            "z": 3.658965879820689
+          },
+          "modelVersion": 2,
+          "phase": 1,
+          "grounded": true,
+          "planted": true,
+          "coachingFootwork": {
+            "mode": "plant",
+            "load": 0.5,
+            "feet": {
+              "left": {
+                "x": -1.2013165342176,
+                "y": 0,
+                "z": 4.5853566417144
+              },
+              "right": {
+                "x": -0.7624045342175999,
+                "y": 0,
+                "z": 4.5853566417144
+              }
+            },
+            "footYaw": {
+              "left": 3.141592653589793,
+              "right": 3.141592653589793
+            },
+            "footPitch": {
+              "left": 0,
+              "right": 0
+            },
+            "pelvisDrop": 0,
+            "splitStepLift": 0,
+            "splitLoad": 0
+          }
+        },
+        "bestDeliveredReachError": 0.000020525656301313867,
+        "incoming": {
+          "from": {
+            "x": 13.101542503208972,
+            "y": 14.68799923264027,
+            "heightFeet": 1.799075802262264
+          },
+          "target": {
+            "x": 6.74573947,
+            "y": 39.390220142
+          },
+          "family": "lob",
+          "physics": {
+            "launchVerticalFeetPerSecond": 32.287723213
+          }
+        },
+        "incomingTimeSeconds": 1.8114337590262823
+      },
+      "oldFailure": {
+        "executionDraws": {
+          "quality": 0.3443821668624878,
+          "error": 0.17246667621657252
+        },
+        "quality": "attackable",
+        "error": null,
+        "target": {
+          "x": 11.631200571854158,
+          "y": 15.323886808194219
+        },
+        "perturbation": {
+          "lateral": 0.37313097761943936,
+          "depth": 0.10323900682851672
+        },
+        "targetDrawIndex": 38
+      },
+      "expected": {
+        "shots": 8,
+        "reason": "wide",
+        "target": {
+          "x": 12.152457167,
+          "y": 15.394402811
+        },
+        "nominal": {
+          "x": 12.4884351,
+          "y": 17.374414583
+        },
+        "nominalPhysics": {
+          "launchVerticalFeetPerSecond": -2.84479038
+        },
+        "perturbation": {
+          "lateral": 0.2760147114749998,
+          "depth": 0.16200234275311232
+        },
+        "targetDrawIndex": 30,
+        "stance": {
+          "x": 7.046834403,
+          "y": 36.818900243
+        },
+        "feet": [
+          {
+            "x": 6.326834403,
+            "y": 36.818900243
+          },
+          {
+            "x": 7.766834403,
+            "y": 36.818900243
+          }
+        ]
+      }
+    }
+  ],
+  "preserved": {
+    "green/left/forehand/0.8/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/0.8/generated": "edb21540dad8e13ab0f85cb51e6541f2036a39d284851ae985e7e349c5ada700",
+    "green/left/forehand/0.8/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/left/forehand/0.8/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/forehand/2.2/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/2.2/generated": "edb21540dad8e13ab0f85cb51e6541f2036a39d284851ae985e7e349c5ada700",
+    "green/left/forehand/2.2/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/left/forehand/2.2/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/forehand/5.5/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/5.5/generated": "7d6faadb6aec958af916ce58619c028f859999db71983cc060bc3556d4ae2547",
+    "green/left/forehand/5.5/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/left/forehand/5.5/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/forehand/6.9/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/6.9/generated": "7d6faadb6aec958af916ce58619c028f859999db71983cc060bc3556d4ae2547",
+    "green/left/forehand/6.9/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/left/forehand/6.9/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/forehand/6.999999/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/6.999999/generated": "7d6faadb6aec958af916ce58619c028f859999db71983cc060bc3556d4ae2547",
+    "green/left/forehand/6.999999/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/left/forehand/6.999999/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/forehand/7/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/7/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/left/forehand/7/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/forehand/7.5/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/left/forehand/7.5/legacy": "4965ddcf8448565e1dbd4dffe16737c3639a5d4b944696308cf9364c6fceafc3",
+    "green/left/forehand/7.5/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/left/backhand/0.8/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/0.8/generated": "08e47ba26562284fbf3d33eff089b5b4928702efcbb5bdf7e18be7f83f26e6d5",
+    "green/left/backhand/0.8/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/left/backhand/0.8/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/left/backhand/2.2/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/2.2/generated": "08e47ba26562284fbf3d33eff089b5b4928702efcbb5bdf7e18be7f83f26e6d5",
+    "green/left/backhand/2.2/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/left/backhand/2.2/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/left/backhand/5.5/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/5.5/generated": "7b2ad7d4e9a07dccc600637455ee23276ab25b535baae61ca5a16dae7ebbfff4",
+    "green/left/backhand/5.5/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/left/backhand/5.5/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/left/backhand/6.9/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/6.9/generated": "7b2ad7d4e9a07dccc600637455ee23276ab25b535baae61ca5a16dae7ebbfff4",
+    "green/left/backhand/6.9/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/left/backhand/6.9/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/left/backhand/6.999999/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/6.999999/generated": "7b2ad7d4e9a07dccc600637455ee23276ab25b535baae61ca5a16dae7ebbfff4",
+    "green/left/backhand/6.999999/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/left/backhand/6.999999/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/left/backhand/7/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/7/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/left/backhand/7/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/left/backhand/7.5/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/left/backhand/7.5/legacy": "8c7c9a313b75e6ee214ffcc3302ac4a8831a7d139a58807c7bc109e0762aef0a",
+    "green/left/backhand/7.5/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/0.8/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/0.8/generated": "08e47ba26562284fbf3d33eff089b5b4928702efcbb5bdf7e18be7f83f26e6d5",
+    "green/right/forehand/0.8/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/right/forehand/0.8/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/2.2/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/2.2/generated": "08e47ba26562284fbf3d33eff089b5b4928702efcbb5bdf7e18be7f83f26e6d5",
+    "green/right/forehand/2.2/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/right/forehand/2.2/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/5.5/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/5.5/generated": "7b2ad7d4e9a07dccc600637455ee23276ab25b535baae61ca5a16dae7ebbfff4",
+    "green/right/forehand/5.5/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/right/forehand/5.5/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/6.9/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/6.9/generated": "7b2ad7d4e9a07dccc600637455ee23276ab25b535baae61ca5a16dae7ebbfff4",
+    "green/right/forehand/6.9/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/right/forehand/6.9/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/6.999999/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/6.999999/generated": "7b2ad7d4e9a07dccc600637455ee23276ab25b535baae61ca5a16dae7ebbfff4",
+    "green/right/forehand/6.999999/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/right/forehand/6.999999/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/7/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/7/legacy": "e044250c8ec775f051ec3350d2012d73dcfe409059e4681220e1c132609550fc",
+    "green/right/forehand/7/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/forehand/7.5/nearest": "544a6f5a35fb2cddef1a5c986d9115be5966a893d8636ba16dee8e52130549da",
+    "green/right/forehand/7.5/legacy": "8c7c9a313b75e6ee214ffcc3302ac4a8831a7d139a58807c7bc109e0762aef0a",
+    "green/right/forehand/7.5/serve": "52587b538aa1fb916702a44262637cc765ca10f4fd1deb1fb05cdae53e44fe53",
+    "green/right/backhand/0.8/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/0.8/generated": "edb21540dad8e13ab0f85cb51e6541f2036a39d284851ae985e7e349c5ada700",
+    "green/right/backhand/0.8/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/right/backhand/0.8/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/right/backhand/2.2/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/2.2/generated": "edb21540dad8e13ab0f85cb51e6541f2036a39d284851ae985e7e349c5ada700",
+    "green/right/backhand/2.2/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/right/backhand/2.2/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/right/backhand/5.5/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/5.5/generated": "7d6faadb6aec958af916ce58619c028f859999db71983cc060bc3556d4ae2547",
+    "green/right/backhand/5.5/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/right/backhand/5.5/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/right/backhand/6.9/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/6.9/generated": "7d6faadb6aec958af916ce58619c028f859999db71983cc060bc3556d4ae2547",
+    "green/right/backhand/6.9/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/right/backhand/6.9/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/right/backhand/6.999999/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/6.999999/generated": "7d6faadb6aec958af916ce58619c028f859999db71983cc060bc3556d4ae2547",
+    "green/right/backhand/6.999999/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/right/backhand/6.999999/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/right/backhand/7/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/7/legacy": "b436b8821e26ac396d31c7bf64945de1f51c390880fdb3e23f295b0c147e9a12",
+    "green/right/backhand/7/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "green/right/backhand/7.5/nearest": "a56805ecc0ef22cf82e726afeee83de0d7d98b88b7d216ab5a3f1870a4545ba8",
+    "green/right/backhand/7.5/legacy": "4965ddcf8448565e1dbd4dffe16737c3639a5d4b944696308cf9364c6fceafc3",
+    "green/right/backhand/7.5/serve": "dcb74d2cd164e5d3fd2138fcd5d9bd91b55f21fd9bdaba2fd13d71076812ff2b",
+    "orange/left/forehand/0.8/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/0.8/generated": "a184d9eda9e66b5866f474817503a04c968000249b40b132b01657d18b1c11bc",
+    "orange/left/forehand/0.8/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/left/forehand/0.8/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/forehand/2.2/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/2.2/generated": "a184d9eda9e66b5866f474817503a04c968000249b40b132b01657d18b1c11bc",
+    "orange/left/forehand/2.2/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/left/forehand/2.2/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/forehand/5.5/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/5.5/generated": "0bc3b410aeb05742bf613d2e046aaf5c1abf5f72481099d0e943c817580f32dc",
+    "orange/left/forehand/5.5/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/left/forehand/5.5/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/forehand/6.9/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/6.9/generated": "0bc3b410aeb05742bf613d2e046aaf5c1abf5f72481099d0e943c817580f32dc",
+    "orange/left/forehand/6.9/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/left/forehand/6.9/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/forehand/6.999999/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/6.999999/generated": "0bc3b410aeb05742bf613d2e046aaf5c1abf5f72481099d0e943c817580f32dc",
+    "orange/left/forehand/6.999999/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/left/forehand/6.999999/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/forehand/7/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/7/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/left/forehand/7/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/forehand/7.5/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/left/forehand/7.5/legacy": "1378a0b294376d2f0d21ae3fc570209116744eeabeb991badbe5bf2d802803cf",
+    "orange/left/forehand/7.5/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/left/backhand/0.8/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/0.8/generated": "27b0fdfb045b1b6c36419b7028a76ec4a7889965e04852814752daf46724ee8d",
+    "orange/left/backhand/0.8/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/left/backhand/0.8/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/left/backhand/2.2/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/2.2/generated": "27b0fdfb045b1b6c36419b7028a76ec4a7889965e04852814752daf46724ee8d",
+    "orange/left/backhand/2.2/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/left/backhand/2.2/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/left/backhand/5.5/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/5.5/generated": "731693a6b99bcd97a440fe396baae1fd6e89bdeb63ba85060c92d5ab3c8764fb",
+    "orange/left/backhand/5.5/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/left/backhand/5.5/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/left/backhand/6.9/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/6.9/generated": "731693a6b99bcd97a440fe396baae1fd6e89bdeb63ba85060c92d5ab3c8764fb",
+    "orange/left/backhand/6.9/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/left/backhand/6.9/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/left/backhand/6.999999/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/6.999999/generated": "731693a6b99bcd97a440fe396baae1fd6e89bdeb63ba85060c92d5ab3c8764fb",
+    "orange/left/backhand/6.999999/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/left/backhand/6.999999/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/left/backhand/7/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/7/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/left/backhand/7/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/left/backhand/7.5/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/left/backhand/7.5/legacy": "8c67ec73562566b405c6b51f2d45d5b020f191e93f416f81bee7a9feb59c3c04",
+    "orange/left/backhand/7.5/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/0.8/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/0.8/generated": "27b0fdfb045b1b6c36419b7028a76ec4a7889965e04852814752daf46724ee8d",
+    "orange/right/forehand/0.8/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/right/forehand/0.8/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/2.2/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/2.2/generated": "27b0fdfb045b1b6c36419b7028a76ec4a7889965e04852814752daf46724ee8d",
+    "orange/right/forehand/2.2/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/right/forehand/2.2/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/5.5/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/5.5/generated": "731693a6b99bcd97a440fe396baae1fd6e89bdeb63ba85060c92d5ab3c8764fb",
+    "orange/right/forehand/5.5/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/right/forehand/5.5/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/6.9/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/6.9/generated": "731693a6b99bcd97a440fe396baae1fd6e89bdeb63ba85060c92d5ab3c8764fb",
+    "orange/right/forehand/6.9/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/right/forehand/6.9/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/6.999999/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/6.999999/generated": "731693a6b99bcd97a440fe396baae1fd6e89bdeb63ba85060c92d5ab3c8764fb",
+    "orange/right/forehand/6.999999/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/right/forehand/6.999999/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/7/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/7/legacy": "3e78b7540fb1ff56835547d096ca64b366b6c3b319495090385f8c84bcfbd795",
+    "orange/right/forehand/7/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/forehand/7.5/nearest": "d62013254752c9b9ae2f3de6dd0fcfab8237081256c00ad03a7c77306cb86244",
+    "orange/right/forehand/7.5/legacy": "8c67ec73562566b405c6b51f2d45d5b020f191e93f416f81bee7a9feb59c3c04",
+    "orange/right/forehand/7.5/serve": "74891b4752d2cc1a8e887ba11daa92dd35a404827d12caa0e6fe7d783cc13163",
+    "orange/right/backhand/0.8/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/0.8/generated": "a184d9eda9e66b5866f474817503a04c968000249b40b132b01657d18b1c11bc",
+    "orange/right/backhand/0.8/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/right/backhand/0.8/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/right/backhand/2.2/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/2.2/generated": "a184d9eda9e66b5866f474817503a04c968000249b40b132b01657d18b1c11bc",
+    "orange/right/backhand/2.2/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/right/backhand/2.2/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/right/backhand/5.5/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/5.5/generated": "0bc3b410aeb05742bf613d2e046aaf5c1abf5f72481099d0e943c817580f32dc",
+    "orange/right/backhand/5.5/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/right/backhand/5.5/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/right/backhand/6.9/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/6.9/generated": "0bc3b410aeb05742bf613d2e046aaf5c1abf5f72481099d0e943c817580f32dc",
+    "orange/right/backhand/6.9/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/right/backhand/6.9/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/right/backhand/6.999999/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/6.999999/generated": "0bc3b410aeb05742bf613d2e046aaf5c1abf5f72481099d0e943c817580f32dc",
+    "orange/right/backhand/6.999999/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/right/backhand/6.999999/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/right/backhand/7/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/7/legacy": "87ba4823d418864172938bef7235fa15521412b92032d629ce692f0b3e3f5db5",
+    "orange/right/backhand/7/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2",
+    "orange/right/backhand/7.5/nearest": "e928eec52995e030798df4e675b19ebdfb650088400a446e6ebe1e0c847fb99e",
+    "orange/right/backhand/7.5/legacy": "1378a0b294376d2f0d21ae3fc570209116744eeabeb991badbe5bf2d802803cf",
+    "orange/right/backhand/7.5/serve": "cd34b6288fe32afb10cd3d8576515e2e80f0b0720ec9c1a08b78f52c35409fc2"
+  }
+}

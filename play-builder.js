@@ -15,6 +15,7 @@ import { resolveServiceContext, updateServiceFromShotEdit, updateServiceCourt } 
 import { createRallyCoverageProvider } from './rally-coverage-provider.js';
 import { simulateRallyInWorker } from './rally-engine-client.js';
 import { normalizeRallyInputV1 } from './rally-recipe.js';
+import { STACKING_VERSION, validateStackingV1 } from './rally-stacking.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
 function claimShotFields(shot, fields) {
@@ -323,9 +324,14 @@ export class PlayBuilder {
         this.cancelPendingProposals();this.pause();this.courtTools.clear();
         let input;
         try {
-            if(Object.keys(options).some(key=>!['lengthFeel','seed'].includes(key)))throw Error('Choose a rally length and an optional whole-number seed.');
+            if(Object.keys(options).some(key=>!['lengthFeel','seed','stacking'].includes(key)))throw Error('Choose a rally length, stacking settings and an optional whole-number seed.');
             const players=Object.fromEntries(Object.entries(this.document.players).map(([player,settings])=>[player,{team:settings.team,handedness:settings.handedness,style:'advanced',flavour:'balanced'}]));
-            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],options:{lengthFeel:options.lengthFeel??'natural'}});
+            // null explicitly turns stacking off for this fresh point. Missing
+            // options inherit saved preferences; neither changes current routes.
+            const stacking=Object.hasOwn(options,'stacking')?options.stacking:this.document.stacking;
+            if(stacking!==null)validateStackingV1(stacking,players);
+            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],options:{lengthFeel:options.lengthFeel??'natural'},
+                ...(stacking!=null?{stacking}:{})});
         } catch(error){this.message=error.message;this.render();return {ok:false,error:this.message};}
         // The Create action is explicit acceptance of a fresh point. Preserve
         // the current authored draft before starting; commit the new one only
@@ -355,7 +361,8 @@ export class PlayBuilder {
             }
             const candidate=copy(result.document);
             if(candidate?.modelVersion!==2||candidate.physicsVersion!=='play-physics-v2'||candidate.generation?.mode!=='engine'
-                ||candidate.generation.seed!==input.seed||JSON.stringify(candidate.generation.input)!==JSON.stringify({players:input.players,layout:input.layout,service:input.service,options:input.options})
+                ||candidate.generation.seed!==input.seed||JSON.stringify(candidate.generation.input)!==JSON.stringify({players:input.players,layout:input.layout,service:input.service,options:input.options,...(input.stacking?{stacking:input.stacking}:{})})
+                ||JSON.stringify(candidate.stacking)!==JSON.stringify(input.stacking)
                 ||JSON.stringify(result.outcome)!==JSON.stringify(candidate.outcome)||!candidate.outcome)throw Error('The rally worker result did not match this request. Your current play was kept.');
             const evaluated=evaluateFullCandidate(candidate);
             if(!evaluated.ok||!evaluated.rules.expectedOutcomes?.some(outcome=>outcome.shotId===candidate.outcome.shotId&&outcome.reason===candidate.outcome.reason
@@ -672,6 +679,14 @@ export class PlayBuilder {
             else if(action==='moveShot')this.edit(doc=>{const from=doc.shots.findIndex(s=>s.id===value.id),to=from+value.delta;if(from<0||to<0||to>=doc.shots.length)return;doc.shots.splice(to,0,doc.shots.splice(from,1)[0]);});
             else if(action==='assistance')this.edit(doc=>{doc.assistance[value.field]=value.value;});
             else if(action==='handedness')this.edit(doc=>{doc.players[value.id].handedness=value.value;});
+            else if(action==='stacking')this.edit(doc=>{
+                if(!['green','orange'].includes(value?.team))throw Error('Choose a represented stacking team.');
+                const teams=copy(doc.stacking?.teams||{});
+                if(value.mode==='off')delete teams[value.team];
+                else teams[value.team]={mode:value.mode,leftPlayer:value.leftPlayer};
+                if(Object.keys(teams).length){const stacking={version:STACKING_VERSION,teams};validateStackingV1(stacking,doc.players);doc.stacking=stacking;}
+                else delete doc.stacking;
+            });
             else if(['opening','ending','intentionalFault'].includes(action))this.edit(doc=>{doc[action]=value;});
             else if(action==='undo'||action==='redo') {
                 this.cancelPendingProposals();

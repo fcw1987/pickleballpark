@@ -1,0 +1,239 @@
+{
+  "version": "nonattacking-drive-50526-v1",
+  "source": {
+    "commit": "6e1e282",
+    "capture": "6e1e282-regression.jsonl",
+    "originalFailure": "bounded-feasible-intents-exhausted",
+    "description": "Exact original request inputs and the six delivered contact decisions/draws. The seventh contact was never executed. Do not regenerate expected prefix values from current output."
+  },
+  "historicalPrefix": [
+    {
+      "chosen": {
+        "id": "serve-deep-middle",
+        "intent": "serve",
+        "family": "serve"
+      },
+      "draws": {
+        "intent": 0.8752387592103332,
+        "execution": {
+          "quality": 0.33629637979902327,
+          "error": 0.005534804658964276
+        },
+        "target": {
+          "lateral": 0.6079087054822594,
+          "depth": 0.903561718063429
+        },
+        "perturbation": {
+          "lateral": 0.1488099282141775,
+          "depth": 0.26768427761271596
+        },
+        "narration": 0.6021989022847265
+      }
+    },
+    {
+      "chosen": {
+        "id": "return-deep-middle",
+        "intent": "deep-return",
+        "family": "return"
+      },
+      "draws": {
+        "intent": 0.8179069065954536,
+        "execution": {
+          "quality": 0.9090421963483095,
+          "error": 0.5459806667640805
+        },
+        "target": {
+          "lateral": 0.8426988758146763,
+          "depth": 0.44502735999412835
+        },
+        "perturbation": {
+          "lateral": 0.32920047268271446,
+          "depth": 0.27359913382679224
+        },
+        "narration": 0.9707958626095206
+      }
+    },
+    {
+      "chosen": {
+        "id": "third-shot-drop",
+        "intent": "third-shot-drop",
+        "family": "drop"
+      },
+      "draws": {
+        "intent": 0.7556899993214756,
+        "execution": {
+          "quality": 0.2559391399845481,
+          "error": 0.6269126180559397
+        },
+        "target": {
+          "lateral": 0.24128630408085883,
+          "depth": 0.4468430138658732
+        },
+        "perturbation": {
+          "lateral": 0.6144022140651941,
+          "depth": 0.14081106730736792
+        },
+        "narration": 0.6828456809744239
+      }
+    },
+    {
+      "chosen": {
+        "id": "drive",
+        "intent": "drive",
+        "family": "drive"
+      },
+      "draws": {
+        "intent": 0.31863782135769725,
+        "execution": {
+          "quality": 0.40315396594814956,
+          "error": 0.9528453543316573
+        },
+        "target": {
+          "lateral": 0.8469630258623511,
+          "depth": 0.3449512158986181
+        },
+        "perturbation": {
+          "lateral": 0.09636760945431888,
+          "depth": 0.9344486489426345
+        },
+        "narration": 0.5884394878521562
+      }
+    },
+    {
+      "chosen": {
+        "id": "lob",
+        "intent": "lob",
+        "family": "lob"
+      },
+      "draws": {
+        "intent": 0.9260712454561144,
+        "execution": {
+          "quality": 0.4502976469229907,
+          "error": 0.21567078959196806
+        },
+        "target": {
+          "lateral": 0.7904255434405059,
+          "depth": 0.7780447097029537
+        },
+        "perturbation": {
+          "lateral": 0.8064941943157464,
+          "depth": 0.9108199346810579
+        },
+        "narration": 0.8740554130636156
+      }
+    },
+    {
+      "chosen": {
+        "id": "overhead",
+        "intent": "overhead",
+        "family": "overhead"
+      },
+      "draws": {
+        "intent": 0.9951555428560823,
+        "execution": {
+          "quality": 0.6311190882697701,
+          "error": 0.18037386913783848
+        },
+        "target": {
+          "lateral": 0.6714503159746528,
+          "depth": 0.899075309978798
+        },
+        "perturbation": {
+          "lateral": 0.8816043604165316,
+          "depth": 0.6561113935895264
+        },
+        "narration": 0.9645802564918995
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "advanced-50526",
+      "input": {
+        "seed": 50526,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "advanced",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player3",
+          "receiver": "player1",
+          "court": "right",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      }
+    },
+    {
+      "name": "intermediate-50526",
+      "input": {
+        "seed": 50526,
+        "players": {
+          "player1": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player2": {
+            "team": "green",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player3": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          },
+          "player4": {
+            "team": "orange",
+            "handedness": "right",
+            "style": "intermediate",
+            "flavour": "balanced"
+          }
+        },
+        "service": {
+          "server": "player3",
+          "receiver": "player1",
+          "court": "right",
+          "courtConvention": "server-perspective-v1"
+        },
+        "options": {
+          "lengthFeel": "natural",
+          "winner": "either",
+          "signatureShots": true,
+          "maxShots": 99
+        }
+      }
+    }
+  ]
+}
