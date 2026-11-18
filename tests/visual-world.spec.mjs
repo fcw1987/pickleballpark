@@ -18,9 +18,9 @@ test('legacy 3D compatibility: camera fitting expands narrow views without chang
   expect(portraitDirection[1] / portraitDirection[0]).toBeCloseTo(desktopDirection[1] / desktopDirection[0], 8);
 });
 
-async function openWorld(page, viewport) {
+async function openWorld(page, viewport, illustrated = false) {
   await page.setViewportSize(viewport);
-  await page.goto('/index.html?workspace=planner&visual-world=1');
+  await page.goto('/index.html?workspace=planner&visual-world=1' + (illustrated ? '&athletes=illustrated' : ''));
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
   await page.evaluate(() => { void pickleboard.threeD.enter(); });
@@ -90,7 +90,7 @@ async function openWorld(page, viewport) {
 }
 
 test('legacy 3D compatibility: reference world has original alpha artwork, solid paddles, deterministic acrylic surfaces, and bounded resources', async ({ page }) => {
-  await openWorld(page, { width: 1280, height: 800 });
+  await openWorld(page, { width: 1280, height: 800 }, true);
   const world = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, garden = viewer.world;
     const gardenMeshMaterials = new Set();

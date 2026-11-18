@@ -15,6 +15,7 @@ import {
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
 import { loadReferenceAthleteAssets, ReferenceAthleteResources as AthleteResources, createReferenceAthlete as createAthlete, updateReferenceAthlete as updateAthlete } from './reference-athletes.js';
+import { loadEmeraldAthlete } from './emerald-athlete.js';
 import { ReadableBall, TerminalEventMarkers } from './three-d-ball.js';
 import { terminalCueAtTime, terminalVisualsAtTime } from './terminal-cues.js';
 import { chapterAtTime } from './shot-chapters.js';
@@ -346,6 +347,14 @@ class ThreeDPlaybackViewer {
             // startup surface can truthfully reveal a complete court.
             this.actorAssets = await loadReferenceAthleteAssets({signal:controller.signal});
             if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
+            if (new URLSearchParams(location.search).get('athletes') !== 'illustrated') {
+                const emerald = await loadEmeraldAthlete(controller.signal);
+                if (generation !== this.loadGeneration || this.board.plays.activePlay !== play || this.board.plays.snapshot !== snapshot) {
+                    emerald?.userData.dispose();
+                    return false;
+                }
+                this.emeraldAthlete = emerald;
+            }
             this.currentPlay = play;
             this.timeline = this.board.plays.timeline;
             this.session.owner = 'replay';
@@ -480,7 +489,9 @@ class ThreeDPlaybackViewer {
         for(let index=1;index<=4;index++) {
             const token=this.board.tokens[`player${index}`];
             const team=token.element.classList.contains('team2-player')?'team2':'team1';
-            const actor=createAthlete(this.actorResources,team,token.handedness,index-1);
+            const actor=(team==='team1' && (index-1)%2===0 && this.emeraldAthlete)
+                || createAthlete(this.actorResources,team,token.handedness,index-1);
+            actor.userData.handedness=token.handedness;
             actor.userData.id=token.id;this.scene.add(actor);this.playerObjects.set(token.id,actor);
         }
     }
@@ -499,7 +510,8 @@ class ThreeDPlaybackViewer {
             const distance=isStriker?Math.abs(localTime-segment.contactTime):isIncoming?Math.abs(segment.duration-localTime):Infinity;
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
-            updateAthlete(actor,sample,this.camera,weight);
+            if (actor===this.emeraldAthlete) actor.userData.applyPose(sample,weight);
+            else updateAthlete(actor,sample,this.camera,weight);
             this.coverageSamples[id] = sample;
         }
     }
@@ -733,6 +745,7 @@ class ThreeDPlaybackViewer {
         this.readableBall?.dispose();this.readableBall=null;
         for (const actor of this.playerObjects.values()) this.scene?.remove(actor);
         this.actorResources?.dispose();this.actorResources=null;
+        this.emeraldAthlete?.userData.dispose();this.emeraldAthlete=null;
         this.scene?.traverse(object => {
             object.geometry?.dispose?.();
             if (Array.isArray(object.material)) object.material.forEach(material => material.dispose());

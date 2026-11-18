@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 
-async function openViewer(page) {
-  await page.goto('/index.html?workspace=planner&second-render=1');
+async function openViewer(page, illustrated=false) {
+  await page.goto('/index.html?workspace=planner&second-render=1'+(illustrated?'&athletes=illustrated':''));
   await expect.poll(() => page.evaluate(() => Boolean(window.pickleboard?.threeD))).toBe(true);
   await page.evaluate(() => window.pickleboard.plays.load('fifth-shot-drop'));
   await page.evaluate(() => { void pickleboard.threeD.enter(); });
@@ -35,8 +35,8 @@ test('legacy 3D compatibility: 3D renderer uses antialiasing and native DPR up t
   await context.close();
 });
 
-test('legacy 3D compatibility: directional artwork and solid athlete meshes own and release every resource on exit', async ({ page }) => {
-  await openViewer(page);
+test('legacy 3D compatibility: illustrated fallback meshes own and release every resource on exit', async ({ page }) => {
+  await openViewer(page,true);
   const result = await page.evaluate(() => {
     const viewer = window.pickleboard.threeD, resources = viewer.actorResources;
     const meshes = [];
@@ -75,11 +75,11 @@ test('legacy 3D compatibility: articulated strokes remain upright, continuously 
           paddle: actor.userData.paddleFaceWorld.toArray(),
           ball: viewer.ballObject.position.toArray(),
           frame: actor.userData.animation.phase,
-          groundY: actor.position.y,
+          groundY: actor.position.y+(actor.userData.emeraldCap?actor.userData.visual.position.y:0),
           expectedY: presentation.worldPosition.y + window.__referenceRigContract.expectedJump(presentation),
           cameraAlignment: window.__referenceRigContract.cameraAlignment(actor, viewer.camera),
           shoeBottoms: window.__athleteAudit(actor).shoeBottoms,
-          artworkError: window.__athleteAudit(actor).artworkError()
+          artworkError: actor.userData.emeraldCap?window.__athleteAudit(actor).rigidPaddleError():window.__athleteAudit(actor).artworkError()
         });
       }
       return { samples };

@@ -77,16 +77,16 @@ test('legacy 3D compatibility: right and left handed forehands animate their dom
     return ['left', 'right'].map(handedness => {
       root.userData.handedness = handedness;
       viewer.applyAtTime(segment.startTime + segment.contactTime);
-      const grip = root.userData.paddle.children[2].getWorldPosition(root.position.clone());
-      const dominant = root.userData.arms[0].hand.getWorldPosition(root.position.clone());
-      const support = root.userData.arms[1].hand.getWorldPosition(root.position.clone());
-      return { handedness: root.userData.handedness, referenceAthlete: root.userData.referenceAthlete,
+      const grip = root.userData.grip.getWorldPosition(root.position.clone());
+      const dominant = root.getObjectByName('HandR').getWorldPosition(root.position.clone());
+      const support = root.getObjectByName('HandL').getWorldPosition(root.position.clone());
+      return { handedness: root.userData.handedness, emeraldCap: root.userData.emeraldCap, mirror: root.userData.model.scale.x,
         action: root.userData.animation.action, phase: root.userData.animation.phase,
         gripDistance: dominant.distanceTo(grip), supportDistance: support.distanceTo(grip) };
     });
   });
   for (const hand of result) {
-    expect(hand).toMatchObject({ referenceAthlete: true, action: 'drive', phase: 'contact' });
+    expect(hand).toMatchObject({ emeraldCap: true, mirror: hand.handedness === 'left' ? -1 : 1, action: 'drive', phase: 'contact' });
     expect(hand.gripDistance, `${hand.handedness} physical hand holds paddle grip`).toBeLessThan(0.06);
     expect(hand.supportDistance, `${hand.handedness} forehand uses dominant arm`).toBeGreaterThan(hand.gripDistance + 0.02);
   }
@@ -131,7 +131,8 @@ test('legacy 3D compatibility: quality guardrails keep mesh anchors finite and c
         const actor = viewer.playerObjects.get(segment.shotSemantics.playerId);
         const paddle = actor.userData.paddleFaceWorld.toArray();
         const ball = viewer.ballObject.position.toArray();
-        const values = [...actor.position.toArray(), ...actor.userData.paddleFaceWorld.toArray(), ...actor.userData.visual.localToWorld(actor.userData.rigPose.shoulder.clone()).toArray()];
+        const shoulder = actor.userData.emeraldCap ? actor.getObjectByName('UpperArmR').getWorldPosition(actor.position.clone()) : actor.userData.visual.localToWorld(actor.userData.rigPose.shoulder.clone());
+        const values = [...actor.position.toArray(), ...actor.userData.paddleFaceWorld.toArray(), ...shoulder.toArray()];
         samples.push({ offset, physicalRadius: viewer.ballObject.userData.physicalRadius, distance: Math.hypot(ball[0] - paddle[0], ball[1] - paddle[1], ball[2] - paddle[2]), finite: values.every(Number.isFinite), meshDistance: window.__athleteAudit(actor).paddleDistance(viewer.ballObject.position) });
       }
       return { step: segment.step.id, samples };

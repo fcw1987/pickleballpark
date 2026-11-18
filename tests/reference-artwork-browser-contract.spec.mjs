@@ -6,7 +6,7 @@ const cuffs = JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-measu
 const hair = JSON.parse(readFileSync(new URL('./fixtures/reference-sleeve-preserved-hair.json', import.meta.url), 'utf8'));
 
 test('original artwork contract preserves all atlas frames and rejects changed pixels, holes, hair transfer and UVs', async ({ page }, testInfo) => {
-  await page.goto('/index.html?workspace=planner&original-artwork-contract=1');
+  await page.goto('/index.html?workspace=planner&athletes=illustrated&original-artwork-contract=1');
   await page.waitForFunction(() => Boolean(window.pickleboard?.threeD));
   await page.evaluate(async () => {
     pickleboard.plays.load('fifth-shot-drop');

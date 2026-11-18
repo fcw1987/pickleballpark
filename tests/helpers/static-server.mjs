@@ -10,7 +10,9 @@ const contentTypes = {
   '.json': 'application/manifest+json; charset=utf-8',
   '.png': 'image/png',
   '.webp': 'image/webp',
-  '.ttf': 'font/ttf'
+  '.ttf': 'font/ttf',
+  '.glb': 'model/gltf-binary',
+  '.txt': 'text/plain; charset=utf-8'
 };
 const varyResponseMarker = '// playwright-vary-response';
 

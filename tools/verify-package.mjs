@@ -714,7 +714,7 @@ const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allM
 if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
 const legacyScopePath = '/pickleboard/';
-const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.ttf': 'font/ttf' };
+const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.ttf': 'font/ttf', '.glb': 'model/gltf-binary', '.txt': 'text/plain' };
 const browsers = [['chromium', chromium], ['webkit', webkit]];
 if (process.env.QA_PACKAGE_BROWSER && !browsers.some(([name]) => name === process.env.QA_PACKAGE_BROWSER)) throw Error('Unknown package verification browser');
 for (const [browserName, browserType] of browsers.filter(([name]) => !process.env.QA_PACKAGE_BROWSER || name === process.env.QA_PACKAGE_BROWSER)) {
@@ -849,6 +849,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         if (f.path.endsWith('.js')) expect(f.type).toContain('javascript');
         if (f.path.endsWith('.png')) expect(f.type).toBe('image/png');
         if (f.path.endsWith('.webp')) expect(f.type).toBe('image/webp');
+        if (f.path.endsWith('.glb')) expect(f.type).toBe('model/gltf-binary');
         if (f.path.endsWith('.ttf')) expect(f.type).toBe('font/ttf');
       }
       for (const f of checks.cached) expect(f.sha256, `cached ${f.path}`).toBe(manifest.files.find(e => e.path === f.path)?.sha256);
