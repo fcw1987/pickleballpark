@@ -10,11 +10,13 @@ const contentTypes = {
   '.json': 'application/manifest+json; charset=utf-8',
   '.png': 'image/png',
   '.webp': 'image/webp',
-  '.ttf': 'font/ttf'
+  '.ttf': 'font/ttf',
+  '.glb': 'model/gltf-binary',
+  '.txt': 'text/plain; charset=utf-8'
 };
 const varyResponseMarker = '// playwright-vary-response';
 
-export function createStaticServer({ root = process.cwd(), workerSource = () => null } = {}) {
+export function createStaticServer({ root = process.cwd(), workerSource = () => null, missingPaths = new Set() } = {}) {
   return createServer((request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const pathname = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
@@ -26,7 +28,7 @@ export function createStaticServer({ root = process.cwd(), workerSource = () => 
   }
 
   try {
-    if (!statSync(filePath).isFile()) throw new Error('Not a file');
+    if (missingPaths.has(pathname) || !statSync(filePath).isFile()) throw new Error('Not a file');
     response.setHeader('Content-Type', contentTypes[extname(filePath)] || 'application/octet-stream');
     response.setHeader('Cache-Control', pathname === '/sw.js' ? 'no-cache' : 'no-store');
     const overriddenWorker = pathname === '/sw.js' ? workerSource() : null;

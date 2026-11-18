@@ -714,7 +714,7 @@ const modes = process.env.QA_PACKAGE_MODE ? [process.env.QA_PACKAGE_MODE] : allM
 if (modes.some(mode => !allModes.includes(mode))) throw Error('Unknown package verification mode');
 const scopePath = new URL('https://fcw1987.github.io/pickleballpark/').pathname;
 const legacyScopePath = '/pickleboard/';
-const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.ttf': 'font/ttf' };
+const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.ttf': 'font/ttf', '.glb': 'model/gltf-binary', '.txt': 'text/plain' };
 const browsers = [['chromium', chromium], ['webkit', webkit]];
 if (process.env.QA_PACKAGE_BROWSER && !browsers.some(([name]) => name === process.env.QA_PACKAGE_BROWSER)) throw Error('Unknown package verification browser');
 for (const [browserName, browserType] of browsers.filter(([name]) => !process.env.QA_PACKAGE_BROWSER || name === process.env.QA_PACKAGE_BROWSER)) {
@@ -849,6 +849,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         if (f.path.endsWith('.js')) expect(f.type).toContain('javascript');
         if (f.path.endsWith('.png')) expect(f.type).toBe('image/png');
         if (f.path.endsWith('.webp')) expect(f.type).toBe('image/webp');
+        if (f.path.endsWith('.glb')) expect(f.type).toBe('model/gltf-binary');
         if (f.path.endsWith('.ttf')) expect(f.type).toBe('font/ttf');
       }
       for (const f of checks.cached) expect(f.sha256, `cached ${f.path}`).toBe(manifest.files.find(e => e.path === f.path)?.sha256);
@@ -871,12 +872,14 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         b.board.updateTokenPosition(b.board.tokens.player1, 8.25, 12.75);
         const planner = b.board.captureBoardState();
         await b.setWorkspace('builder');
-        return { source: JSON.stringify(b.document), time: b.session.clock.elapsed, planner, view: b.view };
+        return { source: JSON.stringify(b.document), time: b.session.clock.elapsed, planner, view: b.view,
+          roster: [...b.board.threeD.playerObjects.values()].map(actor => actor.userData.animation.source) };
       });
       expect(builderProof.source).toBe(await page.evaluate(() => JSON.stringify(playBuilder.document)));
       expect(JSON.parse(builderProof.source).title).toBe('Package offline custom rally');
       expect(builderProof.time).toBeCloseTo(1.25, 8);
       expect(builderProof.view).toBe('3d');
+      expect(builderProof.roster).toEqual(['approved-emerald-cap-glb', ...Array(3).fill('original-imagegen-articulated-v2')]);
       const identityProof = await verifyPackageIdentity(page, context, base, info.sourceRevision);
       await page.screenshot({ path: `release-results/package-${browserName}-${mode}.png` });
       // Real offline: close only this test's server. Do not use setOffline emulation.

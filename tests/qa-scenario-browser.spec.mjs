@@ -46,7 +46,7 @@ for (const scenario of QA_SCENARIOS) {
           failures.push({ label: `${segment.step.id}: handedness` });
         contacts++;
         const tactical = Object.fromEntries([...viewer.playerObjects].map(([id, actor]) => [id, {
-          position: actor.position.toArray(), facing: actor.userData.animation.bodyFacing
+          position: actor.position.toArray(), visualLift: actor.userData.emeraldCap?actor.userData.visual.position.y:0, facing: actor.userData.animation.bodyFacing
         }]));
         // Accepted stroke source 041f285 opts 3D into instructional approach
         // and recovery, while retaining the frozen canonical 2D movement.
@@ -55,7 +55,7 @@ for (const scenario of QA_SCENARIOS) {
           const position = sampleActorWorldPosition(segment, id, segment.contactTime, source.players[id].handedness, true);
           const presentation = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: id, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness: source.players[id].handedness });
           const jump = window.__referenceRigContract.expectedJump(presentation);
-          [position.x, position.y + jump, position.z].forEach((value, axis) => close(state.position[axis], value, `${id}: instructional 3D axis ${axis}`));
+          [position.x, position.y + jump, position.z].forEach((value, axis) => close(state.position[axis]+(axis===1?state.visualLift:0), value, `${id}: instructional 3D axis ${axis}`));
           instructionalComparisons++;
         }
         for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
@@ -78,19 +78,23 @@ for (const scenario of QA_SCENARIOS) {
             const alignment = window.__referenceRigContract.cameraAlignment(actor, viewer.camera);
             for (const property of ['forwardError', 'headingError', 'rollError']) close(alignment[property], 0, `${id}: ${camera} ${property}`, 1e-6);
             close(alignment.elevation, alignment.expectedElevation, `${id}: ${camera} exact capped elevation`, 1e-6);
-            const data = actor.userData, map = data.body.material.map;
+            const data = actor.userData;
             const actualFacing = sampleActorPresentation({instructionalMovement:true, segment, timeline:viewer.timeline, seconds:time, playerId:id, localTime:segment.contactTime, cameraPosition:viewer.camera.position, cameraTarget:viewer.cameraTarget, handedness:source.players[id].handedness}).bodyFacing;
             close(data.animation.bodyFacing.x, actualFacing.x, `${id}: actual tactical facing x`);
             close(data.animation.bodyFacing.z, actualFacing.z, `${id}: actual tactical facing z`);
             const directions = ['front','front-right','right','back-right','back','back-left','left','front-left'];
-            if(data.animation.viewDirection !== directions[sector] || data.animation.frame !== frame || data.animation.mirror !== mirror) failures.push({label:`${id}: rendered direction metadata disagrees with camera sector`});
-            const [x,y,w,h] = data.resources.assets.metadata.frames[data.player][frame].rect;
-            const image = map.image;
-            close(map.offset.x, x / image.width, `${id}: rendered atlas x`);
-            close(map.offset.y, 1 - (y+h) / image.height, `${id}: rendered atlas y`);
-            close(map.repeat.x, w / image.width, `${id}: rendered atlas width`);
-            close(map.repeat.y, h / image.height, `${id}: rendered atlas height`);
-            if (Math.sign(data.body.scale.x) !== mirror) failures.push({label: `${id}: rendered atlas mirror`});
+            if(data.animation.viewDirection !== directions[sector]) failures.push({label:id+' camera sector'});
+            if(!data.emeraldCap){
+              const map=data.body.material.map;
+              if(data.animation.frame !== frame || data.animation.mirror !== mirror) failures.push({label:`${id}: rendered direction metadata disagrees with camera sector`});
+              const [x,y,w,h] = data.resources.assets.metadata.frames[data.player][frame].rect;
+              const image = map.image;
+              close(map.offset.x, x / image.width, `${id}: rendered atlas x`);
+              close(map.offset.y, 1 - (y+h) / image.height, `${id}: rendered atlas y`);
+              close(map.repeat.x, w / image.width, `${id}: rendered atlas width`);
+              close(map.repeat.y, h / image.height, `${id}: rendered atlas height`);
+              if (Math.sign(data.body.scale.x) !== mirror) failures.push({label: `${id}: rendered atlas mirror`});
+            }
             actor.position.toArray().forEach((value, axis) => close(value, before.position[axis], `${id}: camera position`));
             if (JSON.stringify(actor.userData.animation.bodyFacing) !== JSON.stringify(before.facing))
               failures.push({ label: `${id}: camera changed tactical facing` });
@@ -115,7 +119,7 @@ for (const scenario of QA_SCENARIOS) {
             const jump = window.__referenceRigContract.expectedJump(sample), position = viewer.playerObjects.get(strikerId).position;
             close(position.x, sample.worldPosition.x, `${strikerId}: overhead profile tactical x`);
             close(position.z, sample.worldPosition.z, `${strikerId}: overhead profile tactical z`);
-            close(position.y, sample.worldPosition.y + jump, `${strikerId}: overhead profile y`);
+            close(position.y+(viewer.playerObjects.get(strikerId).userData.emeraldCap?viewer.playerObjects.get(strikerId).userData.visual.position.y:0), sample.worldPosition.y + jump, `${strikerId}: overhead profile y`);
             overheadProfileSamples++;
           }
         }

@@ -106,6 +106,34 @@ test('visible full-stack generation preserves settings and passes independent ph
   expect(result.source.stacking.teams).toEqual({ green: { mode: 'full', leftPlayer: 'player1' }, orange: { mode: 'full', leftPlayer: 'player3' } });
   expect(result.accepted).toBe(result.source.shots.length); expect(result.findings).toEqual([]);
   expect(result.rules.violations).toEqual([]); expect(result.movement.valid).toBe(true); expect(result.spacing.valid).toBe(true);
+  const render = await page.evaluate(async () => {
+    const { sampleActorWorldPosition } = await import('/three-d-presentation.js');
+    const b = playBuilder, viewer = b.board.threeD, source = JSON.stringify(b.document);
+    const positions = new Set();
+    let drift = 0, contact = 0, impacts = 0;
+    for (const segment of viewer.timeline.segments.filter(s => s.shotSemantics)) {
+      for (const time of [segment.contactTime, segment.duration * .5]) {
+        b.seek(segment.startTime + time);
+        for (const id of ['player1', 'player2']) {
+          const actor = viewer.playerObjects.get(id);
+          const expected = sampleActorWorldPosition(segment, id, time, b.document.players[id].handedness, true);
+          drift = Math.max(drift, actor.position.distanceTo(expected));
+          if (id === 'player1') positions.add(actor.position.toArray().join(','));
+        }
+        if (time === segment.contactTime && segment.shotSemantics.playerId === 'player1') {
+          impacts++;
+          contact = Math.max(contact, viewer.playerObjects.get('player1').userData.paddleFaceWorld.distanceTo(viewer.ballObject.position));
+        }
+      }
+    }
+    return { model: viewer.playerObjects.get('player1').userData.emeraldCap, drift, contact, impacts,
+      positions: positions.size, sourcePreserved: source === JSON.stringify(b.document) };
+  });
+  expect(render.model && render.sourcePreserved).toBe(true);
+  expect(render.positions).toBeGreaterThan(1);
+  expect(render.impacts).toBeGreaterThan(0);
+  expect(render.drift).toBeLessThan(1e-6);
+  expect(render.contact).toBeLessThan(.01);
   await page.screenshot({ path: testInfo.outputPath('stacked-generated-rally.png'), fullPage: true });
   await page.reload(); await settleBuilderStartup(page);
   expect(await page.evaluate(() => playBuilder.document.stacking)).toEqual(result.source.stacking);

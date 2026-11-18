@@ -49,3 +49,17 @@ The product name is Pickleboard. The original 128×32 banner now reads `PICKLEBO
 ## Pickleball Park branding continuation (current candidate)
 
 The owner confirmed Pickleball Park as the authoritative name. The existing 128×32 banner is regenerated from `tools/generate-park-art.mjs` with the complete PICKLEBALL PARK wordmark. The raised village sign uses two centered lines, PICKLEBALL and PARK, within the existing sign geometry. Materials, sign position, court, athletes, accepted stroke motion and all other artwork remain unchanged. Historical images and prior verification reports keep their original names. No external assets, fonts, dependencies or licenses were introduced.
+
+### Emerald Cap
+
+The normal 3D court loads the approved Emerald Cap mesh from local art checkpoint
+`6b9510b7acdae30110ad42acb995206241467b81`. The editable Blender file is in
+`source-art/athletes/emerald-cap/`. The runtime GLB is the same approved export.
+It was modeled from the first row of the four-angle atlas at `c41e3658`.
+The play sampler drives its stance, stroke phase, handedness and contact.
+The original four-view renderer remains available with `?athletes=illustrated`
+and handles a missing or unreadable model automatically.
+
+The glTF loader and its two utilities come from the project's locked Three.js
+release. Their imports resolve to the shipped Three.js module. The accompanying
+MIT license is under `vendor/three-addons/`.

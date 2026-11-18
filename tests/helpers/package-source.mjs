@@ -17,7 +17,6 @@ export function makePackageSource() {
     'version.json': '{"historical":true}\n',
     'vendor/three.core.min.js': 'export const core = true;\n',
     'vendor/three.module.min.js': 'export const three = true;\n',
-    'tools/runtime-files.json': JSON.stringify(paths),
     'package-lock.json': JSON.stringify({ packages: { 'node_modules/three': { version: '0.0.0' } } }),
     'node_modules/three/package.json': '{"version":"0.0.0"}',
     'node_modules/three/build/three.core.min.js': 'export const core = true;\n',
@@ -26,6 +25,16 @@ export function makePackageSource() {
     'docs/private.md': 'This source-only file must never be published.',
     'tests/private.txt': 'This test-only file must never be published.',
   };
+  for (const name of ['loaders/GLTFLoader.js', 'utils/BufferGeometryUtils.js', 'utils/SkeletonUtils.js']) {
+    const upstream = "import { Vector3 } from 'three';\n";
+    files['node_modules/three/examples/jsm/' + name] = upstream;
+    files['vendor/three-addons/' + name] = upstream.replace("} from 'three';", "} from '../../three.module.min.js';");
+    paths.push('vendor/three-addons/' + name);
+  }
+  files['node_modules/three/LICENSE'] = files['vendor/three-addons/LICENSE.txt'] = 'fixture license\n';
+  paths.push('vendor/three-addons/LICENSE.txt');
+  paths.sort();
+  files['tools/runtime-files.json'] = JSON.stringify(paths);
   for (const [file, value] of Object.entries(files)) {
     mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
     writeFileSync(path.join(root, file), value);
