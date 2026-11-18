@@ -46,10 +46,7 @@ for (const scenario of QA_SCENARIOS) {
           failures.push({ label: `${segment.step.id}: handedness` });
         contacts++;
         const tactical = Object.fromEntries([...viewer.playerObjects].map(([id, actor]) => [id, {
-          position: actor.position.toArray(), facing: actor.userData.animation.bodyFacing,
-          orientation: actor.userData.visual.quaternion.toArray(),
-          vertices: Array.from(actor.userData.bodyBatch.batch.geometry.attributes.position.array),
-          paddleMatrix: actor.userData.paddle.matrixWorld.toArray()
+          position: actor.position.toArray(), facing: actor.userData.animation.bodyFacing
         }]));
         // Accepted stroke source 041f285 opts 3D into instructional approach
         // and recovery, while retaining the frozen canonical 2D movement.
@@ -71,24 +68,29 @@ for (const scenario of QA_SCENARIOS) {
             const before = tactical[id];
             if (!before.facing || ![before.facing.x, before.facing.z].every(Number.isFinite))
               throw Error(`${id}: missing tactical facing sample`);
-            // Camera orbit must reveal different sides of the same solid actor,
-            // never select/mirror a card or change the actual articulated pose.
-            const data = actor.userData;
+            // Derive the eight-view choice from tactical facing and the camera basis,
+            // then inspect the actual atlas transform and mirrored body scale.
+            const dx = viewer.camera.position.x - viewer.cameraTarget.x;
+            const dz = viewer.camera.position.z - viewer.cameraTarget.z;
+            const sector = (Math.round(Math.atan2(before.facing.x * dz - before.facing.z * dx,
+              before.facing.x * dx + before.facing.z * dz) / (Math.PI / 4)) + 8) % 8;
+            const [frame, mirror] = [[0,1],[1,1],[2,1],[3,1],[3,1],[3,-1],[2,-1],[1,-1]][sector];
             const alignment = window.__referenceRigContract.cameraAlignment(actor, viewer.camera);
             for (const property of ['forwardError', 'headingError', 'rollError']) close(alignment[property], 0, `${id}: ${camera} ${property}`, 1e-6);
-            close(alignment.elevation, alignment.expectedElevation, `${id}: ${camera} upright body`, 1e-6);
+            close(alignment.elevation, alignment.expectedElevation, `${id}: ${camera} exact capped elevation`, 1e-6);
+            const data = actor.userData, map = data.body.material.map;
             const actualFacing = sampleActorPresentation({instructionalMovement:true, segment, timeline:viewer.timeline, seconds:time, playerId:id, localTime:segment.contactTime, cameraPosition:viewer.camera.position, cameraTarget:viewer.cameraTarget, handedness:source.players[id].handedness}).bodyFacing;
             close(data.animation.bodyFacing.x, actualFacing.x, `${id}: actual tactical facing x`);
             close(data.animation.bodyFacing.z, actualFacing.z, `${id}: actual tactical facing z`);
-            if (!data.volumetric || !data.bodyBatch.batch.visible || data.bodyBatch.batch.material.map)
-              failures.push({label: `${id}: expected visible untextured volumetric body batch`});
-            if (![data.visual, data.bodyBatch.batch].every(object => object.scale.toArray().every(value => value > 0)))
-              failures.push({label: `${id}: camera must not mirror solid geometry`});
-            data.visual.quaternion.toArray().forEach((value, axis) => close(value, before.orientation[axis], `${id}: camera-independent body orientation`, 1e-6));
-            const vertices = data.bodyBatch.batch.geometry.attributes.position.array;
-            if (vertices.length !== before.vertices.length) failures.push({label: `${id}: camera changed body topology`});
-            else for (let vertex = 0; vertex < vertices.length; vertex++) close(vertices[vertex], before.vertices[vertex], `${id}: camera-independent body vertex ${vertex}`, 1e-6);
-            data.paddle.matrixWorld.toArray().forEach((value, axis) => close(value, before.paddleMatrix[axis], `${id}: camera-independent visible paddle`, 1e-6));
+            const directions = ['front','front-right','right','back-right','back','back-left','left','front-left'];
+            if(data.animation.viewDirection !== directions[sector] || data.animation.frame !== frame || data.animation.mirror !== mirror) failures.push({label:`${id}: rendered direction metadata disagrees with camera sector`});
+            const [x,y,w,h] = data.resources.assets.metadata.frames[data.player][frame].rect;
+            const image = map.image;
+            close(map.offset.x, x / image.width, `${id}: rendered atlas x`);
+            close(map.offset.y, 1 - (y+h) / image.height, `${id}: rendered atlas y`);
+            close(map.repeat.x, w / image.width, `${id}: rendered atlas width`);
+            close(map.repeat.y, h / image.height, `${id}: rendered atlas height`);
+            if (Math.sign(data.body.scale.x) !== mirror) failures.push({label: `${id}: rendered atlas mirror`});
             actor.position.toArray().forEach((value, axis) => close(value, before.position[axis], `${id}: camera position`));
             if (JSON.stringify(actor.userData.animation.bodyFacing) !== JSON.stringify(before.facing))
               failures.push({ label: `${id}: camera changed tactical facing` });
