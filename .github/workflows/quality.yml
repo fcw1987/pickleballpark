@@ -139,7 +139,7 @@ jobs:
   webkit-shards:
     name: WebKit shard ${{ matrix.shard }}/2
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
@@ -165,8 +165,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Install WebKit
+        timeout-minutes: 40
         run: npx playwright install --with-deps webkit
       - name: Run WebKit partition with no retries or failure exceptions
+        timeout-minutes: 25
         run: npx playwright test --config=playwright.webkit.config.mjs --workers=1 --retries=0 --forbid-only --shard=${{ matrix.shard }}/2 --reporter=line,blob
       - name: Retain every WebKit partition result
         if: always()
