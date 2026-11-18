@@ -872,12 +872,14 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
         b.board.updateTokenPosition(b.board.tokens.player1, 8.25, 12.75);
         const planner = b.board.captureBoardState();
         await b.setWorkspace('builder');
-        return { source: JSON.stringify(b.document), time: b.session.clock.elapsed, planner, view: b.view };
+        return { source: JSON.stringify(b.document), time: b.session.clock.elapsed, planner, view: b.view,
+          roster: [...b.board.threeD.playerObjects.values()].map(actor => actor.userData.animation.source) };
       });
       expect(builderProof.source).toBe(await page.evaluate(() => JSON.stringify(playBuilder.document)));
       expect(JSON.parse(builderProof.source).title).toBe('Package offline custom rally');
       expect(builderProof.time).toBeCloseTo(1.25, 8);
       expect(builderProof.view).toBe('3d');
+      expect(builderProof.roster).toEqual(['approved-emerald-cap-glb', ...Array(3).fill('original-imagegen-articulated-v2')]);
       const identityProof = await verifyPackageIdentity(page, context, base, info.sourceRevision);
       await page.screenshot({ path: `release-results/package-${browserName}-${mode}.png` });
       // Real offline: close only this test's server. Do not use setOffline emulation.

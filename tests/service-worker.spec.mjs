@@ -159,3 +159,26 @@ test.describe('service worker lifecycle', () => {
     expect(result.text).toContain('playwright-vary-response');
   });
 });
+
+test('a missing Emerald Cap download still installs a playable illustrated court for offline use', async ({ browser, offlineApp }) => {
+  offlineApp.missingPaths.add('/assets/athletes/emerald-cap.glb');
+  const context = await browser.newContext({ serviceWorkers: 'allow' });
+  try {
+    const page = await context.newPage();
+    await page.goto(offlineApp.url + '/');
+    await waitForWorker(page);
+    await offlineApp.stop();
+    await page.reload();
+    await page.waitForFunction(() => window.playBuilder?.view === '3d' && pickleboard.threeD.active);
+    const result = await page.evaluate(() => {
+      const viewer = pickleboard.threeD, actor = viewer.playerObjects.get('player1');
+      const segment = viewer.timeline.segments.find(s => s.shotSemantics?.playerId === 'player1');
+      playBuilder.seek(segment.startTime + segment.contactTime);
+      return { art: actor.userData.animation.source, players: viewer.playerObjects.size,
+        pixels: actor.userData.body.material.map.image.width, contact: actor.userData.paddleFaceWorld.distanceTo(viewer.ballObject.position) };
+    });
+    expect(result).toMatchObject({ art: 'original-imagegen-articulated-v2', players: 4 });
+    expect(result.pixels).toBeGreaterThan(0);
+    expect(result.contact).toBeLessThan(.01);
+  } finally { await context.close(); }
+});

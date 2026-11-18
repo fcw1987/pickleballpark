@@ -81,12 +81,6 @@ export function createRuntimePackage({ sourceRoot = '.', revision = git(sourceRo
     const installed = JSON.parse(readFileSync(path.join(sourceRoot, 'node_modules/three/package.json')));
     if (installed.version !== lock.packages?.['node_modules/three']?.version) throw Error('Installed Three.js differs from the lockfile');
     for (const name of ['three.module.min.js', 'three.core.min.js']) if (!files.get(`vendor/${name}`)?.equals(readFileSync(path.join(sourceRoot, 'node_modules/three/build', name)))) throw Error(`Vendor differs from locked Three.js: ${name}`);
-    for (const name of ['loaders/GLTFLoader.js', 'utils/BufferGeometryUtils.js', 'utils/SkeletonUtils.js']) {
-      const upstream = readFileSync(path.join(sourceRoot, 'node_modules/three/examples/jsm', name), 'utf8');
-      const bundled = upstream.replace("} from 'three';", "} from '../../three.module.min.js';");
-      if (files.get(`vendor/three-addons/${name}`)?.toString() !== bundled) throw Error(`Vendor differs from locked Three.js: ${name}`);
-    }
-    if (!files.get('vendor/three-addons/LICENSE.txt')?.equals(readFileSync(path.join(sourceRoot, 'node_modules/three/LICENSE')))) throw Error('Three.js addon license differs from installed dependency');
   }
   files.set('version.json', jsonBytes(metadata));
   const metadataSource = files.get('build-metadata.js').toString('utf8');

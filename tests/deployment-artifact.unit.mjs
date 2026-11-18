@@ -82,7 +82,7 @@ test('rejects artifact and source symlinks and unexpected runtime paths', () => 
 
 test('rejects vendor divergence, private paths and unsafe allowlist entries', () => {
   withStage(data => { writeFileSync(path.join(data.sourceRoot, 'vendor/three.module.min.js'), 'modified'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Vendor differs/); });
-  withStage(data => { writeFileSync(path.join(data.sourceRoot, 'vendor/three-addons/loaders/GLTFLoader.js'), 'modified'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Vendor differs/); });
+  withStage(data => { writeFileSync(path.join(data.sourceRoot, 'vendor/three-addons/loaders/GLTFLoader.js'), 'modified'); assert.throws(() => buildSite({ sourceRoot: data.sourceRoot }), /Vendor differs/); });
   withStage(data => { writeFileSync(path.join(data.sourceRoot, 'app.js'), 'const path = "/Users/private/source";'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Private local path/); });
   withStage(data => { writeFileSync(path.join(data.sourceRoot, 'tools/runtime-files.json'), '["../private"]'); assert.throws(() => createRuntimePackage({ sourceRoot: data.sourceRoot }), /Invalid runtime/); });
 });

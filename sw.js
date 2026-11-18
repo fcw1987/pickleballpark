@@ -185,7 +185,10 @@ const CACHEABLE_URLS = new Set([...STATIC_ASSETS, ...OPTIONAL_ASSETS].map(path =
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(STATIC_CACHE);
-    await cache.addAll(STATIC_ASSETS);
+    // Keep the complete illustrated court installable when optional 3D art is unavailable.
+    const modelAsset = path => path === './assets/athletes/emerald-cap.glb' || path.startsWith('./vendor/three-addons/');
+    await cache.addAll(STATIC_ASSETS.filter(path => !modelAsset(path)));
+    await Promise.allSettled(STATIC_ASSETS.filter(modelAsset).map(path => cache.add(path)));
     await self.skipWaiting();
   })());
 });

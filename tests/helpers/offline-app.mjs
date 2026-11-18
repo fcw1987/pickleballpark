@@ -6,7 +6,8 @@ import { createStaticServer } from './static-server.mjs';
 export const test = base.extend({
   offlineApp: async ({ request }, use) => {
     let worker = null;
-    const server = createStaticServer({ workerSource: () => worker });
+    const missingPaths = new Set();
+    const server = createStaticServer({ workerSource: () => worker, missingPaths });
     await new Promise((resolve, reject) => {
       server.once('error', reject);
       server.listen(0, '127.0.0.1', resolve);
@@ -23,6 +24,7 @@ export const test = base.extend({
     try {
       await use({
         url,
+        missingPaths,
         setWorkerSource: source => { worker = source; },
         stop: async () => {
           await stop();
