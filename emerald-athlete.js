@@ -110,13 +110,17 @@ export function createEmeraldAthlete(gltf) {
         grip:model.getObjectByName('GripCenter'),paddleFaceWorld:new THREE.Vector3(),
         dispose:()=>release(model)
     };
-    function sampleBones(stroke,time,shift) {
+    function sampleBones(stroke,time,shift,sideBend=0) {
         const keys=tracks[stroke];
         for (const bone of bones) {
             const n=bone.name, matrix=pose[n].copy(local[n]);
             if (keys[n]) matrix.compose(bone.position,new THREE.Quaternion().fromArray(keys[n].evaluate(time)),ONE);
             if (bone.parent.isBone) matrix.premultiply(pose[bone.parent.name]);
             else matrix.setPosition(position(matrix).add(shift));
+            if (n === 'Torso' && sideBend) {
+                const waist = position(matrix);
+                matrix.premultiply(new THREE.Matrix4().makeRotationZ(-sideBend)).setPosition(waist);
+            }
         }
     }
     const zero=new THREE.Vector3(),calibration={};
@@ -183,21 +187,24 @@ export function createEmeraldAthlete(gltf) {
         };
         const target=active && sample.paddle?.worldContactTarget?canonical(sample.paddle.worldContactTarget):null;
         const weight=target?THREE.MathUtils.clamp(contactWeight,0,1):0;
+        // At overhead height the cap needs room beside the striking arm. Lean
+        // away from the raised hand and straighten the stance over planted feet.
+        const overheadReach = target && family === 'overhead' ? smooth((target.y - .95) / .42) : 0;
         const shift=new THREE.Vector3(0,-.035*(sample.splitStep||0),0);
         if (weight) {
             // A small weight transfer reduces the arm extension on high/wide
             // strokes. The tactical root and both authored foot plants stay put.
             const toward=target.clone().sub(calibration[name]);
-            toward.y=THREE.MathUtils.clamp(toward.y,-.09,.10);
+            toward.y=THREE.MathUtils.clamp(toward.y,-.09,.10 + .10 * overheadReach);
             toward.x=THREE.MathUtils.clamp(toward.x,-.09,.09);
             toward.z=THREE.MathUtils.clamp(toward.z,-.08,.08);
             shift.addScaledVector(toward,weight);
         }
-        sampleBones(name,t,shift);
+        sampleBones(name,t,shift,.54 * overheadReach * weight);
         if (weight) {
             const shoulder=position(pose.UpperArmR);
             const face=position(pose[stroke.face]);
-            const desired=face.clone().addScaledVector(target.clone().sub(calibration[name]).sub(shift),weight);
+            const desired=overheadReach ? face.clone().lerp(target,weight) : face.clone().addScaledVector(target.clone().sub(calibration[name]).sub(shift),weight);
             const wrist=position(pose.HandR),blade=face.clone().sub(wrist);
             const ray=desired.clone().sub(shoulder);
             const align=smooth((ray.length()-.32)/.29)*weight;

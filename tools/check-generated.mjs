@@ -94,12 +94,13 @@ export function compareGeneratedTrees(expected, generated) {
   return { files: expectedPaths.length, encodedOnlyPngs };
 }
 
-// Imagegen proofs are reviewed source assets, not outputs of the pixel generators.
+// Reviewed illustrations and the approved Blender export each have an exact identity.
 // Exact hashes keep this exception narrow and detect altered or missing art.
 export function excludePreservedArt(expected, generated, inventory) {
   const remaining = new Map(expected);
   for (const [file, hash] of Object.entries(inventory)) {
-    if (!/^assets\/(?:source\/)?reference-(?:athletes|depth)\/[^/]+$/.test(file) || !/^[0-9a-f]{64}$/.test(hash)) throw new Error(`Invalid preserved art entry: ${file}`);
+    const approvedModel = file === 'assets/athletes/emerald-cap.glb';
+    if ((!approvedModel && !/^assets\/(?:source\/)?reference-(?:athletes|depth)\/[^/]+$/.test(file)) || !/^[0-9a-f]{64}$/.test(hash)) throw new Error(`Invalid preserved art entry: ${file}`);
     if (generated.has(file)) throw new Error(`Preserved art unexpectedly generated: ${file}`);
     const bytes = expected.get(file);
     if (!bytes || createHash('sha256').update(bytes).digest('hex') !== hash) throw new Error(`Preserved art bytes changed or missing: ${file}`);
