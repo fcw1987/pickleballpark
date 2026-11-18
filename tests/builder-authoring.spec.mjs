@@ -8,15 +8,45 @@ const namePlay=async(page,value)=>{await fileMenu(page);await page.getByLabel('P
 const chooseChapter=async(page,number)=>{const picker=page.getByLabel('Choose shot chapter');if(!(await picker.locator('..').evaluate(node=>node.open)))await picker.click();await page.getByRole('button',{name:`Customize Shot ${number}`,exact:true}).click();};
 const editShot=async page=>{const inspector=page.locator('.builder-inspector');if(await inspector.evaluate(node=>node.classList.contains('builder-inspector-collapsed')))await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();};
 const details=async(page,group='Precision')=>{const summary=page.locator('.builder-shot-details > summary');if(!(await summary.locator('..').evaluate(node=>node.open)))await summary.click();const tab=page.getByRole('tab',{name:group,exact:true});if(await tab.getAttribute('aria-selected')!=='true')await tab.click();};
-test('authors a longer rally through contextual controls, saves copies, and reopens named work',async({page})=>{
+const prepareWideServe = async page => {
  await open(page);await namePlay(page,'Wide serve rally');await editShot(page);await details(page);
  await page.getByLabel('Target width',{exact:true}).fill('7');await page.getByLabel('Target width',{exact:true}).press('Tab');
  await chooseChapter(page,3);await chooseShotFamily(page,'Drive');
+};
+const seedQueuedAdds = (page, seeds) => page.evaluate(values => {
+ const add=playBuilder.queueSmartAdd.bind(playBuilder);
+ playBuilder.queueSmartAdd=options=>{
+   if(!values.length) throw Error('Unexpected extra Add click');
+   return add({...options,seed:values.shift()});
+ };
+},seeds);
+test('authors a longer rally through contextual controls, saves copies, and reopens named work',async({page})=>{
+ await prepareWideServe(page);
+ // This success-path test is about queueing, authoring and persistence. Real
+ // bounded search can refuse a continuation, so fix its inputs, not its output.
+ const seeds=[17,18,19];
+ await seedQueuedAdds(page,seeds);
  for(let i=0;i<3;i++)await page.getByRole('button',{name:'Add shot',exact:true}).click();
  await expectBuilderAddComplete(page,6);
+ expect(await page.evaluate(()=>({valid:playBuilder.compiled.validShotCount,seeds:playBuilder.document.shots.slice(3).map(s=>s.generation.seed)}))).toEqual({valid:6,seeds});
  const id=await page.evaluate(()=>playBuilder.document.id);await fileMenu(page);await page.getByRole('button',{name:'Save As',exact:true}).click();expect(await page.evaluate(()=>playBuilder.document.id)).not.toBe(id);
  await fileMenu(page);await page.getByRole('button',{name:'My Plays',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Wide serve rally',exact:true}).click();expect(await page.evaluate(()=>playBuilder.document.id)).toBe(id);expect(await page.evaluate(()=>playBuilder.document.shots[0].target.x)).toBe(7);
  await fileMenu(page);await page.getByRole('button',{name:'New Play',exact:true}).click();expect(await page.evaluate(()=>playBuilder.document.id)).not.toBe(id);expect(await page.evaluate(id=>playBuilder.store.open(id).shots.length,id)).toBe(6);
+});
+test('a real bounded Smart Add refusal keeps the five-shot rally and its saved copy',async({page})=>{
+ await prepareWideServe(page);
+ // These independent inputs admit two continuations, then exhaust the normal
+ // production search budget on the third. Do not stub proposals or retry Add.
+ await seedQueuedAdds(page,[942903556,4083263051,3534944305]);
+ const add=page.getByRole('button',{name:'Add shot',exact:true});
+ await add.click();await add.click();await expectBuilderAddComplete(page,5);
+ const snapshot=()=>page.evaluate(()=>({source:JSON.stringify(playBuilder.document),saved:localStorage.getItem('pickleballpark-builder-v1'),valid:playBuilder.compiled.validShotCount}));
+ const before=await snapshot();expect(before.valid).toBe(5);expect(before.saved).toBeTruthy();
+ await add.click();
+ const result=await page.evaluate(()=>playBuilder.addQueue);
+ expect(result.ok).toBe(false);expect(result.error).toContain('No compatible continuation was found after 48 bounded attempts.');
+ await expect(page.getByText(/No compatible continuation was found after 48 bounded attempts/)).toBeVisible();
+ await expectBuilderAddComplete(page,5);expect(await snapshot()).toEqual(before);
 });
 test('assistance is undoable and guides do not enable generated movement',async({page})=>{
  await open(page);await editShot(page);await openCoachTools(page);const before=await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps));await page.getByRole('checkbox',{name:'Position Guides',exact:true}).evaluate(node=>node.click());await expect.poll(()=>page.evaluate(()=>playBuilder.document.assistance.showGuides)).toBe(true);expect(await page.evaluate(()=>playBuilder.document.assistance.autoShading)).toBe(false);expect(await page.evaluate(()=>JSON.stringify(playBuilder.compiled.play.steps))).toBe(before);
