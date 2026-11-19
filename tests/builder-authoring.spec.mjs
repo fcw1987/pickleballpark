@@ -1,6 +1,7 @@
 import {chooseShotFamily} from './helpers/builder-navigation.mjs';
 import{test,expect}from'@playwright/test';
 import{expectBuilderAddComplete,openCoachTools}from'./helpers/builder-navigation.mjs';
+import {createStarterDocument} from '../play-document.js';
 const open=async page=>{await page.goto('/');await page.waitForFunction(()=>window.playBuilder&&!playBuilder.busy);};
 const menu=async page=>{const details=page.locator('.builder-main-menu');const summary=details.locator(':scope > summary');if(!(await details.evaluate(node=>node.open)))await summary.click();return summary;};
 const fileMenu=async page=>{await menu(page);const details=page.locator('.builder-document-menu');if(!(await details.evaluate(node=>node.open)))await page.getByLabel('Manage plays',{exact:true}).click();};
@@ -8,8 +9,10 @@ const namePlay=async(page,value)=>{await fileMenu(page);await page.getByLabel('P
 const chooseChapter=async(page,number)=>{const picker=page.getByLabel('Choose shot chapter');if(!(await picker.locator('..').evaluate(node=>node.open)))await picker.click();await page.getByRole('button',{name:`Customize Shot ${number}`,exact:true}).click();};
 const editShot=async page=>{const inspector=page.locator('.builder-inspector');if(await inspector.evaluate(node=>node.classList.contains('builder-inspector-collapsed')))await page.locator('.builder-context-actions [data-action="collapse-inspector"]').click();};
 const details=async(page,group='Precision')=>{const summary=page.locator('.builder-shot-details > summary');if(!(await summary.locator('..').evaluate(node=>node.open)))await summary.click();const tab=page.getByRole('tab',{name:group,exact:true});if(await tab.getAttribute('aria-selected')!=='true')await tab.click();};
-const prepareWideServe = async page => {
- await open(page);await namePlay(page,'Wide serve rally');await editShot(page);await details(page);
+const prepareWideServe = async (page, source) => {
+ await open(page);
+ if(source)await page.evaluate(doc=>playBuilder.loadDocument(doc,{persist:false}),source);
+ await namePlay(page,'Wide serve rally');await editShot(page);await details(page);
  await page.getByLabel('Target width',{exact:true}).fill('7');await page.getByLabel('Target width',{exact:true}).press('Tab');
  await chooseChapter(page,3);await chooseShotFamily(page,'Drive');
 };
@@ -34,7 +37,9 @@ test('authors a longer rally through contextual controls, saves copies, and reop
  await fileMenu(page);await page.getByRole('button',{name:'New Play',exact:true}).click();expect(await page.evaluate(()=>playBuilder.document.id)).not.toBe(id);expect(await page.evaluate(id=>playBuilder.store.open(id).shots.length,id)).toBe(6);
 });
 test('a real bounded Smart Add refusal keeps the five-shot rally and its saved copy',async({page})=>{
- await prepareWideServe(page);
+ // The refusal depends on the original feet as well as the seed. Keep the
+ // five-shot reproduction stable as the fresh demonstration's routes evolve.
+ await prepareWideServe(page,createStarterDocument());
  // These independent inputs admit two continuations, then exhaust the normal
  // production search budget on the third. Do not stub proposals or retry Add.
  await seedQueuedAdds(page,[942903556,4083263051,3534944305]);
