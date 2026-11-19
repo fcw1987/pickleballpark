@@ -201,7 +201,8 @@ export function createEmeraldAthlete(gltf) {
         transfer.x += .10*high*reach;
         const feet = sample.footTargets;
         const stepLift = Math.max(feet?.right?.y || 0,feet?.left?.y || 0);
-        transfer.y = -.071*split - .047*load - .45*stepLift + (.102*high-.126*low)*reach;
+        const unweight=(sample.splitLift || 0)*(1-phase.engaged);
+        transfer.y = unweight - .071*split - .047*load - .45*stepLift + (.102*high-.126*low)*reach;
         const twist = side*shape.coil*(load-.68*finish);
         const torsoTurn = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(.09*load+.15*low*reach,twist,-.48*high*reach,'YXZ'));
         const headTurn = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(
@@ -218,8 +219,7 @@ export function createEmeraldAthlete(gltf) {
         const flight = r<c ? r/c : Math.max(0,(landing-r)/(landing-c));
         const jump = high && sample.modelVersion!==2
             ? Math.min(.88,Math.max(0,target.y-shoulder.y-height+.025))*Math.sin(flight*Math.PI/2)**2 : 0;
-        const unweight=(sample.splitLift || 0)*(1-phase.engaged);
-        visual.position.y=jump+unweight;
+        visual.position.y=jump;
         if (target) target.y-=visual.position.y;
         const blade=bladeFrame(shape,phase,backhand,shoulder,target,aim,split);
         const wrist=fitGrip(shoulder,blade.point,blade.rotation,blade.face,armLength*.992);
@@ -244,7 +244,7 @@ export function createEmeraldAthlete(gltf) {
             // and the leg releases from the court together with the body on a hop.
             const lift = Math.max(0,target.y-root.position.y);
             q.premultiply(new THREE.Quaternion().setFromAxisAngle(lateral,-Math.min(.16,lift*1.8)));
-            ankle.y += Math.min(.06,jump*.12);
+            ankle.y += unweight+Math.min(.06,jump*.12);
             ankle.sub(soles[foot].clone().applyQuaternion(q));
             placeChain('Thigh'+side,'Shin'+side,foot,ankle,new THREE.Vector3(side==='R'?-.13:.13,-.03,.34),q);
         }

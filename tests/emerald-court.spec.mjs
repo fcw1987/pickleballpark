@@ -101,10 +101,11 @@ test('far-court feeds turn the cap and shade the physical blade in both hands ac
       for(let i=0;i<=24;i++)v.cameraControls.setState({azimuth:Math.PI*i/12,elevation:34});
       const afterOrbit=read();
       const incoming=v.timeline.segments[1],opponentHit=incoming.startTime+incoming.contactTime;
-      b.seek(opponentHit-.09);const split=window.__athleteAudit(actor).shoeBottoms;
-      b.seek(opponentHit);const landed=window.__athleteAudit(actor).shoeBottoms;
+      b.seek(opponentHit-.04);const split=window.__athleteAudit(actor).shoeBottoms;
+      b.seek(opponentHit);const atHit=window.__athleteAudit(actor).shoeBottoms;
+      b.seek(opponentHit+.065);const landed=window.__athleteAudit(actor).shoeBottoms;
       const strike=v.timeline.segments.at(-1);b.seek(strike.startTime+strike.contactTime);
-      return {left,center,right,states,afterOrbit,split,landed,hand:actor.userData.handedness,
+      return {left,center,right,states,afterOrbit,split,atHit,landed,hand:actor.userData.handedness,
         gap:window.__athleteAudit(actor).paddleDistance(v.ballObject.position),
         backhand:actor.userData.animation.backhand,source:initial===JSON.stringify(b.document),
         stored:saved===JSON.stringify(localStorage)};
@@ -118,6 +119,8 @@ test('far-court feeds turn the cap and shade the physical blade in both hands ac
     for(const sample of [data.left,data.center,data.right])expect(sample[3]).toBeGreaterThan(.20);
     expect(data.states[2]).toEqual(data.left);expect(data.afterOrbit).toEqual(data.right);
     expect(Math.min(...data.split)).toBeGreaterThan(.025);
+    expect(Math.min(...data.atHit)).toBeGreaterThan(.012);
+    expect(Math.max(...data.atHit)).toBeLessThan(Math.min(...data.split));
     expect(Math.max(...data.landed.map(Math.abs))).toBeLessThan(1e-6);
     expect(data.gap).toBeLessThan(.037);
   }

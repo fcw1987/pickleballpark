@@ -2,6 +2,7 @@
 // The Play timeline remains the sole source of positions, action timing and contact.
 
 import { FEET_TO_METERS, boardToWorld } from './three-d-core.js';
+import { teamForPlayer } from './rally-state.js';
 import { sampleStrokePose } from './three-d-animation.js';
 import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
 
@@ -297,15 +298,23 @@ export function sampleActorPresentation({
     const recordedFeet = articulatedMotion && segment.model2Momentum?.some(
         item=>item.actor===playerId && item.contactTime<=segment.startTime+localTime+1e-9);
     if (model2Feet && articulatedMotion && !recordedFeet) stepBetweenFootprints(segment,playerId,localTime,feet,worldPosition);
-    // Unweight just before the opponent strikes, then absorb the landing on
-    // flexed knees. Recorded fault/momentum feet take precedence at all times.
+    let splitStep=instructionalMovement ? Math.max(
+        !isStriker&&segment.shotSemantics ? Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11) : 0,
+        segment.nextShotSemantics&&!isIncomingStriker ? Math.max(0,1-(segment.duration-localTime)/.11) : 0) : 0;
     let splitLift=0;
-    if(articulatedMotion && !recordedFeet){
-        const untilHit=!isStriker && segment.shotSemantics && localTime<=segment.contactTime
-            ? segment.contactTime-localTime : segment.nextShotSemantics && !isIncomingStriker ? segment.duration-localTime : Infinity;
-        if(untilHit>.018 && untilHit<.168){
+    if(articulatedMotion){
+        const roster=timeline?.play?.players,team=teamForPlayer(playerId,roster);
+        const opponent=shot=>shot && teamForPlayer(shot.playerId,roster)!==team;
+        const current=segment.contactTime-localTime;
+        const next=timeline?.segments?.[segment.index];
+        const untilHit=opponent(segment.shotSemantics) && current>=-.18 ? current :
+            opponent(segment.nextShotSemantics) ? segment.duration-localTime+(next?.contactTime || 0) : Infinity;
+        // The split straddles the opponent's contact. Land on flexed knees as
+        // the ball leaves the paddle, ready to push off the planted foot.
+        splitStep=Math.max(0,1-Math.abs(untilHit+.055)/.12);
+        if(!recordedFeet && untilHit>-.055 && untilHit<.12){
             const grounded=1-clamp01(Math.max(feet?.left.y||0,feet?.right.y||0)/.045);
-            splitLift=.05*Math.sin(Math.PI*(untilHit-.018)/.15)**2*grounded*(1-clamp01(travelSpeed/2));
+            splitLift=.05*Math.sin(Math.PI*(untilHit+.055)/.175)**2*grounded*(1-clamp01(travelSpeed/2));
         }
     }
     return Object.freeze({
@@ -323,9 +332,7 @@ export function sampleActorPresentation({
         travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,
         travelDirection: route?Object.freeze(route.direction):null,
         footTargets: feet ? Object.freeze({left:Object.freeze(feet.left),right:Object.freeze(feet.right)}) : null,
-        splitStep: instructionalMovement?Math.max(
-            !isStriker&&segment.shotSemantics?Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11):0,
-            segment.nextShotSemantics&&segment.nextShotSemantics.playerId!==playerId?Math.max(0,1-(segment.duration-localTime)/.11):0):0,
+        splitStep,
         atlasKey: `${artFamily}/${handedness}/${direction}/${state.action}/${state.phase}`,
         paddle: Object.freeze({ anchorId: `${handedness}-paddle-face`, worldContactTarget: contactTarget })
     });
