@@ -1,4 +1,4 @@
-"""Serve the verified local package and transient Emerald Cap examples on loopback."""
+"""Serve the verified local package and transient court athlete examples on loopback."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -35,5 +35,5 @@ if __name__ == "__main__":
         sys.exit("Build the local runtime with npm run build:site first.")
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8502
     server = ThreadingHTTPServer(("127.0.0.1", port), partial(Handler, directory=PACKAGE))
-    print(f"Emerald Cap review at http://127.0.0.1:{port}/", flush=True)
+    print(f"Court athlete review at http://127.0.0.1:{port}/", flush=True)
     server.serve_forever()

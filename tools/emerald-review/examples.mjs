@@ -9,9 +9,22 @@ export const examples = [
     ['approach','Return to the kitchen'], ['saved','Saved drive–drop rally'], ['grounded','Grounded overhead limit']
 ];
 
-export function reviewDocument(key, handedness, source) {
+// Assign a transient drill to any of the four fixed roster seats. Rotate
+// both axes when the hitter moves to the far team so its contact side and
+// court-relative routes still agree. Solve the lob *after* that assignment.
+function setDrillSeats(doc,index) {
+    if(!index) return doc;
+    const partner=[0,1,2,3].map(i=>'player'+((i^index)+1));
+    const seat=id=>id==='auto'||id==='ball'?id:partner[Number(id.slice(6))-1];
+    const point=p=>index<2?p:{x:20-p.x,y:44-p.y};
+    doc.initialLayout=Object.fromEntries(Object.entries(doc.initialLayout).map(([id,p])=>[seat(id),point(p)]));
+    doc.shots=doc.shots.map(s=>({...s,hitter:seat(s.hitter),receiver:seat(s.receiver),target:point(s.target)}));
+    return doc;
+}
+
+export function reviewDocument(key, handedness, source, index=0) {
     const doc=structuredClone(source);
-    doc.players.player1.handedness=handedness;
+    doc.players['player'+(index+1)].handedness=handedness;
     if (key==='saved') return doc;
     const label=examples.find(([id])=>id===key)?.[1];
     if(!label)throw new Error('Unknown court example');
@@ -45,7 +58,7 @@ export function reviewDocument(key, handedness, source) {
             player3:{x:10,y:31},player4:{x:18,y:33},ball:{x:10,y:31}};
         doc.shots=[{...shot('feed','lob',3,null,miss?19:13,short?12:miss?.8:key==='lob-out'?-1:6),
             intent:'lob',quality:'neutral',physics:{apexFeet:short?13:miss?10:16}}];
-        return resolveLobContinuation(doc,'recovery');
+        return resolveLobContinuation(setDrillSeats(doc,index),'recovery');
     } else if(key==='grounded') {
         doc.modelVersion=2;doc.physicsVersion='play-physics-v2';
         doc.shots=[{...shot('grounded','overhead',1,3,5,31),intent:'put-away',quality:'neutral'}];
@@ -54,5 +67,5 @@ export function reviewDocument(key, handedness, source) {
         doc.shots=[shot('feed','dink',3,1,10,14),shot('stroke',key==='backhand'?'drive':key,1,3,7,30,key==='backhand'?'backhand':'forehand'),
             shot('reply','dink',3,2,4,14)];
     }
-    return doc;
+    return setDrillSeats(doc,index);
 }

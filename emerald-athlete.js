@@ -3,7 +3,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import { fitGrip, paddleFrame, readyAim, strokePhase, strokeShape } from './emerald-motion.js';
 
-const MODEL_URL = new URL('./assets/athletes/emerald-cap.glb', import.meta.url);
+import { COURT_ATHLETES } from './court-athlete-roster.js';
 const UP = new THREE.Vector3(0, 1, 0);
 const ONE = new THREE.Vector3(1, 1, 1);
 const upperBody = new Set(['Torso','Head','UpperArmR','ForearmR','HandR','UpperArmL','ForearmL','HandL']);
@@ -12,7 +12,7 @@ const strokes = {
     Dink: { times: [0, .29, .70, 1.01, 1.59], face: 'PaddleFace' },
     Backhand: { times: [0, .34, .80, 1.09, 1.65], face: 'PaddleBack' }
 };
-let modelBytes;
+const modelBytes = new Map();
 const position = matrix => new THREE.Vector3().setFromMatrixPosition(matrix);
 const rotation = matrix => new THREE.Quaternion().setFromRotationMatrix(matrix);
 const smooth = t => { t=THREE.MathUtils.clamp(t,0,1); return t*t*(3-2*t); };
@@ -27,9 +27,11 @@ function release(scene) {
     for (const resource of [...skeletons, ...geometries, ...materials]) resource.dispose();
 }
 
-export async function loadEmeraldAthlete(signal) {
+export async function loadCourtAthlete(index,signal) {
     // Each court owns fresh skin, materials and GPU state. Only validated source
     // bytes survive exits. Failure leaves the original illustrated player usable.
+    const {key}=COURT_ATHLETES[index];
+    const url=new URL('./assets/athletes/'+key+'.glb',import.meta.url);
     const request=new AbortController();
     const abort=()=>request.abort();
     signal.addEventListener('abort',abort,{once:true});
@@ -39,16 +41,16 @@ export async function loadEmeraldAthlete(signal) {
         if (signal.aborted) return null;
         const [{GLTFLoader}, bytes]=await Promise.all([
             import('./vendor/three-addons/loaders/GLTFLoader.js'),
-            modelBytes || fetch(MODEL_URL,{signal:request.signal}).then(response=>{
-                if (!response.ok) throw new Error('Emerald Cap model unavailable');
+            modelBytes.get(key) || fetch(url,{signal:request.signal}).then(response=>{
+                if (!response.ok) throw new Error(key+' model unavailable');
                 return response.arrayBuffer();
             })
         ]);
         if (request.signal.aborted) return null;
-        gltf=await new GLTFLoader().parseAsync(bytes,new URL('.',MODEL_URL).href);
+        gltf=await new GLTFLoader().parseAsync(bytes,new URL('.',url).href);
         if (request.signal.aborted) { release(gltf.scene); return null; }
-        const actor=createEmeraldAthlete(gltf);
-        modelBytes=bytes;
+        const actor=createCourtAthlete(gltf,index);
+        modelBytes.set(key,bytes);
         return actor;
     } catch {
         if (gltf) release(gltf.scene);
@@ -58,6 +60,10 @@ export async function loadEmeraldAthlete(signal) {
         signal.removeEventListener('abort',abort);
     }
 }
+
+// Keep the original Emerald authoring/preview entry points usable.
+export const createEmeraldAthlete = gltf => createCourtAthlete(gltf,0);
+export const loadEmeraldAthlete = signal => loadCourtAthlete(0,signal);
 
 // Measure the actual flat rubber outsole in bind space, once. Its centroid is
 // the same physical point the foot-placement sampler places on the court.
@@ -80,7 +86,8 @@ function soleOffsets(model, bind) {
     return offsets;
 }
 
-export function createEmeraldAthlete(gltf) {
+export function createCourtAthlete(gltf,index=0) {
+    const {key}=COURT_ATHLETES[index];
     const model=gltf.scene, root=new THREE.Group(), visual=new THREE.Group();
     const bones=[], bind={}, local={}, pose={}, tracks={};
     model.updateMatrixWorld(true);
@@ -93,7 +100,7 @@ export function createEmeraldAthlete(gltf) {
         pose[node.name]=node.matrixWorld.clone();
     });
     for (const name of [...upperBody,...sockets,'Pelvis','ThighR','ThighL','ShinR','ShinL','FootR','FootL']) {
-        if (!bind[name]) throw new Error('Missing approved Emerald Cap joint '+name);
+        if (!bind[name]) throw new Error('Missing court athlete joint '+name);
     }
     for (const name of Object.keys(strokes)) {
         const clip=gltf.animations.find(clip=>clip.name===name);
@@ -106,7 +113,7 @@ export function createEmeraldAthlete(gltf) {
     const soles=soleOffsets(model,bind);
     root.add(visual);visual.add(model);
     root.userData={
-        emeraldCap:true,volumetric:true,team:'team1',player:0,visual,model,
+        courtAthlete:key,emeraldCap:index===0,volumetric:true,team:index<2?'team1':'team2',player:index,visual,model,
         paddleMesh:model.getObjectByName('Paddle').children.find(m=>m.material.name==='Paddle'),
         grip:model.getObjectByName('GripCenter'),paddleFaceWorld:new THREE.Vector3(),
         dispose:()=>release(model)
@@ -259,7 +266,7 @@ export function createEmeraldAthlete(gltf) {
         model.getObjectByName(stroke.face).getWorldPosition(d.paddleFaceWorld);
         d.animation={action:sample.action,phase:sample.phase,frame:sample.frameIndex||0,family,
             viewDirection:sample.viewDirection,bodyFacing:{...facing},backhand:name==='Backhand',
-            planted:sample.planted,jumpHeight:jump,source:'approved-emerald-cap-glb'};
+            planted:sample.planted,jumpHeight:jump,source:index===0?'approved-emerald-cap-glb':key+'-glb'};
     };
     return root;
 }

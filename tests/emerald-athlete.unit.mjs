@@ -3,15 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { GLTFLoader } from '../vendor/three-addons/loaders/GLTFLoader.js';
 import { Vector3 } from '../vendor/three.module.min.js';
-import { createEmeraldAthlete } from '../emerald-athlete.js';
+import { createCourtAthlete } from '../emerald-athlete.js';
 import { compileEffectiveCandidate } from '../rally-proposals.js';
 import { sampleActorPresentation } from '../three-d-presentation.js';
 import { pixelAuthoringCases, pixelTacticalBoundaryCases } from './fixtures/pixel-authoring-cases.mjs';
 
-test('approved Emerald Cap meets every authored contact family and both hands with its physical grip intact', async () => {
-  const bytes = readFileSync(new URL('../assets/athletes/emerald-cap.glb', import.meta.url));
+const roster=['emerald-cap','cream-visor','coral-ponytail','navy-cap'];
+for (const [index,key] of roster.entries()) test(key+' meets every authored contact family and both hands with its physical grip intact', async () => {
+  const bytes = readFileSync(new URL('../assets/athletes/'+key+'.glb', import.meta.url));
   const model = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
-  const actor = createEmeraldAthlete(model);
+  const actor = createCourtAthlete(model,index);
   const joint = name => actor.getObjectByName(name).getWorldPosition(new Vector3());
   const armLength = () => joint('UpperArmR').distanceTo(joint('ForearmR')) + joint('ForearmR').distanceTo(joint('HandR'));
   const neutralArm = armLength(), gripOffset = joint('HandR').distanceTo(joint('GripCenter'));

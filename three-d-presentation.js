@@ -1,10 +1,11 @@
+import { COURT_ATHLETES } from './court-athlete-roster.js';
 // Pure presentation sampling for image-based actors in the 3D replay.
 // The Play timeline remains the sole source of positions, action timing and contact.
 
 import { FEET_TO_METERS, boardToWorld } from './three-d-core.js';
 import { teamForPlayer } from './rally-state.js';
 import { sampleStrokePose } from './three-d-animation.js';
-import { sampleActorBoardPositionV2, sampleActorFeetV2, EMERALD_PLANTED_LIMIT_FEET } from './play-actors-v2.js';
+import { sampleActorBoardPositionV2, sampleActorFeetV2, PLANTED_LIMIT_FEET } from './play-actors-v2.js';
 
 export const VIEW_DIRECTIONS = Object.freeze([
     'front', 'front-right', 'right', 'back-right',
@@ -349,8 +350,8 @@ export function sampleActorPresentation({
         ...(segment.modelVersion === 2 ? { modelVersion: 2 } : {}),
         playerId, worldPosition, bodyFacing: Object.freeze(bodyFacing), viewDirection: direction,
         ...(articulatedMotion ? {courtForward:near?1:-1,splitLift} : {}),
-        ...(articulatedMotion ? {chasingLob:chasing && localTime>=segment.contactTime,motionLeg:segment.rallyLeg,strokeLeg:isStriker?segment.rallyLeg:isIncomingStriker?segment.rallyLeg+1:null,
-            unsupportedHighContact:activeSemantics?.contact.point.heightFeet>EMERALD_PLANTED_LIMIT_FEET &&
+        ...(instructionalMovement ? {chasingLob:chasing && localTime>=segment.contactTime,motionLeg:segment.rallyLeg,strokeLeg:isStriker?segment.rallyLeg:isIncomingStriker?segment.rallyLeg+1:null,
+            unsupportedHighContact:activeSemantics?.contact.point.heightFeet>PLANTED_LIMIT_FEET &&
                 (segment.modelVersion===2 || (isIncomingStriker?lob:(segment.previous.shot?.authoring?.family || segment.previous.shot?.type)==='lob'))} : {}),
         ...(pickupFacing ? {pickupFacing:Object.freeze(pickupFacing)} : {}),
         action: state.action, phase: state.phase, frameIndex: state.frameIndex,
@@ -371,11 +372,11 @@ export function sampleActorPresentation({
 
 export function emeraldReachFindings(timeline) {
     if(!timeline)return [];
-    return timeline.segments.filter(s=>s.shotSemantics?.playerId==='player1' &&
+    return timeline.segments.filter(s=>s.shotSemantics &&
         (timeline.modelVersion===2 || (s.previous.shot?.authoring?.family || s.previous.shot?.type)==='lob') &&
-        s.shotSemantics.contact.point.heightFeet>EMERALD_PLANTED_LIMIT_FEET).map(s=>({
+        s.shotSemantics.contact.point.heightFeet>PLANTED_LIMIT_FEET).map(s=>({
         kind:'feasibility',severity:'warning',shotId:s.step.id,
-        message:`Recorded contact at ${s.shotSemantics.contact.point.heightFeet.toFixed(1)} ft exceeds Emerald Cap’s planted paddle reach.`
+        message:`Recorded contact at ${s.shotSemantics.contact.point.heightFeet.toFixed(1)} ft exceeds ${COURT_ATHLETES[Number(s.shotSemantics.playerId.slice(6))-1].name}’s planted paddle reach.`
     }));
 }
 

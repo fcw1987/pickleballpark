@@ -25,16 +25,16 @@ test('legacy 3D compatibility: 3D View initializes regulation scene with players
     paddles: Object.fromEntries([...window.pickleboard.threeD.playerObjects]
       .map(([id, object]) => {
         const data = object.userData;
-        const hand = data.emeraldCap ? object.getObjectByName('HandR') : data.arms[0].hand;
-        const grip = data.emeraldCap ? data.grip : data.paddle.children[2];
+        const hand = data.courtAthlete ? object.getObjectByName('HandR') : data.arms[0].hand;
+        const grip = data.courtAthlete ? data.grip : data.paddle.children[2];
         return [id, { handedness: data.handedness, gripDistance: hand.getWorldPosition(object.position.clone()).distanceTo(grip.getWorldPosition(object.position.clone())) }];
       }))
   }));
   expect(scene.state).toMatchObject({ active: true, playerCount: 4, hasBall: true, playId: 'third-shot-drop' });
   expect(scene.paddles.player1).toMatchObject({ handedness: 'right' });
   expect(scene.paddles.player2).toMatchObject({ handedness: 'left' });
-  expect(scene.paddles.player1.gripDistance).toBeLessThan(0.06); // Wrist joint to the center of the closed hand.
-  for (const id of ['player2', 'player3', 'player4']) expect(scene.paddles[id].gripDistance).toBeLessThan(0.006);
+  // The common armature puts the handle 27.08 mm from the wrist inside the closed palm.
+  for (const paddle of Object.values(scene.paddles)) expect(paddle.gripDistance).toBeCloseTo(.02708,5);
   expect(errors).toEqual([]);
 });
 

@@ -10,7 +10,7 @@ export const RALLY_PHYSICS_VERSION = 'play-physics-v2';
 export const RALLY_STYLE_IDS = Object.freeze(['pro', 'advanced', 'intermediate', 'beginner']);
 export const RALLY_FLAVOUR_IDS = Object.freeze(['balanced', 'bangers', 'kitchen-masters', 'lobbers']);
 export const RALLY_PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
-export const LOB_RECOVERY_VERSION = 'planted-v1';
+export const LOB_RECOVERY_VERSION = 'planted-v2';
 export const RALLY_DEFAULT_OPTIONS = Object.freeze({ lengthFeel: 'natural', winner: 'either', signatureShots: true, maxShots: 99 });
 const TEAMS = ['green', 'orange'];
 const INPUT_KEYS = ['players', 'layout', 'service', 'seed', 'options', 'stacking', 'signal', 'onProgress'];
@@ -107,7 +107,7 @@ function normalizeOptions(value) {
   return { lengthFeel: choice(value.lengthFeel === undefined ? 'natural' : value.lengthFeel, ['natural', 'short', 'long', 'epic'], 'options.lengthFeel'),
     winner: choice(value.winner === undefined ? 'either' : value.winner, ['either', ...TEAMS], 'options.winner'), signatureShots,
     // Missing in historical recipes. Preserve their exact seeded selection.
-    ...(own(value,'lobRecovery')?{lobRecovery:choice(value.lobRecovery,[LOB_RECOVERY_VERSION],'options.lobRecovery')}:{}),
+    ...(own(value,'lobRecovery')?{lobRecovery:choice(value.lobRecovery,['planted-v1',LOB_RECOVERY_VERSION],'options.lobRecovery')}:{}),
     maxShots: integer(value.maxShots === undefined ? 99 : value.maxShots, 1, 99, 'options.maxShots') };
 }
 

@@ -122,8 +122,12 @@ test('retained 3D compatibility API: thirty editor to 3D cycles restore the exac
       const board=pickleboard;
       if(!board.plays.load(i%2?'dink-exchange':'third-shot-drive'))throw new Error('play did not load');
       if(!await board.threeD.enter())throw new Error('3D did not enter');
+      const geometries=new Set(),materials=new Set();
+      for(const athlete of board.threeD.playerObjects.values())athlete.traverse(part=>{
+        if(part.isMesh){geometries.add(part.geometry);for(const mat of [].concat(part.material))materials.add(mat);}
+      });
       const live={canvas:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size,
-        sceneChildren:board.threeD.scene.children.length,geometries:board.threeD.actorResources.geometries.size,materials:board.threeD.actorResources.materials.size};
+        sceneChildren:board.threeD.scene.children.length,geometries:geometries.size,materials:materials.size};
       board.threeD.exit(); board.plays.exit();
       return {live,after:{canvas:document.querySelectorAll('#threeDCanvas canvas').length,players:board.threeD.playerObjects.size,
         active:board.threeD.active,hasRenderer:Boolean(board.threeD.renderer)},snapshot:board.captureBoardState()};

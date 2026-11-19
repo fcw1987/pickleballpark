@@ -1,3 +1,4 @@
+import { lobVolleyInFront } from './play-actors-v2.js';
 // Offline, deterministic, bounded rally authoring.
 //
 // Every candidate is checked by the production document validator, compiler,
@@ -84,7 +85,7 @@ function familyChoices(index, opening, previous, next, { allowVolley = true, net
   const previousFamily = previous?.family;
   const contactDepth = previous ? Math.min(previous.target.y, 44 - previous.target.y) : 0;
   let choices = index < 3 && opening === 'serve' ? OPENING_FAMILIES
-    : previousFamily === 'lob' ? ['overhead', 'drive', 'drop', 'lob']
+    : previousFamily === 'lob' ? ['volley', 'drive', 'drop', 'lob']
     : contactDepth >= 14 ? ['dink', 'dink', 'volley', 'reset', 'drive', 'lob']
     : ['drive', 'drop', 'drop', 'reset', 'lob'];
   // A deep intended landing can still be intercepted by an established net
@@ -208,9 +209,6 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
     const family = families[attempt % families.length];
     const hitters = hittersFor(document, index, previous, random, positions, availableSeconds);
     for (const hitter of hitters) {
-      // Model 1 encodes overheads at seven feet. Emerald cannot make that
-      // grounded contact. Keep authored plays and allow a real bounced reply.
-      if (previous?.family==='lob' && family==='overhead' && hitter==='player1') continue;
       const candidateShot = shotCandidate(document, index, family, hitter, random, { smartAdd: generationSeed !== undefined, generationSeed });
       // Retain a cross-court option late in the bounded search. The outgoing
       // lane also determines a receiver's contact stance; random corner picks
@@ -223,6 +221,11 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
       candidate.shots.push(candidateShot);
       const result = completeEvaluation(candidate);
       if (result.ok && result.validShotCount === candidate.shots.length) {
+        if(previous?.family==='lob' && family==='volley'){
+          const incoming=result.compiled.timeline.segments.at(-2);
+          const contact=result.compiled.timeline.segments.at(-1).shotSemantics.contact.point;
+          if(!lobVolleyInFront({team:document.players[hitter].team,origin:incoming.previous.positions[hitter],contact}))continue;
+        }
         // Check deep/transition states before committing to them. Near-net
         // exchanges use the direct bounded path. Smart Add needs two future
         // hits: its next Add must itself retain a continuation. Lookahead never

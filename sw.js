@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v48`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v49`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -13,6 +13,10 @@ const STATIC_ASSETS = [
   './reference-world.js',
   './reference-athletes.js',
   './emerald-athlete.js',
+  './court-athlete-roster.js',
+  './assets/athletes/cream-visor.glb',
+  './assets/athletes/coral-ponytail.glb',
+  './assets/athletes/navy-cap.glb',
   './emerald-motion.js',
   './assets/athletes/emerald-cap.glb',
   './vendor/three-addons/loaders/GLTFLoader.js',
@@ -188,7 +192,7 @@ self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(STATIC_CACHE);
     // Keep the complete illustrated court installable when optional 3D art is unavailable.
-    const modelAsset = path => path === './assets/athletes/emerald-cap.glb' || path.startsWith('./vendor/three-addons/');
+    const modelAsset = path => path.startsWith('./assets/athletes/') || path.startsWith('./vendor/three-addons/');
     await cache.addAll(STATIC_ASSETS.filter(path => !modelAsset(path)));
     await Promise.allSettled(STATIC_ASSETS.filter(modelAsset).map(path => cache.add(path)));
     await self.skipWaiting();

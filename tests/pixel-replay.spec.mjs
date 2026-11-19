@@ -6,20 +6,20 @@ async function open(page){await page.goto('/?workspace=planner');await page.wait
 
 // Inspect the actual CanvasImageSource used by every live athlete, rather than
 // requiring HTMLImageElement-only naturalWidth on generated partition canvases.
-async function expectDecodedReferenceArtwork(page){
+async function expectDecodedReferenceArtwork(page,illustrated=false){
  await page.waitForFunction(()=>pickleboard.threeD.active&&pickleboard.threeD.renderer?.info.render.calls>0);
  const result=await page.evaluate(()=>{
   const v=pickleboard.threeD,countFrame=(image,rect)=>{const [x,y,w,h]=rect,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,x,y,w,h,0,0,w,h);const pixels=ctx.getImageData(0,0,w,h).data,bands=[0,0,0];for(let row=0;row<h;row++)for(let col=0;col<w;col++)if(pixels[(row*w+col)*4+3]>=21)bands[row<h*.45?0:row<h*.66?1:2]++;return bands;};
   return {renderCalls:v.renderer.info.render.calls,athletes:[...v.playerObjects.values()].map(actor=>{
    const d=actor.userData;
-   if(d.emeraldCap) return {model:true,player:d.player,visible:actor.visible&&d.model.visible&&d.paddleMesh.visible,
+   if(d.courtAthlete) return {model:true,player:d.player,visible:actor.visible&&d.model.visible&&d.paddleMesh.visible,
      skinned:d.paddleMesh.isSkinnedMesh,grip:d.grip.parent.name,material:d.paddleMesh.material.name};
    const assets=d.resources.assets,image=d.body.material.map.image,source=assets.sourceImage,rect=assets.metadata.frames[d.player][d.animation.frame].rect,validSize=image.width>0&&image.height>0&&image.width===source?.naturalWidth&&image.height===source?.naturalHeight,partitionCanvas=typeof image.getContext==='function';
    return {player:d.player,visible:actor.visible&&d.body.visible,reference:d.referenceAthlete,sourceLoaded:source instanceof HTMLImageElement&&source.complete&&source.naturalWidth>0&&source.naturalHeight>0&&new URL(source.currentSrc||source.src).pathname.endsWith('/assets/reference-athletes/athletes-armless-v2.webp'),validSize,partitionCanvas,bodyBands:partitionCanvas?countFrame(image,rect):[0,0,0],sleeves:d.sleeves.map((mesh,side)=>({visible:mesh.visible,sourceMatches:mesh.material.map.image===assets.sleeves[side],validSize:assets.sleeves[side].width===image.width&&assets.sleeves[side].height===image.height,opaque:countFrame(mesh.material.map.image,rect).reduce((a,b)=>a+b,0)})),paddleVertices:d.paddle.children[1].geometry.attributes.position.count};
   })};
  });
  expect(result.renderCalls).toBeGreaterThan(0);expect(result.athletes).toHaveLength(4);
- expect(result.athletes.filter(actor=>actor.model)).toEqual([{model:true,player:0,visible:true,skinned:true,grip:'HandR',material:'Paddle'}]);
+ expect(result.athletes.filter(actor=>actor.model)).toEqual(illustrated?[]:[0,1,2,3].map(player=>({model:true,player,visible:true,skinned:true,grip:'HandR',material:'Paddle'})));
  for(const actor of result.athletes.filter(actor=>!actor.model)){expect(actor).toMatchObject({visible:true,reference:true,sourceLoaded:true,validSize:true,partitionCanvas:true});for(const band of actor.bodyBands)expect(band,'nonblank original head, torso and shoes').toBeGreaterThan(1000);expect(actor.paddleVertices).toBeGreaterThan(0);for(const sleeve of actor.sleeves){expect(sleeve.sourceMatches&&sleeve.validSize).toBe(true);if(sleeve.visible)expect(sleeve.opaque,'original sleeve patch has actual alpha pixels').toBeGreaterThan(200);else expect(sleeve.opaque).toBe(0);}}
 }
 
@@ -27,7 +27,7 @@ test('legacy 3D compatibility: actual opaque paddle triangles meet the unchanged
  await open(page);
  await installDimensionalAudit(page);
  const result=await page.evaluate(async playIds=>{
-  const v=pickleboard.threeD,errors=[],opaque=[];
+  const v=pickleboard.threeD,errors=[],opaque=[],recorded=[];
   for(const play of playIds) {
    v.exit();pickleboard.plays.load(play);await v.enter();
    for(const handedness of ['left','right']){
@@ -37,15 +37,24 @@ test('legacy 3D compatibility: actual opaque paddle triangles meet the unchanged
      for(const segment of v.timeline.segments.filter(s=>s.trajectory)){
       const time=segment.startTime+segment.contactTime;v.clock.elapsed=time;v.applyAtTime(time);
       const actor=v.playerObjects.get(segment.shotSemantics.playerId);
-      errors.push(window.__athleteAudit(actor).paddleDistance(v.ballObject.position)-v.ballObject.userData.physicalRadius);
-      const face=(actor.userData.emeraldCap?actor.userData.paddleMesh:actor.userData.paddle.children[1]);
+      const audit=window.__athleteAudit(actor),gap=audit.paddleDistance(v.ballObject.position);
+      if(play==='lob-overhead' && segment.step.id==='overhead'){
+        recorded.push({gap,above:v.coverageSamples[segment.shotSemantics.playerId].unsupportedHighContact,
+          height:segment.shotSemantics.contact.point.heightFeet,plant:Math.max(...audit.shoeBottoms.map(Math.abs)),status:v.elements.status.textContent});
+      }else errors.push(gap-v.ballObject.userData.physicalRadius);
+      const face=(actor.userData.courtAthlete?actor.userData.paddleMesh:actor.userData.paddle.children[1]);
       opaque.push(face.visible&&face.material.opacity===1&&!face.material.transparent&&face.material.depthTest&&face.material.depthWrite);
      }
     }
    }
   }
-  return {physicalRadius:v.ballObject.userData.physicalRadius,maxError:Math.max(...errors),opaque:opaque.every(Boolean),samples:errors.length};
+  return {physicalRadius:v.ballObject.userData.physicalRadius,maxError:Math.max(...errors),opaque:opaque.every(Boolean),recorded,samples:errors.length+recorded.length};
  }, PICKLEBOARD_PLAYS.map(play=>play.id));
+ expect(result.recorded).toHaveLength(8);
+ for(const sample of result.recorded){
+   expect(sample.height).toBe(7.2);expect(sample.above).toBe(true);expect(sample.gap).toBeGreaterThan(.2);
+   expect(sample.plant).toBeLessThan(1e-6);expect(sample.status).toContain('above planted reach');
+ }
  expect(result.physicalRadius).toBe(.037);expect(result.samples).toBe(PICKLEBOARD_PLAYS.reduce((sum,play)=>sum+play.steps.filter(step=>step.shot).length,0)*8);expect(result.opaque).toBe(true);expect(result.maxError).toBeLessThanOrEqual(1e-6);
 });
 
@@ -88,5 +97,9 @@ test('legacy 3D compatibility: fresh cached installation opens all four solid at
  await page.goto(`${offlineApp.url}/?workspace=planner`);await page.waitForFunction(()=>navigator.serviceWorker.controller);await offlineApp.stop();await page.reload();
  await page.waitForFunction(()=>window.pickleboard?.plays);await page.evaluate(()=>pickleboard.plays.load('third-shot-drop'));await page.evaluate(() => { void pickleboard.threeD.enter(); });await page.waitForFunction(()=>pickleboard.threeD.active);
  await expectDecodedReferenceArtwork(page);
+ await page.goto(offlineApp.url+'/?workspace=planner&athletes=illustrated');
+ await page.waitForFunction(()=>window.pickleboard?.plays);
+ await page.evaluate(async()=>{pickleboard.plays.load('third-shot-drop');await pickleboard.threeD.enter();});
+ await expectDecodedReferenceArtwork(page,true);
  await page.locator('#threeDExit').click();await page.locator('#playExit').click();await expect(page.locator('#threeDCanvas canvas')).toHaveCount(0);await context.close();
 });

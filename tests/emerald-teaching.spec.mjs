@@ -10,7 +10,7 @@ test('the optional teaching stop, simulator contact, actual blade and selected h
     await page.waitForFunction(()=>window.playBuilder?.view==='3d' && pickleboard.threeD.emeraldAthlete?.parent);
     await expect(page.locator('.builder-emerald-cue')).toHaveCount(0);
     await page.locator('.builder-context-menu summary').click();
-    await page.getByRole('button',{name:'Emerald coaching'}).click();
+    await page.getByRole('button',{name:'Athlete coaching'}).click();
     await page.locator('.builder-context-menu summary').click();
     await installDimensionalAudit(page);
     for(const key of ['backhand-dink','lob-chase','overhead','dink']){

@@ -6,7 +6,7 @@ import { eligibleHitters, contactRequiresBounce, resolveServiceContext } from '.
 import { solveFlightV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { previewDocumentV2, compileDocumentV2 } from './play-compiler-v2.js';
 
-import { EMERALD_OVERHEAD_FEET, lobVolleyInFront } from './play-actors-v2.js';
+import { PLANTED_OVERHEAD_FEET, lobVolleyInFront } from './play-actors-v2.js';
 
 const runningPeak = 16, readTime = .16, settleTime = .12;
 const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -29,7 +29,7 @@ function contactWindows(flight, volleyAllowed) {
     // the physical parabola keeps flight, bounce and subsequent shot joined.
     if (volleyAllowed) {
         const s=flight.stages[0],g=PHYSICS_V2.gravityFeetPerSecond2;
-        for (const height of [6.3,5.5,EMERALD_OVERHEAD_FEET,4.4,4.15]) {
+        for (const height of [PLANTED_OVERHEAD_FEET,4.4,4.15]) {
             const discriminant=s.vy*s.vy+2*g*(flight.from.heightFeet-height);
             if (discriminant<=0) continue;
             const t=(s.vy+Math.sqrt(discriminant))/g;
@@ -68,7 +68,7 @@ function receiverOptions(source,segment,flight,ids,returnLane) {
         const budget=Math.max(0,t-readTime-turn-settleTime)*runningPeak/2;
         if(travel>budget+.01) continue;
         const timing=volley?{beforeBounceSeconds:flight.firstLandingTime-t}:{afterBounceSeconds:t-flight.firstLandingTime};
-        const heightCost=volley?.55*Math.abs(contact.heightFeet-EMERALD_OVERHEAD_FEET):1.65*Math.abs(contact.heightFeet-2.25);
+        const heightCost=volley?.55*Math.abs(contact.heightFeet-PLANTED_OVERHEAD_FEET):1.65*Math.abs(contact.heightFeet-2.25);
         const score=travel+heightCost+
             (lob.receiver!=='auto' && lob.receiver!==id?1.25:0);
         options.push({id,family,volley,timing,contact,feet:fixed?feet:null,target,style:side>=0?'forehand':'backhand',score});

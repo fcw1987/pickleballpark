@@ -68,22 +68,22 @@ test('a protected retreat and the saved high overhead retain their geometry',asy
 });
 
 
-test('new natural points retain the planted lob policy in the replay recipe',async()=>{
+for(const version of ['planted-v1','planted-v2']) test(version+' preserves its natural-point lob envelope in the replay recipe',async()=>{
     const fixture=JSON.parse(readFileSync(new URL('./fixtures/model2/generated-timed-stance-9060-v1.json',import.meta.url)));
     const input=structuredClone(fixture.input);
-    input.options={...input.options,lobRecovery:'planted-v1'};
+    input.options={...input.options,lobRecovery:version};
     const result=await simulateRally(input);
     assert.equal(result.status,'complete');
-    assert.equal(result.document.generation.input.options.lobRecovery,'planted-v1');
+    assert.equal(result.document.generation.input.options.lobRecovery,version);
     const compiled=compileEffectiveCandidate(result.document),legs=compiled.timeline.segments;
-    const replies=legs.filter((s,i)=>i>0 && legs[i-1].shotSemantics.shotType==='lob' && s.shotSemantics.playerId==='player1');
+    const replies=legs.filter((s,i)=>i>0 && legs[i-1].shotSemantics.shotType==='lob' && (version==='planted-v2' || s.shotSemantics.playerId==='player1'));
     assert.ok(replies.length>0);
     for(const s of replies){
         const prior=legs[s.rallyLeg-2];
         assert.ok(s.shotSemantics.contact.point.heightFeet<=4.651);
         if(s.shotSemantics.contact.kind==='volley'){
-            const forward=result.document.players.player1.team==='green'?1:-1;
-            assert.ok((s.shotSemantics.contact.point.y-prior.previous.positions.player1.y)*forward>=-.301);
+            const id=s.shotSemantics.playerId,forward=result.document.players[id].team==='green'?1:-1;
+            assert.ok((s.shotSemantics.contact.point.y-prior.previous.positions[id].y)*forward>=-.301);
         }else assert.ok(compiled.timeline.events.some(e=>e.rallyLeg===prior.rallyLeg && e.type==='bounce'));
     }
 });

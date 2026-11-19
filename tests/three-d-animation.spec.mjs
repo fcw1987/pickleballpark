@@ -131,7 +131,7 @@ test('legacy 3D compatibility: quality guardrails keep mesh anchors finite and c
         const actor = viewer.playerObjects.get(segment.shotSemantics.playerId);
         const paddle = actor.userData.paddleFaceWorld.toArray();
         const ball = viewer.ballObject.position.toArray();
-        const shoulder = actor.userData.emeraldCap ? actor.getObjectByName('UpperArmR').getWorldPosition(actor.position.clone()) : actor.userData.visual.localToWorld(actor.userData.rigPose.shoulder.clone());
+        const shoulder = actor.userData.courtAthlete ? actor.getObjectByName('UpperArmR').getWorldPosition(actor.position.clone()) : actor.userData.visual.localToWorld(actor.userData.rigPose.shoulder.clone());
         const values = [...actor.position.toArray(), ...actor.userData.paddleFaceWorld.toArray(), ...shoulder.toArray()];
         samples.push({ offset, physicalRadius: viewer.ballObject.userData.physicalRadius, distance: Math.hypot(ball[0] - paddle[0], ball[1] - paddle[1], ball[2] - paddle[2]), finite: values.every(Number.isFinite), meshDistance: window.__athleteAudit(actor).paddleDistance(viewer.ballObject.position) });
       }

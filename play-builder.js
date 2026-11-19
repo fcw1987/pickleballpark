@@ -51,6 +51,7 @@ export class PlayBuilder {
         this.proposalGeneration = 0; this.proposalBusy = false; this.proposalProgress = null;
         this.proposalController = null; this.pendingAddCount = 0; this.addQueue = Promise.resolve();
         this.emeraldCoaching=false;
+        this.coachingPlayer='player1';
         this.generateRally = simulateRallyInWorker;
         this.coachOptions = []; this.coachCandidates = new Map();
         try { this.store = new DraftStore({ validate: validateDocument }); }
@@ -163,8 +164,8 @@ export class PlayBuilder {
         return this.dirtySource;
     }
     get emeraldCue() {
-        const view=this.board.threeD,actor=view?.emeraldAthlete?.userData.id;
-        return this.emeraldCoaching && this.view==='3d' && actor ?
+        const view=this.board.threeD,actor=this.coachingPlayer;
+        return this.emeraldCoaching && this.view==='3d' && view?.playerObjects?.has(actor) ?
             emeraldTeaching(view.timeline,view.coverageSamples?.[actor],actor) : null;
     }
     scheduleRender() {
@@ -179,7 +180,7 @@ export class PlayBuilder {
         // Playback identity follows the sampled chapter even while paused. The
         // separate selectedShotId keeps an open editor stable across playback.
         const cue={shotId:currentChapter?.shotId,title:currentChapter?`${currentChapter.number}. ${currentChapter.label}`:'Choose a shot',description:segment?.step.description||'Choose your first shot.'};
-        this.ui.render({cue,emeraldCoaching:this.emeraldCoaching,emeraldCue:this.emeraldCue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
+        this.ui.render({cue,coachingPlayer:this.coachingPlayer,emeraldCoaching:this.emeraldCoaching,emeraldCue:this.emeraldCue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
             playing:this.session.playing, time:this.session.clock.elapsed, duration:this.session.duration, chapters:this.chapters, currentShotId:currentChapter?.shotId || null,
             view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, unsavedChanges:this.hasUnsavedChanges, library,
             templates:PICKLEBOARD_PLAYS.map(({id,name})=>({id,name})), loop:true, rate:this.session.clock.playbackRate,
@@ -195,6 +196,8 @@ export class PlayBuilder {
         const surfaces=[document.querySelector(".court-container-fullscreen"),document.getElementById("threeDViewer")];
         if(this.workspace!=="builder"){for(const surface of surfaces)surface?.style.removeProperty("css-text");for(const surface of surfaces)if(surface)surface.style.cssText="";return;}
         if(!region)return;const rect=region.getBoundingClientRect();
+        // Reach findings and teaching cues can increase the bottom dock height.
+        this.ui.element.style.setProperty('--builder-chapter-max-height',Math.max(48,rect.height-24)+'px');
         // The menu scrolls within the space above playback, including short
         // screens and enlarged text. Its overflow never covers the transport.
         const menu=this.ui.element.querySelector('.builder-main-menu');
@@ -650,9 +653,13 @@ export class PlayBuilder {
                 else this.board.plays.timelineAction(action,value);
             }
             else if(action==='pauseForEditing')this.pause();
-            else if(action==='emeraldCoaching'){
-                this.emeraldCoaching=Boolean(value);
+            else if(action==='emeraldCoaching' || action==='coachingPlayer'){
+                if(action==='coachingPlayer'){
+                    if(!this.document.players[value]) return;
+                    this.coachingPlayer=value;
+                } else this.emeraldCoaching=Boolean(value);
                 if(this.board.threeD){
+                    this.board.threeD.coachingPlayer=this.coachingPlayer;
                     this.board.threeD.emeraldCoaching=this.emeraldCoaching;
                     this.board.threeD.updateBallReadability?.();
                     this.board.threeD.startRenderLoop?.();

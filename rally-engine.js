@@ -6,7 +6,7 @@ import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS, LOB_R
 import { createGenerationPlanningSessionV2, observeGenerationPlanningSessionV2, probeGenerationIncomingV2, probeGenerationReplyV2, commitGenerationRecipeV2, inspectGenerationPendingLegV2, finishGenerationPlanningV2, replaceGenerationPendingMovementV2 } from './play-planning-v2.js';
 import { interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { planRallyFlightV1, FLIGHT_PLANNER_VERSION } from './rally-flight-planner.js';
-import { lobVolleyInFront, emeraldLobOverhead, EMERALD_OVERHEAD_FEET } from './play-actors-v2.js';
+import { lobVolleyInFront, plantedLobOverhead, PLANTED_OVERHEAD_FEET } from './play-actors-v2.js';
 import { eligibleHitters, contactRequiresBounce, resolveServiceContext, teamForPlayer } from './rally-state.js';
 import { REACH_MODEL } from './rally-tactics.js';
 import { createSituationV1, rankContactPairsV1, rankContactCandidatesV2, listIntentCandidatesV1, chooseIntentV1 } from './rally-policy.js';
@@ -197,7 +197,9 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
     if (incoming.obstruction) return;
     const service = resolveServiceContext(planningView(state).play), eligible = eligibleHitters({ players: input.players, service, contactIndex: index, previousHitter: previous.hitter });
     const origins = planningView(state).pendingSegment.previous.positions, endpoints = planningView(state).steps.at(-1).positions, pairs = [];
-    const recoverLob=input.options.lobRecovery===LOB_RECOVERY_VERSION && previous.family==='lob';
+    const recoverLob=Boolean(input.options.lobRecovery) && previous.family==='lob';
+    // Older seeds must reproduce their original Emerald-only envelope.
+    const usesPlantedRig=id=>input.options.lobRecovery===LOB_RECOVERY_VERSION || id==='player1';
     for (const id of eligible) {
         const team = input.players[id].team;
         const post = incoming.stages.find(stage => stage.phase === 'post-bounce');
@@ -228,8 +230,8 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
         // rather than reaching for the authored model's separate 8.5ft ceiling.
         // These are bounded search options, never a lowered/fabricated contact.
         // Exact feet, support and route checks still decide availability.
-        const heights=recoverLob && id==='player1' ?
-            [...GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet,EMERALD_OVERHEAD_FEET] : GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet;
+        const heights=recoverLob && usesPlantedRig(id) ?
+            [...GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet,PLANTED_OVERHEAD_FEET] : GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet;
         if (!contactRequiresBounce(index)) for (const height of heights) {
             if (incoming.metadata.apexFeet <= height) continue;
             let low = Math.max(0, incoming.stages[0].vy / PHYSICS_V2.gravityFeetPerSecond2), high = incoming.firstLandingTime;
@@ -322,10 +324,10 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
     for (const [sourceIndex, pair] of pairs.entries()) {
         if (!reachable.has(sourceIndex)) continue;
         if(recoverLob){
-            if(pair.id==='player1' && pair.contact.heightFeet>EMERALD_OVERHEAD_FEET+.001)continue;
+            if(usesPlantedRig(pair.id) && pair.contact.heightFeet>PLANTED_OVERHEAD_FEET+.001)continue;
             if(pair.kind==='volley' && !lobVolleyInFront({id:pair.id,team:input.players[pair.id].team,
-                origin:origins[pair.id],contact:pair.contact}))continue;
-            pair.plantedOverhead=emeraldLobOverhead(pair.id,pair.kind,pair.contact.heightFeet) && pair.contactStyle==='forehand';
+                origin:origins[pair.id],contact:pair.contact},usesPlantedRig(pair.id)))continue;
+            pair.plantedOverhead=usesPlantedRig(pair.id) && plantedLobOverhead(pair.kind,pair.contact.heightFeet) && pair.contactStyle==='forehand';
         }
         const key = [pair.kind, numberV1(pair.time), pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
         const opportunityId = contactOpportunityIdV1(key, opportunityAliases);

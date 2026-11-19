@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as THREE from '../vendor/three.module.min.js';
 import {GLTFLoader} from '../vendor/three-addons/loaders/GLTFLoader.js';
-import {createEmeraldAthlete} from '../emerald-athlete.js';
+import {createCourtAthlete} from '../emerald-athlete.js';
 import {readyAim} from '../emerald-motion.js';
 import {sampleActorPresentation} from '../three-d-presentation.js';
 import {samplePlayBall} from '../three-d-core.js';
@@ -15,7 +15,7 @@ import {readModel2Fixture} from './fixtures/model2/cases.mjs';
 const source=JSON.parse(readFileSync(new URL('../docs/builder/examples/eight-shot-drive-drop.json',import.meta.url)));
 const bytes=readFileSync(new URL('../assets/athletes/emerald-cap.glb',import.meta.url));
 const audit=emeraldGeometryKernel(THREE);
-const load=async()=>createEmeraldAthlete(await new GLTFLoader().parseAsync(
+const load=async()=>createCourtAthlete(await new GLTFLoader().parseAsync(
     bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),''));
 
 test('the head leads a reversal while the ready grip shades within the front of the stance',()=>{
