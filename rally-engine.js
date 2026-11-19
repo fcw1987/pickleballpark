@@ -529,7 +529,8 @@ function addMovement(input, state, index, pair, recipe, flight) {
     const contactTime = index === 0 ? STROKE_PROFILES.serve.duration * STROKE_PROFILES.serve.contactRatio : 0;
     const movement = planMovementV1({ positions: pair.positions, players: input.players, hitter: pair.id, contact: pair.contact, target: recipe.target,
         durationSeconds: contactTime + flight.firstLandingTime, contactTime, index, service: input.service, stacking: input.stacking, intent: recipe.intent, family: recipe.family,
-        incomingFamily: planningView(state).pendingRecipe?.family, kind: pair.kind, feetState: pair.footState, contactFeet: pair.feet,
+        incomingFamily: planningView(state).pendingRecipe?.family, pairedCoverage: Boolean(input.options.pairPositioning),
+        kind: pair.kind, feetState: pair.footState, contactFeet: pair.feet,
         quality: recipe.quality, pace: recipe.pace, peakFeetPerSecond: 17.95, defaultFootState: GENERATED_DEFAULT_FOOT_STATE_V1 });
     if (!movement.ok) throw new RangeError(movement.reason);
     return { recipe: { ...recipe, movement: generatedV1(movement.movement), playerMovement: generatedV1(movement.playerMovement) }, plan: movement };

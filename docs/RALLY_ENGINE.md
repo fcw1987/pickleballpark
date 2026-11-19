@@ -113,6 +113,15 @@ intent or execution probabilities. Sampled quality, a witnessed legal attacking
 opportunity, the chosen reply and the eventual outcome remain separate facts.
 The dink retains its NVZ landing, 20 mph ceiling and applicable 6.5 ft apex
 ceiling. Drop/reset mappings are unchanged.
+
+New Random Rally recipes record `options.pairPositioning = "ball-side-v1"`.
+When both partners have reached the kitchen line on a soft exchange, they
+shift toward the ball together. The outside receiver keeps the contact and
+the partner adjusts toward 7–9 feet of lateral spacing when reachable. The
+adjustment tapers as the pair leaves the line. A short attackable return also
+limits the returner's advance. These distances illustrate the situation in
+the model. Recipes without this option replay their original movement.
+
 Older `rally-policy-v1` origins retain their exact shape without a planner marker.
 Policy-v2 origins retain either their planner-v1 or planner-v2 marker and their
 historical generation envelope; policy v3 requires planner v2. Opening, importing

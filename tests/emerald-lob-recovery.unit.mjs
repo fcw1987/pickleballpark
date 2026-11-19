@@ -67,6 +67,37 @@ test('a protected retreat and the saved high overhead retain their geometry',asy
     assert.match(emeraldTeaching(timeline,a).title,/out of reach/);
 });
 
+test('a runner with only a backhand path reaches the first rebound on either end with either hand', async () => {
+    for (const seat of [0, 2]) for (const hand of ['right', 'left']) {
+        const doc = reviewDocument('lob-chase', hand, source, seat);
+        const runner = 'player' + (seat + 1), partner = 'player' + (seat + 2);
+        const flipX = (seat === 2) !== (hand === 'left');
+        const point = (x, y) => ({x:flipX ? 20-x : x, y:seat === 2 ? 44-y : y});
+        doc.shots = doc.shots.slice(0, 1);
+        const lob = doc.shots[0];
+        delete lob.playerMovement;
+        doc.ending = 'stop';
+        delete doc.outcome;
+        doc.initialLayout[runner] = point(9,14);
+        doc.initialLayout[partner] = point(2,14);
+        lob.target = point(13,4);
+        if (hand === 'left') doc.players[lob.hitter].handedness = 'left';
+        const proposal = await proposeSmartAdd(doc,{seed:7});
+        assert.ok(proposal.ok, proposal.reason);
+        assert.equal(proposal.document.shots.length, 2);
+        const reply = proposal.document.shots[1];
+        assert.equal(reply.hitter, runner);
+        assert.equal(reply.contactStyle, 'backhand');
+        assert.equal(reply.family, 'drop');
+        const {timeline, validShotCount} = compileEffectiveCandidate(proposal.document);
+        assert.equal(validShotCount, 2);
+        assert.equal(timeline.segments[1].shotSemantics.contact.kind, 'groundstroke');
+        const bounce = timeline.events.find(e => e.type === 'bounce');
+        const hit = timeline.events.find(e => e.type === 'contact' && e.actor === runner);
+        assert.ok(hit.time > bounce.time && Math.abs(hit.time-bounce.time-reply.contactTiming.afterBounceSeconds) < 1e-6);
+    }
+});
+
 
 for(const version of ['planted-v1','planted-v2']) test(version+' preserves its natural-point lob envelope in the replay recipe',async()=>{
     const fixture=JSON.parse(readFileSync(new URL('./fixtures/model2/generated-timed-stance-9060-v1.json',import.meta.url)));

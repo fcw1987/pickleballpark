@@ -8,6 +8,25 @@ test.use({ serviceWorkers: 'block' });
 const ready = page => page.waitForFunction(() =>
   window.playBuilder?.view === '3d' && pickleboard.threeD.active && pickleboard.threeD.renderer.info.render.calls > 0);
 
+test('a fresh court shows both serving partners following the bounced third shot', async ({page}) => {
+  await page.goto('/');
+  await ready(page);
+  const [start,end] = await page.evaluate(async () => {
+    const {worldToBoard} = await import('./three-d-core.js');
+    const viewer = pickleboard.threeD, drop = viewer.timeline.segments.find(s => s.step.id === 'drop-3');
+    return [drop.startTime + drop.contactTime, drop.endTime].map(t => {
+      playBuilder.seek(t);
+      return [...viewer.playerObjects.values()].map(actor => worldToBoard(actor.position));
+    });
+  });
+  for (const i of [0,1]) {
+    expect(end[i].y - start[i].y).toBeGreaterThan(3);
+    expect(start[i].x - end[i].x).toBeGreaterThan(.5);
+  }
+  expect(Math.abs(end[0].y - end[1].y)).toBeLessThan(3);
+  expect(end[3].x - end[2].x).toBeGreaterThan(8);
+});
+
 test('normal court draws the approved skin throughout an orbit and releases its GPU resources on exit', async ({ page }) => {
   await page.goto('/');
   await ready(page);
@@ -96,7 +115,8 @@ test('far-court feeds turn the cap and shade the physical blade in both hands ac
       const read=()=>{
         const forward=new THREE.Vector3(0,0,1).transformDirection(actor.getObjectByName('Head').matrixWorld);
         const tip=point('PaddleFace').sub(point('GripCenter')),grip=point('GripCenter').sub(actor.position);
-        return [Math.atan2(forward.x,forward.z),Math.atan2(tip.x,tip.y),grip.x,grip.z];
+        const normal=point('PaddleFace').sub(point('PaddleBack'));
+        return [Math.atan2(forward.x,forward.z),Math.atan2(tip.x,tip.y),grip.x,grip.z,Math.atan2(normal.x,normal.z)];
       };
       const sample=i=>{b.seek(v.timeline.segments[i].endTime-.04);return read();};
       const left=sample(0),center=sample(4),right=sample(2);
@@ -108,9 +128,10 @@ test('far-court feeds turn the cap and shade the physical blade in both hands ac
       b.seek(opponentHit);const atHit=window.__athleteAudit(actor).shoeBottoms;
       b.seek(opponentHit+.065);const landed=window.__athleteAudit(actor).shoeBottoms;
       const strike=v.timeline.segments.at(-1);b.seek(strike.startTime+strike.contactTime);
+      const gap=window.__athleteAudit(actor).paddleDistance(v.ballObject.position),backhand=actor.userData.animation.backhand;
+      b.seek(v.timeline.duration);
       return {left,center,right,states,afterOrbit,split,atHit,landed,hand:actor.userData.handedness,
-        gap:window.__athleteAudit(actor).paddleDistance(v.ballObject.position),
-        backhand:actor.userData.animation.backhand,source:initial===JSON.stringify(b.document),
+        gap,backhand,recovered:read(),action:actor.userData.animation.action,source:initial===JSON.stringify(b.document),
         stored:saved===JSON.stringify(localStorage)};
     },doc);
     expect(data.hand).toBe(hand);expect(data.source&&data.stored&&data.backhand).toBe(true);
@@ -119,6 +140,13 @@ test('far-court feeds turn the cap and shade the physical blade in both hands ac
       expect(data.right[index]).toBeGreaterThan(data.center[index]+.045);
     }
     expect(data.left[0]).toBeLessThan(-.35);expect(data.right[0]).toBeGreaterThan(.35);
+    // Both the shaft and the physical face must cross neutral on wide feeds.
+    // A blade that leans less far to the wrong side also passes a delta test.
+    for(const i of [1,4]){
+      expect(data.left[i]).toBeLessThan(-.12);expect(data.right[i]).toBeGreaterThan(.12);
+      expect(data.recovered[i]).toBeGreaterThan(.05);
+    }
+    expect(data.action).toBe('ready');
     for(const sample of [data.left,data.center,data.right])expect(sample[3]).toBeGreaterThan(.20);
     expect(data.states[2]).toEqual(data.left);expect(data.afterOrbit).toEqual(data.right);
     expect(Math.min(...data.split)).toBeGreaterThan(.025);
@@ -150,7 +178,9 @@ for(const [index,key] of ['cream-visor','coral-ponytail','navy-cap'].entries()){
               const m=a.getObjectByName('Head').matrixWorld.elements;
               const point=n=>a.getObjectByName(n).getWorldPosition(a.position.clone());
               const blade=point('PaddleFace').sub(point('GripCenter'));
-              return [Math.atan2(m[8],m[10]),Math.atan2(blade.x,blade.y)];
+              const face=point('PaddleFace').sub(point('PaddleBack'));
+              const forward=a.position.z<0?1:-1;
+              return [Math.atan2(m[8],m[10]),Math.atan2(blade.x,blade.y)*forward,Math.atan2(face.x*forward,face.z*forward)];
             });
             return {angles};
           }
@@ -179,6 +209,10 @@ for(const [index,key] of ['cream-visor','coral-ponytail','navy-cap'].entries()){
             expect(Math.abs(delta(right,left))).toBeGreaterThan(.22);
             expect(delta(center,left)*delta(right,center)).toBeGreaterThan(0);
             expect(centerAgain).toBe(center);expect(leftAgain).toBe(left);
+          }
+          for(const component of [1,2]){
+            expect(result.angles[0][component]).toBeLessThan(-.12);
+            expect(result.angles[2][component]).toBeGreaterThan(.12);
           }
           continue;
         }

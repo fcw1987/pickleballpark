@@ -63,13 +63,16 @@ export function paddleFrame(local) {
     const front = offset('PaddleFace'), back = offset('PaddleBack'), grip = offset('GripCenter');
     const rest = basis(front.clone().lerp(back,.5).sub(grip),front.clone().sub(back)).invert();
     const orient = (shaft,normal,reverse=false) => basis(shaft,reverse ? normal.clone().negate() : normal).multiply(rest);
-    const forward = vec(0,0,1), up = vec(0,1,0);
+    const up = vec(0,1,0);
     return (shape,phase,backhand,shoulder,target,aim,split) => {
         const side = backhand ? 1 : -1, face = backhand ? back : front;
-        const tip = vec(-.46,.76,.49).applyAxisAngle(forward,-aim.paddle).applyAxisAngle(up,aim.paddle);
-        const normal = vec(.23,.18,.96).applyAxisAngle(up,aim.paddle);
+        // A slight hand-side cant at neutral leaves room for the visible
+        // blade to shade to either side while the grip stays in front.
+        const normal = vec(0,-.52,.84).normalize();
+        const tip = vec(-.12,.84,.52).applyAxisAngle(normal,-aim.paddle).applyAxisAngle(up,aim.paddle);
+        normal.applyAxisAngle(up,aim.paddle);
         const readyRotation = orient(tip,normal);
-        const readyGrip = shoulder.clone().add(vec(.065+.23*aim.paddle,-.145+.018*split,.268));
+        const readyGrip = shoulder.clone().add(vec(.065+.23*aim.paddle,-.16+.018*split,.285));
         const surface = (gripPoint,q) => face.clone().sub(grip).applyQuaternion(q).add(gripPoint);
         const ready = surface(readyGrip,readyRotation);
         if (!target || !phase.engaged) return {point:ready, rotation:readyRotation, face};

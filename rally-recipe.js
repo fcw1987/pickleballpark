@@ -11,6 +11,7 @@ export const RALLY_STYLE_IDS = Object.freeze(['pro', 'advanced', 'intermediate',
 export const RALLY_FLAVOUR_IDS = Object.freeze(['balanced', 'bangers', 'kitchen-masters', 'lobbers']);
 export const RALLY_PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 export const LOB_RECOVERY_VERSION = 'planted-v2';
+export const PAIR_POSITIONING_VERSION = 'ball-side-v1';
 export const RALLY_DEFAULT_OPTIONS = Object.freeze({ lengthFeel: 'natural', winner: 'either', signatureShots: true, maxShots: 99 });
 const TEAMS = ['green', 'orange'];
 const INPUT_KEYS = ['players', 'layout', 'service', 'seed', 'options', 'stacking', 'signal', 'onProgress'];
@@ -101,13 +102,14 @@ function normalizeLayout(value, players, service, stacking) {
 }
 function normalizeOptions(value) {
   if (value === undefined) value = {};
-  object(value, 'options', [...Object.keys(RALLY_DEFAULT_OPTIONS),'lobRecovery']);
+  object(value, 'options', [...Object.keys(RALLY_DEFAULT_OPTIONS),'lobRecovery','pairPositioning']);
   const signatureShots = own(value, 'signatureShots') ? value.signatureShots : true;
   if (typeof signatureShots !== 'boolean') fail('options.signatureShots', 'must be boolean.');
   return { lengthFeel: choice(value.lengthFeel === undefined ? 'natural' : value.lengthFeel, ['natural', 'short', 'long', 'epic'], 'options.lengthFeel'),
     winner: choice(value.winner === undefined ? 'either' : value.winner, ['either', ...TEAMS], 'options.winner'), signatureShots,
     // Missing in historical recipes. Preserve their exact seeded selection.
     ...(own(value,'lobRecovery')?{lobRecovery:choice(value.lobRecovery,['planted-v1',LOB_RECOVERY_VERSION],'options.lobRecovery')}:{}),
+    ...(own(value, 'pairPositioning') ? { pairPositioning: choice(value.pairPositioning, [PAIR_POSITIONING_VERSION], 'options.pairPositioning') } : {}),
     maxShots: integer(value.maxShots === undefined ? 99 : value.maxShots, 1, 99, 'options.maxShots') };
 }
 

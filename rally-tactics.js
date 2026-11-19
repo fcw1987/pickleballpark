@@ -7,6 +7,15 @@ export const REACH_MODEL = Object.freeze({ speedFeetPerSecond: 14, reactionSecon
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const copy = value => structuredClone(value);
+
+// Court-space lanes for a pair ready to defend the next contact. The
+// ball-side player takes the line and the far player closes more of the seam.
+export function doublesCoverageLanes(threatX) {
+  const side = clamp((threatX - 10) / 10, -1, 1);
+  const center = 10 + 3 * side;
+  const halfWidth = 5 - side * side;
+  return [center - halfWidth, center + halfWidth];
+}
 const unit = (from, to, fallback) => {
   const length = distance(from, to);
   return length > 1e-8 ? { x: (to.x - from.x) / length, y: (to.y - from.y) / length } : { ...fallback };
@@ -42,6 +51,21 @@ export function rankContactCandidates({ eligible, positions, contact, players, a
     const score = reach.distanceFeet / Math.max(1, reach.radiusFeet) + (reach.reachable ? 0 : 10) + (crossesPartner ? .35 : 0) + (crowded ? .5 : 0) - (forehand ? .05 : 0);
     return { id, score, reach, reasons: [reach.reachable ? 'within-illustrative-reach' : 'outside-illustrative-reach', ...(crossesPartner ? ['partner-lane-crossing'] : []), ...(crowded ? ['partner-spacing'] : []), ...(forehand ? ['forehand-tiebreak'] : [])] };
   }).sort((a, b) => a.score - b.score || a.id.localeCompare(b.id));
+}
+
+// Without a scripted next contact, read the shot from the ball that is
+// already visible. Look ahead by at most the distance it has covered, so
+// the instant of impact still belongs to the line/middle defensive shape.
+function readIncomingLane(segment, sampled, eligible, positions) {
+  const origin = segment.shotSemantics.contact.point, ball = sampled.ball.board;
+  const depth = eligible.reduce((sum, id) => sum + positions[id].y, 0) / eligible.length;
+  const travel = ball.y - origin.y;
+  const remaining = Math.abs(travel) > 1e-6 ? Math.max(0, (depth - ball.y) / travel) : 0;
+  const elapsed = Math.max(0, sampled.time - segment.startTime - segment.contactTime);
+  return {
+    contact: { x: ball.x + (ball.x - origin.x) * Math.min(1, remaining), y: depth },
+    availableSeconds: remaining * elapsed
+  };
 }
 
 /** Bounded pair recovery. The original half assignment survives a brief poach. */
@@ -128,7 +152,11 @@ export function createTacticalSnapshot({ play, timeline, elapsed = 0, document, 
   const contactTime = inPreparation ? (contactSegment?.startTime ?? 0) + (contactSegment?.contactTime ?? 0)
     : followingContact ? followingContact.startTime + followingContact.contactTime : segment?.endTime;
   const seconds = Math.max(0, (contactTime ?? sampled.time) - sampled.time);
-  const ranking = rankContactCandidates({ eligible, positions, contact: nextContact, players: records, availableSeconds: seconds });
+  const shot = document?.shots?.[shotIndex];
+  const unscripted = shot?.authoring?.ownership === 'automatic' && shot.receiver === 'auto' && !followingContact;
+  const read = unscripted && !inPreparation && eligible.length && rallyPhase(receivingIndex, opening) === 'open-rally'
+    ? readIncomingLane(segment, sampled, eligible, positions) : { contact: nextContact, availableSeconds: seconds };
+  const ranking = rankContactCandidates({ eligible, positions, players: records, ...read });
   if (authoredReceiver && eligible.includes(authoredReceiver)) {
     ranking.sort((a, b) => Number(b.id === authoredReceiver) - Number(a.id === authoredReceiver) || a.score - b.score);
     ranking[0].reasons.push('authored-next-contact');

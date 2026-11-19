@@ -43,6 +43,21 @@ test('shared coverage requires two same-team sectors; overlap is not a receiver 
   assert.ok(s.every(p => p.legalReceiver === null && p.priority === null));
 });
 
+test('a passing ball behind the shoes leaves solo and paired coverage facing play on either end', () => {
+  for (const forward of [-1, 1]) for (const paired of [false, true]) {
+    const y = forward === 1 ? 14 : 30;
+    const p = player('a', 'green', 10, y);
+    const players = paired ? [p, player('b', 'green', 17, y)] : [p];
+    const sweep = [-2, 0, 2].map(offset => coverageSectors({
+      ...snapshot(), players, ball: {x:10 + offset, y:y - 3 * forward, heightFeet:2}
+    })[0].direction);
+    const angles = sweep.map(d => Math.atan2(d.x, forward * d.y) * 180 / Math.PI);
+    assert.ok(angles[0] < 0 && angles[2] > 0);
+    assert.ok(angles.every(a => Math.abs(a) < 10), angles.join(', '));
+    assert.equal(angles[1], 0);
+  }
+});
+
 test('unknown provider versions, nonfinite coordinates and duplicate IDs fail closed', () => {
   for (const bad of [null, { ...snapshot(), version: 2 }, { ...snapshot(), ball: { x: NaN, y: 3 } }, { ...snapshot(), timeSeconds: NaN }, { ...snapshot(), players: [snapshot().players[0], snapshot().players[0]] }]) {
     assert.equal(isCoverageSnapshot(bad), false); assert.deepEqual(coverageSectors(bad), []);

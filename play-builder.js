@@ -15,7 +15,7 @@ import { playerLabel } from './player-labels.js';
 import { resolveServiceContext, updateServiceFromShotEdit, updateServiceCourt } from './rally-state.js';
 import { createRallyCoverageProvider } from './rally-coverage-provider.js';
 import { simulateRallyInWorker } from './rally-engine-client.js';
-import { normalizeRallyInputV1, LOB_RECOVERY_VERSION } from './rally-recipe.js';
+import { normalizeRallyInputV1, LOB_RECOVERY_VERSION, PAIR_POSITIONING_VERSION } from './rally-recipe.js';
 import { STACKING_VERSION, validateStackingV1 } from './rally-stacking.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
@@ -58,7 +58,7 @@ export class PlayBuilder {
         catch { this.store = new DraftStore({validate:validateDocument,storage:{getItem:()=>null,setItem:()=>{throw Error('Browser storage is unavailable');}}}); this.saveStatus='Browser storage unavailable. Export a backup.'; }
         let document;
         try { document = this.store.loadLast(); } catch (error) { this.saveStatus = `Storage recovery needed: ${error.message}. Export your work as a backup.`; }
-        this.document = document || createStarterDocument();
+        this.document = document || createStarterDocument({ demonstrateTeamMovement: true });
         // Fresh tabs have independent unsaved work. A shared starter id would
         // let a later first save overwrite another tab before either observed it.
         if(!document)this.document.id=id();
@@ -340,7 +340,8 @@ export class PlayBuilder {
             // options inherit saved preferences; neither changes current routes.
             const stacking=Object.hasOwn(options,'stacking')?options.stacking:this.document.stacking;
             if(stacking!==null)validateStackingV1(stacking,players);
-            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],options:{lengthFeel:options.lengthFeel??'natural',lobRecovery:LOB_RECOVERY_VERSION},
+            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],
+                options:{lengthFeel:options.lengthFeel??'natural',lobRecovery:LOB_RECOVERY_VERSION,pairPositioning:PAIR_POSITIONING_VERSION},
                 ...(stacking!=null?{stacking}:{})});
         } catch(error){this.message=error.message;this.render();return {ok:false,error:this.message};}
         // The Create action is explicit acceptance of a fresh point. Preserve
