@@ -33,8 +33,9 @@ function segment(args, plan, duration = args.durationSeconds) {
     previous: { positions: args.positions }, step: { id: 'wide-dink', positions: plan.positions },
     shotSemantics: { playerId: args.hitter, contact: { feet: args.contactFeet } }, model2Momentum: [] };
 }
-for (const reflected of [false,true]) test(`an actual wide kitchen dink brings the supporting partner toward the middle (${reflected})`, () => {
-  const { args, arrival, duration } = setup(reflected), plan = planMovementV1(args), pending = segment(args, plan);
+for (const reflected of [false,true]) for (const pairedCoverage of [false,true]) test(`an actual wide kitchen dink brings the supporting partner toward the middle (reflected=${reflected}, paired=${pairedCoverage})`, () => {
+  const { args, arrival, duration } = setup(reflected);
+  const plan = planMovementV1({ ...args, pairedCoverage }), pending = segment(args, plan);
   const before = JSON.stringify({ args, plan, pending, arrival });
   const result = replanMovementV1({ plan, segment: pending, players: args.players, durationSeconds: duration, arrival, peakFeetPerSecond: 17.95 });
   assert.equal(result.ok, true); assert.deepEqual(result.positions[arrival.id], arrival.stance);

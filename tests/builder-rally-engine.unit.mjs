@@ -7,7 +7,7 @@ import { simulateRally } from '../rally-engine.js';
 
 const clone = value => structuredClone(value);
 const canonical = value => JSON.stringify(value);
-const generated = await simulateRally({ seed: 0, options:{lobRecovery:'planted-v2'} });
+const generated = await simulateRally({ seed: 0, options:{lobRecovery:'planted-v2',pairPositioning:'ball-side-v1'} });
 assert.equal(generated.status, 'complete');
 
 function harness(generate = async () => clone(generated)) {

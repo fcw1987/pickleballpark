@@ -80,9 +80,19 @@ test('wrong-returner import stays authored and shows an actionable identity warn
   await page.goto('/'); await settleBuilderStartup(page);
   const before = await page.evaluate(async () => {
     const doc = structuredClone(playBuilder.document);
-    doc.id = 'wrong-returner-import'; doc.shots[0].receiver = 'auto'; doc.shots[1].hitter = 'player4';
+    doc.id = 'wrong-returner-import'; doc.shots[0].receiver = 'auto';
+    const returned = doc.shots[1], other = 'player4';
+    // Give each player exactly one movement command. The problem in this
+    // import is the wrong returner, which the rules finding must identify.
+    returned.playerMovement ??= {};
+    returned.playerMovement[returned.hitter] = returned.movement;
+    returned.movement = returned.playerMovement[other] ?? {intent:'hold',pinned:false};
+    delete returned.playerMovement[other];
+    returned.hitter = other;
     await playBuilder.action('import', JSON.stringify(doc)); return structuredClone(playBuilder.document);
   });
+  expect(before.shots[1].hitter).toBe('player4');
+  expect(before.service.receiver).toBe('player3');
   expect(await page.evaluate(() => playBuilder.document)).toEqual(before);
   await page.getByRole('button', { name: 'Shot 2 needs attention', exact: true }).click();
   await expect(page.locator('.builder-finding-row[data-kind="rule"]')).toContainText('designated receiver');

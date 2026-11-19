@@ -57,21 +57,28 @@ function receiverOptions(source,segment,flight,ids,returnLane) {
         const depth=family==='drop'?28:37;
         const target={x:Math.max(4,Math.min(16,x)),y:team==='green'?depth:44-depth};
         const fixed=protectedEnd(source,segment,id);
-        const stance=fixed || model2ContactStance(contact,target,'forehand',player.handedness);
-        const front=(contact.y-stance.y)*f,side=(stance.x-contact.x)*f*hand;
-        if(front<.14 || front>1.35 || Math.abs(side)>1.35 || volley && side<.15) continue;
-        const feet=defaultFeetAtV1(stance,source.defaultFootState);
-        if(volley && feet.some(isInNonVolleyZone)) continue;
-        const travel=distance(origin,stance),turn=(stance.y-origin.y)*f<-2 ? .18 : 0;
-        // The eased route peaks at twice its average speed. Budget for the
-        // initial read, drop step when retreating and a balanced final plant.
-        const budget=Math.max(0,t-readTime-turn-settleTime)*runningPeak/2;
-        if(travel>budget+.01) continue;
-        const timing=volley?{beforeBounceSeconds:flight.firstLandingTime-t}:{afterBounceSeconds:t-flight.firstLandingTime};
-        const heightCost=volley?.55*Math.abs(contact.heightFeet-PLANTED_OVERHEAD_FEET):1.65*Math.abs(contact.heightFeet-2.25);
-        const score=travel+heightCost+
-            (lob.receiver!=='auto' && lob.receiver!==id?1.25:0);
-        options.push({id,family,volley,timing,contact,feet:fixed?feet:null,target,style:side>=0?'forehand':'backhand',score});
+        // A runner can set either side of a rebound. Running around a
+        // reachable backhand can cost the remaining time before bounce two.
+        const styles = fixed ? [(fixed.x-contact.x)*f*hand >= 0 ? 'forehand' : 'backhand']
+            : volley ? ['forehand'] : ['forehand', 'backhand'];
+        for (const style of styles) {
+            const stance=fixed || model2ContactStance(contact,target,style,player.handedness);
+            const front=(contact.y-stance.y)*f,side=(stance.x-contact.x)*f*hand;
+            if(front<.14 || front>1.35 || Math.abs(side)>1.35 || volley && side<.15) continue;
+            const feet=defaultFeetAtV1(stance,source.defaultFootState);
+            if(volley && feet.some(isInNonVolleyZone)) continue;
+            const travel=distance(origin,stance),turn=(stance.y-origin.y)*f<-2 ? .18 : 0;
+            // The eased route peaks at twice its average speed. Budget for the
+            // initial read, drop step when retreating and a balanced final plant.
+            const budget=Math.max(0,t-readTime-turn-settleTime)*runningPeak/2;
+            if(travel>budget+.01) continue;
+            const timing=volley?{beforeBounceSeconds:flight.firstLandingTime-t}:{afterBounceSeconds:t-flight.firstLandingTime};
+            const heightCost=volley?.55*Math.abs(contact.heightFeet-PLANTED_OVERHEAD_FEET):1.65*Math.abs(contact.heightFeet-2.25);
+            // Prefer the familiar forehand on effectively equal routes. An
+            // extra step around the ball readily outweighs this small margin.
+            const score=travel+heightCost+(style==='backhand'?.15:0)+(lob.receiver!=='auto' && lob.receiver!==id?1.25:0);
+            options.push({id,family,volley,timing,contact,feet:fixed?feet:null,target,style,score});
+        }
     }
     return options.sort((a,b)=>Number(b.volley)-Number(a.volley)||a.score-b.score);
 }

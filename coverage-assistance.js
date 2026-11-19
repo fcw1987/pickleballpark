@@ -1,4 +1,5 @@
 import {movementProtection} from './play-document.js';
+import { doublesCoverageLanes } from './rally-tactics.js';
 const COURT_MIN_X = 1;
 const COURT_MAX_X = 19;
 const MAX_LATERAL_SPEED_FPS = 13;
@@ -106,12 +107,10 @@ export function applyCoverageAssistance(play, document, timeline) {
     // A coincident lateral pair has no observable left/right assignment. Hold
     // rather than introducing an identity-dependent, non-mirrored tie break.
     const distinctLanes = Math.abs(step.positions[ordered[0].id].x - step.positions[ordered[1].id].x) > 1e-9;
-    const side = clamp((threat.x - 10) / 10, -1, 1);
-    const center = 10 + 3 * side;
-    const halfWidth = 5 - side * side;
+    const lanes = doublesCoverageLanes(threat.x);
     const targets = Object.fromEntries(ordered.map((player, slot) => {
       const position = step.positions[player.id];
-      const lane = center + (slot ? halfWidth : -halfWidth);
+      const lane = lanes[slot];
       return [player.id, {
         x: distinctLanes && !protectedIds.has(player.id)
           ? clamp(position.x + (lane - position.x) * .25, COURT_MIN_X, COURT_MAX_X) : position.x,

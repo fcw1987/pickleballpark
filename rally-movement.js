@@ -3,6 +3,7 @@
 import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
 export { GROUNDED_CONTACT_HEIGHT_FEET } from './play-actors-v2.js';
 import { teamForPlayer } from './rally-state.js';
+import { doublesCoverageLanes } from './rally-tactics.js';
 import { stackingTeamPlanV1 } from './rally-stacking.js';
 import { generatedContactRadiusFeetV1, GENERATED_CONTACT_SUPPORT_V1 } from './generated-contact-support.js';
 import { GENERATION_MOTION_V1, generationDistanceBudgetV1 } from './generated-motion-limits.js';
@@ -16,6 +17,7 @@ const EPS = 1e-7;
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const xy = p => ({ x: p.x, y: p.y });
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const nearReadyLine = (y, line) => clamp(3 - Math.abs(y - line), 0, 1);
 const point = (p, name) => {
   if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) throw new TypeError(`${name} must have finite board coordinates.`);
   return xy(p);
@@ -262,7 +264,8 @@ function groundedExitOrHold(from, goal, seconds, peakFeetPerSecond, feet, defaul
  * endpoint is provisional until the pending leg gets its real next contact. */
 export function planMovementV1({ positions, players, hitter, contact, target, durationSeconds, seconds,
   contactTime = 0, index = 0, service = {}, stacking, intent = '', family = '', incomingFamily = '', quality = 'neutral', pace = 'medium',
-  opening = 'serve', kind = 'groundstroke', contactStyle = 'forehand', feetState = {}, contactFeet, peakFeetPerSecond = 18, defaultFootState } = {}) {
+  opening = 'serve', kind = 'groundstroke', contactStyle = 'forehand', feetState = {}, contactFeet, peakFeetPerSecond = 18, defaultFootState,
+  pairedCoverage = false } = {}) {
   defaultFootHalfWidthFeetV1(defaultFootState);
   const duration = durationSeconds ?? seconds;
   if (!['low', 'neutral', 'attackable', 'excellent', 'error'].includes(quality)) throw new TypeError('Movement needs a supported execution quality.');
@@ -297,6 +300,10 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
       : IDS.filter(id => teamForPlayer(id, players) === team).sort((a, b) => positions[a].x - positions[b].x || a.localeCompare(b));
     if (stackingPlan) diagnostics.push({ code: 'stacking-phase', team, phase: stackingPlan.phase, lanes: [...stackingPlan.lanes] });
     const shift = clamp((target.x - 10) * (team === hittingTeam ? .18 : .28), -2, 2);
+    const lineY = team === 'green' ? 14.25 : 29.75;
+    const coverageWeight = pairedCoverage && openRally && softAdvance
+      ? Math.min(...pair.map(id => nearReadyLine(origins[id].y, lineY))) : 0;
+    const readyLanes = coverageWeight ? doublesCoverageLanes(target.x) : null;
     const pairInTransition = pair.some(id => team === 'green' ? origins[id].y < 12.25 : origins[id].y > 31.75);
     const controlledApproach = team === hittingTeam && openRally && (driveAdvance || firmVolleyAdvance);
     if (controlledApproach) diagnostics.push({ code: driveAdvance ? 'controlled-drive-approach' : 'firm-volley-approach', team });
@@ -317,8 +324,12 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
       // exact coordinate on every dink. Only a transitional pair needs to close.
       const incomingSoftApproach = team !== hittingTeam && pairInTransition && openRally && softAdvance && quality !== 'error';
       const shouldAdvance = !waiting && !receiverWaiting && (ownApproach || incomingSoftApproach || receiverPartnerSetup);
-      const lineY = near ? 14.25 : 29.75;
       let y = shouldAdvance ? lineY : from.y;
+      // A short return that sits up earns little approach time. Take a step
+      // and split in transition; the partner already at the line can hold it.
+      if (pairedCoverage && returningNow && quality === 'attackable' && Math.abs(target.y - 22) < 12) {
+        y = near ? Math.min(lineY, from.y + 2) : Math.max(lineY, from.y - 2);
+      }
       if (family === 'lob' && team !== hittingTeam) y = near ? Math.min(from.y, 9) : Math.max(from.y, 35);
       // A grounded kitchen entry is followed by a bounded retreat. This goal
       // never claims reset until actual sampled feet have exited the zone.
@@ -332,7 +343,9 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
       const canUnwindDeep = stackingPlan?.protectOpeningDepth && stackingPlan.usePreferredLanes;
       const hold = receiverWaiting || stackSetupHold || waiting && !canUnwindDeep;
       if (waiting) y = from.y;
-      goals[id] = hold ? xy(from) : { x: clamp((lane ? 15 : 5) + shift, 1, 19), y };
+      let x = clamp((lane ? 15 : 5) + shift, 1, 19);
+      if (readyLanes) x += (readyLanes[lane] - x) * coverageWeight;
+      goals[id] = hold ? xy(from) : { x, y };
       durations[id] = id === hitter ? Math.max(0, duration - Math.min(duration, contactTime + .12)) : duration;
     }
     // Forward approaches share progress. An urgent grounded NVZ exit has its
@@ -386,7 +399,8 @@ export function planMovementV1({ positions, players, hitter, contact, target, du
     diagnostics: { version: MOVEMENT_VERSION, peakFeetPerSecond, provisional: true,
       arrivalNeedsPendingValidation: contactTime === 0 && distance(positions[hitter], stance) > EPS,
       goals, phaseSeconds: durations, notes: diagnostics,
-      kitchenSupport: { enabled: openRally && softAdvance && quality !== 'error', hittingTeam } } });
+      kitchenSupport: { enabled: openRally && softAdvance && quality !== 'error', hittingTeam,
+        ...(pairedCoverage ? { pairedCoverage: true } : {}) } } });
 }
 
 /** Resolve the one pending tactical plan against its actual contact/dead time.
@@ -415,13 +429,24 @@ export function replanMovementV1({ plan, segment, players, durationSeconds, arri
     // Smoothly retain this support on repeated wide exchanges too. Requiring
     // a fresh outward step or a partner strictly beyond x=10 would send an
     // already-set partner away from the middle on the very next dink.
-    const lineReadiness = clamp(3 - Math.abs(at.y - lineY), 0, 1)
-      * clamp(3 - Math.abs(origins[partner].y - lineY), 0, 1);
+    const lineReadiness = nearReadyLine(at.y, lineY) * nearReadyLine(origins[partner].y, lineY);
     const wideStance = clamp((side * (at.x - 10) - 5) / 3, 0, 1);
     const lowContact = Number.isFinite(height) ? clamp(5 - height, 0, 1) : 0;
     const support = wide * wideStance * lineReadiness * lowContact;
     if (team !== plan.diagnostics.kitchenSupport.hittingTeam && side * (goals[partner].x - 10) < 0 && support > 0) {
       goals[partner].x += (10 - goals[partner].x) * support;
+    }
+    if (plan.diagnostics.kitchenSupport.pairedCoverage && team !== plan.diagnostics.kitchenSupport.hittingTeam) {
+      // The nominal landing can be several feet from the actual dink contact.
+      // Let the outside player receive it. Their partner closes a wide seam
+      // or gives a middle receiver paddle room, while retaining their own lane.
+      const lane = Math.sign(goals[partner].x - goals[arrival.id].x);
+      if (lane * (origins[partner].x - at.x) > 0) {
+        const gap = lane * (goals[partner].x - at.x);
+        const spaced = at.x + lane * clamp(gap, 7, 9);
+        const cover = lane > 0 ? clamp(spaced, 10, 18) : clamp(spaced, 2, 10);
+        goals[partner].x += (cover - goals[partner].x) * lineReadiness * lowContact;
+      }
     }
   }
   const destinations = {}, duration = durationSeconds;

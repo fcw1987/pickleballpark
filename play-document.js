@@ -353,7 +353,7 @@ const templateBaseFields = play => ({
   opening: play.rally?.openingBouncesSatisfied ? 'midrally' : 'serve', ending: 'stop', intentionalFault: false
 });
 
-export function createStarterDocument() {
+export function createStarterDocument({ demonstrateTeamMovement = false } = {}) {
   const document = {
     schemaVersion: SCHEMA_VERSION,
     modelVersion: 1,
@@ -377,6 +377,16 @@ export function createStarterDocument() {
     opening: 'serve', ending: 'stop', intentionalFault: false,
     service: { server: 'player1', receiver: 'player3', court: 'left', courtConvention: SERVICE_COURT_CONVENTION }
   };
+  if (demonstrateTeamMovement) {
+    // Authored routes for the fresh three-shot demonstration. A blank draft
+    // and an existing saved play retain their own movement and assignments.
+    const moveTo = (x, y) => ({ intent: 'manual', pinned: false, target: { x, y } });
+    const [, returned, drop] = document.shots;
+    returned.movement = moveTo(6, 32.25);
+    returned.playerMovement = { player4: moveTo(16, 30), player2: moveTo(6, 0) };
+    drop.movement = moveTo(14.25, 9.25);
+    drop.playerMovement = { player2: moveTo(4.75, 6.5), player3: moveTo(5, 30), player4: moveTo(14, 30) };
+  }
   validateDocument(document);
   return document;
 }

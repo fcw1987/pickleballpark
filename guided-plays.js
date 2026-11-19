@@ -216,7 +216,7 @@ class GuidedPlayEngine {
     renderSessionSample() {
         this.applyAtTime(this.clock.elapsed);
         const viewer = this.board.threeD;
-        if (viewer?.scene) viewer.renderSessionSample?.();
+        if (viewer?.scene) viewer.renderSessionSample?.({ coalescePaint: true });
         this.updateUI();
     }
     continuePlayback() {

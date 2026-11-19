@@ -17,7 +17,10 @@ common shift illustrates coordinating with a partner. The 25% weight is a
 visual design choice, not a measured coaching rule. It fades in over 1.5 feet
 beyond the net and over 1.5 feet of lateral partner separation, keeping net
 crossings and partner crossings continuous. The existing contact ease and
-28-degree clamp are applied afterward. Solo, cross-net and ambiguous groups
+28-degree clamp are applied afterward. Drawing model v4 also eases the turn
+toward the net as a ball passes behind a defender. A player can turn and run
+for a deep lob while the floor fan continues to show forward coverage.
+Solo, cross-net and ambiguous groups
 retain individual tracking; ball targets, player positions and rules never change.
 Teammates have stable rose and blue colours; their overlap mixes to violet
 in linear light, independent of draw order. The outer edge fades, green jerseys

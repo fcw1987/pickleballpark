@@ -2,7 +2,7 @@
  * Coordinates are court feet (+y toward the orange baseline), never screen axes.
  * The angle and radius are design choices, not measured athletic capabilities.
  */
-export const COVERAGE_MODEL = Object.freeze({ version: 3, angleDegrees: 116, radiusFeet: 9, featherFeet: 1.8, maxTurnDegrees: 28, pairBlend: .25 });
+export const COVERAGE_MODEL = Object.freeze({ version: 4, angleDegrees: 116, radiusFeet: 9, featherFeet: 1.8, maxTurnDegrees: 28, pairBlend: .25 });
 // Teammate colours, not jersey colours. Their equal linear-light mix is violet.
 export const COVERAGE_COLORS = Object.freeze({ rose: '#ff3f7d', blue: '#3a9fff', shared: '#bf7bcc' });
 export const COVERAGE_PREFERENCE_KEY = 'pickleboard-player-coverage-v1';
@@ -42,8 +42,12 @@ export function coverageDirection(player, ball, partner = null) {
       y: target.y * (1 - blend) + pairBearing.y * blend }, net);
   }
   const limit = COVERAGE_MODEL.maxTurnDegrees * Math.PI / 180;
-  const turn = clamp(Math.atan2(target.x, Math.max(.35, forward * target.y)), -limit, limit)
-    * clamp(distance / 1.5, 0, 1);
+  // When a lob passes a defender, recenter the floor responsibility as
+  // the runner turns. A ball crossing behind the heels mustn't sweep the
+  // fan from one full lateral limit to the other.
+  const forwardComponent = forward * target.y;
+  const turn = clamp(Math.atan2(target.x, Math.max(.35, forwardComponent)), -limit, limit)
+    * clamp(distance / 1.5, 0, 1) * clamp(1 + forwardComponent, 0, 1);
   return { x: Math.sin(turn), y: forward * Math.cos(turn) };
 }
 
