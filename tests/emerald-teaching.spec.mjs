@@ -25,18 +25,23 @@ test('the optional teaching stop, simulator contact, actual blade and selected h
                 b.seek(time-.015); return time;
             },{hand,key});
             await page.getByRole('button',{name:'Next contact',exact:true}).click();
-            const state=await page.evaluate(()=>{
+            const state=await page.evaluate(async()=>{
                 const b=playBuilder,v=pickleboard.threeD,a=v.emeraldAthlete,read=()=>{
                     const s=v.coverageSamples.player1,ball=v.ballObject.position,face=a.userData.animation.bodyFacing;
                     const dx=ball.x-a.position.x,dz=ball.z-a.position.z;
                     return {gap:window.__athleteAudit(a).paddleDistance(ball),front:dx*face.x+dz*face.z,across:dx*face.z-dz*face.x,
                         side:s.strokeSide,actual:a.userData.animation.backhand,hand:a.userData.handedness};};
                 const hit=read(),time=b.session.clock.elapsed;
+                const teachingSize=v.readableBall.sprite.scale.x;
+                await b.action('emeraldCoaching',false);
+                const trackingSize=v.readableBall.sprite.scale.x;
+                await b.action('emeraldCoaching',true);
                 v.cameraControls.setState({azimuth:1.5,elevation:23});v.applyAtTime(time);
-                return {hit,orbit:read(),time,playing:b.session.playing,coach:b.emeraldCue.title};
+                return {hit,orbit:read(),time,teachingSize,trackingSize,playing:b.session.playing,coach:b.emeraldCue.title};
             });
             expect(state.time).toBeCloseTo(target,7);expect(state.playing).toBe(false);
             expect(state.hit.gap).toBeLessThan(.037);expect(state.orbit.gap).toBeCloseTo(state.hit.gap,6);
+            expect(state.teachingSize).toBeLessThan(state.trackingSize*.65);
             expect(state.hit.hand).toBe(hand);expect(state.hit.front).toBeGreaterThan(.08);
             expect(state.hit.actual).toBe(key==='backhand-dink');
             if(key==='backhand-dink'){

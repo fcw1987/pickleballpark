@@ -629,7 +629,16 @@ class ThreeDPlaybackViewer {
     updateBallReadability() {
         if(!this.readableBall||!this.camera)return;
         const time=this.lastState?.elapsed||0;
-        this.readableBall.update(this.camera,this.elements.canvas.clientHeight,time,t=>this.sampleBall(t),this.lastState?.launched);
+        const actor=this.emeraldAthlete,sample=this.coverageSamples[actor?.userData.id];
+        let diameter=this.ballObject.userData.minimumCSSDiameter;
+        if(this.emeraldCoaching && sample?.strokePose && !sample.unsupportedHighContact){
+            // The enlarged tracking dot can hide the entire blade at court zoom.
+            // Ease it back to ball scale only while the actual grip meets it.
+            const gap=this.ballObject.position.distanceTo(actor.userData.paddleFaceWorld);
+            const mix=THREE.MathUtils.smoothstep(gap,.04,.36);
+            diameter=THREE.MathUtils.lerp(Math.min(4,diameter),diameter,mix);
+        }
+        this.readableBall.update(this.camera,this.elements.canvas.clientHeight,time,t=>this.sampleBall(t),this.lastState?.launched,diameter);
     }
 
     sampleBall(seconds) { return samplePlayBall(this.timeline, seconds); }

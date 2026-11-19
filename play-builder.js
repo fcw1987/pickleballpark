@@ -650,7 +650,14 @@ export class PlayBuilder {
                 else this.board.plays.timelineAction(action,value);
             }
             else if(action==='pauseForEditing')this.pause();
-            else if(action==='emeraldCoaching')this.emeraldCoaching=Boolean(value);
+            else if(action==='emeraldCoaching'){
+                this.emeraldCoaching=Boolean(value);
+                if(this.board.threeD){
+                    this.board.threeD.emeraldCoaching=this.emeraldCoaching;
+                    this.board.threeD.updateBallReadability?.();
+                    this.board.threeD.startRenderLoop?.();
+                }
+            }
             else if(action==='emeraldStep'){
                 const time=this.emeraldCue?.nextTime;
                 if(Number.isFinite(time) && this.compiled.validShotCount===this.document.shots.length)this.seek(time);
