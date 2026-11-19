@@ -81,28 +81,27 @@ export class PlayBuilder {
             };
         });
         this.ui = mountBuilderUI({ onAction: (action, value) => this.action(action, value), onDestroy: () => this.cancelPendingProposals() });
-        // A queued Add may commit between the next native press and release.
-        // Keep its button attached through click dispatch; replacing it during
-        // that gesture makes the browser drop the click entirely.
-        this.addPressPointer = null; this.addPressFrame = null; this.addPressRenderPending = false;
+        // A model load or queued Add can finish during a native press. Keep
+        // the pressed control attached until its click has been dispatched.
+        this.controlPressPointer = null; this.controlPressFrame = null; this.controlPressRenderPending = false;
         this.ui.element.addEventListener('pointerdown',event=>{
-            if(event.button!==0||!event.target.closest('[data-action="add-shot"]'))return;
-            if(this.addPressFrame!==null)cancelAnimationFrame(this.addPressFrame);
-            this.addPressFrame=null;this.addPressPointer=event.pointerId;
+            if(event.button!==0||!event.target.closest('[data-action="add-shot"],.builder-main-menu summary'))return;
+            if(this.controlPressFrame!==null)cancelAnimationFrame(this.controlPressFrame);
+            this.controlPressFrame=null;this.controlPressPointer=event.pointerId;
         },true);
-        const releaseAddPress=event=>{
-            if(this.addPressPointer===null||(event.type!=='blur'&&event.pointerId!==this.addPressPointer))return;
-            if(this.addPressFrame!==null)return;
+        const releaseControlPress=event=>{
+            if(this.controlPressPointer===null||(event.type!=='blur'&&event.pointerId!==this.controlPressPointer))return;
+            if(this.controlPressFrame!==null)return;
             // Native mouseup/click follow pointerup. A frame lets that entire
             // sequence finish before rendering the latest committed state.
-            this.addPressFrame=requestAnimationFrame(()=>{
-                this.addPressFrame=null;this.addPressPointer=null;
-                if(this.addPressRenderPending){this.addPressRenderPending=false;this.render();}
+            this.controlPressFrame=requestAnimationFrame(()=>{
+                this.controlPressFrame=null;this.controlPressPointer=null;
+                if(this.controlPressRenderPending){this.controlPressRenderPending=false;this.render();}
             });
         };
-        window.addEventListener('pointerup',releaseAddPress,true);
-        window.addEventListener('pointercancel',releaseAddPress,true);
-        window.addEventListener('blur',releaseAddPress);
+        window.addEventListener('pointerup',releaseControlPress,true);
+        window.addEventListener('pointercancel',releaseControlPress,true);
+        window.addEventListener('blur',releaseControlPress);
         this.ui.element.addEventListener('scroll',()=>{this.fitCourt();this.courtTools?.render();},{passive:true});
         this.courtTools = new BuilderCourtTools(this);
         this.viewportChanged=()=>{
@@ -173,7 +172,7 @@ export class PlayBuilder {
         this.frame = requestAnimationFrame(() => { this.frame = null; this.render(); });
     }
     render() {
-        if(this.addPressPointer!==null){this.addPressRenderPending=true;return;}
+        if(this.controlPressPointer!==null){this.controlPressRenderPending=true;return;}
         if(this.libraryDirty){try{this.library=this.store.list({includeRevision:true});}catch{/* Save status retains recovery information. */}this.libraryDirty=false;}const library=this.library;
         const segment=this.compiled?.timeline?.segments.find(s=>this.session.clock.elapsed<=s.endTime)||this.compiled?.timeline?.segments.at(-1);
         const currentChapter=chapterAtTime(this.chapters,this.session.clock.elapsed);
@@ -510,7 +509,11 @@ export class PlayBuilder {
         if(view==='2d') {
             this.board.threeD?.suspend?.(); this.view='2d'; this.board.plays.applyAtTime(this.session.clock.elapsed);
         } else {
-            this.busy=true; this.message='Opening 3D at the current playhead…'; this.render();
+            this.busy=true;
+            // The cold-start status already occupies the court. A second row in
+            // the dock would move its Menu button as the models finish loading.
+            this.message=globalThis.document.documentElement.hasAttribute('data-court-loading')?'':'Opening 3D at the current playhead…';
+            this.render();
             let timer;
             let opened=false;
             try {
