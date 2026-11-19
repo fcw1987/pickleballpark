@@ -28,7 +28,10 @@ test('visible serve, return, third workflow supports advanced movement and Save 
 
   await page.getByRole('button', { name: /^Play$/ }).first().click();
   await expect(page.getByRole('button', { name: /^Pause$/ }).first()).toBeVisible();
-  await page.getByRole('button', { name: 'Edit shot' }).click();
+  // This journey edits the serve. The live Edit button correctly follows the
+  // playhead and may already point at the return when the first frame is slow.
+  await page.getByLabel('Choose shot chapter').click();
+  await page.getByLabel('Customize Shot 1', { exact: true }).click();
   await openIntentTab(page, 'Movement');
 
   await page.getByRole('combobox', { name: 'Movement intent' }).selectOption({ label: 'Manual' });
