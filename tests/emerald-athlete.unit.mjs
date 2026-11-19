@@ -27,9 +27,8 @@ test('approved Emerald Cap meets every authored contact family and both hands wi
       assert.ok(actor.position.distanceTo(sample.worldPosition) < 1e-7, item.id);
       assert.ok(actor.userData.paddleFaceWorld.distanceTo(sample.paddle.worldContactTarget) < 1e-6, item.id);
       assert.ok(Math.abs(joint('HandR').distanceTo(joint('GripCenter')) - gripOffset) < 1e-6, item.id);
-      // The high overhead has a calibrated extended reach above this short rig.
-      const maximum = item.family === 'overhead' ? 1.5 : 1.001;
-      assert.ok(armLength() / neutralArm < maximum, item.id);
+      // Even the seven-foot overhead uses the original arm length.
+      assert.ok(Math.abs(armLength() / neutralArm - 1) < .001, item.id);
     }
   } finally { actor.userData.dispose(); }
 });

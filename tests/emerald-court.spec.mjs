@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
+import { readFileSync } from 'node:fs';
+import { reviewDocument } from '../tools/emerald-review/examples.mjs';
 
 test.use({ serviceWorkers: 'block' });
 
@@ -76,3 +78,47 @@ for (const fault of ['missing', 'corrupt']) {
     expect(await page.evaluate(() => pickleboard.threeD.playerObjects.get('player1').userData.emeraldCap)).toBe(true);
   });
 }
+
+test('far-court feeds turn the cap and shade the physical blade in both hands across a reversal and a backhand',async({page})=>{
+  const base=JSON.parse(readFileSync(new URL('../docs/builder/examples/eight-shot-drive-drop.json',import.meta.url)));
+  await page.goto('/');await ready(page);
+  await installDimensionalAudit(page);
+  for(const hand of ['left','right']){
+    const doc=reviewDocument('tracking',hand,base);
+    const data=await page.evaluate(async doc=>{
+      const THREE=await import('./vendor/three.module.min.js'),b=playBuilder,v=pickleboard.threeD;
+      b.loadDocument(doc,{persist:false});
+      const initial=JSON.stringify(b.document),saved=JSON.stringify(localStorage),actor=v.playerObjects.get('player1');
+      const point=n=>actor.getObjectByName(n).getWorldPosition(new THREE.Vector3());
+      const read=()=>{
+        const forward=new THREE.Vector3(0,0,1).transformDirection(actor.getObjectByName('Head').matrixWorld);
+        const tip=point('PaddleFace').sub(point('GripCenter')),grip=point('GripCenter').sub(actor.position);
+        return [Math.atan2(forward.x,forward.z),Math.atan2(tip.x,tip.y),grip.x,grip.z];
+      };
+      const sample=i=>{b.seek(v.timeline.segments[i].endTime-.04);return read();};
+      const left=sample(0),center=sample(4),right=sample(2);
+      const states=[2,1,0,4,2].map(sample);
+      for(let i=0;i<=24;i++)v.cameraControls.setState({azimuth:Math.PI*i/12,elevation:34});
+      const afterOrbit=read();
+      const incoming=v.timeline.segments[1],opponentHit=incoming.startTime+incoming.contactTime;
+      b.seek(opponentHit-.09);const split=window.__athleteAudit(actor).shoeBottoms;
+      b.seek(opponentHit);const landed=window.__athleteAudit(actor).shoeBottoms;
+      const strike=v.timeline.segments.at(-1);b.seek(strike.startTime+strike.contactTime);
+      return {left,center,right,states,afterOrbit,split,landed,hand:actor.userData.handedness,
+        gap:window.__athleteAudit(actor).paddleDistance(v.ballObject.position),
+        backhand:actor.userData.animation.backhand,source:initial===JSON.stringify(b.document),
+        stored:saved===JSON.stringify(localStorage)};
+    },doc);
+    expect(data.hand).toBe(hand);expect(data.source&&data.stored&&data.backhand).toBe(true);
+    for(const index of [0,1,2]){
+      expect(data.left[index]).toBeLessThan(data.center[index]-.045);
+      expect(data.right[index]).toBeGreaterThan(data.center[index]+.045);
+    }
+    expect(data.left[0]).toBeLessThan(-.35);expect(data.right[0]).toBeGreaterThan(.35);
+    for(const sample of [data.left,data.center,data.right])expect(sample[3]).toBeGreaterThan(.20);
+    expect(data.states[2]).toEqual(data.left);expect(data.afterOrbit).toEqual(data.right);
+    expect(Math.min(...data.split)).toBeGreaterThan(.025);
+    expect(Math.max(...data.landed.map(Math.abs))).toBeLessThan(1e-6);
+    expect(data.gap).toBeLessThan(.037);
+  }
+});

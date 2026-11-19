@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'pickleboard-';
-const STATIC_CACHE = `${CACHE_PREFIX}static-v46`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-v47`;
 const LEGACY_CACHES = new Set(['pickleboard-cache-v1']);
 const APP_SHELL_URL = new URL('./index.html', self.location).href;
 const STATIC_ASSETS = [
@@ -13,6 +13,7 @@ const STATIC_ASSETS = [
   './reference-world.js',
   './reference-athletes.js',
   './emerald-athlete.js',
+  './emerald-motion.js',
   './assets/athletes/emerald-cap.glb',
   './vendor/three-addons/loaders/GLTFLoader.js',
   './vendor/three-addons/utils/BufferGeometryUtils.js',

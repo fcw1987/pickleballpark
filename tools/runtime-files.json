@@ -70,6 +70,7 @@
   "depth-camera.js",
   "depth-park-environment.js",
   "emerald-athlete.js",
+  "emerald-motion.js",
   "generated-contact-support.js",
   "generated-motion-limits.js",
   "generated-foot-state.js",

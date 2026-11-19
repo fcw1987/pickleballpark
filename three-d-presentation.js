@@ -122,10 +122,9 @@ export function sampleActorWorldPosition(segment, playerId, localTime, handednes
 // Alternating world-space footsteps. During stance the shoe is anchored to one
 // point on the route; only the swing shoe travels. Both feet settle at endpoints,
 // so segment boundaries and arbitrary reverse seeks need no pose history.
-function routeFoot(route, left) {
-    const {start,end,length,distance,direction,courtForward}=route;
+function stepAlong(length, distance, left) {
+    if(length<.025)return {along:length, lift:0};
     const count=Math.max(2,Math.ceil(length/.26/2)*2),step=length/count;
-    if(length<.025)return {x:end.x+(left?.23:-.23)*courtForward,y:0,z:end.z+.015*courtForward};
     const index=Math.min(count-1,Math.floor(distance/step));
     const swinging=(index%2===0)===left,phase=clamp01(distance/step-index);
     const last=swinging?index-2:index-1;
@@ -133,9 +132,38 @@ function routeFoot(route, left) {
     const previous=landed(last),next=swinging?landed(index):previous;
     const blend=swinging?easeInOut(phase):0;
     const along=distance>=length-1e-9?length:previous+(next-previous)*blend;
-    return {x:start.x+direction.x*along+(left?.23:-.23)*courtForward,
-        y:swinging&&distance<length-1e-9?Math.sin(Math.PI*phase)*Math.min(.075,length*.16):0,
+    const lift=swinging&&distance<length-1e-9?Math.sin(Math.PI*phase)*Math.min(.075,length*.16):0;
+    return {along,lift};
+}
+
+function routeFoot({start,length,distance,direction,courtForward}, left) {
+    const {along,lift}=stepAlong(length,distance,left);
+    return {x:start.x+direction.x*along+(left?.23:-.23)*courtForward,y:lift,
         z:start.z+direction.z*along+.015*courtForward};
+}
+
+// Borrow the planted-step cadence between recorded footprints. Exact contact
+// feet, the post-contact hold and all momentum evidence stay on their authored plane.
+function stepBetweenFootprints(segment, id, localTime, feet, position) {
+    const duration=segment.originalDuration??segment.duration;
+    let start=0,end=duration;
+    if(segment.shotSemantics?.playerId===id && segment.shotSemantics.contact.feet.length===2){
+        const release=Math.min(duration,segment.contactTime+.12);
+        if(localTime<=segment.contactTime)end=segment.contactTime;
+        else if(localTime<=release)return;
+        else start=release;
+    }
+    const from=boardToWorld(sampleActorBoardPositionV2(segment,id,start));
+    const to=boardToWorld(sampleActorBoardPositionV2(segment,id,end));
+    const dx=to.x-from.x,dz=to.z-from.z,length=Math.hypot(dx,dz);
+    if(length<.025)return;
+    const distance=Math.min(length,Math.hypot(position.x-from.x,position.z-from.z));
+    for(const [side,foot] of Object.entries(feet)){
+        const {along,lift}=stepAlong(length,distance,side==='left');
+        foot.x+=dx/length*(along-distance);
+        foot.z+=dz/length*(along-distance);
+        foot.y=lift;
+    }
 }
 
 function actionState(segment, playerId, localTime, distance, instructionalMovement = false) {
@@ -196,7 +224,7 @@ function actionState(segment, playerId, localTime, distance, instructionalMoveme
  */
 export function sampleActorPresentation({
     segment, playerId, localTime, cameraPosition, cameraTarget = { x: 0, y: 0, z: 0 }, handedness,
-    artFamily = 'green', timeline = null, seconds = null, instructionalMovement = false
+    artFamily = 'green', timeline = null, seconds = null, instructionalMovement = false, articulatedMotion = false
 }) {
     if (!segment || !Number.isFinite(localTime)) throw new TypeError('A segment and finite localTime are required.');
     if (!['left', 'right'].includes(handedness)) throw new TypeError('Handedness must be left or right.');
@@ -207,7 +235,7 @@ export function sampleActorPresentation({
     const distance = Math.hypot(to.x - from.x, to.y - from.y) * FEET_TO_METERS;
     const isStriker = segment.shotSemantics?.playerId === playerId;
     const isIncomingStriker = segment.nextShotSemantics?.playerId === playerId;
-    let bodyFacing;
+    let bodyFacing, pickupFacing;
     if (isStriker && segment.trajectory) {
         // Use the outgoing flight tangent. Facing the contact point itself becomes
         // undefined as the planted actor reaches it and can flip between sprite views.
@@ -218,6 +246,10 @@ export function sampleActorPresentation({
         const recover=instructionalMovement?easeInOut((localTime-release)/Math.max(.001,profile.duration*(1-profile.recoverRatio))):0;
         const court={x:0,z:from.y<22?1:-1};
         bodyFacing=normalizeHorizontal({x:outgoing.x*(1-recover),z:outgoing.z*(1-recover)+court.z*recover},court);
+        if (articulatedMotion && segment.startTime===0 && localTime<segment.contactTime) {
+            const turn=easeInOut(localTime/segment.contactTime);
+            pickupFacing=normalizeHorizontal({x:outgoing.x*turn,z:outgoing.z*turn+court.z*(1-turn)},court);
+        }
     } else if (isIncomingStriker && segment.trajectory) {
         const incoming = instructionalMovement?{x:0,z:from.y<22?1:-1}:normalizeHorizontal({x:segment.trajectory.start.x-segment.trajectory.end.x,z:segment.trajectory.start.z-segment.trajectory.end.z});
         const authoredNext = timeline?.play?.steps?.[segment.index + 1]?.shot;
@@ -260,9 +292,27 @@ export function sampleActorPresentation({
     const travelSpeed = sampleInterval > 0 ? Math.hypot(after.x - before.x, after.z - before.z) / sampleInterval : 0;
     const model2Feet = segment.modelVersion === 2 ? sampleActorFeetV2(segment, playerId, localTime).sort((a,b)=>a.x-b.x) : null;
     const near = segment.previous.positions[playerId].y < 22;
+    const feet = model2Feet ? {left:boardToWorld(model2Feet[near?1:0],0), right:boardToWorld(model2Feet[near?0:1],0)} :
+        route ? {left:routeFoot(route,true),right:routeFoot(route,false)} : null;
+    const recordedFeet = articulatedMotion && segment.model2Momentum?.some(
+        item=>item.actor===playerId && item.contactTime<=segment.startTime+localTime+1e-9);
+    if (model2Feet && articulatedMotion && !recordedFeet) stepBetweenFootprints(segment,playerId,localTime,feet,worldPosition);
+    // Unweight just before the opponent strikes, then absorb the landing on
+    // flexed knees. Recorded fault/momentum feet take precedence at all times.
+    let splitLift=0;
+    if(articulatedMotion && !recordedFeet){
+        const untilHit=!isStriker && segment.shotSemantics && localTime<=segment.contactTime
+            ? segment.contactTime-localTime : segment.nextShotSemantics && !isIncomingStriker ? segment.duration-localTime : Infinity;
+        if(untilHit>.018 && untilHit<.168){
+            const grounded=1-clamp01(Math.max(feet?.left.y||0,feet?.right.y||0)/.045);
+            splitLift=.05*Math.sin(Math.PI*(untilHit-.018)/.15)**2*grounded*(1-clamp01(travelSpeed/2));
+        }
+    }
     return Object.freeze({
         ...(segment.modelVersion === 2 ? { modelVersion: 2 } : {}),
         playerId, worldPosition, bodyFacing: Object.freeze(bodyFacing), viewDirection: direction,
+        ...(articulatedMotion ? {courtForward:near?1:-1,splitLift} : {}),
+        ...(pickupFacing ? {pickupFacing:Object.freeze(pickupFacing)} : {}),
         action: state.action, phase: state.phase, frameIndex: state.frameIndex,
         locomotionFrame: state.locomotionFrame, planted: state.planted, handedness,
         artFamily, artAction: state.action,
@@ -272,7 +322,7 @@ export function sampleActorPresentation({
         strokePose, strokeTime, profile, timeSeconds: seconds ?? segment.startTime + localTime,
         travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,
         travelDirection: route?Object.freeze(route.direction):null,
-        footTargets: model2Feet ? Object.freeze({left:Object.freeze(boardToWorld(model2Feet[near?1:0],0)),right:Object.freeze(boardToWorld(model2Feet[near?0:1],0))}) : route?Object.freeze({left:Object.freeze(routeFoot(route,true)),right:Object.freeze(routeFoot(route,false))}):null,
+        footTargets: feet ? Object.freeze({left:Object.freeze(feet.left),right:Object.freeze(feet.right)}) : null,
         splitStep: instructionalMovement?Math.max(
             !isStriker&&segment.shotSemantics?Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11):0,
             segment.nextShotSemantics&&segment.nextShotSemantics.playerId!==playerId?Math.max(0,1-(segment.duration-localTime)/.11):0):0,

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { QA_SCENARIOS } from './fixtures/qa-scenarios.mjs';
 import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 
@@ -10,6 +11,7 @@ for (const scenario of QA_SCENARIOS) {
     await page.goto('/?qa-scenario-browser=1');
     await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
     await installReferenceRigContract(page);
+    await installDimensionalAudit(page);
     const result = await page.evaluate(async ({ document: source, expected }) => {
       const { sampleActorWorldPosition, sampleActorPresentation } = await import('./three-d-presentation.js');
       const { samplePlayState } = await import('./three-d-core.js');
@@ -55,7 +57,10 @@ for (const scenario of QA_SCENARIOS) {
           const position = sampleActorWorldPosition(segment, id, segment.contactTime, source.players[id].handedness, true);
           const presentation = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: id, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness: source.players[id].handedness });
           const jump = window.__referenceRigContract.expectedJump(presentation);
-          [position.x, position.y + jump, position.z].forEach((value, axis) => close(state.position[axis]+(axis===1?state.visualLift:0), value, `${id}: instructional 3D axis ${axis}`));
+          const player=viewer.playerObjects.get(id);
+          const routeLift=player.userData.emeraldCap ? 0 : jump;
+          [position.x, position.y + routeLift, position.z].forEach((value, axis) => close(state.position[axis],value,`${id}: instructional 3D axis ${axis}`));
+          if(player.userData.emeraldCap && !jump)close(state.visualLift,0,`${id}: grounded at contact`);
           instructionalComparisons++;
         }
         for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
@@ -107,6 +112,7 @@ for (const scenario of QA_SCENARIOS) {
         const atContact = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: strikerId, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness });
         if (window.__referenceRigContract.expectedJump(atContact) > 0) {
           const profile = segment.shotSemantics.profile;
+          const airborne=[];
           for (const ratio of [0, profile.contactRatio / 2, profile.contactRatio, (profile.contactRatio + profile.recoverRatio) / 2, profile.recoverRatio, (profile.recoverRatio + 1) / 2, 1]) {
             const seconds = time + profile.duration * (ratio - profile.contactRatio);
             if (seconds < 0 || seconds > viewer.timeline.duration) continue;
@@ -119,8 +125,23 @@ for (const scenario of QA_SCENARIOS) {
             const jump = window.__referenceRigContract.expectedJump(sample), position = viewer.playerObjects.get(strikerId).position;
             close(position.x, sample.worldPosition.x, `${strikerId}: overhead profile tactical x`);
             close(position.z, sample.worldPosition.z, `${strikerId}: overhead profile tactical z`);
-            close(position.y+(viewer.playerObjects.get(strikerId).userData.emeraldCap?viewer.playerObjects.get(strikerId).userData.visual.position.y:0), sample.worldPosition.y + jump, `${strikerId}: overhead profile y`);
+            const player=viewer.playerObjects.get(strikerId);
+            if(player.userData.emeraldCap){
+              close(position.y,sample.worldPosition.y,'Emerald tactical base');
+              const {shoeBottoms}=window.__athleteAudit(player);
+              const sole=Math.min(...shoeBottoms);
+              if(sole < -1e-6 || sole > .96)failures.push({label:'Emerald sole outside the jump envelope',sole});
+              if(ratio===0 || ratio===1)close(sole,0,'Emerald planted takeoff and landing',1e-6);
+              if(Math.abs(ratio-profile.contactRatio)<1e-8 && (sole<.3 || window.__athleteAudit(player).paddleDistance(viewer.ballObject.position)>.037))
+                failures.push({label:'Emerald high contact must reach the ball airborne',sole});
+              airborne.push({ratio,sole});
+            }else close(position.y,sample.worldPosition.y+jump,`${strikerId}: overhead profile y`);
             overheadProfileSamples++;
+          }
+          for(let i=1;i<airborne.length;i++){
+            const {ratio,sole}=airborne[i],before=airborne[i-1].sole;
+            if(ratio<=profile.contactRatio ? sole<before-1e-6 : sole>before+1e-6)
+              failures.push({label:'Emerald overhead must rise to impact then land',ratio,sole,before});
           }
         }
         await b.switchView('2d');

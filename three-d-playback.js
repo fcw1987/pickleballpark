@@ -496,21 +496,28 @@ class ThreeDPlaybackViewer {
         }
     }
 
-    applyAthletes(segment,localTime) {
+    applyAthletes(segment,localTime,trail) {
         for(const [id,actor] of this.playerObjects) {
             let sample;
-            if(segment) sample=sampleActorPresentation({instructionalMovement:true,segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
+            if(segment) sample=sampleActorPresentation({instructionalMovement:true,articulatedMotion:actor===this.emeraldAthlete,segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
             else {
                 const position=this.currentPlay.steps[0].positions[id],world=boardToWorld(position);
                 const facing={x:0,z:position.y<22?1:-1};
                 sample={handedness:actor.userData.handedness,worldPosition:world,bodyFacing:facing,facing,timeSeconds:0,travelPhase:0,viewDirection:selectCameraRelativeDirection(facing,world,this.camera.position,this.cameraTarget),action:'ready',phase:'ready',locomotionFrame:null,paddle:null};
+                if(actor===this.emeraldAthlete){
+                    const segment=this.timeline.segments[0];
+                    const initial=segment && sampleActorPresentation({segment,playerId:id,localTime:0,
+                        handedness:actor.userData.handedness,instructionalMovement:true,articulatedMotion:true});
+                    const offset=side=>({x:world.x+side*.23*facing.z,y:0,z:world.z+.015*facing.z});
+                    sample.footTargets=initial?.footTargets || {left:offset(1),right:offset(-1)};
+                }
             }
             const isStriker=segment?.shotSemantics?.playerId===id;
             const isIncoming=segment?.nextShotSemantics?.playerId===id;
             const distance=isStriker?Math.abs(localTime-segment.contactTime):isIncoming?Math.abs(segment.duration-localTime):Infinity;
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
-            if (actor===this.emeraldAthlete) actor.userData.applyPose(sample,weight);
+            if (actor===this.emeraldAthlete) actor.userData.applyPose(sample,weight,trail);
             else updateAthlete(actor,sample,this.camera,weight);
             this.coverageSamples[id] = sample;
         }
@@ -668,8 +675,9 @@ class ThreeDPlaybackViewer {
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
         this.world?.updateCamera?.(this.camera);
         this.world?.updateAtTime?.(seconds);
-        this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
+        const trail=this.emeraldAthlete ? [ball,this.sampleBall(Math.max(0,seconds-.07)),this.sampleBall(Math.max(0,seconds-.16))] : null;
+        this.applyAthletes(segment,local,trail);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
         const terminalMarkers = terminalVisualsAtTime(this.timeline, seconds);
