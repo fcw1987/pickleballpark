@@ -224,8 +224,13 @@ class ThreeDPlaybackViewer {
         this.courtAthletes = [];
         this.coachingPlayer = 'player1';
         this.coverageSamples = {};
+        this.coverageContext = null;
         this.coveragePreferenceUnsubscribe = getCoveragePreference().subscribe(() => {
-            if (this.active) this.renderSessionSample();
+            if (!this.active) return;
+            // Update the sectors for the displayed sample immediately. A single
+            // animation frame paints them together with the court and athletes.
+            if (this.coverageContext) this.playerCoverage?.update(this.coverageContext);
+            this.startRenderLoop();
         });
         this.ballObject = null;
         this.lastState = null;
@@ -697,7 +702,8 @@ class ThreeDPlaybackViewer {
         const terminalMarkers = terminalVisualsAtTime(this.timeline, seconds);
         if (terminalMarkers.length && !this.terminalMarkers) this.terminalMarkers = new TerminalEventMarkers(this.scene);
         this.terminalMarkers?.update(terminalMarkers);
-        this.playerCoverage?.update({ board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment });
+        this.coverageContext = { board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment };
+        this.playerCoverage?.update(this.coverageContext);
         this.updateBallReadability();
         const hitter=segment?.shotSemantics?.playerId;
         const sample=this.coverageSamples[hitter];
@@ -759,7 +765,7 @@ class ThreeDPlaybackViewer {
 
     disposeScene() {
         this.terminalMarkers?.dispose(); this.terminalMarkers = null;
-        this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {};
+        this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {}; this.coverageContext = null;
         this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;
