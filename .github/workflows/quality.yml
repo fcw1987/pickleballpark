@@ -76,7 +76,7 @@ jobs:
         run: npm ci
       - name: Install Chromium
         timeout-minutes: 40
-        run: npx playwright install --with-deps chromium
+        run: bash tools/install-ci-browsers.sh chromium
       - name: Run duration-balanced whole files with one worker and no retries
         timeout-minutes: 25
         run: node tools/run-chromium-ci.mjs ${{ matrix.shard }}
@@ -168,7 +168,7 @@ jobs:
         run: npm ci
       - name: Install WebKit
         timeout-minutes: 40
-        run: npx playwright install --with-deps webkit
+        run: bash tools/install-ci-browsers.sh webkit
       - name: Run WebKit partition with no retries or failure exceptions
         timeout-minutes: 25
         run: npx playwright test --config=playwright.webkit.config.mjs --workers=1 --retries=0 --forbid-only --shard=${{ matrix.shard }}/2 --reporter=line,blob
@@ -248,7 +248,7 @@ jobs:
         run: npm ci
       - name: Install package-test browsers
         timeout-minutes: 40
-        run: npx playwright install --with-deps chromium webkit
+        run: bash tools/install-ci-browsers.sh chromium webkit
       - name: Build the Pages artifact
         run: npm run build:site -- --require-clean
       - name: Verify the exact Pages artifact
