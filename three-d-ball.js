@@ -49,8 +49,8 @@ export class ReadableBall {
         // The artwork occupies 12 of the 16 texture columns.
         return Math.max(0.074,diameter*worldPerPixel)*16/12;
     }
-    update(camera,height,time,samplePast,launched) {
-        const size=this.sizeAt(this.object.position,camera,height,this.object.userData.minimumCSSDiameter);
+    update(camera,height,time,samplePast,launched,diameter=this.object.userData.minimumCSSDiameter) {
+        const size=this.sizeAt(this.object.position,camera,height,diameter);
         this.sprite.scale.set(size,size,1);
         // Render the near surface of the visual sphere on the same camera ray.
         // Its logical center and projected center remain exactly unchanged.

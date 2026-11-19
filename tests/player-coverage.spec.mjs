@@ -62,11 +62,17 @@ test('the same sampled sectors follow actual actors and ball through seeking and
 });
 
 test('overlay costs one draw call, has fixed resources, honors provider versions and releases resources once', async ({ page }) => {
+  // Exercise all 80 full-court samples even on a software WebGL runner. The
+  // measured budgets are draw calls, allocations and disposals for the overlay.
+  test.setTimeout(90000);
   await open(page);
   const result = await page.evaluate(async () => {
     const { getCoveragePreference } = await import('/player-coverage.js'); const pref = getCoveragePreference(), v = pickleboard.threeD;
     v.renderSessionSample(); const off = v.renderer.info.render.calls;
-    pref.set(true); v.renderSessionSample(); const on = v.renderer.info.render.calls, textures = v.renderer.info.memory.textures, geometryCount = v.renderer.info.memory.geometries;
+    const frame = v.renderer.info.render.frame;
+    pref.set(true);
+    const immediatePaints = v.renderer.info.render.frame - frame;
+    v.renderSessionSample(); const on = v.renderer.info.render.calls, textures = v.renderer.info.memory.textures, geometryCount = v.renderer.info.memory.geometries;
     for (let i = 0; i < 80; i++) { pref.set(i % 2 === 0); v.applyAtTime(v.timeline.duration * (i / 80)); v.renderer.render(v.scene, v.camera); }
     const stable = { textures: v.renderer.info.memory.textures, geometryCount: v.renderer.info.memory.geometries };
     pref.set(true); pickleboard.coverageSnapshotProvider = () => ({ version: 999 }); v.renderSessionSample(); const invalidHidden = !v.playerCoverage.mesh.visible;
@@ -74,8 +80,9 @@ test('overlay costs one draw call, has fixed resources, honors provider versions
     const layer = v.playerCoverage, counts = { geometry: 0, material: 0 };
     layer.mesh.geometry.addEventListener('dispose', () => counts.geometry++); layer.mesh.material.addEventListener('dispose', () => counts.material++);
     const props = { depthTest: layer.mesh.material.depthTest, depthWrite: layer.mesh.material.depthWrite, floorHeight: layer.mesh.position.y };
-    v.exit(); layer.dispose(); return { off, on, textures, geometryCount, stable, invalidHidden, restored, counts, props };
+    v.exit(); layer.dispose(); return { off, on, textures, geometryCount, stable, invalidHidden, restored, counts, props, immediatePaints };
   });
+  expect(result.immediatePaints).toBe(0);
   expect(result.on - result.off).toBe(1); expect(result.stable).toEqual({ textures: result.textures, geometryCount: result.geometryCount });
   expect(result.invalidHidden).toBe(true); expect(result.restored).toBe(true); expect(result.counts).toEqual({ geometry: 1, material: 1 });
   expect(result.props).toEqual({ depthTest: true, depthWrite: false, floorHeight: .035 });

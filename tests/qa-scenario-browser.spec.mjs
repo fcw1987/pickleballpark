@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { QA_SCENARIOS } from './fixtures/qa-scenarios.mjs';
 import { installReferenceRigContract } from './helpers/reference-rig-browser-contract.mjs';
 
@@ -10,6 +11,7 @@ for (const scenario of QA_SCENARIOS) {
     await page.goto('/?qa-scenario-browser=1');
     await page.waitForFunction(() => window.playBuilder && !playBuilder.busy);
     await installReferenceRigContract(page);
+    await installDimensionalAudit(page);
     const result = await page.evaluate(async ({ document: source, expected }) => {
       const { sampleActorWorldPosition, sampleActorPresentation } = await import('./three-d-presentation.js');
       const { samplePlayState } = await import('./three-d-core.js');
@@ -41,12 +43,17 @@ for (const scenario of QA_SCENARIOS) {
         const ball = viewer.ballObject.position.toArray();
         const paddle = actor.userData.paddleFaceWorld.toArray();
         const distance = Math.hypot(...paddle.map((value, axis) => value - ball[axis]));
-        if (distance >= .01) failures.push({ label: `${segment.step.id}: paddle contact`, distance });
+        const index=source.shots.findIndex(shot=>shot.id===segment.step.id);
+        const preservedHighLob=actor.userData.courtAthlete && source.shots[index-1]?.family==='lob' &&
+          source.shots[index]?.family==='overhead' && segment.shotSemantics.contact.point.heightFeet>=7;
+        if(preservedHighLob && (!viewer.coverageSamples[segment.shotSemantics.playerId].unsupportedHighContact || distance<.2))
+          failures.push({label:'high recorded overhead must stay outside planted reach',distance});
+        if (!preservedHighLob && distance >= .01) failures.push({ label: `${segment.step.id}: paddle contact`, distance });
         if (actor.userData.handedness !== source.players[segment.shotSemantics.playerId].handedness)
           failures.push({ label: `${segment.step.id}: handedness` });
         contacts++;
         const tactical = Object.fromEntries([...viewer.playerObjects].map(([id, actor]) => [id, {
-          position: actor.position.toArray(), visualLift: actor.userData.emeraldCap?actor.userData.visual.position.y:0, facing: actor.userData.animation.bodyFacing
+          position: actor.position.toArray(), visualLift: actor.userData.courtAthlete?actor.userData.visual.position.y:0, facing: viewer.coverageSamples[id].bodyFacing, renderedFacing: actor.userData.animation.bodyFacing
         }]));
         // Accepted stroke source 041f285 opts 3D into instructional approach
         // and recovery, while retaining the frozen canonical 2D movement.
@@ -55,7 +62,10 @@ for (const scenario of QA_SCENARIOS) {
           const position = sampleActorWorldPosition(segment, id, segment.contactTime, source.players[id].handedness, true);
           const presentation = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: id, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness: source.players[id].handedness });
           const jump = window.__referenceRigContract.expectedJump(presentation);
-          [position.x, position.y + jump, position.z].forEach((value, axis) => close(state.position[axis]+(axis===1?state.visualLift:0), value, `${id}: instructional 3D axis ${axis}`));
+          const player=viewer.playerObjects.get(id);
+          const routeLift=player.userData.courtAthlete ? 0 : jump;
+          [position.x, position.y + routeLift, position.z].forEach((value, axis) => close(state.position[axis],value,`${id}: instructional 3D axis ${axis}`));
+          if(player.userData.courtAthlete && !jump)close(state.visualLift,0,`${id}: grounded at contact`);
           instructionalComparisons++;
         }
         for (const camera of ['overhead', 'sideline', 'behind-green', 'behind-orange']) {
@@ -63,7 +73,8 @@ for (const scenario of QA_SCENARIOS) {
           viewer.applyAtTime(time);
           const cameraContact = actor.userData.paddleFaceWorld.toArray();
           const cameraDistance = Math.hypot(...cameraContact.map((value, axis) => value - ball[axis]));
-          if (cameraDistance >= .01) failures.push({ label: `${camera}: paddle contact`, distance: cameraDistance });
+          if(preservedHighLob)close(cameraDistance,distance,`${camera}: recorded overhead gap`);
+          else if (cameraDistance >= .01) failures.push({ label: `${camera}: paddle contact`, distance: cameraDistance });
           for (const [id, actor] of viewer.playerObjects) {
             const before = tactical[id];
             if (!before.facing || ![before.facing.x, before.facing.z].every(Number.isFinite))
@@ -79,12 +90,17 @@ for (const scenario of QA_SCENARIOS) {
             for (const property of ['forwardError', 'headingError', 'rollError']) close(alignment[property], 0, `${id}: ${camera} ${property}`, 1e-6);
             close(alignment.elevation, alignment.expectedElevation, `${id}: ${camera} exact capped elevation`, 1e-6);
             const data = actor.userData;
-            const actualFacing = sampleActorPresentation({instructionalMovement:true, segment, timeline:viewer.timeline, seconds:time, playerId:id, localTime:segment.contactTime, cameraPosition:viewer.camera.position, cameraTarget:viewer.cameraTarget, handedness:source.players[id].handedness}).bodyFacing;
+            const expectedPose = sampleActorPresentation({instructionalMovement:true, articulatedMotion:Boolean(data.courtAthlete), segment, timeline:viewer.timeline, seconds:time, playerId:id, localTime:segment.contactTime, cameraPosition:viewer.camera.position, cameraTarget:viewer.cameraTarget, handedness:source.players[id].handedness});
+            const actualFacing=expectedPose.pickupFacing || expectedPose.bodyFacing;
             close(data.animation.bodyFacing.x, actualFacing.x, `${id}: actual tactical facing x`);
             close(data.animation.bodyFacing.z, actualFacing.z, `${id}: actual tactical facing z`);
             const directions = ['front','front-right','right','back-right','back','back-left','left','front-left'];
             if(data.animation.viewDirection !== directions[sector]) failures.push({label:id+' camera sector'});
-            if(!data.emeraldCap){
+            if(data.courtAthlete){
+              const active=viewer.coverageSamples[id],rendered=active.pickupFacing || active.bodyFacing;
+              close(Math.sin(data.visual.rotation.y),rendered.x,id+' rendered turn x');
+              close(Math.cos(data.visual.rotation.y),rendered.z,id+' rendered turn z');
+            }else{
               const map=data.body.material.map;
               if(data.animation.frame !== frame || data.animation.mirror !== mirror) failures.push({label:`${id}: rendered direction metadata disagrees with camera sector`});
               const [x,y,w,h] = data.resources.assets.metadata.frames[data.player][frame].rect;
@@ -96,7 +112,8 @@ for (const scenario of QA_SCENARIOS) {
               if (Math.sign(data.body.scale.x) !== mirror) failures.push({label: `${id}: rendered atlas mirror`});
             }
             actor.position.toArray().forEach((value, axis) => close(value, before.position[axis], `${id}: camera position`));
-            if (JSON.stringify(actor.userData.animation.bodyFacing) !== JSON.stringify(before.facing))
+            if (JSON.stringify(actor.userData.animation.bodyFacing) !== JSON.stringify(before.renderedFacing) ||
+                JSON.stringify(viewer.coverageSamples[id].bodyFacing) !== JSON.stringify(before.facing))
               failures.push({ label: `${id}: camera changed tactical facing` });
           }
         }
@@ -107,6 +124,7 @@ for (const scenario of QA_SCENARIOS) {
         const atContact = sampleActorPresentation({ instructionalMovement: true, segment, timeline: viewer.timeline, seconds: time, playerId: strikerId, localTime: segment.contactTime, cameraPosition: viewer.camera.position, cameraTarget: viewer.cameraTarget, handedness });
         if (window.__referenceRigContract.expectedJump(atContact) > 0) {
           const profile = segment.shotSemantics.profile;
+          const airborne=[];
           for (const ratio of [0, profile.contactRatio / 2, profile.contactRatio, (profile.contactRatio + profile.recoverRatio) / 2, profile.recoverRatio, (profile.recoverRatio + 1) / 2, 1]) {
             const seconds = time + profile.duration * (ratio - profile.contactRatio);
             if (seconds < 0 || seconds > viewer.timeline.duration) continue;
@@ -119,8 +137,27 @@ for (const scenario of QA_SCENARIOS) {
             const jump = window.__referenceRigContract.expectedJump(sample), position = viewer.playerObjects.get(strikerId).position;
             close(position.x, sample.worldPosition.x, `${strikerId}: overhead profile tactical x`);
             close(position.z, sample.worldPosition.z, `${strikerId}: overhead profile tactical z`);
-            close(position.y+(viewer.playerObjects.get(strikerId).userData.emeraldCap?viewer.playerObjects.get(strikerId).userData.visual.position.y:0), sample.worldPosition.y + jump, `${strikerId}: overhead profile y`);
+            const player=viewer.playerObjects.get(strikerId);
+            if(player.userData.courtAthlete){
+              close(position.y,sample.worldPosition.y,'Emerald tactical base');
+              const {shoeBottoms}=window.__athleteAudit(player);
+              const sole=Math.min(...shoeBottoms);
+              if(sole < -1e-6 || sole > .96)failures.push({label:'Emerald sole outside the jump envelope',sole});
+              if(ratio===0 || ratio===1)close(sole,0,'Emerald planted takeoff and landing',1e-6);
+              if(Math.abs(ratio-profile.contactRatio)<1e-8){
+                const gap=window.__athleteAudit(player).paddleDistance(viewer.ballObject.position);
+                if(preservedHighLob){
+                  if(Math.abs(sole)>1e-5 || gap<.2)failures.push({label:'recorded lob must not move the planted feet to fake contact',sole,gap});
+                }else if(sole<.3 || gap>.037)failures.push({label:'Emerald high contact must reach the ball airborne',sole});
+              }
+              airborne.push({ratio,sole});
+            }else close(position.y,sample.worldPosition.y+jump,`${strikerId}: overhead profile y`);
             overheadProfileSamples++;
+          }
+          for(let i=1;i<airborne.length;i++){
+            const {ratio,sole}=airborne[i],before=airborne[i-1].sole;
+            if(ratio<=profile.contactRatio ? sole<before-1e-6 : sole>before+1e-6)
+              failures.push({label:'Emerald overhead must rise to impact then land',ratio,sole,before});
           }
         }
         await b.switchView('2d');

@@ -1,3 +1,4 @@
+import { lobVolleyInFront } from './play-actors-v2.js';
 // Offline, deterministic, bounded rally authoring.
 //
 // Every candidate is checked by the production document validator, compiler,
@@ -12,6 +13,8 @@ import {
   SMART_GENERATOR_VERSION, automaticOwnership, documentSourceIdentity,
   evaluateCandidate, makeProposal, proposalChanges
 } from './rally-proposals.js';
+
+import { resolveLobContinuation } from './lob-recovery.js';
 
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
@@ -82,7 +85,7 @@ function familyChoices(index, opening, previous, next, { allowVolley = true, net
   const previousFamily = previous?.family;
   const contactDepth = previous ? Math.min(previous.target.y, 44 - previous.target.y) : 0;
   let choices = index < 3 && opening === 'serve' ? OPENING_FAMILIES
-    : previousFamily === 'lob' ? ['overhead', 'drive', 'drop', 'lob']
+    : previousFamily === 'lob' ? ['volley', 'drive', 'drop', 'lob']
     : contactDepth >= 14 ? ['dink', 'dink', 'volley', 'reset', 'drive', 'lob']
     : ['drive', 'drop', 'drop', 'reset', 'lob'];
   // A deep intended landing can still be intercepted by an established net
@@ -218,6 +221,11 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
       candidate.shots.push(candidateShot);
       const result = completeEvaluation(candidate);
       if (result.ok && result.validShotCount === candidate.shots.length) {
+        if(previous?.family==='lob' && family==='volley'){
+          const incoming=result.compiled.timeline.segments.at(-2);
+          const contact=result.compiled.timeline.segments.at(-1).shotSemantics.contact.point;
+          if(!lobVolleyInFront({team:document.players[hitter].team,origin:incoming.previous.positions[hitter],contact}))continue;
+        }
         // Check deep/transition states before committing to them. Near-net
         // exchanges use the direct bounded path. Smart Add needs two future
         // hits: its next Add must itself retain a continuation. Lookahead never
@@ -300,6 +308,15 @@ export async function proposeSmartAdd(sourceDocument, options = {}) {
       return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: 'A rally with an explicit terminal outcome or intentional fault cannot accept another shot. Reopen it before appending.' });
     }
     const maxAttempts = normalizedAttempts(options.maxAttempts, MAX_ATTEMPTS_PER_SHOT, MAX_ATTEMPTS_PER_SHOT, 'maxAttempts');
+    if(source.modelVersion===2 && source.shots.at(-1)?.family==='lob' && source.shots.length<MAX_SHOTS) {
+      checkCancelled(options.signal);
+      const document=resolveLobContinuation(source,nextShotId(source,source.shots.length));
+      const evaluated=document && evaluateCandidate(document);
+      if(!evaluated?.ok) return failure({operation:'smart-add',sourceDocument:source,seed,
+        reason:evaluated?.reason || 'No legal lob recovery or physical ending could be established from these footprints.'});
+      return makeProposal({operation:'smart-add',sourceDocument:source,document,seed,
+        reason:document.outcome ? `Lob ended the point · ${document.outcome.reason}.` : `Added a reachable ${document.shots.at(-1).family}.`});
+    }
     const current = completeEvaluation(source);
     if (!current.ok || current.validShotCount !== source.shots.length) {
       return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: current.reason || 'Correct the existing rally with Coach before adding a continuation.' });

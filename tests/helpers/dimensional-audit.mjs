@@ -9,7 +9,7 @@ export async function installDimensionalAudit(page) {
     const referenceAudit = new Function('THREE', `return (${referenceKernelSource})(THREE);`)(THREE);
     const emeraldAudit=new Function('THREE', `return (${emeraldSource})(THREE);`)(THREE);
     window.__athleteAudit = root => {
-      if(root.userData.emeraldCap)return emeraldAudit(root);
+      if(root.userData.courtAthlete)return emeraldAudit(root);
       if(root.userData.referenceAthlete)return referenceAudit(root,{camera:window.pickleboard?.threeD?.camera,viewportHeight:window.pickleboard?.threeD?.renderer.domElement.clientHeight||1});
       root.updateWorldMatrix(true, true);
       const meshes = [];

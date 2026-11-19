@@ -1,3 +1,4 @@
+import { COURT_ATHLETES } from '../court-athlete-roster.js';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
@@ -99,7 +100,7 @@ export function compareGeneratedTrees(expected, generated) {
 export function excludePreservedArt(expected, generated, inventory) {
   const remaining = new Map(expected);
   for (const [file, hash] of Object.entries(inventory)) {
-    const approvedModel = file === 'assets/athletes/emerald-cap.glb';
+    const approvedModel = COURT_ATHLETES.some(({key})=>file==='assets/athletes/'+key+'.glb');
     if ((!approvedModel && !/^assets\/(?:source\/)?reference-(?:athletes|depth)\/[^/]+$/.test(file)) || !/^[0-9a-f]{64}$/.test(hash)) throw new Error(`Invalid preserved art entry: ${file}`);
     if (generated.has(file)) throw new Error(`Preserved art unexpectedly generated: ${file}`);
     const bytes = expected.get(file);

@@ -49,7 +49,7 @@ jobs:
   chromium-shards:
     name: Chromium partition ${{ matrix.shard }}/2
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
@@ -75,8 +75,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 40
+        run: bash tools/install-ci-browsers.sh chromium
       - name: Run duration-balanced whole files with one worker and no retries
+        timeout-minutes: 25
         run: node tools/run-chromium-ci.mjs ${{ matrix.shard }}
       - name: Retain every Chromium partition result and plan
         if: always()
@@ -166,7 +168,7 @@ jobs:
         run: npm ci
       - name: Install WebKit
         timeout-minutes: 40
-        run: npx playwright install --with-deps webkit
+        run: bash tools/install-ci-browsers.sh webkit
       - name: Run WebKit partition with no retries or failure exceptions
         timeout-minutes: 25
         run: npx playwright test --config=playwright.webkit.config.mjs --workers=1 --retries=0 --forbid-only --shard=${{ matrix.shard }}/2 --reporter=line,blob
@@ -230,7 +232,7 @@ jobs:
   package:
     name: Package
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 80
     steps:
       - name: Check out complete source history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -245,10 +247,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Install package-test browsers
-        run: npx playwright install --with-deps chromium webkit
+        timeout-minutes: 40
+        run: bash tools/install-ci-browsers.sh chromium webkit
       - name: Build the Pages artifact
         run: npm run build:site -- --require-clean
       - name: Verify the exact Pages artifact
+        timeout-minutes: 35
         run: npm run verify:package
       - name: Upload package report on failure
         if: failure()

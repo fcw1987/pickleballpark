@@ -20,7 +20,7 @@ test('legacy 3D compatibility: visible athletes combine directional artwork with
   const players = await page.evaluate(() => Object.fromEntries([...window.pickleboard.threeD.playerObjects].map(([id, root]) => {
     const meshes = [];
     root.traverse(mesh => { if (mesh.isMesh && mesh.visible && mesh.name !== 'AthleteContactShadow') meshes.push(mesh); });
-    if (root.userData.emeraldCap) {
+    if (root.userData.courtAthlete) {
       return [id, { model: true, skins: meshes.filter(mesh => mesh.isSkinnedMesh).length,
         paddle: root.userData.paddleMesh.isSkinnedMesh, grip: root.userData.grip.parent.name,
         handedness: root.userData.handedness, team: root.userData.team,
@@ -40,14 +40,9 @@ test('legacy 3D compatibility: visible athletes combine directional artwork with
       phase: root.userData.animation.phase, frame: root.userData.animation.frame, mirror: root.userData.animation.mirror
     }];
   })));
-  expect(players.player1).toMatchObject({ model: true, paddle: true, grip: 'HandR', worldY: 0, phase: 'ready' });
-  expect(players.player1.skins).toBeGreaterThan(12);
-  for (const player of [players.player2, players.player3, players.player4]) {
-    expect(player).toMatchObject({ reference: true, artwork: true, worldY: 0, phase: 'ready' });
-    expect(player.meshCount).toBe(16); // Body, two original-art sleeve planes, ten arm pieces and three paddle pieces.
-    expect(player.solidParts).toBe(13);
-    expect([0, 1, 2, 3]).toContain(player.frame);
-    expect([-1, 1]).toContain(player.mirror);
+  for (const player of Object.values(players)) {
+    expect(player).toMatchObject({model:true,paddle:true,grip:'HandR',worldY:0,phase:'ready'});
+    expect(player.skins).toBeGreaterThan(12);
   }
   expect(players.player1).toMatchObject({ handedness: 'right', team: 'team1' });
   expect(players.player2).toMatchObject({ handedness: 'left', team: 'team1' });

@@ -5,6 +5,18 @@ import { defaultFeetAtV1 } from './generated-foot-state.js';
 // Supported grounded paddle-contact ceiling, not an official rule or a
 // universal human reach measurement. Airborne contacts are not represented.
 export const GROUNDED_CONTACT_HEIGHT_FEET = 8.5;
+// All four costumes share these measured planted joint lengths. The lower value leaves space for a
+// balanced automatic interception. The upper bound flags authored examples
+// beyond the painted blade's reach without changing their stored evidence.
+export const PLANTED_OVERHEAD_FEET = 4.65;
+export const PLANTED_LIMIT_FEET = 5.5;
+export function plantedLobOverhead(kind,heightFeet) {
+  return kind==='volley' && heightFeet>=4.15 && heightFeet<=PLANTED_OVERHEAD_FEET+.001;
+}
+export function lobVolleyInFront({team, origin, contact}, enforcePlantedLimit=true) {
+  return (contact.y-origin.y)*(team==='green'?1:-1)>=-.3 &&
+    (!enforcePlantedLimit || contact.heightFeet<=PLANTED_OVERHEAD_FEET+.001);
+}
 const clamp = value => Math.max(0, Math.min(1, value));
 const ease = value => { const t = clamp(value); return t < .5 ? 2 * t * t : 1 - (1 - t) ** 2 * 2; };
 const blend = (a, b, t) => Object.freeze({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });

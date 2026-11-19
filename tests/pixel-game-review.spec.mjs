@@ -119,7 +119,10 @@ test('normal-motion playback, Pause, chapter seek, and ready view switching shar
   await page.getByLabel('Choose shot chapter', { exact: true }).click();
   await page.getByRole('button', { name: /Shot 2 ·/, exact: false }).first().click();
   const chapterTime = await page.evaluate(() => playBuilder.session.clock.elapsed);
-  expect(chapterTime).toBeGreaterThan(paused);
+  // The previous screenshot can take longer than one shot on a software GPU.
+  // The selected chapter has the same exact anchor from either seek direction.
+  const anchor=await page.evaluate(()=>playBuilder.chapters[1].anchor);
+  expect(chapterTime).toBeCloseTo(anchor,8);
   expect(await page.evaluate(() => playBuilder.session.playing)).toBe(false);
   const beforeView = await page.evaluate(() => playBuilder.session.clock.elapsed);
   const nextView = await page.evaluate(() => playBuilder.view === '3d' ? '2d' : '3d');

@@ -75,11 +75,11 @@ test('legacy 3D compatibility: articulated strokes remain upright, continuously 
           paddle: actor.userData.paddleFaceWorld.toArray(),
           ball: viewer.ballObject.position.toArray(),
           frame: actor.userData.animation.phase,
-          groundY: actor.position.y+(actor.userData.emeraldCap?actor.userData.visual.position.y:0),
+          groundY: actor.position.y+(actor.userData.courtAthlete?actor.userData.visual.position.y:0),
           expectedY: presentation.worldPosition.y + window.__referenceRigContract.expectedJump(presentation),
           cameraAlignment: window.__referenceRigContract.cameraAlignment(actor, viewer.camera),
           shoeBottoms: window.__athleteAudit(actor).shoeBottoms,
-          artworkError: actor.userData.emeraldCap?window.__athleteAudit(actor).rigidPaddleError():window.__athleteAudit(actor).artworkError()
+          artworkError: actor.userData.courtAthlete?window.__athleteAudit(actor).rigidPaddleError():window.__athleteAudit(actor).artworkError()
         });
       }
       return { samples };

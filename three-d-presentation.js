@@ -1,9 +1,11 @@
+import { COURT_ATHLETES } from './court-athlete-roster.js';
 // Pure presentation sampling for image-based actors in the 3D replay.
 // The Play timeline remains the sole source of positions, action timing and contact.
 
 import { FEET_TO_METERS, boardToWorld } from './three-d-core.js';
+import { teamForPlayer } from './rally-state.js';
 import { sampleStrokePose } from './three-d-animation.js';
-import { sampleActorBoardPositionV2, sampleActorFeetV2 } from './play-actors-v2.js';
+import { sampleActorBoardPositionV2, sampleActorFeetV2, PLANTED_LIMIT_FEET } from './play-actors-v2.js';
 
 export const VIEW_DIRECTIONS = Object.freeze([
     'front', 'front-right', 'right', 'back-right',
@@ -122,10 +124,9 @@ export function sampleActorWorldPosition(segment, playerId, localTime, handednes
 // Alternating world-space footsteps. During stance the shoe is anchored to one
 // point on the route; only the swing shoe travels. Both feet settle at endpoints,
 // so segment boundaries and arbitrary reverse seeks need no pose history.
-function routeFoot(route, left) {
-    const {start,end,length,distance,direction,courtForward}=route;
+function stepAlong(length, distance, left) {
+    if(length<.025)return {along:length, lift:0};
     const count=Math.max(2,Math.ceil(length/.26/2)*2),step=length/count;
-    if(length<.025)return {x:end.x+(left?.23:-.23)*courtForward,y:0,z:end.z+.015*courtForward};
     const index=Math.min(count-1,Math.floor(distance/step));
     const swinging=(index%2===0)===left,phase=clamp01(distance/step-index);
     const last=swinging?index-2:index-1;
@@ -133,9 +134,55 @@ function routeFoot(route, left) {
     const previous=landed(last),next=swinging?landed(index):previous;
     const blend=swinging?easeInOut(phase):0;
     const along=distance>=length-1e-9?length:previous+(next-previous)*blend;
-    return {x:start.x+direction.x*along+(left?.23:-.23)*courtForward,
-        y:swinging&&distance<length-1e-9?Math.sin(Math.PI*phase)*Math.min(.075,length*.16):0,
-        z:start.z+direction.z*along+.015*courtForward};
+    const lift=swinging&&distance<length-1e-9?Math.sin(Math.PI*phase)*Math.min(.075,length*.16):0;
+    return {along,lift};
+}
+
+function routeFoot({start,length,distance,direction,courtForward}, left, turn) {
+    const {along,lift}=stepAlong(length,distance,left);
+    const offset=(left?.23:-.23)*courtForward,angle=turn?turn(along/length):0;
+    return {x:start.x+direction.x*along+offset*Math.cos(angle),y:lift,
+        z:start.z+direction.z*along+.015*courtForward-offset*Math.sin(angle),
+        ...(turn?{yaw:(courtForward>0?0:Math.PI)+angle}:{})};
+}
+
+// Turn through the paddle-side shoulder on a straight retreat. Each foot
+// acquires its new stance angle on its own step, including on a reverse seek.
+function chaseTurn(from,to,handedness,brake) {
+    const f=from.y<22?1:-1,dx=(to.x-from.x)*f,dz=(to.y-from.y)*f;
+    let angle=Math.atan2(dx,dz);
+    if(Math.abs(dx)<Math.abs(dz)*.35)angle=(handedness==='right'?-1:1)*Math.abs(angle);
+    return progress=>angle*easeInOut(progress/.18)*(brake?1-easeInOut((progress-.66)/.33):1);
+}
+
+// Borrow the planted-step cadence between recorded footprints. Exact contact
+// feet, the post-contact hold and all momentum evidence stay on their authored plane.
+function stepBetweenFootprints(segment, id, localTime, feet, position, turn = null) {
+    const duration=segment.originalDuration??segment.duration;
+    let start=0,end=duration;
+    if(segment.shotSemantics?.playerId===id && segment.shotSemantics.contact.feet.length===2){
+        const release=Math.min(duration,segment.contactTime+.12);
+        if(localTime<=segment.contactTime)end=segment.contactTime;
+        else if(localTime<=release)return;
+        else start=release;
+    }
+    const from=boardToWorld(sampleActorBoardPositionV2(segment,id,start));
+    const to=boardToWorld(sampleActorBoardPositionV2(segment,id,end));
+    const dx=to.x-from.x,dz=to.z-from.z,length=Math.hypot(dx,dz);
+    if(length<.025)return;
+    const distance=Math.min(length,Math.hypot(position.x-from.x,position.z-from.z));
+    for(const [side,foot] of Object.entries(feet)){
+        const {along,lift}=stepAlong(length,distance,side==='left');
+        if(turn) {
+            const angle=turn(along/length),offset=foot.x-position.x;
+            foot.x+=offset*(Math.cos(angle)-1);
+            foot.z-=offset*Math.sin(angle);
+            foot.yaw=(from.z<0?0:Math.PI)+angle;
+        }
+        foot.x+=dx/length*(along-distance);
+        foot.z+=dz/length*(along-distance);
+        foot.y=lift;
+    }
 }
 
 function actionState(segment, playerId, localTime, distance, instructionalMovement = false) {
@@ -196,7 +243,7 @@ function actionState(segment, playerId, localTime, distance, instructionalMoveme
  */
 export function sampleActorPresentation({
     segment, playerId, localTime, cameraPosition, cameraTarget = { x: 0, y: 0, z: 0 }, handedness,
-    artFamily = 'green', timeline = null, seconds = null, instructionalMovement = false
+    artFamily = 'green', timeline = null, seconds = null, instructionalMovement = false, articulatedMotion = false
 }) {
     if (!segment || !Number.isFinite(localTime)) throw new TypeError('A segment and finite localTime are required.');
     if (!['left', 'right'].includes(handedness)) throw new TypeError('Handedness must be left or right.');
@@ -207,7 +254,7 @@ export function sampleActorPresentation({
     const distance = Math.hypot(to.x - from.x, to.y - from.y) * FEET_TO_METERS;
     const isStriker = segment.shotSemantics?.playerId === playerId;
     const isIncomingStriker = segment.nextShotSemantics?.playerId === playerId;
-    let bodyFacing;
+    let bodyFacing, pickupFacing;
     if (isStriker && segment.trajectory) {
         // Use the outgoing flight tangent. Facing the contact point itself becomes
         // undefined as the planted actor reaches it and can flip between sprite views.
@@ -218,6 +265,10 @@ export function sampleActorPresentation({
         const recover=instructionalMovement?easeInOut((localTime-release)/Math.max(.001,profile.duration*(1-profile.recoverRatio))):0;
         const court={x:0,z:from.y<22?1:-1};
         bodyFacing=normalizeHorizontal({x:outgoing.x*(1-recover),z:outgoing.z*(1-recover)+court.z*recover},court);
+        if (articulatedMotion && segment.startTime===0 && localTime<segment.contactTime) {
+            const turn=easeInOut(localTime/segment.contactTime);
+            pickupFacing=normalizeHorizontal({x:outgoing.x*turn,z:outgoing.z*turn+court.z*(1-turn)},court);
+        }
     } else if (isIncomingStriker && segment.trajectory) {
         const incoming = instructionalMovement?{x:0,z:from.y<22?1:-1}:normalizeHorizontal({x:segment.trajectory.start.x-segment.trajectory.end.x,z:segment.trajectory.start.z-segment.trajectory.end.z});
         const authoredNext = timeline?.play?.steps?.[segment.index + 1]?.shot;
@@ -260,9 +311,49 @@ export function sampleActorPresentation({
     const travelSpeed = sampleInterval > 0 ? Math.hypot(after.x - before.x, after.z - before.z) / sampleInterval : 0;
     const model2Feet = segment.modelVersion === 2 ? sampleActorFeetV2(segment, playerId, localTime).sort((a,b)=>a.x-b.x) : null;
     const near = segment.previous.positions[playerId].y < 22;
+    let feet = model2Feet ? {left:boardToWorld(model2Feet[near?1:0],0), right:boardToWorld(model2Feet[near?0:1],0)} :
+        route ? {left:routeFoot(route,true),right:routeFoot(route,false)} : null;
+    const recordedFeet = articulatedMotion && segment.model2Momentum?.some(
+        item=>item.actor===playerId && item.contactTime<=segment.startTime+localTime+1e-9);
+    const lob=segment.shotSemantics?.shotType==='lob';
+    const terminalChase=!segment.nextShotSemantics && ['unreachable','second-bounce'].includes(timeline?.outcome?.reason);
+    const chasing=articulatedMotion && !isStriker && lob && (to.y-from.y)*(near?1:-1)<-2 &&
+        (isIncomingStriker && segment.nextShotSemantics.contact.kind!=='volley' || terminalChase);
+    const turn=chasing && !recordedFeet ? chaseTurn(from,to,handedness,!terminalChase) : null;
+    if(turn){
+        const offset=turn(Math.min(1,travelDistance/distance));
+        const yaw=Math.atan2(bodyFacing.x,bodyFacing.z)+offset;
+        pickupFacing={x:Math.sin(yaw),z:Math.cos(yaw)};
+        if(route?.length>.025)feet={left:routeFoot(route,true,turn),right:routeFoot(route,false,turn)};
+    }
+    if (model2Feet && articulatedMotion && !recordedFeet) stepBetweenFootprints(segment,playerId,localTime,feet,worldPosition,turn);
+    let splitStep=instructionalMovement ? Math.max(
+        !isStriker&&segment.shotSemantics ? Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11) : 0,
+        segment.nextShotSemantics&&!isIncomingStriker ? Math.max(0,1-(segment.duration-localTime)/.11) : 0) : 0;
+    let splitLift=0;
+    if(articulatedMotion){
+        const roster=timeline?.play?.players,team=teamForPlayer(playerId,roster);
+        const opponent=shot=>shot && teamForPlayer(shot.playerId,roster)!==team;
+        const current=segment.contactTime-localTime;
+        const next=timeline?.segments?.[segment.index];
+        const untilHit=opponent(segment.shotSemantics) && current>=-.18 ? current :
+            opponent(segment.nextShotSemantics) ? segment.duration-localTime+(next?.contactTime || 0) : Infinity;
+        // The split straddles the opponent's contact. Land on flexed knees as
+        // the ball leaves the paddle, ready to push off the planted foot.
+        splitStep=Math.max(0,1-Math.abs(untilHit+.055)/.12);
+        if(!recordedFeet && untilHit>-.055 && untilHit<.12){
+            const grounded=1-clamp01(Math.max(feet?.left.y||0,feet?.right.y||0)/.045);
+            splitLift=.05*Math.sin(Math.PI*(untilHit+.055)/.175)**2*grounded*(1-clamp01(travelSpeed/2));
+        }
+    }
     return Object.freeze({
         ...(segment.modelVersion === 2 ? { modelVersion: 2 } : {}),
         playerId, worldPosition, bodyFacing: Object.freeze(bodyFacing), viewDirection: direction,
+        ...(articulatedMotion ? {courtForward:near?1:-1,splitLift} : {}),
+        ...(instructionalMovement ? {chasingLob:chasing && localTime>=segment.contactTime,motionLeg:segment.rallyLeg,strokeLeg:isStriker?segment.rallyLeg:isIncomingStriker?segment.rallyLeg+1:null,
+            unsupportedHighContact:activeSemantics?.contact.point.heightFeet>PLANTED_LIMIT_FEET &&
+                (segment.modelVersion===2 || (isIncomingStriker?lob:(segment.previous.shot?.authoring?.family || segment.previous.shot?.type)==='lob'))} : {}),
+        ...(pickupFacing ? {pickupFacing:Object.freeze(pickupFacing)} : {}),
         action: state.action, phase: state.phase, frameIndex: state.frameIndex,
         locomotionFrame: state.locomotionFrame, planted: state.planted, handedness,
         artFamily, artAction: state.action,
@@ -272,11 +363,56 @@ export function sampleActorPresentation({
         strokePose, strokeTime, profile, timeSeconds: seconds ?? segment.startTime + localTime,
         travelDistance, travelPhase: travelDistance / .58 * Math.PI * 2, travelSpeed,
         travelDirection: route?Object.freeze(route.direction):null,
-        footTargets: model2Feet ? Object.freeze({left:Object.freeze(boardToWorld(model2Feet[near?1:0],0)),right:Object.freeze(boardToWorld(model2Feet[near?0:1],0))}) : route?Object.freeze({left:Object.freeze(routeFoot(route,true)),right:Object.freeze(routeFoot(route,false))}):null,
-        splitStep: instructionalMovement?Math.max(
-            !isStriker&&segment.shotSemantics?Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11):0,
-            segment.nextShotSemantics&&segment.nextShotSemantics.playerId!==playerId?Math.max(0,1-(segment.duration-localTime)/.11):0):0,
+        footTargets: feet ? Object.freeze({left:Object.freeze(feet.left),right:Object.freeze(feet.right)}) : null,
+        splitStep,
         atlasKey: `${artFamily}/${handedness}/${direction}/${state.action}/${state.phase}`,
         paddle: Object.freeze({ anchorId: `${handedness}-paddle-face`, worldContactTarget: contactTarget })
     });
+}
+
+export function emeraldReachFindings(timeline) {
+    if(!timeline)return [];
+    return timeline.segments.filter(s=>s.shotSemantics &&
+        (timeline.modelVersion===2 || (s.previous.shot?.authoring?.family || s.previous.shot?.type)==='lob') &&
+        s.shotSemantics.contact.point.heightFeet>PLANTED_LIMIT_FEET).map(s=>({
+        kind:'feasibility',severity:'warning',shotId:s.step.id,
+        message:`Recorded contact at ${s.shotSemantics.contact.point.heightFeet.toFixed(1)} ft exceeds ${COURT_ATHLETES[Number(s.shotSemantics.playerId.slice(6))-1].name}’s planted paddle reach.`
+    }));
+}
+
+// The court and this optional cue read one sampled actor and the compiler's
+// actual events. Scrubbing, looping and hand changes therefore need no timer.
+export function emeraldTeaching(timeline,sample,actor='player1') {
+    if(!sample || !timeline)return null;
+    const t=sample.timeSeconds,events=timeline.events,terminal=events.find(e=>e.type==='dead');
+    const isLobBounce=e=>e.type==='bounce' && timeline.segments[e.rallyLeg-1]?.shotSemantics?.shotType==='lob';
+    const stops=events.filter(e=>e.type==='contact' && e.actor===actor || isLobBounce(e) && (!terminal || e.time<terminal.time-.0001) || e.type==='dead');
+    const next=stops.find(e=>e.time>t+.0001) || stops[0];
+    const stepLabel=next?.type==='contact'?'contact':next?.type==='bounce'?'bounce':'ending';
+    const state={nextTime:next?.time,button:next ? (next.time>t+.0001?'Next ':'First ')+stepLabel : 'Next contact'};
+    if(terminal && t>=terminal.time-.0001){
+        const out=['long','wide'].includes(terminal.reason);
+        const outTitle=timeline.segments[terminal.rallyLeg-1]?.shotSemantics?.shotType==='lob'?'Lob out':'Ball out';
+        return {...state,title:out?outTitle:terminal.reason==='second-bounce'||terminal.reason==='unreachable'?'Second bounce':'Point ended',
+            cue:out?'The first landing is out. Let the ball go.':terminal.reason==='second-bounce'||terminal.reason==='unreachable'?'The ball bounced twice before a return.':'The rally has reached its recorded ending.'};
+    }
+    const contact=events.find(e=>e.type==='contact' && e.actor===actor && e.rallyLeg===sample.strokeLeg);
+    if(contact && !['ready','shuffle'].includes(sample.action)){
+        const family=sample.instructionalFamily || sample.shotType;
+        const side=sample.strokeSide==='backhand'?'Backhand':'Forehand';
+        const title=['dink','drive','drop','lob','return','volley'].includes(family)?side+' '+family:family[0].toUpperCase()+family.slice(1);
+        if(sample.unsupportedHighContact)return {...state,title:title+' · out of reach',cue:'The recorded ball is above the planted paddle. These feet stay grounded.'};
+        const at=Math.abs(contact.time-t)<.0001;
+        const cue=t>contact.time+.0001?'Finish balanced and return the paddle in front.':
+            family==='dink'?at?'Meet the ball in front with a quiet, open paddle.':'Set the paddle in front for a short lift.':
+            family==='overhead'?'Set under the ball and strike in front of the hitting shoulder.':
+            family==='drop'?'Get behind the ball and lift softly toward the kitchen.':
+            at?'Meet the ball in front and finish in balance.':'Set the hitting face on the approaching ball.';
+        return {...state,title:title+(at?' · contact':''),cue};
+    }
+    if(sample.chasingLob){
+        const bounce=events.find(e=>e.rallyLeg===sample.motionLeg && isLobBounce(e) && e.time>=t-.0001);
+        return {...state,title:'Lob recovery',cue:bounce?'Drop step, turn and run toward the bounce.':'Get behind the rebound and set the paddle in front.'};
+    }
+    return {...state,title:'Ready',cue:'Stay balanced with the paddle in front and watch the ball.'};
 }

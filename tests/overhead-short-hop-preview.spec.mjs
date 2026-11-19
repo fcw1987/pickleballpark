@@ -13,7 +13,7 @@ async function openFixture(page, document) {
 
 async function reviewWarning(page) {
   await page.getByRole('button', { name: 'Shot 2 needs attention', exact: true }).click();
-  const warning = page.locator('.builder-finding-row[data-kind="feasibility"]');
+  const warning = page.locator('.builder-finding-row[data-kind="feasibility"]').filter({hasText:'low contact height'});
   await expect(warning).toContainText('7 ft contact');
   await expect(warning).toContainText('low contact height');
   await expect(warning).toContainText('Choose Automatic, Forehand, or Backhand');
@@ -39,7 +39,9 @@ test('ordinary Contact style editing warns immediately and clears reversibly', a
   const document = structuredClone(source);
   document.shots[1].contactStyle = 'auto';
   await openFixture(page, document);
-  await expect(page.locator('.builder-issue-chip')).toHaveCount(0);
+  await expect(page.locator('.builder-issue-chip')).toHaveCount(1);
+  expect(await page.evaluate(()=>playBuilder.compiled.findings.filter(f=>f.kind==='feasibility').map(f=>f.message)))
+    .toEqual([expect.stringContaining('planted paddle reach')]);
   await page.getByLabel('Choose shot chapter', { exact: true }).click();
   await page.getByRole('button', { name: 'Customize Shot 2', exact: true }).click();
   await openIntentTab(page, 'Players');
@@ -47,12 +49,16 @@ test('ordinary Contact style editing warns immediately and clears reversibly', a
   await reviewWarning(page);
   await openIntentTab(page, 'Players');
   await page.getByLabel('Contact style', { exact: true }).selectOption('auto');
-  await expect(page.locator('.builder-issue-chip')).toHaveCount(0);
-  await expect(page.locator('.builder-finding-row')).toHaveCount(0);
+  await expect(page.locator('.builder-issue-chip')).toHaveCount(1);
+  expect(await page.evaluate(()=>playBuilder.compiled.findings.filter(f=>f.kind==='feasibility').map(f=>f.message)))
+    .toEqual([expect.stringContaining('planted paddle reach')]);
+  await expect(page.locator('.builder-finding-row').filter({hasText:'low contact height'})).toHaveCount(0);
   await page.evaluate(() => playBuilder.action('undo'));
   await reviewWarning(page);
   expect(await page.evaluate(() => playBuilder.document.shots[1].contactStyle)).toBe('short-hop');
   await page.evaluate(() => playBuilder.action('redo'));
-  await expect(page.locator('.builder-issue-chip')).toHaveCount(0);
+  await expect(page.locator('.builder-issue-chip')).toHaveCount(1);
+  expect(await page.evaluate(()=>playBuilder.compiled.findings.filter(f=>f.kind==='feasibility').map(f=>f.message)))
+    .toEqual([expect.stringContaining('planted paddle reach')]);
   expect(await page.evaluate(() => playBuilder.document.shots[1].contactStyle)).toBe('auto');
 });

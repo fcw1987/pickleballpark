@@ -20,11 +20,18 @@ async function openBuilder(page, viewport) {
   await expect(visiblePlay(page)).toHaveAttribute('aria-label', 'Play');
 }
 
-async function playAndHoldPause(page, frames = 4, pointerType = 'mouse') {
+async function renderFrames(page, frames) {
+  await page.evaluate(async count => {
+    for (let i = 0; i < count; i += 1) await new Promise(resolve => requestAnimationFrame(resolve));
+  }, frames);
+}
+
+async function playAndHoldPause(page, frames = 4, pointerType = 'mouse', advanceFrames = renderFrames) {
   const play = visiblePlay(page);
   await play.click();
   await expect(play).toHaveAttribute('aria-label', 'Pause');
   await expect(play).toHaveAttribute('aria-pressed', 'true');
+  await advanceFrames(page, 2);
   const pause = visiblePlay(page);
   const label = pause.locator('.pixel-play-label:visible');
   const box = await label.boundingBox();
@@ -34,9 +41,7 @@ async function playAndHoldPause(page, frames = 4, pointerType = 'mouse') {
   else {
     await page.mouse.move(point.x, point.y);
     await page.mouse.down();
-    await page.evaluate(async count => {
-      for (let i = 0; i < count; i += 1) await new Promise(resolve => requestAnimationFrame(resolve));
-    }, frames);
+    await advanceFrames(page, frames);
     await page.mouse.up();
   }
   await page.waitForTimeout(60);
@@ -56,9 +61,7 @@ async function openChapterMenuDuringPlay(page) {
 }
 
 async function expectPausedStable(page, timeline) {
-  await page.evaluate(async () => {
-    for (let i = 0; i < 6; i += 1) await new Promise(resolve => requestAnimationFrame(resolve));
-  });
+  await renderFrames(page, 6);
   await page.waitForTimeout(100);
   const current = Number(await page.locator('.builder-transport input[type="range"]:visible').inputValue());
   expect(current).toBeCloseTo(Number(timeline), 6);
@@ -70,7 +73,12 @@ test.describe('BETA009 visible pause input', () => {
   for (const viewport of viewports) {
     test(`desktop/compact visible long press pauses at ${viewport.name}`, async ({ page }) => {
       await openBuilder(page, viewport);
-      const result = await playAndHoldPause(page, 4, 'mouse');
+      // Exercise an interior pause. Four software-rendered frames can otherwise
+      // span the whole starter rally, where Resume legitimately wraps to zero.
+      await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+      await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
+      const result = await playAndHoldPause(page, 4, 'mouse', (page, frames) => page.clock.runFor(16 * frames));
+      await page.clock.resume();
       expect(result.label).toBe('Play');
       expect(result.pressed).toBe('false');
       const pausedAt = Number(result.timeline);

@@ -15,7 +15,8 @@ import {
 } from './three-d-core.js';
 import { sampleActorPresentation, selectCameraRelativeDirection } from './three-d-presentation.js';
 import { loadReferenceAthleteAssets, ReferenceAthleteResources as AthleteResources, createReferenceAthlete as createAthlete, updateReferenceAthlete as updateAthlete } from './reference-athletes.js';
-import { loadEmeraldAthlete } from './emerald-athlete.js';
+import { COURT_ATHLETES, courtAthleteIndex } from './court-athlete-roster.js';
+import { loadCourtAthlete } from './emerald-athlete.js';
 import { ReadableBall, TerminalEventMarkers } from './three-d-ball.js';
 import { terminalCueAtTime, terminalVisualsAtTime } from './terminal-cues.js';
 import { chapterAtTime } from './shot-chapters.js';
@@ -220,9 +221,16 @@ class ThreeDPlaybackViewer {
         this.currentPlay = null;
         this.timeline = null;
         this.playerObjects = new Map();
+        this.courtAthletes = [];
+        this.coachingPlayer = 'player1';
         this.coverageSamples = {};
+        this.coverageContext = null;
         this.coveragePreferenceUnsubscribe = getCoveragePreference().subscribe(() => {
-            if (this.active) this.renderSessionSample();
+            if (!this.active) return;
+            // Update the sectors for the displayed sample immediately. A single
+            // animation frame paints them together with the court and athletes.
+            if (this.coverageContext) this.playerCoverage?.update(this.coverageContext);
+            this.startRenderLoop();
         });
         this.ballObject = null;
         this.lastState = null;
@@ -348,12 +356,12 @@ class ThreeDPlaybackViewer {
             this.actorAssets = await loadReferenceAthleteAssets({signal:controller.signal});
             if(generation!==this.loadGeneration||this.board.plays.activePlay!==play||this.board.plays.snapshot!==snapshot)return false;
             if (new URLSearchParams(location.search).get('athletes') !== 'illustrated') {
-                const emerald = await loadEmeraldAthlete(controller.signal);
+                const athletes = await Promise.all(COURT_ATHLETES.map((_, index) => loadCourtAthlete(index,controller.signal)));
                 if (generation !== this.loadGeneration || this.board.plays.activePlay !== play || this.board.plays.snapshot !== snapshot) {
-                    emerald?.userData.dispose();
+                    for (const actor of athletes) actor?.userData.dispose();
                     return false;
                 }
-                this.emeraldAthlete = emerald;
+                this.courtAthletes = athletes;
             }
             this.currentPlay = play;
             this.timeline = this.board.plays.timeline;
@@ -484,33 +492,42 @@ class ThreeDPlaybackViewer {
     }
 
 
+    get emeraldAthlete() { return this.courtAthletes[0]; }
+
     buildPlayers() {
         this.actorResources=new AthleteResources(this.actorAssets);
         for(let index=1;index<=4;index++) {
             const token=this.board.tokens[`player${index}`];
             const team=token.element.classList.contains('team2-player')?'team2':'team1';
-            const actor=(team==='team1' && (index-1)%2===0 && this.emeraldAthlete)
+            const actor=this.courtAthletes[courtAthleteIndex(team,index-1)]
                 || createAthlete(this.actorResources,team,token.handedness,index-1);
             actor.userData.handedness=token.handedness;
             actor.userData.id=token.id;this.scene.add(actor);this.playerObjects.set(token.id,actor);
         }
     }
 
-    applyAthletes(segment,localTime) {
+    applyAthletes(segment,localTime,trail) {
         for(const [id,actor] of this.playerObjects) {
             let sample;
-            if(segment) sample=sampleActorPresentation({instructionalMovement:true,segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
+            if(segment) sample=sampleActorPresentation({instructionalMovement:true,articulatedMotion:Boolean(actor.userData.courtAthlete),segment,timeline:this.timeline,seconds:segment.startTime+localTime,playerId:id,localTime,cameraPosition:this.camera.position,cameraTarget:this.cameraTarget,handedness:actor.userData.handedness});
             else {
                 const position=this.currentPlay.steps[0].positions[id],world=boardToWorld(position);
                 const facing={x:0,z:position.y<22?1:-1};
                 sample={handedness:actor.userData.handedness,worldPosition:world,bodyFacing:facing,facing,timeSeconds:0,travelPhase:0,viewDirection:selectCameraRelativeDirection(facing,world,this.camera.position,this.cameraTarget),action:'ready',phase:'ready',locomotionFrame:null,paddle:null};
+                if(actor.userData.courtAthlete){
+                    const segment=this.timeline.segments[0];
+                    const initial=segment && sampleActorPresentation({segment,playerId:id,localTime:0,
+                        handedness:actor.userData.handedness,instructionalMovement:true,articulatedMotion:true});
+                    const offset=side=>({x:world.x+side*.23*facing.z,y:0,z:world.z+.015*facing.z});
+                    sample.footTargets=initial?.footTargets || {left:offset(1),right:offset(-1)};
+                }
             }
             const isStriker=segment?.shotSemantics?.playerId===id;
             const isIncoming=segment?.nextShotSemantics?.playerId===id;
             const distance=isStriker?Math.abs(localTime-segment.contactTime):isIncoming?Math.abs(segment.duration-localTime):Infinity;
             const window=localTime<segment?.contactTime?0.18:0.22;
             const t=Math.max(0,1-distance/window),weight=t*t*(3-2*t);
-            if (actor===this.emeraldAthlete) actor.userData.applyPose(sample,weight);
+            if (actor.userData.courtAthlete) actor.userData.applyPose(sample,weight,trail);
             else updateAthlete(actor,sample,this.camera,weight);
             this.coverageSamples[id] = sample;
         }
@@ -622,7 +639,16 @@ class ThreeDPlaybackViewer {
     updateBallReadability() {
         if(!this.readableBall||!this.camera)return;
         const time=this.lastState?.elapsed||0;
-        this.readableBall.update(this.camera,this.elements.canvas.clientHeight,time,t=>this.sampleBall(t),this.lastState?.launched);
+        const actor=this.playerObjects.get(this.coachingPlayer),sample=this.coverageSamples[this.coachingPlayer];
+        let diameter=this.ballObject.userData.minimumCSSDiameter;
+        if(this.emeraldCoaching && actor && sample?.strokePose && !sample.unsupportedHighContact){
+            // The enlarged tracking dot can hide the entire blade at court zoom.
+            // Ease it back to ball scale only while the actual grip meets it.
+            const gap=this.ballObject.position.distanceTo(actor.userData.paddleFaceWorld);
+            const mix=THREE.MathUtils.smoothstep(gap,.04,.36);
+            diameter=THREE.MathUtils.lerp(Math.min(4,diameter),diameter,mix);
+        }
+        this.readableBall.update(this.camera,this.elements.canvas.clientHeight,time,t=>this.sampleBall(t),this.lastState?.launched,diameter);
     }
 
     sampleBall(seconds) { return samplePlayBall(this.timeline, seconds); }
@@ -668,16 +694,22 @@ class ThreeDPlaybackViewer {
         const local=segment?Math.max(0,Math.min(segment.duration,seconds-segment.startTime)):0;
         this.world?.updateCamera?.(this.camera);
         this.world?.updateAtTime?.(seconds);
-        this.applyAthletes(segment,local);
         const ball=this.sampleBall(seconds);
+        const trail=this.courtAthletes.some(Boolean) ? [ball,this.sampleBall(Math.max(0,seconds-.07)),this.sampleBall(Math.max(0,seconds-.16))] : null;
+        this.applyAthletes(segment,local,trail);
         this.ballObject.position.set(ball.x,ball.y,ball.z);
         this.lastState={...ball,elapsed:seconds,stepIndex:segment?.index||0};
         const terminalMarkers = terminalVisualsAtTime(this.timeline, seconds);
         if (terminalMarkers.length && !this.terminalMarkers) this.terminalMarkers = new TerminalEventMarkers(this.scene);
         this.terminalMarkers?.update(terminalMarkers);
-        this.playerCoverage?.update({ board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment });
+        this.coverageContext = { board: this.board, timeSeconds: seconds, ball, samples: this.coverageSamples, segment };
+        this.playerCoverage?.update(this.coverageContext);
         this.updateBallReadability();
-        const status=segment?`${segment.step.label} · ${ball.phase}`:'Ready';
+        const hitter=segment?.shotSemantics?.playerId;
+        const sample=this.coverageSamples[hitter];
+        const recordedHigh=sample?.unsupportedHighContact && sample.strokeLeg===segment.rallyLeg;
+        const status=recordedHigh ? segment.step.label+' · recorded above planted reach' :
+            segment?`${segment.step.label} · ${ball.phase}`:'Ready';
         if(this.elements.status.textContent!==status)this.elements.status.textContent=status;
         return this.lastState;
     }
@@ -733,7 +765,7 @@ class ThreeDPlaybackViewer {
 
     disposeScene() {
         this.terminalMarkers?.dispose(); this.terminalMarkers = null;
-        this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {};
+        this.playerCoverage?.dispose(); this.playerCoverage = null; this.coverageSamples = {}; this.coverageContext = null;
         this.cameraControls?.dispose();this.cameraControls=null;
         this.renderer?.domElement.removeEventListener('webglcontextlost',this.boundContextLost);
         this.staticWorldCache?.dispose();this.staticWorldCache=null;
@@ -745,7 +777,8 @@ class ThreeDPlaybackViewer {
         this.readableBall?.dispose();this.readableBall=null;
         for (const actor of this.playerObjects.values()) this.scene?.remove(actor);
         this.actorResources?.dispose();this.actorResources=null;
-        this.emeraldAthlete?.userData.dispose();this.emeraldAthlete=null;
+        for (const actor of this.courtAthletes) actor?.userData.dispose();
+        this.courtAthletes=[];
         this.scene?.traverse(object => {
             object.geometry?.dispose?.();
             if (Array.isArray(object.material)) object.material.forEach(material => material.dispose());

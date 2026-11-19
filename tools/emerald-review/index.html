@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Athlete review · Pickleball Park</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%}body{background:#172f29;color:#f8f6e7;font:15px system-ui,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:10px 16px}strong{font-size:17px}label{display:flex;align-items:center;gap:7px}select,button{font:inherit;border:1px solid #b0c4ac;border-radius:5px;background:#f3f3df;color:#17372c;padding:4px 8px}button{cursor:pointer}a{color:#e6eed1}iframe{width:100%;flex:1;min-height:0;border:0}#status{font-size:13px}
+</style></head><body>
+<header><label>Athlete <select id="athlete"></select></label><label>Example <select id="example"></select></label>
+<label>Paddle <select id="hand"><option value="right">Right</option><option value="left">Left</option></select></label>
+<button id="replay" disabled>Replay at ½ speed</button><a href="/court/">Open court</a><span id="status" role="status">Opening court…</span></header>
+<iframe id="court" src="/court/" title="Playable Pickleball Park court"></iframe>
+<script type="module">
+import {examples,reviewDocument} from '/court/tools/emerald-review/examples.mjs';
+const el=id=>document.getElementById(id);
+const court=el('court'),example=el('example'),hand=el('hand'),button=el('replay'),status=el('status');
+for(const [id,label] of examples) example.add(new Option(label,id));
+const query=new URLSearchParams(location.search);
+if(examples.some(([id])=>id===query.get('example')))example.value=query.get('example');
+if(query.get('hand')==='left')hand.value='left';
+const athlete=el('athlete');
+const {COURT_ATHLETES}=await import('/court/court-athlete-roster.js');
+for(const [index,player] of COURT_ATHLETES.entries())athlete.add(new Option(player.name,String(index)));
+const focus=COURT_ATHLETES.findIndex(p=>p.key===query.get('athlete'));
+athlete.value=String(Math.max(0,focus));
+const source=await fetch('/saved-rally.json').then(r=>r.json());
+let startTime=0;
+function load(play=false) {
+    const win=court.contentWindow, builder=win.playBuilder;
+    const index=Number(athlete.value),doc=reviewDocument(example.value,hand.value,source,index);
+    const handSide=hand.value==='right'?1:-1;
+    const azimuth={ 'backhand-dink':.62, 'overhead':.55, 'lob-chase':-1.08 }[example.value]??-.7;
+    win.pickleboard.threeD.cameraControls.setState({azimuth:azimuth*handSide+(index>=2?Math.PI:0),elevation:26});
+    builder.loadDocument(doc,{persist:false});
+    if(builder.compiled.validShotCount!==doc.shots.length)throw new Error('Example did not compile');
+    const timeline=win.pickleboard.threeD.timeline;
+    const focusId=example.value==='backhand-dink'?'kitchen':'stroke';
+    const focus=timeline.events.find(e=>e.type==='contact' && timeline.segments[e.rallyLeg-1]?.step.id===focusId);
+    builder.action('coachingPlayer','player'+(index+1));builder.action('emeraldCoaching',true);
+    startTime=focus ? Math.max(0,focus.time-.64) : 0;
+    builder.seek(startTime);
+    builder.action('rate',.5);
+    if(play)builder.play();
+    status.textContent='Drag the court to orbit.';
+    button.disabled=false;
+    history.replaceState(null,'','/?'+new URLSearchParams({athlete:COURT_ATHLETES[index].key,example:example.value,hand:hand.value}));
+}
+function safely(play){try{load(play);}catch(error){status.textContent=error.message;}}
+example.onchange=hand.onchange=athlete.onchange=()=>safely(true);
+button.onclick=()=>{
+    const builder=court.contentWindow.playBuilder;
+    builder.seek(startTime);builder.action('rate',.5);builder.play();
+};
+const started=performance.now();
+function ready(){
+    const win=court.contentWindow;
+    if(win.playBuilder?.view==='3d' && win.pickleboard?.threeD?.playerObjects?.size===4){
+        safely(false);
+    }else if(performance.now()-started<25000){setTimeout(ready,100);}
+    else status.textContent='The 3D court did not open. Open court to retry.';
+}
+ready();
+</script></body></html>

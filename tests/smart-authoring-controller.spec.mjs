@@ -22,6 +22,10 @@ test('an Add pressed during an earlier commit keeps its native click',async({pag
 test('a delayed Add commits and selects the new shot before its next edit',async({page})=>{
   const before=await page.evaluate(()=>{
     const source=structuredClone(playBuilder.document);
+    // Keep the real Add button and generator. This seed permits the subsequent
+    // backhand edit; a generated short-hop can require its original contact.
+    const queueAdd=playBuilder.queueSmartAdd.bind(playBuilder);
+    playBuilder.queueSmartAdd=options=>queueAdd({...options,seed:256});
     const cancel=playBuilder.cancelPendingProposals;
     playBuilder.cancelPendingProposals=function(){
       this.cancelPendingProposals=cancel;

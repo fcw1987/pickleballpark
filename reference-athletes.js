@@ -1,3 +1,4 @@
+import { courtAthleteIndex } from './court-athlete-roster.js';
 import * as THREE from './vendor/three.module.min.js';
 import {computePixelStroke} from './pixel-strokes.js';
 const SOURCE=new URL('./assets/reference-athletes/athletes-armless-v2.webp',import.meta.url).href;
@@ -62,7 +63,7 @@ function segment(part,a,b,eye){const delta=b.clone().sub(a),length=delta.length(
 export function createReferenceAthlete(resources,team,handedness,index=0){
  const root=new THREE.Group(),visual=new THREE.Group(),geometry=new THREE.PlaneGeometry(1,1,12,28),mat=new THREE.MeshBasicMaterial({transparent:true,alphaTest:.08,depthWrite:true,side:THREE.DoubleSide,toneMapped:false});resources.materials.add(mat);resources.geometries.add(geometry);
  const body=new THREE.Mesh(geometry,mat);body.name='OriginalDetailedAthlete';visual.add(body);const sleeves=[0,1].map(()=>{const g=geometry.clone(),m=mat.clone(),s=new THREE.Mesh(g,m);resources.geometries.add(g);resources.materials.add(m);visual.add(s);return s;});root.add(visual);
- const player=(team==='team1'||team==='green'?0:2)+(index%2),skin=['#efae70','#b96c35','#efa16a','#a9653c'][player],arms=[arm(resources,skin),arm(resources,skin)];for(const a of arms)visual.add(a.group);
+ const player=courtAthleteIndex(team,index),skin=['#efae70','#b96c35','#efa16a','#a9653c'][player],arms=[arm(resources,skin),arm(resources,skin)];for(const a of arms)visual.add(a.group);
  const paddle=new THREE.Group(),rim=mesh(resources,new THREE.CylinderGeometry(.19,.19,.046,24),material(resources,'#192d39')),face=mesh(resources,new THREE.CylinderGeometry(.167,.167,.05,24),material(resources,team==='team1'?'#3f8994':'#e7ad67'));rim.rotation.x=face.rotation.x=Math.PI/2;rim.scale.y=face.scale.y=1.2;paddle.add(rim,face);
  const grip=mesh(resources,new THREE.CylinderGeometry(.032,.028,.24,10),material(resources,'#cfa572'));grip.position.y=-.24;paddle.add(grip);visual.add(paddle);
  root.userData={team,handedness,player,resources,visual,body,sleeves,arms,paddle,baseVertices:Float32Array.from(geometry.attributes.position.array),paddleFaceWorld:v(),referenceAthlete:true};return root;
