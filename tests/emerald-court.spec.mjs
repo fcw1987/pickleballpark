@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { installDimensionalAudit } from './helpers/dimensional-audit.mjs';
 import { readFileSync } from 'node:fs';
 import { reviewDocument } from '../tools/emerald-review/examples.mjs';
+import { simulateRally } from '../rally-engine.js';
 
 test.use({ serviceWorkers: 'block' });
 
@@ -25,6 +26,38 @@ test('a fresh court shows both serving partners following the bounced third shot
   }
   expect(Math.abs(end[0].y - end[1].y)).toBeLessThan(3);
   expect(end[3].x - end[2].x).toBeGreaterThan(8);
+});
+
+test('both rendered partners shade a wide drop and the supporting athlete crosses and brakes',async({page})=>{
+  const {document}=await simulateRally({seed:13,options:{lobRecovery:'planted-v2',pairPositioning:'ball-side-v1'}});
+  await page.goto('/');await ready(page);await installDimensionalAudit(page);
+  const result=await page.evaluate(doc=>{
+    const b=playBuilder,v=pickleboard.threeD;
+    b.loadDocument(doc,{persist:false});
+    const leg=v.timeline.segments[6],actor=v.playerObjects.get('player4'),partner=v.playerObjects.get('player3');
+    const sample=f=>{
+      b.seek(leg.startTime+leg.duration*f);
+      const skin=window.__athleteAudit(actor);
+      return {feet:skin.paintedSoles.map(r=>r.reduce((sum,p)=>sum.map((x,i)=>x+p[i]/r.length),[0,0,0])),
+        bottom:skin.shoeBottoms,pair:[actor.position.x,partner.position.x]};
+    };
+    const start=sample(0),frames=Array.from({length:61},(_,i)=>sample(i/60)),end=sample(1);
+    const brake=sample(1-.06/leg.duration);
+    return {start,end,brake,frames};
+  },document);
+  const order=frame=>frame.feet[0][0]-frame.feet[1][0];
+  expect(result.frames.some(f=>order(f)*Math.sign(order(result.start))<-.02)).toBe(true);
+  for(const {feet} of result.frames)
+    expect(Math.hypot(feet[0][0]-feet[1][0],feet[0][2]-feet[1][2])).toBeGreaterThan(.18);
+  const shifts=result.end.pair.map((x,i)=>x-result.start.pair[i]);
+  expect(shifts[0]*shifts[1]).toBeGreaterThan(1);
+  expect(Math.abs(result.end.pair[0]-result.end.pair[1])/.3048).toBeCloseTo(9,1);
+  for(const i of [0,1]) {
+    expect(Math.abs(result.brake.bottom[i])).toBeLessThan(1e-6);
+    expect(Math.abs(result.end.bottom[i])).toBeLessThan(1e-6);
+    expect(result.brake.feet[i][0]).toBeCloseTo(result.end.feet[i][0],5);
+    expect(result.brake.feet[i][2]).toBeCloseTo(result.end.feet[i][2],5);
+  }
 });
 
 test('normal court draws the approved skin throughout an orbit and releases its GPU resources on exit', async ({ page }) => {

@@ -246,7 +246,11 @@ export function createCourtAthlete(gltf,index=0) {
             const target=sample.footTargets?.[(side==='R')===(mirror===1)?'right':'left'];
             if (!target) continue;
             const foot='Foot'+side, q=rotation(bind[foot]);
-            if(Number.isFinite(target.yaw))q.premultiply(new THREE.Quaternion().setFromAxisAngle(UP,(target.yaw-yaw)*mirror));
+            // A planted shoe keeps its court heading when the torso loads or
+            // turns through contact. The gait supplies a new heading on a step.
+            const forward=sample.courtForward ?? (root.position.z<=0?1:-1);
+            const footYaw=target.yaw ?? (forward===-1?Math.PI:0);
+            q.premultiply(new THREE.Quaternion().setFromAxisAngle(UP,(footYaw-yaw)*mirror));
             const ankle=canonical(target);
             // A swing foot pitches slightly on lift. Both soles finish flat,
             // and the leg releases from the court together with the body on a hop.

@@ -77,9 +77,10 @@ function actorRoute(segment, playerId, localTime, handedness) {
         end=contactPlant(segment.nextShotSemantics,segment.nextStep.shot,handedness,fallback);
         endTime=Math.max(.001,segment.duration-.13);
     }
-    const progress=easeInOut((localTime-startTime)/Math.max(.001,endTime-startTime));
+    const clock=clamp01((localTime-startTime)/Math.max(.001,endTime-startTime));
+    const progress=easeInOut(clock);
     const length=Math.hypot(end.x-start.x,end.z-start.z);
-    return {start,end,length,progress,distance:length*progress,
+    return {start,end,length,progress,clock,seconds:endTime-startTime,distance:length*progress,
         direction:normalizeHorizontal({x:end.x-start.x,z:end.z-start.z},fallback),
         position:{x:start.x+(end.x-start.x)*progress,y:0,z:start.z+(end.z-start.z)*progress},
         courtForward:fallback.z};
@@ -138,51 +139,88 @@ function stepAlong(length, distance, left) {
     return {along,lift};
 }
 
-function routeFoot({start,length,distance,direction,courtForward}, left, turn) {
+function routeFoot({start,length,distance,direction,courtForward}, left) {
     const {along,lift}=stepAlong(length,distance,left);
-    const offset=(left?.23:-.23)*courtForward,angle=turn?turn(along/length):0;
-    return {x:start.x+direction.x*along+offset*Math.cos(angle),y:lift,
-        z:start.z+direction.z*along+.015*courtForward-offset*Math.sin(angle),
-        ...(turn?{yaw:(courtForward>0?0:Math.PI)+angle}:{})};
+    return {x:start.x+direction.x*along+(left?.23:-.23)*courtForward,y:lift,
+        z:start.z+direction.z*along+.015*courtForward};
 }
 
-// Turn through the paddle-side shoulder on a straight retreat. Each foot
-// acquires its new stance angle on its own step, including on a reverse seek.
-function chaseTurn(from,to,handedness,brake) {
-    const f=from.y<22?1:-1,dx=(to.x-from.x)*f,dz=(to.y-from.y)*f;
-    let angle=Math.atan2(dx,dz);
-    if(Math.abs(dx)<Math.abs(dz)*.35)angle=(handedness==='right'?-1:1)*Math.abs(angle);
-    return progress=>angle*easeInOut(progress/.18)*(brake?1-easeInOut((progress-.66)/.33):1);
-}
-
-// Borrow the planted-step cadence between recorded footprints. Exact contact
-// feet, the post-contact hold and all momentum evidence stay on their authored plane.
-function stepBetweenFootprints(segment, id, localTime, feet, position, turn = null) {
+// Only the articulated shoes need a gait between the recorded footprints.
+// The root, contact hold, momentum and ball still use the compiled timeline.
+function model2MovementLeg(segment, id, localTime) {
     const duration=segment.originalDuration??segment.duration;
     let start=0,end=duration;
     if(segment.shotSemantics?.playerId===id && segment.shotSemantics.contact.feet.length===2){
         const release=Math.min(duration,segment.contactTime+.12);
-        if(localTime<=segment.contactTime)end=segment.contactTime;
-        else if(localTime<=release)return;
+        if(localTime<segment.contactTime)end=segment.contactTime;
+        else if(localTime<=release)return null;
         else start=release;
     }
     const from=boardToWorld(sampleActorBoardPositionV2(segment,id,start));
     const to=boardToWorld(sampleActorBoardPositionV2(segment,id,end));
-    const dx=to.x-from.x,dz=to.z-from.z,length=Math.hypot(dx,dz);
-    if(length<.025)return;
-    const distance=Math.min(length,Math.hypot(position.x-from.x,position.z-from.z));
-    for(const [side,foot] of Object.entries(feet)){
-        const {along,lift}=stepAlong(length,distance,side==='left');
-        if(turn) {
-            const angle=turn(along/length),offset=foot.x-position.x;
-            foot.x+=offset*(Math.cos(angle)-1);
-            foot.z-=offset*Math.sin(angle);
-            foot.yaw=(from.z<0?0:Math.PI)+angle;
-        }
-        foot.x+=dx/length*(along-distance);
-        foot.z+=dz/length*(along-distance);
-        foot.y=lift;
+    const delta={x:to.x-from.x,z:to.z-from.z};
+    return {start:from,end:to,length:Math.hypot(delta.x,delta.z),direction:normalizeHorizontal(delta),
+        seconds:end-start,clock:clamp01((localTime-start)/Math.max(.001,end-start))};
+}
+
+// Keep the swing on a clear path around the planted shoe during a crossover
+// or drop step. Interpolating straight through the support shoe clips both soles.
+function swingFoot(from,to,plant,phase,maxLift) {
+    const t=easeInOut(phase),dx=to.x-from.x,dz=to.z-from.z;
+    let x=from.x+dx*t,z=from.z+dz*t;
+    const ax=from.x-plant.x,az=from.z-plant.z,bx=to.x-plant.x,bz=to.z-plant.z;
+    const closest=clamp01(-(ax*dx+az*dz)/Math.max(1e-9,dx*dx+dz*dz));
+    const clearance=Math.min(.205,Math.hypot(ax,az),Math.hypot(bx,bz));
+    if(Math.hypot(ax+dx*closest,az+dz*closest)<clearance-1e-6){
+        const angle=Math.atan2(az,ax)+t*Math.atan2(ax*bz-az*bx,ax*bx+az*bz);
+        const radius=Math.max(clearance,Math.hypot(x-plant.x,z-plant.z));
+        x=plant.x+radius*Math.cos(angle);z=plant.z+radius*Math.sin(angle);
     }
+    return {x,z,y:Math.min(maxLift,.22*Math.hypot(dx,dz))*Math.sin(Math.PI*phase)**2,
+        yaw:from.yaw+(to.yaw-from.yaw)*t};
+}
+
+function articulatedFootwork(leg,baseFeet,position,forward,hand,chasing,brake) {
+    const {start,end,length,direction,clock,seconds}=leg;
+    const side=direction.x*forward,depth=direction.z*forward;
+    let travelYaw=Math.atan2(side,depth);
+    if(chasing && Math.abs(side)<Math.abs(depth)*.35)travelYaw=(hand==='right'?-1:1)*Math.abs(travelYaw);
+    // Open the hips for sustained lateral travel. A nearby ball needs a
+    // square shuffle with the destination-side foot leading in both directions.
+    const crossover=easeInOut((length-.9)/.65)*easeInOut((Math.abs(side)-.5)/.35);
+    const openYaw=chasing?travelYaw:Math.max(-1.48,Math.min(1.48,travelYaw))*crossover;
+    const turn=u=>openYaw*easeInOut(u/.24)*(brake?1-easeInOut((u-.64)/.29):1);
+    const running=chasing || crossover>.5 || Math.abs(depth)>.65;
+    let stride=.32;
+    if(chasing)stride=.47;
+    else if(crossover>.5)stride=.38;
+    else if(running)stride=.49;
+    const count=Math.max(2,2*Math.ceil(length/(2*stride)));
+    // A short push-off and a two-foot plant at the end leave the last steps
+    // smaller as the compiled route decelerates into the next contact.
+    const push=Math.min(.12,.060/seconds),settle=Math.min(.15,.085/seconds);
+    // Space steps halfway between equal time and equal travel. Equal travel
+    // alone rushes the middle of a sprint; equal time can overstride the rig.
+    const elapsed=clamp01((clock-push)/(1-push-settle));
+    const beat=(elapsed+easeInOut(elapsed))*.5*count;
+    const index=Math.min(count-1,Math.floor(beat)),phase=beat-index;
+    const leadLeft=chasing?travelYaw>=0:side>=0;
+    const swing=(index%2===0)===leadLeft?'left':'right',stance=swing==='left'?'right':'left';
+    function anchor(foot,k) {
+        const midStance=clamp01((k+1.5)/count);
+        // On the first half the beat fraction equals t² + t/2. The second
+        // half mirrors it, so every plant has a deterministic court point.
+        const halfTime=Math.sqrt(.0625+Math.min(midStance,1-midStance))-.25;
+        const u=k<0?0:k>=count-2?1:push+(1-push-settle)*(midStance<.5?halfTime:1-halfTime);
+        const p=easeInOut(u),angle=turn(u),c=Math.cos(angle),s=Math.sin(angle);
+        const lateral=(baseFeet[foot].x-position.x)*(1-(running?.25:0)*Math.sin(Math.PI*u)**2);
+        const fore=baseFeet[foot].z-position.z;
+        return {x:start.x+(end.x-start.x)*p+lateral*c+fore*s,
+            z:start.z+(end.z-start.z)*p+fore*c-lateral*s,y:0,yaw:(forward>0?0:Math.PI)+angle};
+    }
+    const plant=anchor(stance,index-1);
+    return {feet:{[stance]:plant,[swing]:swingFoot(anchor(swing,index-2),anchor(swing,index),plant,phase,running?.085:.045)},
+        yaw:turn(clock)*(chasing?1:.48)};
 }
 
 function actionState(segment, playerId, localTime, distance, instructionalMovement = false) {
@@ -311,22 +349,27 @@ export function sampleActorPresentation({
     const travelSpeed = sampleInterval > 0 ? Math.hypot(after.x - before.x, after.z - before.z) / sampleInterval : 0;
     const model2Feet = segment.modelVersion === 2 ? sampleActorFeetV2(segment, playerId, localTime).sort((a,b)=>a.x-b.x) : null;
     const near = segment.previous.positions[playerId].y < 22;
+    const forward=near?1:-1;
+    const readyFoot=side=>({x:worldPosition.x+side*.23*forward,y:0,z:worldPosition.z+.015*forward});
     let feet = model2Feet ? {left:boardToWorld(model2Feet[near?1:0],0), right:boardToWorld(model2Feet[near?0:1],0)} :
-        route ? {left:routeFoot(route,true),right:routeFoot(route,false)} : null;
+        route ? (articulatedMotion?{left:readyFoot(1),right:readyFoot(-1)}:{left:routeFoot(route,true),right:routeFoot(route,false)}) : null;
     const recordedFeet = articulatedMotion && segment.model2Momentum?.some(
         item=>item.actor===playerId && item.contactTime<=segment.startTime+localTime+1e-9);
     const lob=segment.shotSemantics?.shotType==='lob';
     const terminalChase=!segment.nextShotSemantics && ['unreachable','second-bounce'].includes(timeline?.outcome?.reason);
     const chasing=articulatedMotion && !isStriker && lob && (to.y-from.y)*(near?1:-1)<-2 &&
         (isIncomingStriker && segment.nextShotSemantics.contact.kind!=='volley' || terminalChase);
-    const turn=chasing && !recordedFeet ? chaseTurn(from,to,handedness,!terminalChase) : null;
-    if(turn){
-        const offset=turn(Math.min(1,travelDistance/distance));
-        const yaw=Math.atan2(bodyFacing.x,bodyFacing.z)+offset;
-        pickupFacing={x:Math.sin(yaw),z:Math.cos(yaw)};
-        if(route?.length>.025)feet={left:routeFoot(route,true,turn),right:routeFoot(route,false,turn)};
+    if(articulatedMotion && feet && !recordedFeet){
+        const leg=route || model2MovementLeg(segment,playerId,localTime);
+        if(leg?.length>=.025 && leg.seconds>0){
+            const gait=articulatedFootwork(leg,feet,worldPosition,forward,handedness,chasing,!(chasing && terminalChase));
+            feet=gait.feet;
+            if(chasing || gait.yaw){
+                const facing=pickupFacing || bodyFacing,yaw=Math.atan2(facing.x,facing.z)+gait.yaw;
+                pickupFacing={x:Math.sin(yaw),z:Math.cos(yaw)};
+            }
+        }
     }
-    if (model2Feet && articulatedMotion && !recordedFeet) stepBetweenFootprints(segment,playerId,localTime,feet,worldPosition,turn);
     let splitStep=instructionalMovement ? Math.max(
         !isStriker&&segment.shotSemantics ? Math.max(0,1-Math.abs(localTime-segment.contactTime)/.11) : 0,
         segment.nextShotSemantics&&!isIncomingStriker ? Math.max(0,1-(segment.duration-localTime)/.11) : 0) : 0;
