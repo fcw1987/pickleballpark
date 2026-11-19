@@ -60,6 +60,33 @@ test('both rendered partners shade a wide drop and the supporting athlete crosse
   }
 });
 
+test('timeline scrubbing samples every pose and paints the landed pose before the next frame',async({page})=>{
+  await page.goto('/');await ready(page);
+  const result=await page.evaluate(async()=>{
+    const b=playBuilder,v=pickleboard.threeD,input=document.querySelector('.builder-transport .shot-timeline-range');
+    const times=[.3,.7,1.1,.4],sampled=[],painted=[];
+    const draw=v.renderer.render;
+    v.renderer.render=function(...args) {
+      painted.push(v.lastState.elapsed);
+      return draw.apply(this,args);
+    };
+    try {
+      for(const time of times) {
+        input.value=String(time);
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        sampled.push([b.session.clock.elapsed,pickleboard.plays.lastState.elapsed,v.lastState.elapsed]);
+      }
+      await Promise.resolve();
+      const scrubPaints=painted.slice();
+      v.renderSessionSample();
+      return {sampled,scrubPaints,direct:painted.slice(scrubPaints.length),times};
+    } finally { v.renderer.render=draw; }
+  });
+  expect(result.sampled).toEqual(result.times.map(t=>[t,t,t]));
+  expect(result.scrubPaints).toEqual([result.times.at(-1)]);
+  expect(result.direct).toEqual([result.times.at(-1)]);
+});
+
 test('normal court draws the approved skin throughout an orbit and releases its GPU resources on exit', async ({ page }) => {
   await page.goto('/');
   await ready(page);

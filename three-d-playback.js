@@ -299,10 +299,23 @@ class ThreeDPlaybackViewer {
         this.renderLoopId = null;
     }
 
-    renderSessionSample() {
+    renderSessionSample({ coalescePaint = false } = {}) {
         if (!this.scene || !this.currentPlay) return;
         this.applyAtTime(this.clock.elapsed);
-        this.renderer?.render(this.scene, this.camera);
+        const scene = this.scene;
+        if (!coalescePaint) {
+            this.pendingSampleScene = null;
+            this.renderer?.render(scene, this.camera);
+        } else if (this.pendingSampleScene !== scene) {
+            // The transport can seek several times before the browser paints.
+            // Sample each pose now and submit the last one before the next paint.
+            this.pendingSampleScene = scene;
+            queueMicrotask(() => {
+                if (this.pendingSampleScene !== scene) return;
+                this.pendingSampleScene = null;
+                if (this.scene === scene && this.active) this.renderer?.render(scene, this.camera);
+            });
+        }
         this.updateUI();
     }
 
