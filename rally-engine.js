@@ -2,10 +2,11 @@ import { refineGeneratedContactProposalsV1, generatedRetrievalProbeTargetsV1 } f
 // Headless versioned policy. Planning uses the same contact, actor and flight
 // construction as compilation; the driver independently validates final source.
 import { createEngineDriverV1 } from './rally-engine-driver.js';
-import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS } from './rally-recipe.js';
+import { createGenerationRecipeV1, RALLY_ENGINE_VERSION, RALLY_PLAYER_IDS, LOB_RECOVERY_VERSION } from './rally-recipe.js';
 import { createGenerationPlanningSessionV2, observeGenerationPlanningSessionV2, probeGenerationIncomingV2, probeGenerationReplyV2, commitGenerationRecipeV2, inspectGenerationPendingLegV2, finishGenerationPlanningV2, replaceGenerationPendingMovementV2 } from './play-planning-v2.js';
 import { interceptFlightV2, localNetHeightFeet, sampleFlightVelocityV2, flightReachCriticalTimesV2, PHYSICS_V2 } from './play-physics-v2.js';
 import { planRallyFlightV1, FLIGHT_PLANNER_VERSION } from './rally-flight-planner.js';
+import { lobVolleyInFront, emeraldLobOverhead, EMERALD_OVERHEAD_FEET } from './play-actors-v2.js';
 import { eligibleHitters, contactRequiresBounce, resolveServiceContext, teamForPlayer } from './rally-state.js';
 import { REACH_MODEL } from './rally-tactics.js';
 import { createSituationV1, rankContactPairsV1, rankContactCandidatesV2, listIntentCandidatesV1, chooseIntentV1 } from './rally-policy.js';
@@ -144,7 +145,7 @@ function contactReplySupportV1(input, pair, { diverse = false } = {}) {
     ];
     if (diverse) for (const target of generatedRetrievalProbeTargetsV1(team))
         if (target.x !== 10 || target.y !== (team === 'green' ? 41 : 3)) probes.push({ id: 'drive', family: 'drive', pace: 'firm', target });
-    if (pair.contact.heightFeet >= 7) probes.push({ id: 'overhead', family: 'overhead', pace: 'firm', target: { x: 10, y: team === 'green' ? 31 : 13 } });
+    if (pair.contact.heightFeet >= 7 || pair.plantedOverhead) probes.push({ id: 'overhead', family: 'overhead', pace: 'firm', target: { x: 10, y: team === 'green' ? 31 : 13 } });
     let drive = false, attacking = false, solverCalls = 0, launchSolverCalls = 0, workUnits = 0;
     const countPlanner = diagnostics => {
         solverCalls += diagnostics?.solverCalls ?? 0; launchSolverCalls += diagnostics?.launchSolverCalls ?? 0;
@@ -196,6 +197,7 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
     if (incoming.obstruction) return;
     const service = resolveServiceContext(planningView(state).play), eligible = eligibleHitters({ players: input.players, service, contactIndex: index, previousHitter: previous.hitter });
     const origins = planningView(state).pendingSegment.previous.positions, endpoints = planningView(state).steps.at(-1).positions, pairs = [];
+    const recoverLob=input.options.lobRecovery===LOB_RECOVERY_VERSION && previous.family==='lob';
     for (const id of eligible) {
         const team = input.players[id].team;
         const post = incoming.stages.find(stage => stage.phase === 'post-bounce');
@@ -226,7 +228,9 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
         // rather than reaching for the authored model's separate 8.5ft ceiling.
         // These are bounded search options, never a lowered/fabricated contact.
         // Exact feet, support and route checks still decide availability.
-        if (!contactRequiresBounce(index)) for (const height of GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet) {
+        const heights=recoverLob && id==='player1' ?
+            [...GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet,EMERALD_OVERHEAD_FEET] : GENERATED_CONTACT_SUPPORT_V1.descendingProposalHeightsFeet;
+        if (!contactRequiresBounce(index)) for (const height of heights) {
             if (incoming.metadata.apexFeet <= height) continue;
             let low = Math.max(0, incoming.stages[0].vy / PHYSICS_V2.gravityFeetPerSecond2), high = incoming.firstLandingTime;
             for (let step = 0; step < 32; step++) {
@@ -317,10 +321,16 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
     const groups = new Map(), replyCache = new Map(), stanceCache = new Map(), opportunityAliases = new Map();
     for (const [sourceIndex, pair] of pairs.entries()) {
         if (!reachable.has(sourceIndex)) continue;
+        if(recoverLob){
+            if(pair.id==='player1' && pair.contact.heightFeet>EMERALD_OVERHEAD_FEET+.001)continue;
+            if(pair.kind==='volley' && !lobVolleyInFront({id:pair.id,team:input.players[pair.id].team,
+                origin:origins[pair.id],contact:pair.contact}))continue;
+            pair.plantedOverhead=emeraldLobOverhead(pair.id,pair.kind,pair.contact.heightFeet) && pair.contactStyle==='forehand';
+        }
         const key = [pair.kind, numberV1(pair.time), pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
         const opportunityId = contactOpportunityIdV1(key, opportunityAliases);
         const supportKey = [pair.contact.x, pair.contact.y, pair.contact.heightFeet].join(':');
-        const replyKey = [supportKey, input.players[pair.id].style, pair.signature?.intent ?? '', pair.signature?.target.x ?? '', pair.signature?.target.y ?? ''].join(':');
+        const replyKey = [supportKey, Boolean(pair.plantedOverhead), input.players[pair.id].style, pair.signature?.intent ?? '', pair.signature?.target.x ?? '', pair.signature?.target.y ?? ''].join(':');
         if (!replyCache.has(replyKey)) {
             const support = contactReplySupportV1(input, pair, { diverse: refinementPass });
             replyCache.set(replyKey, support);
@@ -341,6 +351,11 @@ async function* contactPairs(input, state, index, checkpoint, diagnostics, refin
                 origin: origins[pair.id], team, feasibleReplyIds: pair.replySupport.ids,
                 attackingReplyAvailable: pair.replySupport.attacking, availableSeconds: numberV1(pair.time) })
         })).sort(compareContactOpportunityPreferencesV1);
+        if(recoverLob && pair.id==='player1'){
+            const direction=team==='green'?1:-1;
+            pair.stanceOptions=pair.stanceOptions.filter(({feet})=>
+                (pair.contact.y-feet.stance.y)*direction>.1 && distance(pair.contact,feet.stance)<1.55);
+        }
         if (!pair.stanceOptions.length) continue;
         // Every bounded stance contributes to the optimistic bound. A repaired
         // stance can improve forward position as well as outgoing clearance.
@@ -492,7 +507,7 @@ function situationFor(input, state, index, pair, decisions) {
         hitter: pair.id, contact: { ...pair.contact, kind: pair.kind }, contactIndex: index, service: input.service, incoming,
         priorDecisions: decisions, affordances: { drive: canDrive,
             attack: support.attacking,
-            overhead: support.ids.includes('overhead'), volley: pair.kind === 'volley', bounced: pair.kind !== 'volley', lob: true,
+            overhead: support.ids.includes('overhead') && !(input.options.lobRecovery && previous?.family==='lob' && pair.kind!=='volley'), plantedOverhead:pair.plantedOverhead, volley: pair.kind === 'volley', bounced: pair.kind !== 'volley', lob: true,
             erne: pair.signature?.intent === 'erne', aroundPost: pair.signature?.intent === 'around-the-post', letGo: false } });
     const origin = planningView(state).pendingSegment?.previous.positions[pair.id] ?? input.layout[pair.id];
     return { ...snapshot, sampleTimeSeconds: pair.sampleTimeSeconds, contactTimeSeconds: pair.contactTimeSeconds,

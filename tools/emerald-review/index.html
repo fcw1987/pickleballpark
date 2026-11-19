@@ -10,7 +10,7 @@ header{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:10px
 <button id="replay" disabled>Replay at ½ speed</button><a href="/court/">Open court</a><span id="status" role="status">Opening court…</span></header>
 <iframe id="court" src="/court/" title="Playable Pickleball Park court"></iframe>
 <script type="module">
-import {examples,reviewDocument} from '/examples.mjs';
+import {examples,reviewDocument} from '/court/tools/emerald-review/examples.mjs';
 const el=id=>document.getElementById(id);
 const court=el('court'),example=el('example'),hand=el('hand'),button=el('replay'),status=el('status');
 for(const [id,label] of examples) example.add(new Option(label,id));
@@ -18,29 +18,37 @@ const query=new URLSearchParams(location.search);
 if(examples.some(([id])=>id===query.get('example')))example.value=query.get('example');
 if(query.get('hand')==='left')hand.value='left';
 const source=await fetch('/saved-rally.json').then(r=>r.json());
+let startTime=0;
 function load(play=false) {
     const win=court.contentWindow, builder=win.playBuilder;
     const doc=reviewDocument(example.value,hand.value,source);
+    const handSide=hand.value==='right'?1:-1;
+    const azimuth={ 'backhand-dink':.62, 'overhead':.55, 'lob-chase':-1.08 }[example.value]??-.7;
+    win.pickleboard.threeD.cameraControls.setState({azimuth:azimuth*handSide,elevation:26});
     builder.loadDocument(doc,{persist:false});
     if(builder.compiled.validShotCount!==doc.shots.length)throw new Error('Example did not compile');
-    const stroke=win.pickleboard.threeD.timeline.segments.find(s=>s.step.shot?.authoring?.id==='stroke');
-    builder.seek(stroke ? Math.max(0,stroke.startTime+stroke.contactTime-.85) : 0);
+    const timeline=win.pickleboard.threeD.timeline;
+    const focusId=example.value==='backhand-dink'?'kitchen':'stroke';
+    const focus=timeline.events.find(e=>e.type==='contact' && timeline.segments[e.rallyLeg-1]?.step.id===focusId);
+    builder.action('emeraldCoaching',true);
+    startTime=focus ? Math.max(0,focus.time-.64) : 0;
+    builder.seek(startTime);
     builder.action('rate',.5);
     if(play)builder.play();
-    status.textContent=example.value==='grounded'
-        ? 'Saved at 7½ ft with grounded feet. The ball exceeds Emerald’s planted reach.'
-        : example.value==='tracking' ? 'Watch the cap and blade as the far-side ball changes lanes.' : 'Drag the court to orbit.';
+    status.textContent='Drag the court to orbit.';
     button.disabled=false;
     history.replaceState(null,'','/?'+new URLSearchParams({example:example.value,hand:hand.value}));
 }
 function safely(play){try{load(play);}catch(error){status.textContent=error.message;}}
 example.onchange=hand.onchange=()=>safely(true);
-button.onclick=()=>safely(true);
+button.onclick=()=>{
+    const builder=court.contentWindow.playBuilder;
+    builder.seek(startTime);builder.action('rate',.5);builder.play();
+};
 const started=performance.now();
 function ready(){
     const win=court.contentWindow;
     if(win.playBuilder?.view==='3d' && win.pickleboard?.threeD?.playerObjects?.get('player1')?.userData.emeraldCap){
-        win.pickleboard.threeD.cameraControls.setState({azimuth:hand.value==='right'?-.7:.7,elevation:28});
         safely(false);
     }else if(performance.now()-started<25000){setTimeout(ready,100);}
     else status.textContent='The 3D court did not open. Open court to retry.';

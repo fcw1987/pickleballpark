@@ -26,7 +26,7 @@ export function model2ContactKind(recipe){
   if(recipe.contactMode)return recipe.contactMode==='volley'?'volley':'groundstroke';
   return ['volley','overhead'].includes(recipe.family)||recipe.family==='reset'?'volley':'groundstroke';
 }
-function plant(point,target,side='forehand',handedness='right'){
+export function model2ContactStance(point,target,side='forehand',handedness='right'){
   const dx=target.x-point.x,dy=target.y-point.y,length=Math.hypot(dx,dy)||1,forward={x:dx/length,y:dy/length};
   // Inferred feet follow the declared player's hitting hand. Explicit source
   // feet and first-contact layout remain authoritative in prepareRecipe.
@@ -96,7 +96,7 @@ function prepareRecipe(state,recipe) {
       }
       const sideOrigin=recipe.contactEvidence?.feet?footCenter(recipe.contactEvidence.feet):previous.positions[recipe.hitter];
       const side=contactSide(recipe,contact,sideOrigin,document.players[recipe.hitter]);
-      const initialStance=index?plant(contact,recipe.target,side,document.players[recipe.hitter].handedness):xy(document.initialLayout[recipe.hitter]);
+      const initialStance=index?model2ContactStance(contact,recipe.target,side,document.players[recipe.hitter].handedness):xy(document.initialLayout[recipe.hitter]);
       const feet=recipe.contactEvidence?.feet?copy(recipe.contactEvidence.feet):defaultFeetAtV1(initialStance,document.defaultFootState),stance=footCenter(feet);
       if(distance(stance,contact)>3+.001)findings.push(finding(recipe.id,'Both feet must support a contact within the 3 ft paddle reach model.','feasibility'));
       if(locks.has(recipe.hitter)&&distance(locks.get(recipe.hitter),stance)>.05)findings.push(finding(recipe.id,'The contact cannot move an actor away from an authored pin.','feasibility'));

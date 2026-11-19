@@ -1,7 +1,11 @@
+import {resolveLobContinuation} from '../../lob-recovery.js';
+
 // Each example goes through the regular saved-document compiler and court.
 export const examples = [
-    ['tracking','Track the far court'], ['dink','Forehand dink'], ['drive','Forehand drive'],
-    ['backhand','Backhand drive'], ['lob','Lob'], ['overhead','High overhead'],
+    ['backhand-dink','Backhand dink rally'], ['lob-chase','Lob over player · run and return'],
+    ['overhead','Reachable overhead'], ['lob-miss','Lob over player · too late'],
+    ['lob-out','Lob beyond baseline · out'], ['tracking','Track the far court'], ['dink','Forehand dink'], ['drive','Forehand drive'],
+    ['backhand','Backhand drive'], ['lob','Lob'],
     ['approach','Return to the kitchen'], ['saved','Saved drive–drop rally'], ['grounded','Grounded overhead limit']
 ];
 
@@ -28,18 +32,26 @@ export function reviewDocument(key, handedness, source) {
             shot('right','dink',2,4,19,29),shot('right-return','dink',4,2,5,14),
             shot('middle','dink',2,3,10,29),shot('middle-return','dink',3,1,10,14),
             shot('finish','dink',1,4,16,30,'backhand')];
-    } else if(key==='approach') {
+    } else if(key==='approach' || key==='backhand-dink') {
         doc.modelVersion=2;doc.physicsVersion='play-physics-v2';
         doc.initialLayout.player1={x:12,y:10.2};doc.initialLayout.ball={...doc.initialLayout.player1};
         doc.shots=[shot('approach','drop',1,3,4,29,'forehand','advance'),shot('reply','dink',3,1,12,18.3),
             shot('kitchen','dink',1,4,17,29,'backhand'),shot('reset','dink',4,2,4,15)]
             .map(s=>({...s,intent:s.family,quality:'neutral'}));
+    } else if(['overhead','lob-chase','lob-miss','lob-out'].includes(key)) {
+        doc.modelVersion=2;doc.physicsVersion='play-physics-v2';
+        const miss=key==='lob-miss',short=key==='overhead';
+        doc.initialLayout={player1:{x:miss?4:13,y:short?10:14},player2:{x:miss?1:3,y:miss?12:14},
+            player3:{x:10,y:31},player4:{x:18,y:33},ball:{x:10,y:31}};
+        doc.shots=[{...shot('feed','lob',3,null,miss?19:13,short?12:miss?.8:key==='lob-out'?-1:6),
+            intent:'lob',quality:'neutral',physics:{apexFeet:short?13:miss?10:16}}];
+        return resolveLobContinuation(doc,'recovery');
     } else if(key==='grounded') {
         doc.modelVersion=2;doc.physicsVersion='play-physics-v2';
         doc.shots=[{...shot('grounded','overhead',1,3,5,31),intent:'put-away',quality:'neutral'}];
     } else {
         doc.initialLayout.player3={x:5,y:30};doc.initialLayout.ball={...doc.initialLayout.player3};
-        doc.shots=[shot('feed',key==='overhead'?'lob':'dink',3,1,10,14),shot('stroke',key==='backhand'?'drive':key,1,3,7,30,key==='backhand'?'backhand':'forehand'),
+        doc.shots=[shot('feed','dink',3,1,10,14),shot('stroke',key==='backhand'?'drive':key,1,3,7,30,key==='backhand'?'backhand':'forehand'),
             shot('reply','dink',3,2,4,14)];
     }
     return doc;

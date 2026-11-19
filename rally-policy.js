@@ -1,3 +1,4 @@
+import { emeraldLobOverhead } from './play-actors-v2.js';
 // M2 policy projects information available before a choice. It owns no RNG,
 // simulator clock, execution roll or future outcome and never changes a source.
 import { RALLY_POLICY_VERSION } from './rally-recipe.js';
@@ -134,7 +135,8 @@ export function createSituationV1({ players, positions, feet = {}, footState = {
   // above-net attack. Explicit attack proof can also certify drive feasibility
   // for callers using the earlier API; an explicit false drive wins that tie.
   actions.drive = affordances.drive === true || (affordances.drive === undefined && affordances.attack === true);
-  actions.overhead = actions.overhead && band === 'overhead';
+  actions.overhead = actions.overhead && (band==='overhead' || affordances.plantedOverhead===true &&
+    incoming.family==='lob' && emeraldLobOverhead(hitter,contact.kind,at.heightFeet));
   actions.attack = actions.attack && (actions.drive || actions.overhead) && ['above-net', 'overhead'].includes(band);
   const actualFeet = Array.isArray(feet[hitter]) && feet[hitter].length === 2
     ? feet[hitter].map((value, index) => point(value, `feet.${hitter}[${index}]`)) : [];
@@ -203,7 +205,10 @@ function unavailable(id, situation, signatureShots) {
   if (id === 'drive' && situation.hitterUp && !situation.attackable) return 'no-line-attack-affordance';
   if (id === 'speed-up' && situation.heightBand === 'low') return 'low-contact-favours-reset';
   if (id === 'firm-volley' && situation.contactKind !== 'volley' && !situation.affordances.volley) return 'no-volley-contact';
-  if (id === 'overhead' && (situation.heightBand !== 'overhead' || !situation.affordances.overhead)) return 'no-reachable-overhead';
+  if (id === 'overhead') {
+    const planted=situation.incomingFamily==='lob' && emeraldLobOverhead(situation.hitter,situation.contactKind,situation.contact.heightFeet);
+    if(!situation.affordances.overhead || situation.heightBand!=='overhead' && !planted)return 'no-reachable-overhead';
+  }
   if (['erne', 'around-the-post'].includes(id)) {
     if (!signatureShots) return 'signature-shots-disabled';
     if (id === 'erne' && (!situation.affordances.erne || situation.incomingFamily !== 'dink' || !situation.hitterUp

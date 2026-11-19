@@ -10,9 +10,9 @@ ROOT = HERE.parent.parent
 PACKAGE = ROOT / "dist"
 FILES = {
     "/": HERE / "index.html",
-    "/examples.mjs": HERE / "examples.mjs",
+    "/court/tools/emerald-review/examples.mjs": HERE / "examples.mjs",
     "/saved-rally.json": ROOT / "docs/builder/examples/eight-shot-drive-drop.json",
-    "/motion.mp4": ROOT / "release-results/emerald-motion/emerald-cap-court-motion.mp4",
+    "/teaching.mp4": ROOT / "release-results/emerald-teaching/emerald-cap-teaching.mp4",
 }
 
 
@@ -33,7 +33,7 @@ class Handler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     if not (PACKAGE / "build-info.json").is_file():
         sys.exit("Build the local runtime with npm run build:site first.")
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8496
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8502
     server = ThreadingHTTPServer(("127.0.0.1", port), partial(Handler, directory=PACKAGE))
     print(f"Emerald Cap review at http://127.0.0.1:{port}/", flush=True)
     server.serve_forever()

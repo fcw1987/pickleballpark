@@ -13,6 +13,8 @@ import {
   evaluateCandidate, makeProposal, proposalChanges
 } from './rally-proposals.js';
 
+import { resolveLobContinuation } from './lob-recovery.js';
+
 const copy = value => globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 const PLAYER_IDS = Object.freeze(['player1', 'player2', 'player3', 'player4']);
 const ARCS = Object.freeze(['low', 'medium', 'high']);
@@ -206,6 +208,9 @@ async function appendNext(document, index, random, { signal, maxAttempts = MAX_A
     const family = families[attempt % families.length];
     const hitters = hittersFor(document, index, previous, random, positions, availableSeconds);
     for (const hitter of hitters) {
+      // Model 1 encodes overheads at seven feet. Emerald cannot make that
+      // grounded contact. Keep authored plays and allow a real bounced reply.
+      if (previous?.family==='lob' && family==='overhead' && hitter==='player1') continue;
       const candidateShot = shotCandidate(document, index, family, hitter, random, { smartAdd: generationSeed !== undefined, generationSeed });
       // Retain a cross-court option late in the bounded search. The outgoing
       // lane also determines a receiver's contact stance; random corner picks
@@ -300,6 +305,15 @@ export async function proposeSmartAdd(sourceDocument, options = {}) {
       return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: 'A rally with an explicit terminal outcome or intentional fault cannot accept another shot. Reopen it before appending.' });
     }
     const maxAttempts = normalizedAttempts(options.maxAttempts, MAX_ATTEMPTS_PER_SHOT, MAX_ATTEMPTS_PER_SHOT, 'maxAttempts');
+    if(source.modelVersion===2 && source.shots.at(-1)?.family==='lob' && source.shots.length<MAX_SHOTS) {
+      checkCancelled(options.signal);
+      const document=resolveLobContinuation(source,nextShotId(source,source.shots.length));
+      const evaluated=document && evaluateCandidate(document);
+      if(!evaluated?.ok) return failure({operation:'smart-add',sourceDocument:source,seed,
+        reason:evaluated?.reason || 'No legal lob recovery or physical ending could be established from these footprints.'});
+      return makeProposal({operation:'smart-add',sourceDocument:source,document,seed,
+        reason:document.outcome ? `Lob ended the point · ${document.outcome.reason}.` : `Added a reachable ${document.shots.at(-1).family}.`});
+    }
     const current = completeEvaluation(source);
     if (!current.ok || current.validShotCount !== source.shots.length) {
       return failure({ operation: 'smart-add', sourceDocument: source, seed, reason: current.reason || 'Correct the existing rally with Coach before adding a continuation.' });

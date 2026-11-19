@@ -334,19 +334,26 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     const saveErrorKey = JSON.stringify(current.saveError || null);
     const proposalKey = JSON.stringify([current.proposalBusy, current.proposalProgress]);
     const coachOptionsKey = JSON.stringify(current.coachOptions || null);
-    const settingsKey = JSON.stringify([current.rate, current.camera, current.canUndo, current.canRedo, current.findings, document.body.dataset.theme]);
+    const settingsKey = JSON.stringify([current.rate, current.camera, current.canUndo, current.canRedo, current.emeraldCoaching, Boolean(current.emeraldCue), current.findings, document.body.dataset.theme]);
     const structureChanged = renderedDocument !== doc || renderedSelectedShotId !== current.selectedShotId || renderedView !== current.view || renderedWorkspace !== current.workspace || renderedWaypointKey !== waypointKey || renderedSaveErrorKey !== saveErrorKey || renderedProposalKey !== proposalKey || renderedCoachOptionsKey !== coachOptionsKey || renderedSettingsKey !== settingsKey;
     // The clock still updates the timeline every frame. Other controls change
     // only when their displayed state changes, preserving focused inputs and
     // avoiding repeated DOM queries and live-region writes during playback.
     timelineControl?.update({ chapters: current.chapters || [], time: current.time || 0, duration: current.duration || 0, playing: Boolean(current.playing), busy: Boolean(current.busy), currentShotId: current.currentShotId || current.selectedChapterId || null });
-    const controlsState = [current.currentShotId, current.selectedChapterId, current.cue?.title, current.playing, current.busy, current.saveStatus, current.message, current.retry3D, current.targetPlacement, current.movementPlacement, inspectorManualCollapsed, pendingField];
+    const controlsState = [current.currentShotId, current.selectedChapterId, current.cue?.title, current.playing, current.busy, current.saveStatus, current.message, current.retry3D, current.targetPlacement, current.movementPlacement, inspectorManualCollapsed, pendingField, current.emeraldCue?.title, current.emeraldCue?.cue, current.emeraldCue?.button];
     if (!structureChanged && controlsState.every((value, index) => value === renderedControlsState[index])) return;
     renderedControlsState = controlsState;
     root.classList.toggle('builder-placing', placementActive);
     const labels = getPlayerLabels(doc);
     const players = playerChoices(doc);
     if (!structureChanged && root.childElementCount) {
+      const teaching=root.querySelector('.builder-emerald-cue');
+      if(teaching && current.emeraldCue) {
+        teaching.querySelector('strong').textContent=current.emeraldCue.title;
+        teaching.querySelector('span').textContent=current.emeraldCue.cue;
+        const step=teaching.querySelector('button');step.textContent=current.emeraldCue.button;
+        step.disabled=!Number.isFinite(current.emeraldCue.nextTime);
+      }
       const liveChapterId = current.currentShotId || current.selectedChapterId || null;
       root.querySelectorAll('[data-action="chapter"]').forEach(chapter => chapter.setAttribute('aria-current', String(Boolean(liveChapterId && chapter.dataset.shotId === liveChapterId))));
       const save = root.querySelector('.builder-save-status'); if (save) save.textContent = pendingField?'Editing · not saved yet':current.saveStatus || 'Draft';
@@ -639,10 +646,21 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
     const rate = select('Playback speed', 'rate', [['0.25', '0.25×'], ['0.5', '0.5×'], ['1', '1×']]); rate.querySelector('select').value = String(current.rate || 1);
     const cameraChoices = select('Camera', 'camera', [['overhead', 'Overhead'], ['sideline', 'Sideline'], ['behind-green', 'Behind Green'], ['behind-orange', 'Behind Orange']]); cameraChoices.querySelector('select').value = current.camera || 'overhead';
     const optionsSummary=optionsMenu.querySelector('summary');optionsSummary.replaceChildren(el('span','','⋮'),el('span','sr-only','Playback options'));optionsSummary.setAttribute('aria-label','Playback options');optionsMenu.open=optionsMenuOpen;
-    const optionsPanel=el('div','builder-menu-panel');optionsPanel.append(rate);optionsMenu.append(optionsPanel);
+    const optionsPanel=el('div','builder-menu-panel');optionsPanel.append(rate);
+    if(current.view==='3d'){
+      const coaching=button('Emerald coaching','emerald-coaching','builder-button');
+      coaching.setAttribute('aria-pressed',String(Boolean(current.emeraldCoaching)));optionsPanel.append(coaching);
+    }
+    optionsMenu.append(optionsPanel);
     transportTop.append(optionsMenu); transport.append(transportTop);
     const dock=el('section','builder-reference-dock');dock.setAttribute('aria-label','Park controls');
     dock.append(meta,transport);
+    if(current.emeraldCue){
+      const row=el('div','builder-emerald-cue'),step=button(current.emeraldCue.button,'emerald-step','builder-button');
+      step.disabled=!Number.isFinite(current.emeraldCue.nextTime);
+      row.setAttribute('aria-label','Emerald coaching');
+      row.append(el('strong','',current.emeraldCue.title),el('span','',current.emeraldCue.cue),step);dock.append(row);
+    }
     const cameraBar=el('div','builder-camera-bar');cameraBar.setAttribute('aria-label','Camera controls');
     const cameraModes=el('div','builder-camera-modes');cameraModes.setAttribute('role','group');cameraModes.setAttribute('aria-label','Drag mode');
     const mode=globalThis.pickleboard?.threeD?.cameraControls?.getState?.().mode||'orbit';
@@ -709,6 +727,8 @@ export function mountBuilderUI({ onDestroy = () => {}, onAction = () => {} } = {
       else if(action==='camera-zoom-out')controls.zoomBy(1/.85);
       syncCameraControls();return;
     }
+    if(action==='emerald-coaching'){await fire('emeraldCoaching',!current.emeraldCoaching);return;}
+    if(action==='emerald-step'){await fire('emeraldStep');return;}
     if (action === 'select-shot') { inspectorManualCollapsed = false; userInspectorExpanded = true; current.movementPlayer = null; rerenderAction('selectShot', target.dataset.shotId); }
     else if (action === 'chapter') {
       const shotId = target.dataset.shotId;

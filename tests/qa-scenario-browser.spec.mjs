@@ -43,7 +43,12 @@ for (const scenario of QA_SCENARIOS) {
         const ball = viewer.ballObject.position.toArray();
         const paddle = actor.userData.paddleFaceWorld.toArray();
         const distance = Math.hypot(...paddle.map((value, axis) => value - ball[axis]));
-        if (distance >= .01) failures.push({ label: `${segment.step.id}: paddle contact`, distance });
+        const index=source.shots.findIndex(shot=>shot.id===segment.step.id);
+        const preservedHighLob=actor.userData.emeraldCap && source.shots[index-1]?.family==='lob' &&
+          source.shots[index]?.family==='overhead' && segment.shotSemantics.contact.point.heightFeet>=7;
+        if(preservedHighLob && (!viewer.coverageSamples.player1.unsupportedHighContact || distance<.2))
+          failures.push({label:'high recorded overhead must stay outside planted reach',distance});
+        if (!preservedHighLob && distance >= .01) failures.push({ label: `${segment.step.id}: paddle contact`, distance });
         if (actor.userData.handedness !== source.players[segment.shotSemantics.playerId].handedness)
           failures.push({ label: `${segment.step.id}: handedness` });
         contacts++;
@@ -68,7 +73,8 @@ for (const scenario of QA_SCENARIOS) {
           viewer.applyAtTime(time);
           const cameraContact = actor.userData.paddleFaceWorld.toArray();
           const cameraDistance = Math.hypot(...cameraContact.map((value, axis) => value - ball[axis]));
-          if (cameraDistance >= .01) failures.push({ label: `${camera}: paddle contact`, distance: cameraDistance });
+          if(preservedHighLob)close(cameraDistance,distance,`${camera}: recorded overhead gap`);
+          else if (cameraDistance >= .01) failures.push({ label: `${camera}: paddle contact`, distance: cameraDistance });
           for (const [id, actor] of viewer.playerObjects) {
             const before = tactical[id];
             if (!before.facing || ![before.facing.x, before.facing.z].every(Number.isFinite))
@@ -132,8 +138,12 @@ for (const scenario of QA_SCENARIOS) {
               const sole=Math.min(...shoeBottoms);
               if(sole < -1e-6 || sole > .96)failures.push({label:'Emerald sole outside the jump envelope',sole});
               if(ratio===0 || ratio===1)close(sole,0,'Emerald planted takeoff and landing',1e-6);
-              if(Math.abs(ratio-profile.contactRatio)<1e-8 && (sole<.3 || window.__athleteAudit(player).paddleDistance(viewer.ballObject.position)>.037))
-                failures.push({label:'Emerald high contact must reach the ball airborne',sole});
+              if(Math.abs(ratio-profile.contactRatio)<1e-8){
+                const gap=window.__athleteAudit(player).paddleDistance(viewer.ballObject.position);
+                if(preservedHighLob){
+                  if(Math.abs(sole)>1e-5 || gap<.2)failures.push({label:'recorded lob must not move the planted feet to fake contact',sole,gap});
+                }else if(sole<.3 || gap>.037)failures.push({label:'Emerald high contact must reach the ball airborne',sole});
+              }
               airborne.push({ratio,sole});
             }else close(position.y,sample.worldPosition.y+jump,`${strikerId}: overhead profile y`);
             overheadProfileSamples++;

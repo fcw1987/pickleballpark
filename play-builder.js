@@ -1,3 +1,4 @@
+import { emeraldTeaching, emeraldReachFindings } from './three-d-presentation.js';
 import { createStarterDocument, validateDocument, documentFromTemplate, MAX_SHOTS } from './play-document.js';
 import { DraftStore, EditHistory, STORAGE_KEY, DRAFT_CAPACITY_CODE } from './builder-storage.js';
 import { mountBuilderUI, downloadPlayBackup } from './builder-ui.js';
@@ -14,7 +15,7 @@ import { playerLabel } from './player-labels.js';
 import { resolveServiceContext, updateServiceFromShotEdit, updateServiceCourt } from './rally-state.js';
 import { createRallyCoverageProvider } from './rally-coverage-provider.js';
 import { simulateRallyInWorker } from './rally-engine-client.js';
-import { normalizeRallyInputV1 } from './rally-recipe.js';
+import { normalizeRallyInputV1, LOB_RECOVERY_VERSION } from './rally-recipe.js';
 import { STACKING_VERSION, validateStackingV1 } from './rally-stacking.js';
 const copy = value => structuredClone(value);
 const id = () => crypto.randomUUID();
@@ -49,6 +50,7 @@ export class PlayBuilder {
         this.busy = false; this.generation = 0; this.sourceIntent = 0; this.message = ''; this.saveStatus = 'Starter draft · not saved yet';
         this.proposalGeneration = 0; this.proposalBusy = false; this.proposalProgress = null;
         this.proposalController = null; this.pendingAddCount = 0; this.addQueue = Promise.resolve();
+        this.emeraldCoaching=false;
         this.generateRally = simulateRallyInWorker;
         this.coachOptions = []; this.coachCandidates = new Map();
         try { this.store = new DraftStore({ validate: validateDocument }); }
@@ -160,6 +162,11 @@ export class PlayBuilder {
         }
         return this.dirtySource;
     }
+    get emeraldCue() {
+        const view=this.board.threeD,actor=view?.emeraldAthlete?.userData.id;
+        return this.emeraldCoaching && this.view==='3d' && actor ?
+            emeraldTeaching(view.timeline,view.coverageSamples?.[actor],actor) : null;
+    }
     scheduleRender() {
         if (this.frame !== null) return;
         this.frame = requestAnimationFrame(() => { this.frame = null; this.render(); });
@@ -172,7 +179,7 @@ export class PlayBuilder {
         // Playback identity follows the sampled chapter even while paused. The
         // separate selectedShotId keeps an open editor stable across playback.
         const cue={shotId:currentChapter?.shotId,title:currentChapter?`${currentChapter.number}. ${currentChapter.label}`:'Choose a shot',description:segment?.step.description||'Choose your first shot.'};
-        this.ui.render({cue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
+        this.ui.render({cue,emeraldCoaching:this.emeraldCoaching,emeraldCue:this.emeraldCue,waypointPolicy:this.waypointPolicy,document:this.document, selectedShotId:this.selectedShotId, findings:this.compiled?.findings || [],
             playing:this.session.playing, time:this.session.clock.elapsed, duration:this.session.duration, chapters:this.chapters, currentShotId:currentChapter?.shotId || null,
             view:this.view, workspace:this.workspace, saveStatus:this.saveStatus, saveError:this.saveError, unsavedChanges:this.hasUnsavedChanges, library,
             templates:PICKLEBOARD_PLAYS.map(({id,name})=>({id,name})), loop:true, rate:this.session.clock.playbackRate,
@@ -226,6 +233,7 @@ export class PlayBuilder {
     installPlay(first = false, seconds = null) {
         const previousChapters=this.chapters,previousDuration=this.session.duration,previousTime=this.session.clock.elapsed;
         this.compiled = {...compileEffectiveCandidate(this.document)};
+        this.compiled.findings=[...this.compiled.findings,...emeraldReachFindings(this.compiled.timeline)];
         const play = this.compiled.play || {id:this.document.id,name:this.document.title,description:'Incomplete draft',mode:'doubles',steps:[{id:'start',label:'Starting layout',description:'Add a shot to preview this draft.',durationMs:0,positions:copy(this.document.initialLayout)}]};
         const chapters=buildShotChapters(this.compiled.timeline,{shotIds:this.document.shots.slice(0,this.compiled.validShotCount).map(shot=>shot.id)});
         const mappedSeconds=seconds!=null?Math.max(0,Math.min(this.compiled.timeline.duration,seconds)):first?0:mapSemanticPlayhead(previousChapters,chapters,previousTime,previousDuration,this.compiled.timeline.duration);
@@ -305,7 +313,7 @@ export class PlayBuilder {
             this.selectedShotId=authorized.document.shots.at(-1).id;
             this.applyProposalDocument(authorized.document,generation);
             this.seek(this.chapters.find(chapter=>chapter.shotId===this.selectedShotId)?.anchor||0);
-            this.message=`Added Shot ${this.document.shots.length}. Undo is available.`;
+            this.message=this.document.outcome ? `Lob ended the point · ${this.document.outcome.reason}. Undo is available.` : `Added Shot ${this.document.shots.length}. Undo is available.`;
             return {ok:true};
         }).catch(error=>{if(generation===this.proposalGeneration)this.message=error.message;return {ok:false,error:error.message};}).finally(()=>{
             if(generation!==this.proposalGeneration)return;
@@ -330,7 +338,7 @@ export class PlayBuilder {
             // options inherit saved preferences; neither changes current routes.
             const stacking=Object.hasOwn(options,'stacking')?options.stacking:this.document.stacking;
             if(stacking!==null)validateStackingV1(stacking,players);
-            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],options:{lengthFeel:options.lengthFeel??'natural'},
+            input=normalizeRallyInputV1({players,seed:options.seed??crypto.getRandomValues(new Uint32Array(1))[0],options:{lengthFeel:options.lengthFeel??'natural',lobRecovery:LOB_RECOVERY_VERSION},
                 ...(stacking!=null?{stacking}:{})});
         } catch(error){this.message=error.message;this.render();return {ok:false,error:this.message};}
         // The Create action is explicit acceptance of a fresh point. Preserve
@@ -425,6 +433,7 @@ export class PlayBuilder {
         const proposal=await proposeSmartAdd(prefix,{seed:crypto.getRandomValues(new Uint32Array(1))[0]});
         if(generation!==this.proposalGeneration||revision!==this.sourceIntent||originalIdentity!==documentSourceIdentity(this.document))return {ok:false,error:'A newer edit was kept.'};
         if(!proposal.ok)throw Error(proposal.reason);
+        if(proposal.document.shots.length===prefix.shots.length)throw Error('The lob ends the point before another shot can be inserted.');
         const shot=copy(proposal.document.shots.at(-1));shot.id=id();
         this.selectedShotId=shot.id;
         this.edit(doc=>doc.shots.splice(at,0,shot),{automatic:true,proposalGeneration:generation});
@@ -641,6 +650,11 @@ export class PlayBuilder {
                 else this.board.plays.timelineAction(action,value);
             }
             else if(action==='pauseForEditing')this.pause();
+            else if(action==='emeraldCoaching')this.emeraldCoaching=Boolean(value);
+            else if(action==='emeraldStep'){
+                const time=this.emeraldCue?.nextTime;
+                if(Number.isFinite(time) && this.compiled.validShotCount===this.document.shots.length)this.seek(time);
+            }
             else if(action==='rate')this.board.plays.setPlaybackRate(Number(value));
             else if(action==='loop')this.board.plays.setLoop(Boolean(value));
             else if(action==='camera'){this.courtTools.clear();this.board.threeD?.setCamera?.(value);}

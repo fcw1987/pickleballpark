@@ -98,6 +98,7 @@
   "index.html",
   "keyboard-shortcuts.js",
   "manifest.json",
+  "lob-recovery.js",
   "park-layout.js",
   "park-scene.js",
   "pixel-actor-assets.js",

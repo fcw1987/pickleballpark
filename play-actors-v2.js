@@ -5,6 +5,18 @@ import { defaultFeetAtV1 } from './generated-foot-state.js';
 // Supported grounded paddle-contact ceiling, not an official rule or a
 // universal human reach measurement. Airborne contacts are not represented.
 export const GROUNDED_CONTACT_HEIGHT_FEET = 8.5;
+// Measured on the planted Emerald rig. The lower value leaves space for a
+// balanced automatic interception. The upper bound flags authored examples
+// beyond the painted blade's reach without changing their stored evidence.
+export const EMERALD_OVERHEAD_FEET = 4.65;
+export const EMERALD_PLANTED_LIMIT_FEET = 5.5;
+export function emeraldLobOverhead(id,kind,heightFeet) {
+  return id==='player1' && kind==='volley' && heightFeet>=4.15 && heightFeet<=EMERALD_OVERHEAD_FEET+.001;
+}
+export function lobVolleyInFront({id, team, origin, contact}) {
+  return (contact.y-origin.y)*(team==='green'?1:-1)>=-.3 &&
+    (id!=='player1' || contact.heightFeet<=EMERALD_OVERHEAD_FEET+.001);
+}
 const clamp = value => Math.max(0, Math.min(1, value));
 const ease = value => { const t = clamp(value); return t < .5 ? 2 * t * t : 1 - (1 - t) ** 2 * 2; };
 const blend = (a, b, t) => Object.freeze({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });

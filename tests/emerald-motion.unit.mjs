@@ -70,7 +70,7 @@ test('real rally sweeps keep the skin and paddle rigid through contact, recovery
     const arm=()=>pos('UpperArmR').distanceTo(pos('ForearmR'))+pos('ForearmR').distanceTo(pos('HandR'));
     const armLength=arm();
     try {
-        for(const hand of ['right','left']) for(const key of ['dink','drive','backhand','lob','overhead','approach','grounded']){
+        for(const hand of ['right','left']) for(const key of ['dink','drive','backhand','lob','overhead','approach','grounded','lob-chase','backhand-dink']){
             const doc=reviewDocument(key,hand,source),{timeline,validShotCount}=compileEffectiveCandidate(doc);
             assert.equal(validShotCount,doc.shots.length);
             actor.userData.handedness=hand;
@@ -105,7 +105,7 @@ test('real rally sweeps keep the skin and paddle rigid through contact, recovery
                 assert.ok(geometry.paddleDistance(ball)>.2);
             }else{
                 assert.ok(geometry.paddleDistance(ball)<.037);
-                if(key==='overhead')assert.ok(geometry.shoeBottoms.every(y=>y>.3 && y<.91));
+                if(key==='overhead')assert.ok(geometry.shoeBottoms.every(y=>Math.abs(y)<1e-6),'reachable planted overhead');
             }
             at(timeline.duration);assert.ok(at(impact).distanceTo(face)<1e-7);
         }

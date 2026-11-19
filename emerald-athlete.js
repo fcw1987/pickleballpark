@@ -217,7 +217,7 @@ export function createEmeraldAthlete(gltf) {
         // evidence, including momentum after a fault, always stays on its plane.
         const landing = Math.min(.95,f+.09);
         const flight = r<c ? r/c : Math.max(0,(landing-r)/(landing-c));
-        const jump = high && sample.modelVersion!==2
+        const jump = high && sample.modelVersion!==2 && !sample.unsupportedHighContact
             ? Math.min(.88,Math.max(0,target.y-shoulder.y-height+.025))*Math.sin(flight*Math.PI/2)**2 : 0;
         visual.position.y=jump;
         if (target) target.y-=visual.position.y;
@@ -239,6 +239,7 @@ export function createEmeraldAthlete(gltf) {
             const target=sample.footTargets?.[(side==='R')===(mirror===1)?'right':'left'];
             if (!target) continue;
             const foot='Foot'+side, q=rotation(bind[foot]);
+            if(Number.isFinite(target.yaw))q.premultiply(new THREE.Quaternion().setFromAxisAngle(UP,(target.yaw-yaw)*mirror));
             const ankle=canonical(target);
             // A swing foot pitches slightly on lift. Both soles finish flat,
             // and the leg releases from the court together with the body on a hop.
