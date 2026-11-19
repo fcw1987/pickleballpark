@@ -53,7 +53,7 @@ for (const scenario of QA_SCENARIOS) {
           failures.push({ label: `${segment.step.id}: handedness` });
         contacts++;
         const tactical = Object.fromEntries([...viewer.playerObjects].map(([id, actor]) => [id, {
-          position: actor.position.toArray(), visualLift: actor.userData.courtAthlete?actor.userData.visual.position.y:0, facing: viewer.coverageSamples[id].bodyFacing
+          position: actor.position.toArray(), visualLift: actor.userData.courtAthlete?actor.userData.visual.position.y:0, facing: viewer.coverageSamples[id].bodyFacing, renderedFacing: actor.userData.animation.bodyFacing
         }]));
         // Accepted stroke source 041f285 opts 3D into instructional approach
         // and recovery, while retaining the frozen canonical 2D movement.
@@ -112,7 +112,8 @@ for (const scenario of QA_SCENARIOS) {
               if (Math.sign(data.body.scale.x) !== mirror) failures.push({label: `${id}: rendered atlas mirror`});
             }
             actor.position.toArray().forEach((value, axis) => close(value, before.position[axis], `${id}: camera position`));
-            if (JSON.stringify(actor.userData.animation.bodyFacing) !== JSON.stringify(before.facing))
+            if (JSON.stringify(actor.userData.animation.bodyFacing) !== JSON.stringify(before.renderedFacing) ||
+                JSON.stringify(viewer.coverageSamples[id].bodyFacing) !== JSON.stringify(before.facing))
               failures.push({ label: `${id}: camera changed tactical facing` });
           }
         }
