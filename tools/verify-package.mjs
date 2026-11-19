@@ -879,7 +879,7 @@ for (const [browserName, browserType] of browsers.filter(([name]) => !process.en
       expect(JSON.parse(builderProof.source).title).toBe('Package offline custom rally');
       expect(builderProof.time).toBeCloseTo(1.25, 8);
       expect(builderProof.view).toBe('3d');
-      expect(builderProof.roster).toEqual(['approved-emerald-cap-glb', ...Array(3).fill('original-imagegen-articulated-v2')]);
+      expect(builderProof.roster).toEqual(['approved-emerald-cap-glb','cream-visor-glb','coral-ponytail-glb','navy-cap-glb']);
       const identityProof = await verifyPackageIdentity(page, context, base, info.sourceRevision);
       await page.screenshot({ path: `release-results/package-${browserName}-${mode}.png` });
       // Real offline: close only this test's server. Do not use setOffline emulation.
